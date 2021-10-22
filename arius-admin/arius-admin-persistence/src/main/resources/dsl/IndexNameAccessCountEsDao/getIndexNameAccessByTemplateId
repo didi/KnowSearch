@@ -1,0 +1,30 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "templateId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "date": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "indexName": {
+        "order": "desc"
+      }
+    }
+  ]
+}

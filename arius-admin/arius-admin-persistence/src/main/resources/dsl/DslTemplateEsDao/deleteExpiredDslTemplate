@@ -1,0 +1,27 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "ariusModifyTime": {
+              "lt": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "enable": {
+              "value": "false"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "dslTemplateMd5"
+  ]
+}

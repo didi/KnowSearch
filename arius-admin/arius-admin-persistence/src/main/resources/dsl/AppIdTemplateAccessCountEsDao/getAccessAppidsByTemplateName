@@ -1,0 +1,32 @@
+{
+  "size":0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "templateName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "date": {
+              "gte": "now-7d",
+              "lte": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "appId": {
+      "terms": {
+        "field": "appId",
+        "size": 1000
+      }
+    }
+  }
+}

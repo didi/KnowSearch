@@ -1,0 +1,33 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "ariusModifyTime": {
+              "gte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "version": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "dslTemplateMd5",
+    "queryLimit",
+    "checkMode",
+    "enable",
+    "esCostAvg",
+    "totalHitsAvg",
+    "totalShardsAvg"
+  ]
+}

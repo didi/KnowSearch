@@ -1,0 +1,56 @@
+{
+  "size":%d,
+  "query": {
+        "bool":{
+                "must":[
+                    {
+                        "range":{
+                            "timeStamp":{
+                                "gte":%d,
+                                "lte":%d
+                            }
+                        }
+                    },
+                    {
+                        "term":{
+                            "appid":{
+                                "value":%d
+                            }
+                        }
+                    }
+                ]
+            }
+  },
+ "sort": [
+   {
+     "appid": {
+       "order": "asc"
+     }
+   },
+   {
+     "searchCount":{
+       "order": "desc"
+     }
+   }
+ ],
+ "_source": {
+     "includes": [
+       "appid",
+       "indiceSample",
+       "dsl",
+       "dslTemplate",
+       "dslTemplateMd5",
+       "searchCount",
+       "totalCostAvg",
+       "esCostAvg",
+       "beforeCostAvg",
+       "dslLenAvg",
+       "responseLenAvg",
+       "totalShardsAvg",
+       "totalHitsAvg",
+       "timeStamp",
+       "failedShardsAvg"
+       "queryLimit"
+     ]
+   }
+}

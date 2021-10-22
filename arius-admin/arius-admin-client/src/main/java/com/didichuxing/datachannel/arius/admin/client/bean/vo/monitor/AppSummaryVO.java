@@ -1,0 +1,19 @@
+package com.didichuxing.datachannel.arius.admin.client.bean.vo.monitor;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+@ApiModel(description="App概览信息")
+public class AppSummaryVO {
+
+    @ApiModelProperty(value="AppId")
+    private String appId;
+
+    @ApiModelProperty(value="App名称")
+    private String name;
+
+    @ApiModelProperty(value="App负责人")
+    private String principals;
+}

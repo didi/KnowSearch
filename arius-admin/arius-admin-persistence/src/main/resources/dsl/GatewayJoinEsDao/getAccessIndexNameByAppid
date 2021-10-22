@@ -1,0 +1,24 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "indices": {
+      "terms": {
+        "field": "indices",
+        "size": 10000
+      }
+    }
+  }
+}

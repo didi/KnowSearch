@@ -1,0 +1,23 @@
+{
+  "size": 10000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "indexName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "finish": {
+              "value": "true"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

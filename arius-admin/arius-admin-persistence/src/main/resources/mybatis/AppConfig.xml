@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppConfigDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO">
+        <result column="id" jdbcType="INTEGER" property="appId"/>
+        <result column="dsl_analyze_enable" jdbcType="INTEGER" property="dslAnalyzeEnable"/>
+        <result column="aggr_analyze_enable" jdbcType="INTEGER" property="aggrAnalyzeEnable"/>
+        <result column="is_source_separated" jdbcType="TINYINT" property="isSourceSeparated"/>
+        <result column="analyze_response_enable" jdbcType="TINYINT" property="analyzeResponseEnable"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, dsl_analyze_enable, aggr_analyze_enable, is_source_separated, analyze_response_enable, create_time, update_time
+    </sql>
+
+    <select id="getByAppId" parameterType="integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from query_app
+        where id = #{appId}
+    </select>
+
+    <select id="listAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from query_app
+    </select>
+
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into query_app
+        (app_id, dsl_analyze_enable, aggr_analyze_enable, is_source_separated, analyze_response_enable)
+        values
+        (#{appId}, #{dslAnalyzeEnable}, #{aggrAnalyzeEnable}, #{isSourceSeparated}, #{aggrAnalyzeEnable})
+    </insert>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO">
+        update query_app
+        <trim prefix="set" prefixOverrides=",">
+            <if test="dslAnalyzeEnable != null">,dsl_analyze_enable = #{dslAnalyzeEnable}</if>
+            <if test="aggrAnalyzeEnable != null">,aggr_analyze_enable = #{aggrAnalyzeEnable}</if>
+            <if test="isSourceSeparated != null">,is_source_separated = #{isSourceSeparated}</if>
+            <if test="analyzeResponseEnable != null">,analyze_response_enable = #{analyzeResponseEnable}</if>
+        </trim>
+        where id = #{appId} and is_active = 1
+    </update>
+
+</mapper>

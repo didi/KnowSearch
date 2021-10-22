@@ -1,0 +1,11 @@
+{
+  "size":0,
+  "aggs": {
+    "appidDslTemplateMd5": {
+      "terms": {
+        "field": "appidDslTemplateMd5",
+        "size": 500000
+      }
+    }
+  }
+}

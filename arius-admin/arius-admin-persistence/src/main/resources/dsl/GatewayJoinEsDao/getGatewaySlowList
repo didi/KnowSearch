@@ -1,0 +1,43 @@
+{
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "totalCost": {
+              "gte": 1000
+            }
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+         {
+           "term": {
+             "ariusType": {
+               "value": "type"
+             }
+           }
+         }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "timeStamp",
+    "indiceSample",
+    "dsl",
+    "esCost",
+    "totalCost",
+    "totalHits",
+    "totalShards",
+    "responseLen",
+    "isTimedOut"
+  ]
+}

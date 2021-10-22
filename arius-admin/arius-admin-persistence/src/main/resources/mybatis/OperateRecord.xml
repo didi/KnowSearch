@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO">
+        <result column="id"             jdbcType="INTEGER" property="id"/>
+        <result column="module_id"      jdbcType="INTEGER" property="moduleId"/>
+        <result column="operate_id"     jdbcType="INTEGER" property="operateId"/>
+        <result column="business_id"    jdbcType="INTEGER" property="bizId"/>
+        <result column="biz_id"         jdbcType="VARCHAR" property="bizId"/>
+        <result column="content"        jdbcType="VARCHAR" property="content"/>
+        <result column="operator"       jdbcType="VARCHAR" property="operator"/>
+        <result column="operate_time"   jdbcType="TIMESTAMP" property="operateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, module_id, operate_id, biz_id, content, operator, operate_time
+    </sql>
+
+    <insert id="insert"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into operate_record
+        (module_id, operate_id, biz_id, content, operator)
+        values
+        (#{moduleId}, #{operateId}, #{bizId}, #{content}, #{operator})
+    </insert>
+
+    <select id="listByCondition" resultMap="BaseResultMap"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO">
+        select
+        <include refid="Base_Column_List"/>
+        from operate_record
+        <trim prefix="where" prefixOverrides="and">
+            <if test="id != null">and id = #{id}</if>
+            <if test="moduleId != null">and module_id = #{moduleId}</if>
+            <if test="operateId != null">and operate_id = #{operateId}</if>
+            <if test="bizId != null">and  biz_id = #{bizId}</if>
+            <if test="operator != null">and operator = #{operator}</if>
+            <if test="beginTime != null">and operate_time >= #{beginTime}</if>
+            <if test="endTime != null">and operate_time &lt;= #{endTime}</if>
+        </trim>
+        order by id desc
+    </select>
+
+    <update id="compatible">
+      update operate_record
+      set biz_id = CONCAT(business_id,'')
+      where biz_id = '';
+    </update>
+
+</mapper>

@@ -1,0 +1,18 @@
+{
+  "size":%d,
+  "query": {
+    "range": {
+      "date": {
+        "gte": "%s",
+        "lte": "%s"
+      }
+    }
+  },
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ]
+}

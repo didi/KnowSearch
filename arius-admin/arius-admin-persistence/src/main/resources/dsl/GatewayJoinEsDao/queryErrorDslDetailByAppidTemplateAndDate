@@ -1,0 +1,43 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "exceptionName": {
+              "value": "%s"
+            }
+          }
+        },
+         {
+           "term": {
+             "ariusType": {
+               "value": "error"
+             }
+           }
+         }
+      ]
+    }
+  },
+  "_source": [
+    "indices",
+    "dsl",
+    "dslTemplate",
+    "dslTemplateMd5"
+  ]
+}

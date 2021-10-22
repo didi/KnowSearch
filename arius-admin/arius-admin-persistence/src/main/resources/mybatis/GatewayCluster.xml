@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, cluster_name, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert ignore into gateway_cluster
+        (cluster_name)
+        values
+        (#{clusterName})
+    </insert>
+
+    <select id="getByClusterName" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from gateway_cluster
+        where cluster_name = #{clusterName}
+    </select>
+
+    <select id="listAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from gateway_cluster
+    </select>
+
+</mapper>

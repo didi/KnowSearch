@@ -1,0 +1,116 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%d",
+              "lte": "%d"
+            }
+          }
+        },
+        {
+          "term": {
+            "template": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "cluster": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "hour_hist": {
+      "date_histogram": {
+        "field": "timestamp",
+        "interval": "30m",
+        "time_zone": "Asia/Shanghai",
+        "min_doc_count": 1
+      },
+      "aggs": {
+        "minute_hist": {
+          "date_histogram": {
+            "field": "timestamp",
+            "interval": "1m",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 1
+          },
+          "aggs": {
+            "minute_tps_sum": {
+              "sum": {
+                "field": "metrics.indexing-index_total_rate"
+              }
+            },
+            "minute_query_sum": {
+              "sum": {
+                "field": "metrics.search-query_time_in_millis_rate"
+              }
+            },
+            "minute_scroll_sum": {
+              "sum": {
+                "field": "metrics.search-scroll_time_in_millis_rate"
+              }
+            }
+          }
+        },
+        "hour_tps_avg": {
+          "percentiles_bucket": {
+            "buckets_path": "minute_hist>minute_tps_sum",
+            "percents": [
+              50
+            ]
+          }
+        },
+        "hour_query_avg": {
+          "percentiles_bucket": {
+            "buckets_path": "minute_hist>minute_query_sum",
+            "percents": [
+              50
+            ]
+          }
+        },
+        "hour_scroll_avg": {
+          "percentiles_bucket": {
+            "buckets_path": "minute_hist>minute_scroll_sum",
+            "percents": [
+              50
+            ]
+          }
+        }
+      }
+    },
+    "max_tps": {
+      "percentiles_bucket": {
+        "buckets_path": "hour_hist>hour_tps_avg[50.0]",
+        "percents": [
+          %s
+        ]
+      }
+    },
+    "max_query_time": {
+      "percentiles_bucket": {
+        "buckets_path": "hour_hist>hour_query_avg[50.0]",
+        "percents": [
+          %s
+        ]
+      }
+    },
+    "max_scroll_time": {
+      "percentiles_bucket": {
+        "buckets_path": "hour_hist>hour_scroll_avg[50.0]",
+        "percents": [
+          %s
+        ]
+      }
+    }
+  }
+}

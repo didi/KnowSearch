@@ -1,0 +1,10 @@
+{
+  "size":2,
+  "query": {
+    "term": {
+      "name": {
+        "value": "%s"
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+########################### 索引名称相关配置 begin ###########################
+# 索引名称的配置只需要配置名称，不需要配置数中心前缀
+# DataCentreUtil会根据单元化部署的数据中心给索引加上数据中心前缀
+arius.template.qutoa.notiry.record: arius_template_qutoa_notiry_record
+arius.template.quota.usage: arius_template_quota_usage
+arius.template.record.quota.usage: record_arius_template_quota_usage
+arius.template.capacity.plan.region.statis: arius_capacity_plan_region_statis
+
+es.dsl.analyze.index.name: arius.dsl.analyze.result
+es.dsl.metrics.index.name: arius.dsl.metrics
+arius.gateway.join.name: arius.gateway.join
+es.dsl.template.index.name: arius.dsl.template
+es.template.field.index.name: arius.template.field
+es.dsl.field.use.index.name: arius.dsl.field.use
+es.template.mapping.index.name: arius.template.mapping
+es.index.size.index.name: arius.index.size
+es.template.hit.index.name: arius.template.hit
+
+# 国内原始gateway日志索引
+arius.gateway.original.log.index.name: foundation_fd.data-online.arius.gateway
+# appid维度访问次数索引
+es.appid.template.access.index.name: arius.appid.template.access
+# 索引维度访问次数索引
+es.indexname.access.index.name: arius.indexname.access
+# 索引模板维度访问次数索引
+es.template.access.index.name: arius.template.access
+
+# 不同维度的es监控数据索引
+es.node_index.info.index.name: arius_stats_node_index_info
+es.node.info.index.name: arius_stats_node_info
+es.index.info.index.name: arius_stats_index_info
+es.cluster.info.index.name: arius_stats_cluster_info
+es.index_node.info.index.name: arius_stats_index_node_info
+es.ingest.info.index.name: arius_stats_ingest_info
+es.dcdr.info.index.name: arius_stats_dcdr_info
+
+# es 索引标签数据
+es.template.label.index.name: arius.template.label
+# es 索引健康分
+es.template.health.degree.index.name: arius.template.health.degree
+# es 索引价值
+es.template.value.index.name: arius.template.value
+es.template.value.record.index.name: record.arius.template.value
+
+#健康检查
+es.health.check.info.index.name: health_check_info
+
+#健康分
+es.health.degress.index.name: index_health_degree
+
+########################### 索引名称相关配置 end ###########################
+
+default.query.limit: 100
+delay.delete.expired.template.time: now-1d
+history.query.time: now-93d
+scroll.timeout: 60s
+recent.create.field.day.count: 7
+
+# spring 公共配置
+spring:
+  http:
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
+  messages:
+    encoding: UTF-8
+  profiles:
+    active: test
+
+# mybatis公共配置
+mybatis:
+  configuration:
+    mapUnderscoreToCamelCase: true
+  mapper-locations: classpath*:mybatis/*.xml
+
+# admin组件基本配置
+admin:
+  port:
+    web: 8888
+  contextPath: /admin/api
+
+# 事务超时时间
+spring.transaction.default-timeout: 60
+
+logging:
+  pattern:
+    file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
+
+# 扩展服务
+extend.service:
+#extend.service: capacityPlan,dynamicLimit

@@ -1,0 +1,17 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timestamp": {
+              "gte":"now-3m",
+              "lte":"now-2m"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

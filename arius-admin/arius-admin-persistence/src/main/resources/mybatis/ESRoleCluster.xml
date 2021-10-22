@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO">
+        <id column="id" property="id" />
+        <result column="elastic_cluster_id"     property="elasticClusterId" />
+        <result column="role_cluster_name"      property="roleClusterName" />
+        <result column="role"                   property="role" />
+        <result column="pod_number"             property="podNumber" />
+        <result column="pid_count"              property="pidCount" />
+        <result column="machine_spec"           property="machineSpec" />
+        <result column="es_version"             property="esVersion" />
+        <result column="cfg_id"                 property="cfgId" />
+        <result column="create_time"            property="createTime" />
+        <result column="update_time"            property="updateTime" />
+        <result column="delete_flag"            property="deleteFlag" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, elastic_cluster_id, role_cluster_name, `role`, pod_number, pid_count, machine_spec, es_version, cfg_id, create_time, update_time, delete_flag
+    </sql>
+
+    <!-- 保存 机器规格信息 -->
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id" >
+        insert into es_role_cluster
+        (elastic_cluster_id, role_cluster_name, `role`, pod_number, pid_count,
+            machine_spec, es_version, cfg_id, create_time, delete_flag)
+        values
+        (#{elasticClusterId},#{roleClusterName},#{role},#{podNumber},#{pidCount},
+            #{machineSpec}, #{esVersion}, #{cfgId}, now(), '0')
+    </insert>
+
+    <!-- 根据ID  查询详情 -->
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_role_cluster
+        where id = #{id}
+    </select>
+
+    <!-- 根据clusterId 和 roleClusterName  查询详情 -->
+    <select id="getByClusterIdAndClusterRole" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_role_cluster
+        where elastic_cluster_id = #{clusterId}  and role_cluster_name = #{roleClusterName} and delete_flag = '0'
+    </select>
+
+    <!-- 根据clusterId 和 role  查询详情 -->
+    <select id="getByClusterIdAndRole" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_role_cluster
+        where elastic_cluster_id = #{clusterId}  and  `role` = #{role} and delete_flag = '0'
+    </select>
+
+    <!-- 根据clusterId 和 role  查询详情 -->
+    <select id="listByClusterId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_role_cluster
+        where elastic_cluster_id = #{clusterId}  and  delete_flag = 0 order by id
+    </select>
+
+    <!-- 根据clusterId 和 role  修改podCount -->
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO" >
+        update es_role_cluster
+        set pod_number = #{podNumber}
+        where elastic_cluster_id = #{elasticClusterId} and `role` = #{role}
+    </update>
+
+    <!-- 根据clusterId 和 role  修改es版本 -->
+    <update id="updateVersionByClusterIdAndRole" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO" >
+        update es_role_cluster
+        set es_version = #{esVersion}
+        where elastic_cluster_id = #{elasticClusterId} and `role` = #{role}
+    </update>
+
+    <update id="delete" parameterType="integer">
+            update es_role_cluster
+            set delete_flag = 1
+            where elastic_cluster_id = #{clusterId}
+    </update>
+</mapper>

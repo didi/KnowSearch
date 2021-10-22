@@ -1,0 +1,31 @@
+{
+  "size":0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "wildcard": {
+            "indices": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "requestType": {
+      "terms": {
+        "field": "requestType",
+        "size": 10
+      }
+    }
+  }
+}

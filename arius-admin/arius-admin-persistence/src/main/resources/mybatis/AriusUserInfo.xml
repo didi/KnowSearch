@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.arius.AriusUserInfoDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="domain_account" jdbcType="VARCHAR" property="domainAccount"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="role" jdbcType="BIGINT" property="role"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, `name`, `password`,domain_account, email, mobile, role, status, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into arius_user_info (`name`,`password`, domain_account, email, mobile, status, role)
+        values (#{name}, #{password}, #{domainAccount}, #{email}, #{mobile}, #{status}, #{role})
+    </insert>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO">
+        update arius_user_info
+        <trim prefix="set" prefixOverrides=",">
+            <if test="name != null">,`name` = #{name}</if>
+            <if test="password != null">,`password` = #{password}</if>
+            <if test="domainAccount != null">,domain_account = #{domainAccount}</if>
+            <if test="email != null">,`email` = #{email}</if>
+            <if test="mobile != null">,mobile = #{mobile}</if>
+            <if test="status != null">,status = #{status}</if>
+            <if test="role != null">,role = #{role}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="listByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where status = 1
+        <if test="id != null">and id = #{id}</if>
+        <if test="name != null">and `name` = #{name}</if>
+        <if test="domainAccount != null">and domain_account = #{domainAccount}</if>
+        <if test="status != null">and status = #{status}</if>
+         <if test="role != null">and role = #{role}</if>
+        order by id desc
+    </select>
+
+    <select id="getByDomainAccount" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where domain_account = #{domainAccount} and status = 1
+        order by id desc
+        limit 1
+    </select>
+
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where id = #{userId}
+        limit 1
+    </select>
+    
+    <select id="getByName" parameterType="String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where name = #{name} and status = 1
+        limit 1
+    </select>
+
+    <select id="listAllEnable" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where status = 1
+    </select>
+
+	<select id="listByRole" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where role = #{role} and status = 1
+    </select>
+
+    <select id="listByRoles" parameterType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where
+        status = 1 and
+        role in
+        <foreach collection="list" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+{
+  "size": %d,
+  "query":{
+        "bool":{
+            "must":[
+                {
+                    "range":{
+                        "timestamp":{
+                            "gte": "%d",
+                            "lte": "%d"
+                        }
+                    }
+                },
+                {
+                    "term":{
+                        "template":{
+                            "value":"%s"
+                        }
+                    }
+                },
+                {
+                  "term": {
+                    "cluster": {
+                      "value": "%s"
+                    }
+                  }
+                }
+            ]
+        }
+    },
+  "sort": [
+    {
+      "timestamp": {
+        "order": "desc"
+      }
+    }
+  ]
+}

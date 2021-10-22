@@ -1,0 +1,35 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "indices": {
+              "value": "%s*"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "md5s": {
+      "terms": {
+        "field": "dslTemplateMd5",
+        "size": 0
+      },
+      "aggs": {
+        "samples": {
+          "top_hits": {
+            "size": 1,
+            "_source": [
+              "dsl",
+              "dslTemplateMd5"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

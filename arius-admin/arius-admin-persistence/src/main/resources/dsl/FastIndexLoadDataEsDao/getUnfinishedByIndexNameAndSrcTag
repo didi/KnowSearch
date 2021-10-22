@@ -1,0 +1,37 @@
+{
+  "size": 10000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "indexName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "srcTag": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "finish": {
+              "value": "false"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "startTime": {
+        "order": "asc"
+      }
+    }
+  ]
+}

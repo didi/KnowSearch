@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDetailDAO">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDetailPO">
+        <id column="id" property="id" />
+        <result column="work_order_task_id" property="workOrderTaskId" />
+        <result column="role" property="role" />
+        <result column="hostname" property="hostname" />
+        <result column="grp" property="grp" />
+        <result column="idx" property="idx" />
+        <result column="status" property="status" />
+        <result column="task_id" property="taskId" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, work_order_task_id, `role`, hostname, grp, idx, status, task_id, create_time, update_time
+    </sql>
+
+    <!-- replace工单任务信息 -->
+    <insert id="replace" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDetailPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id" >
+        replace into es_work_order_task_detail
+        (work_order_task_id, `role`, hostname, grp, idx, status, task_id, delete_flag)
+        values
+        (#{workOrderTaskId}, #{role}, #{hostname}, #{grp}, #{idx}, #{status}, #{taskId}, '0')
+    </insert>
+
+    <!-- 保存 工单任务信息 -->
+    <insert id="save" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDetailPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id" >
+        insert into es_work_order_task_detail
+        (work_order_task_id, `role`, hostname, grp, idx, status, task_id)
+        values
+        (#{workOrderTaskId},#{role},#{hostname},#{grp},#{idx},#{status},#{taskId})
+    </insert>
+
+    <!-- 根据工单任务ID  查询工单任务详情 -->
+    <select id="listByWorkOrderTaskId" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_work_order_task_detail
+        where work_order_task_id = #{workOrderTaskId} and delete_flag = '0'
+    </select>
+
+    <!-- 根据工单任务ID、hostname 修改状态 -->
+    <update id="updateStatus" parameterType="map" >
+        update es_work_order_task_detail
+        set status = #{status}
+        where work_order_task_id = #{workOrderTaskId} and hostname = #{hostname} and  delete_flag = '0'
+    </update>
+
+    <!-- 根据工单任务ID、role获取全部hostnames -->
+    <select id="listByTaskIdAndRoleAndWorkOrderTaskId" parameterType="map" resultType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_work_order_task_detail
+        where work_order_task_id = #{workOrderTaskId}  and `role` = #{role} and task_id =#{taskId} and delete_flag = 0
+    </select>
+    <!-- 根据ID  查询工单任务详情 -->
+    <select id="getById"
+            parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_work_order_task_detail
+        where id = #{taskDetailId} and delete_flag = '0'
+    </select>
+
+    <!-- 根据工单任务ID、role 修改 taskId -->
+    <update id="updateTaskIdByRoleAndWorkOrderTaskId" parameterType="map">
+        update es_work_order_task_detail
+        set task_id = #{taskId}
+        where work_order_task_id = #{workOrderTaskId} and `role` = #{role} and  delete_flag = '0'
+    </update>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDetailPO">
+        update es_work_order_task_detail
+        <trim prefix="set" prefixOverrides=",">
+            <if test="workOrderTaskId != null">, work_order_task_id = #{workOrderTaskId}</if>
+            <if test="role != null">,role = #{role}</if>
+            <if test="hostname != null">,hostname = #{hostname}</if>
+            <if test="grp != null">,grp = #{grp}</if>
+            <if test="idx != null">,idx = #{idx}</if>
+            <if test="status != null">,status = #{status}</if>
+            <if test="taskId != null">,task_id = #{taskId}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="getByWorkOderIdAndHostName" parameterType="map" resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDetailPO">
+        select
+        <include refid="Base_Column_List"/>
+        from es_work_order_task_detail
+        where work_order_task_id = #{workOrderTaskId}  and hostname = #{hostname} and delete_flag = 0
+    </select>
+</mapper>

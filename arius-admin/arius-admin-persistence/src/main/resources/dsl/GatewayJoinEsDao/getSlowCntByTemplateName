@@ -1,0 +1,38 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "indices": {
+              "value": "%s*"
+            }
+          }
+        },
+        {
+          "range": {
+            "totalCost": {
+              "gte": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "type"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

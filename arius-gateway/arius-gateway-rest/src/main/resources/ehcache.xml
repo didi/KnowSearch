@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>
+	<cache name="queryContextCache"
+		maxElementsInMemory="5000"
+		eternal="true"
+		overflowToDisk="false"
+		timeToIdleSeconds="0"
+		timeToLiveSeconds="600"
+		memoryStoreEvictionPolicy="LRU" />	
+		
+	<cache name="actionContextCache"
+		maxElementsInMemory="5000"
+		eternal="true"
+		overflowToDisk="false"
+		timeToIdleSeconds="0"
+		timeToLiveSeconds="600"
+		memoryStoreEvictionPolicy="LRU" />			
+		
+	<cache name="dslTemplateCache"
+		maxElementsInMemory="1000000"
+		eternal="true"
+		overflowToDisk="false"
+		memoryStoreEvictionPolicy="LRU" />
+		
+	<cache name="newDslTemplateCache"
+		maxElementsInMemory="1000"
+		eternal="false"
+		overflowToDisk="false"
+		timeToIdleSeconds="0"
+		timeToLiveSeconds="3600"
+		memoryStoreEvictionPolicy="LRU" />		
+		
+</ehcache>

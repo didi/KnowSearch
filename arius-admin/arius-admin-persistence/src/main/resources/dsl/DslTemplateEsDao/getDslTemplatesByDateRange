@@ -1,0 +1,16 @@
+{
+  "size": %d,
+  "query": {
+    "range": {
+      "ariusCreateTime": {
+        "gte": "now-%dd"
+      }
+    }
+  },
+  "_source": [
+    "appid",
+    "dslTemplateMd5",
+    "totalCostAvg",
+    "slowDslThreshold"
+  ]
+}

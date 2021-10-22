@@ -1,0 +1,10 @@
+{
+  "size": 1,
+  "query": {
+    "wildcard": {
+      "indices": {
+        "value": "%s*"
+      }
+    }
+  }
+}

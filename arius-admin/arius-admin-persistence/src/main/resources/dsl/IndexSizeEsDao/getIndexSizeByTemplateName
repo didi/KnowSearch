@@ -1,0 +1,17 @@
+{
+  "size": %d,
+  "query": {
+    "term": {
+      "templateName": {
+        "value": "%s"
+      }
+    }
+  },
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ]
+}

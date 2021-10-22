@@ -1,0 +1,62 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "ariusCreateTime": {
+              "gte": "now-1d"
+            }
+          }
+        },
+        {
+          "term": {
+            "isFromUserConsole": {
+              "value": "false"
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "enable": {
+                    "value": "false"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "version": {
+                    "value": "V1"
+                  }
+                }
+              },
+              {
+                "exists": {
+                  "field": "checkMode"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "appid": {
+        "order": "asc"
+      }
+    }
+  ],
+  "_source": [
+    "appid",
+    "dslTemplateMd5",
+    "indices",
+    "dsl",
+    "ariusCreateTime"
+  ]
+}

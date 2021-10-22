@@ -1,0 +1,17 @@
+{
+  "size": 30,
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ],
+  "query": {
+    "term": {
+      "id": {
+        "value": "%d"
+      }
+    }
+  }
+}

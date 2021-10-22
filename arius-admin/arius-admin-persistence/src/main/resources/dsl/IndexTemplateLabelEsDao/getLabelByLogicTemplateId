@@ -1,0 +1,10 @@
+{
+  "size":%d,
+  "query": {
+    "term": {
+      "indexTemplateId": {
+        "value": %d
+      }
+    }
+  }
+}

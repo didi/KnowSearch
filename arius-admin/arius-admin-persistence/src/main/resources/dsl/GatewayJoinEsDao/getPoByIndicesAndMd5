@@ -1,0 +1,29 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "indices": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "selectFields",
+    "whereFields",
+    "groupByFields",
+    "orderByFields"
+  ]
+}

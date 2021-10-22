@@ -1,0 +1,37 @@
+{
+  "size":%d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "templateName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "date": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "indexName": {
+        "order": "desc"
+      }
+    }
+  ]
+}

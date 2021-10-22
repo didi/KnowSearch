@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO">
+        <result column="id"                         jdbcType="INTEGER" property="id"/>
+        <result column="cluster"                    jdbcType="VARCHAR" property="cluster"/>
+        <result column="read_address"               jdbcType="VARCHAR" property="readAddress"/>
+        <result column="write_address"              jdbcType="VARCHAR" property="writeAddress"/>
+        <result column="http_address"               jdbcType="VARCHAR" property="httpAddress"/>
+        <result column="http_write_address"         jdbcType="VARCHAR" property="httpWriteAddress"/>
+        <result column="desc"                       jdbcType="VARCHAR" property="desc"/>
+        <result column="type"                       jdbcType="TINYINT" property="type"/>
+        <result column="data_center"                jdbcType="VARCHAR" property="dataCenter"/>
+        <result column="idc"                        jdbcType="VARCHAR" property="idc"/>
+        <result column="level"                      jdbcType="TINYINT" property="level"/>
+        <result column="es_version"                 jdbcType="VARCHAR" property="esVersion"/>
+        <result column="cfg_id"                     jdbcType="VARCHAR" property="cfgId"/>
+        <result column="package_id"                 jdbcType="VARCHAR" property="packageId"/>
+        <result column="plug_ids"                   jdbcType="VARCHAR" property="plugIds"/>
+        <result column="creator"                    jdbcType="VARCHAR" property="creator"/>
+        <result column="ns_tree"                    jdbcType="VARCHAR" property="nsTree"/>
+        <result column="image_name"                 jdbcType="VARCHAR" property="imageName"/>
+        <result column="template_srvs"              jdbcType="VARCHAR" property="templateSrvs"/>
+        <result column="create_time"                jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time"                jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
+        es_version, `level`, password, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into es_data_source
+        ( cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
+        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs)
+        values
+        (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type}, #{dataCenter},#{imageName},#{idc},
+        #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs})
+    </insert>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO">
+        update es_data_source
+        <trim prefix="set" prefixOverrides=",">
+            <if test="readAddress != null">,read_address = #{readAddress}</if>
+            <if test="writeAddress != null">,write_address = #{writeAddress}</if>
+            <if test="httpAddress != null">,http_address = #{httpAddress}</if>
+            <if test="httpWriteAddress != null">,http_write_address = #{httpWriteAddress}</if>
+            <if test="desc != null">,`desc` = #{desc}</if>
+            <if test="type != null">,`type` = #{type}</if>
+            <if test="dataCenter != null">,data_center = #{dataCenter}</if>
+            <if test="imageName != null">,image_name = #{imageName}</if>
+            <if test="idc != null">,idc = #{idc}</if>
+            <if test="level != null">,`level` = #{level}</if>
+            <if test="esVersion != null">,es_version = #{esVersion}</if>
+            <if test="password != null">,password = #{password}</if>
+            <if test="cfgId != null">,cfg_id = #{cfgId}</if>
+            <if test="packageId != null">,package_id = #{packageId}</if>
+            <if test="plugIds != null">,plug_ids = #{plugIds}</if>
+            <if test="creator != null">,creator = #{creator}</if>
+            <if test="nsTree != null">,ns_tree = #{nsTree}</if>
+            <if test="templateSrvs != null">,template_srvs = #{templateSrvs}</if>
+        </trim>
+        where id = #{id} and is_active = 1;
+    </update>
+
+    <delete id="delete" parameterType="integer">
+        update es_data_source
+        set is_active = 0 where id = #{clusterId};
+    </delete>
+
+    <select id="listByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_data_source
+        <trim prefix="where" prefixOverrides="and">
+            <if test="id != null">and id = #{id}</if>
+            <if test="cluster != null">and cluster = #{cluster}</if>
+            <if test="type != null">and `type` = #{type}</if>
+            <if test="dataCenter != null">and data_center = #{dataCenter}</if>
+            <if test="idc != null">and idc = #{idc}</if>
+            <if test="level != null">and `level` = #{level}</if>
+            <if test="esVersion != null">and es_version = #{esVersion}</if>
+            and is_active = 1;
+        </trim>
+    </select>
+
+    <select id="getById" parameterType="integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_data_source
+        where id = #{clusterId} and is_active = 1;
+    </select>
+
+    <select id="listIDCClusters" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_data_source
+        where idc = #{idc} and is_active = 1;
+    </select>
+
+    <select id="listAllIDCs" resultType="string">
+        select DISTINCT idc from es_data_source where is_active = 1;
+    </select>
+
+    <select id="getByName" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_data_source
+        where cluster = #{clusterName} and is_active = 1;
+    </select>
+
+    <select id="listAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_data_source where is_active = 1;
+    </select>
+</mapper>

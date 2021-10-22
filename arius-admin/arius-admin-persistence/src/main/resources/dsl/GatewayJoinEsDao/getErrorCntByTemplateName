@@ -1,0 +1,31 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "indices": {
+              "value": "%s*"
+            }
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "error"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

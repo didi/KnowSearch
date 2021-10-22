@@ -1,0 +1,55 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "ariusCreateTime": {
+              "lt": "now-1d",
+              "gt": "now-30d"
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "forceSetQueryLimit": {
+                    "value": "true"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "enable": {
+                    "value": "false"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "appid": {
+        "order": "asc"
+      }
+    }
+  ],
+  "_source": [
+    "appid",
+    "dslTemplateMd5",
+    "indices",
+    "queryLimit",
+    "totalCostAvg",
+    "totalShardsAvg",
+    "totalHitsAvg",
+    "responseLenAvg",
+    "dslType"
+  ]
+}

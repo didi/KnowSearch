@@ -1,0 +1,38 @@
+{
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "error"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "indiceSample",
+    "dsl",
+    "exceptionName",
+    "timeStamp"
+  ],
+  "sort": [
+    {
+      "timeStamp": {
+        "order": "desc"
+      }
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "ariusCreateTime": {
+              "gte": "now-1d"
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "forceSetQueryLimit": {
+                    "value": "true"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "enable": {
+                    "value": "false"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "checkMode": {
+                    "value": "black"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "appid": {
+        "order": "asc"
+      }
+    }
+  ],
+  "_source": [
+    "totalCostAvg",
+    "totalShardsAvg",
+    "totalHitsAvg",
+    "responseLenAvg",
+    "appid",
+    "dslTemplateMd5"
+  ]
+}

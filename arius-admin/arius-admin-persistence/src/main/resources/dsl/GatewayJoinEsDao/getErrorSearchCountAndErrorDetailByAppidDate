@@ -1,0 +1,31 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "error"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "groupByError": {
+      "terms": {
+        "field": "exceptionName",
+        "size": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.region.ClusterRegionDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="logic_cluster_id" jdbcType="BIGINT" property="logicClusterId"/>
+        <result column="phy_cluster_name" jdbcType="VARCHAR" property="phyClusterName"/>
+        <result column="racks" jdbcType="VARCHAR" property="racks"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, logic_cluster_id, phy_cluster_name, racks, create_time, update_time
+    </sql>
+
+    <insert id="insert"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into es_cluster_region
+        (logic_cluster_id, phy_cluster_name, racks)
+        values
+        (#{logicClusterId}, #{phyClusterName}, #{racks})
+    </insert>
+
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_region
+        where id = #{regionId} and delete_flag = 0
+    </select>
+
+    <select id="listByLogicClusterId" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_region
+        where logic_cluster_id = #{logicClusterId} and delete_flag = 0
+    </select>
+
+    <select id="getByPhyClusterName" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_region
+        where phy_cluster_name = #{phyClusterName} and delete_flag = 0
+    </select>
+
+    <select id="listAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_region
+        where delete_flag = 0
+    </select>
+
+    <select id="listBoundRegions" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_region
+        where delete_flag = 0 and logic_cluster_id > 0
+    </select>
+
+    <select id="listBoundRegionsByCondition" resultMap="BaseResultMap" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_region
+        where delete_flag = 0
+        <if test="id != null">and id = #{id}</if>
+        <if test="logicClusterId != null">and logic_cluster_id = #{logicClusterId}</if>
+        <if test="phyClusterName != null">and phy_cluster_name = #{phyClusterName}</if>
+    </select>
+
+    <update id="update"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO">
+        update es_cluster_region
+        <trim prefix="set" prefixOverrides=",">
+            <if test="logicClusterId != null">,logic_cluster_id = #{logicClusterId}</if>
+            <if test="phyClusterName != null">,phy_cluster_name = #{phyClusterName}</if>
+            <if test="racks != null">,racks = #{racks}</if>
+        </trim>
+        where id = #{id} and delete_flag = 0
+    </update>
+
+    <update id="delete" parameterType="long">
+        update es_cluster_region set delete_flag = 1
+        where id = #{regionId}
+    </update>
+
+</mapper>

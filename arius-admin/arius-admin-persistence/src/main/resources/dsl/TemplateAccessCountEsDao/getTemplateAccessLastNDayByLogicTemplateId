@@ -1,0 +1,17 @@
+{
+  "size": %d,
+  "query": {
+    "term": {
+      "logicTemplateId": {
+        "value": %d
+      }
+    }
+  },
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ]
+}

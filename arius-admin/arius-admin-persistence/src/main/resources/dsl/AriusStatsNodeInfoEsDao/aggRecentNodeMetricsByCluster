@@ -1,0 +1,102 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "cluster": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "terms": {
+            "rack": [
+              %s
+            ]
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "now-%dm",
+              "lte": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "minute_bucket": {
+      "date_histogram": {
+        "field": "timestamp",
+        "interval": "1m",
+        "time_zone": "Asia/Shanghai",
+        "min_doc_count": 1,
+        "order": {
+          "_key": "desc"
+        }
+      },
+      "aggs": {
+        "groupByRack": {
+          "terms": {
+            "field": "rack",
+            "size": 1000
+          },
+          "aggs": {
+            "groupByIp": {
+              "terms": {
+                "field": "ip",
+                "size": 1000
+              },
+              "aggs": {
+                "maxFreeDisk": {
+                  "max": {
+                    "field": "metrics.fs-total-free_in_bytes"
+                  }
+                },
+                "maxTotalDisk": {
+                  "max": {
+                    "field": "metrics.fs-total-total_in_bytes"
+                  }
+                },
+                "maxCpu": {
+                  "max": {
+                    "field": "metrics.os-cpu_percent"
+                  }
+                },
+                "sumDocsCount": {
+                  "sum": {
+                    "field": "metrics.indices-docs-count"
+                  }
+                }
+              }
+            },
+            "sumFreeDisk": {
+              "sum_bucket": {
+                "buckets_path": "groupByIp>maxFreeDisk"
+              }
+            },
+            "sumTotalDisk": {
+              "sum_bucket": {
+                "buckets_path": "groupByIp>maxTotalDisk"
+              }
+            },
+            "avgCpuUsage": {
+              "avg_bucket": {
+                "buckets_path": "groupByIp>maxCpu"
+              }
+            },
+            "docsCount": {
+               "sum_bucket": {
+                "buckets_path": "groupByIp>sumDocsCount"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.extend.capacity.plan.dao.mysql.CapacityPlanRegionTaskDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.po.CapacityPlanRegionTaskPO">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="region_id" jdbcType="BIGINT" property="regionId"/>
+        <result column="task" jdbcType="TINYINT" property="task"/>
+        <result column="type" jdbcType="TINYINT" property="type"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="src_racks" jdbcType="VARCHAR" property="srcRacks"/>
+        <result column="delta_racks" jdbcType="VARCHAR" property="deltaRacks"/>
+        <result column="region_cost_disk_g" jdbcType="DECIMAL" property="regionCostDiskG"/>
+        <result column="region_cost_cpu_count" jdbcType="DECIMAL" property="regionCostCpuCount"/>
+        <result column="start_time" jdbcType="TIMESTAMP" property="startTime"/>
+        <result column="finish_time" jdbcType="TIMESTAMP" property="finishTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, region_id, task, `type`, status, src_racks, delta_racks, region_cost_disk_g, region_cost_cpu_count,
+    start_time, finish_time, create_time, update_time
+    </sql>
+
+    <select id="getByRegionId" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from capacity_plan_region_task
+        where region_id = #{regionId}
+    </select>
+
+    <select id="getDecreasingTaskByRegionId" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from capacity_plan_region_task
+        where region_id = #{regionId} and `type` = 2 and status = 3
+        order by id desc
+        limit 1
+    </select>
+
+    <insert id="insert"
+            parameterType="com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.po.CapacityPlanRegionTaskPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into capacity_plan_region_task
+        (region_id, task, `type`, `status`, src_racks, delta_racks, region_cost_disk_g, region_cost_cpu_count, start_time, finish_time)
+        values
+        (#{regionId}, #{task}, #{type}, #{status}, #{srcRacks}, #{deltaRacks}, #{regionCostDiskG}, #{regionCostCpuCount}, #{startTime}, #{finishTime})
+    </insert>
+
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from capacity_plan_region_task
+        where id = #{taskId}
+    </select>
+
+    <select id="getByStatus" parameterType="integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from capacity_plan_region_task
+        where status = #{status}
+    </select>
+
+    <select id="getLastCheckTask" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from capacity_plan_region_task
+        where region_id = #{regionId} and task = 2
+        order by id desc
+        limit 1
+    </select>
+
+    <select id="getLastDecreaseTask" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from capacity_plan_region_task
+        where region_id = #{regionId} and `type` = 2 and create_time >= #{start} and create_time &lt;= #{end}
+        order by id desc
+        limit 1
+    </select>
+
+    <update id="updateStatus" parameterType="map">
+        update capacity_plan_region_task
+        set status = #{status}
+        where id = #{taskId}
+    </update>
+
+    <delete id="deleteByRegionId" parameterType="long">
+        delete from capacity_plan_region_task
+        where region_id = #{regionId}
+    </delete>
+
+</mapper>

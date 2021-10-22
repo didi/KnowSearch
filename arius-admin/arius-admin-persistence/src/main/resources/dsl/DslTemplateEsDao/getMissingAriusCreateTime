@@ -1,0 +1,14 @@
+{
+  "size":%d,
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "ariusCreateTime"
+          }
+        }
+      ]
+    }
+  }
+}

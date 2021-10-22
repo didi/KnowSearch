@@ -1,0 +1,29 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "dltag": {
+              "value": "_arius_query_request_indices"
+            }
+          }
+        },
+        {
+          "range": {
+            "logTime": {
+              "gte": %d,
+              "lt": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "indices",
+    "requestId"
+  ]
+}

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.config.AriusConfigInfoDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="value_group" jdbcType="VARCHAR" property="valueGroup"/>
+        <result column="value_name" jdbcType="VARCHAR" property="valueName"/>
+        <result column="value" jdbcType="VARCHAR" property="value"/>
+        <result column="dimension" jdbcType="INTEGER" property="dimension"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="memo" jdbcType="VARCHAR" property="memo"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, `value_group`, value_name, `value`, dimension, status, memo, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into arius_config_info (`value_group`, value_name, `value`, dimension, status, memo)
+        values (#{valueGroup}, #{valueName}, #{value}, #{dimension}, #{status}, #{memo})
+    </insert>
+
+    <update id="update"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO">
+        update arius_config_info
+        <trim prefix="set" prefixOverrides=",">
+            <if test="valueGroup != null">,`value_group` = #{valueGroup}</if>
+            <if test="valueName != null">,value_name = #{valueName}</if>
+            <if test="value != null">,`value` = #{value}</if>
+            <if test="dimension != null">,dimension = #{dimension}</if>
+            <if test="memo != null">,memo = #{memo}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <update id="updateByIdAndStatus" parameterType="map">
+        update arius_config_info
+        set status = #{status}
+        where id = #{id}
+    </update>
+
+    <update id="updateByGroupAndName"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO">
+        update arius_config_info
+        <trim prefix="set" prefixOverrides=",">
+            <if test="value != null">,`value` = #{value}</if>
+            <if test="dimension != null">,dimension = #{dimension}</if>
+            <if test="status != null">,status = #{status}</if>
+        </trim>
+        where value_group = #{valueGroup} and value_name = #{valueName}
+    </update>
+
+    <select id="listByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_config_info
+        where status != -1
+        <if test="id != null">and id = #{id}</if>
+        <if test="valueGroup != null">and `value_group` = #{valueGroup}</if>
+        <if test="valueName != null">and value_name = #{valueName}</if>
+        <if test="dimension != null">and dimension = #{dimension}</if>
+        <if test="status != null">and status = #{status}</if>
+    </select>
+
+
+    <select id="getbyId" parameterType="integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_config_info
+        where status != -1 and id = #{id}
+    </select>
+
+    <select id="getByGroupAndName" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_config_info
+        where value_group = #{valueGroup} and value_name = #{valueName}
+        limit 1
+    </select>
+
+    <select id="listByGroup" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_config_info
+        where value_group = #{valueGroup}
+    </select>
+
+</mapper>

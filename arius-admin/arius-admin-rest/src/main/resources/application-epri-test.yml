@@ -1,0 +1,169 @@
+spring:
+  profiles:
+    active: test
+  datasource:
+    name: data
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:4859/arius_pre?useUnicode=true&characterEncoding=utf8&jdbcCompliantTruncation=true&allowMultiQueries=true&useSSL=false
+      username: 1
+      password: 1
+      initialSize: 10
+      validationQueryTimeout: 5000
+      transactionQueryTimeout: 60000
+      minIdle: 10
+      maxActive: 30
+      max-wait: 60000
+      keepAlive: true
+      time-between-eviction-runs-millis: 1000
+      min-evictable-idle-time-millis: 300000
+      defaultAutoCommit: true
+      validationQuery: select 'x'
+      testWhileIdle: true
+      testOnReturn: false
+      testOnBorrow: true
+      logAbandoned: true
+      pool-prepared-statements: true
+      max-open-prepared-statements: 50
+      filters: stat,wall
+  servlet:
+    multipart:
+      max-file-size: 60MB
+      max-request-size: 60MB
+
+# 日志相关配置
+logging:
+  path: .
+  file:
+    max-history: 5
+
+# admin配置
+admin:
+  url:
+    console: 1
+  thread:
+    size:
+      task: 2
+      op: 20
+
+# ams服务地址
+arius:
+  server:
+    meta: 1
+    ecm:  1
+    usadmin: 1
+    ruadmin: 1
+
+ecm.request.author: 1
+
+# gateway相关配置
+es.gateway.url: 1
+es.gateway.port: 8200
+es.appid: 21,1187,1190
+es.password: helloworld,helloworld,helloworld
+pre.url:
+scroll.timeout: 60s
+
+# 更新ES数据集群名称
+es.update.cluster.name: 1
+es.maintenance.personnel.name: 1
+
+################依赖的thirdpart接口的配置################
+#sso
+sso:
+  base-url: 1
+  app-id: 1
+  app-key: 1
+  cookie-name: 1
+  cookie-age-ms: 86400
+
+#n9e
+monitor:
+  n9e:
+    base-url: 1
+    sink:
+      base-url: 1
+    account:
+      base-url: 1
+    user-token:
+    nid: 4 # 上报的节点id，如果没有需要新建
+
+# ep配置
+ep:
+  mdata:
+    service:
+      http: 1
+      appid: 1
+      key: 1
+
+#feige
+feige:
+  service:
+    http:
+      token: 1
+      base: 1
+
+# tts配置
+tts:
+  executor:
+    appname: arius-admin-v2-dev
+    logpath: /Users/${USER}/var/logs
+    logretentiondays: 4
+    ip:
+    port: 9999
+  admin:
+    addresses: 1
+
+#集群新建
+cluster:
+  sso:
+    disable: false
+    server: 1
+    brokeerName: 1
+    secretKey: 1
+
+cloud:
+  default:
+    server: 1
+    token: 1
+  us01:
+    server: 1
+    token: 1
+  basic:
+    admins:
+    permServer: 1
+    treeServer: 1
+    maxRollbackCnt: 20
+    selfServer: 1
+  cluster:
+    default:
+      pluginIds: 6,8,10,12,14,16,18,20,22,24
+
+cert:
+  disable: false
+  server: 1
+  calleeName: 1
+  keyName: 1
+
+zeus:
+  server: 1
+  token: 1
+  tplid: 3172
+  user: 1
+
+fs:
+  minio:
+    endpoint: 1
+    accessKeyID: 1
+    secretAccessKey: 1
+    bucket: 1
+  gift:
+    upload-url: 1
+    download-url: 1
+    namespace: 1
+
+cmdb:
+  depart:
+    url: 1
+    token: 1

@@ -1,0 +1,148 @@
+spring:
+  profiles:
+    active: test
+  datasource:
+    name: data
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:4859/arius_pre?useUnicode=true&characterEncoding=utf8&jdbcCompliantTruncation=true&allowMultiQueries=true&useSSL=false
+      username: 1
+      password: 1
+      initialSize: 10
+      validationQueryTimeout: 5000
+      transactionQueryTimeout: 60000
+      minIdle: 10
+      maxActive: 30
+      max-wait: 60000
+      keepAlive: true
+      time-between-eviction-runs-millis: 1000
+      min-evictable-idle-time-millis: 300000
+      defaultAutoCommit: true
+      validationQuery: select 'x'
+      testWhileIdle: true
+      testOnReturn: false
+      testOnBorrow: true
+      logAbandoned: true
+      pool-prepared-statements: true
+      max-open-prepared-statements: 50
+      filters: stat,wall
+  servlet:
+    multipart:
+      max-file-size: 60MB
+      max-request-size: 60MB
+  auv-job:
+    jdbc-url: jdbc:mysql://localhost:4859/arius_pre?useUnicode=true&characterEncoding=utf8&jdbcCompliantTruncation=true&allowMultiQueries=true&useSSL=false
+    username: 1
+    password: 1
+    driver-class-name: com.mysql.jdbc.Driver
+    max-lifetime: 60000
+    init-sql: true
+    init-thread-num: 10
+    max-thread-num: 20
+    log-exipre: 3 # 日志保存天数，以天为单位
+    claim-strategy: com.didiglobal.logi.auvjob.core.RandomConsensual
+
+# 日志相关配置
+logging:
+  path: .
+  file:
+    max-history: 5
+
+# admin配置
+admin:
+  url:
+    console: 1
+  thread:
+    size:
+      task: 2
+      op: 20
+
+# gateway相关配置
+es.gateway.url: 1
+es.gateway.port: 8200
+es.appid: 5,7,9
+es.password: helloworld,helloworld,helloworld
+
+scroll.timeout: 60s
+
+# 更新ES数据集群名称
+es.update.cluster.name: 1
+es.client.cluster.port: 8060
+es.maintenance.personnel.name: 1
+
+#健康检查
+health.check.empty.indices.threshold.day: 30
+health.check.index.doc.averge.size: 2048
+health.check.index.doc.result.level: 5,10,15,20,25
+health.check.index.mapping.large.size: 5000
+health.check.index.mapping.result.level: 5,10,15,20,25
+health.check.small.shard.size: 60
+health.check.small.shard.result.level: 5,10,15,20,25
+health.check.small.shard.repair: false
+
+################################################ 依赖的 remote 接口的配置 begiin ################################################
+monitor:
+  #odin
+  odin:
+    enable: true
+    tree:
+      url: 1
+    monitor:
+      url: 1
+    collector:
+      url: 1
+    namespace: 1
+    securename: 1
+    securekey: 1
+
+# 创建、删除odin节点需要的验证信息
+cert:
+  disable: false
+  server: 1
+  calleeName: 1
+  keyName: 1
+
+cloud:
+  default:
+    server: 1
+    token: 1
+  us01:
+    server: 1
+    token: 1
+  basic:
+    admins:
+    permServer: 1
+    treeServer: 1
+    maxRollbackCnt: 20
+    selfServer: 1
+  cluster:
+    default:
+      pluginIds: 6,8,10,12,14,16,18,20,22,24
+
+zeus:
+  server: 1
+  token: 1
+  tplid: 1
+  user: 1
+
+fs:
+  minio:
+    endpoint: 1
+    accessKeyID: 1
+    secretAccessKey: 1
+    bucket: 1
+  gift:
+    upload-url: 1
+    download-url: 1
+    namespace: 1
+
+s3:
+  endpoint: 1
+  access-key: 1
+  secret-key: 1
+  bucket: elasticsearch
+
+swagger.enable: true
+
+################################################ 依赖的 remote 接口的配置 end ################################################

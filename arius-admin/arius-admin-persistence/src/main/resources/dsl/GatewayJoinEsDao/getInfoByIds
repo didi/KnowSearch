@@ -1,0 +1,44 @@
+{
+  "from": 0,
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        }
+        %s
+      ]
+    }
+  },
+  "aggs": {
+    "template": {
+      "terms": {
+        "field": "dslTemplateMd5",
+        "size": 2000
+      },
+      "aggs": {
+        "minute_hist": {
+          "date_histogram": {
+            "field": "timeStamp",
+            "interval": "%s",
+            "time_zone":"Asia/Shanghai",
+            "min_doc_count":%d
+          }
+        }
+      }
+    }
+  }
+}

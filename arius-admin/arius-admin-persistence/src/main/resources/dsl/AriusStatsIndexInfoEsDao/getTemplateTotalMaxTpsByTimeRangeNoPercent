@@ -1,0 +1,46 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "logicTemplateId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%d",
+              "lte": "%d"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "minute_hist": {
+      "date_histogram": {
+        "field": "timestamp",
+        "interval": "1m",
+        "time_zone": "Asia/Shanghai",
+        "min_doc_count": 1
+      },
+      "aggs": {
+        "minute_sum": {
+          "sum": {
+            "field": "metrics.indexing-index_total_rate"
+          }
+        }
+      }
+    },
+    "tpsMax": {
+      "max_bucket": {
+        "buckets_path": "minute_hist>minute_sum"
+      }
+    }
+  }
+}

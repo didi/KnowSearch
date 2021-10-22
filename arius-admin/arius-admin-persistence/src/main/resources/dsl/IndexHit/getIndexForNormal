@@ -1,0 +1,39 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "from": %d,
+              "to": %d,
+              "include_lower": true,
+              "include_upper": false
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": {
+              "term": {
+                "dslType": {
+                  "value": "aggs"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "aggName": {
+      "terms": {
+        "field": "index",
+        "size": 100000,
+        "min_doc_count": 1
+      }
+    }
+  }
+}

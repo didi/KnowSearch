@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppLogicClusterAuthDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppLogicClusterAuthPO">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="app_id" jdbcType="INTEGER" property="appId"/>
+        <result column="logic_cluster_id" jdbcType="BIGINT" property="logicClusterId"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="responsible" jdbcType="VARCHAR" property="responsible"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, app_id, logic_cluster_id, `type`, responsible, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppLogicClusterAuthPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into app_logic_cluster_auth (app_id, logic_cluster_id, `type`, responsible)
+        values (#{appId}, #{logicClusterId}, #{type}, #{responsible})
+    </insert>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppLogicClusterAuthPO">
+        update app_logic_cluster_auth
+        <trim prefix="set" prefixOverrides=",">
+            <if test="type != null">,`type` = #{type}</if>
+            <if test="responsible != null">,responsible = #{responsible}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="listByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppLogicClusterAuthPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        <trim prefix="where" prefixOverrides="and">
+            <if test="id != null">and id = #{id}</if>
+            <if test="appId != null">and app_id = #{appId}</if>
+            <if test="logicClusterId != null">and logic_cluster_id = #{logicClusterId}</if>
+            <if test="type != null">and `type` &lt;= #{type}</if>
+            <if test="responsible != null">
+                and (responsible = #{responsible}
+                or responsible like concat(#{responsible},',%')
+                or responsible like concat('%,', #{responsible})
+                or responsible like concat('%,', #{responsible},',%'))
+            </if>
+        </trim>
+        order by id desc
+    </select>
+
+    <delete id="delete" parameterType="long">
+        update app_logic_cluster_auth
+        set status = 0
+        where id = #{authId}
+    </delete>
+
+    <select id="listByAppId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where app_id = #{appId} and (`type` != -1) and status = 1
+    </select>
+
+    <select id="listWithRauthByAppId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where app_id = #{appId} and (`type` = 2) and status = 1
+    </select>
+
+    <select id="getByAppIdAndLogicCluseterId" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where app_id = #{appId} and logic_cluster_id = #{logicClusterId} and (`type` != -1) and status = 1
+    </select>
+
+    <select id="getByAppIdAndLogicClusterIdAndType" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where app_id = #{appId} and logic_cluster_id = #{logicClusterId} and `type` = #{type} and status = 1
+    </select>
+
+    <select id="acquireLogicClusterRWAuths" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where logic_cluster_id = #{logicClusterId} and (`type` = 2) and status = 1
+    </select>
+
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where id = #{authId} and status = 1
+    </select>
+
+    <select id="acquireAllRWAuths" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where (`type` != -1) and status = 1
+    </select>
+
+
+    <select id="acquireAllOwnerAuths" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from app_logic_cluster_auth
+        where `type` = 1 and status = 1
+    </select>
+
+</mapper>

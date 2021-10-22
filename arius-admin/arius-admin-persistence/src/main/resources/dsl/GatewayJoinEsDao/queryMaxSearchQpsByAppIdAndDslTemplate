@@ -1,0 +1,41 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+         "term": {
+           "ariusType": {
+             "value": "type"
+           }
+         }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "searchCountPerSecond": {
+      "date_histogram": {
+        "field": "timeStamp",
+        "interval": "1s",
+        "order": {
+          "_count": "desc"
+        }
+      }
+    }
+  }
+}

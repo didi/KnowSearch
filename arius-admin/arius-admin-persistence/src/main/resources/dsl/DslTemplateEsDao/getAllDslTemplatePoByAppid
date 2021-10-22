@@ -1,0 +1,35 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "version": {
+                    "value": "V1"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "dslTemplateMd5",
+    "totalCostAvg",
+    "slowDslThreshold"
+  ]
+}

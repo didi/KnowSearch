@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="data_type" jdbcType="TINYINT" property="dataType"/>
+        <result column="date_format" jdbcType="VARCHAR" property="dateFormat"/>
+        <result column="data_center" jdbcType="VARCHAR" property="dataCenter"/>
+        <result column="expire_time" jdbcType="BIGINT" property="expireTime"/>
+        <result column="hot_time" jdbcType="BIGINT" property="hotTime"/>
+        <result column="department_id" jdbcType="VARCHAR" property="libraDepartmentId"/>
+        <result column="department" jdbcType="VARCHAR" property="libraDepartment"/>
+        <result column="responsible" jdbcType="VARCHAR" property="responsible"/>
+        <result column="date_field" jdbcType="VARCHAR" property="dateField"/>
+        <result column="date_field_format" jdbcType="VARCHAR" property="dateFieldFormat"/>
+        <result column="id_field" jdbcType="VARCHAR" property="idField"/>
+        <result column="routing_field" jdbcType="VARCHAR" property="routingField"/>
+        <result column="expression" jdbcType="VARCHAR" property="expression"/>
+        <result column="desc" jdbcType="VARCHAR" property="desc"/>
+        <result column="quota" jdbcType="DECIMAL" property="quota"/>
+        <result column="app_id" jdbcType="INTEGER" property="appId"/>
+        <result column="ingest_pipeline" jdbcType="VARCHAR" property="ingestPipeline"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+         id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
+         department, responsible, date_field, date_field_format, id_field, routing_field, expression,
+         `desc`, quota, app_id, ingest_pipeline, create_time, update_time
+    </sql>
+
+    <select id="listByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where is_active = 1
+        <if test="id != null">and id = #{id}</if>
+        <if test="name != null">and `name` = #{name}</if>
+        <if test="dataCenter != null">and data_center = #{dataCenter}</if>
+        <if test="appId != null">and app_id = #{appId}</if>
+        order by id desc
+    </select>
+
+    <select id="likeByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where is_active = 1
+        <if test="name != null">and `name` like concat('%,', #{name},',%'))</if>
+        order by id desc
+    </select>
+
+    <select id="listAll"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where is_active = 1
+        order by id desc
+    </select>
+
+    <insert id="insert"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into index_template
+        (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
+         department, responsible, date_field, date_field_format, id_field, routing_field, expression,
+         `desc`, quota, app_id, ingest_pipeline)
+        values
+        (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
+         #{libraDepartmentId}, #{libraDepartment}, #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
+         #{routingField}, #{expression}, #{desc}, #{quota}, #{appId}, #{ingestPipeline})
+    </insert>
+
+    <select id="getById" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where id = #{logicId}
+    </select>
+
+    <select id="listByAppId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where app_id = #{appId} and is_active = 1
+    </select>
+
+    <select id="listByDataCenter" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where data_center = #{dataCenter} and is_active = 1
+    </select>
+
+    <select id="listByName" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where `name` = #{name} and is_active = 1
+    </select>
+
+    <update id="update"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO">
+        update index_template
+        <trim prefix="set" prefixOverrides=",">
+            <if test="appId != null">,app_id = #{appId}</if>
+            <if test="name != null">,`name` = #{name}</if>
+            <if test="dataType != null">,data_type = #{dataType}</if>
+            <if test="dateFormat != null">,date_format = #{dateFormat}</if>
+            <if test="dateFieldFormat != null">,date_field_format = #{dateFieldFormat}</if>
+            <if test="idField != null">,id_field = #{idField}</if>
+            <if test="routingField != null">,routing_field = #{routingField}</if>
+            <if test="expireTime != null">,expire_time = #{expireTime}</if>
+            <if test="hotTime != null">,hot_time = #{hotTime}</if>
+            <if test="libraDepartmentId != null">,department_id = #{libraDepartmentId}</if>
+            <if test="libraDepartment != null">,department = #{libraDepartment}</if>
+            <if test="responsible != null">,responsible = #{responsible}</if>
+            <if test="dateField != null">,date_field = #{dateField}</if>
+            <if test="expression != null">,expression = #{expression}</if>
+            <if test="desc != null">,`desc` = #{desc}</if>
+            <if test="quota != null">,quota = #{quota}</if>
+            <if test="ingestPipeline != null">,ingest_pipeline = #{ingestPipeline}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="batchChangeHotDay"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO">
+        update index_template
+        set hot_time = hot_time + #{days}
+        where hot_time > 0 and is_active = 1
+    </update>
+
+    <delete id="delete" parameterType="int">
+        update index_template set  is_active = 0
+        where id = #{logicId}
+    </delete>
+
+    <select id="listByIds" parameterType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where is_active = 1 and
+        id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <select id="likeByResponsible" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where is_active = 1 and (responsible = #{responsible}
+        or responsible like concat(#{responsible},',%')
+        or responsible like concat('%,', #{responsible})
+        or responsible like concat('%,', #{responsible},',%'))
+    </select>
+
+</mapper>

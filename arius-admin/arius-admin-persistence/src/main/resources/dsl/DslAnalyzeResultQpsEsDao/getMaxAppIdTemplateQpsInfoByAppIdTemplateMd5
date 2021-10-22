@@ -1,0 +1,37 @@
+{
+  "size":1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+           "term": {
+            "ariusType": {
+              "value": "qps"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "searchCount": {
+        "order": "desc"
+      }
+    }
+  ]
+}

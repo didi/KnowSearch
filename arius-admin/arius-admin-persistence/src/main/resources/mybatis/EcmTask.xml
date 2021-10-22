@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO">
+        <id column="id"                     property="id" />
+        <result column="title"              property="title" />
+        <result column="work_order_id"      property="workOrderId" />
+        <result column="physic_cluster_id"  property="physicClusterId" />
+        <result column="cluster_node_role"  property="clusterNodeRole" />
+        <result column="type"               property="type" />
+        <result column="order_type"         property="orderType" />
+        <result column="status"             property="status" />
+        <result column="handle_data"        property="handleData" />
+        <result column="creator"            property="creator" />
+        <result column="create_time"        property="createTime" />
+        <result column="update_time"        property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, title, work_order_id, physic_cluster_id,cluster_node_role,handle_data, `type`,order_type,status, creator,create_time,update_time
+    </sql>
+    <!-- 保存 工单任务信息 -->
+    <insert id="save" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id" >
+        insert into es_work_order_task
+        (title, work_order_id, physic_cluster_id, cluster_node_role,`type`,order_type,status,handle_data,creator,create_time)
+        values
+        (#{title},#{workOrderId},#{physicClusterId},#{clusterNodeRole},#{type},#{orderType},#{status},#{handleData},#{creator},now())
+    </insert>
+
+    <!-- 根据ID  查询工单任务详情 -->
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_work_order_task
+        where id = #{id} and delete_flag = 0
+    </select>
+    <!-- 根据taskId 修改工单任务 -->
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO" >
+        update es_work_order_task
+        <trim prefix="set" prefixOverrides=",">
+            <if test="title != null">,`title` = #{title}</if>
+            <if test="physicClusterId != null">,physic_cluster_id = #{physicClusterId}</if>
+            <if test="clusterNodeRole != null">,cluster_node_role = #{clusterNodeRole}</if>
+            <if test="type != null">,`type` = #{type}</if>
+            <if test="orderType != null">,order_type = #{orderType}</if>
+            <if test="status != null">,status = #{status}</if>
+            <if test="handleData != null">,handle_data = #{handleData}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!-- 根据taskId 只修改工单任务状态 -->
+    <update id="updateStatusById" parameterType="map" >
+        update es_work_order_task set  status = #{status} where id = #{id}
+    </update>
+
+    <!-- 根据物理集群ID 查询未执行的任务-->
+    <select id="listUndoWorkOrderTaskByClusterId" parameterType="long"  resultMap="BaseResultMap">
+        select  <include refid="Base_Column_List"/>
+        from es_work_order_task
+        where physic_cluster_id = #{physicClusterId} and status in ('waiting','pause','running','failed') and  delete_flag = '0'
+    </select>
+
+    <!-- 查询  全部的工单任务-->
+    <select id="listAll" parameterType="string" resultType="list" resultMap="BaseResultMap">
+        select  <include refid="Base_Column_List"/>
+        from es_work_order_task
+        where  delete_flag = 0 order by id  desc
+    </select>
+
+    <!-- 根据物理集群id，查询处于 waiting 或 running 状态的任务 -->
+    <select id="getRunningWorkOrderTaskByClusterId" resultMap="BaseResultMap">
+        select  <include refid="Base_Column_List"/>
+        from es_work_order_task
+        where physic_cluster_id = #{physicClusterId} and status in ('waiting', 'running') and  delete_flag = '0'
+    </select>
+</mapper>

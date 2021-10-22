@@ -1,0 +1,47 @@
+{
+  "size": 500,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "error"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "timeStamp": {
+        "order": "desc"
+      }
+    }
+  ],
+  "_source": {
+    "includes": [
+      "appid",
+      "indiceSample",
+      "dsl",
+      "exceptionName",
+      "timeStamp"
+    ]
+  }
+}

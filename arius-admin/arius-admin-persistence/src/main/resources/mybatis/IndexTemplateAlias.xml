@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateAliasDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="index_template_id" jdbcType="INTEGER" property="logicId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, index_template_id, `name`
+    </sql>
+
+    <select id="listAll" resultMap="BaseResultMap" parameterType="int">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_alias
+    </select>
+
+    <select id="listByTemplateId" resultMap="BaseResultMap" parameterType="int">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_alias
+        where index_template_id = #{logicId}
+    </select>
+
+</mapper>

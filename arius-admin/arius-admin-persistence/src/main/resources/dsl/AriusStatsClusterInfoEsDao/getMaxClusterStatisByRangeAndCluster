@@ -1,0 +1,76 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "cluster": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "storeSize_max": {
+      "max": {
+        "field": "statis.storeSize"
+      }
+    },
+    "totalStoreSize_max": {
+      "max": {
+        "field": "statis.totalStoreSize"
+      }
+    },
+    "freeStoreSize_max": {
+      "max": {
+        "field": "statis.freeStoreSize"
+      }
+    },
+    "totalIndex_max": {
+      "max": {
+        "field": "statis.totalIndicesNu"
+      }
+    },
+    "indexStoreSize_max": {
+      "max": {
+        "field": "statis.indexStoreSize"
+      }
+    },
+    "readTps_max": {
+      "max": {
+        "field": "statis.readTps"
+      }
+    },
+    "writeTps_max": {
+      "max": {
+        "field": "statis.writeTps"
+      }
+    },
+    "totalTemplateNu_max": {
+      "max": {
+        "field": "statis.totalTemplateNu"
+      }
+    },
+    "totalDocNu_max": {
+      "max": {
+        "field": "statis.totalDocNu"
+      }
+    },
+    "clusterNu_max": {
+          "max": {
+            "field": "statis.clusterNu"
+          }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "term": {
+            "ariusType": {
+              "value": "meta"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "indices",
+    "requestId",
+    "destIndexName"
+  ]
+}

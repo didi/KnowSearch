@@ -1,0 +1,16 @@
+{
+  "size": %d,
+  "query": {
+    "range": {
+      "date": {
+        "gte": "now-%dd",
+        "lte": "now"
+      }
+    }
+  },
+  "_source": [
+    "afterMappingInfo",
+    "name",
+    "clusterName"
+  ]
+}

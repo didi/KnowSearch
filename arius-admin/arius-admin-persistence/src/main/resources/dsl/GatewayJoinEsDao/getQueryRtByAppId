@@ -1,0 +1,60 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "appid": {
+              "query": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": "%d",
+              "lte": "%d",
+              "format": "epoch_millis"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "size": 0,
+  "aggs": {
+    "queryByTimeStamp": {
+      "date_histogram": {
+        "field": "timeStamp",
+        "interval": "1m",
+        "time_zone": "Etc/GMT-8",
+        "min_doc_count": 1,
+        "extended_bounds": {
+          "min": 1584953823664,
+          "max": 1584957423664
+        }
+      },
+      "aggs": {
+        "queryByAppid": {
+          "terms": {
+            "field": "appid",
+            "size": 20,
+            "order": {
+              "1.99": "desc"
+            }
+          },
+          "aggs": {
+            "1": {
+              "percentiles": {
+                "field": "totalCost",
+                "percents": [
+                  99
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

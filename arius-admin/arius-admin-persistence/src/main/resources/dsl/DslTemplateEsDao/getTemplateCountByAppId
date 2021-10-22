@@ -1,0 +1,29 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "version": {
+                    "value": "V1"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

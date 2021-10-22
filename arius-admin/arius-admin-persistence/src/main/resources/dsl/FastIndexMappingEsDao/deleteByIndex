@@ -1,0 +1,10 @@
+{
+  "conflicts": "proceed",
+  "query": {
+    "term": {
+      "indexName": {
+        "value": "%s"
+      }
+    }
+  }
+}

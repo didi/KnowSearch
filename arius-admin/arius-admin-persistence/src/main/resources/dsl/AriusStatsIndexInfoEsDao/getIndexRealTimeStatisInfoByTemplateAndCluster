@@ -1,0 +1,76 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "logicTemplateId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%d",
+              "lte": "%d"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "groupByTimeStamp": {
+      "date_histogram": {
+        "field": "timestamp",
+        "interval": "1m",
+        "time_zone": "Asia/Shanghai",
+        "min_doc_count": 1
+      },
+      "aggs": {
+        "store-size_in_bytes-total": {
+          "sum": {
+            "field": "metrics.store-size_in_bytes-total"
+          }
+        },
+        "indexing-index_total_rate": {
+          "sum": {
+            "field": "metrics.indexing-index_total_rate"
+          }
+        },
+        "indexing-index_time_in_millis_rate": {
+          "sum": {
+            "field": "metrics.indexing-index_time_in_millis_rate"
+          }
+        },
+        "indexing-index_failed_rate": {
+          "sum": {
+            "field": "metrics.indexing-index_failed_rate"
+          }
+        },
+        "search-scroll_time_in_millis_rate": {
+          "sum": {
+            "field": "metrics.search-scroll_time_in_millis_rate"
+          }
+        },
+        "search-query_time_in_millis_rate": {
+          "sum": {
+            "field": "metrics.search-query_time_in_millis_rate"
+          }
+        },
+        "docs-count-total": {
+          "sum": {
+            "field": "metrics.docs-count-total"
+          }
+        },
+        "search-query_total_rate": {
+          "sum": {
+            "field": "metrics.search-query_total_rate"
+          }
+        }
+      }
+    }
+  }
+}

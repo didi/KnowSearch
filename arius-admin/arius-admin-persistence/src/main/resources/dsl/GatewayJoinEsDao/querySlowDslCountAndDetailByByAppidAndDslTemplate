@@ -1,0 +1,48 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "totalCost": {
+              "gt": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        },
+         {
+           "term": {
+             "ariusType": {
+               "value": "type"
+             }
+           }
+         }
+      ]
+    }
+  },
+  "_source": [
+    "indices",
+    "dsl",
+    "dslTemplate",
+    "dslType",
+    "esCost",
+    "totalCost",
+    "totalShards",
+    "totalHits",
+    "responseLen"
+    ]
+}

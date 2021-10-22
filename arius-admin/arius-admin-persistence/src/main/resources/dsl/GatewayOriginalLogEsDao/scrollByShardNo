@@ -1,0 +1,15 @@
+{
+  "size": %d,
+  "query": {
+    "term": {
+      "dltag": {
+        "value": "_arius_query_request_indices"
+      }
+    }
+  },
+  "_source": [
+    "appid",
+    "indices",
+    "requestId"
+  ]
+}

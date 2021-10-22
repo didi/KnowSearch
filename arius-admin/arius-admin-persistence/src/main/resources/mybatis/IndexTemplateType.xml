@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="index_template_id" jdbcType="INTEGER" property="indexTemplateId"/>
+        <result column="index_template_name" jdbcType="VARCHAR" property="indexTemplateName"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="id_field" jdbcType="VARCHAR" property="idField"/>
+        <result column="routing" jdbcType="VARCHAR" property="routing"/>
+        <result column="source" jdbcType="BOOLEAN" property="source"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, index_template_id, index_template_name, `name`, id_field, routing, source
+    </sql>
+
+    <select id="listByIndexTemplateId" resultMap="BaseResultMap" parameterType="integer">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_type
+        where is_active = 1 and index_template_id = #{indexTemplateId}
+        order by id desc
+    </select>
+
+    <update id="update"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO">
+        update index_template_type
+        <trim prefix="set" prefixOverrides=",">
+            <if test="name != null">,`name` = #{name}</if>
+            <if test="idField != null">,id_field = #{idField}</if>
+            <if test="routing != null">,routing = #{routing}</if>
+            <if test="source != null">,source = #{source}</if>
+        </trim>
+        where id = #{id} and is_active = 1
+    </update>
+
+
+</mapper>
