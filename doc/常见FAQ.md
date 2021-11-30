@@ -32,8 +32,7 @@
 
 ## 2.6 ES的学习资料
 
-- elasticsearch入门学习： http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=108637827elasticsearch
-- 源码学习:  http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=115678953
+- elasticsearch官网学习：https://www.elastic.co/guide/en/elasticsearch/reference/7.6/release-notes-7.6.2.html#release-notes-7.6.2
 
 ## 2.7 ES集群健康状态
 
