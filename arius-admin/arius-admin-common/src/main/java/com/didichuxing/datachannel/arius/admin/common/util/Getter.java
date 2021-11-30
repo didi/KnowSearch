@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  *
@@ -14,6 +14,8 @@ import com.didichuxing.tunnel.util.log.LogFactory;
  * @date 2019/3/21
  */
 public class Getter {
+
+    private Getter(){}
 
     private static final ILog LOGGER = LogFactory.getLog(Getter.class);
 

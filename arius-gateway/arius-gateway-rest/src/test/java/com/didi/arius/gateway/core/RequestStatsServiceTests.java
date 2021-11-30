@@ -43,23 +43,23 @@ public class RequestStatsServiceTests {
     public void testGetQueryContext() {
         requestStatsService.putQueryContext("key1", new QueryContext());
         final QueryContext key1 = requestStatsService.getQueryContext("key1");
-        assertEquals(key1 != null, true);
+        assertEquals(true, key1 != null);
     }
 
     @Test
     public void testGetQueryKeys() {
         final List<String> queryKeys = requestStatsService.getQueryKeys();
         System.out.println(JSON.toJSONString(queryKeys));
-        assertEquals(queryKeys.size() >= 0, true);
+        assertEquals(true, queryKeys.size() >= 0);
     }
 
     @Test
     public void testRemoveQueryContext() {
         requestStatsService.putQueryContext("key1", new QueryContext());
         final QueryContext key1 = requestStatsService.getQueryContext("key1");
-        assertEquals(key1 != null, true);
+        assertEquals(true, key1 != null);
         requestStatsService.removeQueryContext("key1");
-        assertEquals(requestStatsService.getQueryContext("key1") == null, true);
+        assertEquals(true, requestStatsService.getQueryContext("key1") == null);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class RequestStatsServiceTests {
     public void testGetActionContext() {
         requestStatsService.putActionContext("key1", new ActionContext());
         final ActionContext key1 = requestStatsService.getActionContext("key1");
-        assertEquals(key1 != null, true);
+        assertEquals(true, key1 != null);
     }
 
 
@@ -79,16 +79,16 @@ public class RequestStatsServiceTests {
     public void testRemoveActionContext() {
         requestStatsService.putActionContext("key1", new ActionContext());
         final ActionContext key1 = requestStatsService.getActionContext("key1");
-        assertEquals(key1 != null, true);
+        assertEquals(true, key1 != null);
         requestStatsService.removeActionContext("key1");
-        assertEquals(requestStatsService.getActionContext("key1") == null, true);
+        assertEquals(true, requestStatsService.getActionContext("key1") == null);
     }
 
     @Test
     public void testGetActionKeys() {
         final List<String> queryKeys = requestStatsService.getActionKeys();
         System.out.println(JSON.toJSONString(queryKeys));
-        assertEquals(queryKeys.size() >= 0, true);
+        assertEquals(true, queryKeys.size() >= 0);
     }
 
     @Test

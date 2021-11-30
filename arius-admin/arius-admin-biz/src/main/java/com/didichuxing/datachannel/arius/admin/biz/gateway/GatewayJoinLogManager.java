@@ -1,9 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayJoinVO;
-
 import java.util.List;
+
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayJoinQueryDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayJoinVO;
 
 public interface GatewayJoinLogManager {
     /**
@@ -23,4 +24,31 @@ public interface GatewayJoinLogManager {
      * @return list
      */
     Result<List<GatewayJoinVO>> getGatewaySlowList(Long appId, Long startDate, Long endDate);
+
+    /**
+     * 根据appid获取指定数据中心一段时间查询量
+     *
+     * @param dataCenter
+     * @param appId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Result<Long> getSearchCountByAppId(String dataCenter, Long appId, Long startDate, Long endDate);
+
+    /**
+     * 获取GatewaySlowList
+     * @param appId 应用id
+     * @param queryDTO 查询条件
+     * @return Result<List<GatewayJoinVO>>
+     */
+    Result<List<GatewayJoinVO>> getGatewayJoinSlowList(Integer appId, GatewayJoinQueryDTO queryDTO);
+
+    /**
+     * 获取GatewayErrorList
+     * @param appId 应用id
+     * @param queryDTO 查询条件
+     * @return Result<List<GatewayJoinVO>>
+     */
+    Result<List<GatewayJoinVO>> getGatewayJoinErrorList(Integer appId, GatewayJoinQueryDTO queryDTO);
 }

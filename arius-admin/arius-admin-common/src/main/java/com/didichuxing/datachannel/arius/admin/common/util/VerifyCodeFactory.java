@@ -12,9 +12,13 @@ import com.google.common.collect.Lists;
  */
 public class VerifyCodeFactory {
 
+    private VerifyCodeFactory(){}
+
     private static final String  CHAR_SET = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     private static List<String> charList;
+
+    private static final Random random = new Random();
 
     static {
         charList = Lists.newArrayList();
@@ -25,7 +29,6 @@ public class VerifyCodeFactory {
 
     public static String get(int length) {
         Collections.shuffle(charList);
-        Random random = new Random();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
             int number = random.nextInt(charList.size());

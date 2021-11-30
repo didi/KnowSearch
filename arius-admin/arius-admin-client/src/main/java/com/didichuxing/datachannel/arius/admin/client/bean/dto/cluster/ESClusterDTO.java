@@ -1,21 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
+import java.util.List;
+
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-/**
- * @author d06679
- * @date 2019/3/19
- */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "集群信息")
-public class ESClusterDTO extends BaseDTO {
+public class ESClusterDTO extends PageDTO {
 
     @ApiModelProperty("集群ID")
     private Integer                    id;
@@ -39,7 +39,6 @@ public class ESClusterDTO extends BaseDTO {
     private String                     httpWriteAddress;
 
     /**
-     * 集群类型
      * @see ESClusterTypeEnum
      */
     @ApiModelProperty("集群类型(-1 未知 3 docker集群 4 host集群)")
@@ -95,4 +94,13 @@ public class ESClusterDTO extends BaseDTO {
 
     @ApiModelProperty("集群密码")
     private String                     password;
+
+    @ApiModelProperty("client运行模式（0：读写共享 1：读写分离）")
+    private Integer                    runMode;
+
+    @ApiModelProperty("指定用写client的action")
+    private String                     writeAction;
+
+    @ApiModelProperty("集群状态 1 green 2 yellow 3 red -1 未知")
+    private Integer                    health;
 }

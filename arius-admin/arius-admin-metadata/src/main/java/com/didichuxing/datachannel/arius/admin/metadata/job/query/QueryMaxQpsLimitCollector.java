@@ -49,7 +49,7 @@ public class QueryMaxQpsLimitCollector extends AbstractMetaDataJob {
     /**
      * 任务线程池
      */
-    private final static FutureUtil futureUtil = FutureUtil.init("QueryMaxQpsLimitCollector");
+    private static final FutureUtil futureUtil = FutureUtil.init("QueryMaxQpsLimitCollector");
 
     /**
      * 处理采集任务
@@ -65,7 +65,8 @@ public class QueryMaxQpsLimitCollector extends AbstractMetaDataJob {
 
         // 计算起始结束时间范围
         Tuple<String, String> stringStringTuple = DateTimeUtil.getStartEndTimeByDate("");
-        String startDate = stringStringTuple.v1(), endDate = stringStringTuple.v2();
+        String startDate = stringStringTuple.v1();
+        String endDate   = stringStringTuple.v2();
 
         // 获取指定时间去重的查询模板信息
         List<DslMetricsPO> appidTemplateList = dslMetricsEsDao.getAppIdTemplateMd5InfoByDate(startDate);

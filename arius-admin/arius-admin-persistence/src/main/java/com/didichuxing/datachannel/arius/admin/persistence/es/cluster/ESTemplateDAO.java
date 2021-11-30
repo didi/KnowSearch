@@ -1,28 +1,27 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.model.type.ESVersion;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
+import com.didiglobal.logi.elasticsearch.client.request.index.gettemplate.ESIndicesGetTemplateRequest;
+import com.didiglobal.logi.elasticsearch.client.request.index.puttemplate.ESIndicesPutTemplateRequest;
+import com.didiglobal.logi.elasticsearch.client.response.indices.deletetemplate.ESIndicesDeleteTemplateResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.gettemplate.ESIndicesGetTemplateResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.puttemplate.ESIndicesPutTemplateResponse;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.index.gettemplate.ESIndicesGetTemplateRequest;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.index.puttemplate.ESIndicesPutTemplateRequest;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.deletetemplate.ESIndicesDeleteTemplateResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.gettemplate.ESIndicesGetTemplateResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.puttemplate.ESIndicesPutTemplateResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -30,8 +29,6 @@ import com.didichuxing.tunnel.util.log.LogFactory;
  */
 @Repository
 public class ESTemplateDAO extends BaseESDAO {
-
-    private static final ILog LOGGER = LogFactory.getLog(ESTemplateDAO.class);
 
     /**
      * 修改模板表达式
@@ -63,6 +60,35 @@ public class ESTemplateDAO extends BaseESDAO {
     }
 
     /**
+     * 修改模板分片
+     * @param cluster 集群
+     * @param name 模板名字
+     * @param shardNum 表达式
+     * @return
+     */
+    public boolean updateShardNum(String cluster, String name, Integer shardNum) {
+        ESClient client = esOpClient.getESClient(cluster);
+
+        // 获取es中原来index template的配置
+        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+
+        // 修改分片数目
+        if (shardNum != null && shardNum > 0) {
+            templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shardNum));
+        }
+
+        // 设置ES版本
+        templateConfig.setVersion(client.getEsVersion());
+
+        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+        return response.getAcknowledged();
+    }
+
+    /**
      * 修改模板rack和shard
      * @param cluster 集群
      * @param name 模板名字
@@ -78,7 +104,7 @@ public class ESTemplateDAO extends BaseESDAO {
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
-        if (StringUtils.isNotBlank(rack)) {
+        if (StringUtils.isNotBlank(rack) && !"*".equals(rack)) {
             templateConfig.setSettings(TEMPLATE_INDEX_INCLUDE_RACK, rack);
         }
 
@@ -86,9 +112,10 @@ public class ESTemplateDAO extends BaseESDAO {
             templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shard));
         }
 
-        if (shardRouting != null) {
+        //开源版本不支持这个参数先注释
+        /*if (shardRouting != null) {
             templateConfig.setSettings(INDEX_SHARD_ROUTING_NUM, String.valueOf(shardRouting));
-        }
+        }*/
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
@@ -133,7 +160,7 @@ public class ESTemplateDAO extends BaseESDAO {
                 .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
         } catch (Exception e) {
-            LOGGER.warn("method=create||msg=get src template fail||cluster={}||name={}", cluster, name);
+            LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}", cluster, name);
         }
 
         if (templateConfig == null) {
@@ -144,7 +171,7 @@ public class ESTemplateDAO extends BaseESDAO {
             templateConfig.setTemplate(expression);
         }
 
-        if (StringUtils.isNotBlank(rack)) {
+        if (StringUtils.isNotBlank(rack) && !"*".equals(rack)) {
             templateConfig.setSettings(TEMPLATE_INDEX_INCLUDE_RACK, rack);
         }
 
@@ -152,9 +179,10 @@ public class ESTemplateDAO extends BaseESDAO {
             templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shard));
         }
 
-        if (shardRouting != null) {
+        //开源版本不支持这个参数，先注释
+        /*if (shardRouting != null) {
             templateConfig.setSettings(INDEX_SHARD_ROUTING_NUM, String.valueOf(shardRouting));
-        }
+        }*/
 
         if (templateConfig.getOrder() == null) {
             templateConfig.setOrder(TEMPLATE_DEFAULT_ORDER);
@@ -207,7 +235,7 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             response = esClient.admin().indices().putTemplate(request).actionGet(120, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOGGER.warn("update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}", clusterName, templateName,
+            LOGGER.warn("class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}", clusterName, templateName,
                     esClient.getEsVersion(), templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
             throw e;
         }
@@ -229,6 +257,25 @@ public class ESTemplateDAO extends BaseESDAO {
         }
 
         return templatesConfig.getSingleConfig();
+    }
+
+    /**
+     * 获取所有引擎模板
+     * @param clusters 集群列表
+     * @return
+     */
+    public Map<String, TemplateConfig> getAllTemplate(List<String> clusters) {
+        Map<String, TemplateConfig> map = new HashMap<>();
+        for (String clusterName : clusters) {
+
+            MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null);
+
+            if (null == templatesConfig) {
+                return null;
+            }
+            map.putAll(templatesConfig.getTemplateConfigMap());
+        }
+        return map;
     }
 
     /**
@@ -260,15 +307,19 @@ public class ESTemplateDAO extends BaseESDAO {
 
         ESClient esClient = esOpClient.getESClient(clusterName);
 
+        if(null == esClient){
+            return null;
+        }
+
         ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
         request.setTemplates(templateName);
 
         ESIndicesGetTemplateResponse response = null;
         try {
-            response = esClient.admin().indices().getTemplate(request).actionGet(10, TimeUnit.SECONDS);
+            response = esClient.admin().indices().getTemplate(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOGGER.warn("get templates fail || clusterName={}||templateName={}|| msg={}", clusterName, templateName,
-                e.getMessage(), e);
+            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
+                    clusterName, templateName, e.getMessage(), e);
         }
 
         if (response == null) {
@@ -276,8 +327,7 @@ public class ESTemplateDAO extends BaseESDAO {
         }
 
         if (!EnvUtil.isOnline()) {
-            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||response={}||clusterName={}||templateName={}",
-                    JSON.toJSONString(response), clusterName, templateName);
+            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName, templateName);
         }
 
         return response.getMultiTemplatesConfig();

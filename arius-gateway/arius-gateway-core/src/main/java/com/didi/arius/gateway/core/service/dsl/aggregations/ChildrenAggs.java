@@ -16,7 +16,11 @@ public class ChildrenAggs extends BucketAggsType {
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
+	public ChildrenAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);

@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,17 +9,20 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import com.alibaba.fastjson.JSON;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Sets;
 
 /**
@@ -39,6 +41,9 @@ public class ESOpClient {
     @Autowired
     private ClusterDAO                   clusterDAO;
 
+    @Value("${es.client.io.thread.count:0}")
+    private Integer                      ioThreadCount;
+
     /**
      * 启动就链接所有集群
      * 每10min就检查一遍自己的链接
@@ -47,7 +52,7 @@ public class ESOpClient {
      * Client的信息会8个小时重新连接一遍，做为兜底方案
      */
     @PostConstruct
-    @Scheduled(cron = "0 3/10 * * * ?")
+    @Scheduled(cron = "0 3/5 * * * ?")
     public synchronized void refreshConnect() {
 
         LOGGER.info("class=ESOpClient||method=init||ESOpClient refreshConnect start.");
@@ -103,7 +108,7 @@ public class ESOpClient {
      * @param cluster 集群名称
      */
     public void removeAndCloseESClient(String cluster) {
-        LOGGER.info("remove es client||cluster={}", cluster);
+        LOGGER.info("class=ESOpClient||method=removeAndCloseESClient||msg=remove es client||cluster={}", cluster);
 
         ESClient client = esClientMap.remove(cluster);
         if (client != null) {
@@ -120,8 +125,7 @@ public class ESOpClient {
      */
     public ESClient getESClient(String cluster) {
         if (!esClientMap.containsKey(cluster)) {
-            LOGGER.warn("cluster connect not exist, reconnect||cluster={}", cluster);
-            refreshConnect();
+            LOGGER.warn("class=ESOpClient||method=getESClient||msg=cluster connect not exist, reconnect||cluster={}", cluster);
         }
 
         return esClientMap.get(cluster);
@@ -138,10 +142,10 @@ public class ESOpClient {
 
     /**************************************** private method ****************************************************/
     private void connect(ClusterPO clusterPO) {
-        LOGGER.info("connect es start||cluster={}", clusterPO.getCluster());
+        LOGGER.info("class=ESOpClient||method=connect||msg=connect es start||cluster={}", clusterPO.getCluster());
 
         if (StringUtils.isBlank(clusterPO.getHttpAddress())) {
-            LOGGER.info("connect es fail, httpAddress is null||cluster={}", clusterPO.getCluster());
+            LOGGER.warn("class=ESOpClient||method=connect||msg=connect es fail, httpAddress is null||cluster={}", clusterPO.getCluster());
             return;
         }
 
@@ -150,17 +154,36 @@ public class ESOpClient {
         if (StringUtils.isNotEmpty(clusterPO.getPassword())) {
             client.setPassword(clusterPO.getPassword());
         }
-        client.start();
 
-        ESClusterHealthResponse response = client.admin().cluster().prepareHealth().execute().actionGet(10,
-            TimeUnit.SECONDS);
+        try {
+            if (ESClient.DEFAULT_ES_VERSION.equals(client.getEsVersion())
+                    && !ESClient.DEFAULT_ES_VERSION.equals(clusterPO.getEsVersion())) {
+                client.setEsVersion(clusterPO.getEsVersion());
+                client.setClusterName(clusterPO.getCluster());
+            }
 
-        if (!response.isTimedOut()) {
-            LOGGER.info("connect es by http succ||cluster={}||hosts={}", clusterPO.getCluster(),
+            if (ioThreadCount > 0) {
+                client.setIoThreadCount(ioThreadCount);
+            }
+
+            client.start();
+
+            ESClusterHealthResponse response = client.admin().cluster().prepareHealth().execute().actionGet(10,
+                    TimeUnit.SECONDS);
+
+            if (RestStatus.OK.getStatus() == response.getRestStatus().getStatus()) {
+                LOGGER.info("class=ESOpClient||method=connect||msg=connect es by http succ||cluster={}||hosts={}", clusterPO.getCluster(),
+                        clusterPO.getHttpAddress());
+
+                esClientMap.put(clusterPO.getCluster(), client);
+                esClusterMap.put(clusterPO.getCluster(), clusterPO);
+            }else {
+                client.close();
+            }
+        }catch (Exception e){
+            client.close();
+            LOGGER.error("class=ESOpClient||method=connect||msg=connect es by http error||cluster={}||hosts={}||msg=client start error", clusterPO.getCluster(),
                     clusterPO.getHttpAddress());
-
-            esClientMap.put(clusterPO.getCluster(), client);
-            esClusterMap.put(clusterPO.getCluster(), clusterPO);
         }
     }
 }

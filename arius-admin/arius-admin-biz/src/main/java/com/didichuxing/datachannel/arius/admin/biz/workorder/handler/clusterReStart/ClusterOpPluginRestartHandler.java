@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReStart;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.PhyClusterPluginNotify;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
@@ -12,8 +14,9 @@ import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
@@ -24,20 +27,18 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.PhyClusterPluginNotify;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_PHY_CLUSTER_PLUGIN;
 
@@ -45,25 +46,22 @@ import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskType
 public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
 
     @Autowired
-    private ESClusterPhyService esClusterPhyService;
-
-    @Autowired
     private ESPluginService esPluginService;
 
     @Autowired
-    private ESRoleClusterService esRoleClusterService;
-
-    @Autowired
-    private EcmHandleService ecmHandleService;
+    private RoleClusterService roleClusterService;
 
     @Autowired
     private WorkTaskManager workTaskService;
 
     @Autowired
-    private ESRegionRackService esRegionRackService;
+    private ESClusterService esClusterService;
+
+    @Autowired
+    private EcmTaskManager ecmTaskManager;
 
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         PhyClusterPluginOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
                 PhyClusterPluginOperationContent.class);
 
@@ -74,18 +72,6 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         ESPluginPO plugin = esPluginService.getESPluginById(content.getPluginId());
         if (AriusObjUtils.isNull(plugin)) {
             return Result.buildParamIllegal("插件不存在！");
-        }
-
-        // 校验插件文件名
-        // todo name --> url
-        if (!content.getPluginFileName().equals(plugin.getUrl())) {
-            return Result.buildFail("插件文件名错误！");
-        }
-
-        // 校验插件S3地址
-        // todo s3url --> url
-        if (!content.getS3url().equals(plugin.getS3url())) {
-            return Result.buildFail("插件S3地址错误！");
         }
 
         // 校验操作类型
@@ -102,6 +88,11 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
+        // 集群存在等待执行或正在执行的插件操作任务
+        if (null != ecmTaskManager.getRunningWorkOrderTaskByClusterId(Integer.parseInt(plugin.getPhysicClusterId()))) {
+            return Result.buildFail("该集群上仍存在待执行或者正在执行的插件操作任务，请完成该任务后再提交");
+        }
+
         return Result.buildSucc();
     }
 
@@ -116,13 +107,13 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         }
         OperationTypeEnum operationType = OperationTypeEnum.valueOfCode(content.getOperationType());
         ESPluginPO esPluginPO = esPluginService.getESPluginById(content.getPluginId());
-        ESClusterPhy cluster = esClusterPhyService.getClusterById(Integer.parseInt(esPluginPO.getPhysicClusterId()));
+        ClusterPhy cluster = esClusterPhyService.getClusterById(Integer.parseInt(esPluginPO.getPhysicClusterId()));
         return cluster.getCluster() + " " + esPluginPO.getName() + esPluginPO.getVersion() + " "
                 + workOrderTypeEnum.getMessage() + "-" + operationType.getMessage();
     }
 
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         if(!isOP(workOrder.getSubmitor())){
             return Result.buildOpForBidden("非运维人员不能操作物理集群插件的安装和卸载！");
         }
@@ -131,59 +122,55 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
     }
 
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         PhyClusterPluginOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
                 PhyClusterPluginOperationContent.class);
 
         // 当该物理集群对应的逻辑集群对应多个物理集群时，提示用户应该在逻辑侧进行操作
-        //TODO: 考虑一个物理集群对应多个逻辑集群的情况
         ESPluginPO esPluginPO = esPluginService.getESPluginById(content.getPluginId());
-        Long logicClusterId = esRegionRackService.getLogicClusterIdByPhyClusterId(Integer.parseInt(esPluginPO.getPhysicClusterId()));
-        List<Integer> physicClusterIds = esRegionRackService.listPhysicClusterId(logicClusterId);
-        if (physicClusterIds.size() > 1) {
-            return Result.buildFail("因该物理集群与逻辑集群非1对1映射，请至“集群列表”，在该物理集群对应的逻辑集群侧操作");
-        }
 
-        ESClusterPhy esClusterPhy = esClusterPhyService.getClusterById(Integer.parseInt(esPluginPO.getPhysicClusterId()));
-        List<ESRoleCluster> esRoleClusterList = esRoleClusterService.getAllRoleClusterByClusterId(esClusterPhy.getId());
-        if (CollectionUtils.isEmpty(esRoleClusterList)) {
+        ClusterPhy clusterPhy = esClusterPhyService.getClusterById(Integer.parseInt(esPluginPO.getPhysicClusterId()));
+        List<RoleCluster> roleClusterList = roleClusterService.getAllRoleClusterByClusterId(
+				clusterPhy.getId());
+        if (CollectionUtils.isEmpty(roleClusterList)) {
             return Result.buildFail("物理集群角色不存在");
         }
 
         List<String> roleNameList = new ArrayList<>();
-        for (ESRoleCluster esRoleCluster : esRoleClusterList) {
-            roleNameList.add(esRoleCluster.getRole());
+        for (RoleCluster roleCluster : roleClusterList) {
+            roleNameList.add(roleCluster.getRole());
         }
-        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseList(esClusterPhy.getId(), roleNameList).getData();
+        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseListWithEsPluginAction(clusterPhy.getId(),
+                roleNameList, content.getPluginId(), content.getOperationType()).getData();
 
         // 生成工单任务
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setPhysicClusterId(Long.parseLong(esPluginPO.getPhysicClusterId()));
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.PLUG_OPERATION.getCode());
+        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
-        ecmTaskDTO.setType(esClusterPhy.getType());
+        ecmTaskDTO.setType(clusterPhy.getType());
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(roleNameList));
 
         WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setExpandData(JSONObject.toJSONString( ecmTaskDTO ));
+        workTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
         workTaskDTO.setTaskType(WorkTaskTypeEnum.CLUSTER_RESTART.getType());
         workTaskDTO.setCreator(workOrder.getSubmitor());
-        Result result = workTaskService.addTask(workTaskDTO);
+        Result<WorkTask> result = workTaskService.addTask(workTaskDTO);
         if(null == result || result.failed()){
             return Result.buildFail("生成物理集群插件操作任务失败!");
         }
 
         // 发送通知消息
         sendNotify(WORK_ORDER_PHY_CLUSTER_PLUGIN, new PhyClusterPluginNotify(workOrder.getSubmitorAppid(),
-                esClusterPhy.getCluster(), approver), Arrays.asList(workOrder.getSubmitor()));
+                clusterPhy.getCluster(), approver), Arrays.asList(workOrder.getSubmitor()));
 
         return Result.buildSucc();
     }
@@ -206,9 +193,9 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail( ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }

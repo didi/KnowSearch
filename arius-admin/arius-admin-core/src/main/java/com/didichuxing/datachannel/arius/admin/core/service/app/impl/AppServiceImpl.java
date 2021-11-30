@@ -1,35 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.DELETE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppLogicClusterAuthDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
@@ -43,23 +25,38 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicClusterAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * @author d06679
- * @date 2019/3/13
- */
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP_CONFIG;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
+
 @Service
 public class AppServiceImpl implements AppService {
 
@@ -69,40 +66,54 @@ public class AppServiceImpl implements AppService {
 
     private static final Integer       APP_QUERY_THRESHOLD_DEFAULT = 100;
 
-    @Autowired
-    private AppDAO                     appDAO;
+    private static final String APP_NOT_EXIST = "应用不存在";
 
     @Autowired
-    private EmployeeService            employeeService;
+    private AppDAO                      appDAO;
 
     @Autowired
-    private OperateRecordService       operateRecordService;
+    private EmployeeService             employeeService;
 
     @Autowired
-    private ResponsibleConvertTool     responsibleConvertTool;
+    private OperateRecordService        operateRecordService;
 
     @Autowired
-    private AppConfigDAO               appConfigDAO;
+    private ResponsibleConvertTool      responsibleConvertTool;
 
     @Autowired
-    private AppUserInfoService         appUserInfoService;
+    private AppConfigDAO                appConfigDAO;
 
     @Autowired
-    private ESClusterLogicService      esClusterLogicService;
+    private AppUserInfoService          appUserInfoService;
 
     @Autowired
-    private TemplateLogicService       templateLogicService;
+    private ClusterLogicService         clusterLogicService;
 
     @Autowired
-    private AppLogicClusterAuthService logicClusterAuthService;
+    private TemplateLogicService        templateLogicService;
+
+    @Autowired
+    private AppClusterLogicAuthService logicClusterAuthService;
+
+    private Cache<String, List<?>>      appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
+
 
     /**
      * 查询app详细信息
      * @return 返回app列表
      */
     @Override
-    public List<App> getApps() {
+    public List<App> listApps() {
         return responsibleConvertTool.list2List(appDAO.listByCondition(new AppPO()), App.class);
+    }
+
+    @Override
+    public List<App> listAppWithCache() {
+        try {
+            return (List<App>) appListCache.get("listApp", this::listApps);
+        } catch (ExecutionException e) {
+            return listApps();
+        }
     }
 
     /**
@@ -111,7 +122,7 @@ public class AppServiceImpl implements AppService {
      */
     @Override
     public Map<Integer, App> getAppsMap() {
-        return ConvertUtil.list2Map(getApps(), App::getId);
+        return ConvertUtil.list2Map( listApps(), App::getId);
     }
 
     /**
@@ -123,39 +134,12 @@ public class AppServiceImpl implements AppService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Integer> registerApp(AppDTO appDTO, String operator) {
-        Result checkResult = validateApp(appDTO, ADD);
+        Result<Void> checkResult = validateApp(appDTO, ADD);
         if (checkResult.failed()) {
             LOGGER.warn("class=AppServiceImpl||method=addApp||fail msg={}", checkResult.getMessage());
             return Result.buildFrom(checkResult);
         }
         return addAppWithoutCheck(appDTO, operator);
-    }
-
-    /**
-     * 新建APP  并不会校验参数是否合法  与validateApp配合使用
-     * @param appDTO   dto
-     * @param operator 操作人 邮箱前缀
-     * @return 成功 true  失败 false
-     */
-    private Result<Integer> addAppWithoutCheck(AppDTO appDTO, String operator) {
-        initParam(appDTO);
-
-        AppPO param = responsibleConvertTool.obj2Obj(appDTO, AppPO.class);
-        boolean succ = (appDAO.insert(param) == 1);
-        if (succ) {
-            // 默认配置
-            if (initConfig(param.getId()).failed()) {
-                LOGGER.warn("class=AppServiceImpl||method=addAppWithoutCheck||appid={}||msg=initConfig fail",
-                    param.getId());
-            }
-            // 操作记录
-            operateRecordService.save(APP, ADD, param.getId(), "", operator);
-            appUserInfoService.record(param.getId(), appDTO.getResponsible());
-            SpringTool.publish(
-                new AppAddEvent(this, responsibleConvertTool.obj2Obj(appDAO.getById(param.getId()), App.class)));
-        }
-
-        return Result.build(succ, param.getId());
     }
 
     /**
@@ -166,25 +150,17 @@ public class AppServiceImpl implements AppService {
      * @return 参数合法返回
      */
     @Override
-    public Result validateApp(AppDTO appDTO, OperationEnum operation) {
+    public Result<Void> validateApp(AppDTO appDTO, OperationEnum operation) {
         if (AriusObjUtils.isNull(appDTO)) {
             return Result.buildParamIllegal("应用信息为空");
         }
-        if (AriusObjUtils.isNull(appDTO.getName())) {
-            return Result.buildParamIllegal("应用名称为空");
-        }
-        if (AriusObjUtils.isNull(appDTO.getDepartmentId())) {
-            return Result.buildParamIllegal("部门ID为空");
-        }
-        if (AriusObjUtils.isNull(appDTO.getDepartment())) {
-            return Result.buildParamIllegal("部门名字为空");
-        }
-        if (AriusObjUtils.isNull(appDTO.getResponsible()) || employeeService.checkUsers(appDTO.getResponsible(), null).failed()) {
+        Result<Void> validateAppFieldIsNullResult = validateAppFieldIsNull(appDTO);
+        if (validateAppFieldIsNullResult.failed()) {return validateAppFieldIsNullResult;}
+
+        if (AriusObjUtils.isNull(appDTO.getResponsible()) || employeeService.checkUsers(appDTO.getResponsible()).failed()) {
             return Result.buildParamIllegal("责任人非法");
         }
-        if (appDTO.getMemo() == null) {
-            return Result.buildParamIllegal("备注为空");
-        }
+
         if (appDTO.getIsRoot() == null || !AdminConstant.yesOrNo(appDTO.getIsRoot())) {
             return Result.buildParamIllegal("超管标记非法");
         }
@@ -202,7 +178,7 @@ public class AppServiceImpl implements AppService {
             }
             AppPO oldApp = appDAO.getById(appDTO.getId());
             if (AriusObjUtils.isNull(oldApp)) {
-                return Result.buildNotExist("应用不存在");
+                return Result.buildNotExist(APP_NOT_EXIST);
             }
         }
 
@@ -223,33 +199,13 @@ public class AppServiceImpl implements AppService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result editApp(AppDTO appDTO, String operator) {
-        Result checkResult = validateApp(appDTO, EDIT);
+    public Result<Void> editApp(AppDTO appDTO, String operator) {
+        Result<Void> checkResult = validateApp(appDTO, EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=AppServiceImpl||method=updateApp||msg={}||msg=check fail", checkResult.getMessage());
             return checkResult;
         }
         return editAppWithoutCheck(appDTO, operator);
-    }
-
-    /**
-     * 编辑APP 并不会校验参数是否合法  与validateApp配合使用
-     * @param appDTO   dto
-     * @param operator 操作人 邮箱前缀
-     * @return 成功 true  失败 false
-     */
-    private Result editAppWithoutCheck(AppDTO appDTO, String operator) {
-        AppPO oldPO = appDAO.getById(appDTO.getId());
-        AppPO param = responsibleConvertTool.obj2Obj(appDTO, AppPO.class);
-
-        boolean succeed = (appDAO.update(param) == 1);
-        if (succeed) {
-            operateRecordService.save(APP, EDIT, appDTO.getId(), AriusObjUtils.findChanged(oldPO, param), operator);
-            appUserInfoService.record(appDTO.getId(), appDTO.getResponsible());
-            SpringTool.publish(new AppEditEvent(this, responsibleConvertTool.obj2Obj(oldPO, App.class),
-                responsibleConvertTool.obj2Obj(appDAO.getById(param.getId()), App.class)));
-        }
-        return Result.build(succeed);
     }
 
     /**
@@ -260,7 +216,7 @@ public class AppServiceImpl implements AppService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result deleteAppById(int appId, String operator) {
+    public Result<Void> deleteAppById(int appId, String operator) {
 
         if (hasOwnLogicCluster(appId)) {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "APP申请了集群，不能删除");
@@ -287,7 +243,7 @@ public class AppServiceImpl implements AppService {
      * @return 成功 true  失败false
      */
     @Override
-    public Result initConfig(Integer appId) {
+    public Result<Void> initConfig(Integer appId) {
         AppConfigPO param = new AppConfigPO();
         param.setAppId(appId);
         param.setDslAnalyzeEnable(AdminConstant.YES);
@@ -322,6 +278,25 @@ public class AppServiceImpl implements AppService {
     }
 
     /**
+     * 获取所有应用的配置
+     *
+     * @return list
+     */
+    @Override
+    public List<AppConfig> listConfig() {
+        return ConvertUtil.list2List(appConfigDAO.listAll(), AppConfig.class);
+    }
+
+    @Override
+    public List<AppConfig> listConfigWithCache() {
+        try {
+            return (List<AppConfig>) appListCache.get("listConfig", this::listConfig);
+        } catch (ExecutionException e) {
+            return listConfig();
+        }
+    }
+
+    /**
      * 修改APP配置
      * @param configDTO 配置信息
      * @param operator  操作人
@@ -334,8 +309,8 @@ public class AppServiceImpl implements AppService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result updateAppConfig(AppConfigDTO configDTO, String operator) {
-        Result checkResult = checkConfigParam(configDTO);
+    public Result<Void> updateAppConfig(AppConfigDTO configDTO, String operator) {
+        Result<Void> checkResult = checkConfigParam(configDTO);
         if (checkResult.failed()) {
             LOGGER.warn("class=AppServiceImpl||method=updateConfig||msg={}||msg=check fail!", checkResult.getMessage());
             return checkResult;
@@ -343,7 +318,7 @@ public class AppServiceImpl implements AppService {
 
         AppPO oldApp = appDAO.getById(configDTO.getAppId());
         if (oldApp == null) {
-            return Result.buildNotExist("应用不存在");
+            return Result.buildNotExist(APP_NOT_EXIST);
         }
 
         AppConfigPO oldConfigPO = appConfigDAO.getByAppId(configDTO.getAppId());
@@ -402,11 +377,11 @@ public class AppServiceImpl implements AppService {
      * @return result
      */
     @Override
-    public Result login(Integer appId, String verifyCode, String operator) {
+    public Result<Void> login(Integer appId, String verifyCode, String operator) {
         AppPO appPO = appDAO.getById(appId);
 
         if (appPO == null) {
-            return Result.buildNotExist("应用不存在");
+            return Result.buildNotExist(APP_NOT_EXIST);
         }
 
         if (StringUtils.isBlank(verifyCode) || !appPO.getVerifyCode().equals(verifyCode)) {
@@ -418,7 +393,7 @@ public class AppServiceImpl implements AppService {
         }
 
         // 记录appid登陆的人员信息
-        appUserInfoService.record(appId, operator);
+        appUserInfoService.recordAppidAndUser(appId, operator);
 
         return Result.buildSucc();
     }
@@ -431,11 +406,11 @@ public class AppServiceImpl implements AppService {
      * @return result
      */
     @Override
-    public Result verifyAppCode(Integer appId, String verifyCode) {
+    public Result<Void> verifyAppCode(Integer appId, String verifyCode) {
         AppPO appPO = appDAO.getById(appId);
 
         if (appPO == null) {
-            return Result.buildNotExist("应用不存在");
+            return Result.buildNotExist(APP_NOT_EXIST);
         }
 
         if (StringUtils.isBlank(verifyCode) || !appPO.getVerifyCode().equals(verifyCode)) {
@@ -474,16 +449,6 @@ public class AppServiceImpl implements AppService {
     }
 
     /**
-     * 获取所有应用的配置
-     *
-     * @return list
-     */
-    @Override
-    public List<AppConfig> getAppConfigs() {
-        return ConvertUtil.list2List(appConfigDAO.listAll(), AppConfig.class);
-    }
-
-    /**
      * 根据责任人查询
      *
      * @param responsible
@@ -504,22 +469,22 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, AppLogicClusterAuthEnum logicClusterAuth) {
+    public List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, AppClusterLogicAuthEnum logicClusterAuth) {
         if (logicClusterId == null || logicClusterAuth == null) {
             return new ArrayList<>();
         }
 
         // 要求的最低权限是无权限，所有APP否符合
-        if (logicClusterAuth == AppLogicClusterAuthEnum.NO_PERMISSIONS) {
-            return getApps();
+        if (logicClusterAuth == AppClusterLogicAuthEnum.NO_PERMISSIONS) {
+            return listApps();
         }
 
         // 获取集群的全部权限点，然后筛选
-        List<AppLogicClusterAuthDTO> authDTOs = logicClusterAuthService.getLogicClusterAuths(logicClusterId, null);
+        List<AppClusterLogicAuth> auths = logicClusterAuthService.getLogicClusterAuths(logicClusterId, null);
         // 筛选出权限大于指定值的app
-        List<Integer> appIds = authDTOs.stream().filter(appLogicClusterAuthDTO -> AppLogicClusterAuthEnum
-            .valueOf(appLogicClusterAuthDTO.getType()).higherOrEqual(logicClusterAuth))
-            .map(AppLogicClusterAuthDTO::getAppId).collect(Collectors.toList());
+        List<Integer> appIds = auths.stream().filter(appLogicClusterAuth -> AppClusterLogicAuthEnum
+            .valueOf(appLogicClusterAuth.getType()).higherOrEqual(logicClusterAuth))
+            .map(AppClusterLogicAuth::getAppId).collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(appIds)) {
             return new ArrayList<>();
@@ -573,7 +538,55 @@ public class AppServiceImpl implements AppService {
         }
     }
 
-    private Result checkConfigParam(AppConfigDTO configDTO) {
+    /**
+     * 新建APP  并不会校验参数是否合法  与validateApp配合使用
+     * @param appDTO   dto
+     * @param operator 操作人 邮箱前缀
+     * @return 成功 true  失败 false
+     */
+    private Result<Integer> addAppWithoutCheck(AppDTO appDTO, String operator) {
+        initParam(appDTO);
+
+        AppPO param = responsibleConvertTool.obj2Obj(appDTO, AppPO.class);
+        boolean succ = (appDAO.insert(param) == 1);
+        if (succ) {
+            // 默认配置
+            if (initConfig(param.getId()).failed()) {
+                LOGGER.warn("class=AppServiceImpl||method=addAppWithoutCheck||appid={}||msg=initConfig fail",
+                        param.getId());
+            }
+            // 操作记录
+            operateRecordService.save(APP, ADD, param.getId(), "", operator);
+            appUserInfoService.recordAppidAndUser(param.getId(), appDTO.getResponsible());
+            SpringTool.publish(
+                    new AppAddEvent(this, responsibleConvertTool.obj2Obj(appDAO.getById(param.getId()), App.class)));
+        }
+
+        return Result.build(succ, param.getId());
+    }
+
+    /**
+     * 编辑APP 并不会校验参数是否合法  与validateApp配合使用
+     * @param appDTO   dto
+     * @param operator 操作人 邮箱前缀
+     * @return 成功 true  失败 false
+     */
+    private Result<Void> editAppWithoutCheck(AppDTO appDTO, String operator) {
+        AppPO oldPO = appDAO.getById(appDTO.getId());
+        AppPO param = responsibleConvertTool.obj2Obj(appDTO, AppPO.class);
+
+        boolean succeed = (appDAO.update(param) == 1);
+        if (succeed) {
+            operateRecordService.save(APP, EDIT, appDTO.getId(), AriusObjUtils.findChanged(oldPO, param), operator);
+            appUserInfoService.recordAppidAndUser(appDTO.getId(), appDTO.getResponsible());
+            SpringTool.publish(new AppEditEvent(this, responsibleConvertTool.obj2Obj(oldPO, App.class),
+                    responsibleConvertTool.obj2Obj(appDAO.getById(param.getId()), App.class)));
+        }
+        return Result.build(succeed);
+    }
+
+
+    private Result<Void> checkConfigParam(AppConfigDTO configDTO) {
         if (configDTO == null) {
             return Result.buildParamIllegal("配置信息为空");
         }
@@ -602,7 +615,23 @@ public class AppServiceImpl implements AppService {
     }
 
     private boolean hasOwnLogicCluster(int appId) {
-        List<ESClusterLogic> esClusterLogics = esClusterLogicService.getOwnedLogicClustersByAppId(appId);
-        return CollectionUtils.isNotEmpty(esClusterLogics);
+        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
+        return CollectionUtils.isNotEmpty(clusterLogics);
+    }
+
+    private Result<Void> validateAppFieldIsNull(AppDTO appDTO) {
+        if (AriusObjUtils.isNull(appDTO.getName())) {
+            return Result.buildParamIllegal("应用名称为空");
+        }
+        if (AriusObjUtils.isNull(appDTO.getDepartmentId())) {
+            return Result.buildParamIllegal("部门ID为空");
+        }
+        if (AriusObjUtils.isNull(appDTO.getDepartment())) {
+            return Result.buildParamIllegal("部门名字为空");
+        }
+        if (appDTO.getMemo() == null) {
+            return Result.buildParamIllegal("备注为空");
+        }
+        return Result.buildSucc();
     }
 }

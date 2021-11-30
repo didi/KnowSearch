@@ -1,21 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.template;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateFieldPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateFieldESDAO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeDefine;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.IndexConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateFieldESDAO;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefine;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -23,10 +22,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
@@ -60,7 +57,7 @@ public class TemplateFieldCollector extends AbstractMetaDataJob {
      */
     private Set<String> ignoreFieldSet = new HashSet<>();
 
-    private final static FutureUtil futureUtil = FutureUtil.init("TemplateFieldCollector");
+    private static final FutureUtil futureUtil = FutureUtil.init("TemplateFieldCollector");
 
     /**
      * 处理采集任务
@@ -81,9 +78,9 @@ public class TemplateFieldCollector extends AbstractMetaDataJob {
         int templateTotalCount = 0;
         for (Map.Entry<String, List<TemplateFieldPO>> entry : templateMappingByClusterNameMap.entrySet()) {
             templateTotalCount += entry.getValue().size();
-            entry.getValue().forEach(item -> {
-                idSet.add(item.getId());
-            });
+            entry.getValue().forEach(item ->
+                idSet.add(item.getId())
+            );
         }
 
         stopWatch.stop().start("collect template field");
@@ -111,7 +108,7 @@ public class TemplateFieldCollector extends AbstractMetaDataJob {
     private Map<String, List<TemplateFieldPO>> getAllClusterIndexTemplate() {
         Map<String, List<TemplateFieldPO>> templateMappingByClusterNameMap = Maps.newHashMap();
 
-        List<IndexTemplatePhy> templatePhies = templatePhyService.listTemplateWithCache();
+        List<IndexTemplatePhy> templatePhies = templatePhyService.listTemplate();
         if(CollectionUtils.isEmpty(templatePhies)){return templateMappingByClusterNameMap;}
 
         for (IndexTemplatePhy indexTemplate : templatePhies) {
@@ -149,39 +146,39 @@ public class TemplateFieldCollector extends AbstractMetaDataJob {
      *
      * @param clusterName
      */
-    private List<TemplateFieldPO> getIndexTemplateFieldNamesByClusterName(String clusterName, List<TemplateFieldPO> TemplateFieldPOList) {
+    private List<TemplateFieldPO> getIndexTemplateFieldNamesByClusterName(String clusterName, List<TemplateFieldPO> templateFieldPOS) {
 
         String markTime = DateTimeUtil.getCurrentFormatDateTime();
-        TemplateFieldPO templateFieldPO = null;
+        TemplateFieldPO templateFieldPO;
 
-        Iterator<TemplateFieldPO> TemplateFieldPOIterator = TemplateFieldPOList.iterator();
+        Iterator<TemplateFieldPO> templateFieldPOIterator = templateFieldPOS.iterator();
 
-        while (TemplateFieldPOIterator.hasNext()) {
-            templateFieldPO = TemplateFieldPOIterator.next();
+        while (templateFieldPOIterator.hasNext()) {
+            templateFieldPO = templateFieldPOIterator.next();
             // 收集索引模板字段信息
             templateFieldPO.setTemplateFieldMap(collectTemplateFieldsInfo(clusterName, templateFieldPO, markTime));
             // 设置忽略字段信息
             templateFieldPO.setIgnoreFields(ignoreFieldSet);
         }
 
-        return TemplateFieldPOList;
+        return templateFieldPOS;
     }
 
     /**
      * 收集索引模板字段信息
      *
      * @param clusterName
-     * @param TemplateFieldPO
+     * @param templateFieldPO
      * @param markTime
      */
-    private Map<String, String> collectTemplateFieldsInfo(String clusterName, TemplateFieldPO TemplateFieldPO, String markTime) {
+    private Map<String, String> collectTemplateFieldsInfo(String clusterName, TemplateFieldPO templateFieldPO, String markTime) {
         Map<String, String> templateFieldMap = Maps.newLinkedHashMap();
         Set<String> fieldNameSets = Sets.newLinkedHashSet();
 
         // 从索引模板中获取字段信息
-        fieldNameSets.addAll(getFieldsFromIndexTemplate(clusterName, TemplateFieldPO.getName()));
+        fieldNameSets.addAll(getFieldsFromIndexTemplate(clusterName, templateFieldPO.getName()));
         // 从索引mapping中获取字段信息
-        fieldNameSets.addAll(getFieldsFromIndexMapping(clusterName, String.format("%s*", TemplateFieldPO.getName())));
+        fieldNameSets.addAll(getFieldsFromIndexMapping(clusterName, String.format("%s*", templateFieldPO.getName())));
 
         for (String fieldName : fieldNameSets) {
             // 字段名为空则移除
@@ -194,7 +191,7 @@ public class TemplateFieldCollector extends AbstractMetaDataJob {
 
         if (templateFieldMap.isEmpty()) {
             LOGGER.info("class=TemplateFieldEsDao||method=collectTemplateFieldsInfo||clusterName={}||msg=template [{}] can't find field",
-                    clusterName, TemplateFieldPO.getName());
+                    clusterName, templateFieldPO.getName());
         }
 
         return templateFieldMap;

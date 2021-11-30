@@ -3,13 +3,17 @@ package com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "指标过滤规则")
 public class MonitorStrategyFilterDTO extends BaseDTO {
     @ApiModelProperty(value = "指标")

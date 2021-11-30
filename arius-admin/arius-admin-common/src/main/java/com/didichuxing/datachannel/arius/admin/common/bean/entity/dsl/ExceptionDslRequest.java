@@ -58,12 +58,12 @@ public class ExceptionDslRequest {
     private String lte;
 
 
-    private static final Long _ONE_HOUR = 60 * 60 * 1000L;
-    public static final String TYPE_ESCOST_STR = "esCost";
-    public static final String TYPE_QPS_STR = "qps";
-    public static final String TYPE_TIMEDOUT_STR = "timedOut";
+    private static final Long  ONE_HOUR = 60 * 60 * 1000L;
+    private static final String TYPE_ESCOST_STR = "esCost";
+    private static final String TYPE_QPS_STR = "qps";
+    private static final String TYPE_TIMEDOUT_STR = "timedOut";
 
-    public void check() throws Exception {
+    public void check() {
 
         // 如果大于 小于值存在
         if (StringUtils.isNotBlank(lte) && StringUtils.isNotBlank(gte)) {
@@ -75,7 +75,7 @@ public class ExceptionDslRequest {
             }
 
             if (gap == null) {
-                gap = _ONE_HOUR;
+                gap = ONE_HOUR;
             }
         }
 

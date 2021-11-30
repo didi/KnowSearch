@@ -28,11 +28,6 @@ public class AliasInfoController extends StatController {
     }
 
     @Override
-    protected String name() {
-        return NAME;
-    }
-
-    @Override
     protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception {
         String cluster = request.param("cluster");
         String res = "";
@@ -47,5 +42,10 @@ public class AliasInfoController extends StatController {
         }
 
         sendDirectResponse(queryContext, new BytesRestResponse(RestStatus.OK, res));
+    }
+
+    @Override
+    protected String name() {
+        return NAME;
     }
 }

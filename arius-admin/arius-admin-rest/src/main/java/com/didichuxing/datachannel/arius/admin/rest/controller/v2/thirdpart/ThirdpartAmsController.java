@@ -12,8 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -36,16 +37,15 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  * @author d06679
  * @date 2019/3/13
  */
-@Deprecated
 @RestController
 @RequestMapping(V2_THIRD_PART + "/ams")
-@Api(value = "第三方Ams接口(REST)")
+@Api(tags = "第三方Ams接口(REST)")
 public class ThirdpartAmsController {
 
     private static final ILog                   LOGGER = LogFactory.getLog(ThirdpartAmsController.class);
 
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private TemplatePhyService                  templatePhyService;
 
     @Autowired
     private TemplateLogicService                templateLogicService;
@@ -54,7 +54,7 @@ public class ThirdpartAmsController {
     @ResponseBody
     @ApiOperation(value = "删除物理模板信息，配额减半", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "physicalId", value = "物理模板ID", required = true) })
-    public Result delPhysicalTemplatesById(HttpServletRequest request,
+    public Result<Void> delPhysicalTemplatesById(HttpServletRequest request,
                                      @RequestParam("physicalId") Long physicalId) throws AdminOperateException {
         IndexTemplatePhyWithLogic physicalWithLogic = templatePhyService.getTemplateWithLogicById(physicalId);
 
@@ -62,7 +62,7 @@ public class ThirdpartAmsController {
             return Result.buildNotExist("模板不存在");
         }
 
-        Result delResult = templatePhyService.delTemplate(physicalId, HttpRequestUtils.getOperatorFromHeader(request));
+        Result<Void> delResult = templatePhyService.delTemplate(physicalId, HttpRequestUtils.getOperatorFromHeader(request));
 
         if (delResult.success()) {
             IndexTemplateLogicDTO param = new IndexTemplateLogicDTO();
@@ -109,7 +109,7 @@ public class ThirdpartAmsController {
                     }
 
                 } catch (Exception e) {
-                    LOGGER.warn("method=listTypeMappingIndex||dataCenter={}||errMsg={}", dataCenter, e.getMessage(), e);
+                    LOGGER.warn("class=ThirdpartAmsController||method=listTypeMappingIndex||dataCenter={}||errMsg={}", dataCenter, e.getMessage(), e);
                 }
             }
         }

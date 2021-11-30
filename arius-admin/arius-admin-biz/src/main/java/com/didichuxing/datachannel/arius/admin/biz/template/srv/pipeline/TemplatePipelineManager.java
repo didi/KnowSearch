@@ -17,7 +17,7 @@ public interface TemplatePipelineManager {
      * @param logicId
      * @return
      */
-    Result repairPipeline(Integer logicId) throws ESOperateException;
+    Result<Void> repairPipeline(Integer logicId) throws ESOperateException;
 
     /**
      * 同步pipeline

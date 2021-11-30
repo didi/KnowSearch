@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -10,6 +12,8 @@ import java.util.Date;
  */
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DCDRTaskDetail extends AbstractTaskDetail{
     /**
      * 开始时间

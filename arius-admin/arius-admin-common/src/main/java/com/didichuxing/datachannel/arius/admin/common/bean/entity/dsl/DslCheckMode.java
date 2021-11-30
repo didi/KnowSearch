@@ -33,6 +33,4 @@ public class DslCheckMode extends DslBase {
     public String toString() {
         return JSON.toJSONString(this);
     }
-
-
 }

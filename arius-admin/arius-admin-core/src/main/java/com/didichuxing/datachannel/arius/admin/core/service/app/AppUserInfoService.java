@@ -19,7 +19,7 @@ public interface AppUserInfoService {
      * @param userName 用户名
      * @return
      */
-    boolean record(Integer appid, String userName);
+    boolean recordAppidAndUser(Integer appid, String userName);
 
     /**
      * 获取用户历史登录过的appid

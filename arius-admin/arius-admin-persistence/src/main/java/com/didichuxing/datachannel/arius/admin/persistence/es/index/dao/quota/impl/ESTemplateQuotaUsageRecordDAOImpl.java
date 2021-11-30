@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayCl
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.quota.ESTemplateQuotaUsageRecordDAO;
 import com.google.common.collect.Lists;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -20,16 +21,15 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
  * @date 2019-09-03
  */
 @Repository
+@NoArgsConstructor
 public class ESTemplateQuotaUsageRecordDAOImpl extends BaseESDAO implements ESTemplateQuotaUsageRecordDAO {
-    private String INDEX_NAME;
+    private String indexName;
 
     private static final String GET_BY_LOGICID_AND_TIME_FORMAT = "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"logicId\":{\"value\":%s}}},{\"range\":{\"timestamp\":{\"gte\":%s,\"lte\":%s}}}]}},\"sort\":[{\"timestamp\":{\"order\":\"desc\"}}],\"size\":9999}";
 
     @PostConstruct
     public void init() {
-        LOGGER.info("class=ESTemplateQuotaUsageRecordDAOImpl||method=init||ESTemplateQuotaUsageRecordDAOImpl init start.");
-        this.INDEX_NAME = dataCentreUtil.getAriusTemplateQuotaUsageRecord();
-        LOGGER.info("class=ESTemplateQuotaUsageRecordDAOImpl||method=init||ESTemplateQuotaUsageRecordDAOImpl init finished.");
+        this.indexName = dataCentreUtil.getAriusTemplateQuotaUsageRecord();
     }
 
     @Autowired
@@ -43,7 +43,7 @@ public class ESTemplateQuotaUsageRecordDAOImpl extends BaseESDAO implements ESTe
      */
     @Override
     public boolean insert(ESTemplateQuotaUsageRecordPO recordPO) {
-        return updateClient.batchInsert(IndexNameFactory.getNoVersion(INDEX_NAME + "*", "_yyyy-MM", 0),
+        return updateClient.batchInsert(IndexNameFactory.getNoVersion( indexName + "*", "_yyyy-MM", 0),
             AdminConstant.DEFAULT_TYPE, Lists.newArrayList(recordPO));
     }
 
@@ -57,7 +57,7 @@ public class ESTemplateQuotaUsageRecordDAOImpl extends BaseESDAO implements ESTe
     @Override
     public List<ESTemplateQuotaUsageRecordPO> getByLogicIdAndTime(Integer logicId, long startTimestamp,
                                                                   long endTimestamp) {
-        return esGatewayClient.performRequest(INDEX_NAME, DEFAULT_TYPE, String.format(GET_BY_LOGICID_AND_TIME_FORMAT, logicId, startTimestamp, endTimestamp),
+        return esGatewayClient.performRequest( indexName, DEFAULT_TYPE, String.format(GET_BY_LOGICID_AND_TIME_FORMAT, logicId, startTimestamp, endTimestamp),
             ESTemplateQuotaUsageRecordPO.class);
     }
 }

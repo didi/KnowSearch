@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.SCROLL_SPLIT;
 import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 
 /**
@@ -50,11 +51,9 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("restClearScrollAction")
 public class RestClearScrollAction extends ESAction {
 
-	public static final String NAME = "clearScroll";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "clearScroll";
 	}
 	
     @Override
@@ -94,7 +93,7 @@ public class RestClearScrollAction extends ESAction {
 
                 if (cluster == null) {
                     cluster = inCluster;
-                } else if (false == cluster.equals(inCluster)) {
+                } else if (!cluster.equals(inCluster)) {
                     throw new InvalidParameterException("scrollId cluster error, scrollId=" +  scrollIdWrap);
                 }
 
@@ -102,9 +101,9 @@ public class RestClearScrollAction extends ESAction {
                 scrolls.add(realScrollId);
             }
 
-            readClient = esClusterService.getClientFromCluster(queryContext, cluster);
+            readClient = esClusterService.getClientFromCluster(queryContext, cluster, actionName);
         } else {
-            readClient = esClusterService.getClient(queryContext);
+            readClient = esClusterService.getClient(queryContext, actionName);
             scrolls = clearRequest.getScrollIds();
         }
 
@@ -136,12 +135,7 @@ public class RestClearScrollAction extends ESAction {
                     if (token == XContentParser.Token.FIELD_NAME) {
                         currentFieldName = parser.currentName();
                     } else if ("scroll_id".equals(currentFieldName) && token == XContentParser.Token.START_ARRAY) {
-                        while ((token = parser.nextToken()) != XContentParser.Token.END_ARRAY) {
-                            if (token.isValue() == false) {
-                                throw new IllegalArgumentException("scroll_id array element should only contain scroll_id");
-                            }
-                            clearScrollRequest.addScrollId(parser.text());
-                        }
+                        dealScroll(clearScrollRequest, parser);
                     } else {
                         throw new IllegalArgumentException("Unknown parameter [" + currentFieldName + "] in request body or parameter is of the wrong type[" + token + "] ");
                     }
@@ -149,6 +143,16 @@ public class RestClearScrollAction extends ESAction {
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to parse request body", e);
+        }
+    }
+
+    private static void dealScroll(ClearScrollRequest clearScrollRequest, XContentParser parser) throws IOException {
+        XContentParser.Token token;
+        while ((token = parser.nextToken()) != XContentParser.Token.END_ARRAY) {
+            if (!token.isValue()) {
+                throw new IllegalArgumentException("scroll_id array element should only contain scroll_id");
+            }
+            clearScrollRequest.addScrollId(parser.text());
         }
     }
 

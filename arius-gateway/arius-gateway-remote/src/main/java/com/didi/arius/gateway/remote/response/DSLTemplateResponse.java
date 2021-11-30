@@ -4,8 +4,10 @@ package com.didi.arius.gateway.remote.response;
 
 import com.google.gson.Gson;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class DSLTemplateResponse {
     /**
      * es _id

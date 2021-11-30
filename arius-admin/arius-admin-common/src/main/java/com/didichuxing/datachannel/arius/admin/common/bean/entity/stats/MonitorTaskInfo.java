@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
  * monitor 采集任务信息
  */
@@ -16,15 +15,15 @@ public class MonitorTaskInfo {
     /**
      * 集群名称
      */
-    private String clusterName;
+    private String  clusterName;
     /**
      * 任务开始时刻
      */
-    private Long startTick;
+    private Long    startTick;
     /**
      * 任务执行耗时
      */
-    private Long totalCost;
+    private Long    totalCost;
     /**
      * 是否在运行
      */

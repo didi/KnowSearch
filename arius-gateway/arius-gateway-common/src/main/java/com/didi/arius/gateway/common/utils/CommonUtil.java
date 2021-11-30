@@ -7,26 +7,29 @@ import org.elasticsearch.rest.RestStatus;
 import java.util.List;
 
 public class CommonUtil {
+
+    private CommonUtil(){}
+
     public static boolean isIndexType(QueryContext queryContext) {
-        if (!isSearchKibana(queryContext.getUri(), queryContext.getIndices()) && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.Index) {
-            return true;
-        } else {
-            return false;
+        boolean res = false;
+        if (!isSearchKibana(queryContext.getUri(), queryContext.getIndices()) && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.INDEX) {
+            res = true;
         }
+        return res;
     }
 
     public static boolean isIndexType(QueryContext queryContext, List<String> indices) {
-        if (!isSearchKibana(queryContext.getUri(), indices) && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.Index) {
-            return true;
-        } else {
-            return false;
+        boolean res = false;
+        if (!isSearchKibana(queryContext.getUri(), indices) && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.INDEX) {
+            res = true;
         }
+        return res;
     }
 
     public static boolean isSearchKibana(String uri, List<String> indices) {
         if (uri != null && (uri.startsWith("/."))) {
             return true;
-        } else if (indices != null && indices.size() > 0) {
+        } else if (indices != null && !indices.isEmpty()) {
             for (String index : indices) {
                 if (index.startsWith(".")) {
                     return true;

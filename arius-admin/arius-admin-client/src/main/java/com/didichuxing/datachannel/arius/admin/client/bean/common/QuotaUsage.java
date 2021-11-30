@@ -4,13 +4,17 @@ import java.io.Serializable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/4/25
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "配额使用情况")
 public class QuotaUsage implements Serializable {
 

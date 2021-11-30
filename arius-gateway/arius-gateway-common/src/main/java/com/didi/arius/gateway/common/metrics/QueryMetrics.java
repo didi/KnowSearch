@@ -1,11 +1,11 @@
 package com.didi.arius.gateway.common.metrics;
 
 import com.didi.arius.gateway.common.utils.MetricUtil;
-import com.didi.arius.gateway.metrics.MetricsBuilder;
-import com.didi.arius.gateway.metrics.MetricsSource;
-import com.didi.arius.gateway.metrics.lib.MetricMutablePeriodGaugeLong;
-import com.didi.arius.gateway.metrics.lib.MetricMutableStat;
-import com.didi.arius.gateway.metrics.lib.MetricsRegistry;
+import com.didichuxing.datachannel.metrics.MetricsBuilder;
+import com.didichuxing.datachannel.metrics.MetricsSource;
+import com.didichuxing.datachannel.metrics.lib.MetricMutablePeriodGaugeLong;
+import com.didichuxing.datachannel.metrics.lib.MetricMutableStat;
+import com.didichuxing.datachannel.metrics.lib.MetricsRegistry;
 
 public class QueryMetrics implements MetricsSource {
 	private MetricsRegistry metricsRegistry;
@@ -24,6 +24,8 @@ public class QueryMetrics implements MetricsSource {
 	private static final String APPID_QUERY_FAILED_SHARDS_NAME = "query.failedShards";
 	
 	private static final String APPID_AGGS_COUNT_NAME = "query.aggs.count";
+	private static final String APPID_NAME = "appid [";
+	private static final String COUNT_NAME = "count";
 	
 	
 	private MetricMutablePeriodGaugeLong countMetric;
@@ -48,39 +50,39 @@ public class QueryMetrics implements MetricsSource {
 		metricsRegistry = new MetricsRegistry("query");
 		metricsRegistry.tag("appid", "", String.valueOf(appid));
 		
-		countMetric = metricsRegistry.newPeriodGauge(APPID_COUNT_NAME, "appid ["
+		countMetric = metricsRegistry.newPeriodGauge(APPID_COUNT_NAME, APPID_NAME
 				+ appid + "] query count", 0L);
 		
 		costMetric = metricsRegistry.newStat(APPID_COST_NAME,
-				"appid ["
+				APPID_NAME
 				+ appid + "] query cost", "ops", "time", true);		
 		
-		slowlogCountMetric = metricsRegistry.newPeriodGauge(APPID_SLOWLOG_COUNT_NAME, "appid ["
+		slowlogCountMetric = metricsRegistry.newPeriodGauge(APPID_SLOWLOG_COUNT_NAME, APPID_NAME
 				+ appid + "] slowlog count", 0L);
 		
 		slowlogCostMetric = metricsRegistry.newStat(APPID_SLOWLOG_COST_NAME,
-				"appid ["
+				APPID_NAME
 				+ appid + "] slowlog cost", "ops", "time", true);
 		
 		requestLengthMetric = metricsRegistry.newStat(APPID_QUERY_REQUEST_LENGTH_NAME,
-				"appid [" + appid + "] request length", "ops", "length");
+				APPID_NAME + appid + "] request length", "ops", "length");
 		
 		responseLengthMetric = metricsRegistry.newStat(APPID_QUERY_RESPONSE_LENGTH_NAME,
-				"appid [" + appid + "] response length", "ops", "length");
+				APPID_NAME + appid + "] response length", "ops", "length");
 		
 		tookInMillisMetric = metricsRegistry.newStat(APPID_QUERY_TOOK_NAME,
-				"appid [" + appid + "] tookInMillis", "ops", "millis");
+				APPID_NAME + appid + "] tookInMillis", "ops", "millis");
 		
 		totalHitsMetric = metricsRegistry.newStat(APPID_QUERY_HITS_NAME,
-				"appid [" + appid + "] totalHits", "ops", "count");
+				APPID_NAME + appid + "] totalHits", "ops", COUNT_NAME);
 		
 		totalShardsMetric = metricsRegistry.newStat(APPID_QUERY_TOTAL_SHARDS_NAME,
-				"appid [" + appid + "] totalShards", "ops", "count");
+				APPID_NAME + appid + "] totalShards", "ops", COUNT_NAME);
 		
 		failedShardsMetric = metricsRegistry.newStat(APPID_QUERY_FAILED_SHARDS_NAME,
-				"appid [" + appid + "] failedShards", "ops", "count");
+				APPID_NAME + appid + "] failedShards", "ops", COUNT_NAME);
 		
-		aggsCountMetric = metricsRegistry.newPeriodGauge(APPID_AGGS_COUNT_NAME, "appid ["
+		aggsCountMetric = metricsRegistry.newPeriodGauge(APPID_AGGS_COUNT_NAME, APPID_NAME
 				+ appid + "] query count", 0L);
 		
 		MetricUtil.register("gateway_"+appid, "arius-gateway metrics", this);

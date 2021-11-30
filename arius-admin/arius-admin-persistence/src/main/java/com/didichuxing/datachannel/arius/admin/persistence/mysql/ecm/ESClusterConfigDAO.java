@@ -33,4 +33,10 @@ public interface ESClusterConfigDAO {
                                                        @Param("version") Integer version);
 
     int updateConfigValidById(Long id);
+
+    int insertSelective(ESConfigPO param);
+
+    int deleteByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId,
+                                         @Param("type") String type,
+                                         @Param("engin") String enginName);
 }

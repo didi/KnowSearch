@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import com.google.common.collect.Sets;
  * @date 2019/4/29
  */
 @Component
+@NoArgsConstructor
 public class ExtendServiceFactory {
 
     private static final String DEFAULT = "default";
@@ -47,7 +49,7 @@ public class ExtendServiceFactory {
             }
         }
 
-        return Result.buildFrom(Result.buildNotExist("扩展服务不存在"));
+        return Result.buildNotExist("扩展服务不存在");
     }
 
     public <T> T getDefault(Class<T> tClass) {

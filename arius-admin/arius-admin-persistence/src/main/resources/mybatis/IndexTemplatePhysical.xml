@@ -133,18 +133,18 @@
         where status = #{status} and cluster = #{cluster}
     </select>
 
+    <select id="getByClusterAndNameAndStatus" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_physical
+        where status = #{status} and cluster = #{cluster} and `name` = #{name}
+    </select>
+
     <select id="listByClusterAndStatus" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from index_template_physical
         where status = #{status} and cluster = #{cluster}
-    </select>
-
-    <select id="getAllStatusByClusterName" parameterType="integer" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from index_template_physical
-        where cluster = #{cluster} and `name` = #{name}
     </select>
 
     <select id="getByClusterAndName" parameterType="map" resultMap="BaseResultMap">

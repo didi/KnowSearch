@@ -7,24 +7,18 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * ES插件包管理 Mapper 接口
- * @author didi
- * @since 2020-08-24
- */
 @Repository
 public interface ESPluginDAO {
 
     List<ESPluginPO> listAll();
 
-    List<ESPluginPO>listPluginBelongClus(@Param("pluginIds")List<String> pluginIds,
-                                         @Param("pDefault")String  pDefault);
-
-    String getAllSysDefaultPlugins();
+    List<ESPluginPO> getAllSysDefaultPlugins();
 
     int insert(ESPluginPO esPluginPO);
 
     int update(ESPluginPO param);
+
+    int updateDesc(@Param("id") Long id, @Param("desc") String desc);
 
     int insertBatch(List<ESPluginPO> params);
 
@@ -38,11 +32,7 @@ public interface ESPluginDAO {
     List<ESPluginPO> getByNameAndVersionAndPhysicClusterId(@Param("name") String name, @Param("version") String version,
                                                            @Param("physicClusterId") String physicClusterId);
 
-    List<ESPluginPO> listbyPhyClusterId(String phyClusterId);
+    List<ESPluginPO> listByPhyClusterId(String phyClusterId);
 
     List<ESPluginPO> listByPlugIds(List<Long> plugIds);
-
-    int installESPlugin(Long id);
-
-    int uninstallESPlugin(Long id);
 }

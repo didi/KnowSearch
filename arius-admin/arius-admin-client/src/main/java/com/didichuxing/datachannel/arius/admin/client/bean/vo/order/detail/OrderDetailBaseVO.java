@@ -8,15 +8,19 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.user.AriusUserInfo
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fengqiongfeng
  * @date 2020/8/25
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "工单详情类")
-public class OrderDetailBaseVO<T> extends BaseVO {
+public class OrderDetailBaseVO extends BaseVO {
     @ApiModelProperty(value = "工单ID")
     private Long                  id;
 
@@ -31,6 +35,9 @@ public class OrderDetailBaseVO<T> extends BaseVO {
 
     @ApiModelProperty(value = "申请人使用的appid")
     private Integer               applicantAppId;
+
+    @ApiModelProperty(value = "申请人使用的项目名称")
+    private String                applicantAppName;
 
     @ApiModelProperty(value = "审批人列表, 状态为未处理时返回的是审批人, 状态为处理完成时返回的是审批的人")
     private List<AriusUserInfoVO> approverList;

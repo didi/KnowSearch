@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author linyunan
@@ -15,7 +15,7 @@ import com.didichuxing.tunnel.util.log.LogFactory;
  */
 @Component
 public class LdapLoginProtocolHandle implements LoginProtocolHandle {
-    private final ILog LOGGER = LogFactory.getLog(LdapLoginProtocolHandle.class);
+    private static final ILog LOGGER = LogFactory.getLog(LdapLoginProtocolHandle.class);
 
     @Override
     public Result doAuthentication(Login login) {

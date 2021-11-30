@@ -5,13 +5,17 @@ import java.util.Date;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fengqiongfeng
  * @since 2020-08-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class WorkOrderPO extends BasePO {
 
     /**

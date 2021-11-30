@@ -32,14 +32,14 @@ public interface TemplateLimitManager {
     * @param physicalId 模板ID
     * @return result
     */
-    Result stopIndexWrite(Long physicalId) throws ESOperateException;
+    Result<Void> stopIndexWrite(Long physicalId) throws ESOperateException;
 
     /**
      * 停止模板写入
      * @param physicalId 模板ID
      * @return result
      */
-    Result startIndexWrite(Long physicalId) throws ESOperateException;
+    Result<Void> startIndexWrite(Long physicalId) throws ESOperateException;
 
     /**
      * blockIndexWrite
@@ -49,5 +49,5 @@ public interface TemplateLimitManager {
      * @return
      * @throws ESOperateException
      */
-    Result blockIndexWrite(String cluster, List<String> indices, boolean block) throws ESOperateException;
+    Result<Void> blockIndexWrite(String cluster, List<String> indices, boolean block) throws ESOperateException;
 }

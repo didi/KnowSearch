@@ -6,6 +6,9 @@ package com.didichuxing.datachannel.arius.admin.task;
  * @date 2020/06/05
  */
 public class TaskConcurrentConstants {
+
+    private TaskConcurrentConstants(){}
+
     public static final int ADJUST_PIPELINE_RATE_LIMIT_TASK_CONCURRENT = 100;
     public static final int CAPACITY_AREA_CHECK_TASK_CONCURRENT = 10;
     public static final int CAPACITY_AREA_PLAN_TASK_CONCURRENT = 5;
@@ -22,5 +25,5 @@ public class TaskConcurrentConstants {
     public static final int TEMPLATE_QUOTA_CTL_TASK_CONCURRENT = 20;
 
     public static final int SLEEP_SECONDS_PER_EXECUTE = 3;
-    public static final int SLEEP_SECONDS_PER_BATCH = 60;
+    public static final int SLEEP_SECONDS_PER_BATCH = 2;
 }

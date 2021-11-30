@@ -1,11 +1,11 @@
 package com.didi.arius.gateway.common.metrics;
 
 import com.didi.arius.gateway.common.utils.MetricUtil;
-import com.didi.arius.gateway.metrics.MetricsBuilder;
-import com.didi.arius.gateway.metrics.MetricsSource;
-import com.didi.arius.gateway.metrics.lib.MetricMutablePeriodGaugeLong;
-import com.didi.arius.gateway.metrics.lib.MetricMutableStat;
-import com.didi.arius.gateway.metrics.lib.MetricsRegistry;
+import com.didichuxing.datachannel.metrics.MetricsBuilder;
+import com.didichuxing.datachannel.metrics.MetricsSource;
+import com.didichuxing.datachannel.metrics.lib.MetricMutablePeriodGaugeLong;
+import com.didichuxing.datachannel.metrics.lib.MetricMutableStat;
+import com.didichuxing.datachannel.metrics.lib.MetricsRegistry;
 
 /**
  * author weizijun
@@ -21,6 +21,7 @@ public class IndexMetrics implements MetricsSource {
 
     private static final String INDEX_REQUEST_LENGTH_NAME = "index.request.length";
     private static final String INDEX_RESPONSE_LENGTH_NAME = "index.response.length";
+    private static final String COUNT_NAME = "] count";
 
     private MetricMutablePeriodGaugeLong countMetric;
 
@@ -40,7 +41,7 @@ public class IndexMetrics implements MetricsSource {
         metricsRegistry.tag("operation", "", operation);
 
         countMetric = metricsRegistry.newPeriodGauge(INDEX_COUNT_NAME, "["
-                + name + "] count", 0L);
+                + name + COUNT_NAME, 0L);
 
         costMetric = metricsRegistry.newStat(INDEX_COST_NAME,
                 "["
@@ -53,10 +54,10 @@ public class IndexMetrics implements MetricsSource {
                 "[" + name + "] response length", "ops", "length", true);
 
         requestLengthMetric = metricsRegistry.newPeriodGauge(INDEX_REQUEST_LENGTH_NAME, "["
-                + name + "] count", 0L);
+                + name + COUNT_NAME, 0L);
 
         responseLengthMetric = metricsRegistry.newPeriodGauge(INDEX_RESPONSE_LENGTH_NAME, "["
-                + name + "] count", 0L);
+                + name + COUNT_NAME, 0L);
 
         MetricUtil.register("gateway_"+name, "arius-gateway index metrics", this);
     }

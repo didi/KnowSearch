@@ -17,11 +17,10 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 
 @Component("restCommonAction")
 public class RestCommonAction extends HttpRestHandler {
-    public static final String NAME = "common";
 
     @Override
     public String name() {
-        return NAME;
+        return "common";
     }
 
     @Override
@@ -32,7 +31,7 @@ public class RestCommonAction extends HttpRestHandler {
             throw new InvalidParameterException("uri(" + uri + ") error");
         }
 
-        ESClient client = esClusterService.getClient(queryContext);
+        ESClient client = esClusterService.getClient(queryContext, actionName);
 
         if (queryContext.getRequest().param("index") != null) {
             String index = queryContext.getRequest().param("index");
@@ -45,7 +44,7 @@ public class RestCommonAction extends HttpRestHandler {
             if (isIndexType(queryContext)) {
                 IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
 
-                client = esClusterService.getClient(queryContext, indexTemplate);
+                client = esClusterService.getClient(queryContext, indexTemplate, actionName);
             }
         } else if (!AppUtil.isAdminAppid(queryContext.getAppDetail())
                 && !uri.startsWith("/.")

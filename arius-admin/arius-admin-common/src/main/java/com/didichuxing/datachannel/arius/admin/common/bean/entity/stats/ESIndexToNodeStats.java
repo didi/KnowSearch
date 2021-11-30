@@ -16,47 +16,47 @@ public class ESIndexToNodeStats extends BaseESPO {
     /**
      * 时间戳，单位，毫秒
      */
-    private long timestamp;
+    private long                timestamp;
 
     /**
      * 索引所属集群
      */
-    private String cluster;
+    private String              cluster;
 
     /**
      * 索引模板名称
      */
-    private String template;
+    private String              template;
 
     /**
      * 物理索引模板id
      */
-    private long  templateId;
+    private long                templateId;
 
     /**
      * 逻辑模板id
      */
-    private long  logicTemplateId;
+    private long                logicTemplateId;
 
     /**
      * 索引名称
      */
-    private String index;
+    private String              index;
 
     /**
      * 节点ip
      */
-    private String node;
+    private String              node;
 
     /**
      * 端口
      */
-    private String port;
+    private String              port;
 
     /**
      * rack信息
      */
-    private String rack;
+    private String              rack;
 
     /**
      * index_node的统计信息

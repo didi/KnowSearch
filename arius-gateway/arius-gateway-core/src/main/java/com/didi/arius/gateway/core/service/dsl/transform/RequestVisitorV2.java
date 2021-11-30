@@ -2,21 +2,24 @@ package com.didi.arius.gateway.core.service.dsl.transform;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didi.arius.gateway.dsl.dsl.ast.aggr.*;
-import com.didi.arius.gateway.dsl.dsl.ast.query.Match;
-import com.didi.arius.gateway.dsl.dsl.visitor.basic.OutputVisitor;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.aggr.*;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.query.Match;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.visitor.basic.OutputVisitor;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class RequestVisitorV2 extends OutputVisitor {
+
+    protected static final String ORDER = "order";
 
     @Override
     public void visit(Match node) {
         super.visit(node);
 
         JSONObject obj = (JSONObject) this.ret;
-        for (String key : obj.keySet()) {
-            Object value = obj.get(key);
+        for (Map.Entry<String,Object> entry : obj.entrySet()) {
+            Object value = entry.getValue();
             if (value instanceof JSONObject) {
                 ((JSONObject) value).remove("auto_generate_synonyms_phrase_query");
             }
@@ -28,12 +31,12 @@ public class RequestVisitorV2 extends OutputVisitor {
         super.visit(node);
 
         JSONObject obj = (JSONObject) this.ret;
-        if (obj.containsKey("order")) {
-            if (obj.get("order") instanceof JSONObject) {
-                JSONObject order = obj.getJSONObject("order");
+        if (obj.containsKey(ORDER)) {
+            if (obj.get(ORDER) instanceof JSONObject) {
+                JSONObject order = obj.getJSONObject(ORDER);
                 dealOrder(order);
-            } else if (obj.get("order") instanceof JSONArray) {
-                for (Object o : (JSONArray) obj.get("order")) {
+            } else if (obj.get(ORDER) instanceof JSONArray) {
+                for (Object o : (JSONArray) obj.get(ORDER)) {
                     JSONObject order = (JSONObject) o;
                     dealOrder(order);
                 }

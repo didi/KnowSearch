@@ -3,7 +3,9 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.app;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -11,6 +13,8 @@ import lombok.Data;
  * @date 2019/3/13
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class App extends BaseEntity implements StringResponsible {
 
     private Integer id;

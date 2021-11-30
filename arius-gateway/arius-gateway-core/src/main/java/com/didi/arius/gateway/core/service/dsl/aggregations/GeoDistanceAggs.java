@@ -18,7 +18,11 @@ public class GeoDistanceAggs extends BucketAggsType {
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
+	public GeoDistanceAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);
@@ -30,11 +34,11 @@ public class GeoDistanceAggs extends BucketAggsType {
 		if (ranges != null) {
 			AggsBukcetInfo aggsBukcetInfo = new AggsBukcetInfo();
 			
-			JsonArray jsonRanges = ranges.getAsJsonArray();
-			int size = jsonRanges.size();
+			JsonArray geoJsonRanges = ranges.getAsJsonArray();
+			int size = geoJsonRanges.size();
 			aggsBukcetInfo.setBucketNumber(size);
 			aggsBukcetInfo.setLastBucketNumber(size);
-			aggsBukcetInfo.setMemUsed(size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+			aggsBukcetInfo.setMemUsed((long)size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 			
 			return aggsBukcetInfo;
 		} else {

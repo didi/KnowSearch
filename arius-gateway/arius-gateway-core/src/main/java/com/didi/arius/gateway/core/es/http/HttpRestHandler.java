@@ -1,23 +1,31 @@
 package com.didi.arius.gateway.core.es.http;
 
+import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
+import com.didi.arius.gateway.common.enums.TemplateBlockTypeEnum;
 import com.didi.arius.gateway.common.exception.FlowLimitException;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
+import com.didi.arius.gateway.core.es.http.action.reindex.RestDeleteByQueryAction;
+import com.didi.arius.gateway.core.es.http.action.reindex.RestUpdateByQueryAction;
 import com.didi.arius.gateway.core.es.http.bulk.RestBulkAction;
+import com.didi.arius.gateway.core.es.http.count.RestCountAction;
+import com.didi.arius.gateway.core.es.http.document.RestBaseWriteAction;
+import com.didi.arius.gateway.core.es.http.get.RestBaseGetAction;
+import com.didi.arius.gateway.core.es.http.get.RestHeadAction;
 import com.didi.arius.gateway.core.es.http.get.RestMultiGetAction;
-import com.didi.arius.gateway.core.es.http.search.RestClearScrollAction;
-import com.didi.arius.gateway.core.es.http.search.RestMultiSearchAction;
-import com.didi.arius.gateway.core.es.http.search.RestSearchScrollAction;
+import com.didi.arius.gateway.core.es.http.search.*;
 import com.didi.arius.gateway.core.es.http.sql.SQLAction;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.core.service.MetricsService;
 import com.didi.arius.gateway.core.service.RateLimitService;
 import com.didi.arius.gateway.core.service.RequestStatsService;
+import com.didi.arius.gateway.core.service.arius.AppService;
 import com.didi.arius.gateway.core.service.arius.DynamicConfigService;
 import com.didi.arius.gateway.core.service.arius.ESClusterService;
 import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
@@ -35,6 +43,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.collect.Tuple;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.rest.support.RestUtils;
 import org.slf4j.Logger;
@@ -44,15 +54,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.SCROLL_SPLIT;
+import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+
 public abstract class HttpRestHandler extends ESBase {
     protected static final Logger logger = LoggerFactory.getLogger(HttpRestHandler.class);
     protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
 
     @Autowired
     protected DynamicConfigService dynamicConfigService;
-
-    @Autowired
-    protected IndexTemplateService indexTemplateService;
 
     @Autowired
     protected RequestStatsService requestStatsService;
@@ -72,9 +82,15 @@ public abstract class HttpRestHandler extends ESBase {
     @Autowired
     protected MetricsService metricsService;
 
-    abstract public void handleRequest(QueryContext queryContext) throws Exception;
+    @Autowired
+    protected IndexTemplateService indexTemplateService;
 
-    abstract public String name();
+    @Autowired
+    protected AppService appService;
+
+    public abstract void handleRequest(QueryContext queryContext) throws Exception;
+
+    public abstract String name();
 
     protected void checkFlowLimit(QueryContext queryContext) {
         if (rateLimitService.isTrafficDataOverflow(queryContext.getAppDetail().getId(), queryContext.getSearchId())) {
@@ -84,11 +100,23 @@ public abstract class HttpRestHandler extends ESBase {
 
     protected void checkIndices(QueryContext queryContext) {
         List<String> indices = queryContext.getIndices();
+        indexTemplateService.checkTemplateExist(indices);
         appService.checkIndices(queryContext, indices);
     }
 
-    protected void checkWriteIndices(QueryContext queryContext) {
+    protected void checkIndicesAndTemplateBlockRead(QueryContext queryContext) {
         List<String> indices = queryContext.getIndices();
+        indexTemplateService.checkTemplateBlock(indices, queryContext.getAppDetail(), TemplateBlockTypeEnum.READ_BLOCK_TYPE);
+        appService.checkIndices(queryContext, indices);
+    }
+
+    protected boolean isOriginCluster(QueryContext queryContext){
+        return queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.Origin_Cluster;
+    }
+
+    protected void checkWriteIndicesAndTemplateBlockWrite(QueryContext queryContext) {
+        List<String> indices = queryContext.getIndices();
+        indexTemplateService.checkTemplateBlock(indices, queryContext.getAppDetail(), TemplateBlockTypeEnum.WRITE_WRITE_TYPE);
         appService.checkWriteIndices(queryContext, indices);
     }
 
@@ -114,14 +142,28 @@ public abstract class HttpRestHandler extends ESBase {
             logger.warn(stringBuilder.toString());
         }
 
-        statLogger.info(buildSearchResponseLog(queryContext, queryResponse));
+        buildSearchResponseLog(queryContext, queryResponse);
 
         if (queryResponse.getTook() > queryConfig.getSearchSlowlogThresholdMills()) {
-            statLogger.info(buildSearchSlowlog(queryContext, queryResponse));
+            buildSearchSlowlog(queryContext, queryResponse);
         }
 
         if (queryContext.getAppDetail().isAnalyzeResponseEnable()) {
-            statLogger.info(buildSearchIndex(queryContext, queryResponse));
+            buildSearchIndex(queryContext, queryResponse);
+        }
+
+        if (queryContext.isDetailLog()) {
+            JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+            joinLogContext.setAriusType("type");
+            joinLogContext.setClusterName(queryContext.getClient().getClusterName());
+            joinLogContext.setClientVersion(queryContext.getClient().getEsVersion());
+            joinLogContext.setLogicId(queryContext.getIndexTemplate() != null ? queryContext.getIndexTemplate().getId() : -1);
+            joinLogContext.setTotalCost(System.currentTimeMillis() - queryContext.getRequestTime());
+            joinLogContext.setInternalCost( joinLogContext.getTotalCost() - joinLogContext.getEsCost());
+            joinLogContext.setSinkTime(System.currentTimeMillis());
+            if (queryContext.getIndexTemplate() != null) {
+                joinLogContext.setDestTemplateName(queryContext.getIndexTemplate().getName());
+            }
         }
     }
 
@@ -136,9 +178,9 @@ public abstract class HttpRestHandler extends ESBase {
 
                 queryResponse = dealKibanaResponse(queryContext, queryResponse);
 
-                if (false == Strings.isEmpty(queryResponse.getScrollId())
+                if (!Strings.isEmpty(queryResponse.getScrollId())
                         && queryContext.getClient() != null
-                        && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.Index) {
+                        && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.INDEX) {
                     String encode = Base64.getEncoder().encodeToString(queryContext.getClient().getClusterName().getBytes());
                     queryResponse.setScrollId(encode + SCROLL_SPLIT + queryResponse.getScrollId());
                 }
@@ -147,8 +189,52 @@ public abstract class HttpRestHandler extends ESBase {
         };
     }
 
+    protected RestActionListenerImpl<DirectResponse> newDirectSearchListener(QueryContext queryContext) {
+        return new RestActionListenerImpl<DirectResponse>(queryContext) {
+            @Override
+            public void onResponse(DirectResponse response) {
+                try {
+                    XContentParser parser = JsonXContent.jsonXContent.createParser(response.getResponseContent());
+                    ESSearchResponse queryResponse =  ESSearchResponse.fromXContent(parser);
+                    logSearchResponse(queryContext, queryResponse);
+                    queryResponse = dealKibanaResponse(queryContext, queryResponse);
+                    if (!Strings.isEmpty(queryResponse.getScrollId())
+                            && queryContext.getClient() != null
+                            && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.INDEX) {
+                        String encode = Base64.getEncoder().encodeToString(queryContext.getClient().getClusterName().getBytes());
+                        queryResponse.setScrollId(encode + SCROLL_SPLIT + queryResponse.getScrollId());
+                    }
+                    super.onResponse(response);
+                } catch (Exception e) {
+                    onFailure(e);
+                }
+            }
+        };
+    }
+
+    protected RestActionListenerImpl<DirectResponse> newDirectWriteListener(QueryContext queryContext) {
+        return new RestActionListenerImpl<DirectResponse>(queryContext) {
+            @Override
+            public void onResponse(DirectResponse response) {
+                long currentTime = System.currentTimeMillis();
+                setWriteLog(queryContext, null, response,
+                        currentTime, queryConfig.isWriteLogContentOpen());
+
+                metricsService.addIndexMetrics(null, name(), currentTime - queryContext.getRequestTime(), queryContext.getPostBody().length(), response.getResponseContent().length());
+
+                super.onResponse(response);
+            }
+        };
+    }
+
     protected void directRequest(ESClient client, QueryContext queryContext) {
         RestActionListenerImpl<DirectResponse> listener = new RestActionListenerImpl<>(queryContext);
+        if (this instanceof RestSearchAction) {
+            dslAuditService.auditDSL(queryContext, queryContext.getRequest().content(), queryContext.getIndices().toArray(new String[]{}));
+            listener = newDirectSearchListener(queryContext);
+        } else if (this instanceof RestBaseWriteAction) {
+            listener = newDirectWriteListener(queryContext);
+        }
         directRequest(client, queryContext, listener);
     }
 
@@ -156,13 +242,13 @@ public abstract class HttpRestHandler extends ESBase {
         String uri = queryContext.getUri();
         String queryString = queryContext.getQueryString() == null ? "" : queryContext.getQueryString();
 
-        Map<String, String> params = new HashMap<>();
-        RestUtils.decodeQueryString(queryString, 0, params);
+        Map<String, String> paramsMap = new HashMap<>();
+        RestUtils.decodeQueryString(queryString, 0, paramsMap);
 
         DirectRequest directRequest = new DirectRequest(queryContext.getMethod().toString(), uri);
-        setSocketTimeout(params, directRequest);
+        setSocketTimeout(paramsMap, directRequest);
         directRequest.setPostContent(queryContext.getPostBody());
-        directRequest.setParams(params);
+        directRequest.setParams(paramsMap);
 
         directRequest.putHeader("requestId", queryContext.getRequestId());
         directRequest.putHeader("Authorization", queryContext.getRequest().getHeader("Authorization"));
@@ -199,19 +285,8 @@ public abstract class HttpRestHandler extends ESBase {
                 List<Hit> hitsList = new ArrayList<>();
                 List<Hit> hits = queryResponse.getHits().getHits();
                 for (Hit hit : hits) {
-                    try {
-                        // kibana索引名称字段为title，过滤出有权限访问的索引
-                        if (hit.getId().contains("index-pattern")) {
-                            Map<String, String> map = (Map<String, String>) hit.getSource().get("index-pattern");
-                            if (indexTemplateService.checkIndex(map.get("title"), queryContext.getAppDetail().getIndexExp())) {
-                                hitsList.add(hit);
-                            }
-                        } else {
-                            return queryResponse;
-                        }
-                    } catch (Exception e) {
-                        return queryResponse;
-                    }
+                    ESSearchResponse queryResponse1 = getEsSearchResponse(queryContext, queryResponse, hitsList, hit);
+                    if (queryResponse1 != null) return queryResponse1;
                 }
                 queryResponse.getHits().setHits(hitsList);
                 return queryResponse;
@@ -223,16 +298,43 @@ public abstract class HttpRestHandler extends ESBase {
         }
     }
 
+    private ESSearchResponse getEsSearchResponse(QueryContext queryContext, ESSearchResponse queryResponse, List<Hit> hitsList, Hit hit) {
+        try {
+            // kibana索引名称字段为title，过滤出有权限访问的索引
+            if (hit.getId().contains("index-pattern")) {
+                Map<String, String> map = (Map<String, String>) hit.getSource().get("index-pattern");
+                if (indexTemplateService.checkIndex(map.get("title"), queryContext.getAppDetail().getIndexExp())) {
+                    hitsList.add(hit);
+                }
+            } else {
+                return queryResponse;
+            }
+        } catch (Exception e) {
+            return queryResponse;
+        }
+        return null;
+    }
+
     protected boolean isNeededCheckIndices() {
-        if (this instanceof RestSearchScrollAction
+        return !isNotCheckAction();
+    }
+
+    private boolean isNotCheckAction() {
+        return this instanceof RestSearchScrollAction
                 || this instanceof RestClearScrollAction
                 || this instanceof RestMultiGetAction
                 || this instanceof RestMultiSearchAction
-                || this instanceof RestBulkAction) {
-            return false;
-        } else {
-            return true;
-        }
+                || this instanceof RestBulkAction
+                || this instanceof RestSpatialMultiSearchAction;
+    }
+
+    protected boolean isNeededCheckTemplateSearchBlockAction() {
+        return this instanceof RestBaseGetAction
+                || this instanceof RestCountAction
+                || this instanceof RestHeadAction
+                || this instanceof RestSearchAction
+                || this instanceof RestUpdateByQueryAction
+                || this instanceof RestDeleteByQueryAction;
     }
 
     /**
@@ -249,11 +351,12 @@ public abstract class HttpRestHandler extends ESBase {
                 MapUtils.isNotEmpty(indexTemplate.getMasterInfo().getTypeIndexMapping())) {
 
             // 如果该索引启用type名称映射功能，或者该appid是在白名单中的，则需要替换查询的索引名称
-            if (indexTemplate.getMasterInfo().getMappingIndexNameEnable() ||
+            if (indexTemplate.getMasterInfo().getMappingIndexNameEnable().booleanValue() ||
                     dynamicConfigService.isWhiteAppid(queryContext.getAppid())) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -301,90 +404,56 @@ public abstract class HttpRestHandler extends ESBase {
         IndexTemplate destIndexTemplate = indexTemplateService.getIndexTemplate(destTemplateName);
 
         if (queryContext.isDetailLog()) {
-            statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_replace_index||requestId={}||sourceIndexNames={}||types={}||destIndexName={}||sourceTemplateName={}||destTemplateName={}",
-                    queryContext.getRequestId(),
-                    StringUtils.join(sourceIndexNames, ","), types, StringUtils.join(destIndexName, ","), sourceTemplateName, destTemplateName);
+            JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+            joinLogContext.setSourceIndexNames(StringUtils.join(sourceIndexNames, ","));
+            joinLogContext.setTypeName(StringUtils.join(types, ","));
+            joinLogContext.setDestIndexName(StringUtils.join(destIndexName, ","));
+            joinLogContext.setSourceTemplateName(sourceTemplateName);
+            joinLogContext.setDestTemplateName(destTemplateName);
         }
 
         return new Tuple<>(destIndexTemplate, destIndexName);
     }
 
     /************************************************************** private method **************************************************************/
-    private String buildSearchSlowlog(QueryContext queryContext, ESSearchResponse queryResponse) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(QueryConsts.DLFLAG_PREFIX + "query_search_slowlog||");
-
-        sb.append("appid=").append(queryContext.getAppid()).append("||");
-
-        sb.append("requestId=").append(queryContext.getRequestId())
-                .append("||");
-
-        sb.append("uri=").append(queryContext.getUri())
-                .append("||");
-
-        sb.append("dsl=").append(Convert.getPrefix(queryContext.getPostBody()))
-                .append("||");
-
-        sb.append("tookInMillis=").append(queryResponse.getTook())
-                .append("||");
-
-        sb.append("scrollId=").append(queryResponse.getScrollId())
-                .append("||");
-
-        sb.append("totalShards=").append(queryResponse.getShards().getTotalShard())
-                .append("||");
-
-        sb.append("failedShards=")
-                .append(queryResponse.getShards().getFailedShard()).append("||");
-
-        sb.append("isTimedOut=")
-                .append(queryResponse.getTimeOut()).append("||");
-
-        sb.append("totalHits=").append(queryResponse.getHits().getTotal());
-
-        return sb.toString();
+    protected void buildSearchSlowlog(QueryContext queryContext, ESSearchResponse queryResponse) {
+        JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+        joinLogContext.setEsCost(queryResponse.getTook());
+        joinLogContext.setScrollId(queryResponse.getScrollId());
+        joinLogContext.setTotalShards(queryResponse.getShards().getTotalShard());
+        joinLogContext.setFailedShards(queryResponse.getShards().getFailedShard());
+        joinLogContext.setIsTimedOut(queryResponse.getTimeOut());
+        joinLogContext.setTotalHits(queryResponse.getHits().getTotal());
     }
 
-    private String buildSearchResponseLog(QueryContext queryContext, ESSearchResponse queryResponse) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(QueryConsts.DLFLAG_PREFIX + "query_search_response||");
-
-        sb.append("appid=").append(queryContext.getAppid()).append("||");
-
-        sb.append("requestId=").append(queryContext.getRequestId())
-                .append("||");
-
-        sb.append("tookInMillis=").append(queryResponse.getTook())
-                .append("||");
-
-        sb.append("scrollId=").append(queryResponse.getScrollId())
-                .append("||");
-
-        sb.append("totalShards=").append(queryResponse.getShards().getTotalShard())
-                .append("||");
-
-        sb.append("failedShards=")
-                .append(queryResponse.getShards().getFailedShard()).append("||");
-
-        sb.append("isTimedOut=")
-                .append(queryResponse.getTimeOut()).append("||");
-
-        sb.append("totalHits=").append(queryResponse.getHits().getTotal());
-
-        return sb.toString();
+    protected void buildSearchResponseLog(QueryContext queryContext, ESSearchResponse queryResponse) {
+        JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+        joinLogContext.setEsCost(queryResponse.getTook());
+        joinLogContext.setScrollId(queryResponse.getScrollId());
+        joinLogContext.setTotalShards(queryResponse.getShards().getTotalShard());
+        joinLogContext.setFailedShards(queryResponse.getShards().getFailedShard());
+        joinLogContext.setIsTimedOut(queryResponse.getTimeOut());
+        joinLogContext.setTotalHits(queryResponse.getHits().getTotal());
     }
 
     private void setSocketTimeout(Map<String, String> params, ESActionRequest request) {
         if (params.containsKey(RestConsts.SOCKET_TIMEOUT_PARAMS)) {
             String strSocketTimeout = params.remove(RestConsts.SOCKET_TIMEOUT_PARAMS);
             try {
-                int socketTimeout = Integer.valueOf(strSocketTimeout);
+                int socketTimeout = Integer.parseInt(strSocketTimeout);
                 if (socketTimeout > 0 && socketTimeout <= QueryConsts.MAX_SOCKET_TIMEOUT) {
                     request.setSocketTimeout(socketTimeout);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 // pass
             }
         }
+    }
+
+    protected void handleOriginClusterRequest(QueryContext queryContext){
+        logger.info("handleOriginClusterRequest||queryContext={}", JSON.toJSONString(queryContext));
+
+        ESClient client = esClusterService.getClient(queryContext, actionName);
+        directRequest(client, queryContext);
     }
 }

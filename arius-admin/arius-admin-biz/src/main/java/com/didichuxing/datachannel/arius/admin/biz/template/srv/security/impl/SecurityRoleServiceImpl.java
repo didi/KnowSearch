@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.security.impl;
 
 import java.util.Set;
 
+import com.didiglobal.logi.elasticsearch.client.request.security.SecurityRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityRoleService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESSecurityRoleDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.security.SecurityRole;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author didi
@@ -35,17 +35,17 @@ public class SecurityRoleServiceImpl implements SecurityRoleService {
      * @return result
      */
     @Override
-    public Result createRoleIfAbsent(String cluster, String roleName, String expression, Set<String> privilegeSet,
+    public Result<Boolean> createRoleIfAbsent(String cluster, String roleName, String expression, Set<String> privilegeSet,
                                      int retryCount) throws ESOperateException {
         SecurityRole role = esSecurityRoleDAO.getNyName(cluster, roleName);
         if (role != null) {
             return Result.buildSucc();
         }
 
-        LOGGER.info("method=createRoleIfAbsent||cluster={}||roleName={}||expression={}||privilegeSet={}", cluster,
-            roleName, expression, privilegeSet);
+        LOGGER.info("class=SecurityRoleServiceImpl||method=createRoleIfAbsent||cluster={}||roleName={}||expression={}||privilegeSet={}",
+                cluster, roleName, expression, privilegeSet);
 
-        return Result.build(ESOpTimeoutRetry.esRetryExecute("createRoleIfAbsent", retryCount,
+        return Result.buildBoolen(ESOpTimeoutRetry.esRetryExecute("createRoleIfAbsent", retryCount,
             () -> esSecurityRoleDAO.putRole(cluster, roleName, expression, privilegeSet)));
     }
 
@@ -59,15 +59,15 @@ public class SecurityRoleServiceImpl implements SecurityRoleService {
      * @return result
      */
     @Override
-    public Result ensureRoleExist(String cluster, String roleName, String expression, Set<String> privilegeSet) {
+    public Result<Boolean> ensureRoleExist(String cluster, String roleName, String expression, Set<String> privilegeSet) {
         try {
-            Result result = createRoleIfAbsent(cluster, roleName, expression, privilegeSet, 3);
-            LOGGER.info("method=ensureRoleExist||cluster={}||roleName={}||result={}", cluster, roleName,
-                result.getMessage());
+            Result<Boolean> result = createRoleIfAbsent(cluster, roleName, expression, privilegeSet, 3);
+            LOGGER.info("class=SecurityRoleServiceImpl||method=ensureRoleExist||cluster={}||roleName={}||result={}",
+                    cluster, roleName, result.getMessage());
             return result;
         } catch (Exception e) {
-            LOGGER.error("method=ensureRoleExist||cluster={}||roleName={}||errMsg={}", cluster, roleName,
-                e.getMessage(), e);
+            LOGGER.error("class=SecurityRoleServiceImpl||method=ensureRoleExist||cluster={}||roleName={}||errMsg={}",
+                    cluster, roleName, e.getMessage(), e);
             return Result.buildFail(e.getMessage());
         }
     }

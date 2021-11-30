@@ -14,22 +14,22 @@ import java.util.Set;
  * @date 2020/10/10
  */
 public enum EcmTaskStatusEnum {
-                               /**success*/
-                               SUCCESS("success"),
+    /**success*/
+    SUCCESS("success"),
 
-                               FAILED("failed"),
+    FAILED("failed"),
 
-                               RUNNING("running"),
+    RUNNING("running"),
 
-                               WAITING("waiting"),
+    WAITING("waiting"),
 
-                               PAUSE("pause"),
+    PAUSE("pause"),
 
-                               IGNORE("ignore"),
+    IGNORE("ignore"),
 
-                               CANCEL("cancel"),
+    CANCEL("cancel"),
 
-                               UNKNOWN("unknown");
+    UNKNOWN("unknown");
 
     private String value;
 

@@ -34,10 +34,6 @@ public class UserAccessTemplateDetail {
      */
     @JSONField(serialize = false)
     public boolean isValid() {
-        if (templateId == null || StringUtils.isBlank(countDate)) {
-            return false;
-        }
-
-        return true;
+        return  !(templateId == null || StringUtils.isBlank(countDate));
     }
 }

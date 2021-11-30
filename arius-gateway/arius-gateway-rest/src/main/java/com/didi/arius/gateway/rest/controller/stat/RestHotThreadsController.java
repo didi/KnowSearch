@@ -19,15 +19,16 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class RestHotThreadsController extends StatController {
     public static final String NAME = "hotThreads";
-    @Override
-    protected void register() {
-        controller.registerHandler(RestRequest.Method.GET, "/_gwstat/hotthreads", this);
-        controller.registerHandler(RestRequest.Method.GET, "/_gwstat/hot_threads", this);
-    }
 
     @Override
     protected String name() {
         return NAME;
+    }
+
+    @Override
+    protected void register() {
+        controller.registerHandler(RestRequest.Method.GET, "/_gwstat/hotthreads", this);
+        controller.registerHandler(RestRequest.Method.GET, "/_gwstat/hot_threads", this);
     }
 
     @Override

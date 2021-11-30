@@ -25,7 +25,7 @@ public enum ResultLevel {
     }
 
     public static ResultLevel getResultlevel(String[] levelConfig, double badPercent) {
-        ResultLevel result = FINE;
+        ResultLevel result = null;
 
         if (null == levelConfig || levelConfig.length < 5) {
             levelConfig = new String[] { "5", "10", "15", "20", "25" };

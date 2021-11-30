@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheck
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.cluster.HealthCheckESDAO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

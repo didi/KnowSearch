@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
-import com.didichuxing.tunnel.util.log.util.HostUtil;
-import com.google.common.collect.Sets;
+import com.didiglobal.logi.log.util.HostUtil;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -13,11 +11,10 @@ import java.util.Set;
  *
  * 如果配置的量过多,需要拆解
  *
- *
- * @author d06679
- * @date 2018/5/24
  */
 public class AdminConstant {
+
+    private AdminConstant(){}
 
     public static final String  DEFAULT_TYPE             = "type";
 
@@ -57,9 +54,6 @@ public class AdminConstant {
     public static final Long    MILLIS_PER_DAY           = 24 * 60 * 60 * 1000L;
 
     public static final Long    SECONDS_PER_DAY          = 24 * 60 * 60L;
-
-    public static final Set<String> SUPPORTED_INDEX_DATE_FORMAT_SET = Sets.newHashSet(
-            "_yyyyMMdd", "MMdd", "_yyyy-MM-dd", "_yyyyMM", "_yyyy-MM");
 
     public static final String MM_DD_DATE_FORMAT = "MMdd";
     public static final String YY_MM_DD_DATE_FORMAT = "_yyyy-MM-dd";
@@ -120,7 +114,7 @@ public class AdminConstant {
     /**
      * 默认APP ID
      */
-    public static final Integer DEFAULT_APP_ID = -1;
+    public static final Integer DEFAULT_APP_ID = 1;
 
     /**
      * 数据最短保存时长
@@ -144,7 +138,7 @@ public class AdminConstant {
     /**
      * region没有被绑定到逻辑集群时的逻辑集群ID字段值
      */
-    public static Long REGION_NOT_BOUND_LOGIC_CLUSTER_ID = -1L;
+    public static final Long REGION_NOT_BOUND_LOGIC_CLUSTER_ID = -1L;
 
     public static final String JOB_SUCCESS = "success";
     public static final String JOB_FAILED  = "failed";

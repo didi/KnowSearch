@@ -88,7 +88,7 @@ public class BulkTests {
         String res = HttpClient.forward(HOST+ "/" + INDEX_NAME + "/_doc/_bulk", "POST", bodyform, headerParams, null);
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getBoolean("errors"), false);
+        assertEquals(false, jsonObject.getBoolean("errors"));
     }
 
 

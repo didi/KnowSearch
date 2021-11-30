@@ -17,14 +17,19 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestSpatialMultiSearchController extends BaseHttpRestController {
     @Autowired
     private RestSpatialMultiSearchAction restSpatialMultiSearchAction;
+
+    public RestSpatialMultiSearchController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_spatial_msearch", this);
         controller.registerHandler(POST, "/_spatial_msearch", this);
         controller.registerHandler(GET, "/{index}/_spatial_msearch", this);
         controller.registerHandler(POST, "/{index}/_spatial_msearch", this);
-        controller.registerHandler(GET, "/{index}/{type}/_spatial_msearch", this);
         controller.registerHandler(POST, "/{index}/{type}/_spatial_msearch", this);
+        controller.registerHandler(GET, "/{index}/{type}/_spatial_msearch", this);
     }
 
     @Override

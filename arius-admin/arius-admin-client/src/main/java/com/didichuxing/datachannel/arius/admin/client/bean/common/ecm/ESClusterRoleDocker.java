@@ -2,9 +2,13 @@ package com.didichuxing.datachannel.arius.admin.client.bean.common.ecm;
 
 import java.io.Serializable;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESClusterRoleDocker implements Serializable {
     /**
      * 集群角色(masternode/datanode/clientnode)

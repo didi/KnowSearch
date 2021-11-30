@@ -16,6 +16,11 @@ import static org.elasticsearch.rest.RestRequest.Method.GET;
 public class RestGetMappingController extends BaseHttpRestController {
     @Autowired
     private RestGetMappingAction restGetMappingAction;
+
+    public RestGetMappingController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/{index}/{type}/_mapping", this);

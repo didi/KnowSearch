@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.elasticcloud.ElasticCloudScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.request.ElasticCloudCreateParamDTO;
@@ -20,12 +21,12 @@ public interface ElasticCloudRemoteService {
     /**
      * 按组升级或重启集群
      */
-    Result upgradeOrRestartByGroup(ElasticCloudCommonActionParam elasticCloudCommonActionParam);
+    Result<EcmOperateAppBase> upgradeOrRestartByGroup(ElasticCloudCommonActionParam elasticCloudCommonActionParam);
 
     /**
      * 扩缩容弹性云集群
      */
-    Result scaleAndExecuteAll(ElasticCloudScaleActionParam elasticCloudScaleActionParam);
+    Result<EcmOperateAppBase> scaleAndExecuteAll(ElasticCloudScaleActionParam elasticCloudScaleActionParam);
 
     /**
      * 删除弹性云集群
@@ -36,7 +37,7 @@ public interface ElasticCloudRemoteService {
      * 操作未完成的任务进行
      * 动作: pause|continue|redoFailed|skipFailed
      */
-    Result actionNotFinishedTask(ElasticCloudCommonActionParam elasticCloudCommonActionParam, EcmActionEnum actionEnum);
+    Result<Void> actionNotFinishedTask(ElasticCloudCommonActionParam elasticCloudCommonActionParam, EcmActionEnum actionEnum);
 
     /**
      * 根据taskId 获取弹性云部署日志
@@ -56,5 +57,5 @@ public interface ElasticCloudRemoteService {
      * param elasticCloudCommonActionParam
      * @return Result
      */
-    Result getClusterInfo(ElasticCloudCommonActionParam elasticCloudCommonActionParam);
+    Result<String> getClusterInfo(ElasticCloudCommonActionParam elasticCloudCommonActionParam);
 }

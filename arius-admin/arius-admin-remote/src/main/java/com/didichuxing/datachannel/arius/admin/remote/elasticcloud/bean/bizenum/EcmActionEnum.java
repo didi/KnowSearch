@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum;
 
 public enum EcmActionEnum {
-//    START("start"),
+    START("start"),
 //    SCALE("scale"),
 //    UPGRADE("upgrade"),
 //    RESTART("restart"),
@@ -12,6 +12,7 @@ public enum EcmActionEnum {
     CONTINUE("continue"),
     REDO_FAILED("redo"),
     SKIP_FAILED("ignore"),
+    CANCEL("cancel")
 
     ;
     private String action;

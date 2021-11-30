@@ -18,7 +18,7 @@ public interface NotifyService {
      * @param receivers 接收人列表
      * @return
      */
-    Result send(NotifyTaskTypeEnum type, NotifyInfo data, List<String> receivers);
+    Result<Void> send(NotifyTaskTypeEnum type, NotifyInfo data, List<String> receivers);
 
     /**
      * 异步发送通知

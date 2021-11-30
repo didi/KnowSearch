@@ -30,6 +30,10 @@ public class CheckIndexModeController extends AdminController {
     @Value("${gateway.log.index.name}")
     private String indexNames;
 
+    public CheckIndexModeController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(RestRequest.Method.GET, "/_gwadmin/checkIndexMode/{appid}", this);
@@ -58,11 +62,11 @@ public class CheckIndexModeController extends AdminController {
         }
 
         StringBuilder builder = new StringBuilder("final check result:\n");
-        builder.append(String.format("appid:%40s:count\n", "index"));
+        builder.append(String.format("appid:%40s:count%n", "index"));
         for (Map.Entry<Integer, Map<String, AtomicInteger>> entry : checkResult.entrySet()) {
             int outAppid = entry.getKey();
             for (Map.Entry<String, AtomicInteger> inEntry : entry.getValue().entrySet()) {
-                builder.append(String.format("%5d:%40s:%d\n", outAppid, inEntry.getKey(), inEntry.getValue().get()));
+                builder.append(String.format("%5d:%40s:%d%n", outAppid, inEntry.getKey(), inEntry.getValue().get()));
             }
         }
 
@@ -133,7 +137,7 @@ public class CheckIndexModeController extends AdminController {
             try {
                 Map<String, Object> bucket = (Map<String, Object>) obj;
                 String indices = (String) bucket.get("key");
-                int count = Integer.valueOf(bucket.get("doc_count").toString());
+                int count = Integer.parseInt(bucket.get("doc_count").toString());
 
                 Set<String> indicesSet = Strings.splitStringToSet(indices, ',');
                 Iterator<String> it = indicesSet.iterator();
@@ -144,7 +148,7 @@ public class CheckIndexModeController extends AdminController {
                     }
                 }
 
-                if (indicesSet.size() == 0) {
+                if (indicesSet.isEmpty()) {
                     continue;
                 }
 
@@ -217,7 +221,7 @@ public class CheckIndexModeController extends AdminController {
 
                     logger.warn("appid={} index_more_then_one, indices={}", inAppid, indices);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.warn("appid={} exception obj={}", inAppid, obj, e);
             }
         }

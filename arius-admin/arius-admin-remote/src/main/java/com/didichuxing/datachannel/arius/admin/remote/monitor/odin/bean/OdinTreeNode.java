@@ -1,11 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OdinTreeNode implements Serializable {
 
     private Integer            Id;

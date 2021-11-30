@@ -12,20 +12,18 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 /**
- *
  * 异步操作线程池
- *
- * @author d06679
  */
 @Component
+@NoArgsConstructor
 public class AriusOpThreadPool implements Executor {
 
     private static final String THREAD_FACTORY_NAME = "OP-POOL";
@@ -49,17 +47,17 @@ public class AriusOpThreadPool implements Executor {
             public void run() {
                 pool.shutdown();
                 try {
-                    if (pool.awaitTermination(20, TimeUnit.SECONDS) == false) {
-                        LOG.warn("still some task running, force to shutdown!");
+                    if (!pool.awaitTermination(20, TimeUnit.SECONDS)) {
+                        LOG.warn("class=AriusOpThreadPool||method=init||errMsg=still some task running, force to shutdown!");
                         List<Runnable> shutDownList = pool.shutdownNow();
                         shutDownList
-                            .forEach(e -> LOG.info("Runnable forced shutdown||class={}", e.getClass().getName()));
+                            .forEach(e -> LOG.info("class=AriusOpThreadPool||method=init||msg=Runnable forced shutdown"));
                     }
                 } catch (InterruptedException e) {
                     pool.shutdownNow();
-                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
-                LOG.info(THREAD_FACTORY_NAME + " shutdown finished");
+                LOG.info("class=AriusOpThreadPool||method=init||{}shutdown finished", THREAD_FACTORY_NAME);
             }
         });
         LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init finished.");
@@ -72,6 +70,10 @@ public class AriusOpThreadPool implements Executor {
 
     public int getPoolSize() {
         return poolSize;
+    }
+
+    public void run(Runnable runner) {
+        pool.execute(runner);
     }
 
     @Override

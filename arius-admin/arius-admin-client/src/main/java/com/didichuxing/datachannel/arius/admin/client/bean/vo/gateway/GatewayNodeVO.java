@@ -6,12 +6,16 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.BaseVO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "节点信息")
 public class GatewayNodeVO extends BaseVO {
 

@@ -1,15 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 
 /**
  * @author d06679
@@ -141,6 +142,17 @@ public interface ESIndexService {
                                      int retryCount) throws ESOperateException;
 
     /**
+     * 修改索引只写配置
+     * @param cluster 集群
+     * @param indices 索引
+     * @param block 配置
+     * @param retryCount 重试次数
+     * @return succCount
+     */
+    boolean syncBatchBlockIndexRead(String cluster, List<String> indices, boolean block,
+                                    int retryCount) throws ESOperateException;
+
+    /**
      * 校验索引数据是否一致
      * @param cluster1 集群1
      * @param cluster2 集群2
@@ -160,10 +172,19 @@ public interface ESIndexService {
     /**
      * 获取索引配置
      * @param cluster 集群名称
-     * @param name 索引名称
+     * @param name    索引名称
      * @return
      */
     MultiIndexsConfig syncGetIndexConfigs(String cluster, String name);
+
+    /**
+     * 根据集群名称和索引名称获取索引setting信息
+     * @param cluster           集群名称
+     * @param indexNames        索引列表
+     * @param tryTimes          重试次数
+     * @return
+     */
+    Map<String, IndexConfig> syncGetIndexSetting(String cluster, List<String> indexNames, int tryTimes);
 
     /**
      * cat index
@@ -174,18 +195,38 @@ public interface ESIndexService {
     List<CatIndexResult> syncCatIndexByExpression(String cluster, String expression);
 
     /**
+     * 获取指定集群全量索引列表信息
+     * @param cluster  集群名称
+     * @return List<CatIndexResult>
+     */
+    List<CatIndexResult> syncCatIndex(String cluster);
+
+    /**
      * 获取索引主shard个数
-     * @param clusterName
+     * @param cluster
      * @param indexName
      * @return
      */
-    Integer getIndexPrimaryShardNumber(String clusterName, String indexName);
+    Integer syncGetIndexPrimaryShardNumber(String cluster, String indexName);
 
     /**
      * 获取索引的IndexNodes信息
-     * @param clusterName
+     * @param cluster
      * @param templateExp
      * @return
      */
-    Map<String, IndexNodes> getIndexNodes(String clusterName, String templateExp);
+    Map<String, IndexNodes> syncGetIndexNodes(String cluster, String templateExp);
+
+    /**
+     * 获取原生集群索引名称列表,不包含特殊索引（带.开头）
+     */
+    List<String> syncGetIndexName(String clusterName);
+
+    /**
+     * 索引是否存在
+     * @param cluster   集群名称
+     * @param indexName 索引名称
+     * @return
+     */
+    boolean syncIsIndexExist(String cluster, String indexName);
 }

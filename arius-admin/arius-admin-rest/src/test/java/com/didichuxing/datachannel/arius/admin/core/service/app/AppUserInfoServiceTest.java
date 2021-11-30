@@ -5,8 +5,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInf
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.core.service.app.impl.AppUserInfoServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,10 @@ public class AppUserInfoServiceTest extends AriusAdminApplicationTests {
     @Test
     public void recordNullTest() {
         String user = "1";
-        boolean result = service.record(null, user);
+        boolean result = service.recordAppidAndUser(null, user);
         Assertions.assertFalse(result);
         String user1 = "";
-        boolean result1 = service.record(1, user1);
+        boolean result1 = service.recordAppidAndUser(1, user1);
         Assertions.assertFalse(result1);
     }
 
@@ -63,7 +64,7 @@ public class AppUserInfoServiceTest extends AriusAdminApplicationTests {
         LOGGER.debug("{}", appPO.getId());
         Integer id = appPO.getId();
         String username = "test";
-        boolean result = service.record(id, username);
+        boolean result = service.recordAppidAndUser(id, username);
         Assertions.assertTrue(result);
     }
 
@@ -73,8 +74,8 @@ public class AppUserInfoServiceTest extends AriusAdminApplicationTests {
         appDAO.insert(appPO);
         Integer id = appPO.getId();
         String username = "test";
-        boolean result = service.record(id, username);
-        boolean result1 = service.record(id, username);
+        boolean result = service.recordAppidAndUser(id, username);
+        boolean result1 = service.recordAppidAndUser(id, username);
         Assertions.assertTrue(result1);
     }
 
@@ -87,8 +88,8 @@ public class AppUserInfoServiceTest extends AriusAdminApplicationTests {
         appDAO.insert(appPO1);
         Integer id = appPO.getId();
         Integer id1 = appPO1.getId();
-        boolean result = service.record(id, username);
-        boolean result1 = service.record(id1, username);
+        boolean result = service.recordAppidAndUser(id, username);
+        boolean result1 = service.recordAppidAndUser(id1, username);
         List<AppUserInfo> list = service.getByUser(username);
         List<Integer> idList = list.stream().map(AppUserInfo::getAppId).collect(Collectors.toList());
         Assertions.assertTrue(idList.contains(id));
@@ -113,11 +114,11 @@ public class AppUserInfoServiceTest extends AriusAdminApplicationTests {
         AppPO appPO = getAppPO();
         appDAO.insert(appPO);
         Integer id = appPO.getId();
-        boolean result = service.record(id, username);
+        boolean result = service.recordAppidAndUser(id, username);
         AppUserInfo info = service.getAppLastLoginRecord(id);
         Assertions.assertEquals(1, info.getLoginCount().intValue());
         for (int i = 0; i < 10; i++) {
-            service.record(id, username);
+            service.recordAppidAndUser(id, username);
         }
         AppUserInfo info1 = service.getAppLastLoginRecord(id);
         Assertions.assertEquals(11, info1.getLoginCount().intValue());

@@ -50,4 +50,15 @@
       where biz_id = '';
     </update>
 
+    <select id="selectDescTopNByModuleId" resultMap="BaseResultMap"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO">
+        select id, module_id
+        from operate_record
+        where module_id = #{moduleId} order by id DESC LIMIT #{topN}, 1
+    </select>
+
+    <update id="deleteByModuleIdAndLessThanId">
+        delete from operate_record
+        where module_id = #{moduleId} and id &lt; #{id}
+    </update>
 </mapper>

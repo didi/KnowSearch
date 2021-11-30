@@ -25,6 +25,15 @@ public class SyncTemplateMetadateTask extends BaseConcurrentClusterTask {
     }
 
     /**
+     * 任务的线程个数
+     * @return 任务的线程个数
+     */
+    @Override
+    public int poolSize() {
+        return 20;
+    }
+
+    /**
      * 并发度
      *
      * @return
@@ -41,7 +50,8 @@ public class SyncTemplateMetadateTask extends BaseConcurrentClusterTask {
      */
     @Override
     public boolean executeByCluster(String cluster) throws AdminOperateException {
-        return clusterPhyManager.syncTemplateMetaData(cluster, 5);
+        clusterPhyManager.syncTemplateMetaData(cluster, 5);
+        return true;
     }
 
 }

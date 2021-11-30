@@ -71,7 +71,7 @@ public class DslTemplate {
     /**
      * 查询模板
      */
-    private String dslTemplate;
+    private String dslTemplet;
     /**
      * 查询请求时刻
      */

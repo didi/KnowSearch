@@ -3,7 +3,9 @@ package com.didichuxing.datachannel.arius.admin.client.bean.dto.task;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -11,13 +13,11 @@ import lombok.Data;
  * @date 2018/10/25
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "任务处理信息")
 public class WorkTaskProcessDTO extends BaseDTO {
 
-    /**
-     * 业务主键
-     * 任务id
-     */
     @ApiModelProperty("任务id")
     private Integer              taskId;
 
@@ -33,15 +33,9 @@ public class WorkTaskProcessDTO extends BaseDTO {
     @ApiModelProperty("执行状态")
     private String              status;
 
-    /**
-     * 任务步骤
-     */
     @ApiModelProperty("任务步骤")
     private Integer              taskProgress;
 
-    /**
-     * 扩展信息
-     */
     @ApiModelProperty("扩展信息")
     private String expandData;
 }

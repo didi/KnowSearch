@@ -51,9 +51,11 @@ public class ESNodeToIndexTempBean implements CollectBean {
      */
     private Map<String, String> deriveParam = Maps.newHashMap();
 
-    public ESNodeToIndexTempBean(){}
-    public ESNodeToIndexTempBean(Double value){
-        this.value  = value;
+    public ESNodeToIndexTempBean() {
+    }
+
+    public ESNodeToIndexTempBean(Double value) {
+        this.value = value;
     }
 
     public String getKey() {

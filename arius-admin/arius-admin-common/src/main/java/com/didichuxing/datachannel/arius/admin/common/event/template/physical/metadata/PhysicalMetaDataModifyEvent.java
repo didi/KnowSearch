@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.TemplateEve
  * @date 2020/09/02
  */
 public abstract class PhysicalMetaDataModifyEvent extends TemplateEvent {
-    public PhysicalMetaDataModifyEvent(Object source) {
+    protected PhysicalMetaDataModifyEvent(Object source) {
         super(source);
     }
 }

@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsagePO;
@@ -18,15 +19,14 @@ import javax.annotation.PostConstruct;
  * @date 2019-09-03
  */
 @Repository
+@NoArgsConstructor
 public class ESTemplateQuotaUsageDAOImpl extends BaseESDAO implements ESTemplateQuotaUsageDAO {
 
-    private String INDEX_NAME;
+    private String indexName;
 
     @PostConstruct
     public void init() {
-        LOGGER.info("class=TemplateSrvService||method=init||ESTemplateQuotaUsageDAOImpl init start.");
-        this.INDEX_NAME = dataCentreUtil.getAriusTemplateQuotaUsage();
-        LOGGER.info("class=TemplateSrvService||method=init||ESTemplateQuotaUsageDAOImpl init finished.");
+        this.indexName = dataCentreUtil.getAriusTemplateQuotaUsage();
     }
 
     /**
@@ -37,7 +37,7 @@ public class ESTemplateQuotaUsageDAOImpl extends BaseESDAO implements ESTemplate
      */
     @Override
     public boolean insert(ESTemplateQuotaUsagePO usagePO) {
-        return updateClient.batchInsert(INDEX_NAME, DEFAULT_TYPE, Lists.newArrayList(usagePO));
+        return updateClient.batchInsert( indexName, DEFAULT_TYPE, Lists.newArrayList(usagePO));
     }
 
     /**
@@ -49,12 +49,12 @@ public class ESTemplateQuotaUsageDAOImpl extends BaseESDAO implements ESTemplate
      */
     @Override
     public List<ESTemplateQuotaUsagePO> listAll() {
-        return gatewayClient.performRequest(INDEX_NAME, DEFAULT_TYPE,
+        return gatewayClient.performRequest( indexName, DEFAULT_TYPE,
             "{\"query\":{\"match_all\":{}},\"size\":9999}", ESTemplateQuotaUsagePO.class);
     }
 
     @Override
     public ESTemplateQuotaUsagePO getById(Integer logicId) {
-        return gatewayClient.doGet(INDEX_NAME, DEFAULT_TYPE, String.valueOf(logicId), ESTemplateQuotaUsagePO.class);
+        return gatewayClient.doGet( indexName, DEFAULT_TYPE, String.valueOf(logicId), ESTemplateQuotaUsagePO.class);
     }
 }

@@ -29,7 +29,7 @@ public class RestPutClusterSettingsController extends AdminController {
     @Override
     protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception {
         if (client == null) {
-            client = esRestClientService.getAdminClient();
+            client = esRestClientService.getAdminClient(actionName);
         }
         directRequest(client, queryContext);
     }

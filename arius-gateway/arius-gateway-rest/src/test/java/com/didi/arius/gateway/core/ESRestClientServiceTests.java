@@ -1,6 +1,7 @@
 package com.didi.arius.gateway.core;
 
 import com.alibaba.fastjson.JSON;
+import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.metadata.ESCluster;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
@@ -32,25 +33,25 @@ public class ESRestClientServiceTests {
 
     @Test
     public void testGetClient(){
-        ESClient client = esRestClientService.getClient(CLUSTER);
+        ESClient client = esRestClientService.getClient(CLUSTER, RestConsts.NULL_ACTION);
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
 
     }
 
     @Test
     public void testGetClientStrict(){
-        ESClient client = esRestClientService.getClientStrict(CLUSTER);
+        ESClient client = esRestClientService.getClientStrict(CLUSTER, RestConsts.NULL_ACTION);
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
 
     }
 
     @Test
     public void testGetAdminClient(){
-        ESClient client = esRestClientService.getAdminClient();
+        ESClient client = esRestClientService.getAdminClient(RestConsts.NULL_ACTION);
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
 
     }
 
@@ -58,8 +59,31 @@ public class ESRestClientServiceTests {
     public void testGetESClusterMap(){
         Map<String, ESCluster> esClusterMap = esRestClientService.getESClusterMap();
         System.out.println(JSON.toJSONString(esClusterMap));
-        assertEquals(esClusterMap != null, true);
+        assertEquals(true, esClusterMap != null);
 
     }
+
+    @Test
+    public void testResetClients(){
+        ESClient esClient = new ESClient("dc-es02", "7.6.1.302");
+        ESCluster esCluster = new ESCluster();
+        esCluster.setCluster("dc-es02");
+        esCluster.setReadAddress("10.168.56.135:8060");
+        esCluster.setHttpAddress("10.168.56.135:8060,10.169.182.134:8060");
+        esCluster.setHttpWriteAddress("");
+        esCluster.setClient(null);
+        esCluster.setEsClient(esClient);
+        esCluster.setType(ESCluster.Type.INDEX);
+        esCluster.setDataCenter("cn");
+        esCluster.setEsVersion("7.6.1.302");
+        esCluster.setPassword("password");
+        Map<String, ESCluster> map = Maps.newHashMap();
+        map.put("dc-es02", esCluster);
+        esRestClientService.resetClients(map);
+
+
+    }
+
+
 
 }

@@ -3,10 +3,10 @@ package com.didi.arius.gateway.rest.controller;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.exception.QueryDslLengthException;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
-import com.didi.arius.gateway.core.es.http.HttpRestHandler;
 import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.core.service.RateLimitService;
@@ -36,10 +36,11 @@ import java.util.*;
 
 public abstract class BaseHttpRestController implements IRestHandler {
 
-    protected static final Logger logger = LoggerFactory.getLogger( HttpRestHandler.class);
+    protected static final Logger logger = LoggerFactory.getLogger( BaseHttpRestController.class);
     protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
     protected static final Logger traceLogger = LoggerFactory.getLogger(QueryConsts.TRACE_LOGGER);
     protected static final Logger auditLogger = LoggerFactory.getLogger(QueryConsts.AUDIT_LOGGER);
+    protected static final String AUTHORIZATION = "Authorization";
 
     @Autowired
     protected DynamicConfigService dynamicConfigService;
@@ -68,6 +69,8 @@ public abstract class BaseHttpRestController implements IRestHandler {
     @Autowired
     protected RateLimitService rateLimitService;
 
+    protected String actionName = this.getClass().getSimpleName();
+
     @PostConstruct
     public void init(){
         register();
@@ -86,7 +89,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
             handleRequest(queryContext);
 
             postRequest(queryContext);
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
 
             preException(queryContext, ex);
 
@@ -137,7 +140,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
     protected void checkToken(QueryContext queryContext) {
         appService.checkToken(queryContext);
         String encode = Base64.getEncoder().encodeToString(String.format("%s", "user_" + queryContext.getAppid() + ":" + queryContext.getAppDetail().getVerifyCode()).getBytes( StandardCharsets.UTF_8));
-        queryContext.getRequest().putHeader("Authorization", "Basic " + encode);
+        queryContext.getRequest().putHeader(AUTHORIZATION, "Basic " + encode);
     }
 
     protected void preRequest(QueryContext queryContext) {
@@ -148,12 +151,21 @@ public abstract class BaseHttpRestController implements IRestHandler {
         queryContext.setRequestTime(System.currentTimeMillis());
 
         if (queryContext.isDetailLog()) {
-            statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_request||appid={}||requestId={}||method={}||group={}||clusterId={}||user={}||x-username={}||clientVersion={}||uri={}||queryString={}||remoteAddr={}||postBodyLen={}||postBody={}",
-                    queryContext.getAppid(), queryContext.getRequestId(), queryContext.getMethod(), QueryConsts.GATEWAY_GROUP, queryContext.getClusterId(), queryContext.getUser(), queryContext.getXUserName(), queryContext.getClientVersion(),
-                    queryContext.getUri(), queryContext.getQueryString(), queryContext.getRemoteAddr(), queryContext.getPostBody().length(), queryContext.getPostBody().replaceAll("\\n", " "));
-
-            traceLogger.info("_com_request_in||traceid={}||spanid={}||type=http||appid={}||requestId={}||uri={}||remoteAddr={}||requestLen={}",
-                    queryContext.getTraceid(), queryContext.getSpanid(), queryContext.getAppid(), queryContext.getRequestId(), queryContext.getUri(), queryContext.getRemoteAddr(), queryContext.getPostBody().length());
+            JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+            joinLogContext.setAppid(queryContext.getAppid());
+            joinLogContext.setRequestId(queryContext.getRequestId());
+            joinLogContext.setRequestType(queryContext.getAppDetail().getSearchType());
+            joinLogContext.setMethod(queryContext.getMethod());
+            joinLogContext.setClusterId(queryContext.getClusterId());
+            joinLogContext.setUser(queryContext.getUser());
+            joinLogContext.setUri(queryContext.getUri());
+            joinLogContext.setQueryString(queryContext.getQueryString());
+            joinLogContext.setRemoteAddr(queryContext.getRemoteAddr());
+            joinLogContext.setDslLen(queryContext.getPostBody().length());
+            joinLogContext.setDsl(queryContext.getPostBody().replaceAll("\\n", " "));
+            joinLogContext.setTimeStamp(System.currentTimeMillis());
+            traceLogger.info("_com_request_in||traceid={}||spanid={}||type=http||appid={}||requestId={}||uri={}||remoteAddr={}||requestLen={}||name={}",
+                    queryContext.getTraceid(), queryContext.getSpanid(), queryContext.getAppid(), queryContext.getRequestId(), queryContext.getUri(), queryContext.getRemoteAddr(), queryContext.getPostBody().length(), name());
         } else {
             LogGather.recordInfoLog(QueryConsts.DLFLAG_PREFIX + "query_request_" + queryContext.getAppid() + "_" + name(), String.format("requestId=%s||method=%s||uri=%s||queryString=%s||remoteAddr=%s||postBodyLen=%d",
                     queryContext.getRequestId(), queryContext.getMethod(), queryContext.getUri(), queryContext.getQueryString(), queryContext.getRemoteAddr(), queryContext.getPostBody().length()));
@@ -169,7 +181,16 @@ public abstract class BaseHttpRestController implements IRestHandler {
 
     protected void preException(QueryContext queryContext, Throwable e) {
         if (queryContext.isDetailLog()) {
-            statLogger.error(QueryConsts.DLFLAG_PREFIX + "pre_exception||name={}||appid={}||requestId={}", e.getClass().getName(), queryContext.getAppid(), queryContext.getRequestId());
+            JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+            joinLogContext.setAriusType("error");
+            joinLogContext.setExceptionName(e.getClass().getName());
+            joinLogContext.setStack(Convert.logExceptionStack(e));
+            joinLogContext.setTotalCost(System.currentTimeMillis() - queryContext.getRequestTime());
+            joinLogContext.setInternalCost( joinLogContext.getTotalCost() - joinLogContext.getEsCost());
+            joinLogContext.setSinkTime(System.currentTimeMillis());
+
+            String log = joinLogContext.toString();
+            statLogger.error(log);
 
             traceLogger.info("_com_request_out||traceid={}||spanid={}||type=http||appid={}||requestId={}||errname={}",
                     queryContext.getTraceid(), queryContext.getSpanid(), queryContext.getAppid(), queryContext.getRequestId(), e.getClass().getName());
@@ -184,21 +205,16 @@ public abstract class BaseHttpRestController implements IRestHandler {
     }
 
     protected void postRequest(QueryContext queryContext) {
-        int appid = queryContext.getAppDetail() != null ? queryContext.getAppDetail().getId() : QueryConsts.TOTAL_APPId_ID;
+        int appid = queryContext.getAppDetail() != null ? queryContext.getAppDetail().getId() : QueryConsts.TOTAL_APPID_ID;
         requestStatsService.statsAdd(name(), appid, queryContext.getSearchId(), queryContext.getCostTime(), RestStatus.OK);
 
         String searchId = queryContext.getSearchId() != null ? queryContext.getSearchId() : QueryConsts.TOTAL_SEARCH_ID;
         try {
             rateLimitService.addUp(appid, searchId, 0, 0);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.warn("rateLimitService.addUp exception", e);
         }
 
-    }
-
-    protected void directRequest(ESClient client, QueryContext queryContext) {
-        RestActionListenerImpl<DirectResponse> listener = new RestActionListenerImpl<>(queryContext);
-        directRequest(client, queryContext, listener);
     }
 
     protected void directRequest(ESClient client, QueryContext queryContext, RestActionListenerImpl<DirectResponse> listener) {
@@ -213,16 +229,23 @@ public abstract class BaseHttpRestController implements IRestHandler {
         directRequest.setPostContent(queryContext.getPostBody());
         directRequest.setParams(params);
 
+        directRequest.putHeader(AUTHORIZATION, queryContext.getRequest().getHeader(AUTHORIZATION));
         directRequest.putHeader("requestId", queryContext.getRequestId());
-        directRequest.putHeader("Authorization", queryContext.getRequest().getHeader("Authorization"));
 
         client.direct(directRequest, listener);
+    }
+
+    protected void directRequest(ESClient client, QueryContext queryContext) {
+        RestActionListenerImpl<DirectResponse> listener = new RestActionListenerImpl<>(queryContext);
+        directRequest(client, queryContext, listener);
     }
 
     /************************************************************** private method **************************************************************/
     private QueryContext parseContext(RestRequest request, RestChannel channel) {
         QueryContext context = new QueryContext();
+        context.setRequestTime(System.currentTimeMillis());
         context.setRestName(name());
+        context.setJoinLogContext(new JoinLogContext());
 
         String searchId = request.header( QueryConsts.HEAD_SEARCH_ID);
         String clusterId = request.header(QueryConsts.HEAD_CLUSTER_ID);
@@ -305,8 +328,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
 
         context.setTypedKeys(request.paramAsBoolean("typed_keys", false));
 
-
-        if (dynamicConfigService.getDetailLogFlag() == true
+        if (dynamicConfigService.getDetailLogFlag()
                 || context.isFromKibana()) {
             context.setDetailLog(true);
 //        } else if (this instanceof RestBaseWriteAction) {
@@ -322,11 +344,11 @@ public abstract class BaseHttpRestController implements IRestHandler {
         if (params.containsKey(RestConsts.SOCKET_TIMEOUT_PARAMS)) {
             String strSocketTimeout = params.remove(RestConsts.SOCKET_TIMEOUT_PARAMS);
             try {
-                int socketTimeout = Integer.valueOf(strSocketTimeout);
+                int socketTimeout = Integer.parseInt(strSocketTimeout);
                 if (socketTimeout > 0 && socketTimeout <= QueryConsts.MAX_SOCKET_TIMEOUT) {
                     request.setSocketTimeout(socketTimeout);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 // pass
             }
         }

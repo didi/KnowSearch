@@ -3,6 +3,8 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
@@ -14,6 +16,8 @@ import lombok.Data;
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class IndexTemplateLogicWithPhyTemplates extends IndexTemplateLogic {
 
     /**
@@ -58,9 +62,9 @@ public class IndexTemplateLogicWithPhyTemplates extends IndexTemplateLogic {
      * @return
      */
     public IndexTemplatePhy fetchMasterSlave(String groupId) {
-        List<IndexTemplatePhy> physicals = fetchMasterSlaves(groupId);
-        if (!physicals.isEmpty()) {
-            return physicals.get(0);
+        List<IndexTemplatePhy> physicalsTemp = fetchMasterSlaves(groupId);
+        if (!physicalsTemp.isEmpty()) {
+            return physicalsTemp.get(0);
         }
         return null;
     }

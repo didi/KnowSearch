@@ -35,7 +35,7 @@ public class FlowRateController extends StatController {
 
     @Override
     protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception {
-        int appid = request.paramAsInt("appid", QueryConsts.TOTAL_APPId_ID);
+        int appid = request.paramAsInt("appid", QueryConsts.TOTAL_APPID_ID);
         Map<Integer, FlowController> flowControllerMap = rateLimitService.getFlowControllerMap();
         String res = "";
         if (appid > 0) {

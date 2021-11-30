@@ -2,7 +2,10 @@ package com.didi.arius.gateway.common.metadata;
 
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.elasticsearch.client.Client;
+
+import java.util.Set;
 
 
 /**
@@ -11,6 +14,7 @@ import org.elasticsearch.client.Client;
 * 集群信息
 */
 @Data
+@NoArgsConstructor
 public class ESCluster {
 	/**
 	 * 集群名称
@@ -38,9 +42,14 @@ public class ESCluster {
 	private Client client;
 
 	/**
-	 * http client
+	 * http 读client
 	 */
 	private ESClient esClient;
+
+	/**
+	 * http 写client
+	 */
+	private ESClient esWriteClient;
 
 	/**
 	 * 集群类型，INDEX or TRIB
@@ -62,19 +71,29 @@ public class ESCluster {
 	 */
 	private String password;
 
-	public static enum Type {
+	/**
+	 * 读写模式
+	 */
+	private int runMode;
+
+	/**
+	 * 读写分离，指定得action需要用写的action
+	 */
+	private Set<String> writeAction;
+
+	public enum Type {
 		INDEX(0),
 		SOURCE(1);
 		
-		int type;
+		int clusterType;
 		
-		private Type(int type) {
-			this.type = type;
+		private Type(int clusterType) {
+			this.clusterType = clusterType;
 		}
 
-		public static Type IntegerToType(int code) {
+		public static Type integerToType(int code) {
 			for (Type type : Type.values()) {
-				if (type.type == code) {
+				if (type.clusterType == code) {
 					return type;
 				}
 			}

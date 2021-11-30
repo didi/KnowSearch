@@ -43,7 +43,7 @@ public class TemplateMarkNoQueryLabelJob extends BaseTemplateMarkLabelJob {
      * @return
      */
     @Override
-    protected void genShouldHasAndDelLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> newLabels, List<TemplateLabelPO> expireLabels) throws Exception {
+    protected void genShouldHasAndDelLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> newLabels, List<TemplateLabelPO> expireLabels) {
         TemplateLabelPO noQuery = new TemplateLabelPO();
         noQuery.setIndexTemplateId(indexTemplate.getId());
         noQuery.setLabelId(TemplateLabelEnum.NO_QUERY.getId());

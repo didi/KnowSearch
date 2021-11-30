@@ -15,10 +15,10 @@ public abstract class AdminController extends BaseHttpRestController {
             throw new AccessForbiddenException("action(" + queryContext.getUri() + ") forbidden");
         }
 
-        ESClient client = esClusterService.getClient(queryContext);
+        ESClient client = esClusterService.getClient(queryContext, actionName);
 
         handleAriusRequest(queryContext, queryContext.getRequest(), queryContext.getChannel(), client);
     }
 
-    abstract protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception;
+    protected abstract void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception;
 }

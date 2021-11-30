@@ -3,13 +3,18 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.ecm;
 
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * 容器规格列表
  * @author didi
  * @since 2020-08-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESMachineNormsPO extends BasePO {
 
   private static final long serialVersionUID = 1L;

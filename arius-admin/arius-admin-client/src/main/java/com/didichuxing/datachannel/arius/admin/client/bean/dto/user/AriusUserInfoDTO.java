@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.dto.user;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
@@ -13,6 +15,8 @@ import lombok.Data;
  * @date 2019/3/18
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "用户信息")
 public class AriusUserInfoDTO extends BaseDTO {
     @ApiModelProperty("主键")

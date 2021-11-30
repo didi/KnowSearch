@@ -19,129 +19,79 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(value = "DslMetricsVO", description = "查询模板一分钟聚合指标统计信息")
 public class DslMetricsVO {
-    /**
-     * 创建时间
-     */
+
     @ApiModelProperty("创建时间")
-    private String ariusCreateTime;
-    /**
-     * 日期时间
-     */
+    private String  ariusCreateTime;
+
     @ApiModelProperty("日期时间")
-    private String logTime;
-    /**
-     * sink写入时间
-     */
+    private String  logTime;
+
     @ApiModelProperty("sink写入时间")
-    private Long sinkTime;
-    /**
-     * flink写入时间
-     */
+    private Long    sinkTime;
+
     @ApiModelProperty("flink写入时间")
-    private String flinkTime;
-    /**
-     * 响应平均长度
-     */
+    private String  flinkTime;
+
     @ApiModelProperty("响应平均长度")
-    private Double responseLenAvg;
-    /**
-     * 请求类型 http/tcp
-     */
+    private Double  responseLenAvg;
+
     @ApiModelProperty("请求类型 http/tcp")
-    private String requestType;
-    /**
-     * 查询类型 dsl/sql
-     */
+    private String  requestType;
+
     @ApiModelProperty("查询类型 dsl/sql")
-    private String searchType;
-    /**
-     * 查询次数
-     */
+    private String  searchType;
+
     @ApiModelProperty("查询次数")
-    private Long searchCount;
-    /**
-     * 查询es平均耗时
-     */
+    private Long    searchCount;
+
     @ApiModelProperty("查询es平均耗时")
-    private Double esCostAvg;
-    /**
-     * 查询语句平均长度
-     */
+    private Double  esCostAvg;
+
     @ApiModelProperty("查询语句平均长度")
-    private Double dslLenAvg;
-    /**
-     * 查询平均命中记录数
-     */
+    private Double  dslLenAvg;
+
     @ApiModelProperty("查询平均命中记录数")
-    private Double totalHitsAvg;
-    /**
-     * 查询成功平均shard数
-     */
+    private Double  totalHitsAvg;
+
     @ApiModelProperty("查询成功平均shard数")
-    private Double successfulShardsAvg;
-    /**
-     * 查询平均总shard数
-     */
+    private Double  successfulShardsAvg;
+
     @ApiModelProperty("查询平均总shard数")
-    private Double totalShardsAvg;
-    /**
-     * 查询索引示例
-     */
+    private Double  totalShardsAvg;
+
     @ApiModelProperty("查询索引示例")
-    private String indiceSample;
-    /**
-     * 查询模板
-     */
+    private String  indiceSample;
+
     @ApiModelProperty("查询模板")
-    private String dslTemplate;
-    /**
-     * 记录生成时间戳
-     */
+    private String  dslTemplate;
+
     @ApiModelProperty("记录生成时间戳")
-    private Long timeStamp;
-    /**
-     * dsl语句类型 normal/agg等
-     */
+    private Long    timeStamp;
+
     @ApiModelProperty("dsl语句类型 normal/agg等")
-    private String dslType;
-    /**
-     * 查询索引名称，去重后的
-     */
+    private String  dslType;
+
     @ApiModelProperty("查询索引名称，去重后的")
-    private String indices;
-    /**
-     * 查询模板
-     */
+    private String  indices;
+
     @ApiModelProperty("查询模板")
-    private String dslTemplateMd5;
-    /**
-     * 查询平均总耗时
-     */
+    private String  dslTemplateMd5;
+
     @ApiModelProperty("查询平均总耗时")
-    private Double totalCostAvg;
-    /**
-     * 查询平均失败shard数
-     */
+    private Double  totalCostAvg;
+
     @ApiModelProperty("查询平均失败shard数")
-    private Double failedShardsAvg;
-    /**
-     * appid
-     */
+    private Double  failedShardsAvg;
+
     @ApiModelProperty("appid")
     private Integer appid;
-    /**
-     * 查询语句
-     */
+
     @ApiModelProperty("查询语句")
-    private String dsl;
-    /**
-     * gateway处理平均耗时
-     */
+    private String  dsl;
+
     @ApiModelProperty("gateway处理平均耗时")
-    private Double beforeCostAvg;
-    /**
-     * dsl查询限流值
-     */
+    private Double  beforeCostAvg;
+
     @ApiModelProperty("dsl查询限流值")
-    private Double   queryLimit;
+    private Double  queryLimit;
 }

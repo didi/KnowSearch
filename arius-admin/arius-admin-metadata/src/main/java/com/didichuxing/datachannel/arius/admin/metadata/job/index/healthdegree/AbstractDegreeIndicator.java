@@ -6,15 +6,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.Indicato
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeIndicator.DegreeParam;
 import com.didichuxing.datachannel.arius.admin.metadata.utils.ReadExprValueUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 public abstract class AbstractDegreeIndicator implements IDegreeIndicator {
     protected static final ILog LOGGER = LogFactory.getLog(AbstractDegreeIndicator.class);
 
     private DegreeParam degreeParam;
 
-    public AbstractDegreeIndicator(){}
+    protected AbstractDegreeIndicator(){}
 
     @Override
     public <T extends BaseDegree> T exec(DegreeParam degreeParam) {
@@ -60,16 +60,15 @@ public abstract class AbstractDegreeIndicator implements IDegreeIndicator {
         for (IndicatorChild indicatorChildPO : degreeParam.getIndicatorChilds()) {
             if(getType().getCode() != indicatorChildPO.getCode()){continue;}
 
-            if (indicatorChildPO.getUpper() <= Math.floor(ratio)) {
-                if (indicatorChildPO.getLower() == -1 || indicatorChildPO.getLower() >= Math.floor(ratio)) {
-                    String expr  = indicatorChildPO.getScoreExpr().replaceAll("k", "" + ratio);
+            if (indicatorChildPO.getUpper() <= Math.floor(ratio)
+                && (indicatorChildPO.getLower() == -1 || indicatorChildPO.getLower() >= Math.floor(ratio))) {
+                    String expr  = indicatorChildPO.getScoreExpr().replace("k", "" + ratio);
                     double value = ReadExprValueUtil.readExprValue(expr);
 
                     if (value > 100){value = 100;}
 
                     score = Math.floor(value * 100) / 100;
                     break;
-                }
             }
         }
 
@@ -82,8 +81,8 @@ public abstract class AbstractDegreeIndicator implements IDegreeIndicator {
         for (IndicatorChild indicatorChildPO : degreeParam.getIndicatorChilds()) {
             if(getType().getCode() != indicatorChildPO.getCode()){continue;}
 
-            if (indicatorChildPO.getUpper() <= Math.floor(ratio)) {
-                if (indicatorChildPO.getLower() == -1 || indicatorChildPO.getLower() >= Math.floor(ratio)) {
+            if (indicatorChildPO.getUpper() <= Math.floor(ratio)
+                && (indicatorChildPO.getLower() == -1 || indicatorChildPO.getLower() >= Math.floor(ratio))) {
                     String expr = indicatorChildPO.getScoreExpr();
                     score = ReadExprValueUtil.readExprValue(expr);
 
@@ -91,7 +90,6 @@ public abstract class AbstractDegreeIndicator implements IDegreeIndicator {
 
                     break;
                 }
-            }
         }
 
         return score;

@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNod
 @Repository
 public interface GatewayNodeDAO {
 
-    int record(GatewayNodePO gatewayNodePO);
+    int recordGatewayNode(GatewayNodePO gatewayNodePO);
 
     int aliveCountByClusterNameAndTime(@Param("clusterName") String clusterName,
                                        @Param("time") Date time);

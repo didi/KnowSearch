@@ -6,14 +6,18 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fengqiongfeng
  * @date 2020/8/24
  */
 @Data
-public class OrderDetail{
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrderDetail {
 
     /**
      * 订单id

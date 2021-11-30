@@ -38,37 +38,32 @@ public class IndexTemplateServiceTests {
 
     @Test
     public void testGetTemplateExpressionMap() throws InterruptedException {
-        Thread.sleep(1000L);
         final Map<String, Map<String, TemplateInfo>> templateExpressionMap = indexTemplateService.getTemplateExpressionMap();
         System.out.println(JSON.toJSONString(templateExpressionMap));
     }
 
     @Test
     public void testGetTemplateAliasMap() throws InterruptedException {
-        Thread.sleep(1000L);
         final Map<String, Map<String, TemplateInfo>> templateExpressionMap = indexTemplateService.getTemplateAliasMap();
         System.out.println(JSON.toJSONString(templateExpressionMap));
     }
 
     @Test
     public void testGetIndexTemplate() throws InterruptedException {
-        Thread.sleep(1000L);
         final IndexTemplate indexTemplate = indexTemplateService.getIndexTemplate(INDEX_NAME);
         System.out.println(JSON.toJSONString(indexTemplate));
-        assertEquals(indexTemplate != null, true);
+        assertEquals(true, indexTemplate != null);
     }
 
     @Test
     public void testGetIndexTemplateByTire() throws InterruptedException {
-        Thread.sleep(2000L);
         final IndexTemplate indexTemplate = indexTemplateService.getIndexTemplateByTire(INDEX_NAME);
         System.out.println(JSON.toJSONString(indexTemplate));
-        assertEquals(indexTemplate != null, true);
+        assertEquals(true, indexTemplate != null);
     }
 
     @Test
     public void testGetIndexTemplateMap() throws InterruptedException {
-        Thread.sleep(2000L);
         final Map<String, IndexTemplate> indexTemplateMap = indexTemplateService.getIndexTemplateMap();
         System.out.println(JSON.toJSONString(indexTemplateMap));
     }
@@ -80,24 +75,21 @@ public class IndexTemplateServiceTests {
 
     @Test
     public void testGetIndexAlias() throws InterruptedException {
-        Thread.sleep(2000L);
         final String indexAlias = indexTemplateService.getIndexAlias(INDEX_NAME);
         System.out.println(indexAlias);
     }
 
     @Test
     public void testCheckIndex() throws InterruptedException {
-        Thread.sleep(2000L);
         final boolean b = indexTemplateService.checkIndex(INDEX_NAME+"_2021-05", Lists.newArrayList(INDEX_NAME+"*"));
-        assertEquals(b, true);
+        assertEquals(true, b);
         final boolean b1 = indexTemplateService.checkIndex(INDEX_NAME+"_2021-05", Lists.newArrayList(INDEX_NAME+"asdf*"));
-        assertEquals(b1, false);
+        assertEquals(false, b1);
 
     }
 
     @Test
     public void testGetIndexVersion() throws InterruptedException {
-        Thread.sleep(2000L);
         final int indexVersion = indexTemplateService.getIndexVersion(INDEX_NAME, CLUSTER_NAME);
         System.out.println(indexVersion);
 
@@ -105,10 +97,9 @@ public class IndexTemplateServiceTests {
 
     @Test
     public void testGetTemplateByIndexTire() throws InterruptedException {
-        Thread.sleep(2000L);
         final IndexTemplate templateByIndexTire = indexTemplateService.getTemplateByIndexTire(Lists.newArrayList(INDEX_NAME, INDEX_NAME2), buildQueryContext());
         System.out.println(JSON.toJSONString(templateByIndexTire));
-        assertEquals(templateByIndexTire != null, true);
+        assertEquals(true, templateByIndexTire != null);
 
     }
 

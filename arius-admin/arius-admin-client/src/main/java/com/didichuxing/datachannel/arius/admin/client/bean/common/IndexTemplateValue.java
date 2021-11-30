@@ -1,6 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * 索引模板价值分
@@ -8,7 +12,11 @@ import lombok.Data;
  * @date 2020/09/09
  */
 @Data
-public class IndexTemplateValue{
+@NoArgsConstructor
+@AllArgsConstructor
+public class IndexTemplateValue implements Serializable {
+
+    private static final long serialVersionUID = 1905122041950251207L;
 
     /**
      * 索引模板id

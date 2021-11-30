@@ -38,14 +38,14 @@ public class LoginController {
     @PostMapping("/login")
     @ResponseBody
     @ApiOperation(value = "登录", notes = "无需走SSO逻辑")
-    public Result login(HttpServletRequest request, HttpServletResponse response, @RequestBody LoginDTO loginDTO) {
+    public Result<Boolean> login(HttpServletRequest request, HttpServletResponse response, @RequestBody LoginDTO loginDTO) {
         return loginManager.loginAuthenticateAndGetUserInfo(request, response, loginDTO);
     }
 
     @DeleteMapping("/logout")
     @ResponseBody
     @ApiOperation(value = "登出")
-    public Result logout(HttpServletRequest request, HttpServletResponse response) {
+    public Result<Boolean> logout(HttpServletRequest request, HttpServletResponse response) {
         return loginManager.logout(request, response);
     }
 

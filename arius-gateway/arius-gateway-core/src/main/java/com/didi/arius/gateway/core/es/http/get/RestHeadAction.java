@@ -19,8 +19,11 @@
 
 package com.didi.arius.gateway.core.es.http.get;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
+import java.util.List;
+import java.util.Map;
+
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.metadata.WrapESGetResponse;
 import com.didi.arius.gateway.core.es.http.ESAction;
@@ -36,9 +39,6 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-
 import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 
 /**
@@ -47,11 +47,9 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("restHeadAction")
 public class RestHeadAction extends ESAction {
 
-	public static final String NAME = "head";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "head";
 	}
 
     @Override
@@ -81,21 +79,24 @@ public class RestHeadAction extends ESAction {
                 }
 
                 if (queryContext.isDetailLog()) {
-                    statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_replace_index||requestId={}||sourceIndexNames={}||types={}||destIndexName={}||sourceTemplateName={}||destTemplateName={}",
-                            queryContext.getRequestId(),
-                            sourceIndexName, typeName, index, sourceTemplateName, destTemplateName);
+                    JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+                    joinLogContext.setSourceIndexNames(sourceIndexName);
+                    joinLogContext.setTypeName(typeName);
+                    joinLogContext.setDestIndexName(index);
+                    joinLogContext.setSourceTemplateName(sourceTemplateName);
+                    joinLogContext.setDestTemplateName(destTemplateName);
                 }
             }
         }
 
-        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate);
+        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
     	int indexVersion = indexTemplateService.getIndexVersion(index, queryContext.getCluster());
 
     	if (indexVersion > 0) {
     		getVersionResponse(queryContext, indexVersion, index, request, readClient, WrapESGetResponse.ResultType.HEAD);
     	} else {
-            final ESGetRequest getRequest = new ESGetRequest(index, request.param("type"), request.param("id"));
+            final ESGetRequest getRequest = new ESGetRequest(index, request.param("type") == null ? "_doc" : request.param("type"), request.param("id"));
             getRequest.refresh(request.param("refresh"));
             getRequest.routing(request.param("routing"));  // order is important, set it after routing, so it will set the routing
             getRequest.parent(request.param("parent"));

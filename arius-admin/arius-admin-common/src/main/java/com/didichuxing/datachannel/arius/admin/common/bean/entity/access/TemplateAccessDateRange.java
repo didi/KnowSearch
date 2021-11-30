@@ -35,11 +35,6 @@ public class TemplateAccessDateRange {
      */
     @JSONField(serialize = false)
     public boolean isValid() {
-        if (StringUtils.isBlank(startDate) || StringUtils.isBlank(endDate)) {
-            return false;
-        }
-
-        return true;
+        return !(StringUtils.isBlank(startDate) || StringUtils.isBlank(endDate));
     }
-
 }

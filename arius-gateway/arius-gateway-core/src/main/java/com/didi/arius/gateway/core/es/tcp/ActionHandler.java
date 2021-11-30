@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 * 
 */
 @Component("actionHandler")
-abstract public class ActionHandler extends ESBase {
+public abstract class ActionHandler extends ESBase {
 	protected static final Logger logger = LoggerFactory.getLogger(ActionHandler.class);
 	protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
 	protected static final Logger traceLogger = LoggerFactory.getLogger(QueryConsts.TRACE_LOGGER);
@@ -57,7 +57,7 @@ abstract public class ActionHandler extends ESBase {
 	
 	public void handleRequest(ActionContext actionContext) throws IOException {
 		try {
-			if (false == actionContext.getSemaphore().tryAcquire(10, TimeUnit.MILLISECONDS)) {
+			if (!actionContext.getSemaphore().tryAcquire(10, TimeUnit.MILLISECONDS)) {
 				throw new ServerBusyException("too many block queries, please wait and retry");
 			}
 			
@@ -70,7 +70,7 @@ abstract public class ActionHandler extends ESBase {
 	        handleInterRequest(actionContext, 0);
 	        
 	        postRequest(actionContext);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			if (!(e instanceof ServerBusyException)) {
 				actionContext.getSemaphore().release();
 			}
@@ -90,11 +90,11 @@ abstract public class ActionHandler extends ESBase {
 		actionContext.getRequest().putHeader("Authorization", "Basic " + encode);
 	}
 	
-	abstract public void handleInterRequest(ActionContext actionContext, int retryTimes) throws Exception;
+	public abstract void handleInterRequest(ActionContext actionContext, int retryTimes) throws Exception;
 
-	abstract protected Class<? extends TransportRequest> getRequestClass();
+	protected abstract  Class<? extends TransportRequest> getRequestClass();
 	
-	abstract public String name();
+	public abstract String name();
 	
 	public TransportRequest parseRequest(TransportAddress remoteAddress, StreamInput buffer) throws InstantiationException, IllegalAccessException, IOException {
         Class<? extends TransportRequest> cls = getRequestClass();
@@ -118,13 +118,13 @@ abstract public class ActionHandler extends ESBase {
 	}
 	
 	protected void postRequest(ActionContext actionContext) {
-		int appid = actionContext.getAppDetail() != null ? actionContext.getAppDetail().getId() : QueryConsts.TOTAL_APPId_ID;
+		int appid = actionContext.getAppDetail() != null ? actionContext.getAppDetail().getId() : QueryConsts.TOTAL_APPID_ID;
 		requestStatsService.statsAdd(name(), appid, actionContext.getSearchId(), actionContext.getCostTime(), RestStatus.OK);
 
 		String searchId = actionContext.getSearchId() != null ? actionContext.getSearchId() : QueryConsts.TOTAL_SEARCH_ID;
 		try {
 			rateLimitService.addUp(appid, searchId, 0, 0);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.warn("rateLimitService.addUp exception", e);
 		}
 		
@@ -173,8 +173,8 @@ abstract public class ActionHandler extends ESBase {
             if (ex instanceof ClusterBlockException) {
             	try {
 					Thread.sleep(QueryConsts.RETRY_SLEEP_MILLIS);
-				} catch (InterruptedException e1) {
-					// pass
+				} catch (Exception e1) {
+            		// pass
 				}
 
                 if (retryTimes >= QueryConsts.RETRY_COUNT) {
@@ -182,7 +182,7 @@ abstract public class ActionHandler extends ESBase {
                 } else {
                     try {
                     	actionHandler.handleInterRequest(actionContext, retryTimes+1);
-                    } catch(final Throwable t) {
+                    } catch(final Exception t) {
                         // this exception can't come from the TransportService as it doesn't throw exceptions at all
                         listener.onFailure(t);
                     }

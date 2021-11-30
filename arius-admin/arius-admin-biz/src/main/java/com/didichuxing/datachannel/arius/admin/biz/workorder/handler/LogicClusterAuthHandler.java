@@ -1,25 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterAuthContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.LogicClusterAuthNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterAuthOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicClusterAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +33,13 @@ import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskType
 public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ESClusterLogicService      esClusterLogicService;
+    private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private AppLogicClusterAuthService appLogicClusterAuthService;
+    private AppClusterLogicAuthService appClusterLogicAuthService;
 
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         LogicClusterAuthContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterAuthContent.class);
 
@@ -51,8 +51,8 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("申请的权限为空");
         }
 
-        ESClusterLogic esClusterLogic = esClusterLogicService.getLogicClusterById(content.getLogicClusterId());
-        if (esClusterLogic == null) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getLogicClusterId());
+        if (clusterLogic == null) {
             return Result.buildParamIllegal("集群不存在");
         }
 
@@ -71,29 +71,29 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         LogicClusterAuthContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterAuthContent.class);
 
-        Result result = appLogicClusterAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorAppid(),
-            content.getLogicClusterId(), AppLogicClusterAuthEnum.valueOf(content.getAuthCode()),
+        Result<Void> result = appClusterLogicAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorAppid(),
+            content.getLogicClusterId(), AppClusterLogicAuthEnum.valueOf(content.getAuthCode()),
             workOrder.getSubmitor(), workOrder.getSubmitor());
 
         if (null != result && result.success()) {
             operateRecordService
                 .save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
                     workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
-                                                                               + AppLogicClusterAuthEnum
+                                                                               + AppClusterLogicAuthEnum
                                                                                    .valueOf(content.getAuthCode()),
                     approver);
 
@@ -102,7 +102,7 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
                 Arrays.asList(workOrder.getSubmitor()));
         }
 
-        return result;
+        return Result.buildFrom(result);
     }
 
     @Override
@@ -123,9 +123,9 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }

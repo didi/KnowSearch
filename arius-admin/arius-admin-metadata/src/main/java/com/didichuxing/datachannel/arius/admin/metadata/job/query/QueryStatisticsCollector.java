@@ -1,23 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.query;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayJoinPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppIdTemplateAccessCountPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.IndexNameAccessCountPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.QueryStatisticsResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.TemplateAccessCountPO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app.AppIdTemplateAccessESDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexAccessESDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
-import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ThirdpartAppVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app.AppIdTemplateAccessESDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexAccessESDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -25,13 +24,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,11 +88,11 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
     /**
      * 跳过特殊的索引名称
      */
-    private final static Set<String> skipIndexNameSet = Sets.newHashSet("_aliases", "_mapping", ".arius_info",
+    private static final Set<String> skipIndexNameSet = Sets.newHashSet("_aliases", "_mapping", ".arius_info",
             "logstash-*/_mapping/field/*", "_search/scroll", "_sql/explain", "_cluster/health");
 
 
-    private final static FutureUtil futureUtil = FutureUtil.init("QueryStatisticsCollector");
+    private static final FutureUtil<Map<Integer, Map<String, LongAdder>>> futureUtil = FutureUtil.init("QueryStatisticsCollector");
 
     /**
      * 处理任务
@@ -158,12 +156,12 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
      * @return
      */
     private String getSearchTemplateClusterName(String templateName, Map<String/*templateName*/, List<IndexTemplatePhyWithLogic>> indexTemplateMap) {
-        List<IndexTemplatePhyWithLogic> indexTemplateList = indexTemplateMap.get(templateName);
-        if (CollectionUtils.isEmpty(indexTemplateList)) {
+        List<IndexTemplatePhyWithLogic> indexTemplatePhyWithLogics = indexTemplateMap.get(templateName);
+        if (CollectionUtils.isEmpty(indexTemplatePhyWithLogics)) {
             return null;
         }
 
-        return indexTemplateList.get(0).getCluster();
+        return indexTemplatePhyWithLogics.get(0).getCluster();
     }
 
     /**
@@ -188,7 +186,7 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
         if(StringUtils.isBlank(gatewayJoinClusterName)){return null;}
 
         // 获取索引的主shard个数
-        Integer primaryShardNumber = esIndexService.getIndexPrimaryShardNumber(gatewayJoinClusterName, String.format("%s*", gatewayJoinIndexName));
+        Integer primaryShardNumber = esIndexService.syncGetIndexPrimaryShardNumber(gatewayJoinClusterName, String.format("%s*", gatewayJoinIndexName));
 
         if (primaryShardNumber == null) {
             LOGGER.error("class=QueryStatisticsCollector||method=runTaskAndGetResult||errMsg=clusterName {}, indexName {} primaryShardNumber is null",
@@ -204,11 +202,18 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
         LOGGER.info("class=QueryStatisticsCollector||method=runTaskAndGetResult||msg=submit {} tasks", primaryShardNumber);
 
         Map<Integer/*appId*/, Map<String/*indexName*/, Long/*access indexName count*/>> map = Maps.newTreeMap();
-        Map<String/*indexName*/, Long/*access indexName count*/> accessMap;
 
         List<Map<Integer/*appId*/, Map<String/*indexName*/, LongAdder/*access indexName count*/>>> rets = futureUtil.waitResult();
 
         // 汇聚每个shard统计的结果
+        collectShardCountResult(map, rets);
+
+        return map;
+    }
+
+    private void collectShardCountResult(Map<Integer, Map<String, Long>> map, List<Map<Integer, Map<String, LongAdder>>> rets) {
+        String gatewayJoinIndexName;
+        Map<String/*indexName*/, Long/*access indexName count*/> accessMap;
         for(Map<Integer/*appId*/, Map<String/*indexName*/, LongAdder/*access indexName count*/>> r : rets){
             if (r != null) {
                 for (Map.Entry<Integer/*appId*/, Map<String/*indexName*/, LongAdder/*access indexName count*/>> entry : r.entrySet()) {
@@ -217,10 +222,7 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
 
                     for (Map.Entry<String/*indexName*/, LongAdder/*access indexName count*/> subEntry : entry.getValue().entrySet()) {
                         gatewayJoinIndexName = subEntry.getKey();
-
-                        if (!accessMap.containsKey(gatewayJoinIndexName)) {
-                            accessMap.put(gatewayJoinIndexName, 0L);
-                        }
+                        accessMap.putIfAbsent(gatewayJoinIndexName, 0L);
 
                         // 累加索引的访问次数
                         accessMap.put(gatewayJoinIndexName,
@@ -232,8 +234,6 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
                 LOGGER.error("class=QueryStatisticsCollector||method=runTaskAndGetResult||errMsg=future result is empty");
             }
         }
-
-        return map;
     }
 
     /**
@@ -257,20 +257,18 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
          */
         Map<String/*templateId_appId*/, AppIdTemplateAccessCountPO> appIdTemplateAccessCountMap = stResult.getAppIdTemplateAccessCountMap();
 
-        Integer appId = null;
-        ThirdpartAppVO queryApp = null;
-        String indexName = null;
+        Integer appId;
+        String indexName;
 
-        Set<String> matchIndexTemplateNameSet = null;
+        Set<String> matchIndexTemplateNameSet;
 
-        IndexTemplatePhyWithLogic  indexTemplate = null;
+        IndexTemplatePhyWithLogic  indexTemplate;
 
-        TemplateAccessCountPO      templateAccessCountPo = null;
-        IndexNameAccessCountPO     IndexNameAccessCountPO = null;
-        AppIdTemplateAccessCountPO AppIdTemplateAccessCountPO = null;
+        TemplateAccessCountPO      templateAccessCountPo;
+        IndexNameAccessCountPO     indexNameAccessCountPO;
+        AppIdTemplateAccessCountPO appIdTemplateAccessCountPO;
 
-        Long accessIndexCount = null;
-        Set<String> accessClusterSet = null;
+        Long accessIndexCount;
         Long noAccessTemplateCount = 0L;
 
         // 缓存已经匹配过的索引对应的索引模板名
@@ -332,7 +330,7 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
                     }
 
                     Integer indexTemplateId = indexTemplate.getId().intValue();
-                    Integer logicTemplateId = indexTemplate.getLogicId().intValue();
+                    Integer logicTemplateId = indexTemplate.getLogicId();
                     String  clusterName     = indexTemplate.getCluster();
                     String  indexTemplateName = indexTemplate.getName();
 
@@ -343,32 +341,32 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
                     });
                     templateAccessCountPo.increase(accessIndexCount);
 
-                    IndexNameAccessCountPO = indexNameAccessCountMap.computeIfAbsent(String.valueOf(indexTemplateId).concat("_").concat(indexName), templateId_indexName -> {
+                    indexNameAccessCountPO = indexNameAccessCountMap.computeIfAbsent(String.valueOf(indexTemplateId).concat("_").concat(indexName), templateIdIndexName -> {
                         IndexNameAccessCountPO po = new IndexNameAccessCountPO();
                         po.setTemplateId(indexTemplateId).setLogicTemplteId(logicTemplateId).setClusterName(clusterName).setTemplateName(indexTemplateName).setDate(date);
                         return po;
                     });
-                    IndexNameAccessCountPO.increase(accessIndexCount);
-                    IndexNameAccessCountPO.setIndexName(indexName);
+                    indexNameAccessCountPO.increase(accessIndexCount);
+                    indexNameAccessCountPO.setIndexName(indexName);
 
-                    AppIdTemplateAccessCountPO = appIdTemplateAccessCountMap.computeIfAbsent(String.valueOf(indexTemplateId).concat("_").concat(appId.toString()), templateId_appId -> {
+                    appIdTemplateAccessCountPO = appIdTemplateAccessCountMap.computeIfAbsent(String.valueOf(indexTemplateId).concat("_").concat(appId.toString()), templateIdAppId -> {
                         AppIdTemplateAccessCountPO po = new AppIdTemplateAccessCountPO();
                         po.setTemplateId(indexTemplateId).setLogicTemplateId(logicTemplateId).setClusterName(clusterName).setTemplateName(indexTemplateName).setDate(date);
                         po.setAccessDetailInfo(Maps.newHashMap());
                         return po;
                     });
 
-                    AppIdTemplateAccessCountPO.increase(accessIndexCount);
-                    AppIdTemplateAccessCountPO.setAppId(appId);
+                    appIdTemplateAccessCountPO.increase(accessIndexCount);
+                    appIdTemplateAccessCountPO.setAppId(appId);
 
 
-                    if (!AppIdTemplateAccessCountPO.getAccessDetailInfo().containsKey(indexName)) {
-                        AppIdTemplateAccessCountPO.getAccessDetailInfo().put(indexName, 0L);
+                    if (!appIdTemplateAccessCountPO.getAccessDetailInfo().containsKey(indexName)) {
+                        appIdTemplateAccessCountPO.getAccessDetailInfo().put(indexName, 0L);
                     }
-                    Long count = AppIdTemplateAccessCountPO.getAccessDetailInfo().get(indexName);
+                    Long count = appIdTemplateAccessCountPO.getAccessDetailInfo().get(indexName);
                     count += accessIndexCount;
 
-                    AppIdTemplateAccessCountPO.getAccessDetailInfo().put(indexName, count);
+                    appIdTemplateAccessCountPO.getAccessDetailInfo().put(indexName, count);
                 }
             } // end for indexName
 
@@ -379,7 +377,7 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
 
             if (!templateAccessCountMap.containsKey(String.valueOf(item.getId()))) {
                 TemplateAccessCountPO po = new TemplateAccessCountPO();
-                po.setTemplateId(item.getId().intValue()).setLogicTemplateId(item.getLogicId().intValue()).setClusterName(item.getCluster()).setTemplateName(item.getName()).setDate(date);
+                po.setTemplateId(item.getId().intValue()).setLogicTemplateId(item.getLogicId()).setClusterName(item.getCluster()).setTemplateName(item.getName()).setDate(date);
                 po.setCount(0L);
                 LOGGER.error("class=QueryStatisticsCollector||method=statisticsAppIdAccessDetailInfo||errMsg=clusterName {} templateName -> {} not access",
                         item.getCluster(), item.getName());
@@ -393,32 +391,6 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
                 noAccessTemplateCount, noAccessTemplateNames);
 
         return stResult;
-    }
-
-    /**
-     * 去除重复的索引
-     *
-     * @param indices
-     * @return
-     */
-    private Set<String> removeDuplicateIndexName(String indices) {
-
-        if (StringUtils.isBlank(indices)) {
-            return null;
-        }
-
-        String[] indexNameArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(
-                StringUtils.removeEnd(indices, COMMA), COMMA);
-        if (indexNameArr == null || indexNameArr.length <= 0) {
-            return null;
-        }
-
-        Set<String> indexNameSets = Sets.newHashSet();
-        for (String indexName : indexNameArr) {
-            indexNameSets.add(indexName);
-        }
-
-        return indexNameSets;
     }
 
     /**
@@ -503,6 +475,32 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
             totalCount.add(count.longValue());
 
             return appIdAccessDetailMap;
+        }
+
+        /**
+         * 去除重复的索引
+         *
+         * @param indices
+         * @return
+         */
+        private Set<String> removeDuplicateIndexName(String indices) {
+
+            if (StringUtils.isBlank(indices)) {
+                return new HashSet<>();
+            }
+
+            String[] indexNameArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(
+                    StringUtils.removeEnd(indices, COMMA), COMMA);
+            if (indexNameArr == null || indexNameArr.length <= 0) {
+                return new HashSet<>();
+            }
+
+            Set<String> indexNameSets = Sets.newHashSet();
+            for (String indexName : indexNameArr) {
+                indexNameSets.add(indexName);
+            }
+
+            return indexNameSets;
         }
     }
 }

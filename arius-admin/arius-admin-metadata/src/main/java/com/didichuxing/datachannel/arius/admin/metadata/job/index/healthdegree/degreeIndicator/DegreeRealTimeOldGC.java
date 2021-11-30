@@ -11,7 +11,7 @@ public class DegreeRealTimeOldGC extends AbstractDegreeIndicator {
     @Override
     public <T extends BaseDegree> T execInner(DegreeParam degreeParam, T t) {
         double gcCount = 0;
-        for (ESIndexToNodeStats esESIndexToNodeStats : degreeParam.getESIndexToNodeStatsses()) {
+        for (ESIndexToNodeStats esESIndexToNodeStats : degreeParam.getEsIndexToNodeStats()) {
             if(StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("jvm-gc-old-collection_count"))){
                 gcCount += Math.floor(Double.parseDouble(esESIndexToNodeStats.getMetrics().get("jvm-gc-old-collection_count")) * 100) / 100;
             }

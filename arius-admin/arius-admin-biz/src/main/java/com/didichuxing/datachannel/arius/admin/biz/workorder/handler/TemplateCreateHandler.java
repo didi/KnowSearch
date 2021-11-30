@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
@@ -13,7 +14,8 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateCreateOrderDetail;
@@ -21,14 +23,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicClusterAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
@@ -76,13 +76,16 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     private TemplateAction              templateAction;
 
     @Autowired
-    private ESClusterLogicService       esClusterLogicService;
+    private ClusterLogicService         clusterLogicService;
 
     @Autowired
     private AriusConfigInfoService      ariusConfigInfoService;
 
     @Autowired
-    private AppLogicClusterAuthService  logicClusterAuthService;
+    private AppClusterLogicAuthService  logicClusterAuthService;
+
+    @Autowired
+    private ClusterContextManager       clusterContextManager;
 
     /**
      * 工单是否自动审批
@@ -93,21 +96,21 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     @Override
     public boolean canAutoReview(WorkOrder workOrder) {
         TemplateCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            TemplateCreateContent.class);
-        ESClusterLogic esClusterLogic = esClusterLogicService.getLogicClusterById(content.getResourceId());
+                TemplateCreateContent.class);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getResourceId());
 
-        if (!esClusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())) {
+        if (!clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())) {
             return false;
         }
 
-        LogicResourceConfig resourceConfig = esClusterLogicService
-            .genLogicClusterConfig(esClusterLogic.getConfigJson());
+        LogicResourceConfig resourceConfig = clusterLogicService
+                .genClusterLogicConfig(clusterLogic.getConfigJson());
         if (!resourceConfig.getTemplateCreateWorkOrderAutoProcess()) {
             return false;
         }
 
         Double autoProcessDiskMaxG = ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,
-            "arius.wo.auto.process.create.template.disk.maxG", 10.0);
+                "arius.wo.auto.process.create.template.disk.maxG", 10.0);
 
         return content.getDiskQuota() < autoProcessDiskMaxG;
     }
@@ -115,8 +118,14 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
         TemplateCreateContent content = JSON.parseObject(extensions, TemplateCreateContent.class);
+        TemplateCreateOrderDetail templateCreateOrderDetail = ConvertUtil.obj2Obj(content, TemplateCreateOrderDetail.class);
+        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(content.getResourceId());
+        if (null != clusterLogicContext) {
+            templateCreateOrderDetail.setClusterLogicName(clusterLogicContext.getClusterLogicName());
+            templateCreateOrderDetail.setClusterPhyNameList(clusterLogicContext.getAssociatedClusterPhyNames());
+        }
 
-        return ConvertUtil.obj2Obj(content, TemplateCreateOrderDetail.class);
+        return templateCreateOrderDetail;
     }
 
     @Override
@@ -125,9 +134,9 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isRDOrOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
@@ -141,9 +150,9 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         TemplateCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            TemplateCreateContent.class);
+                TemplateCreateContent.class);
 
         if (AriusObjUtils.isNull(content.getResponsible())) {
             return Result.buildParamIllegal("责任人为空");
@@ -157,39 +166,37 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("索引数据总量为空");
         }
 
-        ESClusterLogic esClusterLogic = esClusterLogicService.getLogicClusterById(content.getResourceId());
-        if (esClusterLogic == null) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getResourceId());
+        if (clusterLogic == null) {
             return Result.buildParamIllegal("集群不存在");
         }
 
-        if (content.getCyclicalRoll()) {
-            if (AriusObjUtils.isNull(content.getDateField())) {
-                return Result.buildParamIllegal("分区字段为空");
-            }
+        if (content.getCyclicalRoll() && AriusObjUtils.isNull(content.getDateField())) {
+            return Result.buildParamIllegal("分区字段为空");
         }
 
         // 集群权限检查
         if (!logicClusterAuthService.canCreateLogicTemplate(workOrder.getSubmitorAppid(), content.getResourceId())) {
             return Result.buildFail(
-                String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", workOrder.getSubmitorAppid(), content.getResourceId()));
+                    String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", workOrder.getSubmitorAppid(), content.getResourceId()));
         }
 
-        Result checkBaseInfoResult = templateLogicService
-            .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorAppid()), OperationEnum.ADD);
+        Result<Void> checkBaseInfoResult = templateLogicService
+                .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorAppid()), OperationEnum.ADD);
         if (checkBaseInfoResult.failed()) {
             return checkBaseInfoResult;
         }
 
         if (content.getMapping() != null) {
-            Result checkMapping = templatePhyMappingManager.checkMappingForNew(content.getName(),
-                genTypeProperty(content.getMapping()));
+            Result<Void> checkMapping = templatePhyMappingManager.checkMappingForNew(content.getName(),
+                    genTypeProperty(content.getMapping()));
             if (checkMapping.failed()) {
                 return checkMapping;
             }
         }
 
         // 校验数据中心是否匹配
-        if (!content.getDataCenter().equals(esClusterLogic.getDataCenter())) {
+        if (!content.getDataCenter().equals(clusterLogic.getDataCenter())) {
             return Result.buildParamIllegal("集群数据中心不符");
         }
 
@@ -199,7 +206,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     @Override
     protected String getTitle(WorkOrder workOrder) {
         TemplateCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            TemplateCreateContent.class);
+                TemplateCreateContent.class);
 
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
@@ -215,7 +222,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         if (!isOP(workOrder.getSubmitor())) {
             return Result.buildOpForBidden("非运维人员不能操作集群扩缩容！");
         }
@@ -230,7 +237,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -241,9 +248,9 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         TemplateCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            TemplateCreateContent.class);
+                TemplateCreateContent.class);
 
         IndexTemplateLogicDTO logicDTO = buildTemplateLogicDTO(content, workOrder.getSubmitorAppid());
 
@@ -255,16 +262,16 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         if (result.success()) {
             // 模板创建成功，如果设置了mapping，更新mapping
             if (StringUtils.isNoneBlank(content.getMapping()) && templateLogicMappingManager
-                .updateMappingForNew(result.getData(), genTypeProperty(content.getMapping())).failed()) {
+                    .updateMappingForNew(result.getData(), genTypeProperty(content.getMapping())).failed()) {
                 throw new AdminOperateException("设置mapping失败");
             }
 
             sendNotify(WORK_ORDER_TEMPLATE_CREATE,
-                new TemplateCreateNotify(workOrder.getSubmitorAppid(), content.getName()),
-                Arrays.asList(workOrder.getSubmitor()));
+                    new TemplateCreateNotify(workOrder.getSubmitorAppid(), content.getName()),
+                    Arrays.asList(workOrder.getSubmitor()));
         }
 
-        return result;
+        return Result.buildFrom(result);
     }
 
     /**************************************** private method ****************************************************/
@@ -294,32 +301,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     private IndexTemplateLogicDTO buildTemplateLogicDTO(TemplateCreateContent content, Integer submitorAppid) {
         IndexTemplateLogicDTO logicDTO = ConvertUtil.obj2Obj(content, IndexTemplateLogicDTO.class);
 
-        if (!content.getCyclicalRoll()) {
-            // 不周期滚动
-            logicDTO.setExpression(logicDTO.getName());
-            logicDTO.setDateFormat("");
-            logicDTO.setExpireTime(-1);
-            logicDTO.setDateField("");
-        } else {
-            // 周期滚动
-            logicDTO.setExpression(logicDTO.getName() + "*");
-
-            // 数据不会过期，必须按月滚动
-            if (content.getExpireTime() < 0) {
-                logicDTO.setDateFormat(AdminConstant.YY_MM_DATE_FORMAT);
-            } else {
-                //每天的数据增量大于200G或者保存时长小于30天 按天存储
-                double incrementPerDay = content.getDiskQuota() / content.getExpireTime();
-                if (incrementPerDay >= 200.0 || content.getExpireTime() <= 30) {
-                    if (StringUtils.isNotBlank(logicDTO.getDateField())
-                        && !AdminConstant.MM_DD_DATE_FORMAT.equals(logicDTO.getDateField())) {
-                        logicDTO.setDateFormat(AdminConstant.YY_MM_DD_DATE_FORMAT);
-                    }
-                } else {
-                    logicDTO.setDateFormat(AdminConstant.YY_MM_DATE_FORMAT);
-                }
-            }
-        }
+        handleIndexTemplateLogic(content, logicDTO);
 
         if (content.getDiskQuota() < 0) {
             content.setDiskQuota(1024.0);
@@ -338,9 +320,38 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         }
 
         logicDTO.setQuota(quotaTool.getQuotaCountByDisk(NodeSpecifyEnum.DOCKER.getCode(), content.getDiskQuota() * 1.2,
-            TEMPLATE_QUOTA_MIN));
+                TEMPLATE_QUOTA_MIN));
         logicDTO.setAppId(submitorAppid);
         return logicDTO;
+    }
+
+    private void handleIndexTemplateLogic(TemplateCreateContent content, IndexTemplateLogicDTO logicDTO) {
+        if (!content.getCyclicalRoll()) {
+            // 不周期滚动
+            logicDTO.setExpression(logicDTO.getName());
+            logicDTO.setDateFormat("");
+            logicDTO.setExpireTime(-1);
+            logicDTO.setDateField("");
+        } else {
+            // 周期滚动
+            logicDTO.setExpression(logicDTO.getName() + "*");
+
+            // 数据不会过期，必须按月滚动
+            if (content.getExpireTime() < 0) {
+                logicDTO.setDateFormat(AdminConstant.YY_MM_DATE_FORMAT);
+            } else {
+                //每天的数据增量大于200G或者保存时长小于30天 按天存储
+                double incrementPerDay = content.getDiskQuota() / content.getExpireTime();
+                if (incrementPerDay >= 200.0 || content.getExpireTime() <= 30) {
+                    if (StringUtils.isNotBlank(logicDTO.getDateField())
+                            && !AdminConstant.MM_DD_DATE_FORMAT.equals(logicDTO.getDateField())) {
+                        logicDTO.setDateFormat(AdminConstant.YY_MM_DD_DATE_FORMAT);
+                    }
+                } else {
+                    logicDTO.setDateFormat(AdminConstant.YY_MM_DATE_FORMAT);
+                }
+            }
+        }
     }
 
     /**

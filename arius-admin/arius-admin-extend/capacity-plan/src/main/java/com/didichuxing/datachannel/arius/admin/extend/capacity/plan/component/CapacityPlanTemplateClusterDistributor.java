@@ -1,33 +1,32 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.belong;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.biz.component.DistributorUtils;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateDistributedRack;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanArea;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanAreaService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.belong;
 
 /**
  * @author d06679
@@ -45,9 +44,6 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
     private CapacityPlanRegionService capacityPlanRegionService;
 
     @Autowired
-    private AriusConfigInfoService    ariusConfigInfoService;
-
-    @Autowired
     private DistributorUtils          distributorUtils;
 
     /**
@@ -61,7 +57,7 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
     public Result<TemplateDistributedRack> distribute(Long resourceId, Double quota) {
         List<CapacityPlanRegion> regions = fetchMatchedRegions(resourceId);
         if (CollectionUtils.isEmpty(regions)) {
-            return Result.buildFrom(Result.build(ResultType.NO_CAPACITY_PLAN));
+            return Result.build(ResultType.NO_CAPACITY_PLAN);
         }
 
         return Result.buildSucc(fetchMaxSuitableRegion(resourceId, regions, quota));
@@ -80,7 +76,7 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
 
         String clusterMostFree = getMostFreeCluster(resourceId, cluster2CapacityPlanRegionMultiMap);
 
-        LOGGER.info("method=distribute||resourceId={}||clusterMostFree={}", resourceId, clusterMostFree);
+        LOGGER.info("class=CapacityPlanTemplateClusterDistributor||method=distribute||resourceId={}||clusterMostFree={}", resourceId, clusterMostFree);
 
         List<CapacityPlanRegion> clusterRegions = Lists
                 .newArrayList(cluster2CapacityPlanRegionMultiMap.get(clusterMostFree));
@@ -96,7 +92,7 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
             isRegionQuotaMatched = false;
         }
 
-        LOGGER.info("method=distribute||resourceId={}||quota={}||freeRackQuota={}||region={}||resourceMatched={}",
+        LOGGER.info("class=CapacityPlanTemplateClusterDistributor||method=distribute||resourceId={}||quota={}||freeRackQuota={}||region={}||resourceMatched={}",
                 resourceId, quota, freeRackQuota, distributedRegion, isRegionQuotaMatched);
 
         TemplateDistributedRack distributedRack = new TemplateDistributedRack();
@@ -114,24 +110,9 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
      */
     private List<CapacityPlanRegion> fetchMatchedRegions(Long resourceId) {
         List<CapacityPlanRegion> regions = capacityPlanRegionService.listLogicClusterSharedRegions(resourceId);
-
-        Set<String> clusterBlackList = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-                "auto.process.work.order.cluster.blacks", "", ",");
-
-        double overSoldThreshold = ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,
-                "auto.process.work.order.oversold.threshold", 2.0);
-
         List<String> clusterNames = distributorUtils.fetchClusterNames();
 
         regions = regions.stream().filter(region -> {
-            if (clusterBlackList.contains(region.getClusterName())) {
-                return false;
-            }
-
-            if (region.getOverSold() != null && region.getOverSold() > overSoldThreshold) {
-                return false;
-            }
-
             if (clusterNames != null && !clusterNames.contains(region.getClusterName())) {
                 return false;
             }
@@ -152,17 +133,10 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
      */
     @Override
     public Result<TemplateDistributedRack> indecrease(Long resourceId, String cluster, String rack, Double quota) {
-        double overSoldThredhold = ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,
-            "auto.process.work.order.oversold.thredhold", 2.0);
-
         List<CapacityPlanRegion> regions = capacityPlanRegionService.listLogicClusterSharedRegions(resourceId);
 
         regions = regions.stream().filter(region -> {
             if (!region.getClusterName().equals(cluster) || !belong(rack, region.getRacks())) {
-                return false;
-            }
-
-            if (region.getOverSold() != null && region.getOverSold() > overSoldThredhold) {
                 return false;
             }
 
@@ -171,7 +145,7 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
         }).collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(regions)) {
-            return Result.buildFrom(Result.build(ResultType.NO_CAPACITY_PLAN));
+            return Result.build(ResultType.NO_CAPACITY_PLAN);
         }
 
         regions.sort(Comparator.comparing(CapacityPlanRegion::getFreeQuota));
@@ -179,10 +153,10 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
 
         CapacityPlanRegion distributedRegion = regions.get(0);
         if (distributedRegion.getFreeQuota() + getClusterFreeRackQuota(resourceId, cluster) < quota) {
-            return Result.buildFrom(Result.buildFail("集群空闲资源不足"));
+            return Result.buildFail("集群空闲资源不足");
         }
 
-        LOGGER.info("method=distribute||resourceId={}||quota={}||region={}", resourceId, quota, distributedRegion);
+        LOGGER.info("class=CapacityPlanTemplateClusterDistributor||method=distribute||resourceId={}||quota={}||region={}", resourceId, quota, distributedRegion);
 
         TemplateDistributedRack distributedRack = new TemplateDistributedRack();
         distributedRack.setCluster(distributedRegion.getClusterName());
@@ -206,14 +180,16 @@ public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDi
 
             freeQuota = freeQuota + getClusterFreeRackQuota(resourceId, cluster);
 
-            LOGGER.info("method=getMostFreeCluster||cluster={}||freeQuota={}", cluster, freeQuota);
+            LOGGER.info("class=CapacityPlanTemplateClusterDistributor||method=getMostFreeCluster||cluster={}||freeQuota={}", cluster, freeQuota);
 
             cluster2FreeQuotaMap.put(cluster, freeQuota);
         }
 
         String mostFreeCluster = "";
         Double maxFreeQuota = -10000.0;
-        for (String cluster : cluster2FreeQuotaMap.keySet()) {
+
+        for(Map.Entry<String, Double> entry : cluster2FreeQuotaMap.entrySet()){
+            String cluster = entry.getKey();
             if (maxFreeQuota < cluster2FreeQuotaMap.get(cluster)) {
                 maxFreeQuota = cluster2FreeQuotaMap.get(cluster);
                 mostFreeCluster = cluster;

@@ -1,47 +1,30 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReStart;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpRestartOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.ClusterOpRestartNotify;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_OP_RESTART;
 
 public abstract class ClusterOpRestartHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    protected ESClusterPhyService esClusterPhyService;
+    protected ClusterPhyService esClusterPhyService;
 
     @Autowired
-    protected EcmHandleService    ecmHandleService;
+    protected EcmHandleService ecmHandleService;
 
     @Autowired
     protected WorkTaskManager workTaskManager;
@@ -56,7 +39,7 @@ public abstract class ClusterOpRestartHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 

@@ -4,13 +4,17 @@ import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAu
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author linyunan
  * @date 2021-03-16
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "携带App权限信息的物理模板信息")
 public class ConsoleTemplatePhyVO extends IndexTemplatePhysicalVO {
 

@@ -20,7 +20,7 @@ public class NormalDepartController {
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "获取部门列表")
-    public Result listDepartments() {
+    public Result<String> listDepartments() {
         return departmentManager.listDepartments();
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.AppMonitorRuleDAO" >
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AppMonitorRulePO" >
+<mapper namespace="MonitorRuleDAO" >
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.MonitorRulePO" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="strategy_name"  property="strategyName"   jdbcType="VARCHAR" />
     <result column="strategy_id"    property="strategyId"     jdbcType="BIGINT" />
@@ -15,7 +15,7 @@
     id, strategy_name, strategy_id, app_id, operator, create_time, update_time
     </sql>
 
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AppMonitorRulePO" >
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.MonitorRulePO" >
       INSERT INTO monitor_rule_info (strategy_id,app_id,strategy_name,operator)
       VALUES (#{strategyId},#{appId},#{strategyName},#{operator})
     </insert>

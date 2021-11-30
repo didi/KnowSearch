@@ -7,15 +7,19 @@ import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESCluste
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/19
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "集群信息")
-public class ESClusterPhyVO extends BaseVO implements Comparable {
+public class ESClusterPhyVO extends BaseVO implements Comparable<ESClusterPhyVO> {
 
     @ApiModelProperty("集群ID")
     private Integer                      id;
@@ -63,11 +67,14 @@ public class ESClusterPhyVO extends BaseVO implements Comparable {
     @ApiModelProperty("集群角色信息")
     private List<ESRoleClusterVO>        esRoleClusterVOS;
 
-    @ApiModelProperty("物理集群状态")
-    private String                       clusterStatus;
-
     @ApiModelProperty("磁盘使用率")
-    private Double                       diskUsage;
+    private Double                       diskUsagePercent;
+
+    @ApiModelProperty("磁盘总量")
+    private Long                         diskTotal;
+
+    @ApiModelProperty("磁盘使用量")
+    private Long                         diskUsage;
 
     @ApiModelProperty("集群密码")
     private String                       password;
@@ -75,11 +82,21 @@ public class ESClusterPhyVO extends BaseVO implements Comparable {
     @ApiModelProperty("机房")
     private String                       idc;
 
-    @Override
-    public int compareTo(Object o) {
-        if(null == o){return 0;}
+    @ApiModelProperty("client运行模式（0：读写共享 1：读写分离）")
+    private Integer                     runMode;
 
-        ESClusterPhyVO e = (ESClusterPhyVO)o;
-        return e.getId().intValue() - this.getId().intValue();
+    @ApiModelProperty("指定用写client的action")
+    private String                      writeAction;
+
+    @ApiModelProperty("集群状态")
+    private Integer                      health;
+
+    @Override
+    public int compareTo(ESClusterPhyVO o) {
+        if (null == o) {
+            return 0;
+        }
+
+        return o.getId().intValue() - this.getId().intValue();
     }
 }

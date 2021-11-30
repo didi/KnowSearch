@@ -1,17 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.rest.web;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * @author jinbinbin
@@ -35,27 +32,6 @@ class TranslateHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return new BufferedReader(new InputStreamReader(getInputStream()));
     }
 
-    /**
-     * 覆盖getParameter方法，将参数名和参数值都做xss过滤。<br/>
-     * 如果需要获得原始的值，则通过super.getParameterValues(name)来获取<br/>
-     * getParameterNames,getParameterValues和getParameterMap也可能需要覆盖
-     */
-    @Override
-    public String getParameter(String name) {
-        return super.getParameter(name);
-    }
-
-    @Override
-    public String[] getParameterValues(String name) {
-        return super.getParameterValues(name);
-    }
-
-    @Override
-    public Map getParameterMap() {
-
-        return (HashMap) super.getParameterMap();
-    }
-
     @Override
     public ServletInputStream getInputStream() throws IOException {
         ServletInputStream inputStream;
@@ -65,15 +41,5 @@ class TranslateHttpServletRequestWrapper extends HttpServletRequestWrapper {
             inputStream = new TranslateServletInputStream(new byte[0]);
         }
         return inputStream;
-    }
-
-    /**
-     * 覆盖getHeader方法，将参数名和参数值都做xss过滤。<br/>
-     * 如果需要获得原始的值，则通过super.getHeaders(name)来获取<br/>
-     * getHeaderNames 也可能需要覆盖
-     */
-    @Override
-    public String getHeader(String name) {
-        return super.getHeader(name);
     }
 }

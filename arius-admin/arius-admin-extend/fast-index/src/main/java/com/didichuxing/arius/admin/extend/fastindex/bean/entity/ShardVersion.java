@@ -15,8 +15,8 @@ public class ShardVersion {
     }
 
     public ShardVersion smaller(ShardVersion shardVersion) {
-        Integer v1 = Integer.parseInt(version.replaceAll("\\.", ""));
-        Integer v2 = Integer.parseInt(shardVersion.version.replaceAll("\\.", ""));
+        Integer v1 = Integer.parseInt(version.replace(".", ""));
+        Integer v2 = Integer.parseInt(shardVersion.version.replace(".", ""));
         return v1 > v2 ? shardVersion : this;
     }
 

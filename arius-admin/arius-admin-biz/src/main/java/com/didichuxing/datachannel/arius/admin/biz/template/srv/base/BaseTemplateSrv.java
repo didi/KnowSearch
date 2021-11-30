@@ -4,41 +4,41 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 public abstract class BaseTemplateSrv {
 
-    protected static final ILog               LOGGER = LogFactory.getLog(BaseTemplateSrv.class);
+    protected static final ILog    LOGGER = LogFactory.getLog(BaseTemplateSrv.class);
 
     @Autowired
-    protected ESClusterPhyService               esClusterPhyService;
+    protected ClusterPhyService    esClusterPhyService;
 
     @Autowired
-    protected ESClusterLogicService             esClusterLogicService;
+    protected ClusterLogicService  clusterLogicService;
 
     @Autowired
-    protected TemplatePhyService                templatePhyService;
+    protected TemplatePhyService   templatePhyService;
 
     @Autowired
-    protected TemplateLogicService              templateLogicService;
+    protected TemplateLogicService templateLogicService;
 
     @Autowired
-    protected OperateRecordService              operateRecordService;
+    protected OperateRecordService operateRecordService;
 
     @Autowired
-    protected TemplateSrvManager                templateSrvManager;
+    protected TemplateSrvManager   templateSrvManager;
 
     @Autowired
-    protected TemplatePhyManager                templatePhyManager;
+    protected TemplatePhyManager   templatePhyManager;
 
     /**
      * 判断指定物理集群是否开启了当前索引服务

@@ -85,4 +85,9 @@
         where id = #{regionId}
     </update>
 
+    <update id="deleteByClusterPhyName" parameterType="String">
+        update es_cluster_region set delete_flag = 1
+        where phy_cluster_name = #{clusterPhyName}
+    </update>
+
 </mapper>

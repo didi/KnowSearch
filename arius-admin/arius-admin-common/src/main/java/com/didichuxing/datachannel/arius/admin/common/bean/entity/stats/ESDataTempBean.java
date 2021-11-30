@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 
-import com.didichuxing.tunnel.util.log.util.HostUtil;
+import com.didiglobal.logi.log.util.HostUtil;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,13 +13,13 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ESDataTempBean implements CollectBean {
-    public static final Integer INDEX = 1;
-    public static final Integer NODE  = 2;
+    public static final Integer INDEX_TYPE = 1;
+    public static final Integer NODE_TYPE  = 2;
 
-    public static final String  DIVIDEND    = "Dividend";
-    public static final String  DIVISOR     = "Divisor";
+    public static final String  DIVIDEND = "Dividend";
+    public static final String  DIVISOR  = "Divisor";
 
-    public ESDataTempBean(Double value){
+    public ESDataTempBean(Double value) {
         this.value = value;
     }
 
@@ -96,7 +96,7 @@ public class ESDataTempBean implements CollectBean {
     /**
      * 是否需要发送odin
      */
-    private boolean             sendToOdin  = false;
+    private boolean             sendToN9e = false;
 
     public String getKey() {
         return getKeyPre() + valueName;
@@ -107,18 +107,18 @@ public class ESDataTempBean implements CollectBean {
      * @return
      */
     public String getKeyPre() {
-        if (Objects.equals(dimension, INDEX)) {
+        if (Objects.equals(dimension, INDEX_TYPE )) {
             return cluster + "@" + index + "@";
         }
 
-        if (Objects.equals(dimension, NODE)) {
+        if (Objects.equals(dimension, NODE_TYPE )) {
             return cluster + "@" + node + "@" + port + "@";
         }
 
         throw new IllegalArgumentException("dimension not know.");
     }
 
-    public String getDeriverParamByKey(String key){
+    public String getDeriverParamByKey(String key) {
         return deriveParam.get(key);
     }
 }

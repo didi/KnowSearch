@@ -19,6 +19,7 @@
 
 package com.didi.arius.gateway.core.es.http.action.fieldstats;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.common.consts.QueryConsts;
@@ -45,11 +46,11 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isSearchKibana;
 @Component
 public class RestFieldStatsAction extends StatAction {
 
-    public static final String NAME = "restFieldStats";
+    public static final String INDEX = "index";
 
     @Override
     public String name() {
-        return NAME;
+        return "restFieldStats";
     }
 
 
@@ -57,11 +58,11 @@ public class RestFieldStatsAction extends StatAction {
     protected void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client)
             throws Exception {
         if (isIndexType(queryContext)) {
-            String[]  indicesArr = Strings.splitStringByCommaToArray(request.param("index"));
+            String[]  indicesArr = Strings.splitStringByCommaToArray(request.param(INDEX));
             List<String> indices = Lists.newArrayList(indicesArr);
             IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
 
-            client = esClusterService.getClient(queryContext, indexTemplate);
+            client = esClusterService.getClient(queryContext, indexTemplate, actionName);
         }
 
         if (isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
@@ -69,18 +70,18 @@ public class RestFieldStatsAction extends StatAction {
         } else if ( queryContext.isFromKibana()
                 && !queryContext.isNewKibana()
                 && !client.getEsVersion().startsWith(QueryConsts.ES_VERSION_2_PREFIX)
-                && request.param("index") != null
+                && request.param(INDEX) != null
                 && request.param("level") != null && request.param("level").equals("indices")) {
 
             // for kibana
-            String index = request.param("index");
+            String index = request.param(INDEX);
 
             String timeStamp = "";
             try {
-                JSONObject source = JSONObject.parseObject(queryContext.getPostBody());
+                JSONObject source = JSON.parseObject(queryContext.getPostBody());
                 JSONArray fields = source.getJSONArray("fields");
                 timeStamp = fields.getString(0);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.info("source parse error, souce={}", queryContext.getPostBody());
             }
 

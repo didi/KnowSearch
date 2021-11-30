@@ -26,8 +26,8 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.dao.mysql.Ca
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.dao.mysql.CapacityPlanRegionTaskItemDAO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +102,7 @@ public class CapacityPlanRegionTaskServiceImpl implements CapacityPlanRegionTask
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result checkTasks() {
+    public Result<Void> checkTasks() {
 
         // 获取数据迁移中的容量规划任务
         List<CapacityPlanRegionTaskPO> movingTaskPOs = capacityPlanRegionTaskDAO
@@ -117,17 +117,17 @@ public class CapacityPlanRegionTaskServiceImpl implements CapacityPlanRegionTask
                 CapacityPlanRegion region = capacityPlanRegionService.getRegionById(taskPO.getRegionId());
                 if (shardMoveFinish(taskPO, region)) {
                     if (finishTask(taskPO.getId()) && changeRegionRacks(taskPO)) {
-                        LOGGER.info("method=checkTasks||regionId={}||msg=succ", taskPO.getRegionId());
+                        LOGGER.info("class=CapacityPlanRegionTaskServiceImpl||method=checkTasks||regionId={}||msg=succ", taskPO.getRegionId());
                     } else {
                         result = false;
-                        LOGGER.warn("method=checkTasks||regionId={}||msg=fail", taskPO.getRegionId());
+                        LOGGER.warn("class=CapacityPlanRegionTaskServiceImpl||method=checkTasks||regionId={}||msg=fail", taskPO.getRegionId());
                     }
                 } else {
-                    LOGGER.info("method=checkTasks||regionId={}||deltaRack={}||msg=has shard", taskPO.getRegionId(),
+                    LOGGER.info("class=CapacityPlanRegionTaskServiceImpl||method=checkTasks||regionId={}||deltaRack={}||msg=has shard", taskPO.getRegionId(),
                         taskPO.getDeltaRacks());
                 }
             } catch (Exception e) {
-                LOGGER.warn("method=checkTasks||regionId={}||errorMsg={}", taskPO.getRegionId(), e.getMessage(), e);
+                LOGGER.warn("class=CapacityPlanRegionTaskServiceImpl||method=checkTasks||regionId={}||errorMsg={}", taskPO.getRegionId(), e.getMessage(), e);
                 result = false;
             }
         }
@@ -180,11 +180,11 @@ public class CapacityPlanRegionTaskServiceImpl implements CapacityPlanRegionTask
      * @return 执行结果
      */
     @Override
-    public Result exeInitTask(Long taskId) {
+    public Result<Void> exeInitTask(Long taskId) {
         CapacityPlanRegionTaskPO taskPO = capacityPlanRegionTaskDAO.getById(taskId);
 
         if (!taskPO.getStatus().equals(CapacityPlanRegionTaskStatusEnum.EXE_PENDING.getCode())) {
-            LOGGER.warn("method=exeInitTask||taskId={}||msg=status illegal", taskPO.getRegionId(), taskId);
+            LOGGER.warn("class=CapacityPlanRegionTaskServiceImpl||method=exeInitTask||taskId={}||msg=status illegal", taskPO.getRegionId(), taskId);
             return Result.buildParamIllegal("任务状态非法");
         }
 
@@ -193,19 +193,19 @@ public class CapacityPlanRegionTaskServiceImpl implements CapacityPlanRegionTask
         boolean succ = true;
         for (CapacityPlanRegionTaskItemPO itemPO : itemPOS) {
             try {
-                Result result = templatePhyManager.editTemplateRackWithoutCheck(itemPO.getPhysicalId(),
+                Result<Void> result = templatePhyManager.editTemplateRackWithoutCheck(itemPO.getPhysicalId(),
                     taskPO.getSrcRacks(), AriusUser.CAPACITY_PLAN.getDesc(), 5);
                 if (result.failed()) {
                     succ = false;
-                    LOGGER.warn("method=exeInitTask||taskId={}||template={}||tgtRack={}||msg=fail", taskId,
+                    LOGGER.warn("class=CapacityPlanRegionTaskServiceImpl||method=exeInitTask||taskId={}||template={}||tgtRack={}||msg=fail", taskId,
                         itemPO.getTemplateName(), taskPO.getSrcRacks());
                 } else {
-                    LOGGER.info("method=exeInitTask||taskId={}||template={}||tgtRack={}||msg=succ", taskId,
+                    LOGGER.info("class=CapacityPlanRegionTaskServiceImpl||method=exeInitTask||taskId={}||template={}||tgtRack={}||msg=succ", taskId,
                         itemPO.getTemplateName(), taskPO.getSrcRacks());
                 }
             } catch (Exception e) {
                 succ = false;
-                LOGGER.warn("method=exeInitTask||taskId={}||template={}||tgtRack={}||errorMsg={}", taskId,
+                LOGGER.warn("class=CapacityPlanRegionTaskServiceImpl||method=exeInitTask||taskId={}||template={}||tgtRack={}||errorMsg={}", taskId,
                     itemPO.getTemplateName(), taskPO.getSrcRacks(), e.getMessage(), e);
             }
         }
@@ -302,7 +302,7 @@ public class CapacityPlanRegionTaskServiceImpl implements CapacityPlanRegionTask
     }
 
     private boolean saveTask(CapacityPlanRegionTaskDTO taskDTO) {
-        LOGGER.info("method=saveTask||regionId={}||taskItems={}", taskDTO.getRegionId(),
+        LOGGER.info("class=CapacityPlanRegionTaskServiceImpl||method=saveTask||regionId={}||taskItems={}", taskDTO.getRegionId(),
             CollectionUtils.isEmpty(taskDTO.getTaskItems()) ? 0 : taskDTO.getTaskItems().size());
 
         CapacityPlanRegionTaskPO taskPO = ConvertUtil.obj2Obj(taskDTO, CapacityPlanRegionTaskPO.class);
@@ -319,11 +319,8 @@ public class CapacityPlanRegionTaskServiceImpl implements CapacityPlanRegionTask
                 .batchList(itemPOS).batchSize(20).processor(items -> capacityPlanRegionTaskItemDAO.insertBatch(items))
                 .process();
 
-            if (!batchResult.isSucc()) {
-                if (batchResult.getErrorMap().size() > 0) {
-                    Exception e = batchResult.getErrorMap().values().stream().findAny().get();
-                    LOGGER.warn("method=saveTask||taskId={}||errMsg={}", taskPO.getId(), e.getMessage(), e);
-                }
+            if (!batchResult.isSucc() && (batchResult.getErrorMap().size() > 0)) {
+                LOGGER.warn("class=CapacityPlanRegionTaskServiceImpl||method=saveTask||taskId={}||errMsg={}", taskPO.getId(), batchResult.getErrorMap());
             }
         }
 
@@ -361,7 +358,7 @@ public class CapacityPlanRegionTaskServiceImpl implements CapacityPlanRegionTask
         // 变化后racks
         String tgtRack = RackUtils.removeRacks(taskPO.getSrcRacks(), taskPO.getDeltaRacks());
 
-        LOGGER.info("method=changeRegionRack||regionId={}||tgtRack={}", taskPO.getRegionId(), tgtRack);
+        LOGGER.info("class=CapacityPlanRegionTaskServiceImpl||method=changeRegionRack||regionId={}||tgtRack={}", taskPO.getRegionId(), tgtRack);
         return capacityPlanRegionService.modifyRegionRacks(taskPO.getRegionId(), tgtRack);
     }
 

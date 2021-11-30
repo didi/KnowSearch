@@ -1,13 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESPluginVO;
-
-/**
- * Created by linyunan on 2021-07-08
- */
 public interface ClusterPluginsManager {
 
-	List<ESPluginVO> getClusterLogicPlugins(Long clusterId);
+	Result<Long> batchAddPlugins(ESPluginDTO plugin);
+
+	Result<Long> deletePluginById(Long id, String operator);
+
+	Result<ESPluginPO> editPluginDesc(ESPluginDTO esPluginDTO, String operator);
 }

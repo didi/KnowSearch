@@ -3,12 +3,14 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019-06-04
  */
 @Data
+@NoArgsConstructor
 public class TemplateCreateContent extends BaseContent {
 
     /**************************************** 基本信息 ****************************************************/

@@ -1,16 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.expire;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.SCHEDULE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_EXPIRE_TIME_MIN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DEL_EXPIRE;
@@ -33,6 +42,12 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
 
     @Autowired
     private ESIndexService           esIndexService;
+
+    @Autowired
+    private IndicesManager           indicesManager;
+
+    @Autowired
+    private ESIndexCatService        esIndexCatService;
 
     @Autowired
     private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
@@ -73,8 +88,14 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
             return true;
         }
 
-        return shouldDels.size() == esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), shouldDels,
-            retryCount);
+        boolean succ = shouldDels.size() == esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(),
+            shouldDels, retryCount);
+
+        if (succ) {
+            indicesManager.batchSetIndexFlagInvalid(templatePhysical.getCluster(), Lists.newArrayList(shouldDels));
+        }
+
+        return succ;
     }
 
     /**
@@ -92,7 +113,13 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
         }
 
         List<TemplatePhysicalPO> physicalPOs = indexTemplatePhysicalDAO
-                .getByClusterAndStatus(physical.getCluster(), TemplatePhysicalStatusEnum.NORMAL.getCode());
+                .getByClusterAndNameAndStatus(physical.getCluster(), physical.getName(), TemplatePhysicalStatusEnum.NORMAL.getCode());
+
+        //如果还有正常状态的物理模板存在，那就把非正常状态的物理模板给清理掉
+        if(CollectionUtils.isNotEmpty(physicalPOs)){
+            deleteTemplateNuNormalStatusFromDB(physical);
+            return true;
+        }
 
         physicalPOs.addAll(indexTemplatePhysicalDAO.getByClusterAndStatus(physical.getCluster(),
                 TemplatePhysicalStatusEnum.INDEX_DELETING.getCode()));
@@ -113,7 +140,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
 
             String expressionPre = physical.getExpression().replace("*", "");
             if (po.getExpression().startsWith(expressionPre)) {
-                LOGGER.info("processLogicDeleted hasConflict||deletedTemplate={}||conflictTemplate={}",
+                LOGGER.info("class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted hasConflict||deletedTemplate={}||conflictTemplate={}",
                     physical.getName(), po.getName());
                 deleteCode = 1;
                 break;
@@ -121,17 +148,23 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
         }
 
         if (deleteCode == 1) {
-            LOGGER.warn("processLogicDeleted has conflict||deletedTemplate={}||expression={}", physical.getName(),
+            LOGGER.warn("class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted has conflict||deletedTemplate={}||expression={}", physical.getName(),
                 physical.getExpression());
             return false;
         }
 
         boolean succ = true;
         if (deleteCode == 0) {
-            LOGGER.info("processLogicDeleted no conflict and not reCreate||deletedTemplate={}||expression={}",
+            LOGGER.info("class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted no conflict and not reCreate||deletedTemplate={}||expression={}",
                 physical.getName(), physical.getExpression());
-            succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(),
-                retryCount);
+            Set<String> shouldDelSet = esIndexService.syncGetIndexNameByExpression(physical.getCluster(), physical.getExpression());
+            if (CollectionUtils.isNotEmpty(shouldDelSet)) {
+                succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(), retryCount);
+                if (succ) {
+                    //批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
+                    indicesManager.batchSetIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
+                }
+            }
         }
 
         if (succ) {
@@ -174,7 +207,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
 
         if (expireTime > 0 && expireTime < PLATFORM_EXPIRE_TIME_MIN) {
             expireTime = PLATFORM_EXPIRE_TIME_MIN;
-            LOGGER.warn("getExpireIndexByTemplate expire time illegal||template={}", logicTemplate.getName());
+            LOGGER.warn("class=BaseTemplateSrv||method= getExpireIndex||msg=getExpireIndexByTemplate expire time illegal||template={}", logicTemplate.getName());
         }
 
         if (expireTime <= 0) {
@@ -183,10 +216,10 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
                 // 对于已经删除的物理索引模板，我们需要重新设置其过期时间
                 expireTime = PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
 
-                LOGGER.info("method=getExpireIndex||msg=reset template expire time||template={}",
+                LOGGER.info("class=BaseTemplateSrv||method= getExpireIndex||msg=method=getExpireIndex||msg=reset template expire time||template={}",
                     logicTemplate.getName());
             } else {
-                LOGGER.info("getExpireIndexByTemplate no expire||template={}", logicTemplate.getName());
+                LOGGER.info("class=BaseTemplateSrv||method= getExpireIndex||msg=getExpireIndexByTemplate no expire||template={}", logicTemplate.getName());
                 return Sets.newHashSet();
             }
 
@@ -225,7 +258,18 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
             return true;
         }
 
-        return esIndexService.syncBatchDeleteIndices(cluster, shouldDels, retryCount) == shouldDels.size();
+        boolean succ = esIndexService.syncBatchDeleteIndices(cluster, shouldDels, retryCount) == shouldDels.size();
+        if (succ) {
+            List<String> shouldDelList = Lists.newArrayList(shouldDels);
+            Result<Boolean> batchSetIndexFlagInvalidResult = indicesManager.batchSetIndexFlagInvalid(cluster, shouldDelList);
+            if (batchSetIndexFlagInvalidResult.success()){
+                operateRecordService.save(SCHEDULE, OperationEnum.DELETE, null,
+                        String.format("根据模板过期时间删除过期索引：集群%s;索引:%s", cluster, ListUtils.strList2String(shouldDelList)),
+                        AriusUser.SYSTEM.getDesc());
+            }
+        }
+
+        return succ;
     }
 
     private boolean deleteDeletingTemplateExpireIndex(String cluster, int retryCount) {
@@ -241,8 +285,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
         boolean succ = true;
         for (IndexTemplatePhy physical : templatePhysicals) {
             try {
-                IndexTemplateLogic templateLogic = templateLogicService
-                    .getLogicTemplateWithPhysicalsById(physical.getLogicId());
+                IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateWithPhysicalsById(physical.getLogicId());
                 if (templateLogic != null) {
                     succ = deleteExpireIndices(physical.getId(), retryCount) && succ;
                 } else {
@@ -256,6 +299,15 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
             }
 
         }
+        
+        if (succ) {
+            List<String> indexTemplatePhyNameList = templatePhysicals.stream().map(IndexTemplatePhy::getName)
+                .collect(Collectors.toList());
+            operateRecordService.save(SCHEDULE, OperationEnum.DELETE, null,
+                String.format("删除已删除模板关联的索引：集群%s; 模板%s", cluster, ListUtils.strList2String(indexTemplatePhyNameList)),
+                AriusUser.SYSTEM.getDesc());
+        }
+        
         return succ;
     }
 
@@ -272,5 +324,9 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
      */
     private boolean finishDeleteIndex(Long physicalId) {
         return 1 == indexTemplatePhysicalDAO.updateStatus(physicalId, TemplatePhysicalStatusEnum.DELETED.getCode());
+    }
+
+    private boolean deleteTemplateNuNormalStatusFromDB(IndexTemplatePhy physical){
+        return indexTemplatePhysicalDAO.deleteDirtyByClusterAndName(physical.getCluster(), physical.getName()) > 0;
     }
 }

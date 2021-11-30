@@ -1,9 +1,12 @@
 package com.didi.arius.gateway.remote;
 
+import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.exception.ServerException;
+import com.didi.arius.gateway.common.metadata.TemplateAlias;
 import com.didi.arius.gateway.common.utils.HttpClient;
 import com.didi.arius.gateway.remote.response.*;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,33 +21,40 @@ import java.util.Map;
  * @date 2021/5/20 11:53 上午
  */
 @Service
+@NoArgsConstructor
 public class AriusAdminRemoteServiceImpl implements AriusAdminRemoteService {
 
     private static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
 
     @Value("${arius.gateway.adminUrl}")
     private String adminUrl;
-    private Map<String, String> headerParams = new HashMap<String, String>(){{put(QueryConsts.GATEWAY_GET_APP_TICKET_NAME, QueryConsts.GATEWAY_GET_APP_TICKET);}};
+    private static final Map<String, String> headerParams = new HashMap<>();
 
-    private static String APPID_SUFFIX              = "/v2/thirdpart/gateway/listApp";
-    private static String DATACENTER_SUFFIX         = "/v2/thirdpart/common/cluster/list";
-    private static String SCHEMA_SUFFIX             = "/v2/thirdpart/gateway/getTemplateMap";
-    private static String GATEWAY_NODES_SUFFIX      = "/v2/thirdpart/gateway/alivecount";
-    private static String TEMPLATE_INFO_SUFFIX      = "/v2/thirdpart/gateway/listDeployInfo";
-    private static String CONFIG_LIST_SUFFIX        = "/v2/thirdpart/common/config/query";
-    private static String GATEWAY_HEARTBEAT_SUFFIX  = "/v2/thirdpart/gateway/heartbeat";
-    private static String GET_DSL_TEMPLATES_SUFFIX  = "/v2/thirdpart/gateway/dsl/scrollDslTemplates";
+    private static final String APPID_SUFFIX              = "/v2/thirdpart/gateway/listApp";
+    private static final String DATACENTER_SUFFIX         = "/v2/thirdpart/common/cluster/list";
+    private static final String SCHEMA_SUFFIX             = "/v2/thirdpart/gateway/getTemplateMap";
+    private static final String GATEWAY_NODES_SUFFIX      = "/v2/thirdpart/gateway/alivecount";
+    private static final String TEMPLATE_INFO_SUFFIX      = "/v2/thirdpart/gateway/listDeployInfo";
+    private static final String CONFIG_LIST_SUFFIX        = "/v2/thirdpart/common/config/query";
+    private static final String GATEWAY_HEARTBEAT_SUFFIX  = "/v2/thirdpart/gateway/heartbeat";
+    private static final String GET_DSL_TEMPLATES_SUFFIX  = "/v2/thirdpart/gateway/dsl/scrollDslTemplates";
+    private static final String ADD_TEMPLATE_ALIAS = "/v2/thirdpart/gateway/addAlias";
+    private static final String DEL_TEMPLATE_ALIAS = "/v2/thirdpart/gateway/delAlias";
 
 
-    private static String SCHEMA_PARAME_CLUSTER         = "cluster";
-    private static String SCHEMA_PARAME_CLUSTER_NAME    = "clusterName";
-    private static String SCHEMA_DATACENTER_NAME        = "dataCenter";
+    private static final String SCHEMA_PARAME_CLUSTER         = "cluster";
+    private static final String SCHEMA_PARAME_CLUSTER_NAME    = "clusterName";
+    private static final String SCHEMA_DATACENTER_NAME        = "dataCenter";
 
-    private static String DSL_QUERY_FIRST_PARAMS    = "{\"dslTemplateVersion\":\"%s\",\"lastModifyTime\":%d,\"scrollSize\":1000}";
-    private static String DSL_QUERY_PARAMS          = "{\"dslTemplateVersion\":\"%s\",\"lastModifyTime\":%d,\"scrollSize\":1000,\"scrollId\" : \"%s\"}";
-    private static String DSL_TEMPLATE_VERSION      = "V2";
+    private static final String DSL_QUERY_FIRST_PARAMS    = "{\"dslTemplateVersion\":\"%s\",\"lastModifyTime\":%d,\"scrollSize\":1000}";
+    private static final String DSL_QUERY_PARAMS          = "{\"dslTemplateVersion\":\"%s\",\"lastModifyTime\":%d,\"scrollSize\":1000,\"scrollId\" : \"%s\"}";
+    private static final String DSL_TEMPLATE_VERSION      = "V2";
 
-    private static String GATEWAY_DYNAMIC_CONFIG    = "{\"valueGroup\":\"arius.gateway.config\"}";
+    private static final String GATEWAY_DYNAMIC_CONFIG    = "{\"valueGroup\":\"arius.gateway.config\"}";
+
+    static {
+        headerParams.put(QueryConsts.GATEWAY_GET_APP_TICKET_NAME, QueryConsts.GATEWAY_GET_APP_TICKET);
+    }
 
     @Override
     public AppListResponse listApp() {
@@ -99,7 +109,7 @@ public class AriusAdminRemoteServiceImpl implements AriusAdminRemoteService {
     @Override
     public IndexTemplateListResponse listDeployInfo() {
         Map<String, String[]> requestParams = new HashMap<>(1);
-        requestParams.put(SCHEMA_DATACENTER_NAME, new String[]{"cn"});//TODO:houxiufeng 这里先写死
+        requestParams.put(SCHEMA_DATACENTER_NAME, new String[]{"cn"});
         IndexTemplateListResponse response = HttpClient.forward(adminUrl + TEMPLATE_INFO_SUFFIX, "GET", null, headerParams, requestParams, IndexTemplateListResponse.class);
 
         if (response.getCode() != 0) {
@@ -144,5 +154,17 @@ public class AriusAdminRemoteServiceImpl implements AriusAdminRemoteService {
             throw new ServerException("resetDSLInfo get dsl list error");
         }
         return dslTemplateListResponse;
+    }
+
+    @Override
+    public TempaletAliasResponse addAdminTemplateAlias(TemplateAlias templateAlias) {
+        return HttpClient.forward(adminUrl + ADD_TEMPLATE_ALIAS, "POST", JSON.toJSONString(templateAlias), headerParams, null,
+                TempaletAliasResponse.class);
+    }
+
+    @Override
+    public TempaletAliasResponse delAdminTemplateAlias(TemplateAlias templateAlias) {
+        return HttpClient.forward(adminUrl + DEL_TEMPLATE_ALIAS, "POST", JSON.toJSONString(templateAlias), headerParams, null,
+                TempaletAliasResponse.class);
     }
 }

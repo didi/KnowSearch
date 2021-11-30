@@ -1,18 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.GatewayAppVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.gateway.GatewayNodeVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 public interface GatewayManager {
 
@@ -21,7 +21,7 @@ public interface GatewayManager {
      * @param heartbeat
      * @return
      */
-    Result heartbeat(GatewayHeartbeat heartbeat);
+    Result<Void> heartbeat(GatewayHeartbeat heartbeat);
 
     /**
      * gateway存活接口
@@ -36,6 +36,13 @@ public interface GatewayManager {
      * @return
      */
     Result<List<GatewayNodeVO>> getGatewayAliveNode(String clusterName);
+
+    /**
+     * 获取gateway存活节点列表接口
+     * @param clusterName
+     * @return
+     */
+    Result<List<String>> getGatewayAliveNodeNames(String clusterName);
 
     /**
      * 获取app列表,包含APP全部元信息
@@ -64,4 +71,35 @@ public interface GatewayManager {
      * @return
      */
     Result<ScrollDslTemplateResponse> scrollSearchDslTemplate(ScrollDslTemplateRequest request);
+
+    /**
+     * addAlias
+     * @param indexTemplateAliasDTO
+     * @return
+     */
+    Result<Boolean> addAlias(IndexTemplateAliasDTO indexTemplateAliasDTO);
+
+    /**
+     * delAlias
+     * @param indexTemplateAliasDTO
+     * @return
+     */
+    Result<Boolean> delAlias(IndexTemplateAliasDTO indexTemplateAliasDTO);
+
+    /**
+     * sql语句翻译
+     * @param sql sql查询语句
+     * @param appId 项目id
+     * @return 翻译结果
+     */
+    Result<String> sqlExplain(String sql, Integer appId);
+
+    /**
+     * sql语句直接查询
+     * @param sql sql查询语句
+     * @param appId 项目id
+     * @return 数据查询结果
+     */
+    Result<String> directSqlSearch(String sql, Integer appId);
+
 }

@@ -20,7 +20,7 @@ public interface TemplateShardManager {
      * @param retryCount retryCount
      * @return result
      */
-    Result adjustShardCount(Long physicalId, int retryCount) throws ESOperateException;
+    Result<Void> adjustShardCount(Long physicalId, int retryCount) throws ESOperateException;
 
     /**
      * 计算shard个数
@@ -35,7 +35,7 @@ public interface TemplateShardManager {
      * @param shardNum num
      * @return result
      */
-    Result updateTemplateShardNumIfGreater(Long physicalId, Integer shardNum, int retryCount) throws ESOperateException;
+    Result<Void> updateTemplateShardNumIfGreater(Long physicalId, Integer shardNum, int retryCount) throws ESOperateException;
 
     /**
      * initShardRoutingAndAdjustShard

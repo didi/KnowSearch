@@ -17,6 +17,10 @@ public class RestGetFieldMappingController extends BaseHttpRestController {
     @Autowired
     private RestGetFieldMappingAction restGetFieldMappingAction;
 
+    public RestGetFieldMappingController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_mapping/field/{fields}", this);

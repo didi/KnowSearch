@@ -1,8 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -12,8 +17,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.alibaba.fastjson.JSONObject;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,11 +27,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 
-/**
- * @author d06679
- * @date 2019/4/3
- */
 public class ConvertUtil {
+
+    private ConvertUtil(){}
+
     private static final ILog LOGGER = LogFactory.getLog(ConvertUtil.class);
 
     public static <T> T str2ObjByJson(String srcStr, Class<T> tgtClass) {
@@ -106,8 +111,7 @@ public class ConvertUtil {
         return multimap;
     }
 
-    public static <K, V, O> Map<K, List<V>> list2MapOfList(List<O> list,
-                                                           Function<? super O, ? extends K> keyMapper,
+    public static <K, V, O> Map<K, List<V>> list2MapOfList(List<O> list, Function<? super O, ? extends K> keyMapper,
                                                            Function<? super O, ? extends V> valueMapper) {
         ArrayListMultimap<K, V> multimap = ArrayListMultimap.create();
         if (CollectionUtils.isNotEmpty(list)) {
@@ -129,16 +133,16 @@ public class ConvertUtil {
         return set;
     }
 
-    public static <T> Set<T> set2Set(Set set, Class<T> tClass){
+    public static <T> Set<T> set2Set(Set<? extends Object> set, Class<T> tClass) {
         if (CollectionUtils.isEmpty(set)) {
             return new HashSet<>();
         }
 
         Set<T> result = new HashSet<>();
 
-        for(Object o : set){
+        for (Object o : set) {
             T t = obj2Obj(o, tClass);
-            if(t != null){
+            if (t != null) {
                 result.add(t);
             }
         }
@@ -146,12 +150,12 @@ public class ConvertUtil {
         return result;
     }
 
-    public static <T> List<T> list2List(List list, Class<T> tClass) {
+    public static <T> List<T> list2List(List<? extends Object> list, Class<T> tClass) {
         return list2List(list, tClass, (t) -> {
         });
     }
 
-    public static <T> List<T> list2List(List list, Class<T> tClass, Consumer<T> consumer) {
+    public static <T> List<T> list2List(List<? extends Object> list, Class<T> tClass, Consumer<T> consumer) {
         if (CollectionUtils.isEmpty(list)) {
             return Lists.newArrayList();
         }
@@ -191,7 +195,7 @@ public class ConvertUtil {
             BeanUtils.copyProperties(srcObj, tgt);
             consumer.accept(tgt);
         } catch (Exception e) {
-            LOGGER.warn("convert obj2Obj error||msg={}", e.getMessage(), e);
+            LOGGER.warn("class=ConvertUtil||method=obj2Obj||msg={}", e.getMessage());
         }
 
         return tgt;
@@ -203,5 +207,87 @@ public class ConvertUtil {
             result.putAll(map);
         }
         return result;
+    }
+
+    public static Map<String, Object> Obj2Map(Object obj) {
+        if (null == obj) {
+            return null;
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        Field[] fields = obj.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                map.put(field.getName(), field.get(obj));
+            } catch (IllegalAccessException e) {
+                LOGGER.warn("class=ConvertUtil||method=Obj2Map||msg={}", e.getMessage(), e);
+            }
+        }
+        return map;
+    }
+
+    public static Object map2Obj(Map<String, Object> map, Class<?> clz) {
+        Object obj = null;
+        try {
+            obj = clz.newInstance();
+            Field[] declaredFields = obj.getClass().getDeclaredFields();
+            for (Field field : declaredFields) {
+                int mod = field.getModifiers();
+                if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
+                    continue;
+                }
+                field.setAccessible(true);
+                field.set(obj, map.get(field.getName()));
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ConvertUtil||method=map2Obj||msg={}", e.getMessage(), e);
+        }
+
+        return obj;
+    }
+
+    public static Map<String, Double> sortMapByValue(Map<String, Double> map) {
+        List<Map.Entry<String, Double>> data = new ArrayList<>(map.entrySet());
+        data.sort((o1, o2) -> {
+            if ((o2.getValue() - o1.getValue()) > 0) {
+                return 1;
+            } else if ((o2.getValue() - o1.getValue()) == 0) {
+                return 0;
+            } else {
+                return -1;
+            }
+        });
+
+        Map<String, Double> result = Maps.newLinkedHashMap();
+
+        for (Entry<String, Double> next : data) {
+            result.put(next.getKey(), next.getValue());
+        }
+        return result;
+    }
+
+    public  static Map<String, Object> directFlatObject(JSONObject obj) {
+        Map<String, Object> ret = new HashMap<>();
+
+        if(obj==null) {
+            return ret;
+        }
+
+        for (Map.Entry<String, Object> entry : obj.entrySet()) {
+            String key = entry.getKey();
+            Object o = entry.getValue();
+
+            if (o instanceof JSONObject) {
+                Map<String, Object> m = directFlatObject((JSONObject) o);
+                for (Map.Entry<String, Object> e : m.entrySet()) {
+                    ret.put(key + "." + e.getKey(), e.getValue());
+                }
+            } else {
+                ret.put(key, o);
+            }
+        }
+
+        return ret;
     }
 }

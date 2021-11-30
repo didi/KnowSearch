@@ -7,8 +7,8 @@ import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +34,7 @@ import java.util.Map;
  */
 @Component
 public class DslLoaderUtil {
-    private final ILog                                            LOGGER  = LogFactory.getLog(DslLoaderUtil.class);
+    private static final ILog LOGGER  = LogFactory.getLog(DslLoaderUtil.class);
     /**
      * 查询语句容器
      */
@@ -52,7 +52,8 @@ public class DslLoaderUtil {
             try {
                 dslFileNames.add(fields[i].get(null).toString());
             } catch (IllegalAccessException e) {
-                LOGGER.error("class=DslLoaderUtil||method=init||errMsg=fail to read {} error. ", fields[i].getName(), e);
+                LOGGER.error("class=DslLoaderUtil||method=init||errMsg=fail to read {} error. ", fields[i].getName(),
+                    e);
             }
         }
 
@@ -64,45 +65,11 @@ public class DslLoaderUtil {
         // 输出加载的查询语句
         LOGGER.info("class=DslLoaderUtil||method=init||msg=dsl files count {}", dslsMap.size());
         for (Map.Entry<String/*fileRelativePath*/, String/*dslContent*/> entry : dslsMap.entrySet()) {
-            LOGGER.info("class=DslLoaderUtil||method=init||msg=file name {}, dsl content {}", entry.getKey(), entry.getValue());
+            LOGGER.info("class=DslLoaderUtil||method=init||msg=file name {}, dsl content {}", entry.getKey(),
+                entry.getValue());
         }
 
         LOGGER.info("class=DslLoaderUtil||method=init||DslLoaderUtil init finished.");
-    }
-
-    /**
-     * 从jar包中读取dsl语句文件
-     *
-     * @param fileName
-     * @return
-     */
-    private String readDslFileInJarFile(String fileName) {
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(String.format("dsl/%s", fileName));
-        if (inputStream != null) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = null;
-            List<String> lines = Lists.newLinkedList();
-            try {
-                while ( (line = bufferedReader.readLine()) != null) {
-                    lines.add(line);
-                }
-                return StringUtils.join(lines, "");
-
-            } catch (IOException e) {
-                LOGGER.error("class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=read file {} error. ", fileName, e);
-
-                return "";
-            } finally {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    LOGGER.error("class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=fail to close file {} error. ", fileName, e);
-                }
-            }
-        } else {
-            LOGGER.error("class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=fail to read file {} content", fileName);
-            return "";
-        }
     }
 
     /**
@@ -127,7 +94,7 @@ public class DslLoaderUtil {
 
         if (StringUtils.isBlank(loadDslContent)) {
             LOGGER.error("class=DslLoaderUtil||method=getFormatDslByFileName||errMsg=dsl file {} content is empty",
-                    fileName);
+                fileName);
             return "";
         }
 
@@ -141,6 +108,40 @@ public class DslLoaderUtil {
         return dsl;
     }
 
+    public String getFormatDslForCatIndexByCondition(String fileName, String boolMustDsl, Object... args) {
+        String formatDslByFileName = getFormatDslByFileName(fileName, args);
+
+        return formatDslByFileName.replace("\"boolMustDsl\"", boolMustDsl);
+    }
+
+    public String getFormatDslByFileNameByAggParam(String fileName, String clusterPhyMetrics, String interval,
+                                                   String aggType, Object... args) {
+        String formatDslByFileName = getFormatDslByFileName(fileName, args);
+
+        return formatDslByFileName
+                .replace("{interval}", interval)
+                .replace("{clusterPhyMetrics}", clusterPhyMetrics)
+                .replace("{aggType}", aggType);
+    }
+
+    public String getFormatDslByFileNameAndOtherParam(String fileName, String interval, String aggsDsl,
+                                                      Object... args) {
+        String formatDslByFileName = getFormatDslByFileName(fileName, args);
+        return formatDslByFileName
+                .replace("{interval}", interval)
+                .replace("\"aggsDsl\":1", aggsDsl);
+    }
+
+    public String getDslByTopNNameInfo(String fileName, String interval, String topNameStr, String aggsDsl,
+                                       Object... args) {
+        String formatDslByFileName = getFormatDslByFileName(fileName, args);
+        return formatDslByFileName
+                .replace("{interval}", interval)
+                .replace("\"aggsDsl\":1", aggsDsl)
+                .replace("\"topNameListStr\"", topNameStr);
+    }
+
+    /**************************************** private method ****************************************************/
     /**
      * 去除json中的空格
      *
@@ -158,18 +159,18 @@ public class DslLoaderUtil {
         for (;;) {
             try {
                 // 这里需要Feature.OrderedField.getMask()保持有序
-                parser = new DefaultJSONParser(dsl, ParserConfig.getGlobalInstance(), JSON.DEFAULT_PARSER_FEATURE | Feature.OrderedField.getMask());
+                parser = new DefaultJSONParser(dsl, ParserConfig.getGlobalInstance(),
+                        JSON.DEFAULT_PARSER_FEATURE | Feature.OrderedField.getMask());
                 obj = parser.parse();
-            } catch (Throwable t) {
-                LOGGER.error("class=DslLoaderUtil||method=trimJsonBank||errMsg=parse json {} error. ",
-                        dsl, t);
+            } catch (Exception t) {
+                LOGGER.error("class=DslLoaderUtil||method=trimJsonBank||errMsg=parse json {} error. ", dsl, t);
             }
             if (obj == null) {
                 break;
             }
 
             if (obj instanceof JSONObject) {
-                dslList.add(JSONObject.toJSONString(obj, SerializerFeature.WriteMapNullValue));
+                dslList.add(JSON.toJSONString(obj, SerializerFeature.WriteMapNullValue));
                 int pos = parser.getLexer().pos();
                 if (pos <= 0) {
                     break;
@@ -188,5 +189,45 @@ public class DslLoaderUtil {
         }
 
         return dslList.get(0);
+    }
+
+    /**
+     * 从jar包中读取dsl语句文件
+     *
+     * @param fileName
+     * @return
+     */
+    private String readDslFileInJarFile(String fileName) {
+        InputStream inputStream = this.getClass().getClassLoader()
+                .getResourceAsStream(String.format("dsl/%s", fileName));
+        if (inputStream != null) {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = null;
+            List<String> lines = Lists.newLinkedList();
+            try {
+                while ((line = bufferedReader.readLine()) != null) {
+                    lines.add(line);
+                }
+                return StringUtils.join(lines, "");
+
+            } catch (IOException e) {
+                LOGGER.error("class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=read file {} error. ", fileName,
+                        e);
+
+                return "";
+            } finally {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    LOGGER.error(
+                            "class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=fail to close file {} error. ",
+                            fileName, e);
+                }
+            }
+        } else {
+            LOGGER.error("class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=fail to read file {} content",
+                    fileName);
+            return "";
+        }
     }
 }

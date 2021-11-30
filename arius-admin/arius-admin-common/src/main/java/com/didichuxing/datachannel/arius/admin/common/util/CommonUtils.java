@@ -1,7 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -12,13 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +36,8 @@ public class CommonUtils {
 
     private static final String REGEX = ",";
 
+    private CommonUtils() {}
+
     /**
      * 获取MD5值
      *
@@ -43,7 +47,7 @@ public class CommonUtils {
     public static String getMD5(String str) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(str.getBytes("utf-8"));
+            byte[] bytes = md.digest(str.getBytes(StandardCharsets.UTF_8));
             return toHex(bytes);
         } catch (Exception e) {
             return "";
@@ -65,7 +69,7 @@ public class CommonUtils {
             //转换为16进制
             return new BigInteger(1, digest).toString(16);
         } catch (Exception e) {
-            LOGGER.error("获取文件的md5失败", e.getMessage());
+            LOGGER.error("class=CommonUtils||method=getMD5||msg=获取文件的md5失败:{}", e.getMessage());
         }
         return null;
     }
@@ -85,11 +89,11 @@ public class CommonUtils {
 
     public static String toHex(byte[] bytes) {
 
-        final char[] HEX_DIGITS = "0123456789ABCDEF".toCharArray();
+        final char[] hexDigits = "0123456789ABCDEF".toCharArray();
         StringBuilder ret = new StringBuilder(bytes.length * 2);
         for (int i = 0; i < bytes.length; i++) {
-            ret.append(HEX_DIGITS[(bytes[i] >> 4) & 0x0f]);
-            ret.append(HEX_DIGITS[bytes[i] & 0x0f]);
+            ret.append(hexDigits[(bytes[i] >> 4) & 0x0f]);
+            ret.append(hexDigits[bytes[i] & 0x0f]);
         }
         return ret.toString();
     }
@@ -156,7 +160,7 @@ public class CommonUtils {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("fail to unZip");
+            LOGGER.error("class=CommonUtils||method=unZip||msg=fail to unZip:",e);
         }
         return null;
     }
@@ -194,7 +198,7 @@ public class CommonUtils {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("fail to unTar");
+            LOGGER.error("class=CommonUtils||method=unTar||msg=fail to unTar:",e);
         }
         return null;
     }
@@ -233,15 +237,33 @@ public class CommonUtils {
             return false;
         }
 
-        String rexp = "^(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])\\."
-                + "(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])\\."
-                + "(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])\\."
-                + "(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])$";
+        String rexp1 = "^(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])\\.";
+        String rexp2 = "(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])\\.";
+        String rexp3 = "(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])$";
 
-        Pattern pat = Pattern.compile(rexp);
+        Pattern pat = Pattern.compile(rexp1 + rexp2 + rexp2 + rexp3);
         Matcher mat = pat.matcher(addr);
 
         return mat.find();
 
+    }
+
+    /**
+     * 生成固定长度的随机字符串
+     */
+    public static String randomString(int length) {
+        char[] value = new char[length];
+        for (int i = 0; i < length; i++) {
+            value[i] = randomWritableChar();
+        }
+        return new String(value);
+    }
+
+    /**
+     * 随机生成单个随机字符
+     */
+    public static char randomWritableChar() {
+        Random random = new Random();
+        return (char) (33 + random.nextInt(94));
     }
 }

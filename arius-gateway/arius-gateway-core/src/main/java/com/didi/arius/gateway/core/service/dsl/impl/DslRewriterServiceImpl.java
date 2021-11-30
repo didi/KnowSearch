@@ -12,9 +12,10 @@ import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV6;
 import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV7;
 import com.didi.arius.gateway.core.service.dsl.DslRewriterService;
 import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
-import com.didi.arius.gateway.dsl.dsl.ast.DslNode;
-import com.didi.arius.gateway.dsl.dsl.parser.DslParser;
-import com.didi.arius.gateway.dsl.dsl.visitor.basic.OutputVisitor;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.DslNode;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.parser.DslParser;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.visitor.basic.OutputVisitor;
+import lombok.NoArgsConstructor;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -33,11 +34,17 @@ import java.util.Objects;
  * @date 2021/5/25 7:46 下午
  */
 @Service
+@NoArgsConstructor
 public class DslRewriterServiceImpl implements DslRewriterService {
     private static final Logger logger = LoggerFactory.getLogger(DslRewriterServiceImpl.class);
     private static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
+    public static final String QUERY = "query";
+    public static final String POST_FILTER = "post_filter";
+    public static final String AGG = "aggregations";
+    public static final String ORDER = "order";
+    public static final String TERM = "_term";
 
-    private final static String TYPE_SPLIT = "#";
+    private static final String TYPE_SPLIT = "#";
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -122,7 +129,7 @@ public class DslRewriterServiceImpl implements DslRewriterService {
             jsonObject = JSON.parseObject(strSource);
 
             return rewriteRequest(context, esVersion, jsonObject);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error("unexcept_error||type=rewriteRequest||e={}", Convert.logExceptionStack(e));
             return source;
         }
@@ -136,24 +143,24 @@ public class DslRewriterServiceImpl implements DslRewriterService {
             source.put("indices_boost", obj);
         }
 
-        if (source.containsKey("queryBinary") && !source.containsKey("query")) {
+        if (source.containsKey("queryBinary") && !source.containsKey(QUERY)) {
             Object obj = source.remove("queryBinary");
-            source.put("query", obj);
+            source.put(QUERY, obj);
         }
 
-        if (source.containsKey("query_binary") && !source.containsKey("query")) {
+        if (source.containsKey("query_binary") && !source.containsKey(QUERY)) {
             Object obj = source.remove("query_binary");
-            source.put("query", obj);
+            source.put(QUERY, obj);
         }
 
-        if (source.containsKey("filter") && !source.containsKey("post_filter")) {
+        if (source.containsKey("filter") && !source.containsKey(POST_FILTER)) {
             Object obj = source.remove("filter");
-            source.put("post_filter", obj);
+            source.put(POST_FILTER, obj);
         }
 
-        if (source.containsKey("postFilter") && !source.containsKey("post_filter")) {
+        if (source.containsKey("postFilter") && !source.containsKey(POST_FILTER)) {
             Object obj = source.remove("postFilter");
-            source.put("post_filter", obj);
+            source.put(POST_FILTER, obj);
         }
 
         if (source.containsKey("trackScores") && !source.containsKey("track_scores")) {
@@ -183,7 +190,7 @@ public class DslRewriterServiceImpl implements DslRewriterService {
                 switch (inKey) {
                     case "meta":
                         break;
-                    case "aggregations":
+                    case AGG:
                     case "aggs":
                         buildAggsPath(path, aggsItem.getJSONObject(inKey), fieldInfoMap);
                         break;
@@ -229,6 +236,7 @@ public class DslRewriterServiceImpl implements DslRewriterService {
                             case "short":
                                 path.setAggsTypedKey("lterms");
                                 break;
+                            default:
                         }
                     }
                 }
@@ -247,10 +255,9 @@ public class DslRewriterServiceImpl implements DslRewriterService {
                 }
                 break;
             case "percentiles" :
+                path.setAggsTypedKey("tdigest_percentiles");
                 if (item.containsKey("hdr")) {
                     path.setAggsTypedKey("hdr_percentiles");
-                } else {
-                    path.setAggsTypedKey("tdigest_percentiles");
                 }
                 break;
             default:
@@ -271,30 +278,31 @@ public class DslRewriterServiceImpl implements DslRewriterService {
 
             AggsPath path = parent.getItem(key);
 
-            for (String inKey : aggsItem.keySet()) {
+            for (Map.Entry<String,Object> aggEntry : aggsItem.entrySet()) {
+                String inKey = aggEntry.getKey();
                 switch (inKey) {
                     case "meta":
                         newAggsItem.put(inKey, aggsItem.get(inKey));
                         break;
-                    case "aggregations":
+                    case AGG:
                     case "aggs":
                         JSONObject newItem = buildTypedKey(path, aggsItem.getJSONObject(inKey));
                         newAggsItem.put(inKey, newItem);
                         break;
                     default:
                         JSONObject aggsType = aggsItem.getJSONObject(inKey);
-                        if (aggsType.containsKey("order") && inKey.equals("terms")) {
-                            if (aggsType.get("order") instanceof JSONObject) {
-                                JSONObject order = aggsType.getJSONObject("order");
+                        if (aggsType.containsKey(ORDER) && inKey.equals("terms")) {
+                            if (aggsType.get(ORDER) instanceof JSONObject) {
+                                JSONObject order = aggsType.getJSONObject(ORDER);
                                 JSONObject newOrder = dealOrder(path, order);
-                                aggsType.put("order", newOrder);
-                            } else if (aggsType.get("order") instanceof JSONArray) {
+                                aggsType.put(ORDER, newOrder);
+                            } else if (aggsType.get(ORDER) instanceof JSONArray) {
                                 JSONArray newOrder = new JSONArray();
-                                for (Object o : (JSONArray) aggsType.get("order")) {
+                                for (Object o : (JSONArray) aggsType.get(ORDER)) {
                                     JSONObject order = (JSONObject) o;
                                     newOrder.add(dealOrder(path, order));
                                 }
-                                aggsType.put("order", newOrder);
+                                aggsType.put(ORDER, newOrder);
                             }
                         }
                         newAggsItem.put(inKey, aggsType);
@@ -317,11 +325,11 @@ public class DslRewriterServiceImpl implements DslRewriterService {
             Object value = entryOrder.getValue();
 
             if (key.equalsIgnoreCase("_key")) {
-                newOrder.put("_term", value);
+                newOrder.put(TERM, value);
             } else if (key.equalsIgnoreCase("_count")) {
                 newOrder.put("_count", value);
-            } else if (key.equalsIgnoreCase("_term")) {
-                newOrder.put("_term", value);
+            } else if (key.equalsIgnoreCase(TERM)) {
+                newOrder.put(TERM, value);
             } else {
                 String[] keys = key.split(">");
                 int i = 0;
@@ -365,7 +373,7 @@ public class DslRewriterServiceImpl implements DslRewriterService {
     private JSONObject getAggsObject(JSONObject parent) {
         Object aggs = parent.get("aggs");
         if (aggs == null) {
-            aggs = parent.get("aggregations");
+            aggs = parent.get(AGG);
         }
 
         if (aggs == null) {
@@ -379,7 +387,7 @@ public class DslRewriterServiceImpl implements DslRewriterService {
         if (source.containsKey("aggs")) {
             source.put("aggs", aggs);
         } else {
-            source.put("aggregations", aggs);
+            source.put(AGG, aggs);
         }
     }
 }

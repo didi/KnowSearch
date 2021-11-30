@@ -3,10 +3,12 @@ package com.didi.arius.gateway.remote.response;
 
 import com.google.gson.annotations.Expose;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.annotation.Generated;
 
 @Data
+@NoArgsConstructor
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
 public class DynamicConfigResponse {

@@ -9,22 +9,41 @@ import org.elasticsearch.common.unit.ByteSizeValue;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ESClusterStatsResponse {
+
+    /**
+     * 状态
+     */
+    private String        status;
+
     /**
      * 索引个数
      */
-    private long indexCount;
+    private long          indexCount;
     /**
      * shard总个数
      */
-    private long totalShard;
+    private long          totalShard;
     /**
      * 文档个数
      */
-    private long docsCount;
+    private long          docsCount;
     /**
      * 总节点个数
      */
-    private long totalNodes;
+    private long          totalNodes;
+    private long          numberDataNodes;
+    private long          numberMasterNodes;
+    private long          numberClientNodes;
+    private long          numberCoordinatingOnly;
+    private long          numberIngestNodes;
+
+    /**********************内存********************/
+    private ByteSizeValue memUsed;
+    private ByteSizeValue memFree;
+    private ByteSizeValue memTotal;
+    private long          memUsedPercent;
+    private long          memFreePercent;
+
     /**
      * 磁盘总大小
      */

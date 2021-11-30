@@ -6,8 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.google.common.collect.Lists;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@NoArgsConstructor
 public class IndexHealthDegreeDAO extends BaseESDAO {
 
     /**
@@ -23,7 +25,7 @@ public class IndexHealthDegreeDAO extends BaseESDAO {
      */
     private String indexName;
 
-    private final static String TYPE = "score";
+    private static final String TYPE = "score";
 
     @PostConstruct
     public void init(){

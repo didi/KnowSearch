@@ -36,7 +36,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     private final boolean httpPipeliningEnabled;
     private final boolean detailedErrorsEnabled;
 
-    protected final ESLogger logger = Loggers.getLogger(org.elasticsearch.http.netty.HttpRequestHandler.class);
+    protected final ESLogger logger = Loggers.getLogger(HttpRequestHandler.class);
 
     public HttpRequestHandler(NettyHttpServerTransport serverTransport, boolean detailedErrorsEnabled) {
         this.serverTransport = serverTransport;

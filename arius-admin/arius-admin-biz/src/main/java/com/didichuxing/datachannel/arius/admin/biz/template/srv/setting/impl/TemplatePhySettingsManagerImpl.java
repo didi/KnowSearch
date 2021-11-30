@@ -8,10 +8,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

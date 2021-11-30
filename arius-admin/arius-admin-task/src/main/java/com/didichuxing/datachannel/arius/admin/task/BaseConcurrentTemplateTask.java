@@ -9,15 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * base任务 模板并发处理
  * @author d06679
  * @date 2019/3/21
  */
-public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask {
+public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<TemplateLogicPO> {
 
     private static final ILog     LOGGER = LogFactory.getLog(BaseConcurrentClusterTask.class);
 
@@ -30,7 +30,7 @@ public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask {
      * @return
      */
     @Override
-    protected List getAllItems() {
+    protected List<TemplateLogicPO> getAllItems() {
         return templateLogicDAO.listAll();
     }
 
@@ -40,26 +40,29 @@ public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask {
      * @param taskBatch
      */
     @Override
-    protected boolean executeByBatch(TaskBatch taskBatch) throws AdminOperateException {
-        List items = taskBatch.getItems();
+    protected boolean executeByBatch(TaskBatch<TemplateLogicPO> taskBatch) throws AdminOperateException {
+        List<TemplateLogicPO> items = taskBatch.getItems();
         if (CollectionUtils.isEmpty(items)) {
             return true;
         }
 
         boolean succeed = true;
 
-        for (Object item : items) {
-            TemplateLogicPO logicPO = (TemplateLogicPO) item;
+        for (TemplateLogicPO item : items) {
+            TemplateLogicPO logicPO = item;
             try {
-                LOGGER.info("executeByLogicTemplate begin||template={}||task={}", logicPO.getName(), getTaskName());
+                LOGGER.info("class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate begin||template={}||task={}", logicPO.getName(), getTaskName());
                 if (executeByLogicTemplate(logicPO.getId())) {
-                    LOGGER.info("executeByLogicTemplate succ||template={}||task={}", logicPO.getName(), getTaskName());
+                    LOGGER.info("class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate succ||template={}||task={}", logicPO.getName(), getTaskName());
                 } else {
                     succeed = false;
-                    LOGGER.warn("executeByLogicTemplate fail||template={}||task={}", logicPO.getName(), getTaskName());
+                    LOGGER.warn("class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate fail||template={}||task={}", logicPO.getName(), getTaskName());
                 }
 
                 Thread.sleep(TimeUnit.SECONDS.toMillis(TaskConcurrentConstants.SLEEP_SECONDS_PER_EXECUTE));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOGGER.warn("class=BaseConcurrentTemplateTask||method=executeByBatc||BaseConcurrentTemplateTask Interrupted||task={}", getTaskName(), e);
             } catch (Exception e) {
                 succeed = false;
                 LOGGER.error("class=BaseConcurrentTemplateTask||method=executeByBatch||errMsg={}||template={}||task={}",

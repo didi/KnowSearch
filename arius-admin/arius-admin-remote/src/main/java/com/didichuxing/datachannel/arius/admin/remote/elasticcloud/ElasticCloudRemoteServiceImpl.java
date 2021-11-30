@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
@@ -19,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response.ElasticCloudStatus;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response.ElasticCloudUserLog;
 import com.google.common.collect.Maps;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +28,10 @@ import org.springframework.util.StringUtils;
 import java.util.Map;
 
 @Service
+@NoArgsConstructor
 public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService {
     
-    private final static Logger LOGGER             = LoggerFactory.getLogger(ElasticCloudRemoteServiceImpl.class);
+    private static final Logger LOGGER             = LoggerFactory.getLogger(ElasticCloudRemoteServiceImpl.class);
 
     @Value("${cloud.default.server}")
     private String              defaultUrl;
@@ -47,7 +48,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
         try {
             LOGGER.info("class=ElasticCloudRemoteServiceImpl||method=createAndStartAll||uri={}", uri);
             response = BaseHttpUtil.postForString(defaultUrl + uri,
-                    JSONObject.toJSONString(elasticCloudCreateParamDTO),
+                    JSON.toJSONString(elasticCloudCreateParamDTO),
                     getHttpHeader()
             );
 
@@ -67,7 +68,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
     }
 
     @Override
-    public Result upgradeOrRestartByGroup(ElasticCloudCommonActionParam elasticCloudCommonActionParam) {
+    public Result<EcmOperateAppBase> upgradeOrRestartByGroup(ElasticCloudCommonActionParam elasticCloudCommonActionParam) {
         Map<String, Object> param = Maps.newHashMap();
         param.put("ImageAddress", elasticCloudCommonActionParam.getImageName());
 
@@ -78,7 +79,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
             LOGGER.info("class=ElasticCloudRemoteServiceImpl||method=upgradeOrRestartByGroup||param={}||uri={}",
                     elasticCloudCommonActionParam, uri);
 
-            response = BaseHttpUtil.putForString(defaultUrl + uri, JSONObject.toJSONString(param), getHttpHeader());
+            response = BaseHttpUtil.putForString(defaultUrl + uri, JSON.toJSONString(param), getHttpHeader());
             EcmOperateAppBase ecmOperateAppBase = JSON.parseObject(response, EcmOperateAppBase.class);
             if (ecmOperateAppBase.getTaskId() == null){
                 return Result.buildFail("集群更新失败");
@@ -93,7 +94,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
     }
 
     @Override
-    public Result scaleAndExecuteAll(ElasticCloudScaleActionParam elasticCloudScaleActionParam) {
+    public Result<EcmOperateAppBase> scaleAndExecuteAll(ElasticCloudScaleActionParam elasticCloudScaleActionParam) {
         Map<String, Object> param = Maps.newHashMap();
         param.put("podCount", elasticCloudScaleActionParam.getPodNum());
         param.put("subnetScale", true);
@@ -104,7 +105,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
             LOGGER.info("class=ElasticCloudRemoteServiceImpl||method=scaleAndExecuteAll||param={}||uri={}",
                     elasticCloudScaleActionParam, uri);
 
-            response = BaseHttpUtil.putForString(defaultUrl + uri, JSONObject.toJSONString(param), getHttpHeader());
+            response = BaseHttpUtil.putForString(defaultUrl + uri, JSON.toJSONString(param), getHttpHeader());
             EcmOperateAppBase ecmOperateAppBase = JSON.parseObject(response, EcmOperateAppBase.class);
             if (ecmOperateAppBase.getTaskId() == null){
                 return Result.buildFail(response);
@@ -136,7 +137,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
         String uri = buildActionUri(elasticCloudActionParam, action);
         try {
             LOGGER.info("class=ElasticCloudRemoteServiceImpl||method=actionNotFinishedTask||namespace={}||action={}", uri,action);
-            response = BaseHttpUtil.putForString(defaultUrl + uri, JSONObject.toJSONString(param), getHttpHeader());
+            response = BaseHttpUtil.putForString(defaultUrl + uri, JSON.toJSONString(param), getHttpHeader());
 
             ElasticCloudResult result = JSON.parseObject(response, ElasticCloudResult.class);
             if (!result.getMessage() .equals("success")){
@@ -159,7 +160,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
         String response = null;
         try {
             LOGGER.info("class=ElasticCloudRemoteServiceImpl||method=delete||namespace={}", uri);
-            response = BaseHttpUtil.deleteForString(defaultUrl + uri, JSONObject.toJSONString(getHttpHeader()), getHttpHeader());
+            response = BaseHttpUtil.deleteForString(defaultUrl + uri, JSON.toJSONString(getHttpHeader()), getHttpHeader());
 
             ElasticCloudAppStatus esAppStatusDTO = JSON.parseObject(response, ElasticCloudAppStatus.class);
             if (esAppStatusDTO.getTaskId() == null){
@@ -168,7 +169,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
 
             return Result.buildSucc(esAppStatusDTO);
         } catch (Exception e) {
-            LOGGER.error("class=ElasticCloudRemoteServiceImpl||method=actionNotFinishedTask||namespace={}||response={}||error={}",
+            LOGGER.error("class=ElasticCloudRemoteServiceImpl||method=delete||namespace={}||response={}||error={}",
                     uri, response,e.getMessage());
         }
         return Result.build(false, response);
@@ -191,13 +192,13 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
         try {
             LOGGER.info("class=ElasticCloudRemoteServiceImpl||method=getDDCloudLogByTaskId||namespace={}", uri);
             response = BaseHttpUtil.get(defaultUrl + uri, null,getHttpHeader());
-            ElasticCloudUserLog diDiCloudUserLog = JSONObject.parseObject(response, ElasticCloudUserLog.class);
+            ElasticCloudUserLog diDiCloudUserLog = JSON.parseObject(response, ElasticCloudUserLog.class);
             if (!StringUtils.isEmpty(ddCloudPodLog)) {
                 ddCloudPodLog = ddCloudPodLog.replace("\\n","\n");
             }
             return Result.buildSucc(new EcmSubTaskLog(ddCloudPodLog, diDiCloudUserLog.convert2FormattedString()));
         } catch (Exception e) {
-            LOGGER.error("class=ElasticCloudRemoteServiceImpl||method=actionNotFinishedTask||namespace={}||response={}||error={}",
+            LOGGER.error("class=ElasticCloudRemoteServiceImpl||method=getTaskLog||namespace={}||response={}||error={}",
                     uri, response,e.getMessage());
         }
         return Result.buildFail();
@@ -219,24 +220,24 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
             LOGGER.info("class=ElasticCloudRemoteServiceImpl||method=getTaskStatus||namespace={}", uri);
 
             response =  BaseHttpUtil.get(defaultUrl + uri,null, getHttpHeader());
-            ElasticCloudStatus elasticCloudStatus = JSONObject.parseObject(response, ElasticCloudStatus.class);
+            ElasticCloudStatus elasticCloudStatus = JSON.parseObject(response, ElasticCloudStatus.class);
 
 
             return Result.buildSucc(elasticCloudStatus);
         } catch (Exception e) {
-            LOGGER.error("class=ElasticCloudRemoteServiceImpl||method=actionNotFinishedTask||namespace={}||response={}||error={}",
+            LOGGER.error("class=ElasticCloudRemoteServiceImpl||method=getTaskStatus||namespace={}||response={}||error={}",
                     uri, response,e);
         }
         return Result.buildFail();
     }
 
     @Override
-    public Result getClusterInfo(ElasticCloudCommonActionParam elasticCloudCommonActionParam) {
+    public Result<String> getClusterInfo(ElasticCloudCommonActionParam elasticCloudCommonActionParam) {
         String url = defaultUrl + "/namespaces/" + elasticCloudCommonActionParam.getNsTree() + "/regions/all/statefulapps";
         String postForString = BaseHttpUtil.get(url, null, getHttpHeader());
-        ESDDCloudClusterInfo esddCloudClusterInfo = JSONObject.parseObject(postForString).toJavaObject(ESDDCloudClusterInfo.class);
+        ESDDCloudClusterInfo esddCloudClusterInfo = JSON.parseObject(postForString).toJavaObject(ESDDCloudClusterInfo.class);
         if (esddCloudClusterInfo != null){
-            return  Result.buildSucc(esddCloudClusterInfo);
+            return  Result.buildSucc(JSON.toJSONString(esddCloudClusterInfo));
         }
         return Result.buildFail(postForString);
     }
@@ -251,7 +252,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
     private String getDDCloudPodLog(String region, String podName) {
         String url = defaultUrl + "/regions/" + region + "/pods/" + podName + "/log";
         String postForString = BaseHttpUtil.get(url, null,  getHttpHeader());
-        if (postForString != "") {
+        if (!postForString.equals("")) {
             postForString = postForString.substring(1,postForString.length()-1);
         }
         return postForString;

@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping(V2_CONSOLE + "/index")
-@Api(value = "Console-索引接口(REST)")
+@Api(tags = "Console-用户侧索引接口(REST)")
 public class ConsoleIndexController {
 
     @Autowired

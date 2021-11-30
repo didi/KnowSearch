@@ -1,11 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.util.List;
 import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 
 /**
  * @author d06679
@@ -61,6 +62,18 @@ public interface ESTemplateService {
      */
     boolean syncUpdateExpression(String cluster, String name, String expression,
                                  int retryCount) throws ESOperateException;
+
+    /**
+     * 修改模板分片数量
+     * @param cluster 集群
+     * @param name 模板姓名
+     * @param shardNum 分片数目
+     * @param retryCount 重试次数
+     * @return
+     * @throws ESOperateException
+     */
+    boolean syncUpdateShardNum(String cluster, String name, Integer shardNum,
+                               int retryCount) throws ESOperateException;
 
     /**
      * 修改模板setting
@@ -124,6 +137,13 @@ public interface ESTemplateService {
     MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName);
 
     /**
+     * 获取所有引擎模板
+     * @param clusters 集群名
+     * @return
+     */
+    Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters);
+
+    /**
      * 修改模板名称
      * @param cluster 集群
      * @param srcName 源名称
@@ -143,4 +163,8 @@ public interface ESTemplateService {
     boolean syncCheckTemplateConfig(String cluster, String name, TemplateConfig templateConfig,
                                     int retryCount) throws ESOperateException;
 
+    /**
+     * 获取集群模板个数, 不包涵原生自带模板
+     */
+    long syncGetTemplateNum(String cluster);
 }

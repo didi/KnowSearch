@@ -29,6 +29,10 @@ public class GetMergeMappingController extends AdminController {
     @Autowired
     private DslAggsAnalyzerService dslAggsAnalyzerService;
 
+    public GetMergeMappingController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(RestRequest.Method.GET, "/_check/mergeMapping/{index}", this);

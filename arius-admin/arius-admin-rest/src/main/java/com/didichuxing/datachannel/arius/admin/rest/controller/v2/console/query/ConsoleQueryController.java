@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_CONSOLE + "/query")
-@Api(value = "Console-查询分析接口(REST)")
+@Api(tags = "Console-用户侧查询分析接口(REST)")
 public class ConsoleQueryController {
 
 
@@ -43,7 +43,7 @@ public class ConsoleQueryController {
     public Result<List<ConsoleTemplateVO>> listNeedAuth() {
         Result<List<TemplateLabel>> result = templateLabelService.listDslReviewTemplates();
         if (result.failed()) {
-            return Result.buildFrom(Result.buildFail("获取索引失败"));
+            return Result.buildFail("获取索引失败");
         }
 
         List<ConsoleTemplateVO> templateVOS = Lists.newArrayList();

@@ -17,14 +17,19 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestMultiGetController extends BaseHttpRestController {
     @Autowired
     private RestMultiGetAction restMultiGetAction;
+
+    public RestMultiGetController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_mget", this);
         controller.registerHandler(POST, "/_mget", this);
-        controller.registerHandler(GET, "/{index}/_mget", this);
         controller.registerHandler(POST, "/{index}/_mget", this);
-        controller.registerHandler(GET, "/{index}/{type}/_mget", this);
+        controller.registerHandler(GET, "/{index}/_mget", this);
         controller.registerHandler(POST, "/{index}/{type}/_mget", this);
+        controller.registerHandler(GET, "/{index}/{type}/_mget", this);
     }
 
     @Override

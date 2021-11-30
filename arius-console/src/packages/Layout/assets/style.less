@@ -1,0 +1,91 @@
+ul {
+  padding: 0;
+}
+
+// reset antd style
+.ant-form-vertical .ant-form-item {
+  padding-bottom: 0;
+}
+.rc-notification-notice {
+  padding: 0;
+}
+.ant-card-compact {
+  .ant-card-head {
+    padding: 0 16px;
+    min-height: unset;
+  }
+  .ant-card-head-title {
+    padding: 10px 0;
+  }
+  .ant-card-extra {
+    padding: 10px 0;
+  }
+  .ant-card-body {
+    padding: 10px 16px;
+  }
+}
+.ant-table-scroll {
+  .ant-table-body { padding-bottom: 10px; }
+}
+.ant-table-scroll table .ant-table-fixed-columns-in-body {
+  visibility: unset;
+}
+.ant-table-thead > tr > th.textAlignCenter {
+  text-align: center;
+}
+
+// global style
+body { background: #f0f2f5; }
+.mt10 { margin-top: 10px; }
+.mr10 { margin-right: 10px; }
+.mb10 { margin-bottom: 10px; }
+.ml10 { margin-left: 10px; }
+.textAlignLeft { text-align: left; }
+.textAlignCenter { text-align: center; }
+.textAlignRight { text-align: right; }
+.pointer { cursor: pointer; }
+.fc50 { color: #f50 }
+.success-btn {
+  background: #87d068;
+  color: #fff;
+  border: 0 none;
+  &:hover,&:active,&:focus {
+    background: #449d44;
+    color: #fff;
+  }
+}
+.warning-btn {
+  background: #f0ad4e;
+  color: #fff;
+  border: 0 none;
+  &:hover,&:active,&:focus {
+    background: #ec971f;
+    color: #fff;
+  }
+}
+.danger-btn {
+  background: #d9534f;
+  color: #fff;
+  border: 0 none;
+  &:hover,&:active,&:focus {
+    background: #c9302c;
+    color: #fff;
+  }
+}
+// Functions
+.single-page-wrap(@width) {
+  width: @width;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+.single-page-main(@height) {
+  height: @height;
+  margin-top: calc(~"50vh - @{height} / 2");
+}
+.danger-link {
+  color: #d9534f;
+  &:hover,&:active,&:focus {
+    color: #c9302c;
+  }
+}

@@ -73,9 +73,16 @@
     </select>
 
     <!-- 根据物理集群id，查询处于 waiting 或 running 状态的任务 -->
-    <select id="getRunningWorkOrderTaskByClusterId" resultMap="BaseResultMap">
+    <select id="getUsefulWorkOrderTaskByClusterId" resultMap="BaseResultMap">
         select  <include refid="Base_Column_List"/>
         from es_work_order_task
-        where physic_cluster_id = #{physicClusterId} and status in ('waiting', 'running') and  delete_flag = '0'
+        where physic_cluster_id = #{physicClusterId} and status in ('waiting','pause','running') and  delete_flag = '0'
+    </select>
+
+    <select id="listRunningTasks" parameterType="string" resultType="list" resultMap="BaseResultMap">
+        select  <include refid="Base_Column_List"/>
+        from es_work_order_task
+        where  delete_flag = 0 and status ='running'
+        order by id  desc
     </select>
 </mapper>

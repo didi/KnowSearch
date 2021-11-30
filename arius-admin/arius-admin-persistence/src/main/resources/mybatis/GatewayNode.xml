@@ -15,7 +15,7 @@
         id, cluster_name, host_name, port, heartbeat_time, create_time, update_time
     </sql>
 
-    <insert id="record" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO"
+    <insert id="recordGatewayNode" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into gateway_node
@@ -31,7 +31,7 @@
         where cluster_name = #{clusterName} AND heartbeat_time > #{time}
     </select>
 
-    <select id="listAliveNodeByClusterNameAndTime" parameterType="map" resultType="integer">
+    <select id="listAliveNodeByClusterNameAndTime" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from gateway_node

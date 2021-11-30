@@ -29,7 +29,7 @@ public class FlowLimit {
 	 */
 	private static final double DOWN_FACTOR = 0.5;
 
-	private static final int MAX_THRESHOLD = 1000;
+	private static final int MAX_THRESHOLD = 2000;
 	private static final Random flowRandom = new Random();
 
 	private String areaId;
@@ -48,10 +48,9 @@ public class FlowLimit {
 		if (threshold == 0)
 			return false;
 		else if (threshold >= MAX_THRESHOLD) {
-			log.warn("Threshold " + threshold + " larger than max " + MAX_THRESHOLD);
+			log.warn("Threshold {} larger than max {}", threshold, MAX_THRESHOLD);
 			return true;
-		} 
-		//return false;
+		}
 		 
 		else
 		{
@@ -84,11 +83,11 @@ public class FlowLimit {
 			threshold = (int)(threshold + UP_FACTOR * (MAX_THRESHOLD - threshold));
 		}
 		
-		log.warn("flow limit up areaId " + areaId + " curt " + threshold);
+		log.warn("flow limit up areaId {} curt {}", areaId, threshold);
 	}
 	
 	public void limitLevelKeep() {
-		
+		// Do nothing
 	}
 	
 	public void limitLevelDown() {
@@ -103,6 +102,6 @@ public class FlowLimit {
 			threshold = 0;
 		}
 		
-		log.warn("flow limit down areaId " + areaId + " curt " + threshold);
+		log.warn("flow limit down areaId {} curt {}", areaId, threshold);
 	}
 }

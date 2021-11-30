@@ -2,27 +2,27 @@ package com.didichuxing.datachannel.arius.admin.client.constant.task;
 
 public enum WorkTaskHandleEnum {
                                 /**新增*/
-                                CLUSTER_NEW(1, "ecmWorkTask"),
+                                CLUSTER_NEW(1, WorkTaskConstant.ECM_WORK_TASK),
 
-                                CLUSTER_EXPAND(2, "ecmWorkTask"),
+                                CLUSTER_EXPAND(2, WorkTaskConstant.ECM_WORK_TASK),
 
-                                CLUSTER_SHRINK(3, "ecmWorkTask"),
+                                CLUSTER_SHRINK(3, WorkTaskConstant.ECM_WORK_TASK),
 
-                                CLUSTER_RESTART(4, "ecmWorkTask"),
+                                CLUSTER_RESTART(4, WorkTaskConstant.ECM_WORK_TASK),
 
-                                CLUSTER_UPGRADE(5, "ecmWorkTask"),
+                                CLUSTER_UPGRADE(5, WorkTaskConstant.ECM_WORK_TASK),
 
-                                CLUSTER_PLUG_OPERATION(6, "ecmWorkTask"),
+                                CLUSTER_PLUG_OPERATION(6, WorkTaskConstant.ECM_WORK_TASK),
 
-                                TEMPLATE_DCDR(10, "dcdrWorkTask"),
+                                TEMPLATE_DCDR(10, WorkTaskConstant.DCDR_WORK_TASK),
 
-                                CLUSTER_CONFIG_ADD(11, "ecmWorkTask"),
+                                CLUSTER_CONFIG_ADD(11, WorkTaskConstant.ECM_WORK_TASK),
 
-                                CLUSTER_CONFIG_EDIT(12, "ecmWorkTask"),
+                                CLUSTER_CONFIG_EDIT(12, WorkTaskConstant.ECM_WORK_TASK),
 
-                                CLUSTER_CONFIG_DELETE(13, "ecmWorkTask"),
+                                CLUSTER_CONFIG_DELETE(13, WorkTaskConstant.ECM_WORK_TASK),
 
-                                UNKNOWN(-1, "unknown");
+                                UNKNOWN(-1, WorkTaskConstant.UNKNOWN);
 
     WorkTaskHandleEnum(Integer type, String message) {
         this.type = type;
@@ -54,4 +54,13 @@ public enum WorkTaskHandleEnum {
         return WorkTaskHandleEnum.UNKNOWN;
     }
 
+}
+
+class WorkTaskConstant {
+
+    private WorkTaskConstant() {}
+
+    public static final String ECM_WORK_TASK     = "ecmWorkTask";
+    public static final String DCDR_WORK_TASK    = "dcdrWorkTask";
+    public static final String UNKNOWN           = "unknown";
 }

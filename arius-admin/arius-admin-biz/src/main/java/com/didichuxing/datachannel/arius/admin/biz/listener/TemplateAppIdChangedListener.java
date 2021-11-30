@@ -12,8 +12,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 @Component
 public class TemplateAppIdChangedListener implements ApplicationListener<LogicTemplateModifyEvent> {
@@ -54,7 +54,7 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
 
         //如果模板的appid发生变更了，代表模板的管理权限发生变更，但是原appid还要拥有模板的读写权限
         //给原appid赋予索引的读写权限
-        Result result = appLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getAppId(),
+        Result<Void> result = appLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getAppId(),
             logicTemplateId, AppTemplateAuthEnum.RW, oldIndexTemplate.getResponsible(), AriusUser.SYSTEM.getDesc());
 
         if (!EnvUtil.isOnline()) {

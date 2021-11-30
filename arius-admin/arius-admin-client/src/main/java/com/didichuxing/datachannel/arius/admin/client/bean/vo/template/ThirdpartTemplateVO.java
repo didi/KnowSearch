@@ -7,13 +7,17 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.DataType
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 包含物理和逻辑信息
  * @author d06679
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "模板信息")
 public class ThirdpartTemplateVO extends BaseVO {
 
@@ -51,9 +55,6 @@ public class ThirdpartTemplateVO extends BaseVO {
 
     /******************************* 逻辑信息 ********************************/
 
-    /**
-     * appid
-     */
     @ApiModelProperty("所属应用ID")
     private Integer appId;
 
@@ -61,7 +62,7 @@ public class ThirdpartTemplateVO extends BaseVO {
      * 用户数据类型
      * @see DataTypeEnum
      */
-    @ApiModelProperty("数据类型（1:日志；2:上报；3:rds；6:离线）")
+    @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds；4:离线）")
     private Integer dataType;
 
     /**
@@ -70,9 +71,6 @@ public class ThirdpartTemplateVO extends BaseVO {
     @ApiModelProperty("分区周期")
     private String  dateFormat;
 
-    /**
-     * 数据中心
-     */
     @ApiModelProperty("数据中心")
     private String  dataCenter;
 
@@ -82,27 +80,15 @@ public class ThirdpartTemplateVO extends BaseVO {
     @ApiModelProperty("保存天数")
     private Integer expireTime;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门ID")
     private String  libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门名称")
     private String  libraDepartment;
 
-    /**
-     * 责任人
-     */
     @ApiModelProperty("责任人")
     private String  responsible;
 
-    /**
-     * 时间字段
-     */
     @ApiModelProperty("时间字段")
     private String  dateField;
 
@@ -112,21 +98,12 @@ public class ThirdpartTemplateVO extends BaseVO {
     @ApiModelProperty("主键字段")
     private String  idField;
 
-    /**
-     * routing字段
-     */
     @ApiModelProperty("routing字段")
     private String  routingField;
 
-    /**
-     * 表达式
-     */
     @ApiModelProperty("表达式")
     private String  expression;
 
-    /**
-     * 备注
-     */
     @ApiModelProperty("描述")
     private String  desc;
 
@@ -136,9 +113,6 @@ public class ThirdpartTemplateVO extends BaseVO {
     @ApiModelProperty("配额")
     private Double  quota;
 
-    /**
-     * 创建时间
-     */
     @ApiModelProperty("创建时间")
     private Date    createTime;
 

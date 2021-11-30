@@ -3,6 +3,7 @@ package com.didi.arius.gateway.core.es.http.search;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.FetchFields;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.es.http.ESAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
@@ -23,6 +24,8 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("restSpatialSearchAction")
 public class RestSpatialSearchAction extends ESAction {
 
+    public static final String INDEX = "index";
+
     @Override
     public String name() {
         return "spatial_search";
@@ -30,8 +33,8 @@ public class RestSpatialSearchAction extends ESAction {
 
     @Override
     public void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel) {
-        String index = queryContext.getRequest().param("index");
-        if (Strings.hasText(index) == false) {
+        String index = queryContext.getRequest().param(INDEX);
+        if (!Strings.hasText(index)) {
             throw new IllegalArgumentException("index must not be null");
         }
 
@@ -49,13 +52,13 @@ public class RestSpatialSearchAction extends ESAction {
 
     private void handle(QueryContext queryContext, RestRequest request, ESSearchRequest esSearchRequest) {
         long start = System.currentTimeMillis();
-        esSearchRequest.indices(Strings.splitStringByCommaToArray(request.param("index")));
+        esSearchRequest.indices(Strings.splitStringByCommaToArray(request.param(INDEX)));
         esSearchRequest.types(Strings.splitStringByCommaToArray(request.param("type")));
         esSearchRequest.setTemplateRequest(request.path().endsWith("/template"));
         esSearchRequest.source(RestActions.getRestContent(request));
         Map<String, String> params = request.params();
         params.remove("source");
-        params.remove("index");
+        params.remove(INDEX);
         params.remove("type");
         params.remove("filter_path");
         params.put(QueryConsts.SEARCH_IGNORE_THROTTLED, "false");
@@ -73,19 +76,19 @@ public class RestSpatialSearchAction extends ESAction {
 
         IndexTemplate indexTemplate = null;
         if (isIndexType(queryContext)) {
-            List<String> indices = queryContext.getIndices();
-            if (indices.size() == 1) {
-                indexTemplate = getTemplateByIndex(indices, queryContext);
+            List<String> indicesList = queryContext.getIndices();
+            if (indicesList.size() == 1) {
+                indexTemplate = getTemplateByIndex(indicesList, queryContext);
             }
 
             if (indexTemplate == null) {
-                indexTemplate = getTemplateByIndexTire(indices, queryContext);
+                indexTemplate = getTemplateByIndexTire(indicesList, queryContext);
             }
         }
 
         long indexTemplateTime = System.currentTimeMillis();
 
-        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate);
+        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
         long getClientTime = System.currentTimeMillis();
 
@@ -97,7 +100,10 @@ public class RestSpatialSearchAction extends ESAction {
         ActionListener<ESSearchResponse> listener = newSearchListener(queryContext);
         readClient.search(esSearchRequest, listener);
 
-        statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_search_internal||requestId={}||paramCost={}||indexTemplateCost={}||getClientCost={}||preProcessCost={}||searchCost={}",
-                queryContext.getRequestId(), paramTime - start, indexTemplateTime - paramTime, getClientTime - indexTemplateTime, preProcessTime - getClientTime, System.currentTimeMillis() - preProcessTime);
+        JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+        joinLogContext.setParamCost(paramTime - start);
+        joinLogContext.setIndexTemplateCost(indexTemplateTime - paramTime);
+        joinLogContext.setGetClientCost(getClientTime - indexTemplateTime);
+        joinLogContext.setPreProcessCost(preProcessTime - getClientTime);
     }
 }

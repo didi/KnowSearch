@@ -24,16 +24,12 @@ import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
 import com.didi.arius.gateway.core.es.http.StatAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectResponse;
-import com.google.common.collect.Sets;
-import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 
 /**
@@ -42,16 +38,10 @@ import java.util.Set;
 @Component("restNodesInfoAction")
 public class RestNodesInfoAction extends StatAction {
 
-    private final static Set<String> ALLOWED_METRICS = Sets.newHashSet("http", "jvm", "os", "plugins", "process", "settings", "thread_pool", "transport");
-
-	public static final String NAME = "restNodesInfo";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "restNodesInfo";
 	}
-	
-	private NodesInfoResponse allNodesCache = null;
 
 	private BytesRestResponse bytesRestResponse = null;
 	
@@ -66,7 +56,7 @@ public class RestNodesInfoAction extends StatAction {
         // cache
         if (request.rawPath().equals("/_nodes")) {
             if (queryContext.isFromKibana()) {
-                client = esRestClientService.getAdminClient();
+                client = esRestClientService.getAdminClient(actionName);
             }
 
         	long now = System.currentTimeMillis();

@@ -5,13 +5,13 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandle
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateAuthContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateAuthNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateAuthOrderDetail;
@@ -19,15 +19,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.notify.info.auth.ImportantTemplateAuthNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicClusterAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.google.common.collect.Lists;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,6 +42,7 @@ import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskType
  * @author d06679
  * @date 2019/4/29
  */
+@NoArgsConstructor
 @Service("templateAuthHandler")
 public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
@@ -64,7 +65,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
     private AppLogicTemplateAuthService                 logicTemplateAuthService;
 
     @Autowired
-    private AppLogicClusterAuthService                  logicClusterAuthService;
+    private AppClusterLogicAuthService logicClusterAuthService;
 
     /**
      * 工单是否自动审批
@@ -89,9 +90,9 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isRDOrOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
@@ -105,7 +106,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         TemplateAuthContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), TemplateAuthContent.class);
 
         if (AriusObjUtils.isNull(content.getId())) {
@@ -125,10 +126,9 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("权限类型非法");
         }
 
-        if (authEnum.equals(AppTemplateAuthEnum.OWN)) {
-            if (AriusObjUtils.isNull(content.getResponsible())) {
-                return Result.buildParamIllegal("管理责任人为空");
-            }
+        if (authEnum.equals(AppTemplateAuthEnum.OWN)
+                && AriusObjUtils.isNull(content.getResponsible())) {
+            return Result.buildParamIllegal("管理责任人为空");
         }
 
         List<AppTemplateAuth> auths = appLogicTemplateAuthService.getTemplateAuthsByAppId(workOrder.getSubmitorAppid());
@@ -160,7 +160,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -171,7 +171,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -182,7 +182,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         TemplateAuthContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), TemplateAuthContent.class);
         Integer logicTemplateId = content.getId();
 
@@ -190,51 +190,49 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
         if (authEnum.equals(AppTemplateAuthEnum.OWN)) {
             // 逻辑模板移交
-            return templateLogicService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
-                content.getResponsible(), workOrder.getSubmitor());
+            return Result.buildFrom(templateLogicService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
+                    content.getResponsible(), workOrder.getSubmitor()));
         } else {
             // 对于索引的工单任务，若没有集群权限，则添加所在集群的访问权限
             // 获取所在集群
-            ESClusterLogic esClusterLogic = templateLogicService
+            ClusterLogic clusterLogic = templateLogicService
                 .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId).getLogicCluster();
 
-            if (esClusterLogic == null) {
+            if (clusterLogic == null) {
                 // 不应该走到这一步，防御编程
                 return Result.buildFail(String.format("找不到模板%s所属的逻辑集群", logicTemplateId));
             }
-            AppLogicClusterAuthEnum logicClusterAuthEnum = logicClusterAuthService
-                .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), esClusterLogic.getId());
+            AppClusterLogicAuthEnum logicClusterAuthEnum = logicClusterAuthService
+                .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), clusterLogic.getId());
 
             boolean addClusterAuth = false;
             // 没有集群权限则添加访问权限
-            if (logicClusterAuthEnum == AppLogicClusterAuthEnum.NO_PERMISSIONS) {
-                logicClusterAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorAppid(), esClusterLogic.getId(),
-                    AppLogicClusterAuthEnum.ACCESS, workOrder.getSubmitor(), workOrder.getSubmitor());
+            if (logicClusterAuthEnum == AppClusterLogicAuthEnum.NO_PERMISSIONS) {
+                logicClusterAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorAppid(), clusterLogic
+								.getId(),
+                    AppClusterLogicAuthEnum.ACCESS, workOrder.getSubmitor(), workOrder.getSubmitor());
                 addClusterAuth = true;
             }
 
             // 逻辑模板权限设置
-            Result result = logicTemplateAuthService.ensureSetLogicTemplateAuth(workOrder.getSubmitorAppid(),
+            Result<Void> result = logicTemplateAuthService.ensureSetLogicTemplateAuth(workOrder.getSubmitorAppid(),
                 logicTemplateId, authEnum, workOrder.getSubmitor(), workOrder.getSubmitor());
 
             // 发送通知
             if (result.success()) {
                 sendNotify(WORK_ORDER_TEMPLATE_AUTH, new TemplateAuthNotify(workOrder.getSubmitorAppid(),
-                    content.getName(), addClusterAuth, esClusterLogic.getName()),
+                    content.getName(), addClusterAuth, clusterLogic.getName()),
                     Arrays.asList(workOrder.getSubmitor()));
 
                 // 如果是重要索引，通知索引负责人
                 if (templateLabelService.isImportantIndex(content.getId())) {
-                    if (EnvUtil.isOnline() || EnvUtil.isPre()) {
-                        notifyService.send(NotifyTaskTypeEnum.IMPORTANT_TEMPLATE_AUTH,
-                            new ImportantTemplateAuthNotifyInfo(logicTemplateId, content.getName(), adminUrlConsole),
-                            Lists.newArrayList(workOrder.getSubmitor()));
-                    }
+                    notifyService.send(NotifyTaskTypeEnum.IMPORTANT_TEMPLATE_AUTH,
+                        new ImportantTemplateAuthNotifyInfo(logicTemplateId, content.getName(), adminUrlConsole),
+                        Lists.newArrayList(workOrder.getSubmitor()));
                 }
             }
 
-            return result;
+            return Result.buildFrom(result);
         }
-
     }
 }

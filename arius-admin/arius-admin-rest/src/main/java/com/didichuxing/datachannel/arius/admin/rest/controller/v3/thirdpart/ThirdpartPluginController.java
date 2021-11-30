@@ -11,18 +11,16 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 @RestController
 @RequestMapping(V3_THIRD_PART + "/plugin")
-@Api(value = "第三方访问接口--自定义插件信息(REST)")
+@Api(tags = "第三方访问接口--自定义插件信息(REST)")
 public class ThirdpartPluginController {
 
     @Autowired
     private WorkOrderManager workOrderManager;
 
-    // todo 路径改rest风格
     @GetMapping(path = "/info")
     @ResponseBody
     @ApiOperation(value = "获取宙斯ES执行脚本插件信息", notes = "")
     @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster_name", value = "集群名称", required = true)
-    // todo cluster_name改clusterName
     public String getPluginDetail(@RequestParam(value = "cluster_name") String cluster) {
         return workOrderManager.getClusterTaskInfo(cluster).getData();
     }

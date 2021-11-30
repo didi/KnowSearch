@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -11,6 +13,8 @@ import java.io.Serializable;
  * @date 2020/08/24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class IndexTemplatePhyAlias implements Serializable {
 
     /**

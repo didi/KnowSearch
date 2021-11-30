@@ -22,7 +22,7 @@ public interface NightingaleClusterRemoteService {
      *
      * @return Result
      */
-    Result actionTask(Integer taskId, String action);
+    Result<Object> actionTask(Integer taskId, String action);
 
     /**
      * 部署 or 继续部署 宙斯集群
@@ -31,7 +31,7 @@ public interface NightingaleClusterRemoteService {
      * @param action  部署动作
      * @return Result
      */
-    Result actionHostTask(Integer taskId, String hostname, String action);
+    Result<Object> actionHostTask(Integer taskId, String hostname, String action);
 
     /**
      *  获取 宙斯任务部署 结果

@@ -6,6 +6,9 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
  * @date 2020/08/24
  */
 public class AdminESOpRetryConstants {
+
+    private AdminESOpRetryConstants(){}
+
     /**
      * 默认重试次数
      */

@@ -16,8 +16,14 @@ import static org.elasticsearch.rest.RestRequest.Method.GET;
 public class RestGetController extends BaseHttpRestController {
     @Autowired
     private RestGetAction restGetAction;
+
+    public RestGetController() {
+        // pass
+    }
+
     @Override
     protected void register() {
+        controller.registerHandler(GET, "/{index}/_doc/{id}", this);
         controller.registerHandler(GET, "/{index}/{type}/{id}", this);
     }
 

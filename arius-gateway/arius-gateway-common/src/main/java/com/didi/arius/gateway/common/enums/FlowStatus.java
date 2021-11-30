@@ -5,7 +5,16 @@ package com.didi.arius.gateway.common.enums;
 * 
 */
 public enum FlowStatus {
-	DOWN,/**低于下限*/
-	KEEP,/**位于流控值的上限和下限之间*/
-	UP;/**高于上限*/ 
+	/**
+	 * 低于下限
+	 */
+	DOWN,
+	/**
+	 * 位于流控值的上限和下限之间
+	 */
+	KEEP,
+	/**
+	 * 高于上限
+	 */
+	UP;
 }

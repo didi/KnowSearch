@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.remote.protocol.content;
 
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+
 /**
  * 登录校验方式
  *
@@ -10,9 +12,9 @@ public enum LoginProtocolTypeEnum {
                               /**
                                * 默认校验方式, 与DB校验
                                */
-                              DEFAULT(1, "defaultLoginProtocol"),
+                              DEFAULT(1, "defaultLogin"),
 
-                              LDAP(2, "ldapLoginProtocol"),
+                              LDAP(2, "ldap"),
 
                               UNKNOWN(-1, "unknown");
 
@@ -33,12 +35,12 @@ public enum LoginProtocolTypeEnum {
         return code;
     }
 
-    public static LoginProtocolTypeEnum valueOfCode(Integer code) {
-        if (code == null) {
+    public static LoginProtocolTypeEnum valueOfType(String type) {
+        if (AriusObjUtils.isNull(type)) {
             return LoginProtocolTypeEnum.UNKNOWN;
         }
         for (LoginProtocolTypeEnum codeEnum : LoginProtocolTypeEnum.values()) {
-            if (code.equals(codeEnum.getCode())) {
+            if (type.equals(codeEnum.getType())) {
                 return codeEnum;
             }
         }

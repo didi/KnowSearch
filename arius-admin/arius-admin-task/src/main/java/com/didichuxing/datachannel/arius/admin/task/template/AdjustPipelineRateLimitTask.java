@@ -1,15 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.limit.TemplateLimitManager;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
 
 /**
  * 删除过期索引任务
@@ -18,9 +14,6 @@ import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
  */
 @Component
 public class AdjustPipelineRateLimitTask extends BaseConcurrentTemplateTask {
-
-    @Autowired
-    private AriusConfigInfoService  ariusConfigInfoService;
 
     @Autowired
     private TemplateLimitManager templateLimitManager;
@@ -33,6 +26,15 @@ public class AdjustPipelineRateLimitTask extends BaseConcurrentTemplateTask {
     @Override
     public String getTaskName() {
         return "pipeline动态限流";
+    }
+
+    /**
+     * 任务的线程个数
+     * @return 任务的线程个数
+     */
+    @Override
+    public int poolSize() {
+        return 20;
     }
 
     /**
@@ -52,9 +54,6 @@ public class AdjustPipelineRateLimitTask extends BaseConcurrentTemplateTask {
      */
     @Override
     protected boolean executeByLogicTemplate(Integer logicId) throws AdminOperateException {
-        if (ariusConfigInfoService.booleanSetting(ARIUS_COMMON_GROUP, "quota.dynamic.limit.flink.sink.enable", false)) {
-            return templateLimitManager.adjustPipelineRateLimit(logicId);
-        }
-        return true;
+        return templateLimitManager.adjustPipelineRateLimit(logicId);
     }
 }

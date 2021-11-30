@@ -1,14 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.task;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.notify.info.rd.ScheduleTaskFailNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,14 +21,14 @@ import java.util.List;
  * @author d06679
  * @date 2019/3/21
  */
-public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask {
+public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask<ClusterPhy> {
 
     private static final ILog     LOGGER         = LogFactory.getLog(BaseConcurrentClusterTask.class);
 
     protected static final String TASK_RETRY_URL = "";
 
     @Autowired
-    protected ESClusterPhyService esClusterPhyService;
+    protected ClusterPhyService clusterPhyService;
 
     @Autowired
     protected ClusterPhyManager clusterPhyManager;
@@ -41,8 +42,8 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask {
      * @return
      */
     @Override
-    protected List getAllItems() {
-        return esClusterPhyService.listAllClusters();
+    protected List<ClusterPhy> getAllItems() {
+        return clusterPhyService.listAllClusters();
     }
 
     /**
@@ -51,8 +52,8 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask {
      * @param taskBatch
      */
     @Override
-    protected boolean executeByBatch(TaskBatch taskBatch) throws AdminOperateException {
-        List items = taskBatch.getItems();
+    protected boolean executeByBatch(TaskBatch<ClusterPhy> taskBatch) throws AdminOperateException {
+        List<ClusterPhy> items = taskBatch.getItems();
         if (CollectionUtils.isEmpty(items)) {
             return true;
         }
@@ -60,8 +61,8 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask {
         boolean succ = true;
 
         // 只要有一个集群失败就认为batch失败
-        for (Object item : items) {
-            ESClusterPhy cluster = (ESClusterPhy) item;
+        for (ClusterPhy item : items) {
+            ClusterPhy cluster = item;
             try {
                 LOGGER.info("executeByCluster begin||cluster={}||task={}", cluster.getCluster(), getTaskName());
                 if (executeByCluster(cluster.getCluster())) {

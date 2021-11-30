@@ -4,7 +4,9 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.ecm;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * ES集群表对应各角色主机列表
@@ -12,6 +14,8 @@ import lombok.Data;
  * @since 2020-08-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESRoleClusterHostPO extends BasePO {
 
     private Long id;
@@ -59,7 +63,7 @@ public class ESRoleClusterHostPO extends BasePO {
     private String  rack;
 
     /**
-     * set
+     * 节点名称
      */
     private String  nodeSet;
 
@@ -86,5 +90,9 @@ public class ESRoleClusterHostPO extends BasePO {
         int result = hostname.hashCode();
         result = 31 * result + cluster.hashCode();
         return result;
+    }
+
+    public String getKey(){
+        return roleClusterId + "@" + nodeSet;
     }
 }

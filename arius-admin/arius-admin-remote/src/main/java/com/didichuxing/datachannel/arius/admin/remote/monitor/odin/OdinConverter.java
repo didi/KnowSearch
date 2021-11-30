@@ -11,6 +11,8 @@ import java.util.Properties;
 public class OdinConverter {
     private static final String SLIENCE_TYPE = "strategy";
 
+    private OdinConverter() { throw new IllegalStateException("Utility class"); }
+
     public static OdinStrategy convert2OdinStrategy(Strategy strategy, String namespace) {
         OdinStrategy odinStrategy = new OdinStrategy();
 

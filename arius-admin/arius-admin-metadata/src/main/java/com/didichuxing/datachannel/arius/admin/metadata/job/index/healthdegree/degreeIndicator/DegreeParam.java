@@ -27,7 +27,7 @@ public class DegreeParam {
 
     IndexRealTimeInfo yesdayReaTimelInfo;
 
-    List<ESIndexToNodeStats> ESIndexToNodeStatsses;
+    List<ESIndexToNodeStats> esIndexToNodeStats;
 
     List<IndicatorChild> indicatorChilds;
 
@@ -40,6 +40,6 @@ public class DegreeParam {
                 ": templateAccessCount="    + templateAccessCount   +
                 ": todayReaTimelInfo="      + todayReaTimelInfo.toString()   +
                 ", yesdayReaTimelInfo="     + yesdayReaTimelInfo.toString() +
-                ", ESIndexToNodeStatsses="  + JSON.toJSONString(ESIndexToNodeStatsses);
+                ", esIndexToNodeStats="  + JSON.toJSONString( esIndexToNodeStats );
     }
 }

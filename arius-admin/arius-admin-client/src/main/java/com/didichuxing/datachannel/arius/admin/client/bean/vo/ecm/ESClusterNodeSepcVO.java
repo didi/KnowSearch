@@ -3,13 +3,17 @@ package com.didichuxing.datachannel.arius.admin.client.bean.vo.ecm;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * es集群节点的套餐
  * @author d06679
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "集群节点规格信息")
 public class ESClusterNodeSepcVO extends BaseDTO {
 

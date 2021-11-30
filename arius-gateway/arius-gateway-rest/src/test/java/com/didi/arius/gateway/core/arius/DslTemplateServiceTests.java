@@ -36,9 +36,9 @@ public class DslTemplateServiceTests {
         dslTemplateService.putDSLTemplate("key1", new DSLTemplate(1, 1, true));
         DSLTemplate dslTemplate = dslTemplateService.getDSLTemplate("key1");
         System.out.println(JSON.toJSONString(dslTemplate));
-        assertEquals(dslTemplate != null, true);
+        assertEquals(true, dslTemplate != null);
         dslTemplateService.removeDSLTemplate("key1");
-        assertEquals(dslTemplateService.getDSLTemplate("key1") == null, true);
+        assertEquals(true, dslTemplateService.getDSLTemplate("key1") == null);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class DslTemplateServiceTests {
         dslTemplateService.putDSLTemplate("key1", new DSLTemplate(1, 1, true));
         DSLTemplate dslTemplate = dslTemplateService.getDSLTemplate("key1");
         System.out.println(JSON.toJSONString(dslTemplate));
-        assertEquals(dslTemplate != null, true);
+        assertEquals(true, dslTemplate != null);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class DslTemplateServiceTests {
         dslTemplateService.putDSLTemplate("key1", new DSLTemplate(1, 1, true));
         final List<String> dslTemplateKeys = dslTemplateService.getDslTemplateKeys();
         System.out.println(JSON.toJSONString(dslTemplateKeys));
-        assertEquals(dslTemplateKeys.size() >= 0, true);
+        assertEquals(true, dslTemplateKeys.size() >= 0);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class DslTemplateServiceTests {
         dslTemplateService.putNewDSLTemplate("key1", new DSLTemplate(1, 1, true));
         final DSLTemplate dslTemplate = dslTemplateService.getNewDSLTemplate("key1");
         System.out.println(JSON.toJSONString(dslTemplate));
-        assertEquals(dslTemplate != null, true);
+        assertEquals(true, dslTemplate != null);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class DslTemplateServiceTests {
         dslTemplateService.putNewDSLTemplate("key1", new DSLTemplate(1, 1, true));
         final List<String> newDslTemplateKeys = dslTemplateService.getNewDslTemplateKeys();
         System.out.println(JSON.toJSONString(newDslTemplateKeys));
-        assertEquals(newDslTemplateKeys.size() >= 0, true);
+        assertEquals(true, newDslTemplateKeys.size() >= 0);
     }
 
     @Test

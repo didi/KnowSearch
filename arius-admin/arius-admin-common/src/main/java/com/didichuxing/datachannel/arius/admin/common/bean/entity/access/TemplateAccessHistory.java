@@ -34,11 +34,7 @@ public class TemplateAccessHistory {
      */
     @JSONField(serialize = false)
     public boolean isValid() {
-        if (StringUtils.isBlank(templateName) || StringUtils.isBlank(clusterName)) {
-            return false;
-        }
-
-        return true;
+        return  !(StringUtils.isBlank(templateName) || StringUtils.isBlank(clusterName));
     }
 
 }

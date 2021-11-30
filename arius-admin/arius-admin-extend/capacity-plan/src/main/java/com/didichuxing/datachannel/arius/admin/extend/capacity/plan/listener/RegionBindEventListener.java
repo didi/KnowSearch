@@ -1,17 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.listener;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionBindEvent;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanAreaDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanAreaService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @Author: lanxinzheng
@@ -27,14 +27,17 @@ public class RegionBindEventListener implements ApplicationListener<RegionBindEv
     private CapacityPlanAreaService capacityPlanAreaService;
 
     @Autowired
-    private ClusterContextManager clusterContextManager;
+    private ClusterContextManager   clusterContextManager;
 
     @Override
     public void onApplicationEvent(RegionBindEvent regionBindEvent) {
-        //更新admin集群校验模型
-        clusterContextManager.flushClusterContext();
-
+        //更新单集群上下文
         ClusterRegion region = regionBindEvent.getClusterRegion();
+        if (null == region) {
+            return;
+        }
+
+        clusterContextManager.flushClusterContextByClusterRegion(region);
 
         // 构建area信息
         CapacityPlanAreaDTO capacityPlanAreaDTO = new CapacityPlanAreaDTO();

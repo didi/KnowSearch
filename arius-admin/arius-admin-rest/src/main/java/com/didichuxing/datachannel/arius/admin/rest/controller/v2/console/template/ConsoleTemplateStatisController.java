@@ -19,7 +19,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 @NoArgsConstructor
 @RestController()
 @RequestMapping(V2_CONSOLE + "/template/statis")
-@Api(tags = "Console-索引模板统计信息接口(REST)")
+@Api(tags = "Console-用户侧索引模板统计信息接口(REST)")
 public class ConsoleTemplateStatisController extends BaseConsoleTemplateController {
 
     @Autowired

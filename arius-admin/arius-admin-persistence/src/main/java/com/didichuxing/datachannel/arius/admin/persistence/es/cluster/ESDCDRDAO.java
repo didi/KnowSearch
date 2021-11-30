@@ -1,24 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
+import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.request.dcdr.*;
+import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESDeleteDCDRTemplateResponse;
+import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESGetDCDRIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESGetDCDRTemplateResponse;
+import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESPutDCDRTemplateResponse;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.dcdr.*;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.dcdr.ESDeleteDCDRTemplateResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.dcdr.ESGetDCDRIndexResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.dcdr.ESGetDCDRTemplateResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.dcdr.ESPutDCDRTemplateResponse;
-import com.google.common.collect.Lists;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
 
 /**
  * @author d06679
@@ -113,8 +110,6 @@ public class ESDCDRDAO extends BaseESDAO {
         if (CollectionUtils.isEmpty(shouldDels)) {
             return true;
         }
-
-        // TODO ZHZ 有序需要优化为一个请求处理；需要引擎接口支持
 
         boolean succ = true;
         for (String delIndex : shouldDels) {

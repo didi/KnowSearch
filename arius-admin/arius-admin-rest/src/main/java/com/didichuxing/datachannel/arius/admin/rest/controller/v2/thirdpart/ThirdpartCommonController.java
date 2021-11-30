@@ -25,15 +25,9 @@ import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
 
-/**
- *
- *
- * @author d06679
- * @date 2019/3/13
- */
 @RestController
 @RequestMapping(V2_THIRD_PART + "/common")
-@Api(value = "第三方公共接口(REST)")
+@Api(tags = "第三方公共接口(REST)")
 public class ThirdpartCommonController {
 
     @Autowired
@@ -42,7 +36,7 @@ public class ThirdpartCommonController {
     @PostMapping("/operate/record/add")
     @ResponseBody
     @ApiOperation(value = "保存操作记录接口", notes = "")
-    public Result addOperateRecord(@RequestBody OperateRecordDTO param) {
+    public Result<Void> addOperateRecord(@RequestBody OperateRecordDTO param) {
         return commonManager.addOperateRecord(param);
     }
 
@@ -84,7 +78,7 @@ public class ThirdpartCommonController {
     @ApiOperation(value = "验证APP校验码接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "String", name = "appsecret", value = "校验码", required = true) })
-    public Result verifyApp(HttpServletRequest request, @RequestParam("appid") Integer appId,
+    public Result<Void> verifyApp(HttpServletRequest request, @RequestParam("appid") Integer appId,
                             @RequestParam("appsecret") String appSecret) throws UnsupportedEncodingException {
         return commonManager.verifyApp(request, appId, appSecret);
 

@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.didi</groupId>
-        <artifactId>arius-gateway</artifactId>
-        <version>${revision}</version>
+        <artifactId>arius-gateway-v2</artifactId>
+        <version>${version}</version>
     </parent>
 
     <artifactId>arius-gateway-remote</artifactId>
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.didi</groupId>
             <artifactId>arius-gateway-common</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

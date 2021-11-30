@@ -23,29 +23,19 @@ import java.util.Map;
 @Accessors(chain = true)
 @ApiModel(value = "AppIdTemplateAccessCountVO", description = "appid访问索引模板级别次数")
 public class AppIdTemplateAccessCountVO {
-    /**
-     * 索引模板主键
-     */
+
     @ApiModelProperty("索引模板主键")
     private Integer templateId;
-    /**
-     * 索引逻辑id
-     */
+
     @ApiModelProperty("索引逻辑id")
     private Integer logicTemplateId;
-    /**
-     * 索引模板名称
-     */
+
     @ApiModelProperty("索引模板名称")
     private String templateName;
-    /**
-     * 集群名称
-     */
+
     @ApiModelProperty("集群名称")
     private String clusterName;
-    /**
-     * 应用账号
-     */
+
     @ApiModelProperty("应用账号")
     private Integer appId;
     /**
@@ -58,9 +48,7 @@ public class AppIdTemplateAccessCountVO {
      */
     @ApiModelProperty("访问索引名称明细数据")
     private Map<String/*indexName*/, Long/*access indexName count*/> accessDetailInfo;
-    /**
-     * 统计日期
-     */
+
     @ApiModelProperty("统计日期")
     private String date;
 }

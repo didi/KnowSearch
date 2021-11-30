@@ -2,6 +2,8 @@ package com.didichuxing.datachannel.arius.admin.client.bean.common;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
@@ -15,6 +17,8 @@ import lombok.Data;
  * @date 2019/5/20
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "模板type信息")
 public class TemplateType {
 

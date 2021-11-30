@@ -31,11 +31,9 @@ import org.springframework.stereotype.Component;
 @Component("restGetAction")
 public class RestGetAction extends RestBaseGetAction {
 
-	public static final String NAME = "get";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "get";
 	}
 	
     @Override

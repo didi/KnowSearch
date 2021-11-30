@@ -40,16 +40,7 @@
 					interval="1" />
 			</Policies>
 		</RollingFile>		
-		
-		<RollingFile name="analysis" fileName="${gateway.queryConfig.logPath}/log/analysis.log" filePattern="${gateway.queryConfig.logPath}/log/analysis.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p][%d][%-4r][%t][%F:%L] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
-		</RollingFile>			
-		
+
 		<RollingFile name="metrics" fileName="${gateway.queryConfig.logPath}/log/metrics.log" filePattern="${gateway.queryConfig.logPath}/log/metrics.log.%d{yyyy-MM-dd}"
 			append="true">
 			<PatternLayout pattern="[%p][%d][%-4r][%t][%F:%L] %m%n" />
@@ -78,26 +69,11 @@
 			</Policies>
 		</RollingFile>
 		
-        <RollingFile name="SystemFile" fileName="${gateway.queryConfig.logPath}/log/system.log"
-                     filePattern="${gateway.queryConfig.logPath}/log/system-%i.log" append="false">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
-            <SizeBasedTriggeringPolicy size="100MB"/>
-            <DefaultRolloverStrategy max="2"/>
-        </RollingFile>
-        <RollingFile name="consumeLogger" fileName="${gateway.queryConfig.logPath}/log/consume.log"
-                     filePattern="${gateway.queryConfig.logPath}/log/consume-%i.log" append="false">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
-            <SizeBasedTriggeringPolicy size="200MB"/>
-            <DefaultRolloverStrategy max="3"/>
-        </RollingFile>		
-        
-		<RollingFile name="tracer" fileName="${gateway.queryConfig.logPath}/log/tracer.log" filePattern="${gateway.queryConfig.logPath}/log/tracer.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p][%d][%-4r][%t][%F:%L] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
+		<RollingFile name="thirdReq" fileName="${gateway.queryConfig.logPath}/log/thirdReq.log"
+					 filePattern="${gateway.queryConfig.logPath}/log/thirdReq-%i.log" append="false">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level - %msg%n"/>
+			<SizeBasedTriggeringPolicy size="100MB"/>
+			<DefaultRolloverStrategy max="2"/>
 		</RollingFile>
 
 		<RollingFile name="gatherInfoLogger" fileName="${gateway.queryConfig.logPath}/log/gather.log"
@@ -125,9 +101,6 @@
 			<AppenderRef ref="console" />
 			<AppenderRef ref="file" />
 		</Root>
-        <AsyncLogger level="info" name="analysis" additivity="false">
-            <AppenderRef ref="analysis"/>
-        </AsyncLogger>
         <AsyncLogger level="info" name="bootLog" additivity="false">
             <AppenderRef ref="bootLog"/>   
         </AsyncLogger>     
@@ -143,18 +116,8 @@
         <AsyncLogger level="info" name="auditLog" additivity="false">
             <AppenderRef ref="auditLog"/>
         </AsyncLogger>   
-        
-        <AsyncLogger level="info" name="consumeLogger" additivity="false">
-            <AppenderRef ref="consumeLogger"/>
-            <!--<AppenderRef ref="Console"/>-->
-        </AsyncLogger>
-        <AsyncLogger level="info" name="SystemFile" additivity="false">
-            <AppenderRef ref="SystemFile"/>
-            <!--<AppenderRef ref="Console"/>-->
-        </AsyncLogger>  
-        
-        <AsyncLogger level="trace" name="org.elasticsearch.transport.tracer" additivity="false">
-            <AppenderRef ref="tracer"/>
+		<AsyncLogger level="info" name="thirdReq" additivity="false">
+            <AppenderRef ref="thirdReq"/>
         </AsyncLogger>
 
 		<logger name="gatherInfoLogger" additivity="false">

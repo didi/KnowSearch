@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ESVersionUtil {
 
+    private ESVersionUtil(){}
+
     private final static int MIN_VERSION_STAGE = 3;
 
     /**

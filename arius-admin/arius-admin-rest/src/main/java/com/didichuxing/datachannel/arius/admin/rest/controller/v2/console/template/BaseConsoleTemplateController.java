@@ -6,31 +6,30 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-
 public class BaseConsoleTemplateController {
 
-    protected static final ILog          LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
+    protected static final ILog    LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
 
     @Autowired
-    protected TemplateLogicService       templateLogicService;
+    protected TemplateLogicService templateLogicService;
 
     @Autowired
-    protected TemplateLabelService       templateLabelService;
+    protected TemplateLabelService templateLabelService;
 
     @Autowired
-    protected AriusConfigInfoService     ariusConfigInfoService;
+    protected AppService           appService;
 
     /**
      * Check是否有逻辑索引操作权限
@@ -38,7 +37,7 @@ public class BaseConsoleTemplateController {
      * @param appId App Id
      * @return
      */
-    protected Result checkAppAuth(Integer logicId, Integer appId) {
+    protected Result<Void> checkAppAuth(Integer logicId, Integer appId) {
 
         if (AriusObjUtils.isNull(logicId)) {
             return Result.buildParamIllegal("索引id为空");
@@ -57,12 +56,11 @@ public class BaseConsoleTemplateController {
             return Result.buildOpForBidden("禁止操作重要索引，请联系Arius服务号处理");
         }
 
-        if (!templateLogic.getAppId().equals(appId)) {
-            return Result.buildOpForBidden("您无权对该索引进行操作");
+        if (appService.isSuperApp(appId)) {
+            return Result.buildSucc();
         }
 
-        if (ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP, "arius.vip.index.ids", "14679,15737", ",")
-            .contains(String.valueOf(logicId))) {
+        if (!templateLogic.getAppId().equals(appId)) {
             return Result.buildOpForBidden("您无权对该索引进行操作");
         }
 
@@ -77,27 +75,39 @@ public class BaseConsoleTemplateController {
         Map<String, Field> name2FieldMap = ConvertUtil.list2Map(templateLogicWithMapping.getFields(), Field::getName);
 
         if (StringUtils.isNotBlank(templateLogicWithMapping.getDateField())) {
-            if (name2FieldMap.containsKey(templateLogicWithMapping.getDateField())) {
-                name2FieldMap.get(templateLogicWithMapping.getDateField()).setDateField(true);
-                name2FieldMap.get(templateLogicWithMapping.getDateField())
-                    .setDateFieldFormat(templateLogicWithMapping.getDateFieldFormat());
-            }
+            handleDateField(templateLogicWithMapping, name2FieldMap);
         }
 
         if (StringUtils.isNotBlank(templateLogicWithMapping.getIdField())) {
-            for (String idField : templateLogicWithMapping.getIdField().split(",")) {
-                if (name2FieldMap.containsKey(idField)) {
-                    name2FieldMap.get(idField).setIdField(true);
-                }
-            }
+            handleIdField(templateLogicWithMapping, name2FieldMap);
         }
 
         if (StringUtils.isNotBlank(templateLogicWithMapping.getRoutingField())) {
-            for (String routingField : templateLogicWithMapping.getRoutingField().split(",")) {
-                if (name2FieldMap.containsKey(routingField)) {
-                    name2FieldMap.get(routingField).setRoutingField(true);
-                }
+            handleRoutingField(templateLogicWithMapping, name2FieldMap);
+        }
+    }
+
+    private void handleRoutingField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        for (String routingField : templateLogicWithMapping.getRoutingField().split(",")) {
+            if (name2FieldMap.containsKey(routingField)) {
+                name2FieldMap.get(routingField).setRoutingField(true);
             }
+        }
+    }
+
+    private void handleIdField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        for (String idField : templateLogicWithMapping.getIdField().split(",")) {
+            if (name2FieldMap.containsKey(idField)) {
+                name2FieldMap.get(idField).setIdField(true);
+            }
+        }
+    }
+
+    private void handleDateField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        if (name2FieldMap.containsKey(templateLogicWithMapping.getDateField())) {
+            name2FieldMap.get(templateLogicWithMapping.getDateField()).setDateField(true);
+            name2FieldMap.get(templateLogicWithMapping.getDateField())
+                .setDateFieldFormat(templateLogicWithMapping.getDateFieldFormat());
         }
     }
 }

@@ -1,10 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common.ecm;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EcmTaskBasic {
     /**
      * ID主键自增
@@ -84,10 +88,10 @@ public class EcmTaskBasic {
     /**
      * 开始时间
      */
-    protected Date  createTime;
+    private Date  createTime;
 
     /**
      * 结束时间
      */
-    protected Date  updateTime;
+    private Date  updateTime;
 }

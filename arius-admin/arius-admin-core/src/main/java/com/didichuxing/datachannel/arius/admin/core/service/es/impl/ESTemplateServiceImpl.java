@@ -1,24 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-
-import java.util.Map;
-import java.util.Set;
-
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESTemplateDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
 
 /**
  * @author d06679
@@ -26,12 +28,10 @@ import javax.annotation.Nullable;
  */
 @Service
 public class ESTemplateServiceImpl implements ESTemplateService {
+    private static final ILog LOGGER = LogFactory.getLog(ESTemplateServiceImpl.class);
 
     @Autowired
     private ESTemplateDAO          esTemplateDAO;
-
-    @Autowired
-    private AriusConfigInfoService ariusConfigInfoService;
 
     /**
      * 删除模板
@@ -58,12 +58,9 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     @Override
     public boolean syncUpdateRackAndShard(String cluster, String name, String rack, Integer shard, Integer shardRouting,
                                           int retryCount) throws ESOperateException {
-        Set<String> shardRoutingEnableClusters = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-            "shard.routing.enable.clusters", "", ",");
-
         return ESOpTimeoutRetry.esRetryExecute("updateTemplateRackAndShard", retryCount,
             () -> esTemplateDAO.updateRackAndShard(cluster, name, rack, shard,
-                shardRoutingEnableClusters.contains(cluster) ? shardRouting : null));
+                shardRouting));
     }
 
     /**
@@ -79,10 +76,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     @Override
     public boolean syncCreate(String cluster, String name, String expression, String rack, Integer shard,
                               Integer shardRouting, int retryCount) throws ESOperateException {
-        Set<String> shardRoutingEnableClusters = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-            "shard.routing.enable.clusters", "", ",");
         return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount, () -> esTemplateDAO.create(cluster, name,
-            expression, rack, shard, shardRoutingEnableClusters.contains(cluster) ? shardRouting : null));
+            expression, rack, shard, shardRouting));
     }
 
     /**
@@ -99,6 +94,12 @@ public class ESTemplateServiceImpl implements ESTemplateService {
                                         int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("updateExpression", retryCount,
             () -> esTemplateDAO.updateExpression(cluster, name, expression));
+    }
+
+    @Override
+    public boolean syncUpdateShardNum(String cluster, String name, Integer shardNum, int retryCount) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("updateShardNum", retryCount,
+                () -> esTemplateDAO.updateShardNum(cluster, name, shardNum));
     }
 
     /**
@@ -197,6 +198,16 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     }
 
     /**
+     * 获取所有引擎模板
+     * @param clusters 集群名
+     * @return
+     */
+    @Override
+    public Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters) {
+        return esTemplateDAO.getAllTemplate(clusters);
+    }
+
+    /**
      * 修改模板名称
      *
      * @param cluster    集群
@@ -231,9 +242,34 @@ public class ESTemplateServiceImpl implements ESTemplateService {
             try {
                 ESOpTimeoutRetry.esRetryExecute("deleteTemplate", retryCount,
                     () -> esTemplateDAO.delete(cluster, name));
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                LOGGER.error(
+                        "class=ESTemplateServiceImpl||method=syncCheckTemplateConfig||clusterName={}||name={}||errMsg=exception",
+                        cluster, name);
             }
         }
+    }
+
+    @Override
+    public long syncGetTemplateNum(String cluster) {
+        String templateNameRequestContent = getTemplateNameRequestContent();
+        try {
+            DirectResponse directResponse = esTemplateDAO.getDirectResponse(cluster, "Get", templateNameRequestContent);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                List<TemplatePhysicalPO> indexBelongNodes = ConvertUtil
+                    .str2ObjArrayByJson(directResponse.getResponseContent(), TemplatePhysicalPO.class);
+
+                return indexBelongNodes.stream().map(TemplatePhysicalPO::getName).filter(r -> !r.startsWith("."))
+                    .count();
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=ESTemplateServiceImpl||method=syncGetTemplateNum||clusterName={}||errMsg=exception",
+                cluster, e.getMessage());
+            return 0;
+        }
+
+        return 0;
     }
 
 }

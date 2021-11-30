@@ -1,17 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.shard;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,9 +35,6 @@ public class TemplateShardManagerImpl extends BaseTemplateSrv implements Templat
     @Autowired
     private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
 
-    @Autowired
-    private TemplatePhyManager templatePhyManager;
-
     @Override
     public TemplateServiceEnum templateService() {
         return TEMPLATE_SHARD;
@@ -61,12 +57,12 @@ public class TemplateShardManagerImpl extends BaseTemplateSrv implements Templat
 
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
-                Result result = adjustShardCount(templatePhysical.getId(), retryCount);
+                Result<Void> result = adjustShardCount(templatePhysical.getId(), retryCount);
                 if (result.failed()) {
-                    LOGGER.warn("method=adjustShardCount||template={}||result={}", templatePhysical.getName(), result);
+                    LOGGER.warn("class=TemplateShardManagerImpl||method=adjustShardCount||template={}||result={}", templatePhysical.getName(), result);
                 }
             } catch (Exception e) {
-                LOGGER.warn("method=adjustShardCount||template={}||errMsg=", templatePhysical.getName(), e.getMessage(),
+                LOGGER.warn("class=TemplateShardManagerImpl||method=adjustShardCount||template={}||errMsg=", templatePhysical.getName(), e.getMessage(),
                     e);
             }
         }
@@ -82,7 +78,7 @@ public class TemplateShardManagerImpl extends BaseTemplateSrv implements Templat
      * @return result
      */
     @Override
-    public Result adjustShardCount(Long physicalId, int retryCount) throws ESOperateException {
+    public Result<Void> adjustShardCount(Long physicalId, int retryCount) throws ESOperateException {
         IndexTemplatePhy templatePhysical = templatePhyService.getTemplateById(physicalId);
 
         if (templatePhysical == null) {
@@ -99,9 +95,9 @@ public class TemplateShardManagerImpl extends BaseTemplateSrv implements Templat
         }
 
         if (templatePhysical.getShard() < shardCount) {
-            Result result = updateTemplateShardNumIfGreater(physicalId, shardCount, retryCount);
+            Result<Void> result = updateTemplateShardNumIfGreater(physicalId, shardCount, retryCount);
             if (result.success()) {
-                LOGGER.info("method=adjustShardCount||template={}||shardCount={}->{}", templatePhysical.getName(),
+                LOGGER.info("class=TemplateShardManagerImpl||method=adjustShardCount||template={}||shardCount={}->{}", templatePhysical.getName(),
                     templatePhysical.getShard(), shardCount);
             }
         }
@@ -142,7 +138,7 @@ public class TemplateShardManagerImpl extends BaseTemplateSrv implements Templat
     }
 
     @Override
-    public Result updateTemplateShardNumIfGreater(Long physicalId, Integer shardNum,
+    public Result<Void> updateTemplateShardNumIfGreater(Long physicalId, Integer shardNum,
                                                   int retryCount) throws ESOperateException {
         TemplatePhysicalPO physicalPO = indexTemplatePhysicalDAO.getById(physicalId);
         if (physicalPO == null) {
@@ -184,7 +180,7 @@ public class TemplateShardManagerImpl extends BaseTemplateSrv implements Templat
             param.setShardRouting(1);
         }
 
-        LOGGER.info("method=initShardRoutingAndAdjustShard||name={}||srcShard={}||shard={}||shardRouting={}", srcShard,
+        LOGGER.info("class=TemplateShardManagerImpl||method=initShardRoutingAndAdjustShard||name={}||srcShard={}||shard={}||shardRouting={}", srcShard,
             param.getName(), param.getShard(), param.getShardRouting());
     }
 

@@ -13,6 +13,8 @@ public enum ESClusterNodeRoleEnum {
 
                                    MASTER_NODE(3, "masternode"),
 
+                                   ML_NODE(4, "mlnode"),
+
                                    UNKNOWN(-1, "unknown");
 
     ESClusterNodeRoleEnum(int code, String desc) {

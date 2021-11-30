@@ -1,5 +1,6 @@
 package com.didi.arius.gateway.remote;
 
+import com.didi.arius.gateway.common.metadata.TemplateAlias;
 import com.didi.arius.gateway.remote.response.*;
 
 /**
@@ -61,5 +62,9 @@ public interface AriusAdminRemoteService {
      * @return
      */
     DSLTemplateListResponse listDslTemplates(long lastModifyTime, String scrollId);
+
+    TempaletAliasResponse addAdminTemplateAlias(TemplateAlias templateAlias);
+
+    TempaletAliasResponse delAdminTemplateAlias(TemplateAlias templateAlias);
 
 }

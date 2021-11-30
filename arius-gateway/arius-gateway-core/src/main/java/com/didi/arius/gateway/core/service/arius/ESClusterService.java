@@ -32,7 +32,7 @@ public interface ESClusterService {
      * @param queryContext
      * @return
      */
-    ESClient getClient(QueryContext queryContext);
+    ESClient getClient(QueryContext queryContext, String actionName);
 
     /**
      * 根据请求上下文获取esClient, 会根据索引模版判定
@@ -40,7 +40,7 @@ public interface ESClusterService {
      * @param indexTemplate
      * @return
      */
-    ESClient getClient(QueryContext queryContext, IndexTemplate indexTemplate);
+    ESClient getClient(QueryContext queryContext, IndexTemplate indexTemplate, String actionName);
 
     /**
      * 根据cluster获取esClient, 并且加入queryContext
@@ -48,12 +48,12 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ESClient getClientFromCluster(QueryContext queryContext, String clusterName);
+    ESClient getClientFromCluster(QueryContext queryContext, String clusterName, String actionName);
 
     /**
      * 获取具有写入权限的esClient
      * @param indexTemplate
      * @return
      */
-    ESClient getWriteClient(IndexTemplate indexTemplate);
+    ESClient getWriteClient(IndexTemplate indexTemplate, String actionName);
 }

@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.AppTemplateAuthVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
@@ -39,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping({ V2_OP + "/app/auth", V3_OP + "/app/auth/template" })
-@Api(value = "OP-App模板权限接口(REST)")
+@Api(tags = "OP-运维侧App模板权限接口(REST)")
 public class AppTemplateAuthController {
 
     @Autowired
@@ -67,14 +67,14 @@ public class AppTemplateAuthController {
     @PostMapping("/add")
     @ResponseBody
     @ApiOperation(value = "增加APP权限接口", notes = "")
-    public Result addTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
+    public Result<Void> addTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
         return appLogicTemplateAuthService.addTemplateAuth(authDTO, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "更新APP权限接口", notes = "")
-    public Result updateTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
+    public Result<Void> updateTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
         return appLogicTemplateAuthManager.updateTemplateAuth(authDTO, HttpRequestUtils.getOperator(request));
     }
 
@@ -82,7 +82,7 @@ public class AppTemplateAuthController {
     @ResponseBody
     @ApiOperation(value = "删除APP权限接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "authId", value = "权限ID", required = true) })
-    public Result deleteTemplateAuth(HttpServletRequest request, @RequestParam("authId") Long authId) {
+    public Result<Void> deleteTemplateAuth(HttpServletRequest request, @RequestParam("authId") Long authId) {
         return appLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtils.getOperator(request));
     }
 
@@ -90,7 +90,7 @@ public class AppTemplateAuthController {
     @ResponseBody
     @ApiOperation(value = "权限元数据校验接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "boolean", name = "delete", value = "是否删除脏数据", required = true) })
-    public Result deleteExcessTemplateAuthsIfNeed(@RequestParam("delete") boolean delete) {
+    public Result<Void> deleteExcessTemplateAuthsIfNeed(@RequestParam("delete") boolean delete) {
         return Result.build(appLogicTemplateAuthService.deleteExcessTemplateAuthsIfNeed(delete));
     }
 
@@ -118,7 +118,7 @@ public class AppTemplateAuthController {
                 // 逻辑模板信息
                 authVO.setTemplateName(logicTemplate.getName());
                 // 逻辑集群信息
-                ESClusterLogic logicCluster = logicTemplate.getLogicCluster();
+                ClusterLogic logicCluster = logicTemplate.getLogicCluster();
                 // 物理模板被删除后有可能没有集群信息
                 if (logicCluster != null) {
                     authVO.setLogicClusterId(logicCluster.getId());

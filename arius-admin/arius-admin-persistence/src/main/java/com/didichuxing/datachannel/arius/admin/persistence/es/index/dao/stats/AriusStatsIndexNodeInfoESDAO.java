@@ -14,6 +14,8 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_USAGE_PERCENT;
+
 @Component
 public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
 
@@ -81,7 +83,7 @@ public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         for (ESIndexToNodeStats indexNode : esIndexStats) {
             String node = indexNode.getNode() + ":" + indexNode.getPort();
-            Double cpu  = Double.valueOf(indexNode.getMetrics().get(OS_CPU));
+            Double cpu  = Double.valueOf(indexNode.getMetrics().get(CPU_USAGE_PERCENT.getType()));
 
             List<Double> cpuList = templateCpuMap.get(node);
             if (CollectionUtils.isEmpty(cpuList)) {
@@ -94,7 +96,8 @@ public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
         }
 
         List<Tuple<String, Double>> ret = Lists.newArrayList();
-        for (String node : templateCpuMap.keySet()) {
+        for(Map.Entry<String, List<Double>> entry : templateCpuMap.entrySet()){
+            String node = entry.getKey();
             List<Double> doubleList = templateCpuMap.get(node);
             if (CollectionUtils.isNotEmpty(doubleList)) {
                 final Double[] totalCpu = {0.0d};

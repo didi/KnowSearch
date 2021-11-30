@@ -2,8 +2,10 @@ package com.didi.arius.gateway.common.metadata;
 
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class DSLTemplate {
 	/**
 	 * dsl模板限流类

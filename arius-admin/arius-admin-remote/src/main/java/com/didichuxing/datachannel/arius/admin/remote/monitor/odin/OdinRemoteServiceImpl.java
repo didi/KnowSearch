@@ -1,31 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.remote.monitor.odin;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.OdinData;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Alert;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Metric;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.MetricSinkPoint;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.NotifyGroup;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Silence;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Strategy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.*;
 import com.didichuxing.datachannel.arius.admin.common.component.RestTool;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.remote.monitor.RemoteMonitorService;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinAlert;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinCluster;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinSilence;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinStrategy;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinTreeNode;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.*;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
+import lombok.NoArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,33 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_ALERT_QUERY_BY_ID_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_ALERT_QUERY_BY_NS_AND_PERIOD_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_ALL_NOTIFY_GROUP_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_CLUSTER_LIST;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_COLLECTOR_DOWNLOAD_DATA_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_COLLECTOR_SINK_DATA_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_NS_LIST;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_SILENCE_ADD_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_SILENCE_MODIFY_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_SILENCE_QUERY_BY_NS_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_SILENCE_RELEASE_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_STRATEGY_ADD_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_STRATEGY_DEL_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_STRATEGY_MODIFY_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_STRATEGY_QUERY_BY_ID_URL;
-import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.ODIN_STRATEGY_QUERY_BY_NS_URL;
+import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.*;
 
 /**
  * @author d06679
@@ -68,18 +36,21 @@ import static com.didichuxing.datachannel.arius.admin.remote.InterfaceConstant.O
  */
 @Service("odinRemoteServiceImpl")
 @ConditionalOnProperty(value = "monitor.odin.enable", havingValue = "true")
+@NoArgsConstructor
 public class OdinRemoteServiceImpl implements RemoteMonitorService {
 
-    private final ILog                                                               LOGGER    = LogFactory
+    private static final ILog                                                        LOGGER    = LogFactory
         .getLog(OdinRemoteServiceImpl.class);
 
     private static final String                                                      DIDILABEL = ".didi.com";
 
+    private static final String UTF8 = "UTF-8";
+
     @Value("${monitor.odin.monitor.url}")
     private String                                                                   odinMonitorUrl;
 
-    @Value("${monitor.odin.collector.url}")
-    private String                                                                   odinCollectorUrl;
+    @Value("${monitor.n9e.collector-url}")
+    private String                                                                   n9eCollectorUrl;
 
     @Value("${monitor.odin.namespace}")
     private String                                                                   odinMonitorNamespace;
@@ -109,25 +80,16 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
             .build();
 
     /**
-     * 向Odin指定ns发送数据
+     * 向夜莺发送数据
      *
-     * @param odinDatas 需要发送的数据
+     * @param n9eData 需要发送的数据
      * @return true/false
      */
     @Override
-    public boolean sendData(Collection<OdinData> odinDatas) {
-        String collectUrl = odinCollectorUrl + ODIN_COLLECTOR_SINK_DATA_URL + "collect." + odinMonitorNamespace;
-        Map resp = restTool.postObjectWithJsonContent(collectUrl, odinDatas, Map.class);
-
-        boolean succ = false;
-        if (resp.containsKey("code")) {
-            Object code = resp.get("code");
-            if (Double.valueOf(String.valueOf(code)).equals(0.0)) {
-                succ = true;
-            }
-        }
-
-        return succ;
+    public boolean sendData(Collection<N9eData> n9eData) {
+        String collectUrl = n9eCollectorUrl + N9E_COLLECTOR_SINK_DATA_URL;
+        String resp = restTool.postObjectWithJsonContent(collectUrl, n9eData, String.class);
+        return Objects.equals(resp, "success");
     }
 
     @Override
@@ -177,13 +139,13 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
             return clusters;
         }
 
-        Map<String, String> odinServices = new HashMap();
+        Map<String, String> odinServices = new HashMap<>();
         for (OdinCluster odinClusterBean : odinClusterBeans) {
             odinServices.put(odinClusterBean.getSu(), odinClusterBean.getName());
         }
 
         List<OdinCluster> odinClusterInfos = getOdinCluster(odinServices.keySet());
-        Map<String, String> odinClusterBeanMap = new HashMap();
+        Map<String, String> odinClusterBeanMap = new HashMap<>();
         for (OdinCluster odinClusterBean : odinClusterInfos) {
             String[] clustersByOdin = odinClusterBean.getCluster();
             //增加按域过滤
@@ -191,7 +153,8 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
                 if (clusterInfoPOS.contains(clusterName)) {
                     odinClusterBeanMap.put(odinClusterBean.getSu(), clusterName);
                 } else {
-                    LOGGER.warn("clusterName:{} not contains in clusterInfoPOS:{} for den:{}", clusterName, clusterInfoPOS, EnvUtil.getDC().getCode());
+                    LOGGER.warn("class=OdinRemoteServiceImpl||method=getMachineRoomsRealTimeByOdin||msg=clusterName:{} not contains in clusterInfoPOS:{} for den:{}",
+                            clusterName, clusterInfoPOS, EnvUtil.getDC().getCode());
                 }
             }
         }
@@ -226,15 +189,12 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
         params.put("ns", odinMonitorNamespace);
         params.put("ids", Arrays.asList(strategyId));
 
-        Result ret = restTool.postObjectWithJsonContentAndHeader(odinMonitorUrl + ODIN_STRATEGY_DEL_URL,
+        Result<Boolean> ret = restTool.postObjectWithJsonContentAndHeader(odinMonitorUrl + ODIN_STRATEGY_DEL_URL,
                 buildHeader(), params,
-                new TypeReference<Result>() {
+                new TypeReference<Result<Boolean>>() {
                 }.getType());
 
-        if (null == ret || ret.failed()) {
-            return false;
-        }
-        return true;
+        return !(null == ret || ret.failed());
     }
 
     @Override
@@ -246,7 +206,7 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
                 }.getType());
 
         if (null == ret || ret.failed()) {
-            return null;
+            return new ArrayList<>();
         }
         return OdinConverter.convert2StrategyList(ret.getData());
     }
@@ -278,7 +238,7 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
                 }.getType());
 
         if (null == ret || ret.failed()) {
-            return null;
+            return new ArrayList<>();
         }
 
         return OdinConverter.convert2AlertList(ret.getData()).stream()
@@ -320,35 +280,17 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
         params.put("ids", Arrays.asList(silenceId));
 
         String url = odinMonitorUrl + ODIN_SILENCE_RELEASE_URL;
-        Result ret = restTool.postObjectWithJsonContentAndHeader(url, buildHeader(), params,
-                new TypeReference<Result>() {
+        Result<Object> ret = restTool.postObjectWithJsonContentAndHeader(url, buildHeader(), params,
+                new TypeReference<Result<Object>>() {
                 }.getType());
 
-        if (null == ret || ret.failed()) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public List<Silence> getSilences(Long strategyId) {
-        List<OdinSilence> odinSilenceList = getSilence();
-        if (odinSilenceList == null) {
-            return null;
-        }
-
-        String strategyIdStr = String.valueOf(strategyId);
-        return OdinConverter.convert2SilenceList(odinSilenceList
-                .stream()
-                .filter(elem -> strategyIdStr.equals(elem.getSids()))
-                .collect(Collectors.toList())
-        );
+        return !(null == ret || ret.failed());
     }
 
     @Override
     public Silence getSilenceById(Long silenceId) {
         List<OdinSilence> odinSilenceList = getSilence();
-        if (odinSilenceList == null) {
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(odinSilenceList)) {
             return null;
         }
 
@@ -360,18 +302,6 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
         return null;
     }
 
-    @Override
-    public List<NotifyGroup> getNotifyGroups() {
-        String url = RestTool.getQueryString(odinMonitorUrl + ODIN_ALL_NOTIFY_GROUP_URL, null);
-
-        Result<List<NotifyGroup>> ret = restTool.getForObject(url, buildHeader(),
-                new TypeReference<Result<List<NotifyGroup>>>() {}.getType());
-        if (null == ret || ret.failed()) {
-            return null;
-        }
-        return ret.getData();
-    }
-
     /**
      * 指标上报
      */
@@ -379,14 +309,11 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
     public Boolean sinkMetrics(List<MetricSinkPoint> pointList) {
         String url = odinMonitorUrl + ODIN_COLLECTOR_SINK_DATA_URL + "collect." + odinMonitorNamespace;
 
-        Result ret = restTool.postObjectWithJsonContentAndHeader(url, null, pointList,
-                new TypeReference<Result>() {
+        Result<Object> ret = restTool.postObjectWithJsonContentAndHeader(url, null, pointList,
+                new TypeReference<Result<Object>>() {
                 }.getType());
 
-        if (null == ret || ret.failed()) {
-            return false;
-        }
-        return true;
+        return !(null == ret || ret.failed());
     }
 
     @Override
@@ -418,10 +345,10 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
     public OdinTreeNode getOdinTreeNode(String username) {
         String url = treeServer+"/api/v1/user/tree?username="+username;
         String result = BaseHttpUtil.get(url,null);
-        if (result == ""){
+        if ("".equals(result)){
             return new OdinTreeNode();
         }
-        OdinTreeNode odinTreeNode = JSONObject.parseObject(result, OdinTreeNode.class);
+        OdinTreeNode odinTreeNode = JSON.parseObject(result, OdinTreeNode.class);
         if ( odinTreeNode == null ) {
             return new OdinTreeNode();
         }
@@ -429,7 +356,7 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
     }
 
     @Override
-    public Result createTreeNode(String ns, String category, String usn, int level) {
+    public Result<Void> createTreeNode(String ns, String category, String usn, int level) {
         String url = treeServer+"/auth/v1/ns/create";
         calleeName = calleeName.trim();
         keyName = keyName.trim();
@@ -441,7 +368,7 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
         params.put("usn", usn);
         params.put("serviceLevel", level);
 
-        String result = BaseHttpUtil.post(url, params,  headers, "UTF-8", "UTF-8");
+        String result = BaseHttpUtil.post(url, params,  headers, UTF8, UTF8);
         LOGGER.info("class=OdinRemoteServiceImpl||method=createTreeNode||result={}||treeNode={}",
                 result,ns);
         if(result.equals("")){
@@ -454,7 +381,7 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
     }
 
     @Override
-    public Result deleteTreeNode(String ns, String category, String usn, int level) {
+    public Result<Void> deleteTreeNode(String ns, String category, String usn, int level) {
         String url = treeServer+"/auth/v1/ns/delete";
         calleeName = calleeName.trim();
         keyName = keyName.trim();
@@ -466,7 +393,7 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
         params.put("usn", usn);
         params.put("serviceLevel", level);
 
-        String result = BaseHttpUtil.post(url, params,  headers, "UTF-8", "UTF-8");
+        String result = BaseHttpUtil.post(url, params,  headers, UTF8, UTF8);
         if(result.equals("")){
             return Result.buildSucc();
         }else {
@@ -487,7 +414,7 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
                 }.getType());
 
         if (null == ret || ret.failed()) {
-            return null;
+            return new ArrayList<>();
         }
         return ret.getData();
     }
@@ -495,14 +422,11 @@ public class OdinRemoteServiceImpl implements RemoteMonitorService {
     private Boolean createOrModifySilence(String url, Silence silence) {
         OdinSilence odinSilence = OdinConverter.convert2OdinSilenceCreation(silence, odinMonitorNamespace);
 
-        Result ret = restTool.postObjectWithJsonContentAndHeader(url, buildHeader(), odinSilence,
-                new TypeReference<Result>() {
+        Result<Object> ret = restTool.postObjectWithJsonContentAndHeader(url, buildHeader(), odinSilence,
+                new TypeReference<Result<Object>>() {
                 }.getType());
 
-        if (null == ret || ret.failed()) {
-            return false;
-        }
-        return true;
+        return !(null == ret || ret.failed());
     }
 
     private Integer createOrModifyOdinMonitorStrategy(String url, Strategy strategy) {

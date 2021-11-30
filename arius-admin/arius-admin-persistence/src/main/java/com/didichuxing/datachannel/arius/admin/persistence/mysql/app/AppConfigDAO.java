@@ -6,10 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO;
 
-/**
- * @author d06679
- * @date 2019/3/13
- */
 @Repository
 public interface AppConfigDAO {
 

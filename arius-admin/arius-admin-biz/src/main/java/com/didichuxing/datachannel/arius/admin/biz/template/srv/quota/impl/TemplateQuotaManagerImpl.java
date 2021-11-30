@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplat
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;
@@ -18,35 +18,28 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQu
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsageRecordPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminOdinTemplateMetricEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateCpuOutOfQuotaEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateDiskOutOfQuotaEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateDiskUsageWarnEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
-import com.didichuxing.datachannel.arius.admin.core.component.OdinSender;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.quota.ESTemplateQuotaUsageDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.quota.ESTemplateQuotaUsageRecordDAO;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
 import static com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig.QUOTA_CTL_DISK;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.HOST_NAME;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_QUOTA;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.QUOTA_DISK_WARN_THRESHOLD;
@@ -66,16 +59,13 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
     private QuotaTool                                 quotaTool;
 
     @Autowired
-    private TemplatePhyStatisManager templatePhyStatisManager;
-
-    @Autowired
-    private OdinSender                                odinSender;
+    private TemplatePhyStatisManager                  templatePhyStatisManager;
 
     @Autowired
     private TemplateAction                            templateAction;
 
     @Autowired
-    private TemplateQuotaManager templateQuotaManager;
+    private TemplateQuotaManager                      templateQuotaManager;
 
     @Autowired
     private AriusConfigInfoService                    ariusConfigInfoService;
@@ -180,9 +170,6 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
             return false;
         }
 
-        // 利用率发送Odin
-        odinSender.batchSend(buildOdinMsg(logicTemplateQuotaUsage));
-
         // 利用率保存es
         templateQuotaManager.save(buildESTemplateQuotaUsage(logicTemplateQuotaUsage));
 
@@ -217,13 +204,13 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
             return 0.0;
         }
 
-        ESClusterLogic esClusterLogic = esClusterLogicService.getLogicClusterById(resourceId);
-        if (esClusterLogic == null) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(resourceId);
+        if (clusterLogic == null) {
             return 0.0;
         }
 
-        LogicResourceConfig resourceConfig = esClusterLogicService
-            .genLogicClusterConfig(esClusterLogic.getConfigJson());
+        LogicResourceConfig resourceConfig = clusterLogicService
+            .genClusterLogicConfig(clusterLogic.getConfigJson());
 
         double quota = quotaTool.getQuotaCountByDisk(NodeSpecifyEnum.DOCKER.getCode(), diskG, TEMPLATE_QUOTA_MIN)
                        * resourceConfig.getReplicaNum();
@@ -237,7 +224,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null || templateLogicWithPhysical.getMasterPhyTemplate() == null) {
-            LOGGER.info("method=ctlSwitch||logicId={}||msg=notExist", logicId);
+            LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=notExist", logicId);
             return false;
         }
 
@@ -246,27 +233,27 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
             "quota.dynamic.limit.black.appIds", "none", ",");
         if (disableAppIdSet.contains(String.valueOf(templateLogicWithPhysical.getAppId()))
             || disableAppIdSet.contains("all")) {
-            LOGGER.info("method=ctlSwitch||logicId={}||msg=black.appIds", logicId);
+            LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=black.appIds", logicId);
             return false;
         }
 
         IndexTemplatePhy templatePhysicalMaster = templateLogicWithPhysical.getMasterPhyTemplate();
 
         if (!isTemplateSrvOpen(templatePhysicalMaster.getCluster())) {
-            LOGGER.info("method=ctlSwitch||logicId={}||cluster={}||msg=没有开启容量管控的索引服务", logicId,
+            LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||cluster={}||msg=没有开启容量管控的索引服务", logicId,
                 templatePhysicalMaster.getCluster());
 
             return false;
         }
 
         // resource按着灰度
-        ESClusterLogic esClusterLogic = esClusterLogicService.getLogicClusterByRack(templatePhysicalMaster.getCluster(),
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByRack(templatePhysicalMaster.getCluster(),
             templatePhysicalMaster.getRack());
-        LogicResourceConfig resourceConfig = esClusterLogicService
-            .genLogicClusterConfig(esClusterLogic.getConfigJson());
+        LogicResourceConfig resourceConfig = clusterLogicService
+            .genClusterLogicConfig(clusterLogic.getConfigJson());
         if (!QUOTA_CTL_DISK.equals(resourceConfig.getQuotaCtl())
             && !QUOTA_CTL_ALL.equals(resourceConfig.getQuotaCtl())) {
-            LOGGER.info("method=ctlSwitch||logicId={}||msg=resourceConfig.off", logicId);
+            LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=resourceConfig.off", logicId);
             return false;
         }
 
@@ -274,15 +261,15 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         Set<String> disableClusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
             "quota.dynamic.limit.black.cluster", "none", ",");
         if (disableClusterSet.contains(templatePhysicalMaster.getCluster()) || disableClusterSet.contains("all")) {
-            LOGGER.info("method=ctlSwitch||logicId={}||msg=black.cluster", logicId);
+            LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=black.cluster", logicId);
             return false;
         }
 
         // 模板控制
         Set<String> disableLogicIdSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
             "quota.dynamic.limit.black.logicId", "none", ",");
-        if (disableLogicIdSet.contains(templatePhysicalMaster.getCluster()) || disableLogicIdSet.contains("all")) {
-            LOGGER.info("method=ctlSwitch||logicId={}||msg=black.logicId", logicId);
+        if (disableLogicIdSet.contains(String.valueOf(logicId)) || disableLogicIdSet.contains("all")) {
+            LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=black.logicId", logicId);
             return false;
         }
 
@@ -298,9 +285,9 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
      */
     @Override
     public String getCtlRange(String cluster, String racks) {
-        ESClusterLogic ESClusterLogic = esClusterLogicService.getLogicClusterByRack(cluster, racks);
-        LogicResourceConfig resourceConfig = esClusterLogicService
-            .genLogicClusterConfig(ESClusterLogic.getConfigJson());
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByRack(cluster, racks);
+        LogicResourceConfig resourceConfig = clusterLogicService
+            .genClusterLogicConfig(clusterLogic.getConfigJson());
         return resourceConfig.getQuotaCtl();
     }
 
@@ -330,20 +317,14 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         usagePO.setAppId(templateLogicWithResource.getAppId());
         usagePO.setLogicClusters(getLogicClusters(templateLogicWithResource.getLogicClusters()));
 
-        if (esTemplateQuotaUsageDAO.insert(usagePO)) {
-            LOGGER.info("method=save||msg=save succ||logicId={}", usagePO.getLogicId());
-        } else {
-            LOGGER.warn("method=save||msg=save fail||logicId={}", usagePO.getLogicId());
-        }
+        boolean succ1 = esTemplateQuotaUsageDAO.insert(usagePO);
+        LOGGER.info("class=TemplateQuotaManagerImpl||method=save||succ={}||logicId={}||msg=save usage", succ1, usagePO.getLogicId());
 
         ESTemplateQuotaUsageRecordPO recordPO = ConvertUtil.obj2Obj(usagePO, ESTemplateQuotaUsageRecordPO.class);
         recordPO.setTimestamp(new Date());
 
-        if (esTemplateQuotaUsageRecordDAO.insert(recordPO)) {
-            LOGGER.info("method=save||msg=save record succ||logicId={}", usagePO.getLogicId());
-        } else {
-            LOGGER.warn("method=save||msg=save record fail||logicId={}", usagePO.getLogicId());
-        }
+        boolean succ2 = esTemplateQuotaUsageRecordDAO.insert(recordPO);
+        LOGGER.info("class=TemplateQuotaManagerImpl||method=save||succ={}||logicId={}||msg=save record", succ2, usagePO.getLogicId());
 
         return true;
     }
@@ -472,27 +453,6 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         return esTemplateQuotaUsage;
     }
 
-    private List<OdinData> buildOdinMsg(LogicTemplateQuotaUsage usage) {
-        OdinData base = new OdinData();
-        base.setTimestamp(System.currentTimeMillis() / 1000);
-        base.setStep(ODIN_STEP);
-        base.putTag("host", HOST_NAME);
-        base.putTag("logicId", String.valueOf(usage.getLogicId()));
-        base.putTag(AdminOdinTemplateMetricEnum.metricTemplte(), usage.getTemplate());
-
-        OdinData diskMsg = ConvertUtil.obj2Obj(base, OdinData.class);
-        diskMsg.setName(AdminOdinTemplateMetricEnum.TEMPLATE_QUOTA_DISK_USAGE.getMetric());
-        diskMsg
-            .setValue(String.valueOf(usage.getQuotaDiskG() == 0 ? 0 : usage.getActualDiskG() / usage.getQuotaDiskG()));
-
-        OdinData cpuMsg = ConvertUtil.obj2Obj(base, OdinData.class);
-        cpuMsg.setName(AdminOdinTemplateMetricEnum.TEMPLATE_QUOTA_CPU_USAGE.getMetric());
-        cpuMsg.setValue(
-            String.valueOf(usage.getQuotaCpuCount() == 0 ? 0 : usage.getActualCpuCount() / usage.getQuotaCpuCount()));
-
-        return Lists.newArrayList(diskMsg, cpuMsg);
-    }
-
     private Double getHotQuotaCpuCount(TemplateMetaMetric templateMetaMetric) {
 
         if (templateMetaMetric.getHotTime() > 0
@@ -504,10 +464,10 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         return templateMetaMetric.getQuotaCpuCount();
     }
 
-    private List<String> getLogicClusters(List<ESClusterLogic> ESClusterLogics) {
-        if (CollectionUtils.isEmpty(ESClusterLogics)) {
-            return null;
+    private List<String> getLogicClusters(List<ClusterLogic> clusterLogics) {
+        if (CollectionUtils.isEmpty(clusterLogics)) {
+            return new ArrayList<>();
         }
-        return ESClusterLogics.stream().map(ESClusterLogic::getName).collect(Collectors.toList());
+        return clusterLogics.stream().map(ClusterLogic::getName).collect(Collectors.toList());
     }
 }

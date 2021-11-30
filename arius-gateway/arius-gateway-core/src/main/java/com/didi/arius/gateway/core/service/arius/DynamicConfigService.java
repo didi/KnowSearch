@@ -20,4 +20,6 @@ public interface DynamicConfigService {
      * 从admin拉取gateway动态配置信息，并更新
      */
     void resetDynamicConfigInfo();
+
+    String getForbiddenSettings();
 }

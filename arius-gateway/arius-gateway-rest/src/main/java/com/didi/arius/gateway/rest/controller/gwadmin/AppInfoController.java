@@ -3,14 +3,12 @@ package com.didi.arius.gateway.rest.controller.gwadmin;
 import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.QueryContext;
-import com.didi.arius.gateway.core.service.arius.AppService;
-import com.didi.arius.gateway.rest.controller.AdminController;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
+import com.didi.arius.gateway.rest.controller.AdminController;
 import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.util.Map;
@@ -20,8 +18,9 @@ public class AppInfoController extends AdminController {
 
     private static final String NAME = "appInfo";
 
-    @Autowired
-    private AppService appService;
+    public AppInfoController() {
+        // pass
+    }
 
     @Override
     public void register() {

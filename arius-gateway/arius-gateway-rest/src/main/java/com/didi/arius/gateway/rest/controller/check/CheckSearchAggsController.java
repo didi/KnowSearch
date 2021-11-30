@@ -3,8 +3,8 @@ package com.didi.arius.gateway.rest.controller.check;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.service.dsl.DslAggsAnalyzerService;
 import com.didi.arius.gateway.rest.controller.AdminController;
-import com.didi.arius.gateway.dsl.DslExtractionUtilV2;
-import com.didi.arius.gateway.dsl.bean.ExtractResult;
+import com.didichuxing.datachannel.arius.dsl.common.DslExtractionUtilV2;
+import com.didichuxing.datachannel.arius.dsl.common.bean.ExtractResult;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -28,6 +28,10 @@ public class CheckSearchAggsController extends AdminController {
     @Autowired
     private DslAggsAnalyzerService dslAggsAnalyzerService;
 
+    public CheckSearchAggsController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(RestRequest.Method.POST, "/_check/search_aggs/{index}", this);
@@ -42,10 +46,7 @@ public class CheckSearchAggsController extends AdminController {
     protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception {
         String[] indices = Strings.splitStringByCommaToArray(queryContext.getRequest().param("index"));
         BytesReference source = new BytesArray(queryContext.getPostBody());
-        String strSource = "";
-        if (source != null && source.length() > 0) {
-            strSource = XContentHelper.convertToJson(source, false);
-        }
+        String strSource = XContentHelper.convertToJson(source, false);
 
         ExtractResult extractResult = DslExtractionUtilV2.extractDsl(strSource);
 

@@ -10,8 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 public class DegreeRealTimeCpuUse extends AbstractDegreeIndicator {
     @Override
     public <T extends BaseDegree> T execInner(DegreeParam degreeParam, T t) {
-        double avgCpuUse = 0.0, totalCpuUse = 0.0;
-        for (ESIndexToNodeStats esESIndexToNodeStats : degreeParam.getESIndexToNodeStatsses()) {
+        double avgCpuUse;
+        double totalCpuUse = 0.0;
+        for (ESIndexToNodeStats esESIndexToNodeStats : degreeParam.getEsIndexToNodeStats()) {
             if(StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("os-cpu_percent"))){
                 totalCpuUse += Double.parseDouble(esESIndexToNodeStats.getMetrics().get("os-cpu_percent"));
             }
@@ -19,11 +20,11 @@ public class DegreeRealTimeCpuUse extends AbstractDegreeIndicator {
 
         RealTimeCpuUse realTimeCpuUsePO = (RealTimeCpuUse)t;
 
-        if (degreeParam.getESIndexToNodeStatsses().size() == 0) {
+        if (degreeParam.getEsIndexToNodeStats().size() == 0) {
             realTimeCpuUsePO.setScore(100.0);
             realTimeCpuUsePO.setDesc("暂无实时cpu使用率信息.");
         } else {
-            avgCpuUse = Math.floor(totalCpuUse / degreeParam.getESIndexToNodeStatsses().size() * 100) / 100;
+            avgCpuUse = Math.floor(totalCpuUse / degreeParam.getEsIndexToNodeStats().size() * 100) / 100;
             realTimeCpuUsePO.setAvgCpuAvgUse(avgCpuUse);
             realTimeCpuUsePO.setScore(calc1(avgCpuUse));
         }

@@ -2,8 +2,12 @@ package com.didichuxing.datachannel.arius.admin.source;
 
 import com.didichuxing.datachannel.arius.admin.AriusClient;
 import com.didichuxing.datachannel.arius.admin.RandomFilledBean;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.client.constant.config.AriusConfigStatusEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.component.RSATool;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.constant.RequestPathThirdpart;
 import org.apache.commons.codec.binary.Base64;
 
@@ -15,13 +19,15 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 public class AriusDataSource {
-    public static String publicKey;
+    private static String publicKey;
+
+    private AriusDataSource() {}
 
     static {
         try {
             publicKey = (String) new AriusClient().get(RequestPathThirdpart.PUBLIC_KEY).getData();
         } catch (IOException e) {
-            throw new RuntimeException("get public key failed");
+            throw new AriusRunTimeException("get public key failed", ResultType.FAIL);
         }
     }
 
@@ -38,5 +44,12 @@ public class AriusDataSource {
         String password = Base64.encodeBase64String(cipher.doFinal(dto.getPassword().getBytes(StandardCharsets.UTF_8)));
         dto.setPassword(password);
         return dto;
+    }
+
+    public static AriusConfigInfoDTO ariusConfigInfoDTOFactory() {
+        AriusConfigInfoDTO ariusConfigInfoDTO = RandomFilledBean.getRandomBeanOfType(AriusConfigInfoDTO.class);
+        ariusConfigInfoDTO.setStatus(AriusConfigStatusEnum.NORMAL.getCode());
+        ariusConfigInfoDTO.setDimension(1);
+        return ariusConfigInfoDTO;
     }
 }

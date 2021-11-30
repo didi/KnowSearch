@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @Author: D10865
@@ -12,6 +12,9 @@ import com.didichuxing.tunnel.util.log.LogFactory;
  * 索引大小转换工具类
  */
 public class SizeUtil {
+
+    private SizeUtil() {
+    }
 
     private static final ILog LOGGER = LogFactory.getLog(SizeUtil.class);
 
@@ -61,12 +64,47 @@ public class SizeUtil {
                 // Allow this special value to be unit-less:
                 bytes = 0;
             } else {
-                LOGGER.error("getUnitSize error {}", proStoreSize);
+                LOGGER.error("class=SizeUtil||method=getUnitSize||msg={}", proStoreSize);
             }
         } catch (Exception e) {
-            LOGGER.error("getUnitSize error {}", proStoreSize, e);
+            LOGGER.error("class=SizeUtil||method=getUnitSize||msg={}", proStoreSize, e);
         }
         return bytes;
+    }
+
+    /**
+     * 得到单位化的大小, 四舍五入保留小数点
+     * @param decimal  保留小数点
+     * @param bytes
+     * @return
+     */
+    public static String getUnitSizeAndFormat(long bytes, int decimal) {
+        final long C0 = 1L;
+        final long C1 = C0 * 1024L;
+        final long C2 = C1 * 1024L;
+        final long C3 = C2 * 1024L;
+        final long C4 = C3 * 1024L;
+        final long C5 = C4 * 1024L;
+        double value = bytes;
+        String suffix = "b";
+        if (bytes >= C5) {
+            value = CommonUtils.formatDouble(((double) bytes) / C5, decimal);
+            suffix = "pb";
+        } else if (bytes >= C4) {
+            value = CommonUtils.formatDouble(((double) bytes) / C4, decimal);
+            suffix = "tb";
+        } else if (bytes >= C3) {
+            value = CommonUtils.formatDouble(((double) bytes) / C3, decimal);
+            suffix = "gb";
+        } else if (bytes >= C2) {
+            value = CommonUtils.formatDouble(((double) bytes) / C2, decimal);
+            suffix = "mb";
+        } else if (bytes >= C1) {
+            value = CommonUtils.formatDouble(((double) bytes) / C1, decimal);
+            suffix = "kb";
+        }
+
+        return String.format("%s%s", value, suffix);
     }
 
     /**

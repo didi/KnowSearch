@@ -6,8 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * 从SpringContent中获取指定接口的类的实例
@@ -20,7 +21,7 @@ public abstract class BaseExtendFactory {
 
     private static final ILog LOGGER = LogFactory.getLog(BaseExtendFactory.class);
 
-    public static  <T> T getByClassNamePer(String classNamePre, Class<T> clazz) {
+    public  <T> T getByClassNamePer(String classNamePre, Class<T> clazz) {
         T handler = null;
         try {
             handler = doGet(classNamePre, clazz);
@@ -32,7 +33,7 @@ public abstract class BaseExtendFactory {
         return handler;
     }
 
-    private static <T> T doGet(String classNamePre, Class<T> clazz) {
+    private <T> T doGet(String classNamePre, Class<T> clazz) {
         Map<String, T> beans = null;
         try {
             beans = SpringTool.getBeansOfType(clazz);
@@ -41,7 +42,7 @@ public abstract class BaseExtendFactory {
                 classNamePre, e.getMessage());
         }
 
-        if (beans.isEmpty()) {
+        if (beans == null || beans.isEmpty()) {
             throw new NotFindSubclassException(String.format("找不到【%s】的具体处理器【%s】", clazz.getSimpleName(), classNamePre));
         }
 

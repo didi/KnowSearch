@@ -1,16 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.employee.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.remote.employee.EmployeeHandle;
 import com.didichuxing.datachannel.arius.admin.remote.employee.content.EmployeeTypeEnum;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author linyunan
@@ -24,61 +28,63 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
     private HandleFactory     handleFactory;
 
-    @Override
-    public Result getByDomainAccount(String domainAccount, EmployeeTypeEnum employeeType) {
-        Result<String> getEmployeeTypeResult = getEmployeeType(employeeType);
-        if (getEmployeeTypeResult.failed()) {
-            return getEmployeeTypeResult;
+    @Value("${extend.employee}")
+    private String employeeType;
+
+    @PostConstruct
+    public void employeeTypeCheck() {
+        EmployeeTypeEnum employeeTypeEnum = EmployeeTypeEnum.valueOfType(employeeType);
+        if (employeeTypeEnum.getCode().equals(FileStorageTypeEnum.UNKNOWN.getCode())) {
+            LOGGER.info("class=EmployeeServiceImpl||method=employeeTypeCheck||employeeType={}", employeeTypeEnum);
         }
-
-        String finalEmployeeType = getEmployeeTypeResult.getData();
-
-        LOGGER.info("class=EmployeeServiceImpl||method=getByDomainAccount||employeeType={}", finalEmployeeType);
-
-        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(finalEmployeeType)).getByDomainAccount(domainAccount);
     }
 
     @Override
-    public Result checkUsers(String domainAccounts, EmployeeTypeEnum employeeType) {
-
-        Result<String> getEmployeeTypeResult = getEmployeeType(employeeType);
+    public <T extends BaseEmInfo> Result<T> getByDomainAccount(String domainAccount) {
+        Result<String> getEmployeeTypeResult = getEmployeeType();
         if (getEmployeeTypeResult.failed()) {
-            return getEmployeeTypeResult;
+            return Result.buildFrom(getEmployeeTypeResult);
         }
 
-        String finalEmployeeType = getEmployeeTypeResult.getData();
+        LOGGER.info("class=EmployeeServiceImpl||method=getByDomainAccount||employeeType={}", employeeType);
 
-        LOGGER.info("class=EmployeeServiceImpl||method=checkUsers||employeeType={}", finalEmployeeType);
-
-        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(finalEmployeeType)).checkUsers(domainAccounts);
+        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(employeeType)).getByDomainAccount(domainAccount);
     }
 
     @Override
-    public Result searchOnJobStaffByKeyWord(String keyWord, EmployeeTypeEnum employeeType) {
-
-        Result<String> getEmployeeTypeResult = getEmployeeType(employeeType);
+    public Result<Void> checkUsers(String domainAccounts) {
+        Result<String> getEmployeeTypeResult = getEmployeeType();
         if (getEmployeeTypeResult.failed()) {
-            return getEmployeeTypeResult;
+            return Result.buildFrom(getEmployeeTypeResult);
         }
 
-        String finalEmployeeType = getEmployeeTypeResult.getData();
+        LOGGER.info("class=EmployeeServiceImpl||method=checkUsers||employeeType={}", employeeType);
 
-        LOGGER.info("class=EmployeeServiceImpl||method=searchOnJobStaffByKeyWord||employeeType={}", finalEmployeeType);
+        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(employeeType)).checkUsers(domainAccounts);
+    }
 
-        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(finalEmployeeType))
-            .searchOnJobStaffByKeyWord(keyWord);
+    @Override
+    public Result<Object> searchOnJobStaffByKeyWord(String keyWord) {
+
+        Result<String> getEmployeeTypeResult = getEmployeeType();
+        if (getEmployeeTypeResult.failed()) {
+            return Result.buildFrom(getEmployeeTypeResult);
+        }
+
+        LOGGER.info("class=EmployeeServiceImpl||method=searchOnJobStaffByKeyWord||employeeType={}", employeeType);
+
+        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(employeeType)).searchOnJobStaffByKeyWord(keyWord);
     }
 
     /*************************************private****************************************************/
-    private Result<String> getEmployeeType(EmployeeTypeEnum typeEnum) {
-        if (AriusObjUtils.isNull(typeEnum)) {
+    private Result<String> getEmployeeType() {
+        if (AriusObjUtils.isNull(employeeType)) {
             return Result.build(Boolean.TRUE, EmployeeTypeEnum.DEFAULT.getType());
         }
 
-        if (EmployeeTypeEnum.valueOfCode(typeEnum.getCode()).getCode() == -1) {
-            return Result.buildFail(String.format("获取 %s 类型出错", typeEnum.getType()));
+        if (EmployeeTypeEnum.valueOfType(employeeType).getCode() == -1) {
+            return Result.buildFail(String.format("获取 %s 类型出错", employeeType));
         }
-
-        return Result.build(Boolean.TRUE, EmployeeTypeEnum.valueOfCode(typeEnum.getCode()).getType());
+        return Result.buildSucc();
     }
 }

@@ -32,7 +32,7 @@ public interface WorkOrderManager {
     /**
      * 工单处理流程
      */
-    Result process(WorkOrderProcessDTO workOrderProcessDTO);
+    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO);
 
     /**
      * 插入一条工单
@@ -58,12 +58,12 @@ public interface WorkOrderManager {
     /**
      * 撤销工单
      */
-    Result cancelOrder(Long id, String userName);
+    Result<Void> cancelOrder(Long id, String userName);
 
     /**
      * 处理工单工单
      */
-    Result processOrder(WorkOrderPO orderDO);
+    Result<Void> processOrder(WorkOrderPO orderDO);
 
     /**
      * 获取工单申请列表

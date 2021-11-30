@@ -77,7 +77,6 @@ public class NettyHttpChannel extends HttpChannel {
 
     @Override
     public void sendResponse(RestResponse response) {
-        // if the response object was created upstream, then use it;
         // otherwise, create a new one
         HttpResponse resp = newResponse();
         resp.setStatus(getStatus(response.status()));
@@ -191,6 +190,9 @@ public class NettyHttpChannel extends HttpChannel {
     private static final HttpResponseStatus TOO_MANY_REQUESTS = new HttpResponseStatus(429, "Too Many Requests");
 
     private HttpResponseStatus getStatus(RestStatus status) {
+        if (status == null) {
+            return HttpResponseStatus.OK;
+        }
         switch (status) {
             case CONTINUE:
                 return HttpResponseStatus.CONTINUE;

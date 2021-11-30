@@ -52,7 +52,7 @@ public class TemplateMarkInvalidLabelJob extends BaseTemplateMarkLabelJob {
     @Override
     protected void genShouldHasAndDelLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate,
                                             List<TemplateLabelPO> newLabels,
-                                            List<TemplateLabelPO> expireLabels) throws Exception {
+                                            List<TemplateLabelPO> expireLabels) {
         Date now = new Date();
         long current = now.getTime();
         long start = current - (30 * ONE_DAY);
@@ -72,7 +72,7 @@ public class TemplateMarkInvalidLabelJob extends BaseTemplateMarkLabelJob {
             }
         }
 
-        LOGGER.info("method=MarkInvalidLabelJobHandler.genShouldHasAndDelLabels||templateId={}||templateName={}||accessCount={}||maxTps={}",
+        LOGGER.info("class=TemplateMarkInvalidLabelJob||method=MarkInvalidLabelJobHandler.genShouldHasAndDelLabels||templateId={}||templateName={}||accessCount={}||maxTps={}",
                 indexTemplate.getId(), indexTemplate.getName(), accessCount, maxTps);
 
         if (maxTps < 0.0001 && accessCount < 1L) {

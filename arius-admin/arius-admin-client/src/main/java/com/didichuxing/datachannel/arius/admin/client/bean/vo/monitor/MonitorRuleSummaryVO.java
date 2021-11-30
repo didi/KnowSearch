@@ -3,9 +3,13 @@ package com.didichuxing.datachannel.arius.admin.client.bean.vo.monitor;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "监控告警")
 public class MonitorRuleSummaryVO extends BaseVO {
     @ApiModelProperty(value = "ID")

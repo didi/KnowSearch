@@ -1,18 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterJoinDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterPhyRegionInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESPluginVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStatis;
-import org.springframework.transaction.annotation.Transactional;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 
 public interface ClusterPhyManager {
 
@@ -30,28 +34,7 @@ public interface ClusterPhyManager {
      * @param retryCount 重试次数
      * @return
      */
-    boolean syncTemplateMetaData(String cluster, int retryCount);
-
-    /**
-     * 物理集群资源使用率
-     * @param cluster 物理集群
-     * @return
-     */
-    ESClusterStatis getClusterResourceUsage(String cluster);
-
-    /**
-     * 获取物理集群状态信息
-     * @param cluster 集群名称
-     * @return
-     */
-    ESClusterStatis getClusterStatus(String cluster);
-
-    /**
-     * 根据指定物理集群和Racks获取对应状态信息
-     * @param cluster 物理集群
-     * @return
-     */
-    ESClusterStatis getPhyClusterStatus(String cluster);
+    void syncTemplateMetaData(String cluster, int retryCount);
 
     /**
      * 集群是否存在
@@ -68,7 +51,7 @@ public interface ClusterPhyManager {
      * @param retryCount 重试次数
      * @return result
      */
-    Result releaseRacks(String cluster, String racks, int retryCount);
+    Result<Void> releaseRacks(String cluster, String racks, int retryCount);
 
     /**
      * 获取控制台物理集群信息列表
@@ -83,30 +66,189 @@ public interface ClusterPhyManager {
     ConsoleClusterPhyVO getConsoleClusterPhyVO(Integer clusterId, Integer currentAppId);
 
     /**
-     * 获取物理集群节点划分信息
+     * 获取单个物理集群overView信息
+     * @param clusterId 物理集群id
+     * @param currentAppId 当前登录项目
      */
-    Result<List<ESClusterPhyRegionInfoVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
+    ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentAppId);
 
     /**
-     * 获取可用物理集群列表
+     * 获取物理集群节点划分信息
+     */
+    Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
+
+    /**
+     * 获取逻辑集群可关联region的物理集群名称列表
      * @param clusterLogicType 逻辑集群类型
+     * @param clusterLogicId   逻辑集群Id
      * @see ResourceLogicTypeEnum
      */
-	Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType);
+    Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(Integer clusterLogicType, Long clusterLogicId);
+
+    /**
+     * 获取新建逻辑集群可关联的物理集群名称
+     * @param clusterLogicType  逻辑集群类型
+     * @see ResourceLogicTypeEnum
+     */
+    Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType);
 
     /**
      * 集群接入
+     * Tuple<Long, String> 逻辑集群Id, 物理集群名称
      */
-	Result clusterJoin(ESClusterJoinDTO param, String operator);
-
-    /**
-     * 校验节点ip是否有效
-     */
-    Result checkValidForClusterNodes(List<String> ips);
+	Result<Tuple<Long, String>> clusterJoin(ClusterJoinDTO param, String operator);
 
     /**
      * 删除接入集群
      * 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
      */
-    Result deleteClusterJoin(Integer clusterId, String operator);
+    Result<Void> deleteClusterJoin(Integer clusterId, String operator);
+
+    Result<List<ESPluginVO>> listPlugins(String cluster);
+
+    /**
+     * 获取集群下的动态配置信息
+     * @param cluster 物理集群的名称
+     * @return 动态配置信息 Map中的String见于动态配置的字段，例如cluster.routing.allocation.awareness.attributes
+     */
+    Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster);
+
+    /**
+     * 更新集群下的动态配置信息
+     * @param param 配置信息参数
+     * @return result
+     */
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param);
+
+    /**
+     * 获取集群下的属性配置
+     * @param cluster 集群名称
+     * @return result
+     */
+    Result<Set<String>> getRoutingAllocationAwarenessAttributes(String cluster);
+
+    /**
+     * 获取APP有管理、读写、读权限的物理集群名称列表
+     */
+	List<String> getAppClusterPhyNames(Integer appId);
+
+    /**
+     * 获取物理集群节点名称列表
+     */
+    List<String> getAppClusterPhyNodeNames(String clusterPhyName);
+
+    /**
+     * 构建单个物理集群统计信息
+     * @param cluster
+     */
+    void buildPhyClusterStatics(ConsoleClusterPhyVO cluster);
+
+    /**
+     * 获取APP可查看的物理集群节点名称列表
+     * @param appId
+     */
+    List<String> getAppNodeNames(Integer appId);
+
+    /**
+     * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
+     * @param clusterPhyId
+     * @param operator
+     * @param appId
+     * @return
+     */
+    Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer appId);
+
+    Result<Boolean> addCluster(ESClusterDTO param, String operator, Integer appId);
+
+    Result<Boolean> editCluster(ESClusterDTO param, String operator, Integer appId);
+
+    /**
+     * 条件组合、分页查询
+     * @param condition
+     * @param appId
+     * @return
+     */
+    PaginationResult<ConsoleClusterPhyVO> pageGetConsoleClusterPhyVOS(ClusterPhyConditionDTO condition, Integer appId);
+
+    /**
+     * 获取项目下指定权限的物理集群列表
+     * @param appId
+     * @param authType
+     * @return
+     */
+    List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer appId, Integer authType);
+
+    /**
+     * 获取项目下有管理权限的物理集群列表
+     * @param appId
+     * @return
+     */
+    List<ClusterPhy> getAppAccessClusterPhyList(Integer appId);
+
+    /**
+     * 获取项目下有访问权限的物理集群列表
+     * @param appId
+     * @return
+     */
+    List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer appId);
+
+    /**
+     * 构建物理集群角色信息
+     * @param cluster
+     */
+    void buildClusterRole(ConsoleClusterPhyVO cluster);
+
+    /**
+     * 更新物理集群状态
+     * @param clusterPhyName   物理集群名称
+     * @param operator         操作者
+     * @return
+     */
+    boolean updateClusterHealth(String clusterPhyName, String operator);
+
+    /**
+     * 校验集群状态是否有效
+     * @param clusterPhyName
+     * @param operator
+     * @return
+     */
+    Result<Boolean> checkClusterHealth(String clusterPhyName, String operator);
+
+    /**
+     * 集群是否存在
+     * @param clusterPhyName
+     * @param operator
+     * @return
+     */
+    Result<Boolean> checkClusterIsExit(String clusterPhyName, String operator);
+
+    /**
+     * 删除存在集群
+     * @param clusterPhyName
+     * @param appId
+     * @param operator
+     * @return
+     */
+    Result<Boolean> deleteClusterExit(String clusterPhyName, Integer appId, String operator);
+
+    /**
+     * 构建物理集群所属项目和所属的appId的信息
+     * @param consoleClusterPhyVO 物理集群看板视图
+     */
+    void buildBelongAppIdAndName(ConsoleClusterPhyVO consoleClusterPhyVO);
+
+    /**
+     *  根据逻辑集群类型和已选中的物理集群名称筛选出es版本一致的物理集群名称列表
+     *  @param hasSelectedClusterNameWhenBind 用户在新建逻辑集群阶段已选择的物理集群名称
+     *  @param clusterLogicType 逻辑集群类型
+     *  @return 同版本的物理集群名称列表
+     */
+    Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType, String hasSelectedClusterNameWhenBind);
+
+    /**
+     * 根据已经创建的逻辑集群id筛选出物理集群版本一致的物理集群名称列表
+     * @param clusterLogicId 逻辑集群id
+     * @return 同版本的物理集群名称列表
+     */
+    Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId);
 }

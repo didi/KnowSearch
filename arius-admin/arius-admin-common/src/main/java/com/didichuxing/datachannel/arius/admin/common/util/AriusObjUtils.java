@@ -2,13 +2,16 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
 
 /**
@@ -18,6 +21,8 @@ import com.google.common.collect.Maps;
  * @date 2019/2/26
  */
 public class AriusObjUtils {
+
+    private AriusObjUtils(){}
 
     private static final ILog LOGGER = LogFactory.getLog(AriusObjUtils.class);
 
@@ -75,12 +80,11 @@ public class AriusObjUtils {
      * @return
      */
     public static boolean isNull(Object object) {
-        if (object instanceof String) {
-            String str = (String) object;
-            return isBlack(str);
-        }
-
         return object == null;
+    }
+
+    public static boolean isNull(String str) {
+        return isBlack(str);
     }
 
     /**
@@ -118,4 +122,70 @@ public class AriusObjUtils {
         return name.length() > 3 ? name.substring(3, 4).toLowerCase() + name.substring(4) : "";
     }
 
+    /**
+     * 是空字符串或者空
+     */
+    public static boolean isBlank(String str) {
+        return StringUtils.isBlank(str);
+    }
+
+    /**
+     * 是空字符串或者空
+     */
+    public static boolean anyBlank(String... strings) {
+        return Arrays.stream(strings).anyMatch(StringUtils::isBlank);
+    }
+
+    /**
+     * 存在空
+     */
+    public static boolean isExistBlank(String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if ((Character.isWhitespace(str.charAt(i)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是空字符串
+     */
+    public static boolean equalList(List<Object> seq1, List<Object> seq2) {
+        if (isNull(seq1) && isNull(seq2)) {
+            return true;
+        } else if (isNull(seq1) || isNull(seq2) || seq1.size() != seq2.size()) {
+            return false;
+        }
+        for (Object elem: seq1) {
+            if (!seq2.contains(elem)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isEmptyList(List<?> seq) {
+        return isNull(seq) || seq.isEmpty();
+    }
+
+    public static boolean isEmptySet(Set<?> seq) {
+        return isNull(seq) || seq.isEmpty();
+    }
+
+    public static boolean isNullOrLessThanZero(Long value) {
+        return value == null || value < 0;
+    }
+
+    public static boolean isNullOrLessThanZero(Integer value) {
+        return value == null || value < 0;
+    }
+
+    public static boolean isNullOrLessThanZero(Double value) {
+        return value == null || value < 0;
+    }
 }

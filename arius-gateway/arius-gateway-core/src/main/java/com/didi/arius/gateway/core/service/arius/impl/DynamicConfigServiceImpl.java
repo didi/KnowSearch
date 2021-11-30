@@ -9,6 +9,7 @@ import com.didi.arius.gateway.core.service.arius.DynamicConfigService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.DynamicConfigListResponse;
 import com.didi.arius.gateway.remote.response.DynamicConfigResponse;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import javax.annotation.PostConstruct;
 import java.util.Map;
 
 @Service
+@NoArgsConstructor
 public class DynamicConfigServiceImpl implements DynamicConfigService {
 
     protected static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
@@ -34,6 +36,8 @@ public class DynamicConfigServiceImpl implements DynamicConfigService {
 
     private String host = Convert.getHostName();
 
+    private String forbiddenSettings;
+
     private boolean detailLogFlag = false;
 
     /**
@@ -43,7 +47,7 @@ public class DynamicConfigServiceImpl implements DynamicConfigService {
 
     @PostConstruct
     public void init(){
-        threadPool.submitScheduleAtFixTask( () -> resetDynamicConfigInfo(), 0, schedulePeriod );
+        threadPool.submitScheduleAtFixTask(this::resetDynamicConfigInfo, 5, schedulePeriod);
     }
 
     @Override
@@ -99,21 +103,33 @@ public class DynamicConfigServiceImpl implements DynamicConfigService {
                         bootLogger.info("resetDynamicConfigInfo reset {} end, detailLogFlag={}", QueryConsts.DETAIL_LOG_FLAG, detailLogFlag);
                         // 动态配置项，可以跳过多type索引启用映射查询的appid列表
                     } else if (QueryConsts.MAPPING_INDEXNAME_WHITE_APPIDS.equals(dynamicConfigResponse.getValueName())) {
-                        MappingIndexNameWhiteAppIds appIdds = JSON.parseObject(dynamicConfigResponse.getValue(), MappingIndexNameWhiteAppIds.class);
-                        if (!whiteAppIds.equals(appIdds)) {
-                            whiteAppIds.setAppids(appIdds.getAppids());
-                        }
+                        dealWhiteAppId(dynamicConfigResponse);
+                    }else if(QueryConsts.FORBIDDEN_SETTING_PATH.equals(dynamicConfigResponse.getValueName())){
+                        forbiddenSettings = dynamicConfigResponse.getValue();
                     }
 
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     bootLogger.error("dynamicConfig process value||name={}||value={}||e={}", dynamicConfigResponse.getValueName(), dynamicConfigResponse.getValue(), Convert.logExceptionStack(e));
                 }
 
             }
 
             bootLogger.info("resetDynamicConfigInfo end...");
-        } catch (Throwable e) {
+        } catch (Exception e) {
             bootLogger.error("resetDynamicConfigInfo_error||e={}", Convert.logExceptionStack(e));
         }
+
     }
+
+    private void dealWhiteAppId(DynamicConfigResponse dynamicConfigResponse) {
+        MappingIndexNameWhiteAppIds appIdds = JSON.parseObject(dynamicConfigResponse.getValue(), MappingIndexNameWhiteAppIds.class);
+        if (!whiteAppIds.equals(appIdds)) {
+            whiteAppIds.setAppids(appIdds.getAppids());
+        }
+    }
+
+    public String getForbiddenSettings() {
+        return forbiddenSettings;
+    }
+
 }

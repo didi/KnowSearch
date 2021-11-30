@@ -37,7 +37,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_OP + "/config")
-@Api(value = "运维配置接口(REST)")
+@Api(tags = "运维配置接口(REST)")
 public class AriusConfigController {
 
     @Autowired
@@ -63,7 +63,7 @@ public class AriusConfigController {
     @PostMapping("/switch")
     @ResponseBody
     @ApiOperation(value = "使能配置接口", notes = "")
-    public Result switchConfig(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
+    public Result<Void> switchConfig(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
         return ariusConfigInfoService.switchConfig(param.getId(), param.getStatus(),
             HttpRequestUtils.getOperator(request));
     }
@@ -72,21 +72,21 @@ public class AriusConfigController {
     @ResponseBody
     @ApiOperation(value = "删除配置接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "id", value = "配置ID", required = true) })
-    public Result delete(HttpServletRequest request, @RequestParam(value = "id") Integer id) {
+    public Result<Void> delete(HttpServletRequest request, @RequestParam(value = "id") Integer id) {
         return ariusConfigInfoService.delConfig(id, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建配置接口", notes = "")
-    public Result add(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
+    public Result<Integer> add(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
         return ariusConfigInfoService.addConfig(param, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑配置接口", notes = "")
-    public Result edit(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
+    public Result<Void> edit(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
         return ariusConfigInfoService.editConfig(param, HttpRequestUtils.getOperator(request));
     }
 

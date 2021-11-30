@@ -1,0 +1,36 @@
+{
+	"size": 0,
+	"query": {
+		"bool": {
+			"must": [{
+					"term": {
+						"cluster": {
+							"value": "%s"
+						}
+					}
+				},
+				{
+					"range": {
+						"timestamp": {
+							"gte": %d,
+							"lte": %d
+						}
+					}
+				}
+			]
+		}
+	},
+	"aggs": {
+		"hist": {
+			"date_histogram": {
+				"field": "timestamp",
+				"fixed_interval": "{interval}",
+				"time_zone": "Asia/Shanghai",
+				"min_doc_count": 0
+			},
+			"aggs": {
+               "aggsDsl":1
+			}
+		}
+	}
+}

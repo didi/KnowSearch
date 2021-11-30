@@ -35,7 +35,7 @@ public class ResultWorkOrder implements Serializable {
         this.errCode = errCode;
     }
 
-    public static ResultWorkOrder build(Result result) {
+    public static <T> ResultWorkOrder build(Result<T> result) {
         return new ResultWorkOrder(result.getMessage(), result.getCode());
     }
 }

@@ -18,7 +18,7 @@ public abstract class TemplateQuotaEvent extends ApplicationEvent {
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public TemplateQuotaEvent(Object source, LogicTemplateQuotaUsage templateQuotaUsage) {
+    protected TemplateQuotaEvent(Object source, LogicTemplateQuotaUsage templateQuotaUsage) {
         super(source);
         this.templateQuotaUsage = templateQuotaUsage;
     }

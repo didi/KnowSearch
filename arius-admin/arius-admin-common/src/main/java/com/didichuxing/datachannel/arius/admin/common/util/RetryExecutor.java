@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 public class RetryExecutor {
     private static final ILog LOGGER     = LogFactory.getLog(RetryExecutor.class);
@@ -9,7 +11,7 @@ public class RetryExecutor {
     /**
      * 最多的重试次数
      */
-    private static int        RETRY_MAX  = 10;
+    private static final int        RETRY_MAX  = 10;
     /**
      * 操作名字
      */
@@ -30,12 +32,27 @@ public class RetryExecutor {
      */
 
     public interface Handler {
-        boolean process() throws Throwable;
+        /**
+         * 处理方法
+         * @return
+         * @throws Throwable
+         */
+        boolean process() throws BaseException;
 
-        default boolean needRetry(Throwable e) {
+        /***
+         * 是否重试
+         * @param e 异常
+         * @return
+         */
+        default boolean needRetry(Exception e) {
             return true;
         }
 
+        /**
+         * 重试Sleep时间间隔
+         * @param retryTimes 重试次数
+         * @return
+         */
         default int retrySleepTime(int retryTimes) {return 0;}
     }
 
@@ -62,7 +79,7 @@ public class RetryExecutor {
      * 重试操作，要么handler执行成功有返回值,要么报异常
      * @throws Throwable 操作的异常
      */
-    public boolean execute() throws Throwable {
+    public boolean execute() throws Exception {
         boolean succ = false;
         int tryCount = 0;
         do {
@@ -76,7 +93,7 @@ public class RetryExecutor {
                 if (succ) {
                     return succ;
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 if (!handler.needRetry(e) || tryCount == retryCount) {
                     LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
                         e.getMessage(), name, tryCount, e);

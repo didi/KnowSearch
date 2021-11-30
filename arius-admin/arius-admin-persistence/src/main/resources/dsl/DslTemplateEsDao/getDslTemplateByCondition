@@ -1,0 +1,25 @@
+{
+  "from": %d,
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": "boolMustDsl",
+      "must_not": [
+        {
+          "prefix": {
+            "indices": {
+              "value": "."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+      {
+        "%s": {
+          "order": "%s"
+        }
+      }
+  ]
+}

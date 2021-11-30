@@ -40,8 +40,9 @@ public class SearchHandler extends BaseSearchHandler {
 		if (searchRequest.source() != null && searchRequest.source().length() > queryConfig.getDslMaxLength()) {
 			throw new QueryDslLengthException(String.format("query length(%d) > %d exception", searchRequest.source().length(), queryConfig.getDslMaxLength()));
 		}
-		
-		statLogger.info(buildSearchRequestLog(actionContext, searchRequest));
+
+		String log = buildSearchRequestLog(actionContext, searchRequest);
+		statLogger.info(log);
 
 		List<String> indices = Arrays.asList(searchRequest.indices());
 		appService.checkIndices(actionContext, indices);

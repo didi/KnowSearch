@@ -3,17 +3,14 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,12 +26,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
  */
 @Service
 public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements TemplatePreCreateManager {
-
-    @Autowired
-    private IndexTemplateConfigDAO   indexTemplateConfigDAO;
-
-    @Autowired
-    private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
 
     @Autowired
     private TemplateDcdrManager templateDcdrManager;
@@ -66,7 +57,7 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
 
         int succeedCount = 0;
         for (IndexTemplatePhy physical : physicals) {
-            TemplateConfigPO config = indexTemplateConfigDAO.getByLogicId(physical.getLogicId());
+            IndexTemplateConfig config = templateLogicService.getTemplateConfig(physical.getLogicId());
             if (config == null || !config.getPreCreateFlags()) {
                 LOGGER.warn(
                     "class=ESClusterPhyServiceImpl||method=preCreateIndex||cluster={}||template={}||msg=skip preCreateIndex",
@@ -100,15 +91,15 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
      */
     @Override
     public boolean reBuildTomorrowIndex(Integer logicId, int retryCount) throws ESOperateException {
-        List<TemplatePhysicalPO> physicalPOS = indexTemplatePhysicalDAO.listByLogicId(logicId);
-        if (CollectionUtils.isEmpty(physicalPOS)) {
+        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(logicId);
+        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
             return true;
         }
 
         boolean succ = true;
-        for (TemplatePhysicalPO physicalPO : physicalPOS) {
-            if (syncDeleteTomorrowIndexByPhysicalId(physicalPO.getId(), retryCount)) {
-                succ = succ && syncCreateTomorrowIndexByPhysicalId(physicalPO.getId(), retryCount);
+        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
+            if (syncDeleteTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount)) {
+                succ = succ && syncCreateTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount);
             }
         }
 

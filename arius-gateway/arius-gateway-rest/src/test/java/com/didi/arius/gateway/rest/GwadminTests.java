@@ -43,7 +43,7 @@ public class GwadminTests {
         String res = HttpClient.forward("http://127.0.0.1:8200/_gwadmin/appinfo", "GET", null, headerParams, null);
         System.out.println(res);
         JSONArray jr = JSON.parseArray(res);
-        assertEquals(jr.size() > 0, true);
+        assertEquals(true, jr.size() > 0);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class GwadminTests {
     public void testDataCenterInfoController() throws IOException{
         JSONArray jr = HttpClient.forward("http://127.0.0.1:8200/_gwadmin/datacenterinfo", "GET", null, headerParams, null, JSONArray.class);
         System.out.println(jr);
-        assertEquals(jr.size() >= 0, true);
+        assertEquals(true, jr.size() >= 0);
     }
 
     @Test

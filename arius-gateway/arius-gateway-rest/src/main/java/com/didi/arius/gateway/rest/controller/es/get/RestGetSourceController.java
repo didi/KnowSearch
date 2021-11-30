@@ -16,6 +16,11 @@ import static org.elasticsearch.rest.RestRequest.Method.GET;
 public class RestGetSourceController extends BaseHttpRestController {
     @Autowired
     private RestGetSourceAction restGetSourceAction;
+
+    public RestGetSourceController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/{index}/{type}/{id}/_source", this);

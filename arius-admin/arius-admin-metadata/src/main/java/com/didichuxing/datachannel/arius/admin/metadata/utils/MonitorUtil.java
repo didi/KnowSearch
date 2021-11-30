@@ -1,12 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.metadata.utils;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.OdinData;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
 public class MonitorUtil {
+
+    private MonitorUtil(){}
+
     public static final String COLLECTION_ROUTE_SPLIT            = ".";
 
     public static final String COLLECTION_ROUTE_COMPUTE_DIVISION = "/";
@@ -53,12 +56,11 @@ public class MonitorUtil {
         }
     }
 
-    public static OdinData fillDataformat(ESDataTempBean esDataTempBean) {
-        OdinData dataFormat = new OdinData();
-        dataFormat.setName(esDataTempBean.getValueName());
+    public static N9eData fillDataformat(ESDataTempBean esDataTempBean) {
+        N9eData dataFormat = new N9eData();
+        dataFormat.setMetric(esDataTempBean.getValueName());
         dataFormat.setValue(String.valueOf(esDataTempBean.getComputeValue()));
-        dataFormat.setTimestamp(esDataTempBean.getTimestamp() / 1000);
-        dataFormat.setStep(60);
+        dataFormat.setTime(esDataTempBean.getTimestamp() / 1000);
         dataFormat.putTag("host", esDataTempBean.getHost());
 
         if (StringUtils.isNotEmpty(esDataTempBean.getCluster())) {

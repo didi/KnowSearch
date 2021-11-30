@@ -39,6 +39,12 @@
         (#{workOrderTaskId},#{role},#{hostname},#{grp},#{idx},#{status},#{taskId})
     </insert>
 
+    <delete id="deleteEcmTaskDetailsByTaskOrder">
+        update es_work_order_task_detail
+        set delete_flag = '1'
+        where work_order_task_id = #{workOrderTaskId}
+    </delete>
+
     <!-- 根据工单任务ID  查询工单任务详情 -->
     <select id="listByWorkOrderTaskId" parameterType="long" resultMap="BaseResultMap">
         select

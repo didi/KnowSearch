@@ -20,65 +20,82 @@ import java.io.IOException;
 * 
 */
 public abstract class BaseSearchHandler extends ActionHandler {
+	public static final String APP_ID = "appid=";
+	public static final String REQUEST_ID = "requestId=";
+	public static final String INDICES = "||indices=";
+	public static final String TYPES = "||types=";
+	public static final String SOURCE = "||source=";
+	public static final String EXTRA_SOURCE = "||extra_source=";
+	public static final String TOOK_MILLIS = "tookInMillis=";
+	public static final String SCROLL_ID = "scrollId=";
+	public static final String TOTAL_SHARDS = "totalShards=";
+	public static final String FAILED_SHARDS = "failedShards=";
+	public static final String IS_TIMEOUT = "isTimedOut=";
+	public static final String TOTAL_HIT = "totalHits=";
+
 	protected String buildSearchRequestLog(ActionContext actionContext, SearchRequest searchRequest) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(QueryConsts.DLFLAG_PREFIX + "query_tcp_search_request||");
 
-		sb.append("appid=").append(actionContext.getAppid())
+		sb.append(APP_ID).append(actionContext.getAppid())
 			.append("||");
 
-		sb.append("requestId=").append(actionContext.getRequestId())
-			.append("||");		
-		
+		sb.append(REQUEST_ID).append(actionContext.getRequestId())
+			.append("||");
+
 		if (searchRequest.indices() != null
 				&& searchRequest.indices().length > 0) {
-			String indices[] = searchRequest.indices();
-			sb.append("||indices=");
+			String[] indices = searchRequest.indices();
+			sb.append(INDICES);
 			for (String index : indices) {
 				sb.append(index).append(",");
 			}
 		} else {
-			sb.append("||indices=");
+			sb.append(INDICES);
 		}
-		if (searchRequest.types() != null && searchRequest.types().length > 0) {
-			String types[] = searchRequest.types();
-			sb.append("||types=");
-			for (String type : types) {
-				sb.append(type).append(",");
-			}
-		} else {
-			sb.append("||types=");
-		}
-		
+		dealType(searchRequest, sb);
+
 		sb.append("||routing=");
 		sb.append(searchRequest.routing());
 
 		if (searchRequest.source() != null
 				&& searchRequest.source().length() > 0) {
 			try {
-				sb.append("||source=")
+				sb.append(SOURCE)
 						.append(XContentHelper.convertToJson(
-								searchRequest.source(), true).replaceAll("\\n", ""));
+								searchRequest.source(), true).replace("\n", ""));
 			} catch (IOException e) {
 				sb.append("||source=_failed_to_convert_");
 			}
 		} else {
-			sb.append("||source=");
+			sb.append(SOURCE);
 		}
 		if (searchRequest.extraSource() != null
 				&& searchRequest.extraSource().length() > 0) {
 			try {
-				sb.append("||extra_source=").append(
+				sb.append(EXTRA_SOURCE).append(
 						XContentHelper.convertToJson(
-								searchRequest.extraSource(), true).replaceAll("\\n", ""));
+								searchRequest.extraSource(), true).replaceAll("\n", ""));
 			} catch (IOException e) {
 				sb.append("||extra_source=_failed_to_convert_");
 			}
 		} else {
-			sb.append("||extra_source=");
+			sb.append(EXTRA_SOURCE);
 		}
 
 		return sb.toString();
+	}
+
+	private void dealType(SearchRequest searchRequest, StringBuilder sb) {
+		if (searchRequest.types() != null && searchRequest.types().length > 0) {
+			String[] types = searchRequest.types();
+			sb.append(TYPES);
+			for (String type : types) {
+				sb.append(type).append(",");
+			}
+		} else {
+			sb.append(TYPES);
+		}
 	}
 
 	protected String buildSearchResponseLog(ActionContext actionContext, SearchResponse searchResponse) {
@@ -87,28 +104,28 @@ public abstract class BaseSearchHandler extends ActionHandler {
 		StringBuilder sb = new StringBuilder();
 		sb.append(QueryConsts.DLFLAG_PREFIX + "query_tcp_search_response||");
 
-		sb.append("appid=").append(actionContext.getAppid())
+		sb.append(APP_ID).append(actionContext.getAppid())
 				.append("||");
 		
-		sb.append("requestId=").append(actionContext.getRequestId())
+		sb.append(REQUEST_ID).append(actionContext.getRequestId())
 				.append("||");
 
-		sb.append("tookInMillis=").append(searchResponse.getTookInMillis())
+		sb.append(TOOK_MILLIS).append(searchResponse.getTookInMillis())
 				.append("||");
 
-		sb.append("scrollId=").append(searchResponse.getScrollId())
+		sb.append(SCROLL_ID).append(searchResponse.getScrollId())
 				.append("||");
 
-		sb.append("totalShards=").append(searchResponse.getTotalShards())
+		sb.append(TOTAL_SHARDS).append(searchResponse.getTotalShards())
 				.append("||");
 
-		sb.append("failedShards=")
+		sb.append(FAILED_SHARDS)
 		.append(searchResponse.getTotalShards()-searchResponse.getSuccessfulShards()).append("||");
 
-		sb.append("isTimedOut=")
+		sb.append(IS_TIMEOUT)
 				.append(searchResponse.isTimedOut()).append("||");		
 		
-		sb.append("totalHits=").append(searchResponse.getHits().getTotalHits());
+		sb.append(TOTAL_HIT).append(searchResponse.getHits().getTotalHits());
 
 		return sb.toString();
 	}
@@ -117,28 +134,28 @@ public abstract class BaseSearchHandler extends ActionHandler {
 		StringBuilder sb = new StringBuilder();
 		sb.append(QueryConsts.DLFLAG_PREFIX + "query_tcp_scroll_search_slowlog||");
 
-		sb.append("appid=").append(actionContext.getAppid())
+		sb.append(APP_ID).append(actionContext.getAppid())
 				.append("||");
 		
-		sb.append("requestId=").append(actionContext.getRequestId())
+		sb.append(REQUEST_ID).append(actionContext.getRequestId())
 				.append("||");
 
-		sb.append("tookInMillis=").append(searchResponse.getTookInMillis())
+		sb.append(TOOK_MILLIS).append(searchResponse.getTookInMillis())
 				.append("||");
 
-		sb.append("scrollId=").append(searchResponse.getScrollId())
+		sb.append(SCROLL_ID).append(searchResponse.getScrollId())
 				.append("||");
 
-		sb.append("totalShards=").append(searchResponse.getTotalShards())
+		sb.append(TOTAL_SHARDS).append(searchResponse.getTotalShards())
 				.append("||");
 
-		sb.append("failedShards=")
+		sb.append(FAILED_SHARDS)
 		.append(searchResponse.getTotalShards()-searchResponse.getSuccessfulShards()).append("||");
 
-		sb.append("isTimedOut=")
+		sb.append(IS_TIMEOUT)
 				.append(searchResponse.isTimedOut()).append("||");		
 		
-		sb.append("totalHits=").append(searchResponse.getHits().getTotalHits());
+		sb.append(TOTAL_HIT).append(searchResponse.getHits().getTotalHits());
 
 		return sb.toString();
 	}	
@@ -147,74 +164,66 @@ public abstract class BaseSearchHandler extends ActionHandler {
 		StringBuilder sb = new StringBuilder();
 		sb.append(QueryConsts.DLFLAG_PREFIX + "query_tcp_search_slowlog||");    
 		
-		sb.append("appid=").append(actionContext.getAppid())
+		sb.append(APP_ID).append(actionContext.getAppid())
 			.append("||");		
 		
-		sb.append("requestId=").append(actionContext.getRequestId());
+		sb.append(REQUEST_ID).append(actionContext.getRequestId());
 
 		if (searchRequest.indices() != null
 				&& searchRequest.indices().length > 0) {
-			String indices[] = searchRequest.indices();
-			sb.append("||indices=");
+			String[] indices = searchRequest.indices();
+			sb.append(INDICES);
 			for (String index : indices) {
 				sb.append(index).append(",");
 			}
 		} else {
-			sb.append("||indices=");
+			sb.append(INDICES);
 		}
-		if (searchRequest.types() != null && searchRequest.types().length > 0) {
-			String types[] = searchRequest.types();
-			sb.append("||types=");
-			for (String type : types) {
-				sb.append(type).append(",");
-			}
-		} else {
-			sb.append("||types=");
-		}
+		dealType(searchRequest, sb);
 
 		if (searchRequest.source() != null
 				&& searchRequest.source().length() > 0) {
 			try {
-				sb.append("||source=")
+				sb.append(SOURCE)
 						.append(XContentHelper.convertToJson(
 								searchRequest.source(), true));
 			} catch (IOException e) {
 				sb.append("||source=_failed_to_convert_");
 			}
 		} else {
-			sb.append("||source=");
+			sb.append(SOURCE);
 		}
 		if (searchRequest.extraSource() != null
 				&& searchRequest.extraSource().length() > 0) {
 			try {
-				sb.append("||extra_source=").append(
+				sb.append(EXTRA_SOURCE).append(
 						XContentHelper.convertToJson(
 								searchRequest.extraSource(), true));
 			} catch (IOException e) {
 				sb.append("||extra_source=_failed_to_convert_");
 			}
 		} else {
-			sb.append("||extra_source=");
+			sb.append(EXTRA_SOURCE);
 		}
 		
 		sb.append("||");
 		
-		sb.append("tookInMillis=").append(searchResponse.getTookInMillis())
+		sb.append(TOOK_MILLIS).append(searchResponse.getTookInMillis())
 				.append("||");
 		
-		sb.append("scrollId=").append(searchResponse.getScrollId())
+		sb.append(SCROLL_ID).append(searchResponse.getScrollId())
 				.append("||");
 		
-		sb.append("totalShards=").append(searchResponse.getTotalShards())
+		sb.append(TOTAL_SHARDS).append(searchResponse.getTotalShards())
 				.append("||");
 		
-		sb.append("failedShards=")
+		sb.append(FAILED_SHARDS)
 		.append(searchResponse.getTotalShards()-searchResponse.getSuccessfulShards()).append("||");
 		
-		sb.append("isTimedOut=")
+		sb.append(IS_TIMEOUT)
 				.append(searchResponse.isTimedOut()).append("||");		
 		
-		sb.append("totalHits=").append(searchResponse.getHits().getTotalHits());
+		sb.append(TOTAL_HIT).append(searchResponse.getHits().getTotalHits());
 		
 		return sb.toString();
     }	
@@ -253,7 +262,6 @@ public abstract class BaseSearchHandler extends ActionHandler {
 					metricsService.addSlowlogCost(actionContext.getAppid(), actionContext.getCostTime());
 				}
 
-				// analysisManager.offerContxtToAnalysis(queryContext);
 				super.onResponse(searchResponse);
 			}
 		};

@@ -48,23 +48,36 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.didichuxing.tunnel</groupId>
-            <artifactId>tunnel-log</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- logi -->
+        <dependency>
+            <groupId>io.github.zqrferrari</groupId>
+            <artifactId>logi-elasticsearch-client</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>elasticsearch-didi-internal-client</artifactId>
+            <groupId>io.github.zqrferrari</groupId>
+            <artifactId>logi-log</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
     </dependencies>
 

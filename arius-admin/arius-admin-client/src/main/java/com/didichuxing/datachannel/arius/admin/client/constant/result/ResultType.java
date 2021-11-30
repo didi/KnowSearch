@@ -61,7 +61,15 @@ public enum ResultType {
 
                         NO_FIND_SUB_CLASS(10025, "找不到实现类"),
 
-                        CLUSTER_LOGIC_TYPE_ERROR(1026, "逻辑集群类型不存在")
+                        CLUSTER_LOGIC_TYPE_ERROR(10026, "逻辑集群类型不存在"),
+
+                        N9E_SERVER_ERROR(10027, "夜莺服务异常"),
+
+                        ARIUS_GATEWAY_ERROR(10028, "arius gateway 异常"),
+
+                        FILE_UPLOAD_ERROR(10029, "upload file failed"),
+
+                        NOT_SUPPORT_ERROR(10030, "接口不再支持"),
     ;
 
     private Integer code;

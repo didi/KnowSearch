@@ -39,10 +39,10 @@ public class SearchScrollHandler extends BaseSearchHandler {
 		sb.append(actionContext.getAppid());
 		sb.append("||requestId=");
 		sb.append(actionContext.getRequestId()).append("||");
-
 		sb.append("scorllId=").append(searchScrollRequest.scrollId());
+		String log = sb.toString();
 
-		statLogger.info(sb.toString());
+		statLogger.info(log);
 		
 		ActionListener<SearchResponse> listener = newListener(actionContext);
 		

@@ -1,6 +1,7 @@
 package com.didi.arius.gateway.common.metadata;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
 * @author weizijun
@@ -8,12 +9,25 @@ import lombok.Data;
 * 
 */
 @Data
+@NoArgsConstructor
 public class FlowThreshold {
 
-	private static final int SEARCHID_FLOW_LIMIT_IN_UPPER = 30 * 1024 * 1024; // 30MB/s
-	private static final int SEARCHID_FLOW_LIMIT_IN_LOWER = 15 * 1024 * 1024; // 15MB/s
-	private static final int SEARCHID_FLOW_LIMIT_OUT_UPPER = 100 * 1024 * 1024; // 100MB/s
-	private static final int SEARCHID_FLOW_LIMIT_OUT_LOWER = 80 * 1024 * 1024; // 80MB/s
+	/**
+	 * 30MB/s
+	 */
+	private static final int SEARCHID_FLOW_LIMIT_IN_UPPER = 30 * 1024 * 1024;
+	/**
+	 * 15MB/s
+	 */
+	private static final int SEARCHID_FLOW_LIMIT_IN_LOWER = 15 * 1024 * 1024;
+	/**
+	 * 100MB/s
+	 */
+	private static final int SEARCHID_FLOW_LIMIT_OUT_UPPER = 100 * 1024 * 1024;
+	/**
+	 * 80MB/s
+	 */
+	private static final int SEARCHID_FLOW_LIMIT_OUT_LOWER = 80 * 1024 * 1024;
 	
 	/**
 	 * 触发ops限流的值

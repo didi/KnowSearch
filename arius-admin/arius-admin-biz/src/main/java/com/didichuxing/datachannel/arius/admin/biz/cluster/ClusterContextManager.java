@@ -3,40 +3,59 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogicContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhyContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 
 /**
  * Created by linyunan on 2021-06-08
  */
 public interface ClusterContextManager {
     /**
-     * 初始化校验模型, 模型中的数据使用为两个map作为存储容器
+     * 刷新物理集群上下文
+     * @param clusterPhyName  物理集群名称
      */
-    void flushClusterContext();
+    void flushClusterPhyContext(String clusterPhyName);
 
     /**
-     * 根据逻辑集群Id 获取逻辑集群关联物理集群的数量信息
+     * 刷新逻辑集群上下文
+     * @param clusterLogicId   逻辑集群Id
      */
-    ESClusterLogicContext getESClusterLogicContext(Long clusterLogicId);
+    void flushClusterLogicContext(Long clusterLogicId);
 
     /**
-     * 根据物理集群Id 获取物理集群关联逻辑集群的数量信息
+     * 根据region信息更新集群上下文
+     * @param clusterRegion
      */
-    ESClusterPhyContext getESClusterPhyContext(String clusterPhyName);
+    void flushClusterContextByClusterRegion(ClusterRegion clusterRegion);
 
     /**
      * 校验逻辑集群是可否关联物理集群, 不同类型的逻辑集群, 校验规则不一样
      */
-    Result canClusterLogicAssociatedPhyCluster(Long clusterLogicId, String clusterPhyName, Integer clusterLogicType);
+    Result<Boolean> canClusterLogicAssociatedPhyCluster(Long clusterLogicId, String clusterPhyName, Long regionId,
+                                                        Integer clusterLogicType);
 
     /**
-     * 获取可关联的物理集群名称列表
+     * 获取可关联的物理集群名称列表, 针对新建逻辑集群、逻辑集群关联region等操作
      */
-    List<String> getCanBeAssociatedClustersPhys(Integer clusterLogicType);
+    Result<List<String>> getCanBeAssociatedClustersPhys(Integer clusterLogicType, Long clusterLogicId);
 
     /**
      * 获取集群关联逻辑集群名称列表
      */
     List<String> getClusterPhyAssociatedClusterLogicNames(String clusterPhyName);
+
+    /**
+     * 构建物理集群上下文
+     * @param cluster
+     * @return
+     */
+    ClusterPhyContext getClusterPhyContext(String cluster);
+
+    /**
+     * 构建逻辑集群上下文
+     * @param clusterLogicId
+     * @return
+     */
+    ClusterLogicContext getClusterLogicContext(Long clusterLogicId);
 }

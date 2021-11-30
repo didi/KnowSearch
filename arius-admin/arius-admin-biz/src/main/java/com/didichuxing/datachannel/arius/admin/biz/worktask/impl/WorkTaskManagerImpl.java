@@ -98,7 +98,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
     }
 
     @Override
-    public Result processTask(WorkTaskProcessDTO processDTO) {
+    public Result<Void> processTask(WorkTaskProcessDTO processDTO) {
         if (AriusObjUtils.isNull(processDTO.getTaskId())) {
             return Result.buildParamIllegal("任务id为空");
         }

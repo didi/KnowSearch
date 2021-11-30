@@ -13,8 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTem
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateEvent;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author d06679
@@ -41,7 +41,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
         Double deltaQuota = getDeltaQuota(event);
         IndexTemplatePhy templatePhysical = getOpTemplate(event);
         if (deltaQuota != 0.0 && templatePhysical != null) {
-            LOGGER.info("method=onApplicationEvent||logicId={}||physicalCluster={}||templateName={}||deltaQuota={}",
+            LOGGER.info("class=PhysicalTemplateNewOrDelEventListener||method=onApplicationEvent||logicId={}||physicalCluster={}||templateName={}||deltaQuota={}",
                     templatePhysical.getLogicId(), templatePhysical.getCluster(), templatePhysical.getName(), deltaQuota);
             updateRegionQuota(templatePhysical, deltaQuota);
             updateLogicTemplateQuota(templatePhysical.getLogicId(), deltaQuota);
@@ -60,7 +60,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
         if (logicPO != null) {
             logicPO.setQuota(logicPO.getQuota() + deltaQuota);
             if (indexTemplateLogicDAO.update(logicPO) == 0) {
-                LOGGER.error("method=updateLogicTemplateQuota||errMsg=updateTemplateQuotaFail||logicId={}||targetQuota={}||deltaQuota={}",
+                LOGGER.error("class=PhysicalTemplateNewOrDelEventListener||method=updateLogicTemplateQuota||errMsg=updateTemplateQuotaFail||logicId={}||targetQuota={}||deltaQuota={}",
                         logicPO.getId(), logicPO.getQuota(), deltaQuota);
             }
         }
@@ -74,7 +74,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
     private void updateRegionQuota(IndexTemplatePhy templatePhysical, Double deltaQuota) {
         CapacityPlanRegion region = capacityPlanRegionService.getRegionOfPhyTemplate(templatePhysical);
         if (region != null) {
-            LOGGER.info("method=onApplicationEvent||region={}||deltaQuota={}||msg=PhysicalTemplateAddEvent", region,
+            LOGGER.info("class=PhysicalTemplateNewOrDelEventListener||method=onApplicationEvent||region={}||deltaQuota={}||msg=PhysicalTemplateAddEvent", region,
                     deltaQuota);
             capacityPlanRegionService.editRegionFreeQuota(region.getRegionId(), region.getFreeQuota() - deltaQuota);
         }
@@ -107,9 +107,8 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
             if (event instanceof PhysicalTemplateAddEvent) {
                 if (currentPhysicalSize > 1) {
                     currentPhysicalSize = currentPhysicalSize - 1;
+                    return logicWithPhysical.getQuota() / currentPhysicalSize;
                 }
-
-                return logicWithPhysical.getQuota() / currentPhysicalSize;
             } else if (event instanceof PhysicalTemplateDeleteEvent) {
                 return -1 * logicWithPhysical.getQuota() / ( currentPhysicalSize + 1);
             }

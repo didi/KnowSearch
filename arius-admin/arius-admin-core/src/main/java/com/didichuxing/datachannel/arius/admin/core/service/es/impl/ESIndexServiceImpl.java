@@ -1,31 +1,44 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.getalias.AliasIndexNode;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.IndexConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author d06679
@@ -106,9 +119,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         LOGGER.info(
             "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||cluster={}||expression={}||indices={}",
             cluster, expression, JSON.toJSONString(indexNodesMap));
-        LOGGER.info(
-            "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||cluster={}||expression={}||indices={}",
-            cluster, expression, JSON.toJSONString(indexNodesMap));
 
         return indexNodesMap.keySet();
     }
@@ -176,7 +186,8 @@ public class ESIndexServiceImpl implements ESIndexService {
 
         List<Tuple<String, String>> ret = new ArrayList<>();
 
-        for (String index : aliasIndexNodeMap.keySet()) {
+        for (Map.Entry<String, AliasIndexNode> entry : aliasIndexNodeMap.entrySet()) {
+            String index = entry.getKey();
             AliasIndexNode aliasIndexNode = aliasIndexNodeMap.get(index);
             Map<String, JSONObject> aliases = aliasIndexNode.getAliases();
 
@@ -207,7 +218,7 @@ public class ESIndexServiceImpl implements ESIndexService {
             .succChecker(succ -> succ).process();
 
         if (!result.isSucc()) {
-            LOGGER.warn("method=syncBatchDeleteIndices||cluster={}||shouldDels={}||result={}", cluster, shouldDels,
+            LOGGER.warn("class=ESIndexServiceImpl||method=syncBatchDeleteIndices||cluster={}||shouldDels={}||result={}", cluster, shouldDels,
                 result);
         }
 
@@ -270,6 +281,22 @@ public class ESIndexServiceImpl implements ESIndexService {
         return result.isSucc();
     }
 
+    @Override
+    public boolean syncBatchBlockIndexRead(String cluster, List<String> indices, boolean block,
+                                           int retryCount) throws ESOperateException {
+        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
+            .batchList(indices).batchSize(30).processor(items -> {
+                try {
+                    return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexRead", retryCount,
+                        () -> esIndexDAO.blockIndexRead(cluster, items, block));
+                } catch (ESOperateException e) {
+                    return false;
+                }
+            }).succChecker(succ -> succ).process();
+
+        return result.isSucc();
+    }
+
     /**
      * 校验索引数据是否一致
      *
@@ -285,7 +312,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                LOGGER.warn("method=ensureDateSame||msg=sleep interrupted", e);
+                Thread.currentThread().interrupt();
+                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
             }
 
             if (checkDateSame(cluster1, cluster2, indexNames)) {
@@ -340,6 +368,23 @@ public class ESIndexServiceImpl implements ESIndexService {
         return catIndexResults;
     }
 
+    @Override
+    public List<CatIndexResult> syncCatIndex(String clusterPhyName) {
+        List<CatIndexResult> catIndexResults = esIndexDAO.catIndices(clusterPhyName);
+        return catIndexResults.stream().filter(this::filterOriginalIndices).collect(Collectors.toList());
+    }
+
+    /**
+     * 过滤原始索引
+     */
+    private boolean filterOriginalIndices(CatIndexResult catIndexResult) {
+        if (null == catIndexResult) {
+            return false;
+        }
+
+        return StringUtils.isNotBlank(catIndexResult.getIndex()) && !catIndexResult.getIndex().startsWith(".");
+    }
+
     /**
      * 获取索引配置
      * @param cluster 集群名称
@@ -351,6 +396,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.getIndexConfigs(cluster, name);
     }
 
+    @Override
+    public Map<String, IndexConfig> syncGetIndexSetting(String cluster, List<String> indexNames, int tryTimes) {
+        return esIndexDAO.getIndicesSetting(cluster, indexNames, tryTimes);
+    }
+
     /**
      * 获取索引主shard个数
      * @param clusterName
@@ -358,7 +408,7 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return
      */
     @Override
-    public Integer getIndexPrimaryShardNumber(String clusterName, String indexName) {
+    public Integer syncGetIndexPrimaryShardNumber(String clusterName, String indexName) {
         Integer primaryShardNumber = null;
 
         MultiIndexsConfig multiIndexsConfig = syncGetIndexConfigs(clusterName, indexName);
@@ -367,13 +417,7 @@ public class ESIndexServiceImpl implements ESIndexService {
                 Map<String, String> settings = entry.getValue().getSettings();
                 if (settings != null) {
                     try {
-                        Integer shardNo = Integer.parseInt(settings.get("index.number_of_shards"));
-                        if (primaryShardNumber == null) {
-                            primaryShardNumber = shardNo;
-                        } else {
-                            // 得到多个索引时获取到最大的主shard个数
-                            primaryShardNumber = Math.max(primaryShardNumber, shardNo);
-                        }
+                        primaryShardNumber = getPrimaryShardNumber(primaryShardNumber, settings);
                     } catch (NumberFormatException e) {
                         LOGGER.error(
                             "class=ESIndexServiceImpl||method=getIndexPrimaryShardNumberByCLusterName||clusterName={}||indexName={}||errMsg=fail to parse {}. ",
@@ -387,12 +431,34 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public Map<String, IndexNodes> getIndexNodes(String clusterName, String templateExp) {
+    public Map<String, IndexNodes> syncGetIndexNodes(String clusterName, String templateExp) {
         return esIndexDAO.getIndexNodes(clusterName, templateExp);
     }
 
+    @Override
+    public List<String> syncGetIndexName(String clusterName) {
+        String indicesRequestContent = getBigIndicesRequestContent("20s");
+
+        DirectResponse directResponse = esIndexDAO.getDirectResponse(clusterName, "Get", indicesRequestContent);
+
+        List<IndexResponse> indexResponses = Lists.newArrayList();
+
+        if (directResponse.getRestStatus() == RestStatus.OK
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+
+            indexResponses = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(), IndexResponse.class);
+        }
+        return indexResponses.stream().map(IndexResponse::getIndex).filter(index -> !index.startsWith("."))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean syncIsIndexExist(String cluster, String indexName) {
+        return esIndexDAO.existByClusterAndIndexName(cluster, indexName);
+    }
+
     /***************************************** private method ****************************************************/
-    private Result refreshIndex(String cluster, List<String> indexNames) {
+    private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indexNames).batchSize(30).processor(items -> esIndexDAO.refreshIndex(cluster, items))
             .succChecker(succ -> succ).process();
@@ -400,15 +466,15 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) {
-        Result refreshIndexResult1 = refreshIndex(cluster1, indexNames);
+        Result<Void> refreshIndexResult1 = refreshIndex(cluster1, indexNames);
         if (refreshIndexResult1.failed()) {
-            LOGGER.warn("method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster1, indexNames);
+            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster1, indexNames);
             return false;
         }
 
-        Result refreshIndexResult2 = refreshIndex(cluster2, indexNames);
+        Result<Void> refreshIndexResult2 = refreshIndex(cluster2, indexNames);
         if (refreshIndexResult2.failed()) {
-            LOGGER.warn("method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster2, indexNames);
+            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster2, indexNames);
             return false;
         }
 
@@ -420,68 +486,71 @@ public class ESIndexServiceImpl implements ESIndexService {
             IndexNodes stat2 = indexStat2.get(index);
 
             if (stat1 == null || stat2 == null) {
-                LOGGER.warn("method=ensureDateSame||indexName={}||msg=index miss", index);
+                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||msg=index miss", index);
                 return false;
             }
 
             if (stat1.getPrimaries().getDocs().getCount() != stat2.getPrimaries().getDocs().getCount()) {
-                LOGGER.warn("method=ensureDateSame||indexName={}||msg=doc count not match, primary={}, replica={}",
+                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||msg=doc count not match, primary={}, replica={}",
                     index, stat1.getPrimaries().getDocs().getCount(), stat2.getPrimaries().getDocs().getCount());
                 return false;
             }
 
             // 校验checkpoint
             AtomicBoolean checkpointEqualSeqNo = new AtomicBoolean(true);
-            AtomicLong totalCheckpoint1 = new AtomicLong(0);
-            stat1.getShards().forEach((shard, v) -> {
-                v.forEach((commonStat) -> {
-                    if (!commonStat.getRouting().isPrimary()) {
-                        return;
-                    }
-
-                    if (commonStat.getSeqNo().getMaxSeqNo() != commonStat.getSeqNo().getGlobalCheckpoint()) {
-                        LOGGER.warn(
-                            "method=ensureDateSame||indexName={}||shard={}||msg=primary maxSeqNo({})!=globalCheckpoint({})",
-                            index, shard, commonStat.getSeqNo().getMaxSeqNo(),
-                            commonStat.getSeqNo().getGlobalCheckpoint());
-                        checkpointEqualSeqNo.set(false);
-                    }
-
-                    totalCheckpoint1.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
-                });
-            });
-
-            AtomicLong totalCheckpoint2 = new AtomicLong(0);
-            stat2.getShards().forEach((shard, v) -> {
-                v.forEach((commonStat) -> {
-                    if (!commonStat.getRouting().isPrimary()) {
-                        return;
-                    }
-
-                    if (commonStat.getSeqNo().getMaxSeqNo() != commonStat.getSeqNo().getGlobalCheckpoint()) {
-                        LOGGER.warn(
-                            "method=ensureDateSame||indexName={}||shard={}||msg=replica maxSeqNo({})!=globalCheckpoint({})",
-                            index, shard, commonStat.getSeqNo().getMaxSeqNo(),
-                            commonStat.getSeqNo().getGlobalCheckpoint());
-                        checkpointEqualSeqNo.set(false);
-                    }
-
-                    totalCheckpoint2.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
-                });
-            });
+            AtomicLong totalCheckpoint1 = getTotalCheckpoint1(index, stat1, checkpointEqualSeqNo);
+            AtomicLong totalCheckpoint2 = getTotalCheckpoint2(index, stat2, checkpointEqualSeqNo);
 
             if (!checkpointEqualSeqNo.get()) {
                 return false;
             }
 
             if (totalCheckpoint1.get() != totalCheckpoint2.get()) {
-                LOGGER.warn("method=ensureDateSame||indexName={}|||msg=checkpoint not match, primary={}, replica={}",
+                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||indexName={}|||msg=checkpoint not match, primary={}, replica={}",
                     index, totalCheckpoint1.get(), totalCheckpoint2.get());
                 return false;
             }
         }
 
         return true;
+    }
+
+    private AtomicLong getTotalCheckpoint2(String index, IndexNodes stat2, AtomicBoolean checkpointEqualSeqNo) {
+        AtomicLong totalCheckpoint2 = new AtomicLong(0);
+        stat2.getShards().forEach((shard, v) -> v.forEach(commonStat -> {
+            if (!commonStat.getRouting().isPrimary()) {
+                return;
+            }
+
+            if (commonStat.getSeqNo().getMaxSeqNo() != commonStat.getSeqNo().getGlobalCheckpoint()) {
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||shard={}||msg=replica maxSeqNo({})!=globalCheckpoint({})",
+                    index, shard, commonStat.getSeqNo().getMaxSeqNo(), commonStat.getSeqNo().getGlobalCheckpoint());
+                checkpointEqualSeqNo.set(false);
+            }
+
+            totalCheckpoint2.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
+        }));
+        return totalCheckpoint2;
+    }
+
+    private AtomicLong getTotalCheckpoint1(String index, IndexNodes stat1, AtomicBoolean checkpointEqualSeqNo) {
+        AtomicLong totalCheckpoint1 = new AtomicLong(0);
+        stat1.getShards().forEach((shard, v) -> v.forEach(commonStat -> {
+            if (!commonStat.getRouting().isPrimary()) {
+                return;
+            }
+
+            if (commonStat.getSeqNo().getMaxSeqNo() != commonStat.getSeqNo().getGlobalCheckpoint()) {
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||shard={}||msg=primary maxSeqNo({})!=globalCheckpoint({})",
+                    index, shard, commonStat.getSeqNo().getMaxSeqNo(), commonStat.getSeqNo().getGlobalCheckpoint());
+                checkpointEqualSeqNo.set(false);
+            }
+
+            totalCheckpoint1.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
+        }));
+        return totalCheckpoint1;
     }
 
     private boolean createIndexInner(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -505,4 +574,14 @@ public class ESIndexServiceImpl implements ESIndexService {
         return false;
     }
 
+    private Integer getPrimaryShardNumber(Integer primaryShardNumber, Map<String, String> settings) {
+        Integer shardNo = Integer.parseInt(settings.get("index.number_of_shards"));
+        if (primaryShardNumber == null) {
+            primaryShardNumber = shardNo;
+        } else {
+            // 得到多个索引时获取到最大的主shard个数
+            primaryShardNumber = Math.max(primaryShardNumber, shardNo);
+        }
+        return primaryShardNumber;
+    }
 }

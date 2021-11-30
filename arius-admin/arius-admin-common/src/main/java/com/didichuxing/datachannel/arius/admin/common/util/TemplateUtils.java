@@ -11,6 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
  */
 public class TemplateUtils {
 
+    private TemplateUtils(){}
+
     /**
      * 模板是否是按天创建
      * @param dateFormat 时间格式

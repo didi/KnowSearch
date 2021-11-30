@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.ecm.ESConfigVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,14 +37,14 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V3_OP + "/cluster/config")
-@Api(tags = "ES-Cluster-Config接口(REST)")
+@Api(tags = "ES集群Config接口(REST)")
 public class ESClusterConfigController {
 
     @Autowired
     private ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private ESRoleClusterService   esRoleClusterService;
+    private RoleClusterService roleClusterService;
 
     @GetMapping("/{clusterId}/list")
     @ResponseBody
@@ -65,8 +65,9 @@ public class ESClusterConfigController {
     @ResponseBody
     @ApiOperation(value = "获取可操作配置文件的ES集群角色")
     public Result<Set<String>> gainEsClusterRoles(@PathVariable Long clusterId) {
-        List<ESRoleCluster> esRoleClusters = esRoleClusterService.getAllRoleClusterByClusterId(clusterId.intValue());
-        return Result.buildSucc(esRoleClusters.stream().filter(Objects::nonNull).map(ESRoleCluster::getRole).collect(Collectors.toSet()));
+        List<RoleCluster> roleClusters = roleClusterService.getAllRoleClusterByClusterId(clusterId.intValue());
+        return Result.buildSucc(
+				roleClusters.stream().filter(Objects::nonNull).map(RoleCluster::getRole).collect(Collectors.toSet()));
     }
 
     @GetMapping("/{type}/template")
@@ -79,7 +80,7 @@ public class ESClusterConfigController {
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "更新ES集群配置描述")
-    public Result editEsClusterConfigDesc(HttpServletRequest request, @RequestBody ESConfigDTO param) {
+    public Result<Void> editEsClusterConfigDesc(HttpServletRequest request, @RequestBody ESConfigDTO param) {
         return esClusterConfigService.editConfigDesc(param, HttpRequestUtils.getOperator(request));
     }
 }

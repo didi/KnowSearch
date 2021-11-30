@@ -1,6 +1,5 @@
 package com.didi.arius.gateway.rest.http;
 
-import org.jboss.netty.util.ThreadNameDeterminer;
 import org.jboss.netty.util.ThreadRenamingRunnable;
 
 import java.util.concurrent.ThreadFactory;
@@ -14,14 +13,7 @@ public class HttpDeamondThreadFactory implements ThreadFactory {
 
     static {
         ThreadRenamingRunnable
-                .setThreadNameDeterminer(new ThreadNameDeterminer() {
-
-                    public String determineThreadName(String currentThreadName,
-                                                      String proposedThreadName) throws Exception {
-                        return currentThreadName;
-                    }
-
-                });
+                .setThreadNameDeterminer((currentThreadName, proposedThreadName) -> currentThreadName);
     }
 
     public HttpDeamondThreadFactory(String prefix) {
@@ -39,5 +31,5 @@ public class HttpDeamondThreadFactory implements ThreadFactory {
         if (t.getPriority() != Thread.NORM_PRIORITY)
             t.setPriority(Thread.NORM_PRIORITY);
         return t;
-    };
+    }
 }

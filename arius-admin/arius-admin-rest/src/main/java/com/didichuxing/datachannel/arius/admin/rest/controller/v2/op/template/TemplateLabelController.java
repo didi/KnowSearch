@@ -35,7 +35,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_OP + "/template/label")
-@Api(value = "es集群模板接口(REST)")
+@Api(tags = "es集群模板标签接口(REST)")
 public class TemplateLabelController {
 
     @Autowired
@@ -54,7 +54,7 @@ public class TemplateLabelController {
     @PutMapping("/save")
     @ResponseBody
     @ApiOperation(value = "保存模板标签", notes = "")
-    public Result save(HttpServletRequest request, @RequestBody TemplateLabelDTO templateLabel) {
+    public Result<Boolean> save(HttpServletRequest request, @RequestBody TemplateLabelDTO templateLabel) {
         return templateLabelService.replaceTemplateLabel(templateLabel.getTemplateId(),
             templateLabel.getTemplateLabel(), HttpRequestUtils.getOperator(request));
     }

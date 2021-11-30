@@ -3,9 +3,13 @@ package com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "监控告警")
 public class MonitorSilenceDTO extends BaseDTO {
     @ApiModelProperty(value = "ID, 修改时传")

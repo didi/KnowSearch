@@ -67,14 +67,14 @@ public class NettyTransportChannel implements TransportChannel {
 
 	@Override
     public void sendResponse(TransportResponse response, TransportResponseOptions options) throws IOException {
-		if (transport.compress) {
-            options = TransportResponseOptions.builder(options).withCompress(transport.compress).build();
+		if (NettyTransport.COMPRESS) {
+            options = TransportResponseOptions.builder(options).withCompress(transport.COMPRESS ).build();
         }
 
         byte status = 0;
         status = TransportStatus.setResponse(status);
 
-        ReleasableBytesStreamOutput bStream = new ReleasableBytesStreamOutput(transport.bigArrays);
+        ReleasableBytesStreamOutput bStream = new ReleasableBytesStreamOutput(NettyTransport.bigArrays);
         boolean addedReleaseListener = false;
         try {
             bStream.skip(NettyHeader.HEADER_SIZE);
@@ -110,24 +110,25 @@ public class NettyTransportChannel implements TransportChannel {
 
     @Override
     public void sendResponse(Throwable error) throws IOException {
-        BytesStreamOutput stream = new BytesStreamOutput();
-        stream.skip(NettyHeader.HEADER_SIZE);
-        RemoteTransportException tx = new RemoteTransportException("", transport.wrapAddress(channel.getLocalAddress()), action, error);
-        stream.writeThrowable(tx);
-        byte status = 0;
-        status = TransportStatus.setResponse(status);
-        status = TransportStatus.setError(status);
+        try (BytesStreamOutput stream = new BytesStreamOutput()){
+            stream.skip(NettyHeader.HEADER_SIZE);
+            RemoteTransportException tx = new RemoteTransportException("", transport.wrapAddress(channel.getLocalAddress()), action, error);
+            stream.writeThrowable(tx);
+            byte status = 0;
+            status = TransportStatus.setResponse(status);
+            status = TransportStatus.setError(status);
 
-        BytesReference bytes = stream.bytes();
-        
-        if (actionContext != null) {
-        	statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_tcp_response_length||type=exception||requestId={}||appid={}||responseLen={}", actionContext.getRequestId(), actionContext.getAppid(), bytes.length());
+            BytesReference bytes = stream.bytes();
+
+            if (actionContext != null) {
+                statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_tcp_response_length||type=exception||requestId={}||appid={}||responseLen={}", actionContext.getRequestId(), actionContext.getAppid(), bytes.length());
+            }
+
+            ChannelBuffer buffer = bytes.toChannelBuffer();
+            NettyHeader.writeHeader(buffer, requestId, status, version);
+            channel.write(buffer);
+            transportServiceAdapter.onResponseSent(requestId, action, error);
         }
-        
-        ChannelBuffer buffer = bytes.toChannelBuffer();
-        NettyHeader.writeHeader(buffer, requestId, status, version);
-        channel.write(buffer);
-        transportServiceAdapter.onResponseSent(requestId, action, error);
     }
 
     @Override

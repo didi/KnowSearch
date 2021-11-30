@@ -2,6 +2,7 @@ package com.didi.arius.gateway.common.metadata;
 
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestResponse;
@@ -9,6 +10,7 @@ import org.elasticsearch.rest.RestResponse;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class QueryContext extends BaseContext {
     /**
      * http request

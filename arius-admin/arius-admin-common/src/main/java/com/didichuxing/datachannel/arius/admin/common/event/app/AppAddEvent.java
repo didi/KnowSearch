@@ -2,10 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.event.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 
-/**
- * @author d06679
- * @date 2019/4/25
- */
 public class AppAddEvent extends AppEvent {
 
     private App app;

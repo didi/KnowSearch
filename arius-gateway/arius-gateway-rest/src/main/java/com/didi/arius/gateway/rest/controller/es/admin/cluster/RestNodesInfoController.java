@@ -18,6 +18,10 @@ public class RestNodesInfoController extends BaseHttpRestController {
     @Autowired
     private RestNodesInfoAction restNodesInfoAction;
 
+    public RestNodesInfoController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_nodes", this);

@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateN
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateQuotaEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.core.notify.MailTool;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTool;
 import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplateQuotaUsageAlarmNotifyInfo;
@@ -17,9 +16,10 @@ import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateNotifyDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +35,7 @@ import java.util.Map;
  * @date 2019/5/24
  */
 @Component
+@NoArgsConstructor
 public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuotaEvent> {
 
     private static final ILog                  LOGGER                 = LogFactory
@@ -45,9 +46,6 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
 
     @Autowired
     private AppService                         appService;
-
-    @Autowired
-    private MailTool                           mailTool;
 
     @Autowired
     private TemplateQuotaManager               templateQuotaManager;
@@ -64,12 +62,12 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
     @Autowired
     private NotifyTool                         notifyTool;
 
-    private final static int                   RATION_80              = 80;
-    private final static int                   RATIO_85               = 85;
-    private final static int                   RATIO_90               = 90;
-    private final static int                   RATIO_95               = 95;
+    private static final  int                   RATION_80              = 80;
+    private static final  int                   RATIO_85               = 85;
+    private static final  int                   RATIO_90               = 90;
+    private static final  int                   RATIO_95               = 95;
 
-    private final static Map<Integer, Integer> RATION_NOTIFY_RULE_MAP = new HashMap<>();
+    private static final Map<Integer, Integer> RATION_NOTIFY_RULE_MAP = new HashMap<>();
 
     static {
         RATION_NOTIFY_RULE_MAP.put(RATION_80, 1);
@@ -103,11 +101,11 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
 
         // 防疲劳
         if (!canNotify(event, templateLogic, app)) {
-            LOGGER.info("method=onApplicationEvent||logicId={}||msg=anti-fatigue", templateLogic.getId());
+            LOGGER.info("class=TemplateQuotaAlarmSender||method=onApplicationEvent||logicId={}||msg=anti-fatigue", templateLogic.getId());
             return;
         }
 
-        LOGGER.info("method=onApplicationEvent||templateName={}||templateQuotaUsage={}", templateLogic.getName(),
+        LOGGER.info("class=TemplateQuotaAlarmSender||method=onApplicationEvent||templateName={}||templateQuotaUsage={}", templateLogic.getName(),
             templateQuotaUsage);
 
         notifyService.send(NotifyTaskTypeEnum.TEMPLATE_QUOTA_USAGE_ALARM_ERROR,
@@ -136,19 +134,16 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
         String zeroDate = String.valueOf(AriusDateUtils.getZeroDate().getTime());
 
         Double diskUsage = templateQuotaUsage.getActualDiskG() / templateQuotaUsage.getQuotaDiskG();
-        Double cpuUsage = templateQuotaUsage.getActualCpuCount() / templateQuotaUsage.getQuotaCpuCount();
-
-        // Double usage = (diskUsage > cpuUsage ? diskUsage : cpuUsage) * 100;
         Double usage = diskUsage * 100;
         Integer usageRatio;
 
         if (usage >= RATIO_95) {
             usageRatio = RATIO_95;
-        } else if (usage < RATIO_95 && usage >= RATIO_90) {
+        } else if (usage >= RATIO_90) {
             usageRatio = RATIO_90;
-        } else if (usage < RATIO_90 && usage >= RATIO_85) {
+        } else if (usage >= RATIO_85) {
             usageRatio = RATIO_85;
-        } else if (usage < RATIO_85 && usage >= RATION_80) {
+        } else if (usage >= RATION_80) {
             usageRatio = RATION_80;
         } else {
             return false;
@@ -158,7 +153,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
             zeroDate, usageRatio);
 
         if (!EnvUtil.isOnline()) {
-            LOGGER.info("method=canNotify||templateName={}||templateNotifyESPOInES={}||templateQuotaUsage={}",
+            LOGGER.info("class=TemplateQuotaAlarmSender||method=canNotify||templateName={}||templateNotifyESPOInES={}||templateQuotaUsage={}",
                 templateLogic.getName(), JSON.toJSONString(templateNotifyESPOList), templateQuotaUsage);
         }
 
@@ -170,17 +165,15 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
             TemplateNotifyESPO templateNotifyESPO = templateNotifyESPOList.get(0);
             Integer ratio = templateNotifyESPO.getRate();
             Integer needNotifyNu = RATION_NOTIFY_RULE_MAP.get(ratio);
-            if (null != needNotifyNu) {
-                if (needNotifyNu.intValue() > templateNotifyESPO.getNotifyNu()) {
-                    templateNotifyESPO.setNotifyNu(templateNotifyESPO.getNotifyNu() + 1);
-                    templateNotifyDAO.insertTemplateNotifyESPO(templateNotifyESPO);
-                    return true;
-                }
+            if (null != needNotifyNu && needNotifyNu.intValue() > templateNotifyESPO.getNotifyNu()) {
+                templateNotifyESPO.setNotifyNu(templateNotifyESPO.getNotifyNu() + 1);
+                templateNotifyDAO.insertTemplateNotifyESPO(templateNotifyESPO);
+                return true;
             }
         }
 
         if (!EnvUtil.isOnline()) {
-            LOGGER.info("method=canNotify||templateName={}||templateNotifyESPOInES={}||msg=notifyInfo too more!",
+            LOGGER.info("class=TemplateQuotaAlarmSender||method=canNotify||templateName={}||templateNotifyESPOInES={}||msg=notifyInfo too more!",
                 templateLogic.getName(), JSON.toJSONString(templateNotifyESPOList));
         }
 

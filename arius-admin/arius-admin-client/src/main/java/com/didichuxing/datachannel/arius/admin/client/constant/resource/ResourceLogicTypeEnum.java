@@ -47,4 +47,7 @@ public enum ResourceLogicTypeEnum {
         return ResourceLogicTypeEnum.UNKNOWN;
     }
 
+    public static boolean isExist(Integer code) {
+        return UNKNOWN.getCode() != ResourceLogicTypeEnum.valueOf(code).getCode();
+    }
 }

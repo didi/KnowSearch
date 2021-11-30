@@ -10,6 +10,9 @@ import java.util.Map;
  * @date 20/5/18
  */
 public class OdinCert {
+
+    private OdinCert() { throw new IllegalStateException("Utility class"); }
+
     /**
      * Token 有效时间 300 s
      */

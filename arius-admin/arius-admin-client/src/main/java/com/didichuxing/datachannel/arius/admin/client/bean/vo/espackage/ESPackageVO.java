@@ -4,13 +4,19 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.BaseVO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 /**
  * @author lyn
  * @date 2021-01-12
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "ES集群安装包VO")
 public class ESPackageVO extends BaseVO {
 
@@ -37,4 +43,7 @@ public class ESPackageVO extends BaseVO {
 
     @ApiModelProperty("标记删除")
     private Boolean deleteFlag;
+
+    @ApiModelProperty("创建时间")
+    private Date createTime;
 }

@@ -12,8 +12,8 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTempla
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author d06679
@@ -47,7 +47,7 @@ public class LogicTemplateQuotaEditEventListener implements ApplicationListener<
                 for (IndexTemplatePhy physical : newTemplateWithPhysical.getPhysicals()) {
                     CapacityPlanRegion region = capacityPlanRegionService.getRegionOfPhyTemplate(physical);
                     if (region != null) {
-                        LOGGER.info("method=onApplicationEvent||region={}||deltaQuota={}||msg=LogicTemplateModifyEvent",
+                        LOGGER.info("class=LogicTemplateQuotaEditEventListener||method=onApplicationEvent||region={}||deltaQuota={}||msg=LogicTemplateModifyEvent",
                             region, deltaQuota);
                         capacityPlanRegionService.editRegionFreeQuota(region.getRegionId(),
                             region.getFreeQuota() + deltaQuota);

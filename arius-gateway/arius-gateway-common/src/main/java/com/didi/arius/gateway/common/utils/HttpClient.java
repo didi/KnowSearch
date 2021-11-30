@@ -25,35 +25,40 @@ import java.util.Map;
  */
 public final class HttpClient {
 
-	private static Logger _LOG = LoggerFactory.getLogger("schema");
+	private static Logger LOG = LoggerFactory.getLogger("thirdReq");
 	private static CloseableHttpClient HTTPCLIENT = HttpClients.createDefault();
+
+	private HttpClient() {
+
+	}
 
 	public static <T> T forward(String url, String method, String bodyform,
 			Map<String, String> headerParams,
 			Map<String, String[]> requestParams, Class<T> clazz)
 			throws ElasticsearchException {
-		_LOG.debug("请求地址：" + url);
-		_LOG.debug("请求method:" + method);
-		_LOG.debug("请求参数:" + requestParams);
-		_LOG.debug("请求头部参数:" + headerParams);
-		_LOG.debug("请求body:" + bodyform);
+		LOG.info("请求地址：" + url);
+		LOG.info("请求method:" + method);
+		LOG.info("请求参数:" + requestParams);
+		LOG.info("请求头部参数:" + headerParams);
+		LOG.info("请求body:" + bodyform);
 
 		T result = null;
 		String content;
 		try {
 			content = forward(url, method, bodyform, headerParams,
 					requestParams);
-		} catch (Throwable e) {
-			_LOG.error("调用错误", e);
-			throw new ElasticsearchException("调用地址：" + url + "发生错误，请求参数："
-					+ requestParams, e);
+		} catch (Exception e) {
+			LOG.error("调用错误", e);
+//			throw new ElasticsearchException("调用地址：" + url + "发生错误，请求参数："
+//					+ requestParams, e);
+			content = String.format("{\"code\":-1,\"message\":\"请求失败, url=%s, params=%s, header=%s\"}", url, JSON.toJSONString(requestParams), JSON.toJSONString(headerParams));
 		}
-		_LOG.debug("请求结果：" + content);
+		LOG.info("请求结果：" + content);
 		try {
 			if (content != null && !content.isEmpty()) {
 				result = JSON.parseObject(content, clazz);
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			result = JSON.parseObject("{\"code\":-1,\"message\":\"请求失败\"}", clazz);
 		}
 
@@ -86,7 +91,7 @@ public final class HttpClient {
 			request = new HttpPut(url);
 			break;
 		default:
-			_LOG.error("错误的请求method： " + method);
+			LOG.error("错误的请求method： " + method);
 			return null;
 		}
 
@@ -110,12 +115,10 @@ public final class HttpClient {
 			request.setConfig(requestConfig);
 			
 			HttpResponse httpResponse = HTTPCLIENT.execute(request);
-			// if (httpResponse.getStatusLine().getStatusCode() == 200) {
 			HttpEntity httpEntity = httpResponse.getEntity();
 			repons = EntityUtils.toString(httpEntity);// 取出应答字符串
-			// }
 		} catch (IOException e) {
-			_LOG.error("转发请求失败", e);
+			LOG.error("转发请求失败", e);
 			throw e;
 		}
 

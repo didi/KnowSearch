@@ -64,7 +64,7 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
     public Object handleJobTask(String params) {
         LOGGER.info("class=AppIdQueryCollector||method=handleJobTask||params={}", params);
 
-        List<App> queryAppList = appService.getApps();
+        List<App> queryAppList = appService.listApps();
         if (CollectionUtils.isEmpty(queryAppList)) {
             LOGGER.error("class=AppIdQueryCollector||method=handleJobTask||params={}||errMsg=appid list response is empty",
                     params);
@@ -79,6 +79,7 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
         return JOB_SUCCESS;
     }
 
+    /**************************************************** private method ****************************************************/
     /**
      * 分析appid查询信息然后保存到es
      *
@@ -92,7 +93,8 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
         List<DslAnalyzeResultTypePO> analyzeResultList = Lists.newArrayList();
 
         Tuple<String,String> stringStringTuple = DateTimeUtil.getStartEndTimeByDate(date);
-        String startDate = stringStringTuple.v1(), endDate = stringStringTuple.v2();
+        String startDate = stringStringTuple.v1();
+        String endDate   = stringStringTuple.v2();
 
         LOGGER.info("class=AppIdQueryCollector||method=analyzeAppIdQueryInfoThenStoreResult||startDate={}||endDate={}",
                 startDate, endDate);
@@ -196,8 +198,8 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
         SlowDsls slowDsls = new SlowDsls();
         SlowQueryInfo slowQueryInfo = null;
         long slowSearchCount = 0L;
-        long slowDslThreshold = 0L;
-        GatewayJoinPO GatewayJoinPO = null;
+        long slowDslThreshold;
+        GatewayJoinPO gatewayJoinPO = null;
         // 分析慢查原因
         List<SlowQueryInfo> slowQueryInfoList = Lists.newArrayList();
 
@@ -218,24 +220,23 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
             }
 
             slowSearchCount += gatewayJoinTuple.v1();
-            GatewayJoinPO = gatewayJoinTuple.v2();
+            gatewayJoinPO = gatewayJoinTuple.v2();
 
-            if (GatewayJoinPO == null) {
-                // LOGGER.error("can't find {}_{} in arius.gateway.join {}", appid, DslTemplatePO.getDslTemplateMd5(), startDate);
+            if (gatewayJoinPO == null) {
                 continue;
             }
 
             slowQueryInfo = new SlowQueryInfo();
             slowQueryInfo.setCount(gatewayJoinTuple.v1());
             slowQueryInfo.setDslTemplateMd5(DslTemplatePO.getDslTemplateMd5());
-            slowQueryInfo.setDslTemplate(GatewayJoinPO.getDslTemplate());
-            slowQueryInfo.setDsl(GatewayJoinPO.getDsl());
-            slowQueryInfo.setCost(1.0 * GatewayJoinPO.getTotalCost());
-            slowQueryInfo.setIndices(GatewayJoinPO.getIndices());
+            slowQueryInfo.setDslTemplate(gatewayJoinPO.getDslTemplate());
+            slowQueryInfo.setDsl(gatewayJoinPO.getDsl());
+            slowQueryInfo.setCost(1.0 * gatewayJoinPO.getTotalCost());
+            slowQueryInfo.setIndices(gatewayJoinPO.getIndices());
             slowQueryInfo.setSlowDslThreshold(slowDslThreshold);
 
             // 判断该查询模板查询耗时与历史查询模板耗时情况对比，逐渐完善
-            if (GatewayJoinPO.getTotalCost() >= DslTemplatePO.getTotalCostAvg()) {
+            if (gatewayJoinPO.getTotalCost() >= DslTemplatePO.getTotalCostAvg()) {
                 slowQueryInfo.setCause("查询语句原因");
                 slowQueryInfo.setSlowReasonType(SlowDslReasonType.USER_DSL);
             } else {
@@ -260,9 +261,9 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
     private ErrorDsls getErrorDsls(Integer appid, String startDate) {
         ErrorDsls errorDsls = new ErrorDsls();
         List<ErrorDslInfo> errorDslInfoList = Lists.newArrayList();
-        ErrorDslInfo errorDslInfo = null;
-        List<ErrorDslDetail> details = null;
-        ErrorDslDetail errorDslDetail = null;
+        ErrorDslInfo errorDslInfo;
+        List<ErrorDslDetail> details;
+
         long totalCount = 0L;
         // 获取查询异常个数和异常
         Tuple<Long, List<Tuple<String, Long>>> errorSearchTuple = gatewayJoinEsDao.getErrorSearchCountAndErrorDetailByAppidDate(appid, startDate);
@@ -282,23 +283,7 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
                     errorDslInfo.setDetails(details);
 
                     // 获取指定异常的具体查询dsltemplateMD5及次数
-                    Map<String, Long> errorDslMap = gatewayJoinEsDao.queryErrorDslByAppidExceptionAndDate(startDate, appid, exceptionName);
-                    for (Map.Entry<String, Long> entry : errorDslMap.entrySet()) {
-                        GatewayJoinPO GatewayJoinPO = gatewayJoinEsDao.queryErrorDslDetailByAppidTemplateAndDate(startDate, appid, entry.getKey(), exceptionName);
-                        if (GatewayJoinPO == null) {
-                            LOGGER.error("class=AppIdQueryCollector||method=getErrorDsls||appid={}||errMsg=can't find error detail {} in arius.gateway.join {}",
-                                    appid, entry.getKey(), startDate);
-                            continue;
-                        }
-                        errorDslDetail = new ErrorDslDetail();
-                        errorDslDetail.setCount(entry.getValue());
-                        errorDslDetail.setIndices(GatewayJoinPO.getIndices());
-                        errorDslDetail.setDsl(GatewayJoinPO.getDsl());
-                        errorDslDetail.setDslTemplateMd5(entry.getKey());
-                        errorDslDetail.setDslTemplate(GatewayJoinPO.getDslTemplate());
-
-                        details.add(errorDslDetail);
-                    }
+                    getErrorDslDetail(appid, startDate, details, exceptionName);
 
                     errorDslInfoList.add(errorDslInfo);
                 }
@@ -310,5 +295,26 @@ public class AppIdQueryCollector extends AbstractMetaDataJob {
         errorDsls.setDetails(errorDslInfoList);
 
         return errorDsls;
+    }
+
+    private void getErrorDslDetail(Integer appid, String startDate, List<ErrorDslDetail> details, String exceptionName) {
+        ErrorDslDetail errorDslDetail;
+        Map<String, Long> errorDslMap = gatewayJoinEsDao.queryErrorDslByAppidExceptionAndDate(startDate, appid, exceptionName);
+        for (Map.Entry<String, Long> entry : errorDslMap.entrySet()) {
+            GatewayJoinPO gatewayJoinPO = gatewayJoinEsDao.queryErrorDslDetailByAppidTemplateAndDate(startDate, appid, entry.getKey(), exceptionName);
+            if (gatewayJoinPO == null) {
+                LOGGER.error("class=AppIdQueryCollector||method=getErrorDsls||appid={}||errMsg=can't find error detail {} in arius.gateway.join {}",
+                        appid, entry.getKey(), startDate);
+                continue;
+            }
+            errorDslDetail = new ErrorDslDetail();
+            errorDslDetail.setCount(entry.getValue());
+            errorDslDetail.setIndices(gatewayJoinPO.getIndices());
+            errorDslDetail.setDsl(gatewayJoinPO.getDsl());
+            errorDslDetail.setDslTemplateMd5(entry.getKey());
+            errorDslDetail.setDslTemplate(gatewayJoinPO.getDslTemplate());
+
+            details.add(errorDslDetail);
+        }
     }
 }

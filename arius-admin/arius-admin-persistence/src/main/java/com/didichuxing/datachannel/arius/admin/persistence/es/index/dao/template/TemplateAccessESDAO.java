@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import static com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils
 import static com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil.getDateStr;
 
 @Component
+@NoArgsConstructor
 public class TemplateAccessESDAO extends BaseESDAO {
 
     /**

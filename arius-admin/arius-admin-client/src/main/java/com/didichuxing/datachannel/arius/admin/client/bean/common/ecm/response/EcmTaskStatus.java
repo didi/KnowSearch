@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response;
 
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,6 +14,8 @@ import java.util.Date;
  * @date 2020/10/17
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EcmTaskStatus implements Serializable {
     /**
      * 主机名或IP

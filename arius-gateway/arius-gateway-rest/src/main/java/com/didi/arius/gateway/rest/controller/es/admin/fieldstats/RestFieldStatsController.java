@@ -19,6 +19,10 @@ public class RestFieldStatsController extends BaseHttpRestController {
     @Autowired
     private RestFieldStatsAction restFieldStatsAction;
 
+    public RestFieldStatsController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_field_stats", this);

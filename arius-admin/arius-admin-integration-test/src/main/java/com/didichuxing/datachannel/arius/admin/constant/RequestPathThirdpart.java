@@ -1,6 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.constant;
 
 public class RequestPathThirdpart {
+
+    private RequestPathThirdpart(){}
+
     public static final String THIRDPART = "/v3/thirdpart";
 
     public static final String LOGIN = THIRDPART + "/sso/login";

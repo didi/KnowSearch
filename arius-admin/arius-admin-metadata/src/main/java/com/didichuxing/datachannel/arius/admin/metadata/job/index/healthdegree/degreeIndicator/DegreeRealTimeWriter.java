@@ -31,7 +31,7 @@ public class DegreeRealTimeWriter extends AbstractDegreeIndicator {
         descBuild.append(" ,历史写入率为:").append(yesdayIndexRate).append("条/s");
         realTimeWritePO.setDesc(descBuild.toString());
 
-        double score = 0.0;
+        double score;
 
         if (todayIndexRate <= 0) {
             score = 0.0;

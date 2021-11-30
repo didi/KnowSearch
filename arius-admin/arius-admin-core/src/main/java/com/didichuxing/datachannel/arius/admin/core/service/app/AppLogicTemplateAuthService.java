@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,7 +33,7 @@ public interface AppLogicTemplateAuthService {
      * @param responsible     责任人，逗号分隔的用户名列表
      * @return 设置结果
      */
-    Result ensureSetLogicTemplateAuth(Integer appId, Integer logicTemplateId, AppTemplateAuthEnum auth,
+    Result<Void> ensureSetLogicTemplateAuth(Integer appId, Integer logicTemplateId, AppTemplateAuthEnum auth,
                                       String responsible, String operator);
 
     /**
@@ -43,6 +44,16 @@ public interface AppLogicTemplateAuthService {
     List<AppTemplateAuth> getTemplateAuthsByAppId(Integer appId);
 
     /**
+     * 从权限表获取APP对active逻辑模板的读写权限点
+     * @param appId APP ID
+     * @return
+     */
+    List<AppTemplateAuth> getAppActiveTemplateRWAndRAuths(Integer appId);
+    List<AppTemplateAuth> getAppTemplateRWAndRAuthsWithoutCodecResponsible(Integer appId);
+    List<AppTemplateAuth> getAppActiveTemplateRWAuths(Integer appId);
+    List<AppTemplateAuth> getAppActiveTemplateRAuths(Integer appId);
+
+    /**
      * 获取指定逻辑模板的模板权限点列表
      * @param logicTemplateId 逻辑模板id
      * @return 模板权限 WR R
@@ -50,9 +61,9 @@ public interface AppLogicTemplateAuthService {
     List<AppTemplateAuth> getTemplateAuthsByLogicTemplateId(Integer logicTemplateId);
 
     /**
-     * 获取指定逻辑模板的模板权限点列表
+     * 获取指定逻辑模板的模板权读、读写限点列表
      */
-    AppTemplateAuth getTemplateAuthByLogicTemplateIdAndAppId(Integer logicTemplateId, Integer appId);
+    AppTemplateAuth getTemplateRWAuthByLogicTemplateIdAndAppId(Integer logicTemplateId, Integer appId);
 
     /**
      * 增加逻辑模板权限
@@ -60,7 +71,7 @@ public interface AppLogicTemplateAuthService {
      * @param operator 操作人
      * @return result
      */
-    Result addTemplateAuth(AppTemplateAuthDTO authDTO, String operator);
+    Result<Void> addTemplateAuth(AppTemplateAuthDTO authDTO, String operator);
 
     /**
      * 修改逻辑模板权限，仅可以修改权限类型和责任人
@@ -68,15 +79,23 @@ public interface AppLogicTemplateAuthService {
      * @param operator 操作人
      * @return result
      */
-    Result updateTemplateAuth(AppTemplateAuthDTO authDTO, String operator);
+    Result<Void> updateTemplateAuth(AppTemplateAuthDTO authDTO, String operator);
 
     /**
      * 删除逻辑模板权限
-     * @param authId   APP ID
+     * @param authId   主键
      * @param operator 操作人
      * @return result
      */
-    Result deleteTemplateAuth(Long authId, String operator);
+    Result<Void> deleteTemplateAuth(Long authId, String operator);
+
+    /**
+     * 根据逻辑模板id删除权限信息
+     * @param templateId  模板Id
+     * @param operator    操作人
+     * @return
+     */
+    Result<Void> deleteTemplateAuthByTemplateId(Integer templateId, String operator);
 
     /**
      * 获取所有APP的权限
@@ -89,4 +108,11 @@ public interface AppLogicTemplateAuthService {
      * appId为超级项目, 有所有资源的管理权限
      */
     AppTemplateAuthEnum getAuthEnumByAppIdAndLogicId(Integer appId, Integer logicId);
+
+    /**
+     * 构建具备O指定权限点的模板
+     * @param logicTemplate 逻辑模板
+     * @return
+     */
+    AppTemplateAuth buildTemplateAuth(IndexTemplateLogic logicTemplate, AppTemplateAuthEnum appTemplateAuthEnum);
 }

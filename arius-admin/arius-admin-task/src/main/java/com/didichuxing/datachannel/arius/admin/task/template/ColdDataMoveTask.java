@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * 关闭集群rebalance任务
@@ -34,6 +34,15 @@ public class ColdDataMoveTask extends BaseConcurrentClusterTask {
     }
 
     /**
+     * 任务的线程个数
+     * @return 任务的线程个数
+     */
+    @Override
+    public int poolSize() {
+        return 3;
+    }
+
+    /**
      * 并发度
      *
      * @return
@@ -50,10 +59,11 @@ public class ColdDataMoveTask extends BaseConcurrentClusterTask {
      */
     @Override
     public boolean executeByCluster(String cluster) {
-        Result result = templateColdManager.move2ColdNode(cluster);
+        Result<Boolean> result = templateColdManager.move2ColdNode(cluster);
         if (result.failed()) {
-            LOGGER.warn("method=executeByCluster||cluster={}||failMsg={}", cluster, result.getMessage());
+            LOGGER.warn("class=ColdDataMoveTask||method=executeByCluster||cluster={}||failMsg={}", cluster, result.getMessage());
+            return false;
         }
-        return result.success();
+        return true;
     }
 }

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.monitor;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.OdinData;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Alert;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Metric;
@@ -24,10 +24,10 @@ import java.util.Set;
 public interface RemoteMonitorService {
     /**
      * 向Odin指定ns发送数据
-     * @param odinDatas 需要发送的数据
+     * @param n9eData 需要发送的数据
      * @return true/false
      */
-    boolean sendData(Collection<OdinData> odinDatas);
+    boolean sendData(Collection<N9eData> n9eData);
 
     /**
      *
@@ -87,8 +87,6 @@ public interface RemoteMonitorService {
 
     Boolean modifySilence(Silence silence);
 
-    List<Silence> getSilences(Long strategyId);
-
     Silence getSilenceById(Long silenceId);
 
     /**
@@ -97,12 +95,6 @@ public interface RemoteMonitorService {
     Boolean sinkMetrics(List<MetricSinkPoint> pointList);
 
     Metric getMetrics(String metric, Long startTime, Long endTime, Integer step, Properties tags);
-
-    /**
-     * 告警组
-     */
-    List<NotifyGroup> getNotifyGroups();
-
 
     /**
      * 获取用户可选Odin节点
@@ -119,7 +111,7 @@ public interface RemoteMonitorService {
      * @param level 水平等级
      * @return Result
      */
-    Result createTreeNode(String ns, String category, String usn, int level);
+    Result<Void> createTreeNode(String ns, String category, String usn, int level);
 
     /**
      * 创建odin 树节点
@@ -129,5 +121,5 @@ public interface RemoteMonitorService {
      * @param level 水平等级
      * @return Result
      */
-    Result deleteTreeNode(String ns, String category,String usn, int level);
+    Result<Void> deleteTreeNode(String ns, String category,String usn, int level);
 }

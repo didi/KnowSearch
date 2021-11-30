@@ -86,6 +86,19 @@ public enum AppTemplateAuthEnum {
 
         return AppTemplateAuthEnum.NO_PERMISSION;
     }
+
+    public static boolean isTemplateAuthExitByCode(Integer code){
+        if (code == null) {
+            return false;
+        }
+        for (AppTemplateAuthEnum state : AppTemplateAuthEnum.values()) {
+            if (state.getCode().equals(code)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
     
     public static List<Integer> listAppTemplateAuthCodes() {
         return Arrays.stream(AppTemplateAuthEnum.values())

@@ -1,0 +1,31 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "group_by_dsl": {
+      "terms": {
+        "field": "dslTemplateMd5"
+      }
+    }
+  }
+}

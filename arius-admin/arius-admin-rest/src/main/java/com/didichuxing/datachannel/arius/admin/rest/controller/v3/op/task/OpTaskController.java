@@ -1,18 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -31,7 +32,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  * @author fengqiongfeng
  * @date 2020/08/24
  */
-@Api(tags = "OP-任务相关接口(REST)")
+@Api(tags = "任务相关接口(REST)")
 @RestController
 @RequestMapping(V3_OP + "/worktask")
 public class OpTaskController {
@@ -41,7 +42,7 @@ public class OpTaskController {
     private WorkTaskManager workTaskManager;
 
     @ApiOperation(value = "任务类型", notes = "")
-    @RequestMapping(value = "/type-enums", method = RequestMethod.GET)
+    @GetMapping(value = "/type-enums")
     @ResponseBody
     public Result<List<TaskTypeVO>> getOrderTypes() {
         List<TaskTypeVO> voList = new ArrayList<>();
@@ -54,13 +55,13 @@ public class OpTaskController {
     /**
      * 提交一个任务
      */
-    @RequestMapping(path = "/{type}/submit", method = RequestMethod.PUT)
+    @PutMapping(path = "/{type}/submit")
     @ResponseBody
     @ApiOperation(value = "提交任务接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
     public Result<WorkTaskVO> submit(HttpServletRequest request,
                                                @PathVariable(value = "type") Integer type,
-                                               @RequestBody WorkTaskDTO workTaskDTO) throws AdminOperateException {
+                                               @RequestBody WorkTaskDTO workTaskDTO) {
         String dataCenter = workTaskDTO.getDataCenter();
         String user = HttpRequestUtils.getOperator(request);
 
@@ -69,10 +70,10 @@ public class OpTaskController {
         workTaskDTO.setCreateTime(new Date());
         workTaskDTO.setUpdateTime(new Date());
 
-        LOGGER.info("method=OpTaskController.process||workTaskDTO={}||envInfo={}||dataCenter={}",
+        LOGGER.info("class=OpTaskController||method=OpTaskController.process||workTaskDTO={}||envInfo={}||dataCenter={}",
             JSON.toJSONString(workTaskDTO), EnvUtil.getStr(), dataCenter);
 
-        Result result = workTaskManager.addTask(workTaskDTO);
+        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
@@ -80,19 +81,19 @@ public class OpTaskController {
     }
 
     @ApiOperation(value = "任务详情", notes = "")
-    @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
+    @GetMapping(value = "/{taskId}")
     @ResponseBody
     public Result<WorkTaskVO> getOrderDetail(@PathVariable(value = "taskId") Integer taskId) {
-        Result result = workTaskManager.getById(taskId);
+        Result<WorkTask> result = workTaskManager.getById(taskId);
         if (result.failed()) {
-            return result;
+            return Result.buildFrom(result);
         }
         return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(),WorkTaskVO.class));
     }
 
 
     @ApiOperation(value = "任务列表", notes = "")
-    @RequestMapping(value = "tasks", method = RequestMethod.GET)
+    @GetMapping(value = "tasks")
     @ResponseBody
     public Result<List<WorkTaskVO>> getTaskList() {
         return Result.buildSucc(ConvertUtil.list2List(

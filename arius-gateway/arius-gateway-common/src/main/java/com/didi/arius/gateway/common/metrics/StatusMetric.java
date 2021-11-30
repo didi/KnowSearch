@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentMap;
 * 
 */
 public class StatusMetric {
-	private ConcurrentMap<RestStatus, MeanMetric> statusMetricMap = new ConcurrentHashMap<RestStatus, MeanMetric>();
+	private ConcurrentMap<RestStatus, MeanMetric> statusMetricMap = new ConcurrentHashMap<>();
 
 	public void incr(RestStatus restStatus, long cost) {
 		MeanMetric meanMetric = statusMetricMap.get(restStatus);

@@ -1,103 +1,118 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.AriusClusterStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggr;
-import org.apache.commons.lang3.StringUtils;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.google.common.collect.Maps;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
 
 @Component
 public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
 
     @PostConstruct
-    public void init(){
-        super.indexName   = dataCentreUtil.getAriusStatsClusterInfo();
-        BaseAriusStatsESDAO.register( AriusStatsEnum.CLUSTER_INFO,this);
+    public void init() {
+        super.indexName = dataCentreUtil.getAriusStatsClusterInfo();
+        BaseAriusStatsESDAO.register(AriusStatsEnum.CLUSTER_INFO, this);
     }
 
     /**
-     * 获取集群级别统计数据
-     *
-     * @param cluster
-     * @param startTime
-     * @param endTime
+     * 获取物理集群分位指标信息
+     * @param clusterName         集群名称
+     * @param clusterMetricsType  集群指标类型
+     * @param aggType             聚合类型 avg sum min max
+     * @param percentilesType     分位类型
+     * @param startTime           开始时间
+     * @param endTime             结束时间
      * @return
      */
-    public AriusClusterStatisPO getMaxClusterStatisByRange(String cluster, Long startTime, Long endTime) {
-        cluster = StringUtils.isBlank(cluster) ? "allCluster" : cluster;
-
+    public Map<Long, Double> getAggSinglePercentilesMetrics(String clusterName,
+                                                            String clusterMetricsType,
+                                                            String aggType,
+                                                            String percentilesType,
+                                                            Long   startTime,
+                                                            Long   endTime) {
+        Map<Long, Double> resultMap = Maps.newHashMap();
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
-        String dsl           = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_MAX_CLUSTER_STATIS_BY_TIME_RANGE_AND_CLUSTER, cluster, startTime, endTime);
+        String interval = MetricsUtils.getInterval(endTime - startTime);
+        try {
+            String dsl = dslLoaderUtil.getFormatDslByFileNameByAggParam(DslsConstant.GET_CLUSTER_PHY_AGG_PERCENTILES_METRICS_BY_AGG_PARAM,
+                    clusterMetricsType, interval, aggType, clusterName, percentilesType, startTime, endTime);
 
-        return gatewayClient.performRequest(realIndexName, TYPE, dsl, response -> {
-            AriusClusterStatisPO ariusClusterStatisPO = new AriusClusterStatisPO();
+            resultMap = gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                    (ESQueryResponse response) -> fetchAggSinglePercentilesMetrics(response, clusterMetricsType, aggType), 3);
+        } catch (Exception e) {
+            LOGGER.error("class=AriusStatsClusterInfoESDAO||method=getAggSinglePercentilesMetrics||clusterName={}||clusterMetricsType={}" +
+                    "percentilesType={}||startTime={}||endTime={}", clusterName, clusterMetricsType, percentilesType, startTime, endTime, e);
+            return resultMap;
+        }
 
-            if (response == null || response.getAggs() == null){return ariusClusterStatisPO;}
+        return resultMap;
+    }
 
-            try {
-                Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+    /**
+     * 获取物理集群其他统计信息
+     */
+    public <T> List<T> getAggClusterPhyMetrics(String clusterName, String aggType, Long startTime, Long endTime,
+                                               Class<T> clazz) {
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
-                ESAggr maxStoreSizeESAggr       = esAggrMap.get("storeSize_max");
-                ESAggr maxTotalStoreSizeESAggr  = esAggrMap.get("totalStoreSize_max");
-                ESAggr maxFreeStoreSizeESAggr   = esAggrMap.get("freeStoreSize_max");
-                ESAggr maxTotalIndexNuESAggr    = esAggrMap.get("totalIndex_max");
-                ESAggr maxTotalDocNuESAggr      = esAggrMap.get("totalDocNu_max");
-                ESAggr maxWriteTpsESAggr        = esAggrMap.get("writeTps_max");
-                ESAggr maxIndexStoreSizeESAggr  = esAggrMap.get("indexStoreSize_max");
-                ESAggr maxTotalTemplateESAggr   = esAggrMap.get("totalTemplateNu_max");
-                ESAggr maxReadTpsESAggr         = esAggrMap.get("readTps_max");
-                ESAggr maxClusterNuESAggr       = esAggrMap.get("clusterNu_max");
+        long intervalTime = endTime - startTime;
 
-                if(null != maxStoreSizeESAggr.getUnusedMap() && null != maxStoreSizeESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setStoreSize(Double.valueOf(maxStoreSizeESAggr.getUnusedMap().get("value").toString()).longValue());
+        String interval = MetricsUtils.getInterval(intervalTime);
+
+        String dsl = dslLoaderUtil.getFormatDslByFileNameAndOtherParam(
+            DslsConstant.GET_CLUSTER_METRICS_BY_RANGE_AND_INTERVAL, interval, buildAggsDSL(clazz, aggType), clusterName,
+            startTime, endTime);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+            (ESQueryResponse response) -> fetchAggClusterPhyMetrics(response, aggType, clazz), 3);
+    }
+
+
+
+    /************************************************private**************************************************/
+
+    /**
+     * 构建单个分位类型的指标数据
+     * @param response            ES响应体
+     * @param clusterMetricsType  指标类型
+     * @param aggType             聚合类型
+     * @return  Map<Long, Double>   time ——> value
+     */
+    private Map<Long, Double> fetchAggSinglePercentilesMetrics(ESQueryResponse response, String clusterMetricsType, String aggType) {
+        Map<Long, Double> timeSlip2ValueMap = Maps.newHashMap();
+        String statsKey = aggType + "_" + clusterMetricsType;
+
+        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+        if (null != esAggrMap && null != esAggrMap.get(HIST)) {
+            esAggrMap.get(HIST).getBucketList().forEach(r -> {
+                //获取时间戳
+                long timeSlip = 0;
+                if (null != r.getUnusedMap() && null != r.getUnusedMap().get(KEY)) {
+                    timeSlip = Long.valueOf(r.getUnusedMap().get(KEY).toString());
                 }
 
-                if(null != maxTotalStoreSizeESAggr.getUnusedMap() && null != maxTotalStoreSizeESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setTotalStoreSize(Double.valueOf(maxTotalStoreSizeESAggr.getUnusedMap().get("value").toString()).longValue());
+                //获取聚合值
+                if (null != r.getAggrMap() && null != r.getAggrMap().get(statsKey)
+                        && null != r.getAggrMap().get(statsKey).getUnusedMap().get(VALUE)) {
+                    double aggCal = Double.parseDouble(r.getAggrMap().get(statsKey).getUnusedMap().get(VALUE).toString());
+                    if (aggCal > 0) {
+                        timeSlip2ValueMap.put(timeSlip, aggCal);
+                    } else {
+                        timeSlip2ValueMap.put(timeSlip, 0d);
+                    }
                 }
+            });
+        }
 
-                if(null != maxFreeStoreSizeESAggr.getUnusedMap() && null != maxFreeStoreSizeESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setFreeStoreSize(Double.valueOf(maxFreeStoreSizeESAggr.getUnusedMap().get("value").toString()).longValue());
-                }
-
-                if(null != maxTotalIndexNuESAggr.getUnusedMap() && null != maxTotalIndexNuESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setTotalIndicesNu(Double.valueOf(maxTotalIndexNuESAggr.getUnusedMap().get("value").toString()).longValue());
-                }
-
-                if(null != maxTotalDocNuESAggr.getUnusedMap() && null != maxTotalDocNuESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setTotalDocNu(Double.valueOf(maxTotalDocNuESAggr.getUnusedMap().get("value").toString()).longValue());
-                }
-
-                if(null != maxWriteTpsESAggr.getUnusedMap() && null != maxWriteTpsESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setWriteTps(Double.valueOf(maxWriteTpsESAggr.getUnusedMap().get("value").toString()));
-                }
-
-                if(null != maxIndexStoreSizeESAggr.getUnusedMap() && null != maxIndexStoreSizeESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setIndexStoreSize(Double.valueOf(maxIndexStoreSizeESAggr.getUnusedMap().get("value").toString()));
-                }
-
-                if(null != maxTotalTemplateESAggr.getUnusedMap() && null != maxTotalTemplateESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setTotalTemplateNu(Double.valueOf(maxTotalTemplateESAggr.getUnusedMap().get("value").toString()).intValue());
-                }
-
-                if(null != maxReadTpsESAggr.getUnusedMap() && null != maxReadTpsESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setReadTps(Double.valueOf(maxReadTpsESAggr.getUnusedMap().get("value").toString()));
-                }
-
-                if(null != maxClusterNuESAggr.getUnusedMap() && null != maxClusterNuESAggr.getUnusedMap().get("value")){
-                    ariusClusterStatisPO.setClusterNu(Double.valueOf(maxClusterNuESAggr.getUnusedMap().get("value").toString()).intValue());
-                }
-            } catch (Exception e){
-                LOGGER.error("class=AriusStatsClusterInfoEsDao||method=getMaxClusterStatisByRange||errMsg=exception! response:{}",
-                        response.toString(), e);
-            }
-
-            return ariusClusterStatisPO;
-        }, 3);
+        return timeSlip2ValueMap;
     }
 }

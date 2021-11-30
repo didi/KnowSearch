@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO;
@@ -18,4 +19,8 @@ public interface OperateRecordDAO {
     int insert(OperateRecordPO po);
 
     int compatible();
+
+    OperateRecordPO selectDescTopNByModuleId(@Param("moduleId") int moduleId, @Param("topN") int topN);
+
+    void deleteByModuleIdAndLessThanId(@Param("moduleId")int moduleId, @Param("id") int id);
 }

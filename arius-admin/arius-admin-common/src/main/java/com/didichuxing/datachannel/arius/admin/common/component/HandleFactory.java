@@ -15,6 +15,7 @@ public class HandleFactory extends BaseExtendFactory {
 
     /**
      * 根据类名前缀获取接口BaseHandle的实现类实例
+     * 注意： handleNamePre 需要保证全局唯一
      */
     public BaseHandle getByHandlerNamePer(String handleNamePre) {
         if (baseHandleMap.containsKey(handleNamePre)) {

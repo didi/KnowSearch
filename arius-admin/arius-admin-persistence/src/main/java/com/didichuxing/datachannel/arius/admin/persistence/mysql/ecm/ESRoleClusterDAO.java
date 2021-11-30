@@ -35,4 +35,7 @@ public interface ESRoleClusterDAO {
 
     int delete(Integer clusterId);
 
+    int deleteRoleClusterByCluterIdAndRole(@Param("clusterId") Long clusterId,
+                                           @Param("role")String role);
+
 }

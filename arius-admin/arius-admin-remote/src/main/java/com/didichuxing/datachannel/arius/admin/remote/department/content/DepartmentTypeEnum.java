@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.remote.department.content;
 
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+
 /**
  * 企业部门枚举
  * 使用只需要加入相应的枚举属性, 对应代码包加入到 com.didichuxing.datachannel.arius.admin.remote.department 路径下
@@ -11,7 +13,7 @@ public enum DepartmentTypeEnum {
                                 /**
                                  * 本地部门信息, 固定为一个部门即可
                                  */
-                                DEFAULT(1, "defaultDepartment"),
+                                DEFAULT(1, "defaultDep"),
 
                                 UNKNOWN(-1, "unknown");
 
@@ -32,12 +34,12 @@ public enum DepartmentTypeEnum {
         return code;
     }
 
-    public static DepartmentTypeEnum valueOfCode(Integer code) {
-        if (code == null) {
+    public static DepartmentTypeEnum valueOfType(String type) {
+        if (AriusObjUtils.isNull(type)) {
             return DepartmentTypeEnum.UNKNOWN;
         }
         for (DepartmentTypeEnum codeEnum : DepartmentTypeEnum.values()) {
-            if (code.equals(codeEnum.getCode())) {
+            if (type.equals(codeEnum.getType())) {
                 return codeEnum;
             }
         }

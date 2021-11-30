@@ -23,6 +23,7 @@ import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.metadata.FetchFields;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.es.http.ESAction;
@@ -50,11 +51,9 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("restSearchAction")
 public class RestSearchAction extends ESAction {
 
-    public static final String NAME = "search";
-
     @Override
     public String name() {
-        return NAME;
+        return "search";
     }
 
     @Override
@@ -95,12 +94,14 @@ public class RestSearchAction extends ESAction {
             }
 
             if (indexTemplate != null) {
-                String dateFrom = queryContext.getRequest().param(RestConsts.SEARCH_DATE_FROM_PARAMS);
-                String dateTo = queryContext.getRequest().param(RestConsts.SEARCH_DATE_TO_PARAMS);
+                if(!isAliasGet(indexTemplate, indices)){
+                    String dateFrom = queryContext.getRequest().param(RestConsts.SEARCH_DATE_FROM_PARAMS);
+                    String dateTo = queryContext.getRequest().param(RestConsts.SEARCH_DATE_TO_PARAMS);
 
-                String[] newIndices = getQueryIndices(indexTemplate, dateFrom, dateTo);
+                    String[] newIndices = getQueryIndices(indexTemplate, dateFrom, dateTo);
 
-                esSearchRequest.indices(newIndices);
+                    esSearchRequest.indices(newIndices);
+                }
             } else {
                 indexTemplate = getTemplateByIndexTire(indices, queryContext);
             }
@@ -123,7 +124,7 @@ public class RestSearchAction extends ESAction {
         // 日期索引加上*号后缀，支持异常索引修复方案
         Convert.convertIndices(esSearchRequest);
 
-        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate);
+        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
         long getClientTime = System.currentTimeMillis();
 
@@ -135,8 +136,11 @@ public class RestSearchAction extends ESAction {
         ActionListener<ESSearchResponse> listener = newSearchListener(queryContext);
         readClient.search(esSearchRequest, listener);
 
-        statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_search_internal||requestId={}||paramCost={}||indexTemplateCost={}||getClientCost={}||preProcessCost={}||searchCost={}",
-                queryContext.getRequestId(), paramTime - start, indexTemplateTime - paramTime, getClientTime - indexTemplateTime, preProcessTime - getClientTime, System.currentTimeMillis() - preProcessTime);
+        JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+        joinLogContext.setParamCost(paramTime - start);
+        joinLogContext.setIndexTemplateCost(indexTemplateTime - paramTime);
+        joinLogContext.setGetClientCost(getClientTime - indexTemplateTime);
+        joinLogContext.setPreProcessCost(preProcessTime - getClientTime);
     }
 
 
@@ -145,9 +149,8 @@ public class RestSearchAction extends ESAction {
 
         String sField = request.param("fields");
         if (sField != null) {
-            if (searchSourceBuilder == null) {
-                searchSourceBuilder = new SearchSourceBuilder();
-            }
+            searchSourceBuilder = new SearchSourceBuilder();
+
             if (!Strings.hasText(sField)) {
                 searchSourceBuilder.noFields();
             } else {

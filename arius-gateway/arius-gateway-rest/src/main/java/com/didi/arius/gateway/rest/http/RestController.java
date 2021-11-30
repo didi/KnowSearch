@@ -45,11 +45,11 @@ public class RestController {
             Iterator<MethodHandlers> allHandlers = getAllHandlers(request.params(), rawPath);
             while (allHandlers.hasNext()) {
                 final IRestHandler handler;
-                final MethodHandlers handlers = allHandlers.next();
-                if (handlers == null) {
+                final MethodHandlers methodHandlers = allHandlers.next();
+                if (methodHandlers == null) {
                     handler = null;
                 } else {
-                    handler = handlers.getHandler(requestMethod);
+                    handler = methodHandlers.getHandler(requestMethod);
                 }
                 if (handler != null) {
                     return handler;

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
@@ -11,41 +12,38 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryCon
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplateMappingFieldLimitNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.IndexConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.google.common.collect.Maps;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-/**/
 /**
  * @author zhonghua
  */
 @Service
+@NoArgsConstructor
 public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager {
     private static final ILog    LOGGER                   = LogFactory.getLog(TemplateLogicServiceImpl.class);
 
     private static final String  MAPPING_STR              = "mapping";
     private static final String  MAPPINGS_STR             = "mappings";
     private static final Integer MAPPING_FIELD_LIMIT_SIZE = 1000;
+
+    private static final String JSON_PARSE_ERROR_TIPS = "json解析失败";
 
     @Autowired
     private ESTemplateService    templateService;
@@ -56,22 +54,13 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     @Autowired
     private ESIndexDAO           esIndexDAO;
 
-    @Autowired
-    private NotifyService        notifyService;
-
-    @Value("${es.update.cluster.name}")
-    private String               cluster;
-
-    @Value("${es.maintenance.personnel.name}")
-    private String               receiver;
-
     @Override
-    public Result updateMapping(String cluster, String template, String mappingStr) {
+    public Result<Void> updateMapping(String cluster, String template, String mappingStr) {
         return updateMappingCore(cluster, template, mappingStr, null, false);
     }
 
     @Override
-    public Result updateMappingAndMerge(String cluster, String template, String mappingStr, Set<String> removeFields) {
+    public Result<Void> updateMappingAndMerge(String cluster, String template, String mappingStr, Set<String> removeFields) {
         return updateMappingCore(cluster, template, mappingStr, removeFields, true);
     }
 
@@ -90,7 +79,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     }
 
     @Override
-    public Result addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
+    public Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
                                   MappingConfig mappingConfig) {
         for (int i = 1; i <= updateDays; i++) {
             String indexName = IndexNameFactory.getNoVersion(expression, dataFormat, 2 - i);
@@ -111,17 +100,16 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
      * @return Result
      */
     @Override
-    public Result checkMappingForNew(String name, AriusTypeProperty ariusTypeProperty) {
+    public Result<Void> checkMappingForNew(String name, AriusTypeProperty ariusTypeProperty) {
         try {
             MappingConfig mappingConfig = new MappingConfig(ariusTypeProperty.toMappingJSON());
             Map<String, TypeConfig> typeConfigMap = mappingConfig.getMapping();
             if (typeConfigMap != null && typeConfigMap.size() > 1) {
                 return Result.build(ResultType.FAIL.getCode(), "mapping具有多个type, 只能配置一个type");
             }
-        } catch (Exception e) {
-            if (e instanceof JSONException) {
-                return Result.build(ResultType.FAIL.getCode(), "json解析失败");
-            }
+        }catch (JSONException e) {
+            return Result.build(ResultType.FAIL.getCode(), JSON_PARSE_ERROR_TIPS);
+        }catch (Exception e) {
             return Result.build(ResultType.FAIL.getCode(), e.getMessage());
         }
 
@@ -129,19 +117,17 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     }
 
     @Override
-    public Result checkMapping(String cluster, String template, String mappingsStr, boolean doMerge) {
+    public Result<Void> checkMapping(String cluster, String template, String mappingsStr, boolean doMerge) {
         try {
-            MappingConfig mappings = new MappingConfig(getMappingObj(JSONObject.parseObject(mappingsStr)));
+            MappingConfig mappings = new MappingConfig( getMappingObj( JSON.parseObject( mappingsStr ) ) );
             if (mappings.haveDefault()) {
-                return Result.build(ResultType.FAIL.getCode(), "mapping have _default_ type");
+                return Result.build( ResultType.FAIL.getCode(), "mapping have _default_ type" );
             }
 
-            return checkMapping(cluster, template, mappings, doMerge);
-
-        } catch (Throwable t) {
-            if (t instanceof JSONException) {
-                return Result.build(ResultType.FAIL.getCode(), "json解析失败");
-            }
+            return checkMapping( cluster, template, mappings );
+        }catch (JSONException e){
+            return Result.build(ResultType.FAIL.getCode(), JSON_PARSE_ERROR_TIPS);
+        } catch (Exception t) {
             return Result.build(ResultType.FAIL.getCode(), t.getMessage());
         }
     }
@@ -153,7 +139,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
             // 拉取模板mapping
             Result<MappingConfig> getTemplateMappingResult = getMapping(cluster, template);
             if (getTemplateMappingResult.failed()) {
-                return Result.buildFrom(getTemplateMappingResult);
+                return getTemplateMappingResult;
             }
             // 模板mapping
             MappingConfig templateMappingConfig = getTemplateMappingResult.getData();
@@ -163,14 +149,14 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
             String yesterdayIndexName = IndexNameFactory.getNoVersion(expression, dataFormat, -1);
             String indexName = todayIndexName + "*," + yesterdayIndexName + "*";
 
-            Result getIndexMappingResult = getIndexMappings(cluster, indexName);
+            Result<List<MappingConfig>> getIndexMappingResult = getIndexMappings(cluster, indexName);
 
             if (getIndexMappingResult.failed()) {
-                return getIndexMappingResult;
+                return Result.buildFrom(getIndexMappingResult);
             }
 
-            List<MappingConfig> indexMappingConfigs = (List<MappingConfig>) getIndexMappingResult.getData();
-            if (indexMappingConfigs == null || indexMappingConfigs.size() == 0) {
+            List<MappingConfig> indexMappingConfigs = getIndexMappingResult.getData();
+            if (indexMappingConfigs == null || indexMappingConfigs.isEmpty()) {
                 return Result.buildSucc(templateMappingConfig);
             }
 
@@ -191,9 +177,9 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
             clearDefaultMapping(mergeMappingConfig);
             // mapping有变化，更新
             if (!mergeMappingConfig.toJson().equals(templateMappingConfig.toJson())) {
-                mergeMultiTypePropertiesToDefaultType(indexName, mergeMappingConfig);
+                mergeMultiTypePropertiesToUserDefinedType(indexName, mergeMappingConfig);
                 MappingConfig toUpdateMapping = new MappingConfig(mergeMappingConfig.toJson());
-                Result result = updateMapping(cluster, template, toUpdateMapping.toJson().toJSONString());
+                Result<Void> result = updateMapping(cluster, template, toUpdateMapping.toJson().toJSONString());
                 if (result.failed()) {
                     LOGGER.error("class=TemplatePhyMappingManagerImpl||method=syncMappingConfig||errMsg={} "
                                  + "{} fail to update mapping, error {}",
@@ -202,13 +188,13 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
             }
 
             return Result.buildSucc(mergeMappingConfig);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             return Result.buildFail(t.getMessage());
         }
     }
 
     /**************************************** private method ****************************************************/
-    private Result checkMapping(String cluster, String template, MappingConfig mappings, boolean doMerge) {
+    private Result<Void> checkMapping(String cluster, String template, MappingConfig mappings) {
         if (isLowVersionCluster(cluster) && !mappings.isEmpty()) {
             String indexName = String.format("indexforcheckmapping_%s_%s", cluster, template);
             return preCreateIndexToCheckTemplateConfig(cluster, indexName, mappings,
@@ -224,33 +210,22 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
      * @return
      */
     private boolean isLowVersionCluster(String cluster) {
-        if (StringUtils.isNotBlank(cluster) && AdminConstant.LOW_VERSION_ES_CLUSTER.contains(cluster)) {
-            return true;
-        }
-        return false;
+        return (StringUtils.isNotBlank(cluster) && AdminConstant.LOW_VERSION_ES_CLUSTER.contains(cluster));
     }
 
     /**
-     * 针对2.3.3这种低版本ES，需要通过创建索引的方式来Check模板Mapping的合法性
+     * 需要通过创建索引的方式来Check模板Mapping的合法性
      * @param cluster 集群名称
      * @param template 模板名称
      * @param mappings 模板Mapping信息
      * @return
      */
-    private Result preCreateIndexToCheckTemplateConfig(String cluster, String template, MappingConfig mappings,
+    private Result<Void> preCreateIndexToCheckTemplateConfig(String cluster, String template, MappingConfig mappings,
                                                        Map<String, String> settings) {
 
         IndexConfig indexConfig = new IndexConfig();
         indexConfig.setMappings(mappings);
         indexConfig.setSettings(settings);
-
-        if (cluster == null) {
-            cluster = getTestClusterName_high();
-        }
-
-        if (cluster.startsWith("bigdata-arius-log")) {
-            cluster = "ecm-meta-phy";
-        }
 
         return tryCreateIndex(cluster, template, indexConfig);
     }
@@ -276,8 +251,8 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
                 }
             }
 
-            if (!settings.containsKey(AdminConstant.SINGLE_TYPE_KEY)
-                || !AdminConstant.DEFAULT_SINGLE_TYPE.equals(settings.get(AdminConstant.SINGLE_TYPE_KEY))) {
+            String settingValue = settings.get(AdminConstant.SINGLE_TYPE_KEY);
+            if (null == settingValue || !AdminConstant.DEFAULT_SINGLE_TYPE.equals(settingValue)) {
                 LOGGER.warn("class=TemplatePhyMappingManagerImpl||method=checkMapping||"
                             + "singleTypeSettings={}||indexTemplate={}",
                     settings.keySet(), indexName);
@@ -306,7 +281,9 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
 
         List<MappingConfig> ret = new ArrayList<>();
         // 遍历索引名，获取索引的mapping配置
-        for (String name : indexConfigMap.keySet()) {
+
+        for(Map.Entry<String, IndexConfig> entry : indexConfigMap.entrySet()){
+            String name = entry.getKey();
             IndexConfig indexConfig = indexConfigMap.get(name);
             if (indexConfig == null) {
                 return Result.buildFail("get null index config, indexName:" + name);
@@ -327,35 +304,26 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
      * @param indexTemplate 索引名称
      * @param templateMappingConfig 模板配置
      */
-    private void mergeMultiTypePropertiesToDefaultType(String indexTemplate, MappingConfig templateMappingConfig) {
+    private void mergeMultiTypePropertiesToUserDefinedType(String indexTemplate, MappingConfig templateMappingConfig) {
         if (templateMappingConfig != null && templateMappingConfig.getMapping() != null) {
             templateMappingConfig.removeDefault();
             Map<String, TypeConfig> typeConfigs = templateMappingConfig.getMapping();
             if (!typeConfigs.isEmpty()) {
-                if (typeConfigs.size() == 1 && !typeConfigs.containsKey(AdminConstant.DEFAULT_TYPE)) {
-                    // 对于type自定义的场景，type换成default type.
-                    String typeName = typeConfigs.entrySet().iterator().next().getKey();
-                    typeConfigs.put(AdminConstant.DEFAULT_TYPE, typeConfigs.get(typeName));
-                    typeConfigs.remove(typeName);
-
-                    LOGGER
-                        .info("class=TemplatePhyMappingManagerImpl||method=mergeMultiTypePropertiesToDefaultType||"
-                              + "msg=one user defined type||typeName={}||indexTemplate={}",
-                            typeName, indexTemplate);
+                if (typeConfigs.size() == 1) {
+                    LOGGER.info("class=TemplatePhysicalMappingServiceImpl||method=mergeMultiTypePropertiesToDefaultType||msg=singleType" +
+                            "||typeName={}||indexTemplate={}", typeConfigs.keySet(), indexTemplate);
                 } else if (typeConfigs.size() == 2 && typeConfigs.containsKey(AdminConstant.DEFAULT_TYPE)) {
                     String userDefinedTypeName = fetchNonDefaultKey(typeConfigs, AdminConstant.DEFAULT_TYPE);
-                    LOGGER
-                        .info("class=TemplatePhyMappingManagerImpl||method=mergeMultiTypePropertiesToDefaultType||"
-                              + "msg=multi type||userDefinedType={}||indexTemplate={}",
+                    LOGGER.info("class=TemplatePhysicalMappingServiceImpl||method=mergeMultiTypePropertiesToDefaultType||" +
+                                    "msg=multi type||userDefinedType={}||indexTemplate={}",
                             userDefinedTypeName, indexTemplate);
                     if (StringUtils.isNotBlank(userDefinedTypeName)) {
-                        typeConfigs.get(AdminConstant.DEFAULT_TYPE).merge(typeConfigs.get(userDefinedTypeName));
-                        typeConfigs.remove(userDefinedTypeName);
+                        typeConfigs.get(userDefinedTypeName).merge(typeConfigs.get(AdminConstant.DEFAULT_TYPE));
+                        typeConfigs.remove(AdminConstant.DEFAULT_TYPE);
                     }
                 } else {
-                    LOGGER
-                        .warn("class=TemplatePhyMappingManagerImpl||method=mergeMultiTypePropertiesToDefaultType||"
-                              + "msg=multi user defined types||userDefinedTypes={}||indexTemplate={}",
+                    LOGGER.warn("class=TemplatePhysicalMappingServiceImpl||method=mergeMultiTypePropertiesToDefaultTypee||" +
+                                    "msg=multi user defined types||userDefinedTypes={}||indexTemplate={}",
                             typeConfigs.keySet(), indexTemplate);
                 }
             }
@@ -391,38 +359,6 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         mappingConfig.removeDefault();
     }
 
-    /**
-     * 清除掉mapper中非properties的所有属性
-     *
-     * @param mappingConfig mapping配置
-     */
-    private void clearNoPropertiesConfig(MappingConfig mappingConfig) {
-        Map<String, TypeConfig> typeConfigMap = mappingConfig.getMapping();
-        for (String typeName : typeConfigMap.keySet()) {
-            typeConfigMap.get(typeName).getNotUsedMap().clear();
-        }
-    }
-
-    private Result checkBaseConfig(String cluster, String names, MappingConfig mappings) {
-        MultiTemplatesConfig templatesConfig = templateService.syncGetTemplates(cluster, names);
-
-        if (templatesConfig == null) {
-            Result result = Result.buildSucc();
-            result.setData(Maps.newHashMap());
-            return result;
-        }
-
-        try {
-            Map<String, Set<String>> m = templatesConfig.checkBaseConfig(cluster, mappings);
-            Result result = Result.buildSucc();
-            result.setData(m);
-            return result;
-
-        } catch (Throwable t) {
-            return Result.buildFail("templateConfig.checkBaseConfig error, msg:" + t.getMessage());
-        }
-    }
-
     private JSONObject getMappingObj(JSONObject obj) {
         if (obj.containsKey(MAPPING_STR)) {
             return obj.getJSONObject(MAPPING_STR);
@@ -435,7 +371,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         return obj;
     }
 
-    private Result tryCreateIndex(String clusterName, String indexName, IndexConfig indexConfig) {
+    private Result<Void> tryCreateIndex(String clusterName, String indexName, IndexConfig indexConfig) {
         try {
             esIndexDAO.deleteIndex(clusterName, indexName);
 
@@ -444,14 +380,14 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
             }
 
             return Result.buildSucc();
-        } catch (Throwable t) {
-            LOGGER.warn("check mapping error, cluster:{}, tmp_index:{}, mapping:{}", clusterName, indexName,
+        } catch (Exception t) {
+            LOGGER.warn("class=TemplatePhyMappingManagerImpl||method=tryCreateIndex||msg=check mapping error, cluster:{}, tmp_index:{}, mapping:{}", clusterName, indexName,
                 indexConfig.getMappings().toJson(), t);
 
             StringBuilder sb = new StringBuilder();
             while (t != null) {
                 sb.append(t.getMessage()).append("\n");
-                t = t.getCause();
+                t = (Exception)t.getCause();
             }
 
             String message = sb.toString();
@@ -469,78 +405,37 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
 
         } finally {
             if (!esIndexDAO.deleteIndex(clusterName, indexName)) {
-                LOGGER.warn("delete index error, indexName:{}", indexName);
+                LOGGER.warn("class=TemplatePhyMappingManagerImpl||method=tryCreateIndex||msg=delete index error, indexName:{}", indexName);
             }
         }
     }
 
-    private String getTestClusterName_high() {
-        return cluster;
-    }
-
-    /**
-     * 校验索引模板Setting信息
-     * @param cluster 物理集群名称
-     * @param template 模板名称
-     * @param templateConfig 模板配置
-     * @param setting 待更新Setting信息
-     * @return
-     */
-    private Result checkTemplateSetting(String cluster, String template, TemplateConfig templateConfig,
-                                        Map<String, String> setting) {
-
-        LOGGER.info("method=checkSetting||cluster={}||template={}||templateConfig={}||setting={}", cluster, template,
-            templateConfig, setting);
-
-        Map<String, String> mergedSetting = templateConfig.getSetttings();
-        if (mergedSetting == null) {
-            mergedSetting = new HashMap<>();
-        }
-
-        if (setting != null) {
-            mergedSetting.putAll(setting);
-        } else {
-            LOGGER.error("method=checkSetting||cluster={}||template={}||errMsg=invalidSetting", cluster, template);
-
-            return Result.buildFail("模板setting或者待merge setting不能为空");
-        }
-
-        LOGGER.info("method=checkSetting||cluster={}||template={}||templateConfig={}||setting={}||mergedSetting={}",
-            cluster, template, templateConfig, setting, mergedSetting);
-
-        return preCreateIndexToCheckTemplateConfig(cluster,
-            String.format("indexforchecksetting_%s_%s", cluster, template), templateConfig.getMappings(),
-            mergedSetting);
-    }
-
-    private Result updateMappingCore(String cluster, String template, String mappingStr, Set<String> removeFields,
+    private Result<Void> updateMappingCore(String cluster, String template, String mappingStr, Set<String> removeFields,
                                      boolean doMerge) {
         try {
 
-            Result result = AriusIndexMappingConfigUtils.parseMappingConfig(mappingStr);
+            Result<MappingConfig> result = AriusIndexMappingConfigUtils.parseMappingConfig( mappingStr );
             if (result.failed()) {
-                return result;
+                return Result.buildFrom( result );
             }
 
-            MappingConfig mappings = (MappingConfig) result.getData();
+            MappingConfig mappings = result.getData();
 
             if (mappings.haveDefault()) {
-                return Result.build(ResultType.FAIL.getCode(), "mapping have _default_ type");
+                return Result.build( ResultType.FAIL.getCode(), "mapping have _default_ type" );
             }
 
-            return updateMapping(cluster, template, mappings, removeFields, doMerge);
-
-        } catch (Throwable t) {
-            if (t instanceof JSONException) {
-                return Result.build(ResultType.FAIL.getCode(), "json解析失败");
-            }
+            return updateMapping( cluster, template, mappings, removeFields, doMerge );
+        } catch (JSONException e){
+            return Result.build(ResultType.FAIL.getCode(), JSON_PARSE_ERROR_TIPS);
+        } catch (Exception t) {
             return Result.build(ResultType.FAIL.getCode(), t.getMessage());
         }
     }
 
-    private Result updateMapping(String cluster, String name, MappingConfig mappings, Set<String> removeFields,
+    private Result<Void> updateMapping(String cluster, String name, MappingConfig mappings, Set<String> removeFields,
                                  boolean doMerge) {
-        Result result = checkMapping(cluster, name, mappings, doMerge);
+        Result<Void> result = checkMapping(cluster, name, mappings);
         if (result.failed()) {
             return result;
         }
@@ -576,7 +471,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     }
 
     /**
-     * 检测模版字段数是否超标 超过则发送警告信息
+     * 检测模版字段数是否超标 超过则记录日志
      * @param cluster 物理集群名称
      * @param template 模板名称
      * @param templateMappingConfig 模板mapping
@@ -585,20 +480,13 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
      */
     private boolean checkMappingFieldSize(String cluster, String template, MappingConfig templateMappingConfig,
                                           Integer fieldLimitSize) {
-
         Map<String, TypeConfig> typeConfigMap = templateMappingConfig.getMapping();
 
         for (TypeConfig typeConfig : typeConfigMap.values()) {
             if (typeConfig.getProperties() != null && typeConfig.getProperties().getJsonMap().size() > fieldLimitSize) {
-
-                LOGGER.info(
-                    "class=TemplatePhyMappingManagerImpl||method=checkMappingFieldSize||template {} mapping size is {}",
-                    template, typeConfig.getProperties().getJsonMap().size());
-
-                notifyService.send(NotifyTaskTypeEnum.TEMPLATE_MAPPING_FIELD_LIMIT_ERROR,
-                    new TemplateMappingFieldLimitNotifyInfo(cluster, template, fieldLimitSize),
-                    Arrays.asList(receiver));
-
+                LOGGER.warn(
+                    "class=TemplatePhyMappingManagerImpl||method=checkMappingFieldSize||cluster={}||template {} mapping size is {}",
+                        cluster, template, typeConfig.getProperties().getJsonMap().size());
                 return true;
             }
         }

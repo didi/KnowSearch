@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.remote.zeus;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmCreateApp;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
-import java.util.List;
 
 public interface ZeusClusterRemoteService {
     Result<EcmOperateAppBase> createTask(List<String> hostList, String args);
@@ -15,13 +15,13 @@ public interface ZeusClusterRemoteService {
      * @param taskId  宙斯任务Id
      * @param action  部署动作
      * start    开始
-     * pause    暂停
+     * pause    暂停createTask
      * kill     结束
      * cancel   撤销
      *
      * @return Result
      */
-    Result actionTask(Integer taskId, String action);
+    Result<Object> actionTask(Integer taskId, String action);
 
     /**
      * 部署 or 继续部署 宙斯集群
@@ -30,7 +30,7 @@ public interface ZeusClusterRemoteService {
      * @param action  部署动作
      * @return Result
      */
-    Result actionHostTask(Integer taskId, String hostname, String action);
+    Result<Object> actionHostTask(Integer taskId, String hostname, String action);
 
     /**
      *  获取 宙斯任务部署 结果

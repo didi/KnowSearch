@@ -19,7 +19,7 @@ public interface AriusConfigInfoService {
      * @param operator 操作人
      * @return 成功 true
      */
-    Result addConfig(AriusConfigInfoDTO configInfoDTO, String operator);
+    Result<Integer> addConfig(AriusConfigInfoDTO configInfoDTO, String operator);
 
     /**
      * 删除配置
@@ -27,7 +27,7 @@ public interface AriusConfigInfoService {
      * @param operator 操作人
      * @return 成功 true  失败 false
      */
-    Result delConfig(Integer configId, String operator);
+    Result<Void> delConfig(Integer configId, String operator);
 
     /**
      * 编辑配置
@@ -36,7 +36,7 @@ public interface AriusConfigInfoService {
      * @return 成功 true  失败 false
      *
      */
-    Result editConfig(AriusConfigInfoDTO configInfoDTO, String operator);
+    Result<Void> editConfig(AriusConfigInfoDTO configInfoDTO, String operator);
 
     /**
      * 使能配置
@@ -46,7 +46,7 @@ public interface AriusConfigInfoService {
      * @return 成功 true  失败 false
      *
      */
-    Result switchConfig(Integer configId, Integer status, String operator);
+    Result<Void> switchConfig(Integer configId, Integer status, String operator);
 
     /**
      * 根据配置组获取配置项
@@ -82,7 +82,7 @@ public interface AriusConfigInfoService {
      * @return  成功 true  失败 false
      *
      */
-    Result updateValueByGroupAndName(String group, String name, String value);
+    Result<Void> updateValueByGroupAndName(String group, String name, String value);
 
     /**
      * 修改一个配置项的值, 获取不存在就新增一个

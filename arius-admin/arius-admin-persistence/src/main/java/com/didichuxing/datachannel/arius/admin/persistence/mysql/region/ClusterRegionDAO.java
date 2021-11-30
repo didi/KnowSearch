@@ -24,6 +24,8 @@ public interface ClusterRegionDAO {
 
     int delete(Long regionId);
 
+    int deleteByClusterPhyName(String clusterPhyName);
+
     List<ClusterRegionPO> listAll();
 
     List<ClusterRegionPO> listBoundRegions();

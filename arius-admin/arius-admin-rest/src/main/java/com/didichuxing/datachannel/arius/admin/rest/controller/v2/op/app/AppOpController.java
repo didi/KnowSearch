@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.AppConfigVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.AppVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
@@ -41,7 +41,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_OP + "/app")
-@Api(value = "OP-APP接口(REST)")
+@Api(tags = "OP-运维侧APP接口(REST)")
 public class AppOpController {
 
     @Autowired
@@ -51,7 +51,7 @@ public class AppOpController {
     @ResponseBody
     @ApiOperation(value = "获取APP列表接口", notes = "获取APP列表,包含APP全部元信息")
     public Result<List<AppVO>> list() {
-        return Result.buildSucc(ConvertUtil.list2List(appService.getApps(), AppVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(appService.listApps(), AppVO.class));
     }
 
     @GetMapping("/listByClusterAuth")
@@ -66,7 +66,7 @@ public class AppOpController {
         @RequestParam Long logicClusterId,
         @RequestParam(required = false, defaultValue = "1") Integer authType) {
 
-        AppLogicClusterAuthEnum logicClusterAuth = AppLogicClusterAuthEnum.valueOf(authType);
+        AppClusterLogicAuthEnum logicClusterAuth = AppClusterLogicAuthEnum.valueOf(authType);
 
         return Result.buildSucc(ConvertUtil.list2List(
             appService.getAppsByLowestLogicClusterAuth(logicClusterId, logicClusterAuth), AppVO.class));
@@ -83,14 +83,14 @@ public class AppOpController {
     @PostMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建APP接口", notes = "")
-    public Result<Integer> add(HttpServletRequest request, @RequestBody AppDTO appDTO) throws Exception {
+    public Result<Integer> add(HttpServletRequest request, @RequestBody AppDTO appDTO) {
         return appService.registerApp(appDTO, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "编辑APP接口", notes = "")
-    public Result update(HttpServletRequest request, @RequestBody AppDTO appDTO) {
+    public Result<Void> update(HttpServletRequest request, @RequestBody AppDTO appDTO) {
         return appService.editApp(appDTO, HttpRequestUtils.getOperator(request));
     }
 
@@ -98,7 +98,7 @@ public class AppOpController {
     @ResponseBody
     @ApiOperation(value = "删除APP接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result delete(HttpServletRequest request, @RequestParam("appId") Integer appId) {
+    public Result<Void> delete(HttpServletRequest request, @RequestParam("appId") Integer appId) {
         return appService.deleteAppById(appId, HttpRequestUtils.getOperator(request));
     }
 
@@ -113,7 +113,7 @@ public class AppOpController {
     @PutMapping("/config/update")
     @ResponseBody
     @ApiOperation(value = "编辑APP配置接口", notes = "")
-    public Result updateConfig(HttpServletRequest request, @RequestBody AppConfigDTO configDTO) {
+    public Result<Void> updateConfig(HttpServletRequest request, @RequestBody AppConfigDTO configDTO) {
         return appService.updateAppConfig(configDTO, HttpRequestUtils.getOperator(request));
     }
 }

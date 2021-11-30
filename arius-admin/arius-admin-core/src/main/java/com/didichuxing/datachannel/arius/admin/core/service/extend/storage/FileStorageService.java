@@ -11,26 +11,30 @@ import org.springframework.web.multipart.MultipartFile;
 public interface FileStorageService {
     /**
      * 根据 FileStorageTypeEnum 获取接口实现类 ,实现上传
-     * @param fileName 文件名
-     * @param fileMd5 文件md5
+     *
+     * @param fileName   文件名
+     * @param fileMd5    文件md5
      * @param uploadFile 文件
-     * @see  FileStorageTypeEnum
      * @return 上传结果
+     * @see FileStorageTypeEnum
      */
-    Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile, FileStorageTypeEnum typeEnum);
+    Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile);
+
+    Result<Void> remove(String fileName);
 
     /**
      * 根据 FileStorageTypeEnum 获取接口实现类, 实现下载文件
+     *
      * @param fileName 文件名
-     * @param fileMd5 文件md5
      * @see  FileStorageTypeEnum
      * @return 文件
      */
-    Result download(String fileName, String fileMd5, FileStorageTypeEnum typeEnum);
+    Result<MultipartFile> download(String fileName);
 
     /**
      * 下载base地址
-     * @see  FileStorageTypeEnum
+     *
+     * @see FileStorageTypeEnum
      */
-    Result<String> getDownloadBaseUrl(FileStorageTypeEnum typeEnum);
+    Result<String> getDownloadBaseUrl();
 }

@@ -1,7 +1,6 @@
 package com.didi.arius.gateway.core.es.http.document;
 
 import com.alibaba.fastjson.JSON;
-import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.exception.InvalidParameterException;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.QueryContext;
@@ -23,20 +22,21 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+
 @Component("restUpdateAction")
 public class RestUpdateAction extends RestBaseWriteAction {
-    public static final String NAME = "update";
 
     @Override
     public String name() {
-        return NAME;
+        return "update";
     }
 
 
     @Override
     public void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel)
             throws Exception {
-        if (request.hasContent() == false) {
+        if (!request.hasContent()) {
             throw  new InvalidParameterException("no source to update");
         }
 
@@ -56,10 +56,8 @@ public class RestUpdateAction extends RestBaseWriteAction {
             throw new InvalidParameterException("kakfa update only support doc update");
         }
 
-        if (doc != null) {
-            if (false == indexTemplate.isInternal()) {
-                doc.put(WRITE_TIME_FIELD, System.currentTimeMillis());
-            }
+        if (doc != null && !indexTemplate.isInternal()) {
+            doc.put(WRITE_TIME_FIELD, System.currentTimeMillis());
         }
 
         String indexName = getIndexName(indexTemplate, doc);
@@ -80,13 +78,12 @@ public class RestUpdateAction extends RestBaseWriteAction {
         updateRequest.retryOnConflict(request.paramAsInt("retry_on_conflict", updateRequest.retryOnConflict()));
         updateRequest.version(RestActions.parseVersion(request));
         updateRequest.versionType(VersionType.fromString(request.param("version_type"), updateRequest.versionType()));
-
         updateRequest.source(JSON.toJSONString(source));
 
         updateRequest.putHeader("requestId", queryContext.getRequestId());
         updateRequest.putHeader("Authorization", request.getHeader("Authorization"));
 
-        ESClient writeClient = esClusterService.getWriteClient(indexTemplate);
+        ESClient writeClient = esClusterService.getWriteClient(indexTemplate, actionName);
 
         LogGather.recordInfoLog( updateRequest.index() + "_" + OPER_UPDATE, String.format("%s update index, type=%s, id=%s", updateRequest.index(), updateRequest.type(), updateRequest.id()));
 
@@ -95,9 +92,8 @@ public class RestUpdateAction extends RestBaseWriteAction {
             public void onResponse(ESUpdateResponse response) {
                 long currentTime = System.currentTimeMillis();
 
-                if (statLogger.isDebugEnabled()) {
-                    statLogger.debug(QueryConsts.DLFLAG_PREFIX + "update_es_response||requestId={}||cost={}", queryContext.getRequestId(), currentTime - queryContext.getRequestTime());
-                }
+                setWriteLog(queryContext, indexTemplate, response,
+                        currentTime, queryConfig.isWriteLogContentOpen());
 
                 metricsService.addIndexMetrics(indexTemplate.getExpression(), name(), currentTime - queryContext.getRequestTime(), queryContext.getPostBody().length(), 0);
 

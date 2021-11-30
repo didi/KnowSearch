@@ -1,6 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.constant;
 
 public class RequestPathNormal {
+
+    private RequestPathNormal(){}
+
     public static final String NORMAL = "/v3/normal";
 
     public static final String ACCOUNT_SEARCH = NORMAL + "/account/search";

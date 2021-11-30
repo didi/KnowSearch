@@ -1,18 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-
-/**
- * <p>
- * ES集群表对应各角色主机列表
- * </p>
- *
- * @author didi
- * @since 2020-08-24
- */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESRoleClusterDTO extends BaseDTO {
     private static final long serialVersionUID = 1L;
 

@@ -5,7 +5,9 @@ package com.didichuxing.datachannel.arius.admin.client.constant.quota;
  *
  * @author d06679
  * @date 2017/7/14
+ * @deprecated
  */
+@Deprecated
 public enum NodeSpecifyEnum {
 
                              /**

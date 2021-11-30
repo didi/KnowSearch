@@ -68,6 +68,7 @@
         <if test="valueName != null">and value_name = #{valueName}</if>
         <if test="dimension != null">and dimension = #{dimension}</if>
         <if test="status != null">and status = #{status}</if>
+        order by id desc
     </select>
 
 
@@ -82,7 +83,7 @@
         select
         <include refid="Base_Column_List"/>
         from arius_config_info
-        where value_group = #{valueGroup} and value_name = #{valueName}
+        where value_group = #{valueGroup} and value_name = #{valueName} and status != -1
         limit 1
     </select>
 

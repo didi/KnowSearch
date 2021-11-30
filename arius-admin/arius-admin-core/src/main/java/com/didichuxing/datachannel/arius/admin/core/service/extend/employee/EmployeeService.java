@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.employee;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import com.didichuxing.datachannel.arius.admin.remote.employee.content.EmployeeTypeEnum;
 
 /**
@@ -14,14 +15,14 @@ public interface EmployeeService {
      * @see	 EmployeeTypeEnum
      * @return data
      */
-    Result getByDomainAccount(String domainAccount, EmployeeTypeEnum employeeType);
+    <T extends BaseEmInfo> Result<T> getByDomainAccount(String domainAccount);
 
     /**
      * 校验用户域账号是否有效
      * @param domainAccounts 域账号列表
      * @see	 EmployeeTypeEnum
      */
-    Result checkUsers(String domainAccounts, EmployeeTypeEnum employeeType);
+    Result<Void> checkUsers(String domainAccounts);
 
     /**
      * searchOnJobStaffByKeyWord
@@ -29,5 +30,5 @@ public interface EmployeeService {
      * @see	 EmployeeTypeEnum
      * @return
      */
-    Result searchOnJobStaffByKeyWord(String keyWord, EmployeeTypeEnum employeeType);
+    Result<Object> searchOnJobStaffByKeyWord(String keyWord);
 }

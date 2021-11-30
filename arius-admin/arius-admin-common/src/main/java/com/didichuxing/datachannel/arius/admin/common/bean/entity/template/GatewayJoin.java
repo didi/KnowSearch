@@ -18,6 +18,11 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GatewayJoin {
+
+    /**
+     * 请求path
+     */
+    private String uri;
     /**
      * 请求id
      */

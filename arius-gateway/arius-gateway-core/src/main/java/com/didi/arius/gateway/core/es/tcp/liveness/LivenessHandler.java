@@ -25,7 +25,11 @@ public class LivenessHandler extends ActionHandler {
 	@Value("${gateway.cluster.name}")
 	private String gatewayClusterName;
 	private ClusterName clusterName;
-	
+
+	public LivenessHandler() {
+		// pass
+	}
+
 	@Override
 	public String name() {
 		return TransportLivenessAction.NAME;
@@ -39,7 +43,7 @@ public class LivenessHandler extends ActionHandler {
 	
 	@Override
 	public void handleInterRequest(ActionContext actionContext, int retryTimes) {
-		ActionListener<LivenessResponse> listener = new ActionListenerImpl<LivenessResponse>(actionContext);
+		ActionListener<LivenessResponse> listener = new ActionListenerImpl<>(actionContext);
 		listener.onResponse(new LivenessResponse(this.clusterName, null));
 	}
 

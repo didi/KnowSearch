@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 @SpringBootTest(classes = AriusGatewayApplication.class)
 public class ESTcpClientServiceTests {
 
-    private static String CLUSTER = "";
+    private static String CLUSTER = "dc-es02";
 
     @Autowired
     private ESTcpClientService esTcpClientService;
@@ -44,7 +44,7 @@ public class ESTcpClientServiceTests {
     public void testGetAdminClient(){
         Client client = esTcpClientService.getAdminClient();
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
 
     }
 
@@ -52,8 +52,31 @@ public class ESTcpClientServiceTests {
     public void testGetESClusterMap(){
         Map<String, ESCluster> esClusterMap = esTcpClientService.getDataCenterMap();
         System.out.println(JSON.toJSONString(esClusterMap));
-        assertEquals(esClusterMap != null, true);
+        assertEquals(true, esClusterMap != null);
 
     }
+
+    @Test
+    public void testResetClients(){
+        ESClient esClient = new ESClient("dc-es01", "7.6.1.302");
+        ESCluster esCluster = new ESCluster();
+        esCluster.setCluster("dc-es01");
+        esCluster.setReadAddress("10.168.56.135:8060");
+        esCluster.setHttpAddress("10.168.56.135:8060,10.169.182.134:8060");
+        esCluster.setHttpWriteAddress("");
+        esCluster.setClient(null);
+        esCluster.setEsClient(esClient);
+        esCluster.setType(ESCluster.Type.INDEX);
+        esCluster.setDataCenter("cn");
+        esCluster.setEsVersion("7.6.1.302");
+        esCluster.setPassword("password");
+        Map<String, ESCluster> map = Maps.newHashMap();
+        map.put("dc-es01", esCluster);
+        esTcpClientService.resetClients(map);
+
+
+    }
+
+
 
 }

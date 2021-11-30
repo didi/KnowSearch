@@ -16,7 +16,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 @RestController
 @RequestMapping(V2_CONSOLE + "/template/access")
-@Api(tags = "Console-索引模板访问统计信息接口(REST)")
+@Api(tags = "Console-用户侧索引模板访问统计信息接口(REST)")
 public class ConsoleTemplateAccessController extends BaseConsoleTemplateController {
 
     @Autowired

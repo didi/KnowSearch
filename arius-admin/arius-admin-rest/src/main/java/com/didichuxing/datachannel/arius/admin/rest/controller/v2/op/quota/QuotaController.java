@@ -20,13 +20,9 @@ import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2;
 
-/**
- * @author d06679
- * @date 2019/4/24
- */
 @RestController()
 @RequestMapping(V2 + "/quota")
-@Api(value = "quota管控接口")
+@Api(tags = "quota管控接口")
 public class QuotaController {
 
     @Autowired

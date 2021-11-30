@@ -106,62 +106,24 @@ public class DslFieldUsePO extends BaseESPO {
      * @param other
      */
     public void combineFieldUseCount(DslFieldUsePO other) {
-        if (other.getSelectFieldsCounter() != null) {
-            for (Map.Entry<String, Long> entry : other.getSelectFieldsCounter().entrySet()) {
-                if (selectFieldsCounter == null) {
-                    selectFieldsCounter = new HashMap<>();
+        countFieldUse(other.getSelectFieldsCounter(), selectFieldsCounter);
+        countFieldUse(other.getWhereFieldsCounter(), whereFieldsCounter);
+        countFieldUse(other.getGroupByFieldsCounter(), groupByFieldsCounter);
+        countFieldUse(other.getSortByFieldsCounter(), sortByFieldsCounter);
+    }
+
+    private void countFieldUse(Map<String, Long> otherFieldsCounter, Map<String, Long> fieldsCounter) {
+        if (otherFieldsCounter != null) {
+            for (Map.Entry<String, Long> entry : otherFieldsCounter.entrySet()) {
+                if (fieldsCounter == null) {
+                    fieldsCounter = new HashMap<>();
                 }
 
-                if (selectFieldsCounter.containsKey(entry.getKey())) {
-                    Long counter = selectFieldsCounter.get(entry.getKey()) + entry.getValue();
-                    selectFieldsCounter.put(entry.getKey(), counter);
+                if (fieldsCounter.containsKey(entry.getKey())) {
+                    Long counter = fieldsCounter.get(entry.getKey()) + entry.getValue();
+                    fieldsCounter.put(entry.getKey(), counter);
                 } else {
-                    selectFieldsCounter.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        if (other.getWhereFieldsCounter() != null) {
-            for (Map.Entry<String, Long> entry : other.getWhereFieldsCounter().entrySet()) {
-                if (whereFieldsCounter == null) {
-                    whereFieldsCounter = new HashMap<>();
-                }
-
-                if (whereFieldsCounter.containsKey(entry.getKey())) {
-                    Long counter = whereFieldsCounter.get(entry.getKey()) + entry.getValue();
-                    whereFieldsCounter.put(entry.getKey(), counter);
-                } else {
-                    whereFieldsCounter.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        if (other.getGroupByFieldsCounter() != null) {
-            for (Map.Entry<String, Long> entry : other.getGroupByFieldsCounter().entrySet()) {
-                if (groupByFieldsCounter == null) {
-                    groupByFieldsCounter = new HashMap<>();
-                }
-
-                if (groupByFieldsCounter.containsKey(entry.getKey())) {
-                    Long counter = groupByFieldsCounter.get(entry.getKey()) + entry.getValue();
-                    groupByFieldsCounter.put(entry.getKey(), counter);
-                } else {
-                    groupByFieldsCounter.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        if (other.getSortByFieldsCounter() != null) {
-            for (Map.Entry<String, Long> entry : other.getSortByFieldsCounter().entrySet()) {
-                if (sortByFieldsCounter == null) {
-                    sortByFieldsCounter = new HashMap<>();
-                }
-
-                if (sortByFieldsCounter.containsKey(entry.getKey())) {
-                    Long counter = sortByFieldsCounter.get(entry.getKey()) + entry.getValue();
-                    sortByFieldsCounter.put(entry.getKey(), counter);
-                } else {
-                    sortByFieldsCounter.put(entry.getKey(), entry.getValue());
+                    fieldsCounter.put(entry.getKey(), entry.getValue());
                 }
             }
         }

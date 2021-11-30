@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.metadata.utils.ReadExprValueUtil;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 
 public class DegreeOffline extends AbstractDegreeIndicator {
-    private final static Long GB_IN_BYTE = 1024 * 1024 * 1024L;
+    private static final Long GB_IN_BYTE = 1024 * 1024 * 1024L;
 
     @Override
     public <T extends BaseDegree> T execInner(DegreeParam degreeParam, T t) {
@@ -21,7 +21,7 @@ public class DegreeOffline extends AbstractDegreeIndicator {
         offLinePO.setCluster(indexTemplate.getMasterTemplate().getCluster());
         offLinePO.setDepartment(indexTemplate.getLibraDepartment());
         offLinePO.setTemplate(indexTemplate.getName());
-        offLinePO.setTemplateId(indexTemplate.getId().intValue());
+        offLinePO.setTemplateId(indexTemplate.getId());
         offLinePO.setZeroCount(0 == degreeParam.getTemplateDocNu());
         offLinePO.setCostByGb(degreeParam.getTemplateSizeInBytes()/GB_IN_BYTE);
         offLinePO.setYesterdayAccessNum(templateAccessCount);
@@ -31,6 +31,12 @@ public class DegreeOffline extends AbstractDegreeIndicator {
         }
 
         //开始计算离线健康分
+        computeOfflineScore(offLinePO, templateAccessCount);
+
+        return (T)offLinePO;
+    }
+
+    private void computeOfflineScore(OffLine offLinePO, long templateAccessCount) {
         StringBuilder offlineDesc = new StringBuilder();
         double offLineScore   = 0.0;
         double singleGbAccess = offLinePO.getSingleGbAccess();
@@ -45,22 +51,7 @@ public class DegreeOffline extends AbstractDegreeIndicator {
             }
 
             // 按访问次数调整(仅对分数低于60分的)
-            if (offLineScore < 60) {
-                int addScore = 0;
-
-                if (templateAccessCount >= 1000000) {
-                    addScore = 30;
-                } else if (1000000 > templateAccessCount && templateAccessCount >= 100000) {
-                    addScore = 20;
-                } else if (100000 > templateAccessCount && templateAccessCount >= 10000) {
-                    addScore = 10;
-                }
-
-                if(addScore > 0){
-                    offLineScore += addScore;
-                    offlineDesc.append(" (+").append(addScore).append(")");
-                }
-            }
+            offLineScore = adjustByAccessCount(templateAccessCount, offlineDesc, offLineScore);
 
             // 最高分为100分
             if (offLineScore > 100) {
@@ -74,8 +65,26 @@ public class DegreeOffline extends AbstractDegreeIndicator {
         offLinePO.setProcess(offlineDesc.toString());
         offLinePO.setScore(Math.floor(offLineScore));
         offLinePO.setPunishment(null);
+    }
 
-        return (T)offLinePO;
+    private double adjustByAccessCount(long templateAccessCount, StringBuilder offlineDesc, double offLineScore) {
+        if (offLineScore < 60) {
+            int addScore = 0;
+
+            if (templateAccessCount >= 1000000) {
+                addScore = 30;
+            } else if (1000000 > templateAccessCount && templateAccessCount >= 100000) {
+                addScore = 20;
+            } else if (100000 > templateAccessCount && templateAccessCount >= 10000) {
+                addScore = 10;
+            }
+
+            if(addScore > 0){
+                offLineScore += addScore;
+                offlineDesc.append(" (+").append(addScore).append(")");
+            }
+        }
+        return offLineScore;
     }
 
     @Override

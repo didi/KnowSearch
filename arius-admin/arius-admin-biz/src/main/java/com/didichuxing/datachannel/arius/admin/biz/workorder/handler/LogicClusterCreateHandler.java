@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_LOGIC_CLUSTER_CREATE;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterDeleteOrderDetail;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterCreateOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 
 /**
  * @author d06679
@@ -38,11 +39,14 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClus
 public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ESClusterLogicService esClusterLogicService;
+    private ClusterLogicService clusterLogicService;
+
+    @Autowired
+    private ClusterLogicManager clusterLogicManager;
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        LogicClusterDeleteOrderDetail content = JSON.parseObject(extensions, LogicClusterDeleteOrderDetail.class);
+        LogicClusterCreateContent content = JSON.parseObject(extensions, LogicClusterCreateContent.class);
 
         return ConvertUtil.obj2Obj(content, LogicClusterCreateOrderDetail.class);
     }
@@ -53,9 +57,9 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
@@ -80,14 +84,14 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         LogicClusterCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterCreateContent.class);
 
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
         resourceLogicDTO.setAppId(workOrder.getSubmitorAppid());
         resourceLogicDTO.setType(ResourceLogicTypeEnum.PRIVATE.getCode());
-        return esClusterLogicService.validateLogicClusterParams(resourceLogicDTO, OperationEnum.ADD);
+        return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD);
     }
 
     @Override
@@ -109,7 +113,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -117,13 +121,13 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
      * 处理工单 该工单需要运维人员在运维控制台处理好后;所以这里不用执行任何逻辑
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ESLogicClusterWithRegionDTO.class);
         esLogicClusterWithRegionDTO.setAppId(workOrder.getSubmitorAppid());
 
-        Result<Long> result = esClusterLogicService.createLogicCluster(esLogicClusterWithRegionDTO,
-            workOrder.getSubmitor());
+        Result<Long> result = clusterLogicManager.addLogicCluster(esLogicClusterWithRegionDTO,
+            workOrder.getSubmitor(), workOrder.getSubmitorAppid());
 
         if (result.success()) {
             sendNotify(WORK_ORDER_LOGIC_CLUSTER_CREATE, new LogicClusterCreateNotify(workOrder.getSubmitorAppid(),
@@ -134,7 +138,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
                 String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
         }
 
-        return result;
+        return Result.buildFrom(result);
     }
 
     @Override

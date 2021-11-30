@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmTaskDetail;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmTaskDetailProgress;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
@@ -53,7 +54,7 @@ public interface EcmTaskDetailManager {
      * @param  operator 操作人
      * @return result
      */
-    Result getTaskDetailLog(Long detailId, String operator);
+    Result<EcmSubTaskLog> getTaskDetailLog(Long detailId, String operator);
 
     /**
      * 根据工单任务ID获取详情列表 与 统计数据
@@ -74,7 +75,7 @@ public interface EcmTaskDetailManager {
      * @param buildEcmTaskDetail
      * @return
      */
-    Result editEcmTaskDetail(EcmTaskDetail buildEcmTaskDetail);
+    Result<Long> editEcmTaskDetail(EcmTaskDetail buildEcmTaskDetail);
 
     /**
      * 获取ecm task Detail
@@ -83,4 +84,9 @@ public interface EcmTaskDetailManager {
      * @return
      */
     EcmTaskDetail getByWorkOderIdAndHostName(Long workOrderId, String hostname);
+
+    /**
+     * 根据工单任务ID删除对应的任务详情信息
+     */
+    Result<Void> deleteEcmTaskDetailsByTaskOrder(Long workOrderTaskId);
 }

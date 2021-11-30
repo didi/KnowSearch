@@ -1,7 +1,6 @@
 package com.didi.arius.gateway.core.es.http.document;
 
 import com.alibaba.fastjson.JSON;
-import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.exception.AccessForbiddenException;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.QueryContext;
@@ -13,7 +12,7 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESDeleteResp
 import com.didichuxing.tunnel.util.log.LogGather;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.support.replication.ReplicationRequest;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -26,13 +25,14 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+
 @Component("restDeleteAction")
 public class RestDeleteAction extends RestBaseWriteAction {
-    public static final String NAME = "delete";
 
     @Override
     public String name() {
-        return NAME;
+        return "delete";
     }
 
 
@@ -63,7 +63,7 @@ public class RestDeleteAction extends RestBaseWriteAction {
             }
         }
 
-        if (indexName.startsWith(".") && AppUtil.isAdminAppid(queryContext.getAppDetail()) == false) {
+        if (indexName.startsWith(".") && !AppUtil.isAdminAppid(queryContext.getAppDetail())) {
             throw new AccessForbiddenException("action(" + queryContext.getUri() + ") forbidden");
         }
 
@@ -73,18 +73,17 @@ public class RestDeleteAction extends RestBaseWriteAction {
         deleteRequest.id(request.param("id"));
         deleteRequest.routing(request.param("routing"));
         deleteRequest.parent(request.param("parent")); // order is important, set it after routing, so it will set the routing
-        deleteRequest.timeout(request.paramAsTime("timeout", DeleteRequest.DEFAULT_TIMEOUT));
+        deleteRequest.timeout(request.paramAsTime("timeout", ReplicationRequest.DEFAULT_TIMEOUT));
         deleteRequest.setRefresh(request.param("refresh"));
         deleteRequest.version(RestActions.parseVersion(request));
         deleteRequest.versionType(VersionType.fromString(request.param("version_type"), deleteRequest.versionType()));
-
         deleteRequest.setConsistencyLevel(request.param("consistency"));
         deleteRequest.setWaitForActiveShards(request.param("wait_for_active_shards"));
 
         deleteRequest.putHeader("requestId", queryContext.getRequestId());
         deleteRequest.putHeader("Authorization", request.getHeader("Authorization"));
 
-        ESClient writeClient = esClusterService.getWriteClient(indexTemplate);
+        ESClient writeClient = esClusterService.getWriteClient(indexTemplate, actionName);
 
         if (logger.isDebugEnabled()) {
             logger.debug("rest delete data:index={}, type={}, id={}", deleteRequest.index(), deleteRequest.type(), deleteRequest.id());
@@ -97,14 +96,15 @@ public class RestDeleteAction extends RestBaseWriteAction {
             public void onResponse(ESDeleteResponse response) {
                 long currentTime = System.currentTimeMillis();
 
-                if (statLogger.isDebugEnabled()) {
-                    statLogger.debug(QueryConsts.DLFLAG_PREFIX + "delete_es_response||requestId={}||cost={}", queryContext.getRequestId(), currentTime - queryContext.getRequestTime());
-                }
+                setWriteLog(queryContext, indexTemplate,
+                        response, currentTime, queryConfig.isWriteLogContentOpen());
 
                 metricsService.addIndexMetrics(indexTemplate.getExpression(), name(), currentTime - queryContext.getRequestTime(), queryContext.getPostBody().length(), 0);
 
                 super.onResponse(response);
             }
+
+
         };
         writeClient.delete(deleteRequest, listener);
     }

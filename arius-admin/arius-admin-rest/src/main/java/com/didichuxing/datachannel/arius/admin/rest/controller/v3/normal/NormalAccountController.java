@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRo
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserLoginRecordService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,6 @@ public class NormalAccountController {
 
     @Autowired
     private AriusUserInfoService        ariusUserInfoService;
-
-    @Autowired
-    private AriusUserLoginRecordService userLoginRecordService;
 
     @GetMapping("/search")
     @ResponseBody
@@ -49,7 +45,7 @@ public class NormalAccountController {
     public Result<AriusUserInfoVO> role(HttpServletRequest request) {
         String username = HttpRequestUtils.getOperator(request);
 
-        AriusUserInfo ariusUserInfo = ariusUserInfoService.getByName(username);
+        AriusUserInfo ariusUserInfo = ariusUserInfoService.getByDomainAccount(username);
         if(null == ariusUserInfo){
             // 用户角色信息不存在的情况下, 默认为Normal
             ariusUserInfo = new AriusUserInfo();
@@ -60,14 +56,4 @@ public class NormalAccountController {
 
         return Result.buildSucc(ConvertUtil.obj2Obj(ariusUserInfo, AriusUserInfoVO.class));
     }
-
-
-    @GetMapping("/isGuide")
-    @ResponseBody
-    @ApiOperation(value = "是否提供向导", notes = "是否提供向导")
-    public Result<Boolean> isGuide(HttpServletRequest request) {
-        String username = HttpRequestUtils.getOperator(request);
-        return Result.buildSucc(userLoginRecordService.isFirstLogin(username));
-    }
-
 }

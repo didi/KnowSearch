@@ -1,20 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.client.constant.quota.QuotaCtlStrategyEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author d06679
  * @date 2019-08-22
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "限流策略")
 public class TemplateLimitStrategy {
 
@@ -45,17 +47,4 @@ public class TemplateLimitStrategy {
         strategy.setAdjustStrategy(QuotaCtlStrategyEnum.INCREASE.getCode());
         return strategy;
     }
-
-    public static void main(String[] args) {
-        List<TemplateLimitStrategy> strategies = new ArrayList<>();
-        for (int i = 0; i < 2; ++i) {
-            TemplateLimitStrategy strategy = new TemplateLimitStrategy();
-            strategy.setAdjustStrategy(QuotaCtlStrategyEnum.INCREASE.getCode());
-            strategy.setTpsAdjustPercent(i);
-            strategies.add(strategy);
-        }
-
-        System.out.println(merge(strategies));
-    }
-
 }

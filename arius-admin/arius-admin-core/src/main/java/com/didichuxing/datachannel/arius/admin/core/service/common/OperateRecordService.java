@@ -9,11 +9,6 @@ import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 
-/**
- *
- * @author d06679
- * @date 2019/3/14
- */
 public interface OperateRecordService {
 
     /**
@@ -33,7 +28,7 @@ public interface OperateRecordService {
      * @return 成功 true   失败 false
      *
      */
-    Result save(int moduleId, int operateId, String bizId, String content, String operator);
+    Result<Void> save(int moduleId, int operateId, String bizId, String content, String operator);
 
     /**
      * 插入一条操作记录
@@ -44,14 +39,14 @@ public interface OperateRecordService {
      * @param operator
      * @return
      */
-    Result save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content, String operator);
+    Result<Void> save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content, String operator);
 
     /**
      * 插入一条操作记录
      * @return 成功 true   失败 false
      *
      */
-    Result save(OperateRecordDTO param);
+    Result<Void> save(OperateRecordDTO param);
 
     /**
      * 查询某个最新的操作记录

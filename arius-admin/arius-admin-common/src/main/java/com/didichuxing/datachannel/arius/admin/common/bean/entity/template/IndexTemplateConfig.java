@@ -1,16 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
-import java.util.Date;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class IndexTemplateConfig extends BaseEntity {
 
     /**
@@ -62,15 +63,5 @@ public class IndexTemplateConfig extends BaseEntity {
      * 限定逻辑模板下所有物理模板shardNum
      */
     private Integer shardNum;
-
-    /**
-     * 创建时间
-     */
-    private Date    createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date    updateTime;
 
 }

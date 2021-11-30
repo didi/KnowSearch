@@ -1,12 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
-
-import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 
 /**
  * 设置时间广播执行的线程池,所有的事件都会异步执行
@@ -18,14 +16,10 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPo
 @Configuration
 public class AppEventMultiConfig {
 
-    @Autowired
-    private AriusOpThreadPool ariusOpThreadPool;
-
     @Bean
-    public ApplicationEventMulticaster applicationEventMulticaster() {
+    public ApplicationEventMulticaster applicationEventMulticaster(AriusOpThreadPool ariusOpThreadPool) {
         SimpleApplicationEventMulticaster applicationEventMulticaster = new SimpleApplicationEventMulticaster();
         applicationEventMulticaster.setTaskExecutor(ariusOpThreadPool);
         return applicationEventMulticaster;
     }
-
 }

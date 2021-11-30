@@ -29,15 +29,12 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Component;
 
-
 @Component("restIndicesAction")
 public class RestIndicesAction extends StatAction {
 
-	public static final String NAME = "restIndices";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "restIndices";
 	}
 	
     @Override
@@ -58,7 +55,6 @@ public class RestIndicesAction extends StatAction {
         
         if (allIndices) {
             sendDirectResponse(queryContext, new BytesRestResponse(RestStatus.OK, "not support!"));
-            return ;
         } else if (request.hasParam("h") && request.param("h").equals("i")){
             // 用户控制台直接获取索引列表
             StringBuilder builder = new StringBuilder();

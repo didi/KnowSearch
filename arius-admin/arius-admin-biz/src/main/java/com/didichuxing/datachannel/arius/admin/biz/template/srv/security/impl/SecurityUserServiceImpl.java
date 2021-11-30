@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.security.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityUserService;
+import com.didiglobal.logi.elasticsearch.client.request.security.SecurityUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,9 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESSecurityUserDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.security.SecurityUser;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
@@ -40,7 +40,7 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @return result
      */
     @Override
-    public Result appendUserRoles(String cluster, String userName, String roleName, Integer appId,
+    public Result<Boolean> appendUserRoles(String cluster, String userName, String roleName, Integer appId,
                                   int retryCount) throws ESOperateException {
         SecurityUser securityUser = esSecurityUserDAO.getByName(cluster, userName);
 
@@ -52,10 +52,10 @@ public class SecurityUserServiceImpl implements SecurityUserService {
         securityUser.setPassword(appService.getAppById(appId).getVerifyCode());
         securityUser.getRoles().add(roleName);
 
-        LOGGER.info("method=appendUserRoles||cluster={}||userName={}||roleName={}", cluster, userName, roleName);
+        LOGGER.info("class=SecurityUserServiceImpl||method=appendUserRoles||cluster={}||userName={}||roleName={}", cluster, userName, roleName);
 
         SecurityUser finalSecurityUser = securityUser;
-        return Result.build(ESOpTimeoutRetry.esRetryExecute("appendUserRoles", retryCount,
+        return Result.buildBoolen(ESOpTimeoutRetry.esRetryExecute("appendUserRoles", retryCount,
             () -> esSecurityUserDAO.putUser(cluster, userName, finalSecurityUser)));
     }
 
@@ -70,7 +70,7 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @return result
      */
     @Override
-    public Result deleteUserRoles(String cluster, String userName, String roleName,
+    public Result<Boolean> deleteUserRoles(String cluster, String userName, String roleName,
                                   int retryCount) throws ESOperateException {
         SecurityUser securityUser = esSecurityUserDAO.getByName(cluster, userName);
 
@@ -80,9 +80,9 @@ public class SecurityUserServiceImpl implements SecurityUserService {
 
         securityUser.getRoles().remove(roleName);
 
-        LOGGER.info("method=deleteUserRoles||cluster={}||userName={}||roleName={}", cluster, userName, roleName);
+        LOGGER.info("class=SecurityUserServiceImpl||method=deleteUserRoles||cluster={}||userName={}||roleName={}", cluster, userName, roleName);
 
-        return Result.build(ESOpTimeoutRetry.esRetryExecute("deleteUserRoles", retryCount,
+        return Result.buildBoolen(ESOpTimeoutRetry.esRetryExecute("deleteUserRoles", retryCount,
             () -> esSecurityUserDAO.putUser(cluster, userName, securityUser)));
     }
 
@@ -96,21 +96,21 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @return result
      */
     @Override
-    public Result ensureUserHasAuth(String cluster, String userName, String roleName, Integer appId) {
+    public Result<Boolean> ensureUserHasAuth(String cluster, String userName, String roleName, Integer appId) {
         try {
             SecurityUser securityUser = esSecurityUserDAO.getByName(cluster, userName);
             if (securityUser == null || !securityUser.getRoles().contains(roleName)) {
-                Result result = appendUserRoles(cluster, userName, roleName, appId, 3);
-                LOGGER.info("method=ensureUserHasAuth||cluster={}||userName={}||roleName={}||result={}", cluster,
-                    userName, roleName, result.getMessage());
+                Result<Boolean> result = appendUserRoles(cluster, userName, roleName, appId, 3);
+                LOGGER.info("class=SecurityUserServiceImpl||method=ensureUserHasAuth||cluster={}||userName={}||roleName={}||result={}",
+                        cluster, userName, roleName, result.getMessage());
                 return result;
             } else {
-                return Result.buildSucc();
+                return Result.buildSucc(true);
             }
 
         } catch (Exception e) {
-            LOGGER.error("method=ensureUserHasAuth||cluster={}||userName={}||roleName={}||errMsg={}", cluster, userName,
-                roleName, e.getMessage(), e);
+            LOGGER.error("class=SecurityUserServiceImpl||method=ensureUserHasAuth||cluster={}||userName={}||roleName={}||errMsg={}",
+                    cluster, userName, roleName, e.getMessage(), e);
             return Result.buildFail(e.getMessage());
         }
 
@@ -126,7 +126,7 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @return
      */
     @Override
-    public Result changePasswordIfExist(String cluster, String userName, String verifyCode,
+    public Result<Boolean> changePasswordIfExist(String cluster, String userName, String verifyCode,
                                         int retryCount) throws ESOperateException {
         SecurityUser securityUser = esSecurityUserDAO.getByName(cluster, userName);
 
@@ -136,9 +136,10 @@ public class SecurityUserServiceImpl implements SecurityUserService {
 
         securityUser.setPassword(verifyCode);
 
-        LOGGER.info("method=deleteUserRoles||cluster={}||userName={}||verifyCode={}", cluster, userName, verifyCode);
+        LOGGER.info("class=SecurityUserServiceImpl||method=deleteUserRoles||cluster={}||userName={}||verifyCode={}",
+                cluster, userName, verifyCode);
 
-        return Result.build(ESOpTimeoutRetry.esRetryExecute("changePasswordIfExist", retryCount,
+        return Result.buildBoolen(ESOpTimeoutRetry.esRetryExecute("changePasswordIfExist", retryCount,
             () -> esSecurityUserDAO.putUser(cluster, userName, securityUser)));
     }
 }

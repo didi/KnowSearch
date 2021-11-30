@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm;
 
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author linyunan
  * @date 2020-12-23
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EcmTask {
     /**
      * ID主键自增
@@ -51,7 +55,7 @@ public class EcmTask {
     private Integer orderType;
 
     /**
-     *  工单数据
+     *  zeus任务角色数据
      */
     private String handleData;
 

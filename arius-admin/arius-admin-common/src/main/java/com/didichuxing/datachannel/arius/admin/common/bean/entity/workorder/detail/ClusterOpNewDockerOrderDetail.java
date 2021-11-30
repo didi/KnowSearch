@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleDocker;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -10,6 +12,8 @@ import java.util.List;
  * @date 2020/8/24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClusterOpNewDockerOrderDetail extends AbstractOrderDetail {
 
     /**

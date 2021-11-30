@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping(V3_NORMAL + "/record")
-@Api(value = "用户操作记录接口(REST)")
+@Api(tags = "用户操作记录接口(REST)")
 public class NormalOperateRecordController {
 
     private static final int     MAX_RECORD_COUNT = 200;

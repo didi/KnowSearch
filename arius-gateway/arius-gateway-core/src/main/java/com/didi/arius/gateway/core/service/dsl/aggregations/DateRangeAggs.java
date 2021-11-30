@@ -19,7 +19,11 @@ public class DateRangeAggs extends BucketAggsType {
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
+	public DateRangeAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);
@@ -35,7 +39,7 @@ public class DateRangeAggs extends BucketAggsType {
 			JsonArray rangesArr = ranges.getAsJsonArray();
 			aggsBukcetInfo.setBucketNumber(rangesArr.size());
 			aggsBukcetInfo.setLastBucketNumber(rangesArr.size());
-			aggsBukcetInfo.setMemUsed(rangesArr.size() * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+			aggsBukcetInfo.setMemUsed((long)rangesArr.size() * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 		}
 		
 		return aggsBukcetInfo;

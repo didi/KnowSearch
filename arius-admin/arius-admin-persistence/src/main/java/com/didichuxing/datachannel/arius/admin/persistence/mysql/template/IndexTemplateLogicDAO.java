@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.template;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
@@ -34,6 +35,11 @@ public interface IndexTemplateLogicDAO {
     List<TemplateLogicPO> listByName(String name);
 
     List<TemplateLogicPO> likeByCondition(TemplateLogicPO param);
+
+    List<TemplateLogicPO> pagingByCondition(@Param("name") String name, @Param("dataType") Integer dataType,
+                                            @Param("from") Long from,   @Param("size") Long size);
+
+    long getTotalHitByCondition(TemplateLogicPO param);
 
     List<TemplateLogicPO> likeByResponsible(String responsible);
 

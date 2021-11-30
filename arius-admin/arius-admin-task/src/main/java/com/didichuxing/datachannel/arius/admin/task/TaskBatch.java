@@ -11,9 +11,9 @@ import lombok.Data;
  * @date 2019/4/10
  */
 @Data
-public class TaskBatch {
+public class TaskBatch<T> {
     /**
      * 批次中需要处理的内容
      */
-    private List items = Lists.newArrayList();
+    private List<T> items = Lists.newArrayList();
 }

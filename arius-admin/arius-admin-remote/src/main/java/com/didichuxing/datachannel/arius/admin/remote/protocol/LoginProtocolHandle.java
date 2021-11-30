@@ -14,7 +14,7 @@ public interface LoginProtocolHandle extends BaseHandle {
     /**
      * 协议认证
      */
-    Result doAuthentication(Login login);
+    Result<Void> doAuthentication(Login login);
 
 	/**
 	 * 从协议中获取用户信息

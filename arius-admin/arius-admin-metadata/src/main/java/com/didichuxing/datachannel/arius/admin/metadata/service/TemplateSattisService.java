@@ -30,11 +30,11 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.Ar
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexNodeInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIngestInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeDefine;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeDefineOperator;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefine;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefineOperator;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,7 +50,7 @@ import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.fo
 @Service
 public class TemplateSattisService {
 
-    protected final ILog LOGGER = LogFactory.getLog(TemplateSattisService.class);
+    protected static final ILog LOGGER = LogFactory.getLog(TemplateSattisService.class);
 
     @Autowired
     private AriusStatsIndexInfoESDAO        ariusStatsIndexInfoESDAO;
@@ -166,7 +166,7 @@ public class TemplateSattisService {
                 templateMetric.setCluster(cluster);
                 templateMetric.setTemplate(template);
 
-                FutureUtil.init("getTemplateBaseStatisInfo").runnableTask(() -> {
+                FutureUtil.DEAULT_FUTURE.runnableTask(() -> {
                     double totalSizeInBytes = ariusStatsIndexInfoESDAO.getTemplateTotalSizeByTimeRange(template,
                             cluster, endDate - min30, endDate);
                     templateMetric.setSumIndexSizeG(totalSizeInBytes / ONE_GB);
@@ -185,21 +185,7 @@ public class TemplateSattisService {
                 }).runnableTask(() -> {
                     Map<String, String> maxInfo = ariusStatsIndexInfoESDAO.getTemplateMaxInfo(template, cluster,
                             startDate, endDate);
-                    if (StringUtils.isNotBlank(maxInfo.get("max_tps"))) {
-                        templateMetric.setMaxTps(Double.valueOf(maxInfo.get("max_tps")));
-                    } else {
-                        templateMetric.setMaxTps(0d);
-                    }
-                    if (StringUtils.isNotBlank(maxInfo.get("max_query_time"))) {
-                        templateMetric.setMaxQueryTime(Double.valueOf(maxInfo.get("max_query_time")));
-                    } else {
-                        templateMetric.setMaxQueryTime(0d);
-                    }
-                    if (StringUtils.isNotBlank(maxInfo.get("max_scroll_time"))) {
-                        templateMetric.setMaxScrollTime(Double.valueOf(maxInfo.get("max_scroll_time")));
-                    } else {
-                        templateMetric.setMaxScrollTime(0d);
-                    }
+                    setMaxField(templateMetric, maxInfo);
                 }).waitExecute();
             } catch (Exception e) {
                 LOGGER.error("class=TemplateStatisController||method=getCapacityMetric||template={}||cluster={}",
@@ -216,6 +202,24 @@ public class TemplateSattisService {
         });
 
         return Result.buildSucc(templateMetrics);
+    }
+
+    private void setMaxField(TemplateMetric templateMetric, Map<String, String> maxInfo) {
+        if (StringUtils.isNotBlank(maxInfo.get("max_tps"))) {
+            templateMetric.setMaxTps(Double.valueOf(maxInfo.get("max_tps")));
+        } else {
+            templateMetric.setMaxTps(0d);
+        }
+        if (StringUtils.isNotBlank(maxInfo.get("max_query_time"))) {
+            templateMetric.setMaxQueryTime(Double.valueOf(maxInfo.get("max_query_time")));
+        } else {
+            templateMetric.setMaxQueryTime(0d);
+        }
+        if (StringUtils.isNotBlank(maxInfo.get("max_scroll_time"))) {
+            templateMetric.setMaxScrollTime(Double.valueOf(maxInfo.get("max_scroll_time")));
+        } else {
+            templateMetric.setMaxScrollTime(0d);
+        }
     }
 
     /**
@@ -314,7 +318,6 @@ public class TemplateSattisService {
         }
 
         DslFieldUsePO dslFieldUsePo = dslFieldUseESDAO.getFieldUseSummeryInfoByTemplateName(template);
-        Map<String, Long> select = dslFieldUsePo.getSelectFieldsCounter();
         Map<String, Long> where = dslFieldUsePo.getWhereFieldsCounter();
         Map<String, Long> group = dslFieldUsePo.getGroupByFieldsCounter();
         Map<String, Long> sort = dslFieldUsePo.getSortByFieldsCounter();
@@ -322,7 +325,9 @@ public class TemplateSattisService {
         MappingOptimize mappingOptimize = new MappingOptimize(cluster, template);
 
         Map<String, Map<String, TypeDefine>> typeMap = mappingConfig.getTypeDefines();
-        for (String type : typeMap.keySet()) {
+
+        for(Map.Entry<String, Map<String, TypeDefine>> entry : typeMap.entrySet()){
+            String type = entry.getKey();
             for (String field : typeMap.get(type).keySet()) {
                 TypeDefine typeDefine = typeMap.get(type).get(field);
 
@@ -340,21 +345,18 @@ public class TemplateSattisService {
 
                 boolean optmize = false;
                 JSONObject tgtTypeJson = new JSONObject( Maps.newHashMap(typeDefine.getDefine()));
-                if (!index) {
-                    // 看是否能够优化关闭index
-                    if (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR))
-                            || NO_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR)))) {
+                // 看是否能够优化关闭index
+                if (!index &&
+                    (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR))
+                            || NO_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR))))) {
                         tgtTypeJson.put(INDEX_STR, false);
                         optmize = true;
-                    }
                 }
 
-                if (!docValue) {
-                    // 看是否能够优化关闭docValue
-                    if (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(DOC_VALUES_STR)))) {
+                if (!docValue &&
+                    (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(DOC_VALUES_STR))))) {
                         tgtTypeJson.put(DOC_VALUES_STR, false);
                         optmize = true;
-                    }
                 }
 
                 if (optmize) {
@@ -386,7 +388,7 @@ public class TemplateSattisService {
         }
 
         IndexTemplateLogicWithStats indexTemplateLogicWithStats = (IndexTemplateLogicWithStats)indexTemplate;
-        FutureUtil.init("getWeeklyTemplateStatsInfo").runnableTask(() -> {
+        FutureUtil.DEAULT_FUTURE.runnableTask(() -> {
             double totalSizeInBytes = ariusStatsIndexInfoESDAO.getLogicTemplateTotalSize(logicTemplateId);
             indexTemplateLogicWithStats.setStore(formatDouble(totalSizeInBytes / ONE_GB, 2));
         }).runnableTask(() -> {
@@ -405,7 +407,7 @@ public class TemplateSattisService {
             Double templateTpsAvgInfo = ariusStatsIndexInfoESDAO.getTemplateTpsAvgInfo(logicTemplateId, startDate,
                     endDate);
             indexTemplateLogicWithStats.setAvgTps(formatDouble(templateTpsAvgInfo, 2));
-        });
+        }).waitExecute();
 
         return Result.buildSucc(indexTemplateLogicWithStats);
     }
@@ -465,7 +467,7 @@ public class TemplateSattisService {
         templateStatsInfoPO.setTemplateId(logicTemplateId);
         templateStatsInfoPO.setQutoa(indexTemplate.getQuota());
 
-        FutureUtil.init("getTemplateBaseStatisInfo").runnableTask(() -> {
+        FutureUtil.DEAULT_FUTURE.runnableTask(() -> {
             double indexHealthDegree = indexHealthDegreeDAO.getTemplateAvgDegree(logicTemplateId, current - ONE_DAY,
                     current);
             templateStatsInfoPO.setIndexHealthDegree(formatDouble(indexHealthDegree, 2));
@@ -494,7 +496,7 @@ public class TemplateSattisService {
                     count += po.getCount();
                 }
 
-                templateStatsInfoPO.setAccessCountPreDay(count / templateAccessCountPos.size());
+                templateStatsInfoPO.setAccessCountPreDay((double)count / templateAccessCountPos.size());
             }
         }).waitExecute();
 

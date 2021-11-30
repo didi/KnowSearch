@@ -17,6 +17,11 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestSearchScrollController extends BaseHttpRestController {
     @Autowired
     private RestSearchScrollAction restSearchScrollAction;
+
+    public RestSearchScrollController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_search/scroll", this);

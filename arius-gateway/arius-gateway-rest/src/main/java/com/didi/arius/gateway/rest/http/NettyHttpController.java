@@ -16,6 +16,10 @@ public class NettyHttpController {
     @Autowired
     private RestCommonController restCommonController;
 
+    public NettyHttpController() {
+        // pass
+    }
+
     public void dispatchRequest(HttpRequest request, HttpChannel channel) {
         try {
             LogFactory.setUniqueFlag();
@@ -29,10 +33,11 @@ public class NettyHttpController {
 
             if (restHandler == null) {
                 restHandler = restCommonController;
-                // throw new UriNotFoundException("No handler found for uri [" + request.rawPath() + "] and method [" + request.method() + "]");
             }
 
-            restHandler.dispatchRequest(request, channel);
+            if(restHandler != null){
+                restHandler.dispatchRequest(request, channel);
+            }
         } finally {
             LogFactory.removeFlag();
         }

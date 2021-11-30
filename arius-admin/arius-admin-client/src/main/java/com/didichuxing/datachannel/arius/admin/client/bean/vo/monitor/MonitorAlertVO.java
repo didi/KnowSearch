@@ -3,11 +3,15 @@ package com.didichuxing.datachannel.arius.admin.client.bean.vo.monitor;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "告警信息")
 public class MonitorAlertVO extends BaseVO {
     @ApiModelProperty(value = "告警ID")
@@ -36,9 +40,6 @@ public class MonitorAlertVO extends BaseVO {
 
     @ApiModelProperty(value = "触发值")
     private Double value;
-
-//    @ApiModelProperty(value = "现场值")
-//    private List<MetricPoint> points;
 
     @ApiModelProperty(value = "告警组")
     private List<String> groups;

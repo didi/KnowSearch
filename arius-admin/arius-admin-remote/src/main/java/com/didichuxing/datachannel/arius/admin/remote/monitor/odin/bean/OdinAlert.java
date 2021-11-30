@@ -1,12 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.MetricPoint;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Properties;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OdinAlert {
     /**
      * 告警ID

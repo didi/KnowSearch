@@ -1,11 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Properties;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Alert {
     /**
      * 告警ID

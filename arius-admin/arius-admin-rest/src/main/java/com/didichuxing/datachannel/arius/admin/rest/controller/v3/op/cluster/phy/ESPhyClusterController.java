@@ -17,58 +17,65 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterPhyRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterJoinDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ValidateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 
 @RestController("esPhyClusterControllerV3")
 @RequestMapping(V3_OP + "/phy/cluster")
-@Api(value = "es物理集群集群接口(REST)")
+@Api(tags = "ES物理集群集群接口(REST)")
 public class ESPhyClusterController {
 
     @Autowired
-    private ESClusterPhyService esClusterPhyService;
+    private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private ClusterPhyManager   clusterPhyManager;
+    private ClusterPhyManager clusterPhyManager;
 
     @Autowired
-    private ESPluginService     esPluginService;
+    private ESPluginService   esPluginService;
 
     @Autowired
-    private ESPackageService    packageService;
-
-    @Autowired
-    private EcmHandleService    ecmHandleService;
+    private ESPackageService  packageService;
 
     /**
      * 根据物理集群ID获取全部角色
      */
-    @GetMapping("{clusterId}/roles")
+    @GetMapping("/{clusterId}/roles")
     @ResponseBody
     @ApiOperation(value = "根据物理集群ID获取全部角色列表", notes = "")
     public Result<List<ESRoleClusterVO>> roleList(@PathVariable Integer clusterId) {
-        List<ESRoleCluster> esRoleClusters = esClusterPhyService.listPhysicClusterRoles(clusterId);
+        List<RoleCluster> roleClusters = esClusterPhyService.listPhysicClusterRoles(clusterId);
 
-        if (ValidateUtils.isNull(esRoleClusters)) {
+        if (AriusObjUtils.isNull(roleClusters)) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.list2List(esRoleClusters, ESRoleClusterVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(roleClusters, ESRoleClusterVO.class));
     }
 
+    /**
+     * @param request
+     * @param id
+     * @return
+     * @deprecated
+     */
     @DeleteMapping("/plugin/{id}")
     @ResponseBody
     @ApiOperation(value = "删除插件接口", notes = "")
@@ -84,39 +91,84 @@ public class ESPhyClusterController {
         return packageService.deleteESPackage(id, HttpRequestUtils.getOperator(request));
     }
 
-    @DeleteMapping("/{clusterId}")
-    @ResponseBody
-    @ApiOperation(value = "删除物理集群接口", notes = "")
-    @Deprecated
-    public Result clusterRemove(HttpServletRequest request, @PathVariable(value = "clusterId") Long clusterId) {
-        return ecmHandleService.deleteESCluster(clusterId, HttpRequestUtils.getOperator(request));
-    }
-
     @PostMapping("/join")
     @ResponseBody
     @ApiOperation(value = "接入集群", notes = "当前版本仅限host类型")
-    public Result clusterJoin(HttpServletRequest request, @RequestBody ESClusterJoinDTO param) {
+    public Result<Tuple<Long, String>> clusterJoin(HttpServletRequest request, @RequestBody ClusterJoinDTO param) {
         return clusterPhyManager.clusterJoin(param, HttpRequestUtils.getOperator(request));
     }
 
-    @GetMapping("{clusterId}/regioninfo")
+    @GetMapping("/{clusterId}/regioninfo")
     @ResponseBody
     @ApiOperation(value = "获取节点划分列表")
-    public Result<List<ESClusterPhyRegionInfoVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
+    public Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
         return clusterPhyManager.getClusterPhyRegionInfos(clusterId);
     }
 
-    @GetMapping("{clusterLogicType}/list")
+    @GetMapping("/{clusterLogicType}/{clusterLogicId}/list")
     @ResponseBody
-    @ApiOperation(value = "获取可用物理集群列表")
-    public Result<List<String>> listCanBeAssociatedClustersPhys(@PathVariable Integer clusterLogicType){
+    @ApiOperation(value = "获取逻辑集群可关联region的物理集群名称列表")
+    public Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(@PathVariable Integer clusterLogicType,
+                                                                        @PathVariable Long clusterLogicId) {
+        return clusterPhyManager.listCanBeAssociatedRegionOfClustersPhys(clusterLogicType, clusterLogicId);
+    }
+
+    @GetMapping("/{clusterLogicType}/list")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑集群可进行关联的物理集群名称")
+    public Result<List<String>> listCanBeAssociatedClustersPhys(@PathVariable Integer clusterLogicType) {
         return clusterPhyManager.listCanBeAssociatedClustersPhys(clusterLogicType);
     }
 
-    @GetMapping("{ips}/check")
+    @GetMapping("/names")
     @ResponseBody
-    @ApiOperation(value = "校验节点ip是否有效")
-    public Result checkValidForClusterNodes(@PathVariable List<String> ips){
-        return clusterPhyManager.checkValidForClusterNodes(ips);
+    @ApiOperation(value = "根据AppId获取逻辑集群下的物理集群名称")
+    public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getAppId(request)));
     }
+
+    @GetMapping("/{clusterPhyName}/nodes")
+    @ResponseBody
+    @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
+    public Result<List<String>> getAppClusterPhyNodeNames(@PathVariable String clusterPhyName) {
+        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNodeNames(clusterPhyName));
+    }
+
+    @GetMapping("/node/names")
+    @ResponseBody
+    @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
+    public Result<List<String>> getAppNodeNames(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.getAppNodeNames(HttpRequestUtils.getAppId(request)));
+    }
+
+    @PostMapping("/page")
+    @ResponseBody
+    @ApiOperation(value = "条件获取物理集群列表")
+    public PaginationResult<ConsoleClusterPhyVO> pageGetConsoleClusterPhyVOS(HttpServletRequest request,
+                                                                         @RequestBody ClusterPhyConditionDTO condition) {
+        return clusterPhyManager.pageGetConsoleClusterPhyVOS(condition, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("/{clusterPhyId}/overView")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群概览信息接口")
+    @ApiImplicitParam(type = "Integer", name = "clusterPhyId", value = "物理集群ID", required = true)
+    public Result<ConsoleClusterPhyVO> get(@PathVariable("clusterPhyId") Integer clusterId, HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhy(clusterId, HttpRequestUtils.getAppId(request)));
+    }
+
+    @GetMapping("/{clusterLogicType}/{clusterName}/version/list")
+    @ResponseBody
+    @ApiOperation(value = "根据逻辑集群类型和物理集群名称获取相同版本的可关联的物理名称列表")
+    public Result<List<String>> getPhyClusterNameWithSameEsVersion(@PathVariable("clusterLogicType") Integer clusterLogicType, @PathVariable(name = "clusterName", required = false) String clusterName) {
+        return clusterPhyManager.getPhyClusterNameWithSameEsVersion(clusterLogicType, clusterName);
+    }
+
+    @GetMapping("/{clusterLogicId}/bind/version/list")
+    @ResponseBody
+    @ApiOperation(value = "新建的逻辑集群绑定region的时候进行物理集群版本的校验")
+    public Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(@PathVariable("clusterLogicId") Long clusterLogicId) {
+        return clusterPhyManager.getPhyClusterNameWithSameEsVersionAfterBuildLogic(clusterLogicId);
+    }
+
 }

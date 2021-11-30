@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@NoArgsConstructor
 public class IndexSizeESDAO extends BaseESDAO {
 
     /**
@@ -75,10 +77,10 @@ public class IndexSizeESDAO extends BaseESDAO {
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_YESTERDAY_INDEX_SIZE, DateTimeUtil.getFormatDayByOffset(offset));
 
-        List<IndexSizePO> IndexSizePOS = gatewayClient.performRequest(indexName, typeName, dsl, IndexSizePO.class);
+        List<IndexSizePO> indexSizePOS = gatewayClient.performRequest(indexName, typeName, dsl, IndexSizePO.class);
 
         Map<String, IndexSizePO> ret = new HashMap<>();
-        for(IndexSizePO IndexSizePO : IndexSizePOS) {
+        for(IndexSizePO IndexSizePO : indexSizePOS) {
             ret.put(IndexSizePO.getTemplateName(), IndexSizePO);
         }
         return ret;

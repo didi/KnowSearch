@@ -9,6 +9,7 @@ import com.didi.arius.gateway.core.service.arius.DslTemplateService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.DSLTemplateListResponse;
 import com.didi.arius.gateway.remote.response.DSLTemplateResponse;
+import lombok.NoArgsConstructor;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -22,6 +23,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Service
+@NoArgsConstructor
 public class DslTemplateServiceImpl implements DslTemplateService{
 
     protected static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
@@ -51,7 +53,7 @@ public class DslTemplateServiceImpl implements DslTemplateService{
         dslTemplateCache    = manager.getCache("dslTemplateCache");
         newDslTemplateCache = manager.getCache("newDslTemplateCache");
 
-        threadPool.submitScheduleAtFixTask( () -> resetDslInfo(), 0, adminSchedulePeriod );
+        threadPool.submitScheduleAtFixTask(this::resetDslInfo, 10, adminSchedulePeriod);
     }
 
     @Override
@@ -104,7 +106,11 @@ public class DslTemplateServiceImpl implements DslTemplateService{
     @Override
     public void resetDslInfo(){
         resetDslTemplateInfo();
-        resetDslRateLimit(1);
+        try {
+            resetDslRateLimit(1);
+        } catch (Exception e) {
+            bootLogger.error("resetDslRateLimit error", e);
+        }
     }
 
     /************************************************************** private method **************************************************************/
@@ -112,7 +118,7 @@ public class DslTemplateServiceImpl implements DslTemplateService{
      * 更新dsl模板
      * @return
      */
-    synchronized private boolean resetDslTemplateInfo() {
+    private synchronized boolean resetDslTemplateInfo() {
         bootLogger.info("resetDSLInfo begin...");
 
         try {
@@ -126,26 +132,18 @@ public class DslTemplateServiceImpl implements DslTemplateService{
             do {
                 totalCount += dslTemplateListResponse.getData().getDslTemplatePoList().size();
 
-                //for (Hit hit : scrollResp.getHits().getHits()) {
                 for (DSLTemplateResponse response : dslTemplateListResponse.getData().getDslTemplatePoList()) {
                     try {
                         String key = response.getKey();
 
-                        if (response.getEnable() != null) {
-                            if (false == response.getEnable()) {
-                                removeDSLTemplate(key);
+                        if (response.getEnable() != null && !response.getEnable()) {
+                            removeDSLTemplate(key);
 
-                                bootLogger.info("dsl_remove||key={}", key);
-                                continue ;
-                            }
+                            bootLogger.info("dsl_remove||key={}", key);
+                            continue ;
                         }
 
-                        boolean queryForbidden = false;
-                        if (response.getCheckMode() != null) {
-                            if (QueryConsts.CHECK_MODE_BLACK.equals(response.getCheckMode())) {
-                                queryForbidden = true;
-                            }
-                        }
+                        boolean queryForbidden = isQueryForbidden(response);
 
                         double queryLimit = queryConfig.getDslQPSLimit();
                         if (response.getQueryLimit() != null) {
@@ -153,32 +151,8 @@ public class DslTemplateServiceImpl implements DslTemplateService{
                         }
 
                         DSLTemplate dslTemplate = getDSLTemplate(key);
-                        if (dslTemplate == null) {
-                            dslTemplate = new DSLTemplate(queryLimit, queryLimit, queryForbidden);
-                            putDSLTemplate(key, dslTemplate);
-
-                            bootLogger.info("new_dsl_add||key={}||dslTemplate={}", key, dslTemplate);
-                        } else {
-                            dslTemplate.setQueryForbidden(queryForbidden);
-                            if (queryLimit != dslTemplate.getQueryLimit()) {
-                                dslTemplate.setTotalQueryLimit(queryLimit);
-                                dslTemplate.setQueryLimit(queryLimit);
-                                dslTemplate.updateRateLimiter(queryLimit);
-                            }
-                        }
-
-                        if (response.getEsCostAvg() != null) {
-                            dslTemplate.setEsCostAvg(response.getEsCostAvg());
-                        }
-
-                        if (response.getTotalHitsAvg() != null) {
-                            dslTemplate.setTotalHitsAvg(response.getTotalHitsAvg());
-                        }
-
-                        if (response.getTotalShardsAvg() != null) {
-                            dslTemplate.setTotalShardsAvg(response.getTotalShardsAvg());
-                        }
-                    } catch (Throwable e) {
+                        initailTemplateValue(response, key, queryForbidden, queryLimit, dslTemplate);
+                    } catch (Exception e) {
                         bootLogger.error("unexpect_exception||source={}||e={}", response, Convert.logExceptionStack(e));
                     }
                 }
@@ -186,15 +160,51 @@ public class DslTemplateServiceImpl implements DslTemplateService{
                 dslTemplateListResponse = ariusAdminRemoteService.listDslTemplates(lastModifyTime, dslTemplateListResponse.getData().getScrollId());
 
                 //Zero hits mark the end of the scroll and the while loop.
-            } while(dslTemplateListResponse.getData().getDslTemplatePoList().size() != 0);
+            } while(!dslTemplateListResponse.getData().getDslTemplatePoList().isEmpty());
 
             lastModifyTime = runTime;
 
             bootLogger.info("resetDSLInfo end successfully! totalCount={}", totalCount);
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             bootLogger.error("resetDSLInfo_error||e={}", Convert.logExceptionStack(e));
             return false;
+        }
+    }
+
+    private boolean isQueryForbidden(DSLTemplateResponse response) {
+        boolean queryForbidden = false;
+        if (response.getCheckMode() != null && QueryConsts.CHECK_MODE_BLACK.equals(response.getCheckMode())) {
+            queryForbidden = true;
+        }
+        return queryForbidden;
+    }
+
+    private void initailTemplateValue(DSLTemplateResponse response, String key, boolean queryForbidden, double queryLimit, DSLTemplate dslTemplate) {
+        if (dslTemplate == null) {
+            dslTemplate = new DSLTemplate(queryLimit, queryLimit, queryForbidden);
+            putDSLTemplate(key, dslTemplate);
+
+            bootLogger.info("new_dsl_add||key={}||dslTemplate={}", key, dslTemplate);
+        } else {
+            dslTemplate.setQueryForbidden(queryForbidden);
+            if (queryLimit != dslTemplate.getQueryLimit()) {
+                dslTemplate.setTotalQueryLimit(queryLimit);
+                dslTemplate.setQueryLimit(queryLimit);
+                dslTemplate.updateRateLimiter(queryLimit);
+            }
+        }
+
+        if (response.getEsCostAvg() != null) {
+            dslTemplate.setEsCostAvg(response.getEsCostAvg());
+        }
+
+        if (response.getTotalHitsAvg() != null) {
+            dslTemplate.setTotalHitsAvg(response.getTotalHitsAvg());
+        }
+
+        if (response.getTotalShardsAvg() != null) {
+            dslTemplate.setTotalShardsAvg(response.getTotalShardsAvg());
         }
     }
 

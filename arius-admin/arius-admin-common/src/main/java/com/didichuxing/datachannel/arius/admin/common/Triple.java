@@ -5,6 +5,8 @@ public class Triple<T, V, U> {
     private V v2;
     private U v3;
 
+    public Triple(){}
+
     public Triple(T v1, V v2, U v3) {
         this.v1 = v1;
         this.v2 = v2;
@@ -15,7 +17,7 @@ public class Triple<T, V, U> {
         return v1;
     }
 
-    public Triple setV1(T v1) {
+    public Triple<T, V, U> setV1(T v1) {
         this.v1 = v1;
         return this;
     }
@@ -24,7 +26,7 @@ public class Triple<T, V, U> {
         return v2;
     }
 
-    public Triple setV2(V v2) {
+    public Triple<T, V, U> setV2(V v2) {
         this.v2 = v2;
         return this;
     }
@@ -33,7 +35,7 @@ public class Triple<T, V, U> {
         return v3;
     }
 
-    public Triple setV3(U v3) {
+    public Triple<T, V, U> setV3(U v3) {
         this.v3 = v3;
         return this;
     }

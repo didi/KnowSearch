@@ -54,7 +54,7 @@ public class CountTests {
         //{"_shards":{"failedShard":0,"skippedShard":0,"successfulShard":16,"totalShard":16},"count":1}
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getIntValue("count") >= 0, true);
+        assertEquals(true, jsonObject.getIntValue("count") >= 0);
     }
 
     /**
@@ -69,7 +69,7 @@ public class CountTests {
         //{"_shards":{"failedShard":0,"skippedShard":0,"successfulShard":16,"totalShard":16},"count":1}
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getIntValue("count") >= 0, true);
+        assertEquals(true, jsonObject.getIntValue("count") >= 0);
     }
 
 

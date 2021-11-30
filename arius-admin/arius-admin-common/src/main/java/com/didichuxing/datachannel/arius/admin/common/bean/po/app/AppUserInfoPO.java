@@ -4,7 +4,9 @@ import java.util.Date;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -12,6 +14,8 @@ import lombok.Data;
  * @date 2019/5/20
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppUserInfoPO extends BasePO {
 
     private Long    id;

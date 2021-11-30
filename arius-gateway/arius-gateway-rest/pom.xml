@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.didi</groupId>
-        <artifactId>arius-gateway</artifactId>
-        <version>${revision}</version>
+        <artifactId>arius-gateway-v2</artifactId>
+        <version>${version}</version>
     </parent>
 
     <artifactId>arius-gateway-rest</artifactId>
@@ -17,31 +17,22 @@
             <artifactId>arius-gateway-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.didi</groupId>
-            <artifactId>arius-gateway-common</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.didi</groupId>
-            <artifactId>arius-gateway-remote</artifactId>
-            <version>${revision}</version>
-        </dependency>
     </dependencies>
 
     <build>
+        <finalName>arius-gateway-rest</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,22 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.extend.login.LoginService;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.didichuxing.datachannel.arius.admin.common.util.ValidateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.login.LoginService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 
 /**
  * 登陆拦截 && 权限校验
@@ -55,6 +57,12 @@ public class PermissionInterceptor implements HandlerInterceptor {
         return loginService.interceptorCheck(request, response, classRequestMappingValue);
     }
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        GlobalParams.CURRENT_USER.remove();
+        GlobalParams.CURRENT_APPID.remove();
+    }
+
     /**
      * 通过反射获取带有@RequestMapping的Controller
      * @param handler 请求处理器
@@ -72,7 +80,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
         } else {
             requestMapping = handler.getClass().getAnnotation(RequestMapping.class);
         }
-        if (ValidateUtils.isNull(requestMapping) || requestMapping.value().length == 0) {
+        if (AriusObjUtils.isNull(requestMapping) || requestMapping.value().length == 0) {
             return null;
         }
         return requestMapping.value()[0];
@@ -82,6 +90,10 @@ public class PermissionInterceptor implements HandlerInterceptor {
      * 是否需要拦截
      */
     private boolean hasNoInterceptor(HttpServletRequest request) {
+
+        if (EnvUtil.isDev()) {
+            return Boolean.TRUE;
+        }
 
         if (request.getServletPath().contains(SWAGGER)) {
             return Boolean.TRUE;

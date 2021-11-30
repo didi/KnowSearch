@@ -3,13 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.didi</groupId>
-    <artifactId>arius-gateway</artifactId>
-    <version>${revision}</version>
+    <artifactId>arius-gateway-v2</artifactId>
+    <version>${version}</version>
     <packaging>pom</packaging>
-    <name>arius-gateway</name>
+    <name>arius-gateway-v2</name>
 
     <modules>
-        <module>arius-gateway-dependency</module>
         <module>arius-gateway-common</module>
         <module>arius-gateway-core</module>
         <module>arius-gateway-remote</module>
@@ -28,7 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <revision>0.0.1-SNAPSHOT</revision>
+        <version>0.0.1-SNAPSHOT</version>
         <lucene.version>5.5.0.0.0.2-SNAPSHOT</lucene.version>
         <es.version>2.3.3-SNAPSHOT</es.version>
     </properties>
@@ -42,10 +41,6 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>jakarta.annotation</groupId>
-                    <artifactId>jakarta.annotation-api</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -55,18 +50,6 @@
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.jayway.jsonpath</groupId>
-                    <artifactId>json-path</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>jakarta.xml.bind</groupId>
-                    <artifactId>jakarta.xml.bind-api</artifactId>
                 </exclusion>
             </exclusions>
             <scope>test</scope>
@@ -126,7 +109,7 @@
             <dependency>
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
-                <version>1.9.3</version>
+                <version>1.9.4</version>
             </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
@@ -146,27 +129,12 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.5.2</version>
+                <version>4.5.13</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>1.2.70</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-math</artifactId>
-                <version>2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>com.didichuxing.tunnel</groupId>
-                <artifactId>tunnel-log</artifactId>
-                <version>0.1.9-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid</artifactId>
-                <version>1.0.15</version>
             </dependency>
 
             <dependency>
@@ -176,14 +144,71 @@
             </dependency>
             <dependency>
                 <groupId>org.nlpcn</groupId>
-                <artifactId>elasticsearch-sql</artifactId>
-                <version>7.8.0.1</version>
+                <artifactId>elasticsearch-sql-didi</artifactId>
+                <version>2.3.3.3-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.elasticsearch</groupId>
+                        <artifactId>elasticsearch</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>elasticsearch-rest-client</artifactId>
                 <version>6.6.1</version>
                 <exclusions>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!-- 滴滴模块 -->
+            <!-- 依赖DSL 解析模块 -->
+            <dependency>
+                <groupId>com.didichuxing.datachannel</groupId>
+                <artifactId>dsl-parse</artifactId>
+                <version>1.0.1-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>elasticsearch-didi</artifactId>
+                        <groupId>org.elasticsearch</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.nlpcn</groupId>
+                        <artifactId>elasticsearch-sql</artifactId>
+                    </exclusion>
+                    <!--如果不排除下面两个，日志打印不出来，有配置冲突 -->
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.didichuxing.datachannel</groupId>
+                <artifactId>metrics</artifactId>
+                <version>1.0.1-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>log4j</artifactId>
+                        <groupId>log4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-beanutils</groupId>
+                        <artifactId>commons-beanutils</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-collections</groupId>
+                        <artifactId>commons-collections</artifactId>
+                    </exclusion>
                     <exclusion>
                         <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>

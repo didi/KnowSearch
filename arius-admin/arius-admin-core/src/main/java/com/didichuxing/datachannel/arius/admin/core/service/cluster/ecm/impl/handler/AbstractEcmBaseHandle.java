@@ -21,22 +21,24 @@ public abstract class AbstractEcmBaseHandle {
         return esClusterTypeEnum;
     }
 
-    public abstract Result saveESCluster(List<EcmParamBase> ecmParamBaseList);
+    /**
+     * 保留集群信息、集群角色信息, 不保留集群节点信息, 集群节点信息由定时任务同步
+     */
+    public abstract Result<Long> saveESCluster(List<EcmParamBase> ecmParamBaseList);
 
     public abstract Result<EcmOperateAppBase> startESCluster(EcmParamBase actionParamBase);
 
-    public abstract Result scaleESCluster(EcmParamBase actionParamBase);
+    public abstract Result<EcmOperateAppBase> scaleESCluster(EcmParamBase actionParamBase);
 
-    public abstract Result upgradeESCluster(EcmParamBase actionParamBase);
+    public abstract Result<EcmOperateAppBase> upgradeESCluster(EcmParamBase actionParamBase);
 
-    public abstract Result restartESCluster(EcmParamBase actionParamBase);
+    public abstract Result<EcmOperateAppBase> restartESCluster(EcmParamBase actionParamBase);
 
-    public abstract Result removeESCluster(EcmParamBase actionParamBase);
+    public abstract Result<EcmOperateAppBase> removeESCluster(EcmParamBase actionParamBase);
 
-    public abstract Result actionNotFinishedTask(EcmParamBase actionParamBase, EcmActionEnum ecmActionEnum,
-                                                 String hostname);
+    public abstract Result<EcmOperateAppBase> actionNotFinishedTask(EcmParamBase actionParamBase, EcmActionEnum ecmActionEnum, String hostname);
 
-    public abstract Result infoESCluster(EcmParamBase actionParamBase);
+    public abstract Result<String> infoESCluster(EcmParamBase actionParamBase);
 
     public abstract Result<EcmSubTaskLog> getSubTaskLog(Long taskId, String hostname, EcmParamBase actionParamBase);
 

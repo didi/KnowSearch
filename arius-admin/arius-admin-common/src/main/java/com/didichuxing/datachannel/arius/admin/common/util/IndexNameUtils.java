@@ -1,8 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +11,7 @@ import java.util.Set;
 
 public class IndexNameUtils {
 
-    private static final ILog LOGGER = LogFactory.getLog(IndexNameUtils.class);
+    private IndexNameUtils(){}
 
     private static final String VERSION_TAG = "_v";
 
@@ -37,7 +35,7 @@ public class IndexNameUtils {
             }
 
             Long.valueOf(numStr);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             return indexName;
         }
 
@@ -365,7 +363,6 @@ public class IndexNameUtils {
         }
 
         // 查询使用的索引名称不包含*
-        //if (indexSplits.length <= 1) {
         if (!searchIndexName.endsWith("*") && indexSplits.length <= 1) {
             String trimSearchIndexName = StringUtils.removeEnd(searchIndexName , "*");
             // 如果查询索引名称和索引表达式相同，例如arius.dsl.template -> arius.dsl.template

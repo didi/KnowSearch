@@ -7,6 +7,7 @@ import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.arius.GateWayHeartBeatService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.ActiveCountResponse;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 
 @Service
+@NoArgsConstructor
 public class GateWayHeartBeatServiceImpl implements GateWayHeartBeatService {
 
     protected static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
@@ -39,13 +41,22 @@ public class GateWayHeartBeatServiceImpl implements GateWayHeartBeatService {
 
     @PostConstruct
     public void init() {
-        threadPool.submitScheduleAtFixTask( () -> resetHeartBeatInfo(), 0, adminSchedulePeriod );
+        threadPool.submitScheduleAtFixTask(this::resetHeartBeatInfo, 15, adminSchedulePeriod);
     }
 
     @Override
     public void resetHeartBeatInfo(){
-        heartbeat();
-        resetActiveCount();
+        try {
+            heartbeat();
+        } catch (Exception e) {
+            bootLogger.error("heartbeat error", e);
+        }
+        try {
+            resetActiveCount();
+        } catch (Exception e) {
+            bootLogger.error("resetActiveCount error", e);
+        }
+
     }
 
     /************************************************************** private method **************************************************************/

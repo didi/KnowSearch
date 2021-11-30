@@ -52,7 +52,7 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
      */
     public static void clearHolder() {
         if (logger.isDebugEnabled()) {
-            logger.debug("清除SpringContextHolder中的ApplicationContext:" + applicationContext);
+            logger.debug(String.format("清除SpringContextHolder中的ApplicationContext:%s", applicationContext));
         }
         applicationContext = null;
     }

@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateL
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.template.mark.BaseTemplateMarkLabelJob;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,7 +72,7 @@ public class TemplateMarkHasDeletedDocLabelJob extends BaseTemplateMarkLabelJob 
     private Long getDelCount(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate) {
         IndexTemplatePhy masterTemplate = indexTemplate.getMasterTemplate();
 
-        Map<String, IndexNodes> indexNodesMap = esIndexService.getIndexNodes(masterTemplate.getCluster(), masterTemplate.getExpression());
+        Map<String, IndexNodes> indexNodesMap = esIndexService.syncGetIndexNodes(masterTemplate.getCluster(), masterTemplate.getExpression());
         if (indexNodesMap == null || indexNodesMap.isEmpty()) {
             LOGGER.error("class=MarkHasDeletedDocLabelJobHandler||method=getDelCount||errMsg=template: {} get index fail", indexTemplate.getName());
             return -1L;

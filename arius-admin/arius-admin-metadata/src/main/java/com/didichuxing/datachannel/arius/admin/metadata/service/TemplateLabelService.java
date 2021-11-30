@@ -17,8 +17,8 @@ import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Service
 public class TemplateLabelService {
 
-    private final ILog LOGGER = LogFactory.getLog( TemplateLabelService.class);
+    private static final ILog LOGGER = LogFactory.getLog( TemplateLabelService.class);
 
     public static final String TEMPLATE_HAS_DELETED_DOC   = "21140";
     public static final String TEMPLATE_DSL_REVIEW_LABEL  = "11101";
@@ -124,7 +124,7 @@ public class TemplateLabelService {
         for (Map.Entry<Integer, Collection<TemplateLabelPO>> entry : integerCollectionMap.entrySet()) {
             TemplateLabel temp = new TemplateLabel();
             temp.setIndexTemplateId(entry.getKey());
-            temp.setLabels(ConvertUtil.list2List(new ArrayList(entry.getValue()), Label.class));
+            temp.setLabels(ConvertUtil.list2List(new ArrayList<>(entry.getValue()), Label.class));
 
             templateLabels.add(temp);
         }
@@ -175,7 +175,7 @@ public class TemplateLabelService {
      * @param labelIds  标签列表
      * @return true/false
      */
-    public Result replaceTemplateLabel(Integer logicId, List<String> labelIds, String operator) {
+    public Result<Boolean> replaceTemplateLabel(Integer logicId, List<String> labelIds, String operator) {
 
         // 构造ams需要的数据结构
         List<Label> labels = Lists.newArrayList();
@@ -190,7 +190,7 @@ public class TemplateLabelService {
         param.setIndexTemplateLabels(labels);
         param.setOperator(operator);
 
-        return Result.build(updateIndexTemplateLabel(param));
+        return Result.buildBoolen(updateIndexTemplateLabel(param));
     }
 
     /**
@@ -202,7 +202,7 @@ public class TemplateLabelService {
      * @param operator   operator
      * @return result
      */
-    public Result updateTemplateLabel(Integer logicId, Set<String> shouldAdds, Set<String> shouldDels,
+    public Result<Boolean> updateTemplateLabel(Integer logicId, Set<String> shouldAdds, Set<String> shouldDels,
                                       String operator) {
         List<Label> allLabels = listTemplateLabel(logicId);
 
@@ -218,7 +218,7 @@ public class TemplateLabelService {
         }
 
         if (oldLabelIdSet.containsAll(newLabelIdSet) && newLabelIdSet.size() == oldLabelIdSet.size()) {
-            return Result.buildSucc();
+            return Result.buildSucc(true);
         }
 
         return replaceTemplateLabel(logicId, Lists.newArrayList(newLabelIdSet), operator);
@@ -286,7 +286,7 @@ public class TemplateLabelService {
         List<IndexTemplateLogic> templateLogics = templateLogicService.getAllLogicTemplates();
 
         templateLogics.parallelStream().forEach(indexTemplate -> {
-            Integer templateId = indexTemplate.getId().intValue();
+            Integer templateId = indexTemplate.getId();
             List<TemplateLabelPO> templateLabelPOS = listIndexTemplateLabelPO(templateId);
 
             LOGGER.info("class=IndexTemplateLabelService||method=listAllIndexTemplateLabelByLabelIds||indexTemplates={}||templateLabelPOS={}",
@@ -415,10 +415,9 @@ public class TemplateLabelService {
     }
 
     private boolean isIndexTemplateLabelsMatch(List<String> labelIds, String includeLabelIds, String excludeLabelIds) {
-        if (StringUtils.isNotBlank(includeLabelIds)) {
-            if (!labelIds.containsAll(Arrays.asList(includeLabelIds.split(",")))) {
+        if (StringUtils.isNotBlank(includeLabelIds)
+            && !labelIds.containsAll(Arrays.asList(includeLabelIds.split(",")))) {
                 return false;
-            }
         }
 
         if (StringUtils.isNotBlank(excludeLabelIds)) {

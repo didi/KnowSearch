@@ -7,13 +7,7 @@ package com.didichuxing.datachannel.arius.admin.common.util;
  * @modified By D10865
  */
 
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.google.common.collect.Maps;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +18,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Maps;
+
 /**
  * @Author: D10865
  * @Description:
@@ -32,10 +34,17 @@ import java.util.regex.Pattern;
  */
 public class DateTimeUtil {
 
-    private static final ILog LOGGER = LogFactory.getLog(DateTimeUtil.class);
+    private static final ILog           LOGGER            = LogFactory.getLog(DateTimeUtil.class);
+
+    private static final String REGEX = "\\d{4}-\\d{2}-\\d{2}";
+    private static final String PATTERN_1 = "yyyy-MM-dd";
+    private static final String PATTERN_2 = "yyyy-MM-dd HH:mm:ss.SSS Z";
+    private static final String PATTERN_3 = "yyyy-MM-dd HH:mm:ss";
 
     // 不同日期格式的正则匹配
     private static Map<String, Pattern> dateFormatPattern = Maps.newHashMap();
+
+    private DateTimeUtil() {}
 
     static {
         dateFormatPattern.put("_YYYY-MM", Pattern.compile("\\d{4}-\\d{2}"));
@@ -44,27 +53,27 @@ public class DateTimeUtil {
 
         dateFormatPattern.put("YYYYMMdd", Pattern.compile("\\d{8}"));
         dateFormatPattern.put("_YYYYMMdd", Pattern.compile("\\d{8}"));
-        dateFormatPattern.put("_YYYY-MM-dd", Pattern.compile("\\d{4}-\\d{2}-\\d{2}"));
-        dateFormatPattern.put("__YYYY-MM-dd", Pattern.compile("\\d{4}-\\d{2}-\\d{2}"));
-        dateFormatPattern.put("_yyyyMMdd", Pattern.compile("\\d{4}-\\d{2}-\\d{2}"));
-        dateFormatPattern.put("_yyyy-MM-dd", Pattern.compile("\\d{4}-\\d{2}-\\d{2}"));
+        dateFormatPattern.put("_YYYY-MM-dd", Pattern.compile(REGEX));
+        dateFormatPattern.put("__YYYY-MM-dd", Pattern.compile(REGEX));
+        dateFormatPattern.put("_yyyyMMdd", Pattern.compile(REGEX));
+        dateFormatPattern.put("_yyyy-MM-dd", Pattern.compile(REGEX));
 
         // 除了定义的可以还有
         dateFormatPattern.put("YYYY_MM_dd", Pattern.compile("\\d{4}_\\d{2}_\\d{2}"));
     }
 
     public static String getDateStr(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat(PATTERN_1);
         return sdf.format(new Date(time));
     }
 
     public static String getDateStr(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat(PATTERN_1);
         return sdf.format(date);
     }
 
     public static Long getTime(String date) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(PATTERN_1);
         if (StringUtils.isBlank(date)) {
             date = dateTimeFormatter.format(ZonedDateTime.now().minus(1, ChronoUnit.DAYS));
         }
@@ -74,9 +83,23 @@ public class DateTimeUtil {
         return instant.toEpochMilli();
     }
 
+    public static Long getTimeEpochMilli(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(PATTERN_3);
+        try {
+            return simpleDateFormat.parse(date).getTime();
+        } catch (ParseException e) {
+            LOGGER.error("class=DateTimeUtil||method=getTimeEpochMilli||date={}||errMsg={}", date, e.getMessage());
+        }
+        return 0L;
+    }
+
     public static Date getBeforeDays(Date time, int before) {
-        if (time == null){return null;}
-        if (before < 1){return null;}
+        if (time == null) {
+            return null;
+        }
+        if (before < 1) {
+            return null;
+        }
 
         Calendar c = Calendar.getInstance();
         c.setTime(time);
@@ -113,7 +136,7 @@ public class DateTimeUtil {
         // 使用正则提取时间
         Pattern pattern = dateFormatPattern.get(dateFormat);
         if (pattern == null) {
-            LOGGER.error("{} can't find pattern dateFormat {}, date {}", indexName, dateFormat, date);
+            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg={} can't find pattern dateFormat {}, date {}", indexName, dateFormat, date);
             return indexDate;
         }
 
@@ -131,10 +154,10 @@ public class DateTimeUtil {
                     return matcher.group();
                 }
             }
-            LOGGER.error("{} dateFormat {} not match date {}", indexName, dateFormat, date);
+            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg={} dateFormat {} not match date {}", indexName, dateFormat, date);
 
         } catch (Exception e) {
-            LOGGER.error("fail to getIndexDate {}, {}, {}", indexName, dateFormat, date, e);
+            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg=fail to getIndexDate {}, {}, {}", indexName, dateFormat, date, e);
         }
 
         return indexDate;
@@ -148,7 +171,7 @@ public class DateTimeUtil {
      * @return
      */
     public static boolean isBeforeDateTime(String formatDateTime, int dayOffset) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(PATTERN_2);
         ZonedDateTime markDateTime = ZonedDateTime.parse(formatDateTime, dateTimeFormatter);
         ZonedDateTime expectDateTime = ZonedDateTime.now().minus(dayOffset, ChronoUnit.DAYS);
 
@@ -156,7 +179,7 @@ public class DateTimeUtil {
     }
 
     public static String getDateTimeStr(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(PATTERN_3);
         return sdf.format(new Date(time));
     }
 
@@ -194,7 +217,8 @@ public class DateTimeUtil {
      * @return
      */
     public static String getCurrentFormatDateTime() {
-        String formatDateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z").format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.systemDefault()));
+        String formatDateTime = DateTimeFormatter.ofPattern(PATTERN_2)
+            .format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.systemDefault()));
 
         return formatDateTime;
     }
@@ -208,7 +232,7 @@ public class DateTimeUtil {
     public static String formatTimestamp(long timestamp) {
         Instant instant = Instant.ofEpochMilli(timestamp);
         ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z").format(zonedDateTime);
+        return DateTimeFormatter.ofPattern(PATTERN_2).format(zonedDateTime);
     }
 
     /**
@@ -230,7 +254,7 @@ public class DateTimeUtil {
      * @return
      */
     public static String getFormatDayByOffset(int offset) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(PATTERN_1);
         return dateTimeFormatter.format(ZonedDateTime.now().minus(offset, ChronoUnit.DAYS));
     }
 
@@ -249,10 +273,10 @@ public class DateTimeUtil {
         try {
             LocalDateTime dateTime = LocalDateTime.now().minusDays(1);
             // 根据时间格式转换为格式化后的时间字符串
-            return DateTimeFormatter.ofPattern(dateFormat.replaceAll("Y", "y")).format(dateTime);
+            return DateTimeFormatter.ofPattern(dateFormat.replace("Y", "y")).format(dateTime);
         } catch (Exception e) {
             LOGGER.error("class=DateTimeUtil||method=getYesterdayDayByFormat||errMsg=format date error {}. ",
-                    dateFormat, e);
+                dateFormat, e);
             return null;
         }
     }
@@ -267,10 +291,10 @@ public class DateTimeUtil {
         try {
             LocalDateTime dateTime = LocalDateTime.now().minusMonths(1);
             // 根据时间格式转换为格式化后的时间字符串
-            return DateTimeFormatter.ofPattern(dateFormat.replaceAll("Y", "y")).format(dateTime);
+            return DateTimeFormatter.ofPattern(dateFormat.replace("Y", "y")).format(dateTime);
         } catch (Exception e) {
             LOGGER.error("class=DateTimeUtil||method=getLastMonthDayByFormat||errMsg=format date error {}. ",
-                    dateFormat, e);
+                dateFormat, e);
             return null;
         }
     }
@@ -285,14 +309,13 @@ public class DateTimeUtil {
         try {
             LocalDateTime dateTime = LocalDateTime.now().minusYears(1);
             // 根据时间格式转换为格式化后的时间字符串
-            return DateTimeFormatter.ofPattern(dateFormat.replaceAll("Y", "y")).format(dateTime);
+            return DateTimeFormatter.ofPattern(dateFormat.replace("Y", "y")).format(dateTime);
         } catch (Exception e) {
             LOGGER.error("class=DateTimeUtil||method=getLastMonthDayByFormat||errMsg=format date error {}. ",
-                    dateFormat, e);
+                dateFormat, e);
             return null;
         }
     }
-
 
     /**
      * 获取周几
@@ -304,7 +327,7 @@ public class DateTimeUtil {
         return dateTime.getDayOfWeek().getValue();
     }
 
-    public static Integer getDayOfCurrentMonth(){
+    public static Integer getDayOfCurrentMonth() {
         Calendar now = Calendar.getInstance();
 
         return now.get(Calendar.DAY_OF_MONTH);
@@ -319,7 +342,7 @@ public class DateTimeUtil {
     public static Tuple<String, String> getStartEndTimeByDate(String date) {
         //计算时间范围
         String startDate = "", endDate = "";
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(PATTERN_1);
         if (StringUtils.isBlank(date)) {
             date = dateTimeFormatter.format(ZonedDateTime.now().minus(1, ChronoUnit.DAYS));
         }
@@ -339,7 +362,7 @@ public class DateTimeUtil {
      */
     public static Tuple<String, String> getStartEndWeekTimeByDate(String date) {
         String startDate = "", endDate = "";
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(PATTERN_1);
         if (StringUtils.isBlank(date)) {
             date = dateTimeFormatter.format(ZonedDateTime.now());
         }
@@ -361,13 +384,14 @@ public class DateTimeUtil {
         long startTimeMilli = System.currentTimeMillis() - 43200000;
         long endTimeMilli = System.currentTimeMillis() + 43200000;
         try {
-            ZonedDateTime dateTime = ZonedDateTime.parse(ariusCreateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z"));
+            ZonedDateTime dateTime = ZonedDateTime.parse(ariusCreateTime,
+                DateTimeFormatter.ofPattern(PATTERN_2));
             ZonedDateTime startDate = dateTime.minus(12, ChronoUnit.HOURS);
             ZonedDateTime endDate = dateTime.plus(12, ChronoUnit.HOURS);
             startTimeMilli = startDate.toInstant().toEpochMilli();
             endTimeMilli = endDate.toInstant().toEpochMilli();
         } catch (Exception e) {
-            LOGGER.error("fail to parse data {}", ariusCreateTime, e);
+            LOGGER.error("class=DateTimeUtil||method=getAriusCreateTimeRange||msg=fail to parse data {}", ariusCreateTime, e);
         }
 
         return new Tuple<>(startTimeMilli, endTimeMilli);
@@ -393,7 +417,9 @@ public class DateTimeUtil {
      * @return
      */
     public static Date getZeroDate(Date time, int offset) {
-        if (time == null){time = new Date();}
+        if (time == null) {
+            time = new Date();
+        }
 
         Calendar c = Calendar.getInstance();
         c.setTime(time);
@@ -408,8 +434,8 @@ public class DateTimeUtil {
         return offsetDate;
     }
 
-    public static long getCurrentMonthEnd(){
-        Calendar c=Calendar.getInstance();
+    public static long getCurrentMonthEnd() {
+        Calendar c = Calendar.getInstance();
         c.add(Calendar.MONTH, 0);
 
         int currentMonthMaxDay = c.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -418,15 +444,15 @@ public class DateTimeUtil {
         return c.getTimeInMillis();
     }
 
-    public static long getCurrentMonthStart(){
-        Calendar c=Calendar.getInstance();
+    public static long getCurrentMonthStart() {
+        Calendar c = Calendar.getInstance();
         c.add(Calendar.MONTH, 0);
         c.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH), 1, 00, 00, 00);
         return c.getTimeInMillis();
     }
 
-    public static long getLastMonthEnd(){
-        Calendar c=Calendar.getInstance();
+    public static long getLastMonthEnd() {
+        Calendar c = Calendar.getInstance();
         c.add(Calendar.MONTH, -1);
 
         int lastMonthMaxDay = c.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -435,8 +461,8 @@ public class DateTimeUtil {
         return c.getTimeInMillis();
     }
 
-    public static long getLastMonthStart(){
-        Calendar c=Calendar.getInstance();
+    public static long getLastMonthStart() {
+        Calendar c = Calendar.getInstance();
         c.add(Calendar.MONTH, -1);
         c.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH), 1, 00, 00, 00);
         return c.getTimeInMillis();
@@ -457,5 +483,4 @@ public class DateTimeUtil {
 
         return timeStamp;
     }
-
 }

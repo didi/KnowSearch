@@ -24,9 +24,7 @@ public class ESPackageManager {
     private ESPackageService packageService;
 
     public Result<List<ESPackageVO>> listESPackage() {
-        return AriusOptional
-                .ofListNullable(ConvertUtil.list2List(packageService.listESPackage(), ESPackageVO.class))
-                .orGetResult(() -> Result.buildFail("ES安装包列表为空"));
+        return Result.buildSucc(ConvertUtil.list2List(packageService.listESPackage(), ESPackageVO.class));
     }
 
     public Result<ESPackageVO> getESPackageById(Long id) {

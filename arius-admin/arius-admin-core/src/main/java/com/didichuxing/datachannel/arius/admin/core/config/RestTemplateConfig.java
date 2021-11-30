@@ -22,9 +22,9 @@ import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.ThirdPartRemoteException;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.didichuxing.tunnel.util.log.common.Constants;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.log.common.Constants;
 
 /**
  * @author jinbinbin
@@ -33,9 +33,9 @@ import com.didichuxing.tunnel.util.log.common.Constants;
 @Configuration
 public class RestTemplateConfig {
 
-    private final ILog REQ_LOGGER    = LogFactory.getLog("thirdReqLogger");
-    private final ILog RESP_LOGGER   = LogFactory.getLog("thirdRespLogger");
-    private final ILog SYSTEM_LOGGER = LogFactory.getLog(RestTemplateConfig.class);
+    private static final ILog REQ_LOGGER    = LogFactory.getLog("thirdReqLogger");
+    private static final ILog RESP_LOGGER   = LogFactory.getLog("thirdRespLogger");
+    private static final ILog SYSTEM_LOGGER = LogFactory.getLog(RestTemplateConfig.class);
 
     @Bean
     public RestTemplate restTemplate() {
@@ -91,7 +91,7 @@ public class RestTemplateConfig {
                 try {
                     traceResponse(request, response, exe, subFlag, beginNano);
                 } catch (Exception e) {
-                    SYSTEM_LOGGER.warn(e.getMessage(), e);
+                    SYSTEM_LOGGER.warn("class=LogHttpRequestInterceptor||method=intercept||msg={}", e.getMessage());
                 }
                 throw new ThirdPartRemoteException("rest-template: " + exe.getMessage(), exe,
                     ResultType.HTTP_REQ_ERROR);
@@ -99,8 +99,8 @@ public class RestTemplateConfig {
         }
 
         private void traceRequest(HttpRequest request, String subFlag, byte[] body) throws IOException {
-            REQ_LOGGER.info("remoteRequest||url={}||method={}||headers={}||body={}||subFlag={}", request.getURI(),
-                request.getMethod(), JSON.toJSONString(request.getHeaders()), new String(body, "UTF-8"), subFlag);
+            REQ_LOGGER.info("class=LogHttpRequestInterceptor||method=traceRequest||remoteRequest||url={}||method={}||headers={}||body={}||subFlag={}",
+                    request.getURI(), request.getMethod(), JSON.toJSONString(request.getHeaders()), new String(body, "UTF-8"), subFlag);
         }
 
         private void traceResponse(HttpRequest request, ClientHttpResponse response, IOException exception,
@@ -109,8 +109,8 @@ public class RestTemplateConfig {
             StringBuilder inputStringBuilder = new StringBuilder();
             if (response == null) {
                 RESP_LOGGER.warn(
-                    "remoteResponse||code=-1||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}", url, null,
-                    null, null, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
+                    "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code=-1||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
+                        url, null, null, null, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 return;
             }
 
@@ -132,7 +132,7 @@ public class RestTemplateConfig {
                 }
             } catch (Exception e) {
                 RESP_LOGGER.warn(
-                    "remoteResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
+                    "class=remoteResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
                     response.getStatusCode(), url, response.getStatusText(), response.getHeaders(),
                     inputStringBuilder.toString(), e, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 if (!response.getStatusCode().is2xxSuccessful()) {
@@ -145,7 +145,7 @@ public class RestTemplateConfig {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 if (exception == null) {
                     RESP_LOGGER.warn(
-                        "remoteResponse||code={}||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
+                        "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
                         response.getStatusCode(), url, response.getStatusText(), response.getHeaders(), responseString,
                         (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 } else {
@@ -159,12 +159,12 @@ public class RestTemplateConfig {
 
             if (exception == null) {
                 RESP_LOGGER.info(
-                    "remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||timeCost={}||subFlag={}",
+                    "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||timeCost={}||subFlag={}",
                     response.getStatusCode(), url, response.getStatusText(), response.getHeaders(), responseString,
                     (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
             } else {
                 RESP_LOGGER.warn(
-                    "remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||error={}||timeCost={}||subFlag={}",
+                    "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||error={}||timeCost={}||subFlag={}",
                     response.getStatusCode(), url, response.getStatusText(), response.getHeaders(), responseString,
                     exception, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
             }

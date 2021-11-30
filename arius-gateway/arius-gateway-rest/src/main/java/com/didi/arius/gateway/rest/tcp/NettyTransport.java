@@ -5,14 +5,12 @@ import org.elasticsearch.common.network.NetworkUtils;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.BigArrays;
 import org.elasticsearch.monitor.jvm.JvmInfo;
 import org.elasticsearch.transport.netty.SizeHeaderFrameDecoder;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.util.ThreadNameDeterminer;
 import org.jboss.netty.util.ThreadRenamingRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,6 @@ import java.net.SocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -52,78 +49,55 @@ public class NettyTransport {
 	@Value("${gateway.nettyTransport.keepAlive}")
 	private boolean keepAlive;
 	
-	protected final boolean compress = false;
+	protected static final boolean COMPRESS = false;
+	protected static final BigArrays bigArrays = BigArrays.NON_RECYCLING_INSTANCE;
 	
-	protected final BigArrays bigArrays = BigArrays.NON_RECYCLING_INSTANCE;
-	
-    public static final ByteSizeValue TCP_DEFAULT_SEND_BUFFER_SIZE = null;
-    public static final ByteSizeValue TCP_DEFAULT_RECEIVE_BUFFER_SIZE = null;
-    public static final TimeValue TCP_DEFAULT_CONNECT_TIMEOUT = new TimeValue(30, TimeUnit.SECONDS);
-
-	private ExecutorService bossThreadPool = null;
-	private ExecutorService workerThreadPool = null;
-	private NioServerSocketChannelFactory serverNioFactory = null;
-	
-	private ServerBootstrap serverBootstrap = null;
-	
-	private ReceiveBufferSizePredictorFactory receiveBufferSizePredictorFactory;
-	private ByteSizeValue receivePredictorMin;
-	private ByteSizeValue receivePredictorMax;
-	
-	 // package private for testing
-    volatile OpenChannelsHandler serverOpenChannels;
-    
     @Autowired
     private MessageChannelHandler messageChannelHandler;
-	
+
+	public NettyTransport() {
+		// pass
+	}
+
 	public void init() {
-		serverOpenChannels = new OpenChannelsHandler(logger);
-		
-		bossThreadPool = Executors
+		OpenChannelsHandler serverOpenChannels = new OpenChannelsHandler(logger);
+
+		ExecutorService bossThreadPool = Executors
 				.newCachedThreadPool(new DeamondThreadFactory(
 						"boss"));
-		workerThreadPool = Executors
+		ExecutorService workerThreadPool = Executors
 				.newCachedThreadPool(new DeamondThreadFactory(
 						"worker"));
-		serverNioFactory = new NioServerSocketChannelFactory(bossThreadPool,
+		NioServerSocketChannelFactory serverNioFactory = new NioServerSocketChannelFactory(bossThreadPool,
 				bossThreadCount, workerThreadPool,
 				workerCount);
-		
-        serverBootstrap = new ServerBootstrap(serverNioFactory);
-        serverBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-			public ChannelPipeline getPipeline() {
-				ChannelPipeline channelPipeline = Channels.pipeline();
-				channelPipeline.addLast("openChannels", serverOpenChannels);
-	            SizeHeaderFrameDecoder sizeHeader = new SizeHeaderFrameDecoder();
-	            channelPipeline.addLast("size", sizeHeader);
-	            channelPipeline.addLast("dispatcher", messageChannelHandler);
-				return channelPipeline;
-			}
-		});
-        
-        ByteSizeValue tcpSendBufferSize = TCP_DEFAULT_SEND_BUFFER_SIZE;
-        ByteSizeValue tcpReceiveBufferSize = TCP_DEFAULT_RECEIVE_BUFFER_SIZE;
 
+		ServerBootstrap serverBootstrap = new ServerBootstrap(serverNioFactory);
+        serverBootstrap.setPipelineFactory(() -> {
+			ChannelPipeline channelPipeline = Channels.pipeline();
+			channelPipeline.addLast("openChannels", serverOpenChannels);
+			SizeHeaderFrameDecoder sizeHeader = new SizeHeaderFrameDecoder();
+			channelPipeline.addLast("size", sizeHeader);
+			channelPipeline.addLast("dispatcher", messageChannelHandler);
+			return channelPipeline;
+		});
         
         serverBootstrap.setOption("child.tcpNoDelay", tcpNoDelay);
         serverBootstrap.setOption("child.keepAlive", keepAlive);
-        if (tcpSendBufferSize != null && tcpSendBufferSize.bytes() > 0) {
-            serverBootstrap.setOption("child.sendBufferSize", tcpSendBufferSize.bytes());
-        }
-        if (tcpReceiveBufferSize != null && tcpReceiveBufferSize.bytes() > 0) {
-            serverBootstrap.setOption("child.receiveBufferSize", tcpReceiveBufferSize.bytes());
-        }
-        
-        long defaultReceiverPredictor = 512 * 1024;
+
+        long defaultReceiverPredictor = 512 * 1024L;
         if (JvmInfo.jvmInfo().getMem().getDirectMemoryMax().bytes() > 0) {
             // we can guess a better default...
             long l = (long) ((0.3 * JvmInfo.jvmInfo().getMem().getDirectMemoryMax().bytes()) / workerCount);
-            defaultReceiverPredictor = Math.min(defaultReceiverPredictor, Math.max(l, 64 * 1024));
+            defaultReceiverPredictor = Math.min(defaultReceiverPredictor, Math.max(l, 64 * 1024L));
         }
         
         // See AdaptiveReceiveBufferSizePredictor#DEFAULT_XXX for default values in netty..., we can use higher ones for us, even fixed one
-        this.receivePredictorMin = new ByteSizeValue(defaultReceiverPredictor);
-        this.receivePredictorMax = new ByteSizeValue(defaultReceiverPredictor);
+		ByteSizeValue receivePredictorMin = new ByteSizeValue(defaultReceiverPredictor);
+		ByteSizeValue receivePredictorMax = new ByteSizeValue(defaultReceiverPredictor);
+
+		ReceiveBufferSizePredictorFactory receiveBufferSizePredictorFactory;
+
         if (receivePredictorMax.bytes() == receivePredictorMin.bytes()) {
             receiveBufferSizePredictorFactory = new FixedReceiveBufferSizePredictorFactory((int) receivePredictorMax.bytes());
         } else {
@@ -167,14 +141,7 @@ class DeamondThreadFactory implements ThreadFactory {
 
 	static {
 		ThreadRenamingRunnable
-				.setThreadNameDeterminer(new ThreadNameDeterminer() {
-
-					public String determineThreadName(String currentThreadName,
-							String proposedThreadName) throws Exception {
-						return currentThreadName;
-					}
-
-				});
+				.setThreadNameDeterminer((currentThreadName, proposedThreadName) -> currentThreadName);
 	}
 
 	public DeamondThreadFactory(String prefix) {
@@ -184,6 +151,7 @@ class DeamondThreadFactory implements ThreadFactory {
 		namePrefix = prefix + "-pool-" + poolNumber.getAndIncrement() + "-";
 	}
 
+	@Override
 	public Thread newThread(Runnable r) {
 		Thread t = new Thread(group, r, namePrefix
 				+ threadNumber.getAndIncrement(), 0);
@@ -192,5 +160,5 @@ class DeamondThreadFactory implements ThreadFactory {
 		if (t.getPriority() != Thread.NORM_PRIORITY)
 			t.setPriority(Thread.NORM_PRIORITY);
 		return t;
-	};
+	}
 }

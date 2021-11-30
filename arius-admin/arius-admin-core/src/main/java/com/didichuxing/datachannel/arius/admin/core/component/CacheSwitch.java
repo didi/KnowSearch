@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigIn
 /**
  * @author didi
  */
+
 @Component
 public class CacheSwitch {
 

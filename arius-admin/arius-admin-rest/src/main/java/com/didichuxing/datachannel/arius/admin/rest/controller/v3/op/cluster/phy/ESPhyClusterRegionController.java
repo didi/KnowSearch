@@ -6,20 +6,16 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ClusterReg
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.impl.CapacityPlanRegionServiceImpl;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -44,25 +40,23 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  */
 @RestController
 @RequestMapping(V3_OP + "/phy/cluster/region")
-@Api(value = "ES物理集群region接口(REST)")
+@Api(tags = "ES物理集群region接口(REST)")
 public class ESPhyClusterRegionController {
 
-    private static final ILog         LOGGER = LogFactory.getLog(CapacityPlanRegionServiceImpl.class);
+    @Autowired
+    private ClusterPhyService         clusterPhyService;
 
     @Autowired
-    private ESClusterPhyService esClusterPhyService;
+    private RegionRackService         regionRackService;
 
     @Autowired
-    private ESRegionRackService       esRegionRackService;
+    private RoleClusterHostService    roleClusterHostService;
 
     @Autowired
-    private ESRoleClusterHostService  esRoleClusterHostService;
+    private TemplatePhyService        physicalService;
 
     @Autowired
-    private TemplatePhyService physicalService;
-
-    @Autowired
-    private ClusterRegionManager clusterRegionManager;
+    private ClusterRegionManager      clusterRegionManager;
 
     @Autowired
     private CapacityPlanRegionService capacityPlanRegionService;
@@ -72,46 +66,34 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
     public Result<List<ClusterRegionVO>> listPhyClusterRegions(@RequestParam("cluster") String cluster) {
 
-        if (StringUtils.isBlank(cluster)){
+        if (StringUtils.isBlank(cluster)) {
             return Result.buildSucc(new ArrayList<>());
         }
 
-        List<ClusterRegion> regions = esRegionRackService.listPhyClusterRegions(cluster);
-        return Result.buildSucc( clusterRegionManager.buildLogicClusterRegionVO(regions));
+        List<ClusterRegion> regions = regionRackService.listPhyClusterRegions(cluster);
+        return Result.buildSucc(clusterRegionManager.buildLogicClusterRegionVO(regions));
     }
 
     @PostMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建物理集群region接口", notes = "")
-    public Result createRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
+    public Result<Long> createRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
 
-        return esRegionRackService.createPhyClusterRegion(param.getClusterName(), param.getRacks(), param.getShare(), HttpRequestUtils.getOperator(request));
+        return regionRackService.createPhyClusterRegion(param.getClusterName(), param.getRacks(), param.getShare(),
+            HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/phyClusterRacks")
     @ResponseBody
-    @ApiOperation(value = "获取物理集群Racks列表", notes = "")
+    @ApiOperation(value = "获取物理集群可划分至region的Racks信息", notes = "")
     public Result<List<PhyClusterRackVO>> listPhyClusterRacks(@RequestParam("cluster") String cluster) {
-
-        // 所有的racks
-        Set<String> clusterRacks = esClusterPhyService.getClusterRacks(cluster);
-
-        // 已经被分配(绑定到逻辑集群)的racks
-        List<ESClusterLogicRackInfo> usedRacksInfo = esRegionRackService.listAssignedRacksByClusterName(cluster);
-
-        // 构建VO
-        List<PhyClusterRackVO> data = clusterRegionManager.buildPhyClusterRackVOs(cluster, clusterRacks, usedRacksInfo);
-
-        LOGGER.info("class=ESClusterRegionController||method=listPhyClusterRacks||clusterRacks={}||usedRacksInfo={}||racks={}",
-                clusterRacks, usedRacksInfo, data);
-
-        return Result.buildSucc(data);
+        return Result.buildSucc(clusterRegionManager.buildCanDividePhyClusterRackVOs(cluster));
     }
 
     @PutMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "修改容量规划region接口", notes = "同时可修改物理集群region的racks")
-    public Result editClusterRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
+    public Result<Void> editClusterRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
 
         // 当前接口只更改两部分内容：
         // 1. racks（属于物理集群region部分）
@@ -123,9 +105,9 @@ public class ESPhyClusterRegionController {
     @DeleteMapping("/delete")
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true)})
-    public Result removeRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
-        return esRegionRackService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
+    public Result<Void> removeRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
+        return regionRackService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/{regionId}/nodes")
@@ -133,12 +115,13 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "获取region下的节点列表", notes = "")
     public Result<List<ESRoleClusterHostVO>> getRegionNodes(@PathVariable Long regionId) {
 
-        ClusterRegion region = esRegionRackService.getRegionById(regionId);
+        ClusterRegion region = regionRackService.getRegionById(regionId);
         if (region == null) {
             return Result.buildFail("region不存在");
         }
 
-        List<ESRoleClusterHost> hosts = esRoleClusterHostService.listRacksNodes(region.getPhyClusterName(), region.getRacks());
+        List<RoleClusterHost> hosts = roleClusterHostService.listRacksNodes(region.getPhyClusterName(),
+            region.getRacks());
 
         return Result.buildSucc(ConvertUtil.list2List(hosts, ESRoleClusterHostVO.class));
 
@@ -146,10 +129,16 @@ public class ESPhyClusterRegionController {
 
     @GetMapping("/{regionId}/templates")
     @ResponseBody
-    @ApiOperation(value = "获取Region物理模板列表接口", notes = "")
+    @ApiOperation(value = "获取Region物理模板列表接口")
     public Result<List<IndexTemplatePhysicalVO>> getRegionPhysicalTemplates(@PathVariable Long regionId) {
         return Result.buildSucc(
             ConvertUtil.list2List(physicalService.getTemplateByRegionId(regionId), IndexTemplatePhysicalVO.class));
     }
 
+    @GetMapping("/{clusterPhyName}/rack")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群下的rack列表")
+    public Result<Set<String>> getClusterPhyRacks(@PathVariable String clusterPhyName) {
+        return Result.buildSucc(clusterPhyService.getClusterRacks(clusterPhyName));
+    }
 }

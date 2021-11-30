@@ -2,13 +2,17 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.quota;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019-09-03
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESTemplateQuotaUsage extends BaseEntity {
 
     /**

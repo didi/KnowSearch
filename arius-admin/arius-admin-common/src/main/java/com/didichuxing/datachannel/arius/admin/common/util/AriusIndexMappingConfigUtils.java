@@ -1,18 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author wangshu
  * @date 2020/06/14
  */
 public class AriusIndexMappingConfigUtils {
+
+    private AriusIndexMappingConfigUtils(){}
 
     private static final ILog LOGGER = LogFactory.getLog(AriusIndexMappingConfigUtils.class);
 
@@ -24,10 +28,10 @@ public class AriusIndexMappingConfigUtils {
      * @param mappingConfig mapping config JSON序列化内容
      * @return
      */
-    public static Result parseMappingConfig(String mappingConfig) {
+    public static Result<MappingConfig> parseMappingConfig(String mappingConfig) {
         try {
-            return Result.buildSucc(new MappingConfig(getMappingObj(JSONObject.parseObject(mappingConfig))));
-        } catch (Throwable t) {
+            return Result.buildSucc(new MappingConfig(getMappingObj(JSON.parseObject(mappingConfig))));
+        } catch (Exception t) {
             LOGGER.warn(
                     "class=AriusIndexMappingConfigUtils||method=parseMappingConfig||" +
                             "mappingConfig={}||exception={}", mappingConfig, t);

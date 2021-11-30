@@ -18,7 +18,11 @@ public class IpRangeAggs extends BucketAggsType {
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
+	public IpRangeAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);
@@ -30,11 +34,11 @@ public class IpRangeAggs extends BucketAggsType {
 		if (ranges != null) {
 			AggsBukcetInfo aggsBukcetInfo = new AggsBukcetInfo();
 			
-			JsonArray jsonRanges = ranges.getAsJsonArray();
-			int size = jsonRanges.size();
-			aggsBukcetInfo.setBucketNumber(size);
+			JsonArray ipJsonRanges = ranges.getAsJsonArray();
+			int size = ipJsonRanges.size();
 			aggsBukcetInfo.setLastBucketNumber(size);
-			aggsBukcetInfo.setMemUsed(size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+			aggsBukcetInfo.setBucketNumber(size);
+			aggsBukcetInfo.setMemUsed((long)size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 			
 			return aggsBukcetInfo;
 		} else {

@@ -16,13 +16,13 @@ import com.didichuxing.datachannel.arius.admin.core.notify.info.template.Templat
 import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplatePropertiesTypesChangedNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplateSettingsChangedNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 @Component
 public class TemplatePhyMetaChangedListener implements ApplicationListener<PhysicalMetaDataModifyEvent> {
 
-    private static final ILog sLogger = LogFactory.getLog( TemplatePhyMetaChangedListener.class);
+    private static final ILog LOGGER = LogFactory.getLog( TemplatePhyMetaChangedListener.class);
 
     @Autowired
     private NotifyService     notifyService;
@@ -35,9 +35,9 @@ public class TemplatePhyMetaChangedListener implements ApplicationListener<Physi
                 aliasModifyEvent.getAppId(), aliasModifyEvent.getTemplateName(),
                 aliasModifyEvent.getBeforeUpdateAlias(), aliasModifyEvent.getAfterUpdateAlias());
 
-            sLogger
-                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||"
-                      + "msg=templateAliasesChanged||cluster={}||templateName={}||beforeUpdateAliases={}||afterUpdateAliases={}",
+            LOGGER
+                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateAliasesChanged" +
+                                "||cluster={}||templateName={}||beforeUpdateAliases={}||afterUpdateAliases={}",
                     aliasModifyEvent.getCluster(), aliasModifyEvent.getTemplateName(),
                     JSON.toJSONString(aliasModifyEvent.getBeforeUpdateAlias()),
                     JSON.toJSONString(aliasModifyEvent.getAfterUpdateAlias()));
@@ -51,9 +51,9 @@ public class TemplatePhyMetaChangedListener implements ApplicationListener<Physi
                 typesModifyModifyEvent.getAppId(), typesModifyModifyEvent.getTemplateName(),
                 typesModifyModifyEvent.getBeforeUpdateTypes(), typesModifyModifyEvent.getAfterUpdateTypes());
 
-            sLogger
-                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||"
-                      + "msg=templateTypesChanged||cluster={}||templateName={}||beforeUpdateTypes={}||afterUpdateTypes={}",
+            LOGGER
+                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateTypesChanged" +
+                                "||cluster={}||templateName={}||beforeUpdateTypes={}||afterUpdateTypes={}",
                     typesModifyModifyEvent.getCluster(), typesModifyModifyEvent.getTemplateName(),
                     JSON.toJSONString(typesModifyModifyEvent.getBeforeUpdateTypes()),
                     JSON.toJSONString(typesModifyModifyEvent.getAfterUpdateTypes()));
@@ -66,9 +66,9 @@ public class TemplatePhyMetaChangedListener implements ApplicationListener<Physi
                 settingsModifyEvent.getAppId(), settingsModifyEvent.getTemplateName(),
                 settingsModifyEvent.getBeforeUpdateSettings(), settingsModifyEvent.getAfterUpdateSettings());
 
-            sLogger
-                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||"
-                      + "msg=templateSettingsChanged||cluster={}||templateName={}||beforeChangedSettings={}||afterChangedSettings={}",
+            LOGGER
+                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateSettingsChanged" +
+                                "||cluster={}||templateName={}||beforeChangedSettings={}||afterChangedSettings={}",
                     settingsModifyEvent.getCluster(), settingsModifyEvent.getTemplateName(),
                     JSON.toJSONString(settingsModifyEvent.getBeforeUpdateSettings()),
                     JSON.toJSONString(settingsModifyEvent.getAfterUpdateSettings()));

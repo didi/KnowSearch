@@ -13,7 +13,6 @@
     <artifactId>arius-admin-task</artifactId>
 
     <dependencies>
-        
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>
             <artifactId>arius-admin-core</artifactId>
@@ -34,13 +33,12 @@
             <artifactId>capacity-plan</artifactId>
         </dependency>
 
+        <!-- logi -->
         <dependency>
-            <groupId>com.didiglobal.logi</groupId>
-            <artifactId>auv-job-spring-boot-starter</artifactId>
-            <version>1.1-20210608.092437-3</version>
+            <groupId>io.github.zqrferrari</groupId>
+            <artifactId>logi-job-spring-boot-starter</artifactId>
+            <version>1.0.22</version>
         </dependency>
 
     </dependencies>
-
-
 </project>

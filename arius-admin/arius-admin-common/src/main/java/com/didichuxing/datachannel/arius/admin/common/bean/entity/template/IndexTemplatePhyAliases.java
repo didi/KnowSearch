@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
 public class IndexTemplatePhyAliases implements Serializable {
     private JSONObject aliases;
 

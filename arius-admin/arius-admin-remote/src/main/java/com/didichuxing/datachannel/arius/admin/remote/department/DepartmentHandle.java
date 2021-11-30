@@ -12,5 +12,5 @@ public interface DepartmentHandle extends BaseHandle {
     /**
      * 获取部门列表
      */
-    Result listDepartment();
+    Result<String> listDepartment();
 }

@@ -1,50 +1,50 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.model.Client;
+import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
+import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
+import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
+import com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesStatsRequestBuilder;
+import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.closeindex.ESIndicesCloseIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.deletebyquery.ESIndicesDeleteByQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.deleteindex.ESIndicesDeleteIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
+import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.getindex.ESIndicesGetIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.openindex.ESIndicesOpenIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.putindex.ESIndicesPutIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.indices.updatemapping.ESIndicesUpdateMappingResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.updatesettings.ESIndicesUpdateSettingsResponse;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Repository;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.model.type.ESVersion;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.index.stats.ESIndicesStatsRequestBuilder;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.index.stats.IndicesStatsLevel;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.model.Client;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.closeindex.ESIndicesCloseIndexResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.deletebyquery.ESIndicesDeleteByQueryResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.deleteindex.ESIndicesDeleteIndexResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.getalias.AliasIndexNode;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.getindex.ESIndicesGetIndexResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.openindex.ESIndicesOpenIndexResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.putindex.ESIndicesPutIndexResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.updatemapping.ESIndicesUpdateMappingResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.updatesettings.ESIndicesUpdateSettingsResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.IndexConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.google.common.collect.Lists;
-
-import javax.annotation.Nullable;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -52,8 +52,6 @@ import javax.annotation.Nullable;
  */
 @Repository
 public class ESIndexDAO extends BaseESDAO {
-
-    private static final ILog LOGGER = LogFactory.getLog(ESIndexDAO.class);
 
     /**
      * 创建索引
@@ -63,7 +61,7 @@ public class ESIndexDAO extends BaseESDAO {
      */
     public boolean createIndex(String cluster, String indexName) {
         if (exist(cluster, indexName)) {
-            LOGGER.warn("index already exist||cluster={}||indexName={}", cluster, indexName);
+            LOGGER.warn("class=ESIndexDAO||method=createIndex||index already exist||cluster={}||indexName={}", cluster, indexName);
             return true;
         }
 
@@ -85,7 +83,7 @@ public class ESIndexDAO extends BaseESDAO {
     private ESClient fetchESClientByCluster(String clusterName) {
         ESClient client = esOpClient.getESClient(clusterName);
         if (client == null) {
-            LOGGER.warn("cannot get es client||cluster={}", clusterName);
+            LOGGER.warn("class=ESIndexDAO||method=fetchESClientByCluster||cannot get es client,cluster={}", clusterName);
         }
         return client;
     }
@@ -99,14 +97,14 @@ public class ESIndexDAO extends BaseESDAO {
      */
     public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig) {
         if (exist(cluster, indexName)) {
-            LOGGER.warn("index already exist||cluster={}||indexName={}", cluster, indexName);
+            LOGGER.warn("class=ESIndexDAO||method=createIndexWithConfig||index already exist||cluster={}||indexName={}", cluster, indexName);
             return true;
         }
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
             indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
             ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName)
-                    .setIndexConfig(indexConfig).execute().actionGet(5, TimeUnit.MINUTES);
+                    .setIndexConfig(indexConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.MINUTES);
             return response.getAcknowledged();
         } else {
             return false;
@@ -114,7 +112,7 @@ public class ESIndexDAO extends BaseESDAO {
     }
 
     /**
-     * 索引是否已存在
+     * 根据表达式判断索引是否已存在
      * @param cluster
      * @return
      */
@@ -123,6 +121,23 @@ public class ESIndexDAO extends BaseESDAO {
         if (client != null) {
             return client.admin().indices().prepareExists(expression).execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).isExists();
+        }
+        return false;
+    }
+
+    /**
+     * 根据索引名称判断索引是否已存在
+     * @param cluster    集群名称
+     * @param indexName  索引名称
+     * @return
+     */
+    public boolean existByClusterAndIndexName(String cluster, String indexName) {
+        Client client = fetchESClientByCluster(cluster);
+        ESIndicesExistsRequest esIndicesExistsRequest = new ESIndicesExistsRequest();
+        esIndicesExistsRequest.setIndex(indexName);
+        if (client != null) {
+            return client.admin().indices().exists(esIndicesExistsRequest)
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).isExists();
         }
         return false;
     }
@@ -154,7 +169,8 @@ public class ESIndexDAO extends BaseESDAO {
      */
     public MappingConfig getIndexMapping(String cluster, String indexName) {
         if (!exist(cluster, indexName)) {
-            LOGGER.warn("index not exist||cluster={}||indexName={}", cluster, indexName);
+            LOGGER.warn("class=ESIndexDAO||method=getIndexMapping||cluster={}||indexName={}||msg=index not exist",
+                    cluster, indexName);
             return null;
         }
 
@@ -173,7 +189,8 @@ public class ESIndexDAO extends BaseESDAO {
      */
     public boolean updateIndexMapping(String cluster, String indexName, MappingConfig mappingConfig) {
         if (!exist(cluster, indexName)) {
-            LOGGER.warn("index not exist||cluster={}||indexName={}", cluster, indexName);
+            LOGGER.warn("class=ESIndexDAO||method=updateIndexMapping||cluster={}||indexName={}||msg=index not exist",
+                    cluster, indexName);
             return true;
         }
 
@@ -183,12 +200,13 @@ public class ESIndexDAO extends BaseESDAO {
             return false;
         }
 
-        for (String typeName : typeConfigMap.keySet()) {
+        for(Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()){
+            String typeName = entry.getKey();
             ESIndicesUpdateMappingResponse response = client.admin().indices().prepareUpdateMapping()
                 .setIndex(indexName).setType(typeName).setTypeConfig(typeConfigMap.get(typeName)).execute()
                 .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-            if (!response.getAcknowledged()) {
+            if (!response.getAcknowledged().booleanValue()) {
                 return false;
             }
         }
@@ -204,7 +222,8 @@ public class ESIndexDAO extends BaseESDAO {
      */
     public boolean deleteIndex(String cluster, String indexName) {
         if (!exist(cluster, indexName)) {
-            LOGGER.warn("index not exist||cluster={}||indexName={}", cluster, indexName);
+            LOGGER.warn("class=ESIndexDAO||method=deleteIndex||cluster={}||indexName={}||msg=index not exist",
+                    cluster, indexName);
             return true;
         }
 
@@ -232,8 +251,31 @@ public class ESIndexDAO extends BaseESDAO {
                 indices.addAll(response.getCatIndexResults());
             }
         } catch (Exception e) {
-            LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
+            LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}||expression={}",
                     e.getMessage(), cluster, expression, e);
+        }
+
+        return indices;
+    }
+
+    /**
+     * 获取集群中全量索引
+     * @param cluster
+     * @return
+     */
+    public List<CatIndexResult> catIndices(String cluster) {
+        List<CatIndexResult> indices = Lists.newArrayList();
+
+        try {
+            ESClient client = fetchESClientByCluster(cluster);
+            if (client != null) {
+                ESIndicesCatIndicesResponse response = client.admin().indices().prepareCatIndices().execute()
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                indices.addAll(response.getCatIndexResults());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}",
+                    e.getMessage(), cluster, e);
         }
 
         return indices;
@@ -350,6 +392,17 @@ public class ESIndexDAO extends BaseESDAO {
     }
 
     /**
+     * 设置索引只写属性
+     * @param cluster 集群
+     * @param indexNames 索引列表
+     * @param block 配置
+     * @return result
+     */
+    public boolean blockIndexRead(String cluster, List<String> indexNames, boolean block) {
+        return putIndexSetting(cluster, indexNames, INDEX_BLOCKS_READ, String.valueOf(block), "false");
+    }
+
+    /**
      * refresh索引
      * @param cluster 集群
      * @param indexNames 索引列表
@@ -456,15 +509,19 @@ public class ESIndexDAO extends BaseESDAO {
     public MultiIndexsConfig getIndexConfigs(String clusterName, String indexName) {
         ESClient esClient = esOpClient.getESClient(clusterName);
 
+        if (null == esClient) {
+            return null;
+        }
+
         ESIndicesGetIndexRequest request = new ESIndicesGetIndexRequest();
         request.setIndices(indexName);
 
         ESIndicesGetIndexResponse response = null;
         try {
-            response = esClient.admin().indices().getIndex(request).actionGet(120, TimeUnit.SECONDS);
+            response = esClient.admin().indices().getIndex(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOGGER.warn("get index fail || clusterName={}||indexName={}|| msg={}", clusterName, indexName,
-                    e.getMessage(), e);
+            LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
+                    clusterName, indexName, e.getMessage(), e);
         }
 
         if (response == null) {
@@ -476,6 +533,49 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         return response.getIndexsMapping();
+    }
+
+    /**
+     * 根据集群名称和索引名称获取索引setting信息
+     * @param clusterName       集群名称
+     * @param indexNames        索引列表
+     * @param tryTimes
+     * @return
+     */
+    public Map<String, IndexConfig> getIndicesSetting(String clusterName, List<String> indexNames, int tryTimes) {
+        ESClient esClient = esOpClient.getESClient(clusterName);
+        if (null == esClient) {
+            return Maps.newHashMap();
+        }
+
+        ESIndicesGetAllSettingRequest request = new ESIndicesGetAllSettingRequest();
+        request.setDefaultSettingFlag(true);
+        request.mapping(false);
+        request.alias(false);
+        request.setIndices(ListUtils.strList2StringArray(indexNames));
+
+        ESIndicesGetIndexResponse response = null;
+        try {
+            for (int i = 0; i < tryTimes; i++) {
+                response = esClient.admin().indices().getIndex(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                if (null != response) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
+                    clusterName, e.getMessage(), e);
+        }
+
+        if (response == null) {
+            return Maps.newHashMap();
+        }
+
+        if (!EnvUtil.isOnline()) {
+            LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||response={}", JSON.toJSONString(response));
+        }
+
+        return response.getIndexsMapping().getIndexConfigMap();
     }
 
     /**
@@ -502,7 +602,7 @@ public class ESIndexDAO extends BaseESDAO {
             } else {
                 builder = esClient.admin().indices().prepareStats(templateExp);
             }
-            response = builder.setStore(true).setDocs(true).execute().actionGet(120, TimeUnit.SECONDS);
+            response = builder.setStore(true).setDocs(true).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
             LOGGER.error("class=ClusterClientPool||method=getIndexNodes||clusterName={}||errMsg=get {} index stats error. ",
                     clusterName, templateExp, e);

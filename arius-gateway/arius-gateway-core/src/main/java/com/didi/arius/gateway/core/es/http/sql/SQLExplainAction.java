@@ -2,10 +2,10 @@ package com.didi.arius.gateway.core.es.http.sql;
 
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.es.http.HttpRestHandler;
-import com.didi.arius.gateway.query.SqlElasticRequestBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestStatus;
+import org.nlpcn.es4sql.query.SqlElasticRequestBuilder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,11 +16,9 @@ import org.springframework.stereotype.Component;
 @Component("sqlExplainAction")
 public class SQLExplainAction extends HttpRestHandler {
 	
-	public static final String NAME = "sqlExplain";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "sqlExplain";
 	}
     
 	@Override

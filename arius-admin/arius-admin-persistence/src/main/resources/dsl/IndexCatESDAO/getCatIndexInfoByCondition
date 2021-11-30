@@ -1,0 +1,16 @@
+{
+  "query": {
+    "bool": {
+      "must": "boolMustDsl"
+    }
+  },
+  "sort": [
+      {
+        "%s": {
+          "order": "%s"
+        }
+      }
+    ],
+  "from": %d,
+  "size": %d
+}

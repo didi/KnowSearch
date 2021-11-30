@@ -16,7 +16,11 @@ public class FilterAggs extends BucketAggsType {
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
+	public FilterAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);

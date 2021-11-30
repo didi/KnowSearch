@@ -41,7 +41,7 @@
             <if test="id != null">and id = #{id}</if>
             <if test="appId != null">and appid = #{appId}</if>
             <if test="templateId != null">and template = #{templateId}</if>
-            <if test="type != null">and `type` &lt;= #{type}</if>
+            <if test="type != null">and `type` = #{type}</if>
             <if test="responsible != null">
                 and (responsible_ids = #{responsible}
                 or responsible_ids like concat(#{responsible},',%')
@@ -49,6 +49,7 @@
                 or responsible_ids like concat('%,', #{responsible},',%'))
             </if>
         </trim>
+        and status = 1
         order by id desc
     </select>
 
@@ -56,6 +57,12 @@
         update appid_template_info
         set status = 0
         where id = #{authId}
+    </delete>
+
+    <delete id="deleteByTemplate" parameterType="int">
+        update appid_template_info
+        set status = 0
+        where template = #{templateId}
     </delete>
 
     <select id="listWithRwAuthsByAppId" parameterType="int" resultMap="BaseResultMap">
@@ -86,11 +93,18 @@
         where template = #{templateId} and (`type` = 2 or `type` = 3) and status = 1
     </select>
 
+    <select id="getByTemplateId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from appid_template_info
+        where template = #{templateId} and status = 1
+    </select>
+
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from appid_template_info
-        where id = #{authId}
+        where id = #{authId} and status = 1
     </select>
 
     <select id="listWithRwAuths" resultMap="BaseResultMap">
@@ -107,6 +121,4 @@
         from appid_template_info
         where `type` = 1 and status = 1
     </select>
-
-
 </mapper>

@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.*;
 import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 
 /**
@@ -50,29 +51,21 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component
 public class RestGetFieldMappingAction extends StatAction {
 
-    public static final String NAME = "restGetFieldMapping";
-
-    @Override
-    public String name() {
-        return NAME;
-    }
-
-
     @Override
     protected void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client)
             throws Exception {
-        String index = request.param("index");
-        if (index == null) {
+        String index = request.param(INDEX);
+        if (null == index) {
             sendDirectResponse(queryContext, new BytesRestResponse(RestStatus.OK, XContentType.JSON.restContentType(), "{}"));
             return;
         }
 
         if (isIndexType(queryContext)) {
-            String[] indicesArr = Strings.splitStringByCommaToArray(request.param("index"));
+            String[] indicesArr = Strings.splitStringByCommaToArray(index);
             List<String> indices = Lists.newArrayList(indicesArr);
             IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
 
-            client = esClusterService.getClient(queryContext, indexTemplate);
+            client = esClusterService.getClient(queryContext, indexTemplate, actionName);
         }
 
         if (queryContext.isFromKibana() && !queryContext.isNewKibana() && !client.getEsVersion().startsWith(QueryConsts.ES_VERSION_2_PREFIX)) {
@@ -81,27 +74,27 @@ public class RestGetFieldMappingAction extends StatAction {
                 @Override
                 public void onResponse(DirectResponse response) {
                     if (response.getRestStatus() == RestStatus.OK) {
-                        JSONObject res = JSON.parseObject(response.getResponseContent());
+                        JSONObject jsonRes = JSON.parseObject(response.getResponseContent());
 
                         // for kibana
                         // 遍历索引
-                        for (Map.Entry<String, Object> entry : res.entrySet()) {
+                        for (Map.Entry<String, Object> entry : jsonRes.entrySet()) {
                             JSONObject index = (JSONObject) entry.getValue();
-                            JSONObject mappings = index.getJSONObject("mappings");
+                            JSONObject mapping = index.getJSONObject("mappings");
 
-                            if (mappings == null || mappings.size() == 0) {
+                            if (mapping == null || mapping.size() == 0) {
                                 continue;
                             }
 
                             // 遍历mappings
                             if (finalClient.getEsVersion().startsWith(QueryConsts.ES_VERSION_7_PREFIX)) {
                                 //7.x single type
-                                String text = mappings.toJSONString();
-                                Set<String> keySet = new HashSet<>(mappings.keySet());
-                                keySet.forEach(key -> mappings.remove(key));
-                                mappings.put("_doc", JSON.parseObject(text));
+                                String text = mapping.toJSONString();
+                                Set<String> keySet = new HashSet<>(mapping.keySet());
+                                keySet.forEach(mapping::remove);
+                                mapping.put("_doc", JSON.parseObject(text));
                             }
-                            for (Map.Entry<String, Object> inEntry : mappings.entrySet()) {
+                            for (Map.Entry<String, Object> inEntry : mapping.entrySet()) {
                                 JSONObject type = (JSONObject) inEntry.getValue();
 
                                 //遍历type
@@ -112,7 +105,7 @@ public class RestGetFieldMappingAction extends StatAction {
                             }
                         }
 
-                        response.setResponseContent(res.toJSONString());
+                        response.setResponseContent(jsonRes.toJSONString());
                     }
 
                     super.onResponse(response);
@@ -132,45 +125,40 @@ public class RestGetFieldMappingAction extends StatAction {
 
             //遍历field
             for (Map.Entry<String, Object> mappingEntry : mapping.entrySet()) {
-                JSONObject fieldType = (JSONObject) mappingEntry.getValue();
-                if (fieldType.containsKey("type")) {
-                    String strType = fieldType.getString("type");
-                    String isIndex = fieldType.getString("index");
-                    if (strType.equalsIgnoreCase("text")) {
-                        fieldType.put("type", "string");
-                        if (isIndex == null || isIndex.equals("true")) {
-                            fieldType.put("index", "analyzed");
-                        }
-                    } else if (strType.equalsIgnoreCase("keyword")) {
-                        fieldType.put("type", "string");
-                        if (isIndex == null || isIndex.equals("true")) {
-                            fieldType.put("index", "not_analyzed");
-                        }
-                    }
-                }
+                JSONObject fieldTypes = (JSONObject) mappingEntry.getValue();
+                dealType(fieldTypes);
 
                 //如果type包含fields，则继续处理fields
-                if (fieldType.containsKey("fields")) {
-                    for (Map.Entry<String, Object> fieldsEntry : fieldType.getJSONObject("fields").entrySet()) {
+                if (fieldTypes.containsKey("fields")) {
+                    for (Map.Entry<String, Object> fieldsEntry : fieldTypes.getJSONObject("fields").entrySet()) {
                         JSONObject fields = (JSONObject) fieldsEntry.getValue();
-                        if (fields.containsKey("type")) {
-                            String strType = fields.getString("type");
-                            String isIndex = fields.getString("index");
-                            if (strType.equalsIgnoreCase("text")) {
-                                fields.put("type", "string");
-                                if (isIndex == null || isIndex.equals("true")) {
-                                    fields.put("index", "analyzed");
-                                }
-                            } else if (strType.equalsIgnoreCase("keyword")) {
-                                fields.put("type", "string");
-                                if (isIndex == null || isIndex.equals("true")) {
-                                    fields.put("index", "not_analyzed");
-                                }
-                            }
-                        }
+                        dealType(fields);
                     }
                 }
             }
         }
+    }
+
+    private void dealType(JSONObject fieldTypes) {
+        if (fieldTypes.containsKey("type")) {
+            String strType = fieldTypes.getString("type");
+            String isIndex = fieldTypes.getString(INDEX);
+            if (strType.equalsIgnoreCase("text")) {
+                fieldTypes.put("type", STRING_NAME);
+                if (isIndex == null || isIndex.equals("true")) {
+                    fieldTypes.put(INDEX, "analyzed");
+                }
+            } else if (strType.equalsIgnoreCase("keyword")) {
+                fieldTypes.put("type", STRING_NAME);
+                if (isIndex == null || isIndex.equals("true")) {
+                    fieldTypes.put(INDEX, "not_analyzed");
+                }
+            }
+        }
+    }
+
+    @Override
+    public String name() {
+        return "restGetFieldMapping";
     }
 }

@@ -3,13 +3,17 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.arius;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserStatusEnum;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/18
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AriusUserInfoPO extends BasePO {
     /**
      * 主键

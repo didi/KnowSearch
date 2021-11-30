@@ -1,15 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.metadata.utils;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class ReadExprValueUtil {
     protected static final ILog LOGGER = LogFactory.getLog(ReadExprValueUtil.class);
+
+    private ReadExprValueUtil(){}
 
     /**
      * 返回 表达式的值(double)
@@ -24,8 +24,8 @@ public class ReadExprValueUtil {
                 return -1;
             }
             List<String> list = resolveString(expr);
-            list = nifix_to_post(list);
-            return get_postfis_result(list);
+            list = nifixToPost(list);
+            return getPostfisResult(list);
         } catch (Exception e) {
             LOGGER.error("class=ReadExprValueUtil||method=readExprValue||expr={}", expr, e);
             return 0.0d;
@@ -38,14 +38,14 @@ public class ReadExprValueUtil {
      * @param list
      * @return
      */
-    private static double get_postfis_result(List<String> list) {
-        Stack<String> stack = new Stack<String>();
+    private static double getPostfisResult(List<String> list) {
+        Deque<String> stack = new ArrayDeque<>();
         for (String str : list) {
             if (isDouble(str)) {
                 stack.push(str);
             } else if (isStrOperator(str)) {
-                double n2 = Double.valueOf(stack.pop());
-                double n1 = Double.valueOf(stack.pop());
+                double n2 = Double.parseDouble(stack.pop());
+                double n1 = Double.parseDouble(stack.pop());
                 stack.push("" + getCountResult(str, n1, n2));
             }
         }
@@ -59,11 +59,7 @@ public class ReadExprValueUtil {
      * @return
      */
     private static boolean isNum(char ch) {
-        if (ch <= '9' && ch >= '0') {
-            return true;
-        } else {
-            return false;
-        }
+        return  (ch <= '9' && ch >= '0');
     }
 
     /**
@@ -88,11 +84,7 @@ public class ReadExprValueUtil {
      * @return
      */
     private static boolean isOperator(char ch) {
-        if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '=') {
-            return true;
-        } else {
-            return false;
-        }
+        return (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '=');
     }
 
     /**
@@ -102,11 +94,7 @@ public class ReadExprValueUtil {
      * @return
      */
     private static boolean isStrOperator(String s) {
-        if (s.equals("+") || s.equals("-") || s.equals("*") || s.equals("/") || s.equals("(") || s.equals(")")) {
-            return true;
-        } else {
-            return false;
-        }
+        return (s.equals("+") || s.equals("-") || s.equals("*") || s.equals("/") || s.equals("(") || s.equals(")"));
     }
 
     /**
@@ -121,7 +109,7 @@ public class ReadExprValueUtil {
             return true;
         } else if ((o1.equals("+") || o1.equals("-")) && (o2.equals("*") || o2.equals("/"))) {
             return false;
-        } else if ((o1.equals("*") || o1.equals("/")) && ((o2.equals("*") || o2.equals("/")))) {
+        } else if ((o1.equals("*") || o1.equals("/")) && (o2.equals("*") || o2.equals("/"))) {
             return true;
         } else if ((o1.equals("+") || o1.equals("-")) && (o2.equals("+") || o2.equals("-"))) {
             return true;
@@ -136,9 +124,9 @@ public class ReadExprValueUtil {
      * @param list
      * @return
      */
-    private static List<String> nifix_to_post(List<String> list) {
-        Stack<String> stack = new Stack<String>();
-        List<String> plist = new ArrayList<String>();
+    private static List<String> nifixToPost(List<String> list) {
+        Deque<String> stack = new ArrayDeque<>();
+        List<String> plist = new ArrayList<>();
         for (String str : list) {
             if (isDouble(str)) {
                 plist.add(str);
@@ -146,25 +134,7 @@ public class ReadExprValueUtil {
             if (isStrOperator(str) && stack.isEmpty()) {
                 stack.push(str);
             } else if (isStrOperator(str) && !stack.isEmpty()) {
-                String last = stack.lastElement();
-                if (heightOperator(str, last) || str.equals("(")) {
-                    stack.push(str);
-                } else if (!heightOperator(str, last) && !str.equals(")")) {
-                    while (!stack.isEmpty() && !stack.lastElement().equals("(")) {
-                        plist.add(stack.pop());
-                    }
-                    stack.push(str);
-                } else if (str.equals(")")) {
-                    while (!stack.isEmpty()) {
-                        String pop = stack.pop();
-                        if (!pop.equals("(")) {
-                            plist.add(pop);
-                        }
-                        if (pop.equals("(")) {
-                            break;
-                        }
-                    }
-                }
+                change(stack, plist, str);
             }
 
         }
@@ -175,6 +145,28 @@ public class ReadExprValueUtil {
         return plist;
     }
 
+    private static void change(Deque<String> stack, List<String> plist, String str) {
+        String last = stack.getLast();
+        if (heightOperator(str, last) || str.equals("(")) {
+            stack.push(str);
+        } else if (!heightOperator(str, last) && !str.equals(")")) {
+            while (!stack.isEmpty() && !stack.getLast().equals("(")) {
+                plist.add(stack.pop());
+            }
+            stack.push(str);
+        } else if (str.equals(")")) {
+            while (!stack.isEmpty()) {
+                String pop = stack.pop();
+                if (!pop.equals("(")) {
+                    plist.add(pop);
+                }
+                if (pop.equals("(")) {
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * 分解表达式
      *
@@ -182,7 +174,7 @@ public class ReadExprValueUtil {
      * @return
      */
     private static List<String> resolveString(String str) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         String temp = "";
         for (int i = 0; i < str.length(); i++) {
             final char ch = str.charAt(i);
@@ -245,19 +237,19 @@ public class ReadExprValueUtil {
             char ch = str.charAt(i);
             char chb = str.charAt(i + 1);
             if ((!isNum(ch) && i == 0) && ch != '(' || !isNum(chb) && (i == str.length() - 2) && chb != ')') {
-                LOGGER.error("首尾不是数字---->" + ch + chb);
+                LOGGER.error("class=ReadExprValueUtil||method=isExpression||errMsg=首尾不是数字---->{}", ch + chb);
                 return false;
             }
             if ((ch == '.' && !isNum(chb)) || (!isNum(ch) && chb == '.')) {
-                LOGGER.error("小数点前后不是数字--->" + ch + chb);
+                LOGGER.error("class=ReadExprValueUtil||method=isExpression||errMsg=小数点前后不是数字--->{}", ch + chb);
                 return false;
             }
             if (isOperator(ch) && !isNum(chb) && chb != '(') {
-                LOGGER.error("运算符不是数字--->" + ch + chb);
+                LOGGER.error("class=ReadExprValueUtil||method=isExpression||errMsg=运算符不是数字--->{}", ch + chb);
                 return false;
             }
             if (isNum(ch) && !isOperator(chb) && chb != '.' && chb != ')' && chb != 'E' && !isNum(chb)) {
-                LOGGER.error("数字后不是运算符--->" + ch + chb);
+                LOGGER.error("class=ReadExprValueUtil||method=isExpression||errMsg=数字后不是运算符--->{}",ch + chb);
                 return false;
             }
             if (ch == '(') {
@@ -268,7 +260,7 @@ public class ReadExprValueUtil {
             }
         }
         if (flag != 0) {
-            LOGGER.error("括号不匹配--->");
+            LOGGER.error("class=ReadExprValueUtil||method=isExpression||errMsg=括号不匹配--->");
             return false;
         }
         return true;
@@ -310,12 +302,12 @@ public class ReadExprValueUtil {
      * @return 返回2位小数数值
      */
     public static double getDouble2(Double value) {
-        BigDecimal bg = new BigDecimal(value);
+        BigDecimal bg = BigDecimal.valueOf(value);
         return bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public static double getDouble3(Double value) {
-        BigDecimal bg = new BigDecimal(value);
+        BigDecimal bg = BigDecimal.valueOf(value);
         return bg.setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 }

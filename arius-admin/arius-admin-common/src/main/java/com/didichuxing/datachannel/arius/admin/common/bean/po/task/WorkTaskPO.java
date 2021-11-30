@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.task;
 
-import java.util.Date;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * WorkTask PO 对象
@@ -13,6 +13,8 @@ import lombok.Data;
  */
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class WorkTaskPO extends BasePO {
 
     /**
@@ -52,16 +54,6 @@ public class WorkTaskPO extends BasePO {
      * 创建人 
      */
     private String creator;
-
-    /**
-     * 创建时间 
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间 
-     */
-    private Date updateTime;
 
     /**
      * 标记删除 

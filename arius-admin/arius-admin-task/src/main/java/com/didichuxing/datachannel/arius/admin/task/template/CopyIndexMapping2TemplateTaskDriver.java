@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.didiglobal.logi.auvjob.annotation.Task;
-import com.didiglobal.logi.auvjob.core.consensual.ConsensualConstant;
-import com.didiglobal.logi.auvjob.core.job.Job;
-import com.didiglobal.logi.auvjob.core.job.JobContext;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.job.annotation.Task;
+import com.didiglobal.logi.job.common.TaskResult;
+import com.didiglobal.logi.job.core.job.Job;
+import com.didiglobal.logi.job.core.job.JobContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -15,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Task(name = "copyIndexMapping2TemplateTaskDriver",
         description = "copyMapping任务，定期将索引中的mapping拷贝到模板中，避免大量的put-mappin",
         cron = "0 45 9/12 * * ?",
-        autoRegister = true,
-        consensual = ConsensualConstant.RANDOM)
+        autoRegister = true)
 public class CopyIndexMapping2TemplateTaskDriver implements Job {
 
     private static final ILog             LOGGER = LogFactory.getLog(CopyIndexMapping2TemplateTaskDriver.class);
@@ -25,11 +24,11 @@ public class CopyIndexMapping2TemplateTaskDriver implements Job {
     private CopyIndexMapping2TemplateTask task;
 
     @Override
-    public Object execute(JobContext jobContext) throws Exception {
+    public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=CopyIndexMapping2TemplateTaskDriver||method=execute||msg=DeleteExpireIndexTask start.");
         if (task.execute()) {
-            return "success";
+            return TaskResult.SUCCESS;
         }
-        return "fail";
+        return TaskResult.FAIL;
     }
 }

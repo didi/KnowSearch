@@ -48,7 +48,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_OP + "/template/physical")
-@Api(value = "es集群资源接口(REST)")
+@Api(tags = "es集群物理模板接口(REST)")
 public class TemplatePhysicalController {
 
     @Autowired
@@ -63,14 +63,18 @@ public class TemplatePhysicalController {
     @Autowired
     private ESIndexService      esIndexService;
 
+    /**
+     * @param param
+     * @param request
+     * @return
+     * @deprecated
+     */
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取物理模板列表接口")
-    @Deprecated
     public Result<List<ConsoleTemplatePhyVO>> list(@RequestBody IndexTemplatePhysicalDTO param,
                                                    HttpServletRequest request) {
-        return Result
-            .buildSucc(templatePhyManager.getConsoleTemplatePhyVOSFromCache(param, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(templatePhyManager.getConsoleTemplatePhyVOS(param, HttpRequestUtils.getAppId(request)));
     }
 
     @GetMapping("/get")
@@ -78,7 +82,6 @@ public class TemplatePhysicalController {
     @ApiOperation(value = "获取指定物理模板接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "physicalId", value = "物理模板ID", required = true) })
     public Result<IndexTemplatePhysicalVO> get(@RequestParam("physicalId") Long physicalId) {
-        //TODO:lyn, 是否携带索引监控图
         return Result.buildSucc(
             ConvertUtil.obj2Obj(templatePhyService.getTemplateById(physicalId), IndexTemplatePhysicalVO.class));
     }
@@ -87,15 +90,15 @@ public class TemplatePhysicalController {
     @ResponseBody
     @ApiOperation(value = "删除物理模板接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "physicalId", value = "物理模板ID", required = true) })
-    public Result delete(HttpServletRequest request,
+    public Result<Void> delete(HttpServletRequest request,
                          @RequestParam(value = "physicalId") Long physicalId) throws ESOperateException {
-        return templatePhyService.delTemplate(physicalId, HttpRequestUtils.getOperator(request));
+        return templatePhyManager.delTemplate(physicalId, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/upgrade")
     @ResponseBody
     @ApiOperation(value = "升级物理模板接口", notes = "")
-    public Result upgrade(HttpServletRequest request,
+    public Result<Void> upgrade(HttpServletRequest request,
                           @RequestBody TemplatePhysicalUpgradeDTO param) throws ESOperateException {
         return templatePhyManager.upgradeTemplate(param, HttpRequestUtils.getOperator(request));
     }
@@ -103,7 +106,7 @@ public class TemplatePhysicalController {
     @PutMapping("/copy")
     @ResponseBody
     @ApiOperation(value = "复制物理模板接口", notes = "")
-    public Result copy(HttpServletRequest request,
+    public Result<Void> copy(HttpServletRequest request,
                        @RequestBody TemplatePhysicalCopyDTO param) throws AdminOperateException {
         return templatePhyManager.copyTemplate(param, HttpRequestUtils.getOperator(request));
     }
@@ -111,7 +114,7 @@ public class TemplatePhysicalController {
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑物理资源接口", notes = "")
-    public Result edit(HttpServletRequest request,
+    public Result<Void> edit(HttpServletRequest request,
                        @RequestBody IndexTemplatePhysicalDTO param) throws ESOperateException {
         return templatePhyManager.editTemplate(param, HttpRequestUtils.getOperator(request));
     }
@@ -119,14 +122,14 @@ public class TemplatePhysicalController {
     @PutMapping("/checkMeta")
     @ResponseBody
     @ApiOperation(value = "元数据校验接口", notes = "")
-    public Result checkMeta() {
+    public Result<Void> checkMeta() {
         return Result.build(templatePhyManager.checkMeta());
     }
 
     @PutMapping("/dcdr")
     @ResponseBody
     @ApiOperation(value = "创建dcdr链路", notes = "")
-    public Result createDcdr(HttpServletRequest request,
+    public Result<Void> createDcdr(HttpServletRequest request,
                              @RequestBody TemplatePhysicalDCDRDTO param) throws AdminOperateException {
         if (param.getPhysicalId() != null && CollectionUtils.isEmpty(param.getPhysicalIds())) {
             param.setPhysicalIds(Collections.singletonList(param.getPhysicalId()));
@@ -142,7 +145,7 @@ public class TemplatePhysicalController {
     @DeleteMapping("/dcdr")
     @ResponseBody
     @ApiOperation(value = "删除dcdr链路", notes = "")
-    public Result deleteDcdr(HttpServletRequest request,
+    public Result<Void> deleteDcdr(HttpServletRequest request,
                              @RequestBody TemplatePhysicalDCDRDTO param) throws AdminOperateException {
         return templateDcdrManager.deletePhyDcdr(param, HttpRequestUtils.getOperator(request));
     }
@@ -153,7 +156,7 @@ public class TemplatePhysicalController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "String", name = "indices", value = "索引", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "String", name = "rack", value = "rack", required = true) })
-    public Result batchUpdateIndexRack(HttpServletRequest request, @RequestParam(value = "cluster") String cluster,
+    public Result<Void> batchUpdateIndexRack(HttpServletRequest request, @RequestParam(value = "cluster") String cluster,
                                        @RequestParam(value = "indices") String indices,
                                        @RequestParam(value = "rack") String rack) throws AdminOperateException {
         return Result

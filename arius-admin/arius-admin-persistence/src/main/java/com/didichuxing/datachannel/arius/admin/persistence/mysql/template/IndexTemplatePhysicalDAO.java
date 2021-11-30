@@ -30,6 +30,10 @@ public interface IndexTemplatePhysicalDAO {
     List<TemplatePhysicalPO> getByClusterAndStatus(@Param("cluster") String cluster,
                                                    @Param("status") Integer status);
 
+    List<TemplatePhysicalPO> getByClusterAndNameAndStatus(@Param("cluster") String cluster,
+                                                               @Param("name") String name,
+                                                               @Param("status") Integer status);
+
     List<TemplatePhysicalPO> listByClusterAndStatus(@Param("cluster") String cluster,
                                                     @Param("status") Integer status);
 

@@ -16,6 +16,10 @@ public class RestIndicesController extends BaseHttpRestController {
     @Autowired
     private RestIndicesAction restIndicesAction;
 
+    public RestIndicesController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_cat/indices", this);

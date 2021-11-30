@@ -5,11 +5,12 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggr;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggrMap;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +20,7 @@ import java.util.Set;
 import static com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil.getDateStr;
 
 @Component
+@NoArgsConstructor
 public class AppIdTemplateAccessESDAO extends BaseESDAO {
 
     /**

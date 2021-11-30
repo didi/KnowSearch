@@ -1,12 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 资源的配置
  * @author wangshu
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LogicResourceConfig {
 
     public static final String  QUOTA_CTL_NONE                     = "none";

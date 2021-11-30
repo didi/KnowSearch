@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * ES插件包管理
@@ -9,6 +11,8 @@ import lombok.Data;
  * @since 2020-08-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESPluginPO extends BasePO {
 
     private static final long serialVersionUID = 1L;
@@ -54,11 +58,6 @@ public class ESPluginPO extends BasePO {
     private String            creator;
 
     /**
-     * S3上的url
-     */
-    private String            s3url;
-
-    /**
      * 是否为系统默认： 0 否  1 是
      */
     private Boolean           pDefault;
@@ -67,9 +66,4 @@ public class ESPluginPO extends BasePO {
      * 标记删除
      */
     private Boolean           deleteFlag;
-
-    /**
-     * 标记插件是否已经安装：0 未安装  1 已安装
-     */
-    private Boolean           installFlag;
 }

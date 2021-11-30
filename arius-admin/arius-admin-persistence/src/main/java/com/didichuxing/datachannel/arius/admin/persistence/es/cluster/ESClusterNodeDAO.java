@@ -1,13 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.cluster.nodessetting.ESClusterNodesSettingResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
@@ -20,25 +16,6 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
  */
 @Repository
 public class ESClusterNodeDAO extends BaseESDAO {
-
-    private static final ILog LOGGER = LogFactory.getLog(ESClusterNodeDAO.class);
-
-    /**
-     * 获取集群node属性
-     * @param cluster 集群名称
-     * @return client原生对象列表
-     */
-    public Map<String, ClusterNodeSettings> getSettingsByCluster(String cluster) {
-        try {
-            ESClient client = esOpClient.getESClient(cluster);
-            ESClusterNodesSettingResponse response = client.admin().cluster().prepareNodesSetting().execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return response.getNodes();
-        } catch (Exception e) {
-            LOGGER.warn("method=getSettingsByCluster||cluster={}||mg=get es setting fail", cluster, e);
-            return null;
-        }
-    }
 
     /**
      * 获取节点上的索引个数

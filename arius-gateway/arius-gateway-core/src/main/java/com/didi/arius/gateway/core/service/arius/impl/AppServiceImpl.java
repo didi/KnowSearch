@@ -1,5 +1,6 @@
 package com.didi.arius.gateway.core.service.arius.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.exception.IndexNotPermittedException;
 import com.didi.arius.gateway.common.exception.InvalidParameterException;
@@ -17,6 +18,7 @@ import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.AppDetailResponse;
 import com.didi.arius.gateway.remote.response.AppListResponse;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@NoArgsConstructor
 public class AppServiceImpl implements AppService {
 
     private static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
@@ -56,7 +59,7 @@ public class AppServiceImpl implements AppService {
 
     @PostConstruct
     public void init(){
-        threadPool.submitScheduleAtFixTask( () -> resetAppInfo(), 0, schedulePeriod );
+        threadPool.submitScheduleAtFixTask(this::resetAppInfo, 0, schedulePeriod);
     }
 
     @Override
@@ -71,7 +74,8 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public AppDetail getAppDetailFromIp(String ip) {
-        for (String mask : ipToAppMap.keySet()) {
+        for(Map.Entry<String, AppDetail> entry : ipToAppMap.entrySet()){
+            String mask = entry.getKey();
             if (Regex.ipMaskMatch(ip, mask)) {
                 return ipToAppMap.get(mask);
             }
@@ -82,7 +86,12 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public void resetAppInfo(){
-        resetAppDetails();
+        try {
+            resetAppDetails();
+        } catch (Exception e) {
+            bootLogger.error("resetAppDetails error", e);
+        }
+
     }
 
     @Override
@@ -157,7 +166,7 @@ public class AppServiceImpl implements AppService {
 
             appDetail.setAggrAnalyzeEnable(appDetailResponse.getAggrAnalyzeEnable() == 1);
             appDetail.setAnalyzeResponseEnable(appDetailResponse.getAnalyzeResponseEnable() == 1);
-            appDetail.setSearchType(appDetailResponse.getSearchType() == 1 ? AppDetail.RequestType.Index : AppDetail.RequestType.Cluster);
+            appDetail.setSearchType(AppDetail.RequestType.integerToType(appDetailResponse.getSearchType()));
             appDetail.setIsRoot(appDetailResponse.getIsRoot());
 
             FlowThreshold flowThreshold = new FlowThreshold();
@@ -172,7 +181,8 @@ public class AppServiceImpl implements AppService {
             rateLimitService.resetAppAreaFlow(appDetail.getId(), flowThreshold);
         }
 
-        bootLogger.info("resetAppDetails done,old appDetails size={}, new appDetails size={}", appDetails.size(), newAppDetails.size());
+        String appDetailLog = JSON.toJSONString(newAppDetails);
+        bootLogger.info("resetAppDetails done,old appDetails size={}, new appDetails size={}, detail={}", appDetails.size(), newAppDetails.size(), appDetailLog);
 
         appDetails = newAppDetails;
 
@@ -199,14 +209,14 @@ public class AppServiceImpl implements AppService {
             throw new InvalidParameterException("no index to query");
         }
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (String index : indices) {
             rejectAllIndexQuery(baseContext, index);
 
             buffer.append(index);
             buffer.append(",");
             boolean matched = indexTemplateService.checkIndex(index, indexExps);
-            if (false == matched) {
+            if (!matched) {
                 throw new IndexNotPermittedException("appid=" + baseContext.getAppDetail().getId() + " don't have permission to access " + index);
             }
         }

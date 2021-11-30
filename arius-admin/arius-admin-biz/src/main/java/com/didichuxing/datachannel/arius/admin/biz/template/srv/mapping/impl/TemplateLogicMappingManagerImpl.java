@@ -12,26 +12,24 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.mapping.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeConfig;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeDefine;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.TypeProperties;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefine;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeProperties;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -52,25 +50,34 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
  * @author zhonghua
  * @date 2019-06-13
  */
-@Service
+@Service("templateLogicMappingManagerImpl")
 public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements TemplateLogicMappingManager {
 
     private static final ILog              LOGGER = LogFactory.getLog(TemplateLogicServiceImpl.class);
 
+    private static final String PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS = "物理模板不存在，ID:%d";
     @Autowired
-    private TemplatePhyMappingManager templatePhyMappingManager;
+    private TemplatePhyMappingManager       templatePhyMappingManager;
 
     @Autowired
     private TemplateSattisService           templateSattisService;
 
     @Autowired
-    private TemplatePreCreateManager templatePreCreateManager;
+    private TemplatePreCreateManager        templatePreCreateManager;
 
     @Autowired
     private IndexTemplateConfigDAO         templateConfigDAO;
 
     @Autowired
     private IndexTemplateTypeDAO           indexTemplateTypeDAO;
+
+    private static final String TEXT_STR       = "text";
+    private static final String TYPE_STR       = "type";
+    private static final String KEYWORD_STR    = "keyword";
+    private static final String IK_SMART_SRT   = "ik_smart";
+    private static final String ANALYZER_STR   = "analyzer";
+    private static final String DOC_VALUES_STR = "doc_values";
+    private static final String INDEX_STR      = "index";
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -86,22 +93,23 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     @Override
     public Result<IndexTemplateLogicWithMapping> getTemplateWithMapping(Integer logicId) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
-            .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
             LOGGER.warn("method=getTemplateWithFieldById||msg=not exit||logicId={}", logicId);
-            return Result.buildFrom(Result.buildNotExist("模板不存在"));
+            return Result.buildNotExist("模板不存在");
         }
 
         IndexTemplateLogicWithMapping templateLogicWithMapping = ConvertUtil.obj2Obj(templateLogicWithPhysical,
-            IndexTemplateLogicWithMapping.class);
+                IndexTemplateLogicWithMapping.class);
+
         if (templateLogicWithPhysical.hasPhysicals()) {
             MappingConfig mergeMappingConfig = null;
             List<IndexTemplatePhy> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
             for (IndexTemplatePhy templatePhysical : masterPhysicalTemplates) {
 
                 Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
-                    templatePhysical.getName());
+                        templatePhysical.getName());
                 if (result.failed()) {
                     return Result.buildFrom(result);
                 }
@@ -113,18 +121,20 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                 }
             }
 
-            templateLogicWithMapping
-                .setTypeProperties(genAriusTypePropertyList(templateLogicWithMapping, mergeMappingConfig.getMapping()));
-            List<Field> fields = null;
-            try {
-                fields = convert2Fields(mergeMappingConfig);
-            } catch (Throwable t) {
-                LOGGER.warn("method=getTemplateWithFieldById||msg=mappint to field error||logicId={}", logicId, t);
+            if(null != mergeMappingConfig){
+                templateLogicWithMapping
+                        .setTypeProperties(genAriusTypePropertyList(templateLogicWithMapping, mergeMappingConfig.getMapping()));
+                List<Field> fields = null;
+                try {
+                    fields = convert2Fields(mergeMappingConfig);
+                } catch (Exception t) {
+                    LOGGER.warn("method=getTemplateWithFieldById||msg=mappint to field error||logicId={}", logicId, t);
+                }
+                if (fields == null) {
+                    fields = new ArrayList<>();
+                }
+                templateLogicWithMapping.setFields(fields);
             }
-            if (fields == null) {
-                fields = new ArrayList<>();
-            }
-            templateLogicWithMapping.setFields(fields);
         } else {
             LOGGER.warn("method=getTemplateWithFieldById||msg=not deploy||logicId={}", logicId);
         }
@@ -138,31 +148,31 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return Result.buildSucc();
         }
 
-        Result result = checkFieldInternal(fields);
+        Result<Void> result = checkFieldInternal(fields);
         if (result.failed()) {
             return result;
         }
 
         List<IndexTemplatePhy> templatePhysicals = getMasterTemplatePhysicalByLogicId(logicId);
 
-        if (templatePhysicals == null) {
+        if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildFail("can not find template physical, logicId:" + logicId);
         }
 
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-            result = getDiffMapping(templatePhysical.getCluster(), templatePhysical.getName(), fields);
-            if (result.failed()) {
-                return result;
+            Result<MappingConfig> getDiffMappingResult = getDiffMapping(templatePhysical.getCluster(), templatePhysical.getName(), fields);
+            if (getDiffMappingResult.failed()) {
+                return getDiffMappingResult;
             }
 
-            MappingConfig mappingConfig = (MappingConfig) result.getData();
+            MappingConfig mappingConfig = getDiffMappingResult.getData();
 
             String cluster = templatePhysical.getCluster();
             String template = templatePhysical.getName();
             String mapping = mappingConfig.toJson().toJSONString();
-            result = templatePhyMappingManager.checkMapping(cluster, template, mapping, true);
-            if (result.failed()) {
-                return result;
+            Result<Void> checkMappingResult = templatePhyMappingManager.checkMapping(cluster, template, mapping, true);
+            if (checkMappingResult.failed()) {
+                return checkMappingResult;
             }
         }
 
@@ -170,19 +180,19 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     @Override
-    public Result updateFields(Integer logicId, List<Field> fields, Set<String> removeFields) {
+    public Result<Void> updateFields(Integer logicId, List<Field> fields, Set<String> removeFields) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
-            .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
-            return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
+            return Result.buildNotExist(String.format(PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS, logicId));
         }
 
         if (!templateLogicWithPhysical.hasPhysicals()) {
-            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+            return Result.buildNotExist(String.format(PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS, logicId));
         }
 
-        Result checkFieldResult = checkFieldInternal(fields);
+        Result<Void> checkFieldResult = checkFieldInternal(fields);
         if (checkFieldResult.failed()) {
             return checkFieldResult;
         }
@@ -193,18 +203,18 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                 return Result.buildFail("can not find template physical, logicId:" + logicId);
             }
 
-            Result getDiffResult = getDiffMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName(),
-                fields);
+            Result<MappingConfig> getDiffResult = getDiffMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName(),
+                    fields);
             if (getDiffResult.failed()) {
-                return getDiffResult;
+                return Result.buildFrom(getDiffResult);
             }
 
-            String diffMapping = ((MappingConfig) getDiffResult.getData()).toJson().toJSONString();
+            String diffMapping = getDiffResult.getData().toJson().toJSONString();
 
-            Result editResult = templatePhyMappingManager.updateMappingAndMerge(
-                masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName(), diffMapping, removeFields);
+            Result<Void> editResult = templatePhyMappingManager.updateMappingAndMerge(
+                    masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName(), diffMapping, removeFields);
             if (editResult.failed()) {
-                return editResult;
+                return Result.buildFrom(editResult);
             }
         }
 
@@ -213,7 +223,6 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     @Override
     public AriusTypeProperty fields2Mapping(List<Field> fields) {
-
         if (fields == null) {
             fields = Lists.newArrayList();
         }
@@ -223,7 +232,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         ariusTypeProperty.setTypeName(AdminConstant.DEFAULT_TYPE);
         if (CollectionUtils.isNotEmpty(fields)) {
             ariusTypeProperty
-                .setProperties(mappingConfig.getMapping().get(AdminConstant.DEFAULT_TYPE).getProperties().toJson());
+                    .setProperties(mappingConfig.getMapping().get(AdminConstant.DEFAULT_TYPE).getProperties().toJson());
         } else {
             ariusTypeProperty.setProperties(new JSONObject());
         }
@@ -239,10 +248,10 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     @Override
     public Result<List<MappingOptimize>> getTemplateMappingOptimize(Integer logicId) {
         IndexTemplateLogicWithPhyTemplates logicWithPhysical = this.templateLogicService
-            .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(logicId);
 
         if (logicWithPhysical == null) {
-            return Result.buildFrom(Result.buildNotExist("模板不存在"));
+            return Result.buildNotExist("模板不存在");
         }
 
         List<IndexTemplatePhy> templatePhysicals = logicWithPhysical.fetchMasterPhysicalTemplates();
@@ -250,7 +259,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         List<MappingOptimize> mappingOptimizes = new ArrayList<>();
         for (IndexTemplatePhy master : templatePhysicals) {
             Result<MappingOptimize> getMappingOptimizeResult = templateSattisService
-                .getMappingOptimize(master.getCluster(), master.getName());
+                    .getMappingOptimize(master.getCluster(), master.getName());
 
             if (getMappingOptimizeResult.failed()) {
                 return Result.buildFrom(getMappingOptimizeResult);
@@ -262,11 +271,10 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         }
 
         if (CollectionUtils.isEmpty(mappingOptimizes)) {
-            return Result.buildFrom(Result.buildParamIllegal("mapping不需要优化"));
+            return Result.buildParamIllegal("mapping不需要优化");
         }
 
         return Result.buildSucc(mappingOptimizes);
-
     }
 
     /**
@@ -277,7 +285,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      * @return result
      */
     @Override
-    public Result modifySchemaOptimize(ConsoleTemplateSchemaOptimizeDTO optimizeDTO, String operator) {
+    public Result<Void> modifySchemaOptimize(ConsoleTemplateSchemaOptimizeDTO optimizeDTO, String operator) {
 
         if (CollectionUtils.isEmpty(optimizeDTO.getItems())) {
             return Result.buildParamIllegal("未选择优化字段");
@@ -291,14 +299,14 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     @Override
     public Result updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
-            .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
             return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
         }
 
         if (!templateLogicWithPhysical.hasPhysicals()) {
-            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+            return Result.buildNotExist(String.format(PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS, logicId));
         }
 
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
@@ -306,23 +314,23 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
 
-            Result mappingConfigResult = AriusIndexMappingConfigUtils
-                .parseMappingConfig(ariusTypeProperty.toMappingJSON().toJSONString());
+            Result<MappingConfig> mappingConfigResult = AriusIndexMappingConfigUtils
+                    .parseMappingConfig(ariusTypeProperty.toMappingJSON().toJSONString());
             if (mappingConfigResult.failed()) {
                 return mappingConfigResult;
             }
 
-            MappingConfig mappingConfig = (MappingConfig) mappingConfigResult.getData();
+            MappingConfig mappingConfig = mappingConfigResult.getData();
 
-            if (config != null && config.getDisableSourceFlags() != null && config.getDisableSourceFlags()) {
+            if (config != null && config.getDisableSourceFlags() != null && config.getDisableSourceFlags().booleanValue()) {
                 LOGGER.info("method=updateMappingForNew||msg=disableSource||logicId={}", logicId);
                 mappingConfig.disableSource();
             } else {
                 mappingConfig.enableSource();
             }
 
-            Result result = templatePhyMappingManager.updateMapping(templatePhysical.getCluster(),
-                templatePhysical.getName(), mappingConfig.toJson().toJSONString());
+            Result<Void> result = templatePhyMappingManager.updateMapping(templatePhysical.getCluster(),
+                    templatePhysical.getName(), mappingConfig.toJson().toJSONString());
 
             if (result.failed()) {
                 return result;
@@ -333,28 +341,29 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     @Override
-    public Result updateProperties(Integer logicId, List<AriusTypeProperty> ariusTypePropertyList) {
+    public Result<Void> updateProperties(Integer logicId, List<AriusTypeProperty> ariusTypePropertyList) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
-            .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
             return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
         }
 
         if (!templateLogicWithPhysical.hasPhysicals()) {
-            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+            return Result.buildNotExist(String.format(PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS, logicId));
         }
 
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-            Result result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
-                templatePhysical.getName());
+            Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
+                    templatePhysical.getName());
             if (result.failed()) {
-                return result;
+                return Result.buildFrom(result);
             }
-            MappingConfig templateMappingConfig = (MappingConfig) (result.getData());
+
+            MappingConfig templateMappingConfig = (result.getData());
             Map<String, TypeConfig> typeConfigMap = templateMappingConfig.getMapping();
 
             if (typeConfigMap.size() == 0) {
@@ -367,8 +376,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                 //高版本es集群只有一个type
                 TypeProperties typeProperties = new TypeProperties(ariusTypeProperty.getProperties());
 
-                for (String type : typeConfigMap.keySet()) {
-                    typeConfigMap.get(type).setProperties(typeProperties);
+                for (Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()) {
+                    entry.getValue().setProperties(typeProperties);
                 }
             }
 
@@ -378,11 +387,11 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                 templateMappingConfig.enableSource();
             }
 
-            result = templatePhyMappingManager.updateMapping(templatePhysical.getCluster(),
-                templatePhysical.getName(), templateMappingConfig.toJson().toJSONString());
+            Result<Void> updateMappingResult = templatePhyMappingManager.updateMapping(templatePhysical.getCluster(),
+                    templatePhysical.getName(), templateMappingConfig.toJson().toJSONString());
 
-            if (result.failed()) {
-                return result;
+            if (updateMappingResult.failed()) {
+                return Result.buildFrom(updateMappingResult);
             }
         }
 
@@ -398,7 +407,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
+    public Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
         }
@@ -411,27 +420,26 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return Result.buildParamIllegal("fields或mapping信息非法");
         }
 
-        if (schemaDTO.getFields() != null) {
-            if (!clusterIsHighVersion(schemaDTO.getLogicId())) {
-                return Result.buildParamIllegal("该功能只支持高高版本es， 请使用JSON格式");
-            }
+        if (schemaDTO.getFields() != null &&
+                !clusterIsHighVersion(schemaDTO.getLogicId())) {
+            return Result.buildParamIllegal("该功能只支持高版本(6.5.1以上)es， 请使用JSON格式");
         }
 
-        Result saveSpecialFieldResult = saveSpecialField(schemaDTO, operator);
+        Result<Void> saveSpecialFieldResult = saveSpecialField(schemaDTO, operator);
         if (saveSpecialFieldResult.failed()) {
             return saveSpecialFieldResult;
         }
 
         // 修改mapping信息.
         if (schemaDTO.getTypeProperties() != null) {
-            Result result = updateProperties(schemaDTO.getLogicId(), schemaDTO.getTypeProperties());
+            Result<Void> result = updateProperties(schemaDTO.getLogicId(), schemaDTO.getTypeProperties());
             if (result.success()) {
                 templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
             }
             return result;
         }
 
-        Result result = updateFields(schemaDTO.getLogicId(), schemaDTO.getFields(), schemaDTO.getRemoveFieldNames());
+        Result<Void> result = updateFields(schemaDTO.getLogicId(), schemaDTO.getFields(), schemaDTO.getRemoveFieldNames());
         if (result.success()) {
             // 记录操作记录
             operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_MAPPING, schemaDTO.getLogicId(), "-", operator);
@@ -449,7 +457,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         List<IndexTemplateType> templateTypes = templateLogicService.getLogicTemplateTypes(templateLogic.getId());
         Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
-            IndexTemplateType::getName);
+                IndexTemplateType::getName);
 
         List<AriusTypeProperty> ariusTypePropertyList = Lists.newArrayList();
 
@@ -459,7 +467,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             ariusTypePropertyList.add(buildOneType(templateLogic, typeConfigMap, typeName2IndexTemplateTypeMap));
         } else {
             List<AriusTypeProperty> typeProperties = buildMultiType(templateLogic, typeConfigMap,
-                typeName2IndexTemplateTypeMap);
+                    typeName2IndexTemplateTypeMap);
             ariusTypePropertyList.addAll(typeProperties);
         }
 
@@ -468,97 +476,129 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     private List<IndexTemplatePhy> getMasterTemplatePhysicalByLogicId(Integer logicId) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
-            .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
             LOGGER.warn("method=getIndexTemplatePhysicalByLogicId||msg=not exit||logicId={}", logicId);
-            return null;
+            return Collections.emptyList();
         }
 
         if (templateLogicWithPhysical.hasPhysicals()) {
             return templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         } else {
             LOGGER.warn("method=getIndexTemplatePhysicalByLogicId||msg=not deploy||logicId={}", logicId);
-            return null;
+            return Collections.emptyList();
         }
     }
 
-    private Result checkFieldInternal(List<Field> fields) {
+    private Result<Void> checkFieldInternal(List<Field> fields) {
         Set<String> existName = Sets.newHashSet();
         for (Field field : fields) {
-            if (AriusObjUtils.isNull(field)) {
-                return Result.buildParamIllegal("字段信息不能为空");
-            }
+            Result<Void> result = checkField(existName, field);
+            if (result.failed()) {return result;}
+        }
+        return Result.buildSucc();
+    }
 
-            if (AriusObjUtils.isNull(field.getName())) {
-                return Result.buildParamIllegal("字段名称不能为空");
-            }
-            if (existName.contains(field.getName())) {
-                return Result.buildParamIllegal("字段名称重复");
-            }
-            existName.add(field.getName());
+    private Result<Void> checkField(Set<String> existName, Field field) {
+        Result<Void> result = checkFieldIsNull(field);
+        if (result.failed()) {return result;}
 
-            if (AriusObjUtils.isNull(field.getType())) {
-                return Result.buildParamIllegal("字段类型不能为空");
-            }
-            TypeEnum typeEnum = TypeEnum.valueFrom(field.getType());
-            if (typeEnum.equals(TypeEnum.UNKNOWN)) {
-                return Result.buildParamIllegal("字段类型非法");
-            }
-
-            if (AriusObjUtils.isNull(field.getIndexType())) {
-                return Result.buildParamIllegal("检索类型不能为空");
-            }
-            IndexEnum indexEnum = IndexEnum.valueFrom(field.getIndexType());
-            if (indexEnum.equals(IndexEnum.UNKNOWN)) {
-                return Result.buildParamIllegal("检索类型非法");
-            }
-
-            if (field.getAnalyzerType() != null) {
-                AnalyzerEnum analyzerEnum = AnalyzerEnum.valueFrom(field.getAnalyzerType());
-                if (analyzerEnum.equals(AnalyzerEnum.UNKNOWN)) {
-                    return Result.buildParamIllegal("分词器非法");
-                }
-            }
-
-            if (field.getSortType() != null) {
-                SortEnum sortEnum = SortEnum.valueFrom(field.getSortType());
-                if (sortEnum.equals(SortEnum.UNKNOWN)) {
-                    return Result.buildParamIllegal("是否排序非法非法");
-                }
-            }
-
-            if (field.getType().equals(TypeEnum.STRING.getCode())) {
-                if (field.getIndexType().equals(IndexEnum.FUZZY.getCode())) {
-                    if (field.getSortType() != null && field.getSortType().equals(SortEnum.YES.getCode())) {
-                        return Result.buildParamIllegal("全文检索的string类型不能排序");
-                    }
-                    if (field.getAnalyzerType() == null) {
-                        return Result.buildParamIllegal("全文检索的string类型必须选择分词器");
-                    }
-                }
-
-                if (field.getIndexType().equals(IndexEnum.FORBID.getCode())) {
-                    if (field.getAnalyzerType() != null) {
-                        return Result.buildParamIllegal("不检索的string类型不能配置分词器");
-                    }
-                }
-
-                if (field.getIndexType().equals(IndexEnum.EXACT.getCode())) {
-                    if (field.getAnalyzerType() != null) {
-                        return Result.buildParamIllegal("精确检索的string类型不能配置分词器");
-                    }
-                }
-            } else {
-                if (field.getIndexType().equals(IndexEnum.FUZZY.getCode())) {
-                    return Result.buildParamIllegal("非string类型的字段不能配置全文检索");
-                }
-                if (field.getAnalyzerType() != null) {
-                    return Result.buildParamIllegal("非string类型的字段不能配置分词器");
-                }
-            }
+        if (existName.contains(field.getName())) {
+            return Result.buildParamIllegal("字段名称重复");
         }
 
+        existName.add(field.getName());
+        TypeEnum typeEnum = TypeEnum.valueFrom(field.getType());
+        if (typeEnum.equals(TypeEnum.UNKNOWN)) {
+            return Result.buildParamIllegal("字段类型非法");
+        }
+
+        IndexEnum indexEnum = IndexEnum.valueFrom(field.getIndexType());
+        if (indexEnum.equals(IndexEnum.UNKNOWN)) {
+            return Result.buildParamIllegal("检索类型非法");
+        }
+
+        if (field.getAnalyzerType() != null) {
+            Result<Void> checkFieldAnalyzerTypeResult = checkFieldAnalyzerType(field);
+            if (checkFieldAnalyzerTypeResult.failed()) {return checkFieldAnalyzerTypeResult;}
+        }
+
+        if (field.getSortType() != null) {
+            Result<Void> checkFieldSortTypeResult = checkFieldSortType(field);
+            if (checkFieldSortTypeResult.failed()) {return checkFieldSortTypeResult;}
+        }
+
+        Result<Void> checkFieldTypeResult = checkfieldType(field);
+        if (checkFieldTypeResult.failed()) {return checkFieldTypeResult;}
+
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkFieldAnalyzerType(Field field) {
+        AnalyzerEnum analyzerEnum = AnalyzerEnum.valueFrom(field.getAnalyzerType());
+        if (analyzerEnum.equals(AnalyzerEnum.UNKNOWN)) {
+            return Result.buildParamIllegal("分词器非法");
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkFieldSortType(Field field) {
+        SortEnum sortEnum = SortEnum.valueFrom(field.getSortType());
+        if (sortEnum.equals(SortEnum.UNKNOWN)) {
+            return Result.buildParamIllegal("是否排序非法非法");
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkfieldType(Field field) {
+        if (field.getType().equals(TypeEnum.STRING.getCode())) {
+            Result<Void> checkFieldStringResult = handleCheckFieldString(field);
+            if (checkFieldStringResult.failed()) {return checkFieldStringResult;}
+        } else {
+            if (field.getIndexType().equals(IndexEnum.FUZZY.getCode())) {
+                return Result.buildParamIllegal("非string类型的字段不能配置全文检索");
+            }
+            if (field.getAnalyzerType() != null) {
+                return Result.buildParamIllegal("非string类型的字段不能配置分词器");
+            }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleCheckFieldString(Field field) {
+        if (field.getIndexType().equals(IndexEnum.FUZZY.getCode())) {
+            if (field.getSortType() != null && field.getSortType().equals(SortEnum.YES.getCode())) {
+                return Result.buildParamIllegal("全文检索的string类型不能排序");
+            }
+            if (field.getAnalyzerType() == null) {
+                return Result.buildParamIllegal("全文检索的string类型必须选择分词器");
+            }
+        }
+        if (field.getIndexType().equals(IndexEnum.FORBID.getCode()) &&
+                field.getAnalyzerType() != null) {
+            return Result.buildParamIllegal("不检索的string类型不能配置分词器");
+        }
+        if (field.getIndexType().equals(IndexEnum.EXACT.getCode()) &&
+                field.getAnalyzerType() != null) {
+            return Result.buildParamIllegal("精确检索的string类型不能配置分词器");
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkFieldIsNull(Field field) {
+        if (AriusObjUtils.isNull(field)) {
+            return Result.buildParamIllegal("字段信息不能为空");
+        }
+        if (AriusObjUtils.isNull(field.getName())) {
+            return Result.buildParamIllegal("字段名称不能为空");
+        }
+        if (AriusObjUtils.isNull(field.getType())) {
+            return Result.buildParamIllegal("字段类型不能为空");
+        }
+        if (AriusObjUtils.isNull(field.getIndexType())) {
+            return Result.buildParamIllegal("检索类型不能为空");
+        }
         return Result.buildSucc();
     }
 
@@ -567,46 +607,36 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      */
     private Result<MappingConfig> getDiffMapping(String cluster, String template, List<Field> fields) {
         try {
-            Result result = templatePhyMappingManager.getMapping(cluster, template);
+            Result<MappingConfig> result = templatePhyMappingManager.getMapping(cluster, template);
             if (result.failed()) {
                 return result;
             }
 
-            MappingConfig mappingConfig = (MappingConfig) result.getData();
+            MappingConfig mappingConfig = result.getData();
             Set<String> typeNames = mappingConfig.getMapping().keySet();
             if (typeNames.size() > 1) {
-                return Result
-                    .buildFail("模板中有多个type，请使用mapping json的方式修改, " + "cluster:" + cluster + ", template:" + template);
+                return Result.buildFrom(Result
+                        .buildFail("模板中有多个type，请使用mapping json的方式修改, " + "cluster:" + cluster + ", template:" + template));
             }
 
             String type = "type";
             if (typeNames.size() == 1) {
                 for (String typeName : typeNames) {
                     type = typeName;
-                    break;
                 }
             }
 
-            List<Field> srcFields = convert2Fields(mappingConfig);
-
+            List<Field> srcFields  = convert2Fields(mappingConfig);
             List<Field> diffFields = diffField(srcFields, fields);
 
             mappingConfig = convert2Mapping(type, diffFields);
 
             return Result.buildSucc(mappingConfig);
 
-        } catch (Throwable t) {
-            return Result.buildFail(t.getMessage());
+        } catch (Exception e) {
+            return Result.buildFail(e.getMessage());
         }
     }
-
-    private static final String TEXT_STR       = "text";
-    private static final String TYPE_STR       = "type";
-    private static final String KEYWORD_STR    = "keyword";
-    private static final String IK_SMART_SRT   = "ik_smart";
-    private static final String ANALYZER_STR   = "analyzer";
-    private static final String DOC_VALUES_STR = "doc_values";
-    private static final String INDEX_STR      = "index";
 
     private List<Field> convert2Fields(MappingConfig mapping) {
         Map<String/*typeName*/, Map<String/*field*/, TypeDefine>> typeFieldTypeMap = mapping.getTypeDefines();
@@ -614,93 +644,22 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         Set<String> fieldNames = new HashSet<>();
 
-        for (String typeName : typeFieldTypeMap.keySet()) {
-            for (String fieldName : typeFieldTypeMap.get(typeName).keySet()) {
+        for (Map.Entry<String/*typeName*/, Map<String/*field*/, TypeDefine>> entry : typeFieldTypeMap.entrySet()) {
+            for (String fieldName : entry.getValue().keySet()) {
                 if (fieldNames.contains(fieldName)) {
                     continue;
                 } else {
                     fieldNames.add(fieldName);
                 }
 
-                TypeDefine td = typeFieldTypeMap.get(typeName).get(fieldName);
+                TypeDefine td = entry.getValue().get(fieldName);
 
                 JSONObject typeObj = td.getDefine();
                 if (typeObj.isEmpty()) {
                     continue;
                 }
 
-                Field field = new Field();
-                field.setName(fieldName);
-                if (TEXT_STR.equals(typeObj.getString(TYPE_STR))) {
-                    field.setType(TypeEnum.STRING.getCode());
-
-                    // 分词配置
-                    if (typeObj.containsKey(ANALYZER_STR) && IK_SMART_SRT.equals(typeObj.getString(ANALYZER_STR))) {
-                        field.setAnalyzerType(AnalyzerEnum.IK.getCode());
-                    } else {
-                        field.setAnalyzerType(AnalyzerEnum.DEFAULT.getCode());
-                    }
-
-                    if (typeObj.containsKey(INDEX_STR) && !typeObj.getBoolean(INDEX_STR)) {
-                        field.setIndexType(IndexEnum.FORBID.getCode());
-                        field.setAnalyzerType(null);
-                    } else {
-                        field.setIndexType(IndexEnum.FUZZY.getCode());
-                    }
-
-                    if (typeObj.containsKey(DOC_VALUES_STR)) {
-                        if (typeObj.getBoolean(DOC_VALUES_STR)) {
-                            field.setSortType(SortEnum.YES.getCode());
-                        } else {
-                            field.setSortType(SortEnum.NO.getCode());
-                        }
-                    }
-
-                } else if (KEYWORD_STR.equals(typeObj.get(TYPE_STR))) {
-                    field.setType(TypeEnum.STRING.getCode());
-
-                    if (typeObj.containsKey(INDEX_STR) && !typeObj.getBoolean(INDEX_STR)) {
-                        field.setIndexType(IndexEnum.FORBID.getCode());
-                    } else {
-                        field.setIndexType(IndexEnum.EXACT.getCode());
-                    }
-
-                    if (typeObj.containsKey(DOC_VALUES_STR)) {
-                        if (typeObj.getBoolean(DOC_VALUES_STR)) {
-                            field.setSortType(SortEnum.YES.getCode());
-                        } else {
-                            field.setSortType(SortEnum.NO.getCode());
-                        }
-                    }
-
-                } else if (TypeEnum.INT.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
-                           || TypeEnum.LONG.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
-                           || TypeEnum.Boolean.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
-                           || TypeEnum.DOUBLE.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
-                           || TypeEnum.DATE.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
-                           || TypeEnum.OBJECT.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))) {
-                    field.setType(typeObj.getString(TYPE_STR));
-
-                    if (typeObj.containsKey(INDEX_STR) && !typeObj.getBoolean(INDEX_STR)) {
-                        field.setIndexType(IndexEnum.FORBID.getCode());
-                    } else {
-                        field.setIndexType(IndexEnum.EXACT.getCode());
-                    }
-
-                    if (typeObj.containsKey(DOC_VALUES_STR)) {
-                        if (typeObj.getBoolean(DOC_VALUES_STR)) {
-                            field.setSortType(SortEnum.YES.getCode());
-                        } else {
-                            field.setSortType(SortEnum.NO.getCode());
-                        }
-                    }
-
-                } else {
-                    field.setType(TypeEnum.UNKNOWN.getCode());
-                    field.setAnalyzerType(AnalyzerEnum.UNKNOWN.getCode());
-                    field.setIndexType(IndexEnum.UNKNOWN.getCode());
-                    field.setSortType(SortEnum.UNKNOWN.getCode());
-                }
+                Field field = getField(fieldName, typeObj);
 
                 ret.add(field);
             }
@@ -711,6 +670,96 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         }
 
         return ret;
+    }
+
+    private Field getField(String fieldName, JSONObject typeObj) {
+        Field field = new Field();
+        field.setName(fieldName);
+
+        if (TEXT_STR.equals(typeObj.getString(TYPE_STR))) {
+            handleTypeText(typeObj, field);
+        } else if (KEYWORD_STR.equals(typeObj.get(TYPE_STR))) {
+            handleTypeKeyword(typeObj, field);
+        } else if (TypeEnum.INT.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
+                || TypeEnum.LONG.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
+                || TypeEnum.BOOLEAN.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
+                || TypeEnum.DOUBLE.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
+                || TypeEnum.DATE.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
+                || TypeEnum.OBJECT.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))) {
+            handleTypeNonString(typeObj, field);
+        } else {
+            handleTypeUnknown(field);
+        }
+        return field;
+    }
+
+    private void handleTypeUnknown(Field field) {
+        field.setType(TypeEnum.UNKNOWN.getCode());
+        field.setAnalyzerType(AnalyzerEnum.UNKNOWN.getCode());
+        field.setIndexType(IndexEnum.UNKNOWN.getCode());
+        field.setSortType(SortEnum.UNKNOWN.getCode());
+    }
+
+    private void handleTypeNonString(JSONObject typeObj, Field field) {
+        field.setType(typeObj.getString(TYPE_STR));
+
+        if (typeObj.containsKey(INDEX_STR) && !typeObj.getBoolean(INDEX_STR).booleanValue()) {
+            field.setIndexType(IndexEnum.FORBID.getCode());
+        } else {
+            field.setIndexType(IndexEnum.EXACT.getCode());
+        }
+
+        if (typeObj.containsKey(DOC_VALUES_STR)) {
+            if (typeObj.getBoolean(DOC_VALUES_STR).booleanValue()) {
+                field.setSortType(SortEnum.YES.getCode());
+            } else {
+                field.setSortType(SortEnum.NO.getCode());
+            }
+        }
+    }
+
+    private void handleTypeKeyword(JSONObject typeObj, Field field) {
+        field.setType(TypeEnum.STRING.getCode());
+
+        if (typeObj.containsKey(INDEX_STR) && !typeObj.getBoolean(INDEX_STR).booleanValue()) {
+            field.setIndexType(IndexEnum.FORBID.getCode());
+        } else {
+            field.setIndexType(IndexEnum.EXACT.getCode());
+        }
+
+        if (typeObj.containsKey(DOC_VALUES_STR)) {
+            if (typeObj.getBoolean(DOC_VALUES_STR).booleanValue()) {
+                field.setSortType(SortEnum.YES.getCode());
+            } else {
+                field.setSortType(SortEnum.NO.getCode());
+            }
+        }
+    }
+
+    private void handleTypeText(JSONObject typeObj, Field field) {
+        field.setType(TypeEnum.STRING.getCode());
+
+        // 分词配置
+        if (typeObj.containsKey(ANALYZER_STR) && IK_SMART_SRT.equals(typeObj.getString(ANALYZER_STR))) {
+            field.setAnalyzerType(AnalyzerEnum.IK.getCode());
+        } else {
+            field.setAnalyzerType(AnalyzerEnum.DEFAULT.getCode());
+        }
+
+        if (typeObj.containsKey(INDEX_STR) && !typeObj.getBoolean(INDEX_STR).booleanValue()) {
+            field.setIndexType(IndexEnum.FORBID.getCode());
+            field.setAnalyzerType(null);
+        } else {
+            field.setIndexType(IndexEnum.FUZZY.getCode());
+        }
+
+        if (typeObj.containsKey(DOC_VALUES_STR)) {
+            if (typeObj.getBoolean(DOC_VALUES_STR).booleanValue()) {
+                field.setSortType(SortEnum.YES.getCode());
+            } else {
+                field.setSortType(SortEnum.NO.getCode());
+            }
+        }
     }
 
     private MappingConfig convert2Mapping(String type, List<Field> fields) {
@@ -725,50 +774,9 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
             JSONObject typeObj = new JSONObject();
             if (typeEnum == TypeEnum.STRING) {
-                if (indexEnum == IndexEnum.FUZZY) {
-                    typeObj.put(TYPE_STR, TEXT_STR);
-                } else {
-                    typeObj.put(TYPE_STR, KEYWORD_STR);
-                }
-
-                if (indexEnum == IndexEnum.FORBID) {
-                    typeObj.put(INDEX_STR, false);
-                } else if (indexEnum == IndexEnum.EXACT) {
-                    typeObj.put(INDEX_STR, true);
-                }
-
-                if (sortEnum == SortEnum.NO) {
-                    typeObj.put(DOC_VALUES_STR, false);
-                } else if (sortEnum == SortEnum.YES) {
-                    typeObj.put(DOC_VALUES_STR, true);
-                }
-
-                if (analyzerEnum == AnalyzerEnum.IK) {
-                    typeObj.put(ANALYZER_STR, IK_SMART_SRT);
-                }
-
+                handleTypeString(indexEnum, sortEnum, analyzerEnum, typeObj);
             } else {
-                typeObj.put(TYPE_STR, typeEnum.getCode());
-
-                if (typeEnum != TypeEnum.OBJECT && typeEnum != TypeEnum.ARRAY) {
-                    if (indexEnum == IndexEnum.FORBID) {
-                        typeObj.put(INDEX_STR, false);
-                    } else if (indexEnum == IndexEnum.EXACT) {
-                        typeObj.put(INDEX_STR, true);
-                    }
-
-                    if (sortEnum == SortEnum.NO) {
-                        typeObj.put(DOC_VALUES_STR, false);
-                    } else if (sortEnum == SortEnum.YES) {
-                        typeObj.put(DOC_VALUES_STR, true);
-                    }
-
-                    // 如果新增，或者改为Date类型，则自动增加format
-                    if (typeEnum == TypeEnum.DATE) {
-                        typeObj.put("format",
-                            "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis");
-                    }
-                }
+                handleTypeNonString(typeEnum, indexEnum, sortEnum, typeObj);
             }
 
             mappingTypes.put(field.getName(), new TypeDefine(typeObj));
@@ -776,16 +784,63 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         MappingConfig mappingConfig = new MappingConfig();
 
-        for (String field : mappingTypes.keySet()) {
+        for (Map.Entry<String, TypeDefine> entry : mappingTypes.entrySet()) {
+            String field = entry.getKey();
             List<String> fieldList = new ArrayList<>();
-            for (String fieldName : field.split("\\.")) {
-                fieldList.add(fieldName);
-            }
-
-            mappingConfig.addFields(type, fieldList, mappingTypes.get(field));
+            fieldList.addAll(Arrays.asList(field.split("\\.")));
+            mappingConfig.addFields(type, fieldList, entry.getValue());
         }
 
         return mappingConfig;
+    }
+
+    private void handleTypeNonString(TypeEnum typeEnum, IndexEnum indexEnum, SortEnum sortEnum, JSONObject typeObj) {
+        typeObj.put(TYPE_STR, typeEnum.getCode());
+
+        if (typeEnum != TypeEnum.OBJECT && typeEnum != TypeEnum.ARRAY) {
+            if (indexEnum == IndexEnum.FORBID) {
+                typeObj.put(INDEX_STR, false);
+            } else if (indexEnum == IndexEnum.EXACT) {
+                typeObj.put(INDEX_STR, true);
+            }
+
+            if (sortEnum == SortEnum.NO) {
+                typeObj.put(DOC_VALUES_STR, false);
+            } else if (sortEnum == SortEnum.YES) {
+                typeObj.put(DOC_VALUES_STR, true);
+            }
+
+            // 如果新增，或者改为Date类型，则自动增加format
+            if (typeEnum == TypeEnum.DATE) {
+                typeObj.put("format",
+                        "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS" +
+                                "||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis");
+            }
+        }
+    }
+
+    private void handleTypeString(IndexEnum indexEnum, SortEnum sortEnum, AnalyzerEnum analyzerEnum, JSONObject typeObj) {
+        if (indexEnum == IndexEnum.FUZZY) {
+            typeObj.put(TYPE_STR, TEXT_STR);
+        } else {
+            typeObj.put(TYPE_STR, KEYWORD_STR);
+        }
+
+        if (indexEnum == IndexEnum.FORBID) {
+            typeObj.put(INDEX_STR, false);
+        } else if (indexEnum == IndexEnum.EXACT) {
+            typeObj.put(INDEX_STR, true);
+        }
+
+        if (sortEnum == SortEnum.NO) {
+            typeObj.put(DOC_VALUES_STR, false);
+        } else if (sortEnum == SortEnum.YES) {
+            typeObj.put(DOC_VALUES_STR, true);
+        }
+
+        if (analyzerEnum == AnalyzerEnum.IK) {
+            typeObj.put(ANALYZER_STR, IK_SMART_SRT);
+        }
     }
 
     /**
@@ -878,8 +933,9 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                                                    Map<String, TypeConfig> typeConfigMap,
                                                    Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap) {
         List<AriusTypeProperty> typeProperties = Lists.newArrayList();
-        for (String typeName : typeConfigMap.keySet()) {
-            TypeConfig typeConfig = typeConfigMap.get(typeName);
+        for (Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()) {
+            String typeName = entry.getKey();
+            TypeConfig typeConfig = entry.getValue();
 
             AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
             ariusTypeProperty.setTypeName(typeName);
@@ -908,7 +964,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     private List<AriusTypeProperty> buildAriusTypeProperty(List<MappingOptimizeItem> items) {
         Multimap<String, MappingOptimizeItem> typeName2JSONObjectMultiMap = ConvertUtil.list2MulMap(items,
-            MappingOptimizeItem::getTypeName);
+                MappingOptimizeItem::getTypeName);
 
         List<AriusTypeProperty> typeProperties = Lists.newArrayList();
         for (String typeName : typeName2JSONObjectMultiMap.keySet()) {
@@ -929,7 +985,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return typeProperties;
     }
 
-    private Result saveSpecialField(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
+    private Result<Void> saveSpecialField(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
         if (CollectionUtils.isNotEmpty(schemaDTO.getFields())) {
             return saveSpecialFieldByField(schemaDTO, operator);
         } else {
@@ -938,11 +994,11 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     }
 
-    private Result saveSpecialFieldByJSON(ConsoleTemplateSchemaDTO schemaDTO,
-                                          String operator) throws AdminOperateException {
+    private Result<Void> saveSpecialFieldByJSON(ConsoleTemplateSchemaDTO schemaDTO,
+                                                String operator) throws AdminOperateException {
         List<AriusTypeProperty> typeProperties = schemaDTO.getTypeProperties();
         if (typeProperties.size() == 1 && (StringUtils.isBlank(typeProperties.get(0).getTypeName())
-                                           || typeProperties.get(0).getTypeName().equals(DEFAULT_TYPE))) {
+                || typeProperties.get(0).getTypeName().equals(DEFAULT_TYPE))) {
             // 就一个type，修改模板的id和routing字段
             IndexTemplateLogicDTO templateLogicDTO = new IndexTemplateLogicDTO();
             templateLogicDTO.setId(schemaDTO.getLogicId());
@@ -950,69 +1006,80 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             templateLogicDTO.setRoutingField(typeProperties.get(0).getRoutingField());
             templateLogicDTO.setDateField(typeProperties.get(0).getDateField());
             templateLogicDTO.setDateFieldFormat(typeProperties.get(0).getDateFieldFormat());
-            Result editDateFieldResult = templateLogicService.editTemplate(templateLogicDTO, operator);
+            Result<Void>  editDateFieldResult = templateLogicService.editTemplate(templateLogicDTO, operator);
             if (editDateFieldResult.failed()) {
                 return editDateFieldResult;
             }
         } else {
-
-            // 修改type表
-            List<IndexTemplateType> templateTypes = templateLogicService.getLogicTemplateTypes(schemaDTO.getLogicId());
-            Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
-                IndexTemplateType::getName);
-
-            String dateField = typeProperties.get(0).getDateField();
-            String dateFieldFormat = typeProperties.get(0).getDateFieldFormat();
-
-            for (AriusTypeProperty typeProperty : typeProperties) {
-
-                if (!Objects.equals(dateField, typeProperty.getDateField())) {
-                    return Result.buildFail("多个type的分区字段必须一致");
-                }
-
-                if (typeName2IndexTemplateTypeMap.containsKey(typeProperty.getTypeName())) {
-                    // 更新
-                    IndexTemplateType indexTemplateType = typeName2IndexTemplateTypeMap.get(typeProperty.getTypeName());
-                    TemplateTypePO param = new TemplateTypePO();
-                    param.setId(indexTemplateType.getId());
-                    param.setIdField(typeProperty.getIdField());
-                    param.setRouting(typeProperty.getRoutingField());
-                    if (1 != indexTemplateTypeDAO.update(param)) {
-                        return Result.buildFail("保存特征字段失败");
-                    } else {
-                        LOGGER.info("method=saveSpecialFieldByJSON||msg=update db succ||typeId={}", param.getId());
-                    }
-                } else {
-                    if (StringUtils.isNotBlank(typeProperty.getIdField())
-                        || StringUtils.isNotBlank(typeProperty.getRoutingField())) {
-                        return Result
-                            .buildFail(
-                                "平台升级es到高版本，高版本es索引仅支持单type，不再支持多个type；平台弱化了用户侧索引type的概念，索引多type需求用户可以通过创建多个索引来实现；\n"
-                                       + "如需指定索引type的主键字段或者路由字段，请确认您的索引mapping中只有一个名为\"" + DEFAULT_TYPE + "\"的type；");
-                    }
-                }
-            }
-
-            // 修改模板的时间字段
-            if (dateField != null || dateFieldFormat != null) {
-                IndexTemplateLogicDTO templateLogicDTO = new IndexTemplateLogicDTO();
-                templateLogicDTO.setId(schemaDTO.getLogicId());
-                templateLogicDTO.setDateField(dateField);
-                templateLogicDTO.setDateFieldFormat(dateFieldFormat);
-                Result editDateFieldResult = templateLogicService.editTemplate(templateLogicDTO, operator);
-                if (editDateFieldResult.failed()) {
-                    return editDateFieldResult;
-                }
-            }
+            Result<Void> result = handleUpdateType(schemaDTO, operator, typeProperties);
+            if (result.failed()) {return result;}
         }
 
         return Result.buildSucc();
     }
 
-    private Result saveSpecialFieldByField(ConsoleTemplateSchemaDTO schemaDTO,
-                                           String operator) throws AdminOperateException {
+    private Result<Void> handleUpdateType(ConsoleTemplateSchemaDTO schemaDTO, String operator, List<AriusTypeProperty> typeProperties) throws AdminOperateException {
+        // 修改type表
+        List<IndexTemplateType> templateTypes = templateLogicService.getLogicTemplateTypes(schemaDTO.getLogicId());
+        Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
+                IndexTemplateType::getName);
+
+        String dateField = typeProperties.get(0).getDateField();
+        String dateFieldFormat = typeProperties.get(0).getDateFieldFormat();
+
+        Result<Void> result = handleTypeProperties(typeProperties, typeName2IndexTemplateTypeMap, dateField);
+        if (result.failed()) {return result;}
+
+        // 修改模板的时间字段
+        if (dateField != null || dateFieldFormat != null) {
+            IndexTemplateLogicDTO templateLogicDTO = new IndexTemplateLogicDTO();
+            templateLogicDTO.setId(schemaDTO.getLogicId());
+            templateLogicDTO.setDateField(dateField);
+            templateLogicDTO.setDateFieldFormat(dateFieldFormat);
+            Result<Void>  editDateFieldResult = templateLogicService.editTemplate(templateLogicDTO, operator);
+            if (editDateFieldResult.failed()) {
+                return editDateFieldResult;
+            }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleTypeProperties(List<AriusTypeProperty> typeProperties, Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap, String dateField) {
+        for (AriusTypeProperty typeProperty : typeProperties) {
+
+            if (!Objects.equals(dateField, typeProperty.getDateField())) {
+                return Result.buildFail("多个type的分区字段必须一致");
+            }
+
+            if (typeName2IndexTemplateTypeMap.containsKey(typeProperty.getTypeName())) {
+                // 更新
+                IndexTemplateType indexTemplateType = typeName2IndexTemplateTypeMap.get(typeProperty.getTypeName());
+                TemplateTypePO param = new TemplateTypePO();
+                param.setId(indexTemplateType.getId());
+                param.setIdField(typeProperty.getIdField());
+                param.setRouting(typeProperty.getRoutingField());
+                if (1 != indexTemplateTypeDAO.update(param)) {
+                    return Result.buildFail("保存特征字段失败");
+                } else {
+                    LOGGER.info("method=saveSpecialFieldByJSON||msg=update db succ||typeId={}", param.getId());
+                }
+            } else {
+                if (StringUtils.isNotBlank(typeProperty.getIdField())
+                        || StringUtils.isNotBlank(typeProperty.getRoutingField())) {
+                    return Result
+                            .buildFail(
+                                    "平台升级es到高版本(7.6.1)，高版本es索引仅支持单type，不再支持多个type；平台弱化了用户侧索引type的概念，索引多type需求用户可以通过创建多个索引来实现；\n"
+                                            + "如需指定索引type的主键字段或者路由字段，请确认您的索引mapping中只有一个名为\"" + DEFAULT_TYPE + "\"的type；");
+                }
+            }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> saveSpecialFieldByField(ConsoleTemplateSchemaDTO schemaDTO,
+                                                 String operator) throws AdminOperateException {
         SpecialField specialField = SpecialField.analyzeFromFields(schemaDTO.getFields(),
-            schemaDTO.getRemoveFieldNames());
+                schemaDTO.getRemoveFieldNames());
         IndexTemplateLogicDTO templateLogicDTO = new IndexTemplateLogicDTO();
         templateLogicDTO.setId(schemaDTO.getLogicId());
         templateLogicDTO.setDateField(specialField.getDateField());
@@ -1024,11 +1091,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     private boolean clusterIsHighVersion(Integer logicId) {
         IndexTemplateLogicWithPhyTemplates logicWithPhysical = this.templateLogicService
-            .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(logicId);
 
-        if (!logicWithPhysical.hasPhysicals()) {
-            return false;
-        }
-        return esClusterPhyService.isHighVersionCluster(logicWithPhysical.getAnyOne().getCluster());
+        if(!logicWithPhysical.hasPhysicals()){return false;}
+
+        ClusterPhy clusterPhy = esClusterPhyService.getClusterByName(logicWithPhysical.getAnyOne().getCluster());
+        if(null == clusterPhy){return false;}
+
+        return ESVersionUtil.isHigher(clusterPhy.getEsVersion(), "6.5.1");
     }
 }

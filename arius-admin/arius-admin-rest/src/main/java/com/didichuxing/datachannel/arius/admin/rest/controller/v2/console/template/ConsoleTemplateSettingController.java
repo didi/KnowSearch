@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,8 +26,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(V2_CONSOLE + "/template/settings")
-@Api(value = "Console-索引接口(REST)")
+@RequestMapping(V2_CONSOLE + "/template/setting")
+@Api(tags = "Console-用户侧索引模板setting接口(REST)")
 public class ConsoleTemplateSettingController extends BaseConsoleTemplateController {
 
     @Autowired
@@ -36,9 +37,9 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ResponseBody
     @ApiOperation(value = "更新索引Setting接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
-    public Result modifySetting(HttpServletRequest request,
+    public Result<Void> modifySetting(HttpServletRequest request,
                                 @RequestBody ConsoleTemplateSettingDTO settingDTO) throws AdminOperateException {
-        Result checkAuthResult = checkAppAuth(settingDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(settingDTO.getLogicId(), HttpRequestUtils.getAppId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -50,7 +51,7 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ResponseBody
     @ApiOperation(value = "获取索引Setting接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
+    public Result<IndexTemplatePhySettings> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
         return templateLogicSettingsManager.getSettings(logicId);
     }
 }

@@ -2,6 +2,7 @@ package com.didi.arius.gateway.common.flowcontrol;
 
 import com.didi.arius.gateway.common.enums.FlowStatus;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author weizijun 
@@ -9,6 +10,7 @@ import lombok.Data;
  * 
  */
 @Data
+@NoArgsConstructor
 public class AreaFlow {
 	private Flow in;
 

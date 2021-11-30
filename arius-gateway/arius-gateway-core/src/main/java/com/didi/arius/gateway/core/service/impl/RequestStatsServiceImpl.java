@@ -11,6 +11,7 @@ import com.didi.arius.gateway.common.metrics.AppMetric;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.RequestStatsService;
+import lombok.NoArgsConstructor;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -28,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
+@NoArgsConstructor
 public class RequestStatsServiceImpl implements RequestStatsService, ApplicationListener<PostResponseEvent> {
     protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
     private ConcurrentMap<String, ActionMetric> actionMetricMap = new ConcurrentHashMap<>();
@@ -47,7 +49,7 @@ public class RequestStatsServiceImpl implements RequestStatsService, Application
 
     @PostConstruct
     public void init(){
-        threadPool.submitScheduleAtFixTask( () -> dealRequest(), schedulePeriod, schedulePeriod );
+        threadPool.submitScheduleAtFixTask(this::dealRequest, schedulePeriod, schedulePeriod);
 
         CacheManager manager = CacheManager.create(RequestStatsServiceImpl.class.getResourceAsStream("/ehcache.xml"));
         queryContextCache = manager.getCache("queryContextCache");
@@ -59,7 +61,7 @@ public class RequestStatsServiceImpl implements RequestStatsService, Application
         try {
             dealHttpRequest();
             dealTcpRequest();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             bootLogger.error("longTimeContextSchedule exception", e);
         }
     }
@@ -213,8 +215,8 @@ public class RequestStatsServiceImpl implements RequestStatsService, Application
     }
 
     private void appIncr(String actionName, int appid, String searchId, long cost, RestStatus restStatus) {
-        if (appid != QueryConsts.TOTAL_APPId_ID) {
-            appIncr(actionName, QueryConsts.TOTAL_APPId_ID, searchId, cost, restStatus);
+        if (appid != QueryConsts.TOTAL_APPID_ID) {
+            appIncr(actionName, QueryConsts.TOTAL_APPID_ID, searchId, cost, restStatus);
         }
 
         AppMetric appMetric = appMetricMap.get(appid);
@@ -229,8 +231,8 @@ public class RequestStatsServiceImpl implements RequestStatsService, Application
     }
 
     private void actionIncr(String actionName, int appid, String searchId, long cost, RestStatus restStatus) {
-        if (appid != QueryConsts.TOTAL_APPId_ID) {
-            actionIncr(actionName, QueryConsts.TOTAL_APPId_ID, searchId, cost, restStatus);
+        if (appid != QueryConsts.TOTAL_APPID_ID) {
+            actionIncr(actionName, QueryConsts.TOTAL_APPID_ID, searchId, cost, restStatus);
         }
 
         ActionMetric actionMetric = actionMetricMap.get(actionName);

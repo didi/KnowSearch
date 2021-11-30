@@ -21,7 +21,7 @@ public abstract class StatController extends BaseHttpRestController {
     @Override
     protected void handleRequest(QueryContext queryContext) throws Exception {
 
-        ESClient client = esClusterService.getClient(queryContext);
+        ESClient client = esClusterService.getClient(queryContext, actionName);
 
         if (queryContext.getRequest().param("index") != null) {
             String index = queryContext.getRequest().param("index");
@@ -34,7 +34,7 @@ public abstract class StatController extends BaseHttpRestController {
             if (isIndexType(queryContext)) {
                 IndexTemplate indexTemplate = indexTemplateService.getTemplateByIndexTire(indices, queryContext);
 
-                client = esClusterService.getClient(queryContext, indexTemplate);
+                client = esClusterService.getClient(queryContext, indexTemplate, actionName);
             }
         }
 
@@ -42,5 +42,5 @@ public abstract class StatController extends BaseHttpRestController {
 
     }
 
-    abstract protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception;
+    protected abstract  void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception;
 }

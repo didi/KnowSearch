@@ -13,7 +13,7 @@ public enum WorkOrderTypeEnum {
     /**
      * 应用创建工单
      */
-    APP_CREATE("appCreate", "应用创建"),
+    APP_CREATE("appCreate", "项目创建"),
 
     LOGIC_CLUSTER_CREATE("logicClusterCreate", "集群创建"),
 
@@ -39,10 +39,6 @@ public enum WorkOrderTypeEnum {
 
     QUERY_DSL_LIMIT_EDIT("queryDslLimitEdit", "查询语句编辑"),
 
-    RESPONSIBLE_GOVERN("responsibleGovern", "员工离职"),
-
-    UNHEALTHY_TEMPLATE_GOVERN("unhealthyTemplateGovern", "不健康索引治理"),
-
     CLUSTER_OP_INDECREASE("clusterOpIndecrease", "集群扩缩(OP)"),
 
     CLUSTER_OP_NEW("clusterOpNew", "集群创建(OP)"),
@@ -59,9 +55,7 @@ public enum WorkOrderTypeEnum {
 
     CLUSTER_DELETE("clusterDelete","物理集群删除"),
 
-
-
-    PHY_CLUSTER_PLUGIN_OPERATION("phyClusterPluginOperation", "物理集群插件操作"),
+    PHY_CLUSTER_PLUGIN_OPERATION("clusterOpPluginRestart", "物理集群插件操作"),
 
     UNKNOWN("unknown", "未知");
 

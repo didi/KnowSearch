@@ -17,18 +17,16 @@ import com.didichuxing.datachannel.arius.admin.remote.protocol.content.LoginProt
 public interface LoginService {
 
     /**
-     * @param typeEnum 登录认证协议类型
      * @see LoginProtocolTypeEnum
      */
-    Result loginAuthenticate(HttpServletRequest request,
+    Result<Boolean> loginAuthenticate(HttpServletRequest request,
                             HttpServletResponse response,
-                            LoginDTO loginDTO,
-                            LoginProtocolTypeEnum typeEnum);
+                            LoginDTO loginDTO);
 
     /**
      * 登出
      */
-    Result logout(HttpServletRequest request, HttpServletResponse response);
+    Result<Boolean> logout(HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 检查登陆

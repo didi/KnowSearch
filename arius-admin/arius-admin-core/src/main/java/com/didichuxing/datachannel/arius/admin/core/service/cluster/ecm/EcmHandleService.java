@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinTreeNode;
 import com.google.common.collect.Multimap;
 
 /**
@@ -21,7 +21,7 @@ public interface EcmHandleService {
      * @param ecmParamBaseList
      * @return Result
      */
-    Result saveESCluster(List<EcmParamBase> ecmParamBaseList);
+    Result<Long> saveESCluster(List<EcmParamBase> ecmParamBaseList);
 
     /**
      * 启动集群
@@ -29,7 +29,7 @@ public interface EcmHandleService {
      * @param operator      操作人
      * @return
      */
-    Result startESCluster(EcmParamBase ecmParamBase, String operator);
+    Result<EcmOperateAppBase> startESCluster(EcmParamBase ecmParamBase, String operator);
 
     /**
      * 集群扩缩容
@@ -37,7 +37,7 @@ public interface EcmHandleService {
      * @param operator      操作人
      * @return Result
      */
-    Result scaleESCluster(EcmParamBase ecmParamBase, String operator);
+    Result<EcmOperateAppBase> scaleESCluster(EcmParamBase ecmParamBase, String operator);
 
     /**
      * 集群升级
@@ -45,7 +45,7 @@ public interface EcmHandleService {
      * @param   operator      操作人
      * @return Result
      */
-    Result upgradeESCluster(EcmParamBase ecmParamBase, String operator);
+    Result<EcmOperateAppBase> upgradeESCluster(EcmParamBase ecmParamBase, String operator);
 
     /**
      * 重启集群
@@ -53,7 +53,7 @@ public interface EcmHandleService {
      * @param operator      操作人
      * @return Result
      */
-    Result restartESCluster(EcmParamBase ecmParamBase, String operator);
+    Result<EcmOperateAppBase> restartESCluster(EcmParamBase ecmParamBase, String operator);
 
     /**
      * 根据物理集群Id删除集群
@@ -61,14 +61,14 @@ public interface EcmHandleService {
      * @param operator      操作人
      * @return
      */
-    Result deleteESCluster(Long clusterId, String operator);
+    Result<Void> deleteESCluster(Long clusterId, String operator);
 
     /**
      * 继续启动角色集群中未完成的节点任务
      * @param operator  操作人
      * @return Result
      */
-    Result actionUnfinishedESCluster(EcmActionEnum ecmActionEnum, EcmParamBase actionParamBase, String hostname,
+    Result<EcmOperateAppBase> actionUnfinishedESCluster(EcmActionEnum ecmActionEnum, EcmParamBase actionParamBase, String hostname,
                                      String operator);
 
     /**
@@ -77,7 +77,7 @@ public interface EcmHandleService {
      * @param operator  操作人
      * @return Result
      */
-    Result infoESCluster(Long clusterId, String operator);
+    Result<String> infoESCluster(Long clusterId, String operator);
 
     /**
      * 获取容器云节点日志信息
@@ -94,13 +94,6 @@ public interface EcmHandleService {
      * @return
      */
     Result<List<EcmTaskStatus>> getESClusterStatus(EcmParamBase actionParamBase, Integer orderType, String operator);
-
-    /**
-     * 获取用户可选Odin节点
-     * @param username 用户名称
-     * @return Result
-     */
-    Result<OdinTreeNode> getOdinTreeNode(String username);
 
     /**
      * 依据集群ID & 角色列表构造EcmParamBase

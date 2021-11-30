@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -43,7 +44,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
+    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
 
         LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
             JSON.toJSONString(settingDTO));
@@ -56,7 +57,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
             return Result.buildParamIllegal("setting信息不能为空");
         }
 
-        Result result = updateSettings(settingDTO.getLogicId(), settingDTO.getSetting());
+        Result<Void> result = updateSettings(settingDTO.getLogicId(), settingDTO.getSetting());
         if (result.success()) {
             templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
         }
@@ -72,7 +73,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @throws AdminOperateException
      */
     @Override
-    public Result getSettings(Integer logicId) {
+    public Result<IndexTemplatePhySettings> getSettings(Integer logicId) {
         return getTemplateSettings(logicId);
     }
 
@@ -83,7 +84,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @return
      */
     @Override
-    public Result updateSettings(Integer logicId, AriusIndexTemplateSetting settings) {
+    public Result<Void> updateSettings(Integer logicId, AriusIndexTemplateSetting settings) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
             .getLogicTemplateWithPhysicalsById(logicId);
 
@@ -119,7 +120,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @return
      */
     @Override
-    public Result getTemplateSettings(Integer logicId) {
+    public Result<IndexTemplatePhySettings> getTemplateSettings(Integer logicId) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
             .getLogicTemplateWithPhysicalsById(logicId);
 

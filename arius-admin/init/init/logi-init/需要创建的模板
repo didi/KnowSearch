@@ -1,0 +1,72 @@
++-----------------------------------------+------------------------------------------+-----------+-------------+-------------+------------+-------------------+---------------+----------------------+--------+------------------------------------------+
+| name                                    | expression                               | data_type | date_format | expire_time | date_field | date_field_format | routing_field | id_field             | quota  | desc                                     |
++-----------------------------------------+------------------------------------------+-----------+-------------+-------------+------------+-------------------+---------------+----------------------+--------+------------------------------------------+
+| arius.dsl.analyze.result                | arius.dsl.analyze.result                 |        -1 |             |          -1 | logTime    |                   |               |                      |  0.015 | DSL分析结果                              |
+| arius.dsl.field.use                     | arius.dsl.field.use                      |        -1 |             |          -1 | logTime    |                   |               |                      |  0.010 | 字段使用索引                             |
+| arius.dsl.metrics                       | arius.dsl.metrics*                       |         2 | _yyyy-MM-dd |         150 | timeStamp  |                   |               |                      |  0.500 | 用户查询聚合信息                         |
+| arius.dsl.template                      | arius.dsl.template                       |         2 |             |          -1 | logTime    |                   |               | appid,dslTemplateMd5 |  0.500 | DSL审核与分析                            |
+| arius.gateway.join                      | arius.gateway.join*                      |         2 | _yyyy-MM-dd |          23 | timeStamp  | epoch_millis      |               | requestId            | 10.000 | gateway日志按照requestId进行join         |
+| arius.index.size                        | arius.index.size                         |        -1 |             |          -1 | logTime    |                   |               |                      |  0.010 | 索引大小                                 |
+| arius.master.slave.check                | arius.master.slave.check                 |         2 |             |          -1 | logTime    |                   |               |                      |  0.010 | 主从索引内容检测                         |
+| arius.template.field                    | arius.template.field                     |        -1 |             |          -1 | logTime    |                   |               |                      |  0.010 | 索引模板字段数据                         |
+| arius.template.hit                      | arius.template.hit                       |        -1 |             |          -1 | logTime    |                   |               |                      |  0.010 | 查询索引命中                             |
+| arius.template.mapping                  | arius.template.mapping                   |        -1 |             |          -1 | logTime    |                   |               |                      |  0.010 | 索引mapping                              |
+| cn_arius.appid.template.access          | cn_arius.appid.template.access           |        -1 |             |          -1 | logTime    |                   |               |                      |  0.015 | appid维度访问次数索引                    |
+| cn_arius.indexname.access               | cn_arius.indexname.access                |        -1 |             |          -1 | logTime    |                   |               |                      |  0.015 | 索引维度访问次数索引                     |
+| cn_arius.indexname.collect              | cn_arius.indexname.collect               |         2 |             |          -1 |            |                   |               |                      |  0.100 | 索引type名称统计                         |
+| cn_arius.template.access                | cn_arius.template.access                 |        -1 |             |          -1 | logTime    |                   |               |                      |  0.015 | 索引模板维度访问次数索引                 |
+| cn_arius.template.value                 | cn_arius.template.value                  |         2 |             |          -1 |            |                   |               |                      |  0.015 | cn_arius.template.value                  |
+| cn_arius_meta_job_log                   | cn_arius_meta_job_log*                   |         1 | _yyyy-MM-dd |           2 | logTime    |                   |               |                      |  0.400 | AMS任务执行器日志                        |
+| cn_arius_meta_server_log                | cn_arius_meta_server_log*                |         1 | _yyyy-MM-dd |           6 | logTime    |                   |               |                      |  3.200 | AMS对外服务日志                          |
+| cn_arius_stats_cluster_info             | cn_arius_stats_cluster_info*             |         1 | _yyyy-MM-dd |         720 | timestamp  |                   |               |                      |  5.000 |                                          |
+| cn_arius_stats_dcdr_info                | cn_arius_stats_dcdr_info*                |         1 | _yyyy-MM-dd |          14 | timestamp  |                   |               |                      |  5.000 |                                          |
+| cn_arius_stats_index_info               | cn_arius_stats_index_info*               |         1 | _yyyy-MM-dd |         180 | timestamp  |                   |               |                      |  5.000 |                                          |
+| cn_arius_stats_index_node_info          | cn_arius_stats_index_node_info*          |         1 | _yyyy-MM-dd |           7 | timestamp  |                   |               |                      |  5.000 |                                          |
+| cn_arius_stats_ingest_info              | cn_arius_stats_ingest_info*              |         1 | _yyyy-MM-dd |           7 | timestamp  |                   |               |                      |  5.000 |                                          |
+| cn_arius_stats_node_index_info          | cn_arius_stats_node_index_info*          |         1 | _yyyy-MM-dd |           7 | timestamp  |                   |               |                      |  5.000 |                                          |
+| cn_arius_stats_node_info                | cn_arius_stats_node_info*                |         1 | _yyyy-MM-dd |         360 | timestamp  |                   |               |                      |  5.000 |                                          |
+| cn_arius_template_quota_usage           | cn_arius_template_quota_usage            |         2 |             |          -1 | time       |                   |               |                      |  0.015 | cn_arius_template_quota_usage            |
+| cn_arius_template_qutoa_notiry_record   | cn_arius_template_qutoa_notiry_record*   |         2 | _yyyy-MM-dd |           7 | zeroDate   |                   |               |                      |  0.010 | arius模板qutoa满时候的通知策略           |
+| cn_record.arius.template.value          | cn_record.arius.template.value*          |         2 | _yyyy-MM    |         180 | timestamp  |                   |               |                      |  0.010 | cn_record.arius.template.value           |
+| cn_record_arius_template_quota_usage    | cn_record_arius_template_quota_usage*    |         2 | _yyyy-MM    |         360 | timestamp  |                   |               |                      |  0.010 | cn_record_arius_template_quota_usage     |
+| cn_v2.arius.template.label              | cn_v2.arius.template.label               |         2 |             |          -1 |            |                   |               |                      |  0.015 | cn_v2.arius.template.label               |
+| foundation_fd.data-online.arius.gateway | foundation_fd.data-online.arius.gateway* |         1 | _yyyy-MM-dd |           2 | logTime    |                   |               |                      |  8.000 | gateway日志                              |
+| index_health_degree                     | index_health_degree*                     |         1 | _yyyy-MM-dd |          15 | timestamp  |                   |               |                      |  0.010 | 健康分索引                               |
++-----------------------------------------+------------------------------------------+-----------+-------------+-------------+------------+-------------------+---------------+----------------------+--------+------------------------------------------+
+
+
+select name, expression, data_type, date_format, expire_time, date_field, date_field_format, routing_field, id_field, quota, `desc` from index_template
+where name in
+(
+'arius.dsl.analyze.result',               
+'arius.dsl.field.use',                    
+'arius.dsl.metrics',                      
+'arius.dsl.template',                     
+'arius.gateway.join',                     
+'arius.index.size',                       
+'arius.master.slave.check',               
+'arius.template.field',                   
+'arius.template.hit',                     
+'arius.template.mapping',                 
+'cn_arius.appid.template.access',         
+'cn_arius.indexname.access',              
+'cn_arius.indexname.collect',             
+'cn_arius.template.access',               
+'cn_arius.template.value',                
+'cn_arius_meta_job_log',                  
+'cn_arius_meta_server_log',               
+'cn_arius_stats_cluster_info',            
+'cn_arius_stats_dcdr_info',               
+'cn_arius_stats_index_info',              
+'cn_arius_stats_index_node_info',         
+'cn_arius_stats_ingest_info',             
+'cn_arius_stats_node_index_info',         
+'cn_arius_stats_node_info',               
+'cn_arius_template_quota_usage',          
+'cn_arius_template_qutoa_notiry_record',  
+'cn_record.arius.template.value',         
+'cn_record_arius_template_quota_usage',   
+'cn_v2.arius.template.label',             
+'foundation_fd.data-online.arius.gateway',
+'index_health_degree'                    
+) and is_active=1;

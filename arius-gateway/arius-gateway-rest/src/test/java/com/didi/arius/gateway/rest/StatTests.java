@@ -113,7 +113,7 @@ public class StatTests {
         String res = HttpClient.forward("http://127.0.0.1:8200/_gwstat/requesting", "GET", null, headerParams, null);
         System.out.println(res);
         JSONArray jr = JSON.parseArray(res);
-        assertEquals(jr.size() > 0, true);
+        assertEquals(true, jr.size() > 0);
     }
 
 
@@ -125,7 +125,7 @@ public class StatTests {
         String res = HttpClient.forward("http://127.0.0.1:8200/_gwstat/tcp/requesting", "GET", null, headerParams, null);
         System.out.println(res);
         JSONArray jr = JSON.parseArray(res);
-        assertEquals(jr.size() >= 0, true);
+        assertEquals(true, jr.size() >= 0);
     }
 
     /**

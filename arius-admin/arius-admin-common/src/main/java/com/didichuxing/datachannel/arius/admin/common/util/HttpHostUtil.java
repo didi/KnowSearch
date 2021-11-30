@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.tunnel.util.log.util.HostUtil;
+import com.didiglobal.logi.log.util.HostUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -17,6 +17,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
  * @Modified By
  */
 public class HttpHostUtil {
+
+    private HttpHostUtil(){}
 
     public static final String HOST_NAME   = HostUtil.getHostName();
 
@@ -47,7 +49,7 @@ public class HttpHostUtil {
         ArrayList<HttpHost> hosts = Lists.newArrayList();
 
         if (StringUtils.isBlank(address)) {
-            return null;
+            return new HttpHost[]{};
         }
 
         String[] httpAddressArray = StringUtils.splitByWholeSeparatorPreserveAllTokens(address, COMMA);
@@ -76,7 +78,7 @@ public class HttpHostUtil {
         int portStartIndex = url.lastIndexOf(":");
         if (portStartIndex > 0) {
             httpHost = url.substring(0, portStartIndex).replace("http://", "");
-            int portEndIndex = url.substring(portStartIndex).indexOf("/");
+            int portEndIndex = url.substring(portStartIndex).indexOf("/", 0);
             if (portEndIndex > 0) {
                 baseUrl = url.substring(portStartIndex + portEndIndex);
                 port = Integer.valueOf(url.substring(portStartIndex + 1, portStartIndex + portEndIndex));
@@ -86,6 +88,7 @@ public class HttpHostUtil {
         return new Tuple<>(new HttpHost(httpHost, port), baseUrl);
     }
 
+    //从类似10.179.100.148:9300的地址中获取端口
     public static String getPortFromTransportAddress(String transportAddress){
         if(StringUtils.isBlank(transportAddress)){return "";}
 
@@ -95,6 +98,7 @@ public class HttpHostUtil {
         return strTemp[1];
     }
 
+    //从类似10.179.100.148:9300的地址中获取ip
     public static String getIpFromTransportAddress(String transportAddress){
         if(StringUtils.isBlank(transportAddress)){return "";}
 

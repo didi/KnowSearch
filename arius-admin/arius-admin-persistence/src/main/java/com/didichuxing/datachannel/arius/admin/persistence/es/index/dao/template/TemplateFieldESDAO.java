@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
+@NoArgsConstructor
 public class TemplateFieldESDAO extends BaseESDAO {
 
     /**
@@ -104,23 +106,23 @@ public class TemplateFieldESDAO extends BaseESDAO {
      * @return
      */
     public boolean updateIgnoreFieldById(Integer id, String fieldName, boolean isIgnoreImprove) {
-        TemplateFieldPO TemplateFieldPO = getTemplateFieldById(id);
-        if (null == TemplateFieldPO) {
+        TemplateFieldPO templateFieldPO = getTemplateFieldById(id);
+        if (null == templateFieldPO) {
             return false;
         }
 
         Set<String> ignoreFields = Sets.newHashSet();
-        if (null != TemplateFieldPO.getIgnoreFields()) {
-            ignoreFields.addAll(TemplateFieldPO.getIgnoreFields());
+        if (null != templateFieldPO.getIgnoreFields()) {
+            ignoreFields.addAll(templateFieldPO.getIgnoreFields());
         }
         if (isIgnoreImprove) {
             ignoreFields.add(fieldName);
         } else {
             ignoreFields.remove(fieldName);
         }
-        TemplateFieldPO.setIgnoreFields(ignoreFields);
+        templateFieldPO.setIgnoreFields(ignoreFields);
 
-        boolean operatorResult = batchInsert(Lists.newArrayList(TemplateFieldPO));
+        boolean operatorResult = batchInsert(Lists.newArrayList(templateFieldPO));
         // 手动执行刷新操作，为了快速得到操作结果
         updateClient.refreshIndex(EnvUtil.getWriteIndexNameByEnv(this.indexName));
 
@@ -278,8 +280,8 @@ public class TemplateFieldESDAO extends BaseESDAO {
         for (TemplateFieldPO indexTemplateMappingItem : indexTemplateMappingList) {
 
             // 通过查询模板来找到对应的数据，不能通过id获取，由于会存在索引模板跨集群迁移和主备集群双写索引
-            TemplateFieldPO TemplateFieldPOFromEs = getFieldByTemplateNameAndClusterName(indexTemplateMappingItem.getName(), indexTemplateMappingItem.getClusterName());
-            if (TemplateFieldPOFromEs == null) {
+            TemplateFieldPO templateFieldPO = getFieldByTemplateNameAndClusterName(indexTemplateMappingItem.getName(), indexTemplateMappingItem.getClusterName());
+            if (templateFieldPO == null) {
                 LOGGER.info("class=TemplateFieldEsDao||method=compareThenUpdate||msg=template [{}] not found in es",
                         indexTemplateMappingItem.getName());
                 // 在es中没有找到对应的索引模板数据，则加入队列中
@@ -288,9 +290,9 @@ public class TemplateFieldESDAO extends BaseESDAO {
             }
 
             // 如果不相同，则需要覆盖更新，templateFieldMap中已经存在的字段的值以之前的为准，保持之前该字段的创建时间
-            if (!TemplateFieldPOFromEs.equals(indexTemplateMappingItem)) {
+            if (!templateFieldPO.equals(indexTemplateMappingItem)) {
 
-                indexTemplateMappingItem.updateFromTemplateFieldPO(TemplateFieldPOFromEs);
+                indexTemplateMappingItem.updateFromTemplateFieldPO(templateFieldPO);
                 needInsertDocList.add(indexTemplateMappingItem);
             }
         }

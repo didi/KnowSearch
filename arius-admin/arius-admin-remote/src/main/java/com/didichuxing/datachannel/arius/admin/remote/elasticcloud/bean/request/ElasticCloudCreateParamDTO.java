@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.request;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
  * 创建弹性云参数
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class ElasticCloudCreateParamDTO extends BaseDTO {
     /**

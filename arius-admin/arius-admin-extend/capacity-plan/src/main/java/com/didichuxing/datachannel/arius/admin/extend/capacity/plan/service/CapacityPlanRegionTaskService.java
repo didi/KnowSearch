@@ -41,7 +41,7 @@ public interface CapacityPlanRegionTaskService {
      * 检查任务
      * @return result
      */
-    Result checkTasks();
+    Result<Void> checkTasks();
 
     /**
      * 完成任务
@@ -64,7 +64,7 @@ public interface CapacityPlanRegionTaskService {
      * @param taskId taskId
      * @return result
      */
-    Result exeInitTask(Long taskId);
+    Result<Void> exeInitTask(Long taskId);
 
     /**
      * 保存任务

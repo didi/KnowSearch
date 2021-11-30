@@ -2,9 +2,13 @@ package com.didichuxing.datachannel.arius.admin.client.bean.common;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class GetTemplateLimitStrategyContext extends GetTemplateQuotaUsageContext {
 
     private PhysicalTemplateTpsMetric physicalTemplateTpsMetric;

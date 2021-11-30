@@ -16,6 +16,11 @@ import static org.elasticsearch.rest.RestRequest.Method.DELETE;
 public class RestDeleteController extends BaseHttpRestController {
     @Autowired
     private RestDeleteAction restDeleteAction;
+
+    public RestDeleteController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(DELETE, "/{index}/_doc/{id}", this);

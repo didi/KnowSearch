@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.cluster;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPlugin;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ConsoleLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterDTO;
@@ -14,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.ecm.ESClusterNodeS
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -28,17 +27,13 @@ import java.util.Set;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
-/**
- * @author d06679
- * @date 2019/5/15
- */
 @RestController
 @RequestMapping(V2_CONSOLE + "/cluster")
-@Api(value = "Console-集群接口(REST)")
+@Api(tags = "Console-用户侧集群接口(REST)")
 public class ConsoleClusterController {
 
     @Autowired
-    private ESClusterLogicService   esClusterLogicService;
+    private ClusterLogicService clusterLogicService;
 
     @Autowired
     private ClusterLogicManager     clusterLogicManager;
@@ -71,9 +66,10 @@ public class ConsoleClusterController {
     @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "用户编辑集群接口", notes = "支持修改责任人、备注、成本部门")
-    public Result editLogicClusterConfig(HttpServletRequest request,
+    public Result<Void> editLogicClusterConfig(HttpServletRequest request,
                                          @RequestBody ConsoleLogicClusterDTO resourceLogicDTO) {
-        return esClusterLogicService.editLogicCluster(ConvertUtil.obj2Obj(resourceLogicDTO, ESLogicClusterDTO.class),
+        return clusterLogicService
+                .editClusterLogic(ConvertUtil.obj2Obj(resourceLogicDTO, ESLogicClusterDTO.class),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -123,13 +119,13 @@ public class ConsoleClusterController {
     @ApiOperation(value = "获取逻辑集群插件列表(用户侧获取)", notes = "")
     public Result<List<ESPluginVO>> pluginList(Long clusterId) {
         return Result.buildSucc(
-            ConvertUtil.list2List(esClusterLogicService.getLogicClusterPlugins(clusterId), ESPluginVO.class));
+            ConvertUtil.list2List(clusterLogicService.getClusterLogicPlugins(clusterId), ESPluginVO.class));
     }
 
     @PostMapping("/plugin")
     @ResponseBody
     @ApiOperation(value = "添加逻辑集群插件(用户侧添加)", notes = "")
-    public Result<ESPlugin> addPlugin(HttpServletRequest request, Long logicClusterId, ESPluginDTO esPluginDTO) {
-        return esClusterLogicService.addPlugin(logicClusterId, esPluginDTO, HttpRequestUtils.getOperator(request));
+    public Result<Long> addPlugin(HttpServletRequest request, Long logicClusterId, ESPluginDTO esPluginDTO) {
+        return clusterLogicService.addPlugin(logicClusterId, esPluginDTO, HttpRequestUtils.getOperator(request));
     }
 }

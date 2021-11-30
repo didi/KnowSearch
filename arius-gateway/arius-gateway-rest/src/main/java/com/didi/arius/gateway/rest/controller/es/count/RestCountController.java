@@ -17,6 +17,11 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestCountController extends BaseHttpRestController {
     @Autowired
     private RestCountAction restCountAction;
+
+    public RestCountController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(POST, "/_count", this);

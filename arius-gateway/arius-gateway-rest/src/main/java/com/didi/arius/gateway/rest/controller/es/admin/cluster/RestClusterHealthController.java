@@ -13,6 +13,10 @@ public class RestClusterHealthController extends BaseHttpRestController {
     @Autowired
     private RestClusterHealthAction restClusterHealthAction;
 
+    public RestClusterHealthController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler( RestRequest.Method.GET, "/_cluster/health", this);

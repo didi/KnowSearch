@@ -1,12 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.request;
 
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ElasticCloudAppDeployGroupsDTO {
+public class ElasticCloudAppDeployGroupsDTO extends BaseDTO {
 
+   private static final long serialVersionUID = 7952859746201227569L;
    /**
     * 分组  按照百分比进行分割
     * 该值表示每个分组的比例范围，例如：10,50,100 代表如下含义：

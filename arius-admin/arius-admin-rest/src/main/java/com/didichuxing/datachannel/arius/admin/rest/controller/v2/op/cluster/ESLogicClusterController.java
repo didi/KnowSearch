@@ -11,12 +11,12 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClu
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicNodeService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType.NOT_SUPPORT_ERROR;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
 /**
@@ -38,31 +39,30 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  */
 @RestController
 @RequestMapping({ V2_OP + "/resource", V2_OP + "/logic/cluster" })
-@Api(value = "es集群逻辑集群接口(REST)")
+@Api(tags = "es集群逻辑集群接口(REST)")
 public class ESLogicClusterController {
 
     @Autowired
-    private ESClusterLogicService     esClusterLogicService;
+    private ClusterLogicService     clusterLogicService;
 
     @Autowired
-    private ESClusterLogicNodeService esClusterLogicNodeService;
+    private ClusterLogicNodeService clusterLogicNodeService;
 
     @Autowired
-    private TemplateLogicManager      templateLogicManager;
+    private TemplateLogicManager    templateLogicManager;
 
     @Autowired
-    private ClusterNodeManager        clusterNodeManager;
+    private ClusterNodeManager      clusterNodeManager;
 
     @Autowired
-    private ClusterLogicManager       clusterLogicManager;
+    private ClusterLogicManager     clusterLogicManager;
 
     @Autowired
-    private TemplateSrvManager        templateSrvManager;
+    private TemplateSrvManager      templateSrvManager;
 
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取所有逻辑集群列表接口", notes = "")
-    @Deprecated
     public Result<List<ConsoleClusterVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
                                                                 HttpServletRequest request) {
         return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtils.getAppId(request)));
@@ -72,7 +72,6 @@ public class ESLogicClusterController {
     @ResponseBody
     @ApiOperation(value = "获取指定逻辑集群接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
-    @Deprecated
     public Result<ConsoleClusterVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
                                                         HttpServletRequest request) {
         return Result.buildSucc(
@@ -83,26 +82,25 @@ public class ESLogicClusterController {
     @ResponseBody
     @ApiOperation(value = "删除逻辑集群接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
-    @Deprecated
-    public Result deleteLogicClusterById(HttpServletRequest request,
+    public Result<Void> deleteLogicClusterById(HttpServletRequest request,
                                          @RequestParam(value = "resourceId") Long resourceId) throws AdminOperateException {
-        return esClusterLogicService.deleteLogicClusterById(resourceId, HttpRequestUtils.getOperator(request));
+        return clusterLogicManager.deleteLogicCluster(resourceId, HttpRequestUtils.getOperator(request),
+            HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建带有region信息的逻辑集群接口", notes = "")
-    @Deprecated
     public Result<Long> createLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return esClusterLogicService.createLogicCluster(param, HttpRequestUtils.getOperator(request));
+        return clusterLogicManager.addLogicCluster(param, HttpRequestUtils.getOperator(request),
+            HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑逻辑集群接口", notes = "")
-    @Deprecated
-    public Result modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return esClusterLogicService.editLogicCluster(param, HttpRequestUtils.getOperator(request));
+    public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
+        return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/nodes")
@@ -111,14 +109,14 @@ public class ESLogicClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
     public Result<List<ESRoleClusterHostVO>> getLogicClusterNodes(@RequestParam(value = "clusterId") Long clusterId) {
         return Result.buildSucc(clusterNodeManager
-            .convertClusterNodes(esClusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
+            .convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
     }
 
     @PutMapping("/checkMeta")
     @ResponseBody
     @ApiOperation(value = "元数据校验接口", notes = "")
-    public Result checkAllLogicClustersMeta() {
-        return Result.build(esClusterLogicService.checkAllLogicClustersMeta());
+    public Result<Void> checkAllLogicClustersMeta() {
+        return Result.build(NOT_SUPPORT_ERROR);
     }
 
     @GetMapping("/logicTemplates")
@@ -138,41 +136,39 @@ public class ESLogicClusterController {
     @ApiOperation(value = "获取逻辑集群列表接口", notes = "")
     public Result<List<ConsoleClusterVO>> getLogicClusters(@RequestParam ESLogicClusterDTO param) {
         return Result.buildSucc(
-            clusterLogicManager.batchBuildOpClusterVOs(esClusterLogicService.listLogicClusters(param), null));
+            clusterLogicManager.batchBuildOpClusterVOs(clusterLogicService.listClusterLogics(param), null));
     }
 
     @GetMapping("/{clusterId}")
     @ResponseBody
     @ApiOperation(value = "获取指定逻辑集群接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
-    @Deprecated
     public Result<ConsoleClusterVO> fetchLogicClusterById(@PathVariable(value = "clusterId") Long clusterId) {
         return Result.buildSucc(
-            clusterLogicManager.buildOpClusterVO(esClusterLogicService.getLogicClusterById(clusterId), null));
+            clusterLogicManager.buildOpClusterVO(clusterLogicService.getClusterLogicById(clusterId), null));
     }
 
     @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "删除逻辑集群接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
-    @Deprecated
-    public Result removeLogicClusterById(HttpServletRequest request,
+    public Result<Void> removeLogicClusterById(HttpServletRequest request,
                                          @RequestParam(value = "clusterId") Long clusterId) throws AdminOperateException {
-        return esClusterLogicService.deleteLogicClusterById(clusterId, HttpRequestUtils.getOperator(request));
+        return clusterLogicService.deleteClusterLogicById(clusterId, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "新建逻辑集群接口", notes = "")
-    public Result<Long> addLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterWithRegionDTO param) {
+    public Result<Void> addLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterWithRegionDTO param) {
         return clusterLogicManager.addLogicClusterAndClusterRegions(param, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "编辑逻辑集群接口", notes = "")
-    public Result updateLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return esClusterLogicService.editLogicCluster(param, HttpRequestUtils.getOperator(request));
+    public Result<Void> updateLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
+        return clusterLogicService.editClusterLogic(param, HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/{clusterId}/nodes")
@@ -181,14 +177,14 @@ public class ESLogicClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
     public Result<List<ESRoleClusterHostVO>> getClusterNodes(@PathVariable(value = "clusterId") Long clusterId) {
         return Result.buildSucc(clusterNodeManager
-            .convertClusterNodes(esClusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
+            .convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
     }
 
     @GetMapping("/{clusterId}/templatesrv")
     @ResponseBody
     @ApiOperation(value = "获取集群当前支持的索引服务", notes = "")
     public Result<List<ESClusterTemplateSrvVO>> list(@PathVariable(value = "clusterId") Long clusterId) {
-        Result<List<ESClusterTemplateSrv>> listResult = templateSrvManager.getLogicClusterTemplateSrv(clusterId);
+        Result<List<ClusterTemplateSrv>> listResult = templateSrvManager.getLogicClusterTemplateSrv(clusterId);
 
         if (listResult.failed()) {
             return Result.buildFail(listResult.getMessage());

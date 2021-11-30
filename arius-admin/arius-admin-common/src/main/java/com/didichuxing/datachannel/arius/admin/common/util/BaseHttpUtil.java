@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -34,14 +36,16 @@ public class BaseHttpUtil {
     public static final String UTF8 = "UTF-8";
     public static final String GBK = "GBK";
     public static final String GB2312 = "GB2312";
-    private static final int CONNECTION_TIMEOUT = 20000;
-    private static final int SO_TIMEOUT = 20000;
-    private static final int MAX_TOTAL = 200;
-    private static final int DEFAULT_MAX_PERROUTE = 50;
+
+    private static final String COOKIE_POLICY = "http.protocol.cookie-policy";
+    private static final String COMPATIBILITY = "compatibility";
+    private static final String EXCEPTION_1 = "UTF-8 is not surportted";
+    private static final String EXCEPTION_2 = "error post data to ";
+    private static final String RESPONSE = "response=";
+
     private static final HttpClient HTTP_CLIENT;
 
-    public BaseHttpUtil() {
-    }
+    private BaseHttpUtil() {}
 
     public static String post(String url, Map<String, Object> params) {
         return post(url, params, (Map)null, (String)null, (String)null);
@@ -54,17 +58,17 @@ public class BaseHttpUtil {
     public static String post(String url, Map<String, Object> params, Map<String, String> headers, String reqEncode, String resEncode) {
         HttpPost post = new HttpPost(url);
         if(StringUtils.isBlank(reqEncode)) {
-            reqEncode = "UTF-8";
+            reqEncode = UTF8;
         }
 
         if(StringUtils.isBlank(resEncode)) {
-            resEncode = "UTF-8";
+            resEncode = UTF8;
         }
 
-        List httpParams = null;
+        List<BasicNameValuePair> httpParams;
         Iterator var7;
         if(params != null && !params.isEmpty()) {
-            httpParams = new ArrayList(params.size());
+            httpParams = new ArrayList<>(params.size());
             var7 = params.entrySet().iterator();
 
             while(true) {
@@ -102,10 +106,10 @@ public class BaseHttpUtil {
 
                 try {
                     post.setEntity(new UrlEncodedFormEntity(httpParams, reqEncode));
-                    post.getParams().setParameter("http.protocol.cookie-policy", "compatibility");
+                    post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
                     break;
                 } catch (UnsupportedEncodingException var20) {
-                    throw new RuntimeException("UTF-8 is not surportted", var20);
+                    throw new AriusRunTimeException(EXCEPTION_1, var20, ResultType.FAIL);
                 }
             }
         }
@@ -117,13 +121,13 @@ public class BaseHttpUtil {
             HttpEntity entity = HTTP_CLIENT.execute(post).getEntity();
             response = EntityUtils.toString(entity, resEncode);
         } catch (Exception var18) {
-            throw new RuntimeException("error post data to " + url, var18);
+            throw new AriusRunTimeException(EXCEPTION_2 + url, var18, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("response=" + response);
+            LOGGER.debug("class=BaseHttpUtil||method=post||mesg={}", RESPONSE + response);
         }
 
         return response;
@@ -132,25 +136,25 @@ public class BaseHttpUtil {
     public static String postForString(String url, String content, Map<String, String> headers) {
         HttpPost post = new HttpPost(url);
 
-        Iterator var4;
+        Iterator<Map.Entry<String, String>> var4;
         if(StringUtils.isNotBlank(content)) {
             if(headers != null) {
                 var4 = headers.entrySet().iterator();
 
                 while(var4.hasNext()) {
-                    Map.Entry<String, String> e = (Map.Entry)var4.next();
-                    post.addHeader((String)e.getKey(), (String)e.getValue());
+                    Map.Entry<String, String> e = var4.next();
+                    post.addHeader(e.getKey(), e.getValue());
                 }
             }
 
             try {
                 BasicHttpEntity requestBody = new BasicHttpEntity();
-                requestBody.setContent(new ByteArrayInputStream(content.getBytes("UTF-8")));
-                requestBody.setContentLength((long)content.getBytes("UTF-8").length);
+                requestBody.setContent(new ByteArrayInputStream(content.getBytes(UTF8)));
+                requestBody.setContentLength((long)content.getBytes(UTF8).length);
                 post.setEntity(requestBody);
-                post.getParams().setParameter("http.protocol.cookie-policy", "compatibility");
+                post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
             } catch (UnsupportedEncodingException var12) {
-                throw new RuntimeException("UTF-8 is not surportted", var12);
+                throw new AriusRunTimeException(EXCEPTION_1, var12, ResultType.FAIL);
             }
         }
 
@@ -159,16 +163,16 @@ public class BaseHttpUtil {
         String response;
         try {
             HttpEntity entity = HTTP_CLIENT.execute(post).getEntity();
-            response = EntityUtils.toString(entity, "UTF-8");
+            response = EntityUtils.toString(entity, UTF8);
             EntityUtils.consume(entity);
         } catch (Exception var10) {
-            throw new RuntimeException("error post data to " + url, var10);
+            throw new AriusRunTimeException(EXCEPTION_2 + url, var10, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("response=" + response);
+            LOGGER.debug("class=BaseHttpUtil||method=postForString||msg={}", RESPONSE + response);
         }
 
         return response;
@@ -176,25 +180,24 @@ public class BaseHttpUtil {
     public static String deleteForString(String url, String content, Map<String, String> headers) {
         HttpDelete post = new HttpDelete(url);
 
-        Iterator var4;
+        Iterator<Map.Entry<String, String>> var4;
         if(StringUtils.isNotBlank(content)) {
             if(headers != null) {
                 var4 = headers.entrySet().iterator();
 
                 while(var4.hasNext()) {
-                    Map.Entry<String, String> e = (Map.Entry)var4.next();
-                    post.addHeader((String)e.getKey(), (String)e.getValue());
+                    Map.Entry<String, String> e = var4.next();
+                    post.addHeader(e.getKey(), e.getValue());
                 }
             }
 
             try {
                 BasicHttpEntity requestBody = new BasicHttpEntity();
-                requestBody.setContent(new ByteArrayInputStream(content.getBytes("UTF-8")));
-                requestBody.setContentLength((long)content.getBytes("UTF-8").length);
-               // post.setEntity(requestBody);
-                post.getParams().setParameter("http.protocol.cookie-policy", "compatibility");
+                requestBody.setContent(new ByteArrayInputStream(content.getBytes(UTF8)));
+                requestBody.setContentLength((long)content.getBytes(UTF8).length);
+                post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
             } catch (UnsupportedEncodingException var12) {
-                throw new RuntimeException("UTF-8 is not surportted", var12);
+                throw new AriusRunTimeException(EXCEPTION_1, var12, ResultType.FAIL);
             }
         }
 
@@ -203,16 +206,16 @@ public class BaseHttpUtil {
         String response;
         try {
             HttpEntity entity = HTTP_CLIENT.execute(post).getEntity();
-            response = EntityUtils.toString(entity, "UTF-8");
+            response = EntityUtils.toString(entity, UTF8);
             EntityUtils.consume(entity);
         } catch (Exception var10) {
-            throw new RuntimeException("error post data to " + url, var10);
+            throw new AriusRunTimeException(EXCEPTION_2 + url, var10, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("response=" + response);
+            LOGGER.debug("class=BaseHttpUtil||method=deleteForString||msg={}", RESPONSE + response);
         }
 
         return response;
@@ -221,25 +224,25 @@ public class BaseHttpUtil {
     public static String putForString(String url, String content, Map<String, String> headers) {
         HttpPut post = new HttpPut(url);
 
-        Iterator var4;
+        Iterator<Map.Entry<String, String>> var4;
         if(StringUtils.isNotBlank(content)) {
             if(headers != null) {
                 var4 = headers.entrySet().iterator();
 
                 while(var4.hasNext()) {
-                    Map.Entry<String, String> e = (Map.Entry)var4.next();
-                    post.addHeader((String)e.getKey(), (String)e.getValue());
+                    Map.Entry<String, String> e = var4.next();
+                    post.addHeader(e.getKey(), e.getValue());
                 }
             }
 
             try {
                 BasicHttpEntity requestBody = new BasicHttpEntity();
-                requestBody.setContent(new ByteArrayInputStream(content.getBytes("UTF-8")));
-                requestBody.setContentLength((long)content.getBytes("UTF-8").length);
+                requestBody.setContent(new ByteArrayInputStream(content.getBytes(UTF8)));
+                requestBody.setContentLength((long)content.getBytes(UTF8).length);
                  post.setEntity(requestBody);
-                post.getParams().setParameter("http.protocol.cookie-policy", "compatibility");
+                post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
             } catch (UnsupportedEncodingException var12) {
-                throw new RuntimeException("UTF-8 is not surportted", var12);
+                throw new AriusRunTimeException(EXCEPTION_1, var12, ResultType.FAIL);
             }
         }
 
@@ -248,16 +251,16 @@ public class BaseHttpUtil {
         String response;
         try {
             HttpEntity entity = HTTP_CLIENT.execute(post).getEntity();
-            response = EntityUtils.toString(entity, "UTF-8");
+            response = EntityUtils.toString(entity, UTF8);
             EntityUtils.consume(entity);
         } catch (Exception var10) {
-            throw new RuntimeException("error post data to " + url, var10);
+            throw new AriusRunTimeException(EXCEPTION_2 + url, var10, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("response=" + response);
+            LOGGER.debug("class=BaseHttpUtil||method=putForString||msg={}", RESPONSE + response);
         }
 
         return response;
@@ -265,7 +268,7 @@ public class BaseHttpUtil {
 
 
     public static String get(String url, Map<String, String> params) {
-        Iterator var3;
+        Iterator<Map.Entry<String, String>> var3;
         if(params != null) {
             StringBuilder builder = (new StringBuilder(url)).append('?');
             var3 = params.entrySet().iterator();
@@ -284,15 +287,15 @@ public class BaseHttpUtil {
         String response;
         try {
             HttpEntity entity = HTTP_CLIENT.execute(get).getEntity();
-            response = EntityUtils.toString(entity, "UTF-8");
+            response = EntityUtils.toString(entity, UTF8);
         } catch (Exception var8) {
-            throw new RuntimeException("error post data to " + url, var8);
+            throw new AriusRunTimeException(EXCEPTION_2 + url, var8, ResultType.FAIL);
         } finally {
             get.releaseConnection();
         }
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("response=" + response);
+            LOGGER.debug("class=BaseHttpUtil||method=get||msg={}", RESPONSE + response);
         }
 
         return response;
@@ -317,15 +320,15 @@ public class BaseHttpUtil {
         String response = null;
         try {
             HttpEntity entity = HTTP_CLIENT.execute(get).getEntity();
-            response = EntityUtils.toString(entity, "UTF-8");
+            response = EntityUtils.toString(entity, UTF8);
         } catch (Exception e) {
-            throw new RuntimeException("error post data to " + url, e);
+            throw new AriusRunTimeException(EXCEPTION_2 + url, e, ResultType.FAIL);
         } finally {
             get.releaseConnection();
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("response=" + response);
+            LOGGER.debug("class=BaseHttpUtil||method=get||msg={}", RESPONSE + response);
         }
         return response;
     }
@@ -334,7 +337,7 @@ public class BaseHttpUtil {
         // 构建认证信息的header
         Header header = null;
         try {
-            header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", appid, passWord).getBytes("UTF-8")));
+            header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", appid, passWord).getBytes(UTF8)));
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("class=BaseHttpUtil||method=buildHttpHeader||appid={}||passWord={}||errMsg=encoding error",
                     appid, passWord, e);

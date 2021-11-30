@@ -1,14 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.listener;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.common.event.region.RegionUnbindEvent;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanAreaService;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.event.region.RegionUnbindEvent;
 
 /**
  * @Author: lanxinzheng
@@ -18,20 +16,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class RegionUnbindEventListener implements ApplicationListener<RegionUnbindEvent> {
 
-    private static final ILog         LOGGER = LogFactory.getLog(RegionUnbindEventListener.class);
-
-    @Autowired
-    private CapacityPlanAreaService   capacityPlanAreaService;
-
-    @Autowired
-    private CapacityPlanRegionService capacityPlanRegionService;
-
     @Autowired
     private ClusterContextManager clusterContextManager;
 
     @Override
     public void onApplicationEvent(RegionUnbindEvent regionUnbindEvent) {
-        //更新集群校验模型
-        clusterContextManager.flushClusterContext();
+        ClusterRegion region = regionUnbindEvent.getClusterRegion();
+        if (null == region) {
+            return;
+        }
+
+        clusterContextManager.flushClusterContextByClusterRegion(region);
     }
 }

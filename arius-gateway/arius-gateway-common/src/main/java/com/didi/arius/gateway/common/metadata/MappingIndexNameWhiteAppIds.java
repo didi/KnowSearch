@@ -2,15 +2,22 @@ package com.didi.arius.gateway.common.metadata;
 
 import com.google.common.collect.Sets;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 import java.util.Set;
 
-// 可以跳过多type索引启用映射查询的appid列表
+/**
+ *
+ * @desc 可以跳过多type索引启用映射查询的appid列表
+ */
 @Data
+@NoArgsConstructor
 public class MappingIndexNameWhiteAppIds {
 
-    // appid列表
+    /**
+     * appid列表
+     */
     private Set<Integer> appids = Sets.newHashSet();
 
     /**

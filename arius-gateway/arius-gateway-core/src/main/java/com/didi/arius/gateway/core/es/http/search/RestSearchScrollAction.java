@@ -21,6 +21,7 @@ package com.didi.arius.gateway.core.es.http.search;
 
 import com.didi.arius.gateway.common.exception.InvalidParameterException;
 import com.didi.arius.gateway.common.metadata.FetchFields;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.es.http.ESAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
@@ -43,6 +44,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Base64;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.SCROLL;
+import static com.didi.arius.gateway.common.consts.RestConsts.SCROLL_SPLIT;
 import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 import static org.elasticsearch.common.unit.TimeValue.parseTimeValue;
 
@@ -52,21 +55,21 @@ import static org.elasticsearch.common.unit.TimeValue.parseTimeValue;
 @Component("restSearchScrollAction")
 public class RestSearchScrollAction extends ESAction {
 
-	public static final String NAME = "searchScroll";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "searchScroll";
 	}
 
     @Override
     public void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel) throws Exception {
+        long start = System.currentTimeMillis();
+
         String scrollId = request.param("scroll_id");
         SearchScrollRequest searchScrollRequest = new SearchScrollRequest();
         searchScrollRequest.scrollId(scrollId);
-        String scroll = request.param("scroll");
+        String scroll = request.param(SCROLL);
         if (scroll != null) {
-            searchScrollRequest.scroll(new Scroll(parseTimeValue(scroll, null, "scroll")));
+            searchScrollRequest.scroll(new Scroll(parseTimeValue(scroll, null, SCROLL)));
         }
 
         if (RestActions.hasBodyContent(request)) {
@@ -81,6 +84,8 @@ public class RestSearchScrollAction extends ESAction {
                 buildFromContent(RestActions.getRestContent(request), searchScrollRequest);
             }
         }
+
+        long paramTime = System.currentTimeMillis();
 
         ESClient readClient;
         String realScrollId;
@@ -97,11 +102,13 @@ public class RestSearchScrollAction extends ESAction {
             String cluster = new String(bytes);
 
             realScrollId = scrollIdWrap.substring(pos+1);
-            readClient = esClusterService.getClientFromCluster(queryContext, cluster);
+            readClient = esClusterService.getClientFromCluster(queryContext, cluster, actionName);
         } else {
             realScrollId = searchScrollRequest.scrollId();
-            readClient = esClusterService.getClient(queryContext);
+            readClient = esClusterService.getClient(queryContext, actionName);
         }
+
+        long getClientTime = System.currentTimeMillis();
 
         ESSearchScrollRequest esSearchScrollRequest = new ESSearchScrollRequest();
         esSearchScrollRequest.setScrollId(realScrollId);
@@ -118,6 +125,10 @@ public class RestSearchScrollAction extends ESAction {
 
         ActionListener<ESSearchResponse> listener = newSearchListener(queryContext);
         readClient.searchScroll(esSearchScrollRequest, listener);
+
+        JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+        joinLogContext.setParamCost(paramTime - start);
+        joinLogContext.setGetClientCost(getClientTime - paramTime);
     }
 
     public static void buildFromContent(BytesReference content, SearchScrollRequest searchScrollRequest) {
@@ -132,8 +143,8 @@ public class RestSearchScrollAction extends ESAction {
                         currentFieldName = parser.currentName();
                     } else if ("scroll_id".equals(currentFieldName) && token == XContentParser.Token.VALUE_STRING) {
                         searchScrollRequest.scrollId(parser.text());
-                    } else if ("scroll".equals(currentFieldName) && token == XContentParser.Token.VALUE_STRING) {
-                        searchScrollRequest.scroll(new Scroll(TimeValue.parseTimeValue(parser.text(), null, "scroll")));
+                    } else if (SCROLL.equals(currentFieldName) && token == XContentParser.Token.VALUE_STRING) {
+                        searchScrollRequest.scroll(new Scroll(TimeValue.parseTimeValue(parser.text(), null, SCROLL)));
                     } else {
                         throw new IllegalArgumentException("Unknown parameter [" + currentFieldName + "] in request body or parameter is of the wrong type[" + token + "] ");
                     }

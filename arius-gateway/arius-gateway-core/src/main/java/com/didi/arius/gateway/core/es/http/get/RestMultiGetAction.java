@@ -22,6 +22,7 @@ package com.didi.arius.gateway.core.es.http.get;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.FetchFields;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.es.http.ESAction;
 import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
@@ -45,14 +46,14 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("restMultiGetAction")
 public class RestMultiGetAction extends ESAction {
 
-	public static final String NAME = "multiGet";
+	public static final String AUTHORIZATION = "Authorization";
 	
 	@Override
 	public String name() {
-		return NAME;
+		return "multiGet";
 	}
 	
-    private final boolean allowExplicitIndex = true;
+    private static final boolean allowExplicitIndex = true;
 
     @Override
 	public void handleInterRequest(final QueryContext queryContext, RestRequest request, RestChannel channel)
@@ -72,7 +73,7 @@ public class RestMultiGetAction extends ESAction {
 
         // multi get body may contain index, so this will check indices again
         addIndices(queryContext, esMultiGetRequest);
-        checkIndices(queryContext);
+        checkIndicesAndTemplateBlockRead(queryContext);
 
 		List<String> indices = queryContext.getIndices();
 		IndexTemplate indexTemplate = null;
@@ -131,21 +132,22 @@ public class RestMultiGetAction extends ESAction {
 				// 替换mget请求
 				esMultiGetRequest = resetMultiGetRequest;
 				if (queryContext.isDetailLog()) {
-					statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_replace_index||requestId={}||sourceIndexNames={}||types={}||destIndexName={}||sourceTemplateName={}||destTemplateName={}",
-							queryContext.getRequestId(),
-							StringUtils.join(sourceIndexNameList, ","),
-							StringUtils.join(typeNameList, ","),
-							StringUtils.join(destIndexNameList, ","), sourceTemplateName, destTemplateName);
+					JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+					joinLogContext.setSourceIndexNames(StringUtils.join(sourceIndexNameList, ","));
+					joinLogContext.setTypeName(StringUtils.join(typeNameList, ","));
+					joinLogContext.setDestIndexName(StringUtils.join(destIndexNameList, ","));
+					joinLogContext.setSourceTemplateName(sourceTemplateName);
+					joinLogContext.setDestTemplateName(destTemplateName);
 				}
 			}
 		}
 
-		ESClient readClient = esClusterService.getClient(queryContext, indexTemplate);
+		ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
         //for kibana
         for (String index : indices) {
         	if (index.startsWith(".kibana")) {
-        		readClient = esRestClientService.getAdminClient();
+        		readClient = esRestClientService.getAdminClient(actionName);
         		break;
         	}
         }
@@ -153,8 +155,8 @@ public class RestMultiGetAction extends ESAction {
 		final List<FetchFields> fetchFieldsList = new ArrayList<>(esMultiGetRequest.getItems().size());
         for (ESMultiGetRequest.Item item : esMultiGetRequest.getItems()) {
         	FetchFields fetchFields = new FetchFields();
+			fetchFields.setFields(item.fields());
         	fetchFields.setFetchSourceContext(item.fetchSourceContext());
-        	fetchFields.setFields(item.fields());
             if (fetchFields.getFields() != null) {
                 for (String field : fetchFields.getFields()) {
         			if (field.equals(QueryConsts.MESSAGE_FIELD)) {
@@ -187,11 +189,11 @@ public class RestMultiGetAction extends ESAction {
 
 					ESMultiGetRequest.Item newItem = new ESMultiGetRequest.Item(inIndex, item.type(), item.id());
 
+					newItem.fetchSourceContext(item.fetchSourceContext());
         			newItem.version(item.version());
-        			newItem.fetchSourceContext(item.fetchSourceContext());
+					newItem.versionType(item.versionType());
         			newItem.fields(item.fields());
         			newItem.routing(item.routing());
-        			newItem.versionType(item.versionType());
         			
         			newMultiGetRequest.add(newItem);
         			
@@ -251,13 +253,13 @@ public class RestMultiGetAction extends ESAction {
 			};
 
 			newMultiGetRequest.putHeader("requestId", queryContext.getRequestId());
-			newMultiGetRequest.putHeader("Authorization", queryContext.getRequest().getHeader("Authorization"));
+			newMultiGetRequest.putHeader(AUTHORIZATION, queryContext.getRequest().getHeader(AUTHORIZATION));
 
 			readClient.multiGet(newMultiGetRequest, listener);
         } else {
-			ActionListener<ESMultiGetResponse> listener = new RestActionListenerImpl<ESMultiGetResponse>(queryContext);
+			ActionListener<ESMultiGetResponse> listener = new RestActionListenerImpl<>(queryContext);
 			esMultiGetRequest.putHeader("requestId", queryContext.getRequestId());
-			esMultiGetRequest.putHeader("Authorization", queryContext.getRequest().getHeader("Authorization"));
+			esMultiGetRequest.putHeader(AUTHORIZATION, queryContext.getRequest().getHeader(AUTHORIZATION));
 			readClient.multiGet(esMultiGetRequest, listener);
         }
         

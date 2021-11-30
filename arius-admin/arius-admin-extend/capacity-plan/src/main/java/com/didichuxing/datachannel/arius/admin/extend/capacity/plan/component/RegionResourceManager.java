@@ -13,8 +13,8 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -83,13 +83,13 @@ public class RegionResourceManager {
         regionPlanContext.setRegionCostDiskG(regionCostDiskG);
         regionPlanContext.setRegionCostCpuCount(regionCostCpuCount);
 
-        LOGGER.info("method=getIntervalResourceGap||region={}||resourceGap={}", regionPlanContext.getRegion(),
+        LOGGER.info("class=RegionResourceManager||method=getIntervalResourceGap||region={}||resourceGap={}", regionPlanContext.getRegion(),
             resourceGap);
 
-        Result globalCheckResult = checkGlobal(regionPlanContext, false);
+        Result<Boolean> globalCheckResult = checkGlobal(regionPlanContext, false);
         if (globalCheckResult.failed()) {
             LOGGER.info(
-                "method=getIntervalResourceGap||msg=checkGlobalFail||templateMetaMetrics={}||rackMetas={}||regionMetric={}||resourceGap={}",
+                "class=RegionResourceManager||method=getIntervalResourceGap||msg=checkGlobalFail||templateMetaMetrics={}||rackMetas={}||regionMetric={}||resourceGap={}",
                 JSON.toJSON(templateMetaMetrics), JSON.toJSON(rackMetas), JSON.toJSON(regionMetric),
                 JSON.toJSON(resourceGap));
             throw new AmsRemoteException(
@@ -120,7 +120,7 @@ public class RegionResourceManager {
 
         // 通过region中各个模板的实时指标计算region实时的cpu消耗
         List<TemplateMetaMetric> templateMetaMetrics = getRegionTemplateMetrics(region,
-            regionConfig.getCheckRegionResourceMinutes() * 60 * 1000, regionConfig);
+            regionConfig.getCheckRegionResourceMinutes() * 60 * 1000L, regionConfig);
         Double regionCurrentCostCpuCount = computeCurrentCostCpuCount(templateMetaMetrics);
 
         Double regionCurrentCostDiskG = regionMetric.getResource().getDisk() - regionMetric.getDiskFreeG();
@@ -136,13 +136,13 @@ public class RegionResourceManager {
         regionPlanContext.setRegionCostCpuCount(regionCurrentCostCpuCount);
 
         LOGGER.info(
-            "method=getCurrentResourceGap||region={}||regionMetric={}||resourceGap={}||templateMetaMetricsSize={}",
+            "class=RegionResourceManager||method=getCurrentResourceGap||region={}||regionMetric={}||resourceGap={}||templateMetaMetricsSize={}",
             regionPlanContext.getRegion(), regionMetric, resourceGap, templateMetaMetrics.size());
 
-        Result globalCheckResult = checkGlobal(regionPlanContext, true);
+        Result<Boolean> globalCheckResult = checkGlobal(regionPlanContext, true);
         if (globalCheckResult.failed()) {
             LOGGER.info(
-                "method=getCurrentResourceGap||msg=checkGlobalFail||rackMetaMetrics={}||regionMetric={}||templateMetaMetrics={}||resourceGap={}",
+                "class=RegionResourceManager||method=getCurrentResourceGap||msg=checkGlobalFail||rackMetaMetrics={}||regionMetric={}||templateMetaMetrics={}||resourceGap={}",
                 JSON.toJSON(rackMetaMetrics), JSON.toJSON(regionMetric), JSON.toJSON(templateMetaMetrics),
                 JSON.toJSON(resourceGap));
             throw new AmsRemoteException(
@@ -174,7 +174,7 @@ public class RegionResourceManager {
         double overSoldRate = capacityPlanConfig.getOverSoldRate();
         for (TemplateMetaMetric templateMetaMetric : templateMetaMetrics) {
             computeCombinedHotCost(templateMetaMetric, overSoldRate);
-            LOGGER.info("method=getTemplateMetrics||template={}||templateMetaMetric={}",
+            LOGGER.info("class=RegionResourceManager||method=getTemplateMetrics||template={}||templateMetaMetric={}",
                 templateMetaMetric.getTemplateName(), templateMetaMetric);
         }
 
@@ -206,7 +206,7 @@ public class RegionResourceManager {
         Double regionActualCpuCount = 0.0;
         for (TemplateMetaMetric templateMetaMetric : templateMetaMetrics) {
             regionActualCpuCount += templateMetaMetric.getActualCpuCount();
-            LOGGER.info("method=computeCurrentCostCpuCount||template={}||templateMetaMetric={}",
+            LOGGER.info("class=RegionResourceManager||method=computeCurrentCostCpuCount||template={}||templateMetaMetric={}",
                 templateMetaMetric.getTemplateName(), templateMetaMetric);
         }
         return regionActualCpuCount;
@@ -246,12 +246,14 @@ public class RegionResourceManager {
      * @return gap
      */
     private Double getGap(Double has, Double cost, CapacityPlanConfig regionConfig) {
-        Double max = has * regionConfig.getRegionWatermarkHigh();
-        Double min = has * regionConfig.getRegionWatermarkLow();
-        return cost > max ? cost - max : cost < min ? cost - min : 0.0;
+        Double max  = has * regionConfig.getRegionWatermarkHigh();
+        Double min  = has * regionConfig.getRegionWatermarkLow();
+        Double temp = cost < min ? cost - min : 0.0d;
+
+        return (cost > max) ? (cost - max) : temp;
     }
 
-    private Result checkGlobal(CapacityPlanRegionContext regionPlanContext, boolean checkRegionFreeDisk) {
+    private Result<Boolean> checkGlobal(CapacityPlanRegionContext regionPlanContext, boolean checkRegionFreeDisk) {
 
         // 实际的模板资源消耗
         Double regionCostDiskG = 0.0;
@@ -268,40 +270,40 @@ public class RegionResourceManager {
         }
 
         if (regionCostDiskG >= regionTotalDiskG) {
-            LOGGER.warn("method=checkGlobal||regionCostDiskG={}||regionDiskTotal={}||msg=disk cost too large",
+            LOGGER.warn("class=RegionResourceManager||method=checkGlobal||regionCostDiskG={}||regionDiskTotal={}||msg=disk cost too large",
                 regionCostDiskG, regionTotalDiskG);
             return Result.buildParamIllegal("磁盘消耗过大(" + regionCostDiskG + " >= " + regionTotalDiskG + ")");
         }
 
         if (regionCostCpuCount > regionTotalCpuCount) {
-            LOGGER.warn("method=checkGlobal||regionCostCpuCount={}||regionCpuTotal={}||msg=cpu cost too large",
+            LOGGER.warn("class=RegionResourceManager||method=checkGlobal||regionCostCpuCount={}||regionCpuTotal={}||msg=cpu cost too large",
                 regionCostCpuCount, regionTotalCpuCount);
             return Result.buildParamIllegal("CPU消耗过大(" + regionCostCpuCount + " > " + regionTotalCpuCount + ")");
         }
 
         if (regionCostDiskG < 0) {
-            LOGGER.warn("method=checkGlobal||regionCostDiskG={}||msg=disk cost too small", regionCostDiskG);
+            LOGGER.warn("class=RegionResourceManager||method=checkGlobal||regionCostDiskG={}||msg=disk cost too small", regionCostDiskG);
             return Result.buildParamIllegal("磁盘消耗过小(" + regionCostDiskG + " < 0)");
         }
 
         if (regionCostCpuCount <= 0) {
-            LOGGER.warn("method=checkGlobal||regionCostCpuCount={}||msg=cpu cost too small", regionCostCpuCount);
+            LOGGER.warn("class=RegionResourceManager||method=checkGlobal||regionCostCpuCount={}||msg=cpu cost too small", regionCostCpuCount);
             return Result.buildParamIllegal("CPU消耗过小(" + regionCostCpuCount + " <= 0)");
         }
 
         if (checkRegionFreeDisk) {
             if (regionFreeDiskG <= 0) {
-                LOGGER.warn("method=checkGlobal||regionFreeDiskG={}||msg=disk free too small", regionFreeDiskG);
+                LOGGER.warn("class=RegionResourceManager||method=checkGlobal||regionFreeDiskG={}||msg=disk free too small", regionFreeDiskG);
                 return Result.buildParamIllegal("磁盘空闲过小(" + regionFreeDiskG + " <= 0)");
             }
 
             if (regionFreeDiskG >= regionTotalDiskG) {
-                LOGGER.warn("method=checkGlobal||regionFreeDiskG={}||regionTotalDiskG={}||msg=disk free too large",
+                LOGGER.warn("class=RegionResourceManager||method=checkGlobal||regionFreeDiskG={}||regionTotalDiskG={}||msg=disk free too large",
                     regionFreeDiskG, regionTotalDiskG);
                 return Result.buildParamIllegal("磁盘空闲过大(" + regionFreeDiskG + " >=" + regionTotalDiskG + ")");
             }
         }
 
-        return Result.buildSucc();
+        return Result.buildSucc(true);
     }
 }

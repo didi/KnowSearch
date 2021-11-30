@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_THIRD_PART + "/zeus")
-@Api(value = "第三方Zeus接口(REST)")
+@Api(tags = "第三方Zeus接口(REST)")
 public class ThirdpartZeusController {
 
     @Autowired

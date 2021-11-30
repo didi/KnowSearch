@@ -34,14 +34,14 @@ public interface WorkOrderHandler extends BaseHandle {
      * @param workOrder 工单内容
      * @return result
      */
-    Result processAgree(WorkOrder workOrder, String approver, String opinion) throws AdminOperateException;
+    Result<Void> processAgree(WorkOrder workOrder, String approver, String opinion) throws AdminOperateException;
 
     /**
      * 处理审核不同意的工单
      * @param processDTO 工单内容
      * @return result
      */
-    Result processDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO);
+    Result<Void> processDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO);
 
     /**
      * 工单是否自动审批
@@ -69,6 +69,6 @@ public interface WorkOrderHandler extends BaseHandle {
      * @param orderPO 订单信息, userName 审批人名称
      * @return Result
      */
-    Result checkAuthority(WorkOrderPO orderPO, String userName);
+    Result<Void> checkAuthority(WorkOrderPO orderPO, String userName);
 
 }

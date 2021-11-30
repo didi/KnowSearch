@@ -1,31 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.order.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author d06679
@@ -55,20 +52,19 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     @Override
     public Result<WorkOrderPO> submit(WorkOrder workOrder) throws AdminOperateException {
 
-        Result checkAuth = validateConsoleAuth(workOrder);
+        Result<Void> checkAuth = validateConsoleAuth(workOrder);
         if (checkAuth.failed()) {
             LOGGER.warn("class=BaseWorkOrderHandler||method=submit||msg=checkAuth fail||type={}||content={}",
                 workOrder.getType(), ConvertUtil.obj2Json(workOrder.getContentObj()));
 
-            return checkAuth;
+            return Result.buildFrom(checkAuth);
         }
 
-        Result checkParam = validateConsoleParam(workOrder);
+        Result<Void> checkParam = validateConsoleParam(workOrder);
         if (checkParam.failed()) {
             LOGGER.warn("class=BaseWorkOrderHandler||method=submit||msg=checkParam fail||type={}||content={}",
                 workOrder.getType(), ConvertUtil.obj2Json(workOrder.getContentObj()));
-
-            return checkParam;
+            return Result.buildFrom(checkParam);
         }
 
         workOrder.setTitle(getTitle(workOrder));
@@ -87,8 +83,8 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result processAgree(WorkOrder workOrder, String approver, String opinion) throws AdminOperateException {
-        Result checkParamResult = validateParam(workOrder);
+    public Result<Void> processAgree(WorkOrder workOrder, String approver, String opinion) throws AdminOperateException {
+        Result<Void> checkParamResult = validateParam(workOrder);
 
         if (checkParamResult.failed()) {
             LOGGER.warn("class=BaseWorkOrderHandler||method=processAgree||msg=checkParam fail||type={}||content={}",
@@ -108,7 +104,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result processDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
+    public Result<Void> processDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
         return doProcessDisagree(orderPO, processDTO);
     }
 
@@ -118,7 +114,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @param orderPO
      * @return
      */
-    protected Result doProcessDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
+    protected Result<Void> doProcessDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
         orderPO.setApprover(processDTO.getAssignee());
         orderPO.setApproverAppId(processDTO.getAssigneeAppid());
         orderPO.setOpinion(processDTO.getComment());
@@ -135,7 +131,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @param workOrder 工单
      * @return result
      */
-    protected abstract Result validateConsoleParam(WorkOrder workOrder);
+    protected abstract Result<Void> validateConsoleParam(WorkOrder workOrder);
 
     /**
      * 生成标题
@@ -149,21 +145,21 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @param workOrder 工单内容
      * @return result
      */
-    protected abstract Result validateConsoleAuth(WorkOrder workOrder);
+    protected abstract Result<Void> validateConsoleAuth(WorkOrder workOrder);
 
     /**
      * 验证平台参数
      * @param workOrder 工单内容
      * @return result
      */
-    protected abstract Result validateParam(WorkOrder workOrder);
+    protected abstract Result<Void> validateParam(WorkOrder workOrder);
 
     /**
      * 处理工单
      * @param workOrder 工单
      * @return result
      */
-    protected abstract Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException;
+    protected abstract Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException;
 
     protected List<AriusUserInfo> getRDOrOPList() {
         return ariusUserInfoService
@@ -175,17 +171,11 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     }
 
     protected boolean isRDOrOP(String userName) {
-        if (ariusUserInfoService.isOPByDomainAccount(userName) || ariusUserInfoService.isRDByDomainAccount(userName)) {
-            return true;
-        }
-        return false;
+        return ariusUserInfoService.isOPByDomainAccount(userName) || ariusUserInfoService.isRDByDomainAccount(userName);
     }
 
     protected boolean isOP(String userName) {
-        if (ariusUserInfoService.isOPByDomainAccount(userName)) {
-            return true;
-        }
-        return false;
+        return ariusUserInfoService.isOPByDomainAccount(userName);
     }
 
     protected void sendNotify(NotifyTaskTypeEnum type, NotifyInfo data, List<String> receivers) {
@@ -212,13 +202,12 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
         return orderPo;
     }
 
-    private Result handleProcessAgree(WorkOrder workOrder, String approver,
+    private Result<Void> handleProcessAgree(WorkOrder workOrder, String approver,
                                       String opinion) throws AdminOperateException {
-
-        Result result = doProcessAgree(workOrder, approver);
+        Result<Void> result = doProcessAgree(workOrder, approver);
 
         if (result.success()) {
-            Result updateResult = updateWorkOrderStatus(workOrder, approver, opinion);
+            Result<Void> updateResult = updateWorkOrderStatus(workOrder, approver, opinion);
             if (updateResult.failed()) {
                 return updateResult;
             }
@@ -227,13 +216,13 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
         return result;
     }
 
-    private Result updateWorkOrderStatus(WorkOrder workOrder, String approver, String opinion) {
+    private Result<Void> updateWorkOrderStatus(WorkOrder workOrder, String approver, String opinion) {
         WorkOrderPO orderPO = new WorkOrderPO();
         orderPO.setId(workOrder.getId());
         orderPO.setApprover(approver);
         orderPO.setOpinion(opinion);
         orderPO.setStatus(OrderStatusEnum.PASSED.getCode());
-        Result processResult = workOrderManager.processOrder(orderPO);
+        Result<Void> processResult = workOrderManager.processOrder(orderPO);
         if (processResult.failed()) {
             return processResult;
         }

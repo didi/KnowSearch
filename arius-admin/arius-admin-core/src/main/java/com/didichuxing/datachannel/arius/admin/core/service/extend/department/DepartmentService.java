@@ -11,5 +11,5 @@ public interface DepartmentService {
     /**
      * 根据Type获取部门列表
      */
-    Result listDepartmentsByType(DepartmentTypeEnum typeEnum);
+    Result<String> listDepartmentsByType();
 }

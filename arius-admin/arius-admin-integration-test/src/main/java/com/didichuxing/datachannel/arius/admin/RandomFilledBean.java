@@ -12,11 +12,14 @@ import java.util.Date;
 import java.util.Map;
 
 public class RandomFilledBean {
+
+    private RandomFilledBean() {}
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RandomFilledBean.class);
 
     public static <T> T construct(Class<T> cls) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Constructor constructor = cls.getConstructor();
-        return (T) constructor.newInstance();
+        Constructor<T> constructor = cls.getConstructor();
+        return constructor.newInstance();
     }
 
     public static <T> void fill(T bean) {
@@ -26,34 +29,42 @@ public class RandomFilledBean {
                 continue;
             }
             field.setAccessible(true);
-            Class cls = field.getType();
+            Class<?> cls = field.getType();
             try {
-                if (String.class.isAssignableFrom(cls)) {
-                    field.set(bean, RandomGenerator.randomString(10));
-                } else if (Number.class.isAssignableFrom(cls)) {
-                    if (cls == Integer.class) {
-                        field.set(bean, RandomGenerator.randomInt(0, 1));
-                    } else if (cls == Long.class) {
-                        field.set(bean, Long.valueOf(RandomGenerator.randomInt(0, 100000)));
-                    } else if (cls == Double.class) {
-                        field.set(bean, RandomGenerator.randomDouble(0, 1));
-                    } else if (cls == BigDecimal.class) {
-                        field.set(bean, BigDecimal.valueOf(RandomGenerator.randomInt(0, 100000)));
-                    }
-                } else if (cls == Boolean.class) {
-                    field.set(bean, RandomGenerator.randomBoolean());
-                } else if (cls == Date.class) {
-                    field.set(bean, new Date());
-                } else if (Collection.class.isAssignableFrom(cls) || Map.class.isAssignableFrom(cls)) {
-                    field.set(bean, null);
-                } else if (Enum.class.isAssignableFrom(cls)) {
-                    field.set(bean, RandomGenerator.randomFromEnum(cls));
-                } else {
-                    field.set(bean, null);
-                }
+                setBean(bean, field, cls);
             } catch (IllegalAccessException e) {
-                LOGGER.error("field generate failed", e);
+                LOGGER.error("class=RandomFilledBean||method=fill||errMsg=field generate failed");
             }
+        }
+    }
+
+    private static <T> void setBean(T bean, Field field, Class cls) throws IllegalAccessException {
+        if (String.class.isAssignableFrom(cls)) {
+            field.set(bean, RandomGenerator.randomString(RandomConfig.STRING_LENGTH));
+        } else if (Number.class.isAssignableFrom(cls)) {
+            setBeanRandom(bean, field, cls);
+        } else if (cls == Boolean.class) {
+            field.set(bean, RandomGenerator.randomBoolean());
+        } else if (cls == Date.class) {
+            field.set(bean, new Date());
+        } else if (Collection.class.isAssignableFrom(cls) || Map.class.isAssignableFrom(cls)) {
+            field.set(bean, null);
+        } else if (Enum.class.isAssignableFrom(cls)) {
+            field.set(bean, RandomGenerator.randomFromEnum(cls));
+        } else {
+            field.set(bean, null);
+        }
+    }
+
+    private static <T> void setBeanRandom(T bean, Field field, Class cls) throws IllegalAccessException {
+        if (cls == Integer.class) {
+            field.set(bean, RandomGenerator.randomInt(RandomConfig.INT_LOW, RandomConfig.INT_HIGH));
+        } else if (cls == Long.class) {
+            field.set(bean, Long.valueOf(RandomGenerator.randomInt(RandomConfig.LONG_LOW, RandomConfig.LONG_HIGH)));
+        } else if (cls == Double.class) {
+            field.set(bean, RandomGenerator.randomDouble(RandomConfig.DOUBLE_LOW, RandomConfig.DOUBLE_HIGH));
+        } else if (cls == BigDecimal.class) {
+            field.set(bean, BigDecimal.valueOf(RandomGenerator.randomDouble(RandomConfig.DOUBLE_LOW, RandomConfig.DOUBLE_HIGH)));
         }
     }
 
@@ -63,10 +74,10 @@ public class RandomFilledBean {
             t = construct(cls);
             fill(t);
         } catch (NoSuchMethodException e) {
-            LOGGER.error("field generate failed", e);
+            LOGGER.error("class=RandomFilledBean||method=fill||errMsg=field generate failed");
             return null;
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error("", e);
+            LOGGER.error("class=RandomFilledBean||method=fill||errMsg=field generate failed");
         }
         return t;
     }

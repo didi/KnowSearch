@@ -1,11 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -16,8 +18,10 @@ import java.util.List;
  * @date 2020/09/23
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel("逻辑集群")
-public class ConsoleClusterVO extends BaseVO implements Comparable {
+public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleClusterVO> {
 
     @ApiModelProperty("集群ID")
     private Long                         id;
@@ -42,7 +46,7 @@ public class ConsoleClusterVO extends BaseVO implements Comparable {
     private Boolean                      phyClusterAssociated;
 
     @ApiModelProperty("关联物理集群列表")
-    private String                       associatedPhyClusterName;
+    private List<String>                 associatedPhyClusterName;
 
     @ApiModelProperty("数据节点数")
     private Integer                      dataNodesNumber;
@@ -66,13 +70,12 @@ public class ConsoleClusterVO extends BaseVO implements Comparable {
     private Integer                      level;
 
     @ApiModelProperty("配额")
-    @Deprecated
     private Double                       quota;
 
     @ApiModelProperty("权限记录ID")
     private Long                         authId;
 
-    /** @see AppLogicClusterAuthEnum */
+    /** @see AppClusterLogicAuthEnum */
     @ApiModelProperty("权限,1:配置管理,2:访问,-1:无权限")
     private Integer                      authType;
 
@@ -94,13 +97,15 @@ public class ConsoleClusterVO extends BaseVO implements Comparable {
     @ApiModelProperty("集群角色信息")
     private List<ESRoleClusterVO>        esRoleClusterVOS;
 
+    @ApiModelProperty("集群健康状态")
+    private Integer                      health;
+
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(ConsoleClusterVO o) {
         if (null == o) {
-            return 0;
+            return -1;
         }
 
-        ConsoleClusterVO c = (ConsoleClusterVO) o;
-        return c.getId().intValue() - this.getId().intValue();
+        return o.getId().intValue() - this.getId().intValue();
     }
 }

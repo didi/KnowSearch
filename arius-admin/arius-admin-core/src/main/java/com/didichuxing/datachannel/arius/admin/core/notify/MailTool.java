@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
@@ -55,9 +55,9 @@ public class MailTool {
         try {
             HtmlEmail email = constructEmail(subject, htmlMsg, replaceT2Leader(toAddr), replaceT2Leader(ccAddr));
             String result = email.send();
-            LOGGER.info("email send||content={}||result={}", htmlMsg, result);
+            LOGGER.info("class=MailTool||method=send||email send||content={}||result={}", htmlMsg, result);
         } catch (EmailException e) {
-            LOGGER.warn("email send got an exception,msg=" + e.getMessage(), e);
+            LOGGER.warn("class=MailTool||method=send||email send got an exception,msg={}", e.getMessage());
             return false;
         }
 
@@ -91,19 +91,14 @@ public class MailTool {
 
         // 发件人邮箱
         email.setFrom(ARIUS, "Arius服务中心");
-        email.setAuthentication("arius_admin@didichuxing.com", "N0iMhUsJ");
+        email.setAuthentication(ARIUS, "N0iMhUsJ");
         email.setCharset("utf-8");
         email.setSubject(subject);
         email.setHtmlMsg(htmlMsg);
 
         List<InternetAddress> toAddrList = Lists.newArrayList();
         for (String emailAddress : toAddr) {
-            try {
-                InternetAddress internetAddress = new InternetAddress(emailAddress.trim());
-                toAddrList.add(internetAddress);
-            } catch (AddressException e) {
-                LOGGER.warn("illegal email address:" + emailAddress, e);
-            }
+            addInternetAddress(toAddrList, emailAddress);
         }
         email.setTo(toAddrList);
 
@@ -111,21 +106,25 @@ public class MailTool {
             List<InternetAddress> ccAddrList = Lists.newArrayList();
             if (CollectionUtils.isNotEmpty(ccAddr)) {
                 for (String emailAddress : ccAddr) {
-                    try {
-                        InternetAddress internetAddress = new InternetAddress(emailAddress.trim());
-                        ccAddrList.add(internetAddress);
-                    } catch (AddressException e) {
-                        LOGGER.warn("illegal email address:" + emailAddress, e);
-                    }
+                    addInternetAddress(ccAddrList, emailAddress);
                 }
             }
             ccAddrList.add(new InternetAddress(ARIUS));
             email.setCc(ccAddrList);
         } catch (AddressException e) {
-            LOGGER.warn("illegal admin email address", e);
+            LOGGER.warn("class=MailTool||method=constructEmail||msg=exception:{}", e.getMessage());
         }
 
         return email;
+    }
+
+    private void addInternetAddress(List<InternetAddress> ccAddrList, String emailAddress) {
+        try {
+            InternetAddress internetAddress = new InternetAddress(emailAddress.trim());
+            ccAddrList.add(internetAddress);
+        } catch (AddressException e) {
+            LOGGER.warn("class=MailTool||method=constructEmail||msg=illegal email address:" + emailAddress, e);
+        }
     }
 
     /**

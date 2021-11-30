@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.vo;
 
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.ToString;
-
 import java.io.Serializable;
 import java.util.Date;
+
+import lombok.Data;
+import lombok.ToString;
 
 /**
  * @author d06679
@@ -14,15 +13,6 @@ import java.util.Date;
 @ToString
 @Data
 public class BaseVO implements Serializable {
-    /**
-     * 开始时间
-     */
-    @ApiModelProperty("开始时间")
-    protected Date createTime;
-
-    /**
-     * 结束时间
-     */
-    @ApiModelProperty("结束时间")
-    protected Date updateTime;
+    private Date createTime;
+    private Date updateTime;
 }

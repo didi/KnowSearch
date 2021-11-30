@@ -75,9 +75,9 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isRDOrOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
@@ -91,7 +91,7 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         TemplateIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateIndecreaseContent.class);
 
@@ -129,7 +129,7 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         TemplateIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateIndecreaseContent.class);
 
@@ -152,7 +152,7 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -163,12 +163,12 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         TemplateIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateIndecreaseContent.class);
 
         // 修改模板quota及保存时长信息
-        Result result = templateAction.indecreaseWithAutoDistributeResource(content.getId(),
+        Result<Void> result = templateAction.indecreaseWithAutoDistributeResource(content.getId(),
             content.getExpectExpireTime(), content.getExpectQuota(), workOrder.getSubmitor());
 
         //Quota更新

@@ -77,7 +77,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         int hotTime = templatePhysicalWithLogic.getLogicTemplate().getHotTime();
 
         if (hotTime <= 0) {
-            LOGGER.info("method=getColdIndex||template={}||msg=hotTime illegal", templatePhysicalWithLogic.getName());
+            LOGGER.info("class=TemplateColdManagerImpl||method=getColdIndex||template={}||msg=hotTime illegal", templatePhysicalWithLogic.getName());
             return Sets.newHashSet();
         }
 
@@ -88,7 +88,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         }
 
         if (hotTime >= templatePhysicalWithLogic.getLogicTemplate().getExpireTime()) {
-            LOGGER.info("method=getColdIndex||||template={}||msg=all index is hot",
+            LOGGER.info("class=TemplateColdManagerImpl||method=getColdIndex||||template={}||msg=all index is hot",
                 templatePhysicalWithLogic.getName());
             return Sets.newHashSet();
         }
@@ -106,7 +106,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      * @return result
      */
     @Override
-    public Result move2ColdNode(String phyCluster) {
+    public Result<Boolean> move2ColdNode(String phyCluster) {
         if (!isTemplateSrvOpen(phyCluster)) {
             return Result.buildFail(phyCluster + " 没有开启冷存搬迁服务");
 
@@ -121,7 +121,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
 
         List<String> coldRackList = Lists.newArrayList(esClusterPhyService.listColdRacks(phyCluster));
         if (CollectionUtils.isEmpty(coldRackList)) {
-            LOGGER.warn("method=move2ColdNode||cluster={}||no cold rack", phyCluster);
+            LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||cluster={}||no cold rack", phyCluster);
             return Result.buildFail(phyCluster + "没有冷节点");
         }
 
@@ -133,28 +133,28 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         List<IndexTemplatePhy> templatePhysicals = templatePhyService.getNormalTemplateByCluster(phyCluster);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
-            return Result.buildSucc();
+            return Result.buildSucc(true);
         }
 
-        LOGGER.info("method=move2ColdNode||cluster={}||coldRacks={}", phyCluster, coldRack);
+        LOGGER.info("class=TemplateColdManagerImpl||method=move2ColdNode||cluster={}||coldRacks={}", phyCluster, coldRack);
 
         int succ = 0;
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
-                Result moveResult = movePerTemplate(templatePhysical, coldRack);
+                Result<Boolean> moveResult = movePerTemplate(templatePhysical, coldRack);
                 if (moveResult.success()) {
                     succ++;
                 } else {
-                    LOGGER.warn("method=move2ColdNode||template={}||msg=move2ColdNode fail",
+                    LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail",
                         templatePhysical.getName());
                 }
             } catch (Exception e) {
-                LOGGER.warn("method=move2ColdNode||template={}||errMsg={}", templatePhysical.getName(), e.getMessage(),
+                LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||template={}||errMsg={}", templatePhysical.getName(), e.getMessage(),
                     e);
             }
         }
 
-        return Result.build(succ * 1.0 / templatePhysicals.size() > 0.8);
+        return Result.buildSucc(succ * 1.0 / templatePhysicals.size() > 0.8);
     }
 
     /**
@@ -175,7 +175,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
             }
         }
 
-        LOGGER.info("method=fetchClusterDefaultHotDay||msg=no changed||cluster={}||enableClusters={}||version={}",
+        LOGGER.info("class=TemplateColdManagerImpl||method=fetchClusterDefaultHotDay||msg=no changed||cluster={}||enableClusters={}||version={}",
             phyCluster, JSON.toJSONString(enableClusterSet), hotDay);
 
         return hotDay;
@@ -191,12 +191,12 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     @Override
     public Result<Integer> batchChangeHotDay(Integer days, String operator) {
         if (days > 2 || days < -2) {
-            return Result.buildFrom(Result.buildParamIllegal("days参数非法, [-2, 2]"));
+            return Result.buildParamIllegal("days参数非法, [-2, 2]");
         }
 
         int count = indexTemplateLogicDAO.batchChangeHotDay(days);
 
-        LOGGER.info("method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
+        LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
 
         operateRecordService.save(ModuleEnum.PLATFORM_OP, BATCH_CHANGE_TEMPLATE_HOT_DAYS, -1,
             "deltaHotDays:" + days + ";editCount:" + count, operator);
@@ -228,41 +228,9 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
 
         int hotDay = physicalWithLogic.getLogicTemplate().getHotTime();
 
-        List<String> expList = Lists.newArrayList();
+        List<String> expList = getExpList(physicalWithLogic, indices, hotDay);
 
-        if (hotDay < 0) {
-            expList.addAll(indices);
-        } else if (TemplateUtils.isOnly1Index(physicalWithLogic.getExpression())) {
-            expList.add(physicalWithLogic.getExpression());
-        } else {
-            if (CollectionUtils.isEmpty(indices)) {
-                LOGGER.info("method=updateHotIndexRack||template={}||msg=no matched indices",
-                    physicalWithLogic.getName());
-                return true;
-            }
-
-            Set<String> hotIndexNames = Sets.newHashSet();
-            for (String indexName : indices) {
-                Date indexTime = IndexNameFactory.genIndexTimeByIndexName(
-                    genIndexNameClear(indexName, physicalWithLogic.getExpression()), physicalWithLogic.getExpression(),
-                    physicalWithLogic.getLogicTemplate().getDateFormat());
-                if (indexTime == null) {
-                    LOGGER.warn("method=updateHotIndexRack||template={}||msg=parse index time fail",
-                        physicalWithLogic.getName());
-                    continue;
-                }
-                long timeIntervalDay = (System.currentTimeMillis() - indexTime.getTime()) / MILLIS_PER_DAY;
-                if (timeIntervalDay >= hotDay) {
-                    LOGGER.info("method=updateHotIndexRack||template={}||indexName={}||msg=index is cold",
-                        physicalWithLogic.getName(), indexName);
-                    continue;
-                }
-                hotIndexNames.add(indexName);
-            }
-            expList.addAll(hotIndexNames);
-        }
-
-        LOGGER.info("method=updateHotIndexRack||template={}||expList={}", physicalWithLogic.getName(), expList);
+        LOGGER.info("class=TemplateColdManagerImpl||method=updateHotIndexRack||template={}||expList={}", physicalWithLogic.getName(), expList);
 
         if (CollectionUtils.isNotEmpty(expList)) {
             return esIndexService.syncBatchUpdateRack(physicalWithLogic.getCluster(), expList, tgtRack, retryCount);
@@ -271,32 +239,69 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         }
     }
 
-    /**************************************** private method ****************************************************/
-    private Result movePerTemplate(IndexTemplatePhy templatePhysical, String coldRacks) throws ESOperateException {
+    /**************************************************** private method ****************************************************/
+    private List<String> getExpList(IndexTemplatePhyWithLogic physicalWithLogic, List<String> indices, int hotDay) {
+        List<String> expList = Lists.newArrayList();
+
+        if (hotDay < 0) {
+            expList.addAll(indices);
+        } else if (TemplateUtils.isOnly1Index(physicalWithLogic.getExpression())) {
+            expList.add(physicalWithLogic.getExpression());
+        } else {
+            if (CollectionUtils.isEmpty(indices)) {
+                LOGGER.info("class=TemplateColdManagerImpl||method=updateHotIndexRack||template={}||msg=no matched indices",
+                        physicalWithLogic.getName());
+                return Lists.newArrayList();
+            }
+            Set<String> hotIndexNames = Sets.newHashSet();
+            for (String indexName : indices) {
+                Date indexTime = IndexNameFactory.genIndexTimeByIndexName(
+                        genIndexNameClear(indexName, physicalWithLogic.getExpression()), physicalWithLogic.getExpression(),
+                        physicalWithLogic.getLogicTemplate().getDateFormat());
+                if (indexTime == null) {
+                    LOGGER.warn("class=TemplateColdManagerImpl||method=updateHotIndexRack||template={}||msg=parse index time fail",
+                            physicalWithLogic.getName());
+                    continue;
+                }
+                long timeIntervalDay = (System.currentTimeMillis() - indexTime.getTime()) / MILLIS_PER_DAY;
+                if (timeIntervalDay >= hotDay) {
+                    LOGGER.info("class=TemplateColdManagerImpl||method=updateHotIndexRack||template={}||indexName={}||msg=index is cold",
+                            physicalWithLogic.getName(), indexName);
+                    continue;
+                }
+                hotIndexNames.add(indexName);
+            }
+            expList.addAll(hotIndexNames);
+        }
+
+        return expList;
+    }
+
+    private Result<Boolean> movePerTemplate(IndexTemplatePhy templatePhysical, String coldRacks) throws ESOperateException {
         Set<String> coldIndexNames = getColdIndex(templatePhysical.getId());
         if (CollectionUtils.isEmpty(coldIndexNames)) {
-            LOGGER.info("method=movePerTemplate||template={}||msg=no cold index", templatePhysical.getName());
+            LOGGER.info("class=TemplateColdManagerImpl||method=movePerTemplate||template={}||msg=no cold index", templatePhysical.getName());
             return Result.buildSucc();
         }
 
         boolean success = esIndexService.syncBatchUpdateRack(templatePhysical.getCluster(),
             Lists.newArrayList(coldIndexNames), coldRacks, 3);
 
-        LOGGER.info("method=movePerTemplate||template={}||coldRacks={}||coldIndexNames={}||success={}",
+        LOGGER.info("class=TemplateColdManagerImpl||method=movePerTemplate||template={}||coldRacks={}||coldIndexNames={}||success={}",
             templatePhysical.getName(), coldRacks, coldIndexNames, success);
 
-        return Result.build(success);
+        return Result.buildBoolen(success);
     }
 
     private void tryConfigCluster(String cluster) {
         try {
             if (esClusterService.syncConfigColdDateMove(cluster, 2, 2, "10MB", 3)) {
-                LOGGER.info("method=tryConfigCluster||cluster={}||msg=config cluster succ", cluster);
+                LOGGER.info("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||msg=config cluster succ", cluster);
             } else {
-                LOGGER.warn("method=tryConfigCluster||cluster={}||msg=config cluster fail", cluster);
+                LOGGER.warn("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||msg=config cluster fail", cluster);
             }
         } catch (Exception e) {
-            LOGGER.info("method=tryConfigCluster||cluster={}||errMsg={}", cluster, e.getMessage(), e);
+            LOGGER.info("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||errMsg={}", cluster, e.getMessage(), e);
         }
     }
 
@@ -307,13 +312,13 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     private int getDefaultHotDay() {
         String defaultDay = ariusConfigInfoService.stringSetting(ARIUS_TEMPLATE_COLD, "defaultDay", "");
-        LOGGER.info("method=getDefaultHotDay||msg=defaultDay: {}", defaultDay);
+        LOGGER.info("class=TemplateColdManagerImpl||method=getDefaultHotDay||msg=defaultDay: {}", defaultDay);
         if (StringUtils.isNotBlank(defaultDay)) {
             try {
-                JSONObject object = JSONObject.parseObject(defaultDay);
+                JSONObject object = JSON.parseObject(defaultDay);
                 return object.getInteger("defaultHotDay");
             } catch (JSONException e) {
-                LOGGER.warn("class=TemplateLogicServiceImpl||method=getDefaultHotDay||errMsg={}", e.getMessage());
+                LOGGER.warn("class=TemplateColdManagerImpl||method=getDefaultHotDay||errMsg={}", e.getMessage());
             }
         }
         return -1;

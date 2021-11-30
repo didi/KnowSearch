@@ -2,9 +2,13 @@ package com.didichuxing.datachannel.arius.admin.client.bean.vo.template;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(value = "TemplateCyclicalRollInfoVO", description = "索引分区信息")
 public class TemplateCyclicalRollInfoVO {
 

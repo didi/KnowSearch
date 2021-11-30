@@ -91,16 +91,20 @@ public class MetricsServiceImpl implements MetricsService, ApplicationListener<P
             QueryContext queryContext = queryPostResponseEvent.getQueryContext();
 
             if(null != queryContext){
-                int responseBodyLen = queryContext.getResponse() != null ? queryContext.getResponse().content().length() : 0;
-                if (queryContext.isDetailLog()) {
-                    if (queryContext.getCostTime() > queryContext.getRequestSlowlogThresholdMills()) {
-                        addSlowlogCost(queryContext.getAppid(), queryContext.getCostTime());
-                    }
-                    addQueryMetrics(queryContext.getAppid(), queryContext.getCostTime(), queryContext.getPostBody().length(), responseBodyLen);
-                }
+                dealResponse(queryContext);
             }
         }
 
+    }
+
+    private void dealResponse(QueryContext queryContext) {
+        int responseBodyLen = queryContext.getResponse() != null ? queryContext.getResponse().content().length() : 0;
+        if (queryContext.isDetailLog()) {
+            if (queryContext.getCostTime() > queryContext.getRequestSlowlogThresholdMills()) {
+                addSlowlogCost(queryContext.getAppid(), queryContext.getCostTime());
+            }
+            addQueryMetrics(queryContext.getAppid(), queryContext.getCostTime(), queryContext.getPostBody().length(), responseBodyLen);
+        }
     }
 
     /************************************************************** private method **************************************************************/

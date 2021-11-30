@@ -4,7 +4,7 @@ import org.springframework.context.ApplicationEvent;
 
 public abstract class PostResponseEvent extends ApplicationEvent {
 
-    public PostResponseEvent(Object source) {
+    protected PostResponseEvent(Object source) {
         super( source );
     }
 }

@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
  * @author d06679
  * @date 2019/3/21
  */
+@Deprecated
 @Component
 public class SecurityMetaCheckTask extends BaseConcurrentClusterTask {
 
@@ -27,6 +28,15 @@ public class SecurityMetaCheckTask extends BaseConcurrentClusterTask {
     @Override
     public String getTaskName() {
         return "权限数据校验";
+    }
+
+    /**
+     * 任务的线程个数
+     * @return 任务的线程个数
+     */
+    @Override
+    public int poolSize() {
+        return 3;
     }
 
     /**
@@ -45,7 +55,8 @@ public class SecurityMetaCheckTask extends BaseConcurrentClusterTask {
      * @param cluster 集群名字
      */
     @Override
-    public boolean executeByCluster(String cluster) throws ESOperateException {
-        return securityService.checkMeta(cluster);
+    public boolean executeByCluster(String cluster) {
+        securityService.checkMeta(cluster);
+        return true;
     }
 }

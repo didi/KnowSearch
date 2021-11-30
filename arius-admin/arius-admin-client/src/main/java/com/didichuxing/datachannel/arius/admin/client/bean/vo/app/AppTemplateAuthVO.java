@@ -4,15 +4,17 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/4/16
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "应用权限信息")
 public class AppTemplateAuthVO extends BaseVO {
     @ApiModelProperty("ID")

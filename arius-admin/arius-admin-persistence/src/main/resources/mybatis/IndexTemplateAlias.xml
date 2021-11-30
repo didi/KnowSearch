@@ -25,4 +25,19 @@
         where index_template_id = #{logicId}
     </select>
 
+    <insert id="insert"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into index_template_alias
+        (index_template_id, `name`)
+        values
+        (#{logicId}, #{name})
+    </insert>
+
+    <delete id="delete" parameterType="map">
+        delete from index_template_alias
+        where index_template_id = #{logicId} and `name` = #{name}
+    </delete>
+
 </mapper>

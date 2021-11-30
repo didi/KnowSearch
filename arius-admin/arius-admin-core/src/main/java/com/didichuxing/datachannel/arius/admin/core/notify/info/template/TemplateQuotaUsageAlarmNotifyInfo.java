@@ -67,15 +67,6 @@ public class TemplateQuotaUsageAlarmNotifyInfo implements NotifyInfo {
             .replace("{ariusConsole}", ariusConsole);
     }
 
-    /**
-     * 解析格式化的字符串为字符串列表
-     * @param formattedData 格式化的字符串
-     * @return
-     */
-    private List<String> parseArrays(String formattedData) {
-        return Lists.newArrayList(formattedData.split(","));
-    }
-
     private String getDiskUsePercent(LogicTemplateQuotaUsage templateQuotaUsage) {
         double usage = templateQuotaUsage.getActualDiskG() / templateQuotaUsage.getQuotaDiskG();
         return PercentUtils.getStrWithLimit(usage);

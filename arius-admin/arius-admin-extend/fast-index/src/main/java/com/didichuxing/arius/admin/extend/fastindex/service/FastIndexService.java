@@ -53,6 +53,6 @@ public class FastIndexService {
 
     private static final long   MAX_COUNT   = 90; // 90分钟
 
-    private static final String CMDB_URL = "";
-    private static final String STAR_URL = "";
+    private static final String CMDB_URL = "http://cmdb.sys.xiaojukeji.com:8000/cmdb/cmdb/devices/getMachinesByIps";
+    private static final String STAR_URL = "http://cmdb.intra.xiaojukeji.com/cmdbRead/cmdb/devices/getDevicesByUsername?username=isThread&searchType=IP&searchValue=";
 }

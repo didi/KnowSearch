@@ -73,8 +73,8 @@ public abstract class BaseTemplateMarkLabelJob extends AbstractMetaDataJob {
                 if (CollectionUtils.isNotEmpty(shouldAdds)) {
                     boolean insertResult = templateLabelService.batchInsert(shouldAdds);
                     changeCount += shouldAdds.size();
-                    LOGGER.debug("class=BaseTemplateMarkLabelJob||method=handleJobTask||msg=template: {} add label: {} result: {}",
-                            template.getName(), getJoinLabelName(shouldAdds), insertResult);
+                    LOGGER.debug("class=BaseTemplateMarkLabelJob||method=handleJobTask||msg=template={}||label={}||changeCount={}||result={}",
+                            template.getName(), getJoinLabelName(shouldAdds), changeCount, insertResult);
                 }
 
                 if (CollectionUtils.isNotEmpty(shouldDels)) {
@@ -111,7 +111,7 @@ public abstract class BaseTemplateMarkLabelJob extends AbstractMetaDataJob {
      *
      * @return
      */
-    protected abstract void genShouldHasAndDelLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> newLabels, List<TemplateLabelPO> expireLabels) throws Exception;
+    protected abstract void genShouldHasAndDelLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> newLabels, List<TemplateLabelPO> expireLabels);
 
 
     /**
@@ -128,18 +128,14 @@ public abstract class BaseTemplateMarkLabelJob extends AbstractMetaDataJob {
     /**
      * 对一个索引模板执行具体的打标任务
      */
-    private void markTemplateLabel(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> shouldAdds, List<TemplateLabelPO> shouldDels) throws Exception {
+    private void markTemplateLabel(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> shouldAdds, List<TemplateLabelPO> shouldDels) {
         if (indexTemplate == null) {
             LOGGER.error("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||errMsg=mark template is null.");
             return;
         }
 
         // 根据索引模板Id和标签维度进行查找
-        List<TemplateLabelPO> existLabelList = templateLabelService.listIndexTemplateLabelPO(indexTemplate.getId());
-        Map<String, TemplateLabelPO> existLabelMap = Maps.newHashMap();
-        for (TemplateLabelPO labelPO : existLabelList) {
-            existLabelMap.put(labelPO.getLabelId(), labelPO);
-        }
+        Map<String, TemplateLabelPO> existLabelMap = getExistLabelList(indexTemplate);
 
         // 回调子类具体实现
         // 识别出需要新增和删除的标签
@@ -150,32 +146,49 @@ public abstract class BaseTemplateMarkLabelJob extends AbstractMetaDataJob {
 
         // 对这个索引模板应该有的标签进行处理
         if (CollectionUtils.isNotEmpty(newLabels)) {
-            for (TemplateLabelPO labelPO : newLabels) {
-                if (existLabelMap.containsKey(labelPO.getId())) {
-                    LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} has exist",
-                            indexTemplate.getName(), labelPO.getLabelId());
-                } else {
-                    shouldAdds.add(labelPO);
-                    LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} new label",
-                            indexTemplate.getName(), labelPO.getLabelId());
-                }
-            }
+            handleNewLabels(indexTemplate, shouldAdds, existLabelMap, newLabels);
         }
 
         // 对这个索引模板应该删除的标签进行处理
         if (CollectionUtils.isNotEmpty(expireLabels)) {
-            for (TemplateLabelPO labelPO : expireLabels) {
-                if (existLabelMap.containsKey(labelPO.getLabelId())) {
-                    shouldDels.add(existLabelMap.get(labelPO.getLabelId()));
-                    LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} should deleted",
-                            indexTemplate.getName(), labelPO.getLabelId());
-                } else {
-                    LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} not exist",
-                            indexTemplate.getName(), labelPO.getLabelId());
-                }
-            }
+            handleExpireLabels(indexTemplate, shouldDels, existLabelMap, expireLabels);
         }
 
+    }
+
+    private void handleExpireLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> shouldDels, Map<String, TemplateLabelPO> existLabelMap, List<TemplateLabelPO> expireLabels) {
+        for (TemplateLabelPO labelPO : expireLabels) {
+            if (existLabelMap.containsKey(labelPO.getLabelId())) {
+                shouldDels.add(existLabelMap.get(labelPO.getLabelId()));
+                LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} should deleted",
+                        indexTemplate.getName(), labelPO.getLabelId());
+            } else {
+                LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} not exist",
+                        indexTemplate.getName(), labelPO.getLabelId());
+            }
+        }
+    }
+
+    private void handleNewLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate, List<TemplateLabelPO> shouldAdds, Map<String, TemplateLabelPO> existLabelMap, List<TemplateLabelPO> newLabels) {
+        for (TemplateLabelPO labelPO : newLabels) {
+            if (existLabelMap.containsKey(labelPO.getId())) {
+                LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} has exist",
+                        indexTemplate.getName(), labelPO.getLabelId());
+            } else {
+                shouldAdds.add(labelPO);
+                LOGGER.debug("class=BaseTemplateMarkLabelJob||method=markOneTemplateLabel||msg=template {} label {} new label",
+                        indexTemplate.getName(), labelPO.getLabelId());
+            }
+        }
+    }
+
+    private Map<String, TemplateLabelPO> getExistLabelList(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate) {
+        List<TemplateLabelPO> existLabelList = templateLabelService.listIndexTemplateLabelPO(indexTemplate.getId());
+        Map<String, TemplateLabelPO> existLabelMap = Maps.newHashMap();
+        for (TemplateLabelPO labelPO : existLabelList) {
+            existLabelMap.put(labelPO.getLabelId(), labelPO);
+        }
+        return existLabelMap;
     }
 
     /**

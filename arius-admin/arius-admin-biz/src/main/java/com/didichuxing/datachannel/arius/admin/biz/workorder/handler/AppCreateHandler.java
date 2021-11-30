@@ -1,6 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.AppCreateContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.AppCreateNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
@@ -13,11 +16,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AppCreateOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ValidateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.AppCreateContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.AppCreateNotify;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         AppDTO appDTO = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), AppDTO.class);
         return appService.validateApp(appDTO, OperationEnum.ADD);
     }
@@ -67,7 +67,7 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -89,7 +89,7 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -100,7 +100,7 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         AppCreateContent appCreateContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             AppCreateContent.class);
         AppDTO appDTO = new AppDTO();
@@ -120,7 +120,7 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
                 Arrays.asList(workOrder.getSubmitor()));
         }
 
-        return result;
+        return Result.buildFrom(result);
     }
 
     @Override
@@ -130,10 +130,11 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        AppDTO orderExtensionDTO = null;
+        AppDTO orderExtensionDTO;
         try {
-            orderExtensionDTO = JSONObject.parseObject(extensions, AppDTO.class);
+            orderExtensionDTO = JSON.parseObject(extensions, AppDTO.class);
         } catch (Exception e) {
+            return null;
         }
 
         AppCreateOrderDetail orderDetailDTO = new AppCreateOrderDetail();
@@ -142,7 +143,7 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
         orderDetailDTO.setDepartment(orderExtensionDTO.getDepartment());
         orderDetailDTO.setDepartmentId(orderExtensionDTO.getDepartmentId());
         App app = appService.getAppByName(orderExtensionDTO.getName());
-        if (ValidateUtils.isNull(app)) {
+        if (AriusObjUtils.isNull(app)) {
             return orderDetailDTO;
         }
 
@@ -151,9 +152,9 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isRDOrOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }

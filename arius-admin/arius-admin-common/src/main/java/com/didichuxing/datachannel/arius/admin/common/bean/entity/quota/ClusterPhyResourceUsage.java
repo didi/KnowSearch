@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.quota;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -10,6 +12,8 @@ import java.io.Serializable;
  * @date 2020/10/04
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClusterPhyResourceUsage implements Serializable {
     /**
      * 物理集群名称

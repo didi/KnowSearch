@@ -49,7 +49,7 @@ public class FlowController {
 	
 	public boolean addUpIn(String searchId, int in) {
 		boolean isRelaxed = false;
-		if (searchId != QueryConsts.TOTAL_SEARCH_ID) {
+		if (!searchId.equals(QueryConsts.TOTAL_SEARCH_ID)) {
 			isRelaxed = addUpIn(QueryConsts.TOTAL_SEARCH_ID, in);
 		}
 		
@@ -61,7 +61,7 @@ public class FlowController {
 		boolean limit = false;
 		limit = !addUpFlow(areaFlow.getIn(), in) || limit;
 		limit = !addUpFlow(areaFlow.getOps(), 1) || limit;
-		if (limit == true) {
+		if (limit) {
 			areaFlow.setStatus(FlowStatus.UP);
 			logger.info("appid={} Add up request: search_id={}, in={}, status={}",
 					appid, searchId, in, areaFlow.getStatus());
@@ -72,7 +72,7 @@ public class FlowController {
 	
 	public boolean addUpOut(String searchId, int out) {
 		boolean isRelaxed = false;
-		if (searchId != QueryConsts.TOTAL_SEARCH_ID) {
+		if (!searchId.equals(QueryConsts.TOTAL_SEARCH_ID)) {
 			isRelaxed = addUpOut(QueryConsts.TOTAL_SEARCH_ID, out);
 		}
 		
@@ -83,7 +83,7 @@ public class FlowController {
 		
 		boolean limit = false;
 		limit = !addUpFlow(areaFlow.getOut(), out) || limit;
-		if (limit == true) {
+		if (limit) {
 			areaFlow.setStatus(FlowStatus.UP);
 			logger.info("appid={} Add up response: search_id={}, out={}, status={}",
 					appid, searchId, out, areaFlow.getStatus());
@@ -172,7 +172,7 @@ public class FlowController {
 	}
 	
 	public static String formAreaId(int appid, String searchId) {
-		StringBuffer buffer = new StringBuffer(String.valueOf(appid));
+		StringBuilder buffer = new StringBuilder(String.valueOf(appid));
 		buffer.append("_");
 		buffer.append(searchId);
 		return buffer.toString();

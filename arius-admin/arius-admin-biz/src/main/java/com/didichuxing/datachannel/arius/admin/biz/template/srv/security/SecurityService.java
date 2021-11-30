@@ -17,7 +17,7 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result saveAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount);
+    Result<Void> saveAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount);
 
     /**
      * 为逻辑模板删除APP的指定权限
@@ -27,7 +27,7 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result deleteAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount);
+    Result<Void> deleteAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount);
 
     /**
      * 修改逻辑模板的APPID
@@ -37,7 +37,7 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result editLogicTemplateOwnApp(Integer logicTemplateId, Integer srcAppId, Integer tgtAppId, int retryCount);
+    Result<Void> editLogicTemplateOwnApp(Integer logicTemplateId, Integer srcAppId, Integer tgtAppId, int retryCount);
 
     /**
      * 为物理模板创建APP的管理权限
@@ -47,7 +47,7 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result saveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
+    Result<Void> saveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
                                        int retryCount) throws ESOperateException;
 
     /**
@@ -58,7 +58,7 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result deleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
+    Result<Void> deleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
                                          int retryCount) throws ESOperateException;
 
     /**
@@ -68,12 +68,12 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result editAppVerifyCode(Integer appId, String verifyCode, int retryCount);
+    Result<Void> editAppVerifyCode(Integer appId, String verifyCode, int retryCount);
 
     /**
      * 元数据一致性保证
      * @param cluster 集群
      * @return result
      */
-    boolean checkMeta(String cluster);
+    void checkMeta(String cluster);
 }

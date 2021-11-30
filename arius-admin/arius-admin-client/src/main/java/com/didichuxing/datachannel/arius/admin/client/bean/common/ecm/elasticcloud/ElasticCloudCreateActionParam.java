@@ -75,7 +75,7 @@ public class ElasticCloudCreateActionParam extends EcmParamBase {
      */
     private Integer  level;
 
-    public Result validateFiledIllegal() {
+    public Result<Void> validateFiledIllegal() {
         if (StringUtils.isBlank(this.phyClusterName)) {
             return Result.buildParamIllegal("集群名称为空");
         }

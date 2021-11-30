@@ -17,6 +17,11 @@ import static org.elasticsearch.rest.RestRequest.Method.PUT;
 public class RestIndexController extends BaseHttpRestController {
     @Autowired
     private RestIndexAction restIndexAction;
+
+    public RestIndexController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(POST, "/{index}/_doc", this); // auto id creation

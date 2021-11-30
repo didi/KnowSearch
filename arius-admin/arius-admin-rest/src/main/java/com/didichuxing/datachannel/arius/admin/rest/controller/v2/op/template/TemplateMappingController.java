@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,11 +27,10 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping({V2 + "/template/mapping", V2_OP + "/template/mapping"})
-@Api(value = "mapping管理接口(REST)")
+@Api(tags = "mapping管理接口(REST)")
 public class TemplateMappingController {
     private static final String            CLUSTER_STR       = "cluster";
     private static final String            TEMPLATE_STR      = "template";
-    private static final String            LOGIC_TEMPLATE_ID = "logicTemplateId";
     private static final String            MAPPING_STR       = "mapping";
     private static final String            DO_MERGE_STR      = "doMerge";
 
@@ -40,7 +39,7 @@ public class TemplateMappingController {
 
     @PostMapping("/check")
     @ApiOperation(value = "检查索引mapping", notes = "")
-    public Result<String> checkMapping(@RequestBody JSONObject param) {
+    public Result<Void> checkMapping(@RequestBody JSONObject param) {
         String cluster = param.getString(CLUSTER_STR);
         String template = param.getString(TEMPLATE_STR);
         String mappings = param.getJSONObject(MAPPING_STR).toJSONString();
@@ -53,7 +52,7 @@ public class TemplateMappingController {
 
     @PostMapping("/update")
     @ApiOperation(value = "更新索引mapping", notes = "")
-    public Result<String> updateMapping(@RequestBody JSONObject param) {
+    public Result<Void> updateMapping(@RequestBody JSONObject param) {
         if (!param.containsKey(CLUSTER_STR) || !param.containsKey(TEMPLATE_STR) || !param.containsKey(MAPPING_STR)) {
             return Result.build(ResultType.FAIL.getCode(), "param is null");
         }
@@ -68,19 +67,18 @@ public class TemplateMappingController {
     @GetMapping("/getMapping")
     @ApiOperation(value = "获取索引mapping", notes = "")
     public Result<JSONObject> getMapping(@RequestParam(value = "cluster") String cluster,
-                                         @RequestParam(value = "template") String name) throws Exception {
+                                         @RequestParam(value = "template") String name) {
         try {
-            MappingConfig mappings = mappingService.getMapping(cluster, name).getData();
+            MappingConfig mappings = mappingService.getMapping( cluster, name ).getData();
             if (mappings == null) {
-                return Result.build(ResultType.FAIL.getCode(), "mapping不存在");
+                return Result.build( ResultType.FAIL.getCode(), "mapping不存在" );
             }
 
             mappings.removeDefault();
-            return Result.build(true, mappings.toJson());
-        } catch (Throwable t) {
-            if (t instanceof JSONException) {
-                return Result.build(ResultType.FAIL.getCode(), "json解析失败");
-            }
+            return Result.build( true, mappings.toJson() );
+        } catch (JSONException e){
+            return Result.build(ResultType.FAIL.getCode(), "json解析失败");
+        } catch (Exception t) {
             return Result.build(ResultType.FAIL.getCode(), t.getMessage());
         }
     }

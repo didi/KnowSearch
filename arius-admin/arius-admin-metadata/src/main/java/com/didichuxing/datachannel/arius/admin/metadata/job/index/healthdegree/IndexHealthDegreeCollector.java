@@ -74,9 +74,9 @@ public class IndexHealthDegreeCollector extends AbstractMetaDataJob {
             IndexRealTimeInfo yesdayReaTimelInfo = getIndexRealTimeInfo(templateName, cluster, 1);
 
             //4、获取索引的实时
-            List<ESIndexToNodeStats> ESIndexToNodeStatsses = ariusStatsIndexNodeInfoEsDao.getIndexToNodeStats(templateName, cluster, todayStart, todayEnd);
+            List<ESIndexToNodeStats> indexToNodeStats = ariusStatsIndexNodeInfoEsDao.getIndexToNodeStats(templateName, cluster, todayStart, todayEnd);
 
-            DegreeParam degreeParam = genDegreeParam(indexTemplate, templateDocNu, templateSizeInBytes, templateAccessCount, todayReaTimelInfo, yesdayReaTimelInfo, ESIndexToNodeStatsses, indicatorChildPOS);
+            DegreeParam degreeParam = genDegreeParam(indexTemplate, templateDocNu, templateSizeInBytes, templateAccessCount, todayReaTimelInfo, yesdayReaTimelInfo, indexToNodeStats, indicatorChildPOS);
 
             //5、开始计算健康分
             HealthDegreesPO healthDegreesPO = calcHealthDegrees(degreeParam);
@@ -101,14 +101,14 @@ public class IndexHealthDegreeCollector extends AbstractMetaDataJob {
                                        double templateSizeInBytes, long templateAccessCount,
                                        IndexRealTimeInfo todayReaTimelInfo,
                                        IndexRealTimeInfo yesdayReaTimelInfo,
-                                       List<ESIndexToNodeStats> ESIndexToNodeStatsses,
+                                       List<ESIndexToNodeStats> esIndexToNodeStats,
                                        List<IndicatorChild> indicatorChildPOS){
         DegreeParam degreeParam = new DegreeParam();
         degreeParam.setIndexTemplate(indexTemplate);
         degreeParam.setTemplateDocNu(templateDocNu);
         degreeParam.setTemplateAccessCount(templateAccessCount);
         degreeParam.setTemplateSizeInBytes(templateSizeInBytes);
-        degreeParam.setESIndexToNodeStatsses(ESIndexToNodeStatsses);
+        degreeParam.setEsIndexToNodeStats(esIndexToNodeStats);
         degreeParam.setTodayReaTimelInfo(todayReaTimelInfo);
         degreeParam.setYesdayReaTimelInfo(yesdayReaTimelInfo);
         degreeParam.setIndicatorChilds(indicatorChildPOS);
@@ -126,7 +126,7 @@ public class IndexHealthDegreeCollector extends AbstractMetaDataJob {
         HealthDegreesPO healthDegreesPO = new HealthDegreesPO();
         healthDegreesPO.setTemplate(indexTemplate.getName());
         healthDegreesPO.setCluster(indexTemplate.getMasterTemplate().getCluster());
-        healthDegreesPO.setTemplateId(indexTemplate.getId().intValue());
+        healthDegreesPO.setTemplateId(indexTemplate.getId());
         healthDegreesPO.setLogicTemplateId(indexTemplate.getId());
         healthDegreesPO.setDepartment(indexTemplate.getLibraDepartment());
         healthDegreesPO.setTimestamp(System.currentTimeMillis());

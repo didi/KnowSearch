@@ -17,7 +17,6 @@ import java.util.List;
  * @author d06679
  * @date 2018/4/3
  */
-// TODO cron表达式和描述信息暂时没找到
 @Component
 public class TemplateMarkLowValueLabelJob extends BaseTemplateMarkLabelJob {
 
@@ -46,7 +45,7 @@ public class TemplateMarkLowValueLabelJob extends BaseTemplateMarkLabelJob {
     @Override
     protected void genShouldHasAndDelLabels(IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate,
                                             List<TemplateLabelPO> newLabels,
-                                            List<TemplateLabelPO> expireLabels) throws Exception {
+                                            List<TemplateLabelPO> expireLabels) {
         TemplateLabelPO valueLow = new TemplateLabelPO();
         valueLow.setIndexTemplateId(indexTemplate.getId());
         valueLow.setLabelId(TemplateLabelEnum.VALUE_LOW.getId());

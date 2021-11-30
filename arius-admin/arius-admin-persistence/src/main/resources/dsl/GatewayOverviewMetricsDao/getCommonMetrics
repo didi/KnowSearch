@@ -1,0 +1,49 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "group_by_timeStamp": {
+      "date_histogram": {
+        "field": "timeStamp",
+        "interval": "%s",
+        "time_zone": "Asia/Shanghai",
+        "min_doc_count": 0
+      },
+      "aggs": {
+        "total_hits_avg": {
+          "avg": {
+            "field": "totalHits"
+          }
+        },
+        "total_cost_avg": {
+          "avg": {
+            "field": "totalCost"
+          }
+        },
+        "total_shards_avg": {
+          "avg": {
+            "field": "totalShards"
+          }
+        },
+        "failed_shards_avg": {
+          "avg": {
+            "field": "failedShards"
+          }
+        }
+      }
+    }
+  }
+}

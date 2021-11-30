@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -12,6 +13,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Component
+@NoArgsConstructor
 public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
 
     /**
@@ -23,7 +25,7 @@ public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
      */
     private String typeName = "type";
 
-    private final static int SCROLL_SIZE = 5000;
+    private static final int SCROLL_SIZE = 5000;
 
     @PostConstruct
     public void init(){

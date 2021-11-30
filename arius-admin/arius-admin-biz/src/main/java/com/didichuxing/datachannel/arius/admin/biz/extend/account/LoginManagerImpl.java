@@ -1,29 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.biz.extend.account;
 
-import java.util.Date;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.UserLoginRecord;
 import com.didichuxing.datachannel.arius.admin.common.component.RSATool;
 import com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserLoginRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.login.LoginService;
-import com.didichuxing.datachannel.arius.admin.remote.protocol.content.LoginProtocolTypeEnum;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * @author linyunan
@@ -39,25 +33,16 @@ public class LoginManagerImpl implements  LoginManager{
     private AriusUserInfoService               ariusUserInfoService;
 
     @Autowired
-    private AriusUserLoginRecordService        userLoginRecordService;
-
-    @Autowired
     private RSATool                            rsaTool;
-
-    /**
-     * 兼容外部企业不同的用户校验方式
-     * @see LoginProtocolTypeEnum
-     */
-    private static final LoginProtocolTypeEnum PROTOCOL_TYPE = null;
 
     private static final int                   DEFAULT_APPID = 1;
 
     @Override
-    public Result loginAuthenticateAndGetUserInfo(HttpServletRequest request,
+    public Result<Boolean> loginAuthenticateAndGetUserInfo(HttpServletRequest request,
                                                   HttpServletResponse response,
                                                   LoginDTO loginDTO) {
         //1. 校验
-        Result loginResult = loginService.loginAuthenticate(request, response, loginDTO, PROTOCOL_TYPE);
+        Result<Boolean> loginResult = loginService.loginAuthenticate(request, response, loginDTO);
         if (loginResult.failed()) {
             return loginResult;
         }
@@ -70,14 +55,11 @@ public class LoginManagerImpl implements  LoginManager{
         //2. 初始化登录上下文
         initLoginContext(request, response, userInfo);
 
-        //3. 保存登录记录
-        userLoginRecordService.save(buildUserLoginRecord(loginDTO));
-
-        return Result.buildSucc();
+        return Result.buildSucc(true);
     }
 
     @Override
-    public Result logout(HttpServletRequest request, HttpServletResponse response) {
+    public Result<Boolean> logout(HttpServletRequest request, HttpServletResponse response) {
         return loginService.logout(request, response);
     }
 
@@ -99,8 +81,6 @@ public class LoginManagerImpl implements  LoginManager{
         return loginService.register(userInfoDTO, appId);
     }
 
-
-
     private void init(AriusUserInfoDTO userInfoDTO) {
         if (AriusObjUtils.isNull(userInfoDTO.getEmail())) {
             userInfoDTO.setEmail("");
@@ -116,13 +96,6 @@ public class LoginManagerImpl implements  LoginManager{
 
         userInfoDTO.setStatus(AriusUserStatusEnum.NORMAL.getCode());
         userInfoDTO.setRole(AriusUserRoleEnum.OP.getRole());
-    }
-
-    private UserLoginRecord buildUserLoginRecord(LoginDTO loginDTO) {
-        UserLoginRecord userLoginRecord = new UserLoginRecord();
-        userLoginRecord.setLoginName(loginDTO.getDomainAccount());
-        userLoginRecord.setLoginTime(new Date());
-        return userLoginRecord;
     }
 
     private void initLoginContext(HttpServletRequest request, HttpServletResponse response, AriusUserInfo userInfo) {

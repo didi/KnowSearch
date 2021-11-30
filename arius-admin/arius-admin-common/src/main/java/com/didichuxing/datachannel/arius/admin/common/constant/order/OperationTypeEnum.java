@@ -37,7 +37,7 @@ public enum OperationTypeEnum {
             return OperationTypeEnum.UNKNOWN;
         }
         for (OperationTypeEnum typeEnum : OperationTypeEnum.values()) {
-            if (code == typeEnum.getCode()) {
+            if (code.equals(typeEnum.getCode())) {
                 return typeEnum;
             }
         }

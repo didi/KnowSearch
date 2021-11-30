@@ -17,7 +17,11 @@ public class BucketScriptAggs extends MetricsAggsType {
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
+	public BucketScriptAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);

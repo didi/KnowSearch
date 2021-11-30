@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.SCROLL_SPLIT;
 import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 
 /**
@@ -54,7 +55,8 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("restSpatialMultiSearchAction")
 public class RestSpatialMultiSearchAction extends ESAction {
 
-    private final boolean allowExplicitIndex = true;
+    private static final boolean ALLOW_EXPLICIT_INDEX = true;
+    private static final String TYPED_KEYS = "typed_keys";
 
     @Override
     public String name() {
@@ -68,8 +70,8 @@ public class RestSpatialMultiSearchAction extends ESAction {
 
     private void handle(QueryContext queryContext, RestRequest request, ESMultiSearchRequest esMultiSearchRequest) throws Exception {
         Map<String, String> params = new HashMap<>();
-        if (request.hasParam("typed_keys")) {
-            params.put("typed_keys", request.param("typed_keys"));
+        if (request.hasParam(TYPED_KEYS)) {
+            params.put(TYPED_KEYS, request.param(TYPED_KEYS));
         }
         params.put(QueryConsts.SEARCH_IGNORE_THROTTLED, "false");
 
@@ -80,11 +82,11 @@ public class RestSpatialMultiSearchAction extends ESAction {
         esMultiSearchRequest.setTemplateRequest(isTemplateRequest);
 
         IndicesOptions indicesOptions = IndicesOptions.fromRequest(request, IndicesOptions.strictExpandOpenAndForbidClosed());
-        esMultiSearchRequest.add(RestActions.getRestContent(request), isTemplateRequest, indices, types, request.param("search_type"), request.param("routing"), indicesOptions, allowExplicitIndex);
+        esMultiSearchRequest.add(RestActions.getRestContent(request), isTemplateRequest, indices, types, request.param("search_type"), request.param("routing"), indicesOptions, ALLOW_EXPLICIT_INDEX );
 
         // multi search body may contain index, so this will check indices again
         addIndices(queryContext, esMultiSearchRequest);
-        checkIndices(queryContext);
+        checkIndicesAndTemplateBlockRead(queryContext);
 
         final List<FetchFields> fetchFieldsList = new ArrayList<>(esMultiSearchRequest.requests().size());
 
@@ -97,7 +99,6 @@ public class RestSpatialMultiSearchAction extends ESAction {
                     ESSearchResponse esSearchResponse = item.getResponse();
 
                     if (esSearchResponse == null) {
-                        // statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_search_response||appid={}||requestId={}", queryContext.getAppid(), queryContext.getRequestId());
                         continue;
                     }
 
@@ -129,7 +130,7 @@ public class RestSpatialMultiSearchAction extends ESAction {
                 }
             }
 
-            ESClient readClient = esClusterService.getClient(queryContext, indexTemplate);
+            ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
             queryContext.setClusterName(readClient.getClusterName());
 
             // pre process
@@ -140,47 +141,51 @@ public class RestSpatialMultiSearchAction extends ESAction {
 
             final int index = i;
 
-            ActionListener<ESSearchResponse> listener = new RestActionListenerImpl<ESSearchResponse>(queryContext) {
-                @Override
-                public void onResponse(ESSearchResponse esSearchResponse) {
-                    if (false == Strings.isEmpty(esSearchResponse.getScrollId())
-                            && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.Index) {
-                        String encode = Base64.getEncoder().encodeToString(readClient.getClusterName().getBytes());
-                        esSearchResponse.setScrollId(encode + SCROLL_SPLIT + esSearchResponse.getScrollId());
-                    }
-
-                    ESMultiSearchResponse.Item item = new ESMultiSearchResponse.Item(esSearchResponse, null);
-                    item.setStatus(esSearchResponse.getRestStatus().getStatus());
-
-                    responses.set(index, item);
-                    if (counter.decrementAndGet() == 0) {
-                        finish(responses, multiListener);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable e) {
-                    try {
-                        String strException = exceptionToJsonString(e);
-                        JSONObject err = JSON.parseObject(strException);
-                        ESMultiSearchResponse.Item item = new ESMultiSearchResponse.Item(null, err.get("error"));
-                        item.setStatus(err.getIntValue("status"));
-
-                        responses.set(index, item);
-                    } catch (Throwable ex) {
-                        ESMultiSearchResponse.Item item = new ESMultiSearchResponse.Item(null, "unknow");
-                        item.setStatus(RestStatus.INTERNAL_SERVER_ERROR.getStatus());
-                        responses.set(index, item);
-                    }
-
-                    if (counter.decrementAndGet() == 0) {
-                        finish(responses, multiListener);
-                    }
-                }
-            };
+            ActionListener<ESSearchResponse> listener = getEsSearchResponseActionListener(queryContext, multiListener, counter, responses, readClient, index);
 
             readClient.search(esSearchRequest, listener);
         }
+    }
+
+    private ActionListener<ESSearchResponse> getEsSearchResponseActionListener(QueryContext queryContext, ActionListener<ESMultiSearchResponse> multiListener, AtomicInteger counter, AtomicArray<ESMultiSearchResponse.Item> responses, ESClient readClient, int index) {
+        return new RestActionListenerImpl<ESSearchResponse>(queryContext) {
+            @Override
+            public void onResponse(ESSearchResponse esSearchResponse) {
+                if (!Strings.isEmpty(esSearchResponse.getScrollId())
+                        && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.INDEX) {
+                    String encode = Base64.getEncoder().encodeToString(readClient.getClusterName().getBytes());
+                    esSearchResponse.setScrollId(encode + SCROLL_SPLIT + esSearchResponse.getScrollId());
+                }
+
+                ESMultiSearchResponse.Item item = new ESMultiSearchResponse.Item(esSearchResponse, null);
+                item.setStatus(esSearchResponse.getRestStatus().getStatus());
+
+                responses.set(index, item);
+                if (counter.decrementAndGet() == 0) {
+                    finish(responses, multiListener);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                try {
+                    String strException = exceptionToJsonString(e);
+                    JSONObject err = JSON.parseObject(strException);
+                    ESMultiSearchResponse.Item item = new ESMultiSearchResponse.Item(null, err.get("error"));
+                    item.setStatus(err.getIntValue("status"));
+
+                    responses.set(index, item);
+                } catch (Exception ex) {
+                    ESMultiSearchResponse.Item item = new ESMultiSearchResponse.Item(null, "unknow");
+                    item.setStatus(RestStatus.INTERNAL_SERVER_ERROR.getStatus());
+                    responses.set(index, item);
+                }
+
+                if (counter.decrementAndGet() == 0) {
+                    finish(responses, multiListener);
+                }
+            }
+        };
     }
 
     private boolean isTemplateRequest(String path) {

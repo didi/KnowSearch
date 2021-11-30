@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.component;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -58,7 +57,7 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
      */
     public static void clearHolder() {
         if (logger.isDebugEnabled()) {
-            logger.debug("清除SpringContextHolder中的ApplicationContext:" + applicationContext);
+            logger.debug("class=SpringTool||method=learHolder||msg=清除SpringContextHolder中的ApplicationContext:{}", applicationContext);
         }
         applicationContext = null;
     }
@@ -80,8 +79,11 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
     }
 
     public static String getUserName() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                .getRequest();
+        ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
+        if(null == servletRequestAttributes) {
+            throw new OperateForbiddenException("请携带操作人信息,HTTP_HEADER_KEY:X-SSO-USER");
+        }
+        HttpServletRequest request = servletRequestAttributes.getRequest();
         Object value = request.getHeader(HttpRequestUtils.USER);
         if (value == null) {
             throw new OperateForbiddenException("请携带操作人信息,HTTP_HEADER_KEY:X-SSO-USER");

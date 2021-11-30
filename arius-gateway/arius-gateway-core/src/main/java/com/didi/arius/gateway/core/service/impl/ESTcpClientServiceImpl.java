@@ -4,6 +4,7 @@ import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.ESCluster;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.service.ESTcpClientService;
+import lombok.NoArgsConstructor;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -24,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.*;
  * @date 2021/5/26 5:34 下午
  */
 @Service
+@NoArgsConstructor
 public class ESTcpClientServiceImpl implements ESTcpClientService {
     protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
 
@@ -56,16 +58,16 @@ public class ESTcpClientServiceImpl implements ESTcpClientService {
         // check update and delete
         for (Map.Entry<String, ESCluster> entry : dataCenterMap.entrySet()) {
             String clusterName = entry.getKey();
-            ESCluster ESCluster = entry.getValue();
+            ESCluster esCluster = entry.getValue();
 
-            if (newDataCenterMap.containsKey(clusterName) == false) {
+            if (!newDataCenterMap.containsKey(clusterName)) {
                 // delete
-                deletes.add( ESCluster );
+                deletes.add( esCluster );
                 continue;
             }
 
             ESCluster newESCluster = newDataCenterMap.get(clusterName);
-            if (ESCluster.getReadAddress().equals( newESCluster.getReadAddress()) == false) {
+            if (!esCluster.getReadAddress().equals( newESCluster.getReadAddress())) {
                 adds.add( newESCluster );
             }
         }
@@ -75,29 +77,29 @@ public class ESTcpClientServiceImpl implements ESTcpClientService {
             String clusterName = entry.getKey();
             ESCluster newESCluster = entry.getValue();
 
-            if (false == newESCluster.getEsVersion().startsWith(QueryConsts.ES_VERSION_2_PREFIX)) {
+            if (!newESCluster.getEsVersion().startsWith(QueryConsts.ES_VERSION_2_PREFIX)) {
                 bootLogger.info("tcp client reject high version, cluster={}, version={}", clusterName, newESCluster.getEsVersion());
                 continue;
             }
 
-            if (dataCenterMap.containsKey(clusterName) == false) {
+            if (!dataCenterMap.containsKey(clusterName)) {
                 adds.add( newESCluster );
             }
         }
 
-        for (ESCluster ESCluster : deletes) {
-            bootLogger.info("delete dateCenter, cluster={}||addr={}", ESCluster.getCluster(), ESCluster.getReadAddress());
-            ESCluster.getClient().close();
-            dataCenterMap.remove( ESCluster );
+        for (ESCluster esCluster : deletes) {
+            bootLogger.info("delete dateCenter, cluster={}||addr={}", esCluster.getCluster(), esCluster.getReadAddress());
+            esCluster.getClient().close();
+            dataCenterMap.remove( esCluster.getCluster() );
         }
 
-        for (ESCluster ESCluster : adds) {
-            bootLogger.info("add dateCenter, cluster={}||addr={}", ESCluster.getCluster(), ESCluster.getReadAddress());
+        for (ESCluster esCluster : adds) {
+            bootLogger.info("add dateCenter, cluster={}||addr={}", esCluster.getCluster(), esCluster.getReadAddress());
 
             //reset client
-            initClient( ESCluster );
+            initClient( esCluster );
 
-            dataCenterMap.put( ESCluster.getCluster(), ESCluster );
+            dataCenterMap.put( esCluster.getCluster(), esCluster );
         }
     }
 
@@ -112,28 +114,28 @@ public class ESTcpClientServiceImpl implements ESTcpClientService {
     }
 
     /************************************************************** private method **************************************************************/
-    private void initClient(ESCluster ESCluster) {
-        if (ESCluster.getClient() != null) {
-            ESCluster.getClient().close();
+    private void initClient(ESCluster esCluster) {
+        if (esCluster.getClient() != null) {
+            esCluster.getClient().close();
         }
 
-        String addr = ESCluster.getReadAddress();
+        String addr = esCluster.getReadAddress();
         Settings settings = Settings.builder()
-                .put("cluster.name", ESCluster.getCluster())
+                .put("cluster.name", esCluster.getCluster())
                 .put("transport.tcp.connect_timeout", queryConfig.getConnectESTime())
                 .put("transport.netty.worker_count", queryConfig.getClientWorkerCount())
                 .build();
         TransportClient client = TransportClient.builder().settings(settings).build();
 
-        ESCluster.setClient(client);
+        esCluster.setClient(client);
         for (String clusterNode : split(addr, COMMA)) {
             String hostName = substringBeforeLast(clusterNode, COLON);
             String port = substringAfterLast(clusterNode, COLON);
-            bootLogger.info("adding transport node={}||clusterName={}", clusterNode, ESCluster.getCluster());
+            bootLogger.info("adding transport node={}||clusterName={}", clusterNode, esCluster.getCluster());
             try {
                 client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(hostName), Integer.valueOf(port)));
-            } catch (Throwable e) {
-                bootLogger.error("adding exception, transport node={}||clusterName={}", clusterNode, ESCluster.getCluster(), e);
+            } catch (Exception e) {
+                bootLogger.error("adding exception, transport node={}||clusterName={}", clusterNode, esCluster.getCluster(), e);
             }
         }
         client.connectedNodes();

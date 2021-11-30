@@ -1,8 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.elasticsearch.client.utils.JsonUtils;
+import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Map;
  * @date 2020/08/24
  */
 @Data
+@NoArgsConstructor
 public class IndexTemplatePhySettings implements Serializable {
     private JSONObject settings;
 

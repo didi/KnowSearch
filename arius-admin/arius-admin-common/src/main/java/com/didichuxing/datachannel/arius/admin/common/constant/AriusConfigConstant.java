@@ -11,6 +11,9 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
  * @date 2018/5/24
  */
 public class AriusConfigConstant {
+
+    private AriusConfigConstant(){}
+
     /**
      * arius的common配置
      */

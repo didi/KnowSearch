@@ -4,7 +4,9 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -12,6 +14,8 @@ import lombok.Data;
  * @date 2019/3/13
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "应用信息")
 public class AppDTO extends BaseDTO {
 

@@ -3,7 +3,9 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.app;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -12,6 +14,8 @@ import lombok.Data;
  * @date 2019/3/13
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppPO extends BasePO implements DigitResponsible {
 
     /**

@@ -2,22 +2,23 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAliases;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 模板别名服务
@@ -43,13 +44,29 @@ public class TemplatePhyAliasesManagerImpl implements TemplatePhyAliasesManager 
                                                             String templateName) throws ESOperateException {
         TemplateConfig templateConfig = fetchTemplateConfig(cluster, templateName);
 
-        List<IndexTemplatePhyAlias> aliases = new ArrayList<>();
-        if (templateConfig != null) {
-            IndexTemplatePhyAliases templateAliases = new IndexTemplatePhyAliases(templateConfig.getAliases());
-            return templateAliases.parseTemplateAliases();
-        }
+        IndexTemplatePhyAliases templateAliases = new IndexTemplatePhyAliases(templateConfig.getAliases());
+        return templateAliases.parseTemplateAliases();
+    }
 
-        return aliases;
+
+    /**
+     * 获取所有模板别名列表
+     * @param clusters 集群名
+     * @return
+     * @throws ESOperateException
+     */
+    @Override
+    public Map<String, List<IndexTemplatePhyAlias>> fetchAllTemplateAliases(List<String> clusters) throws ESOperateException {
+        Map<String, TemplateConfig> templateConfigMap = fetchAllTemplateConfig(clusters);
+
+        Map<String, List<IndexTemplatePhyAlias>> templatePhyAliasMap = new HashMap<>();
+
+        templateConfigMap.forEach((x,y) -> {
+            IndexTemplatePhyAliases templateAliases = new IndexTemplatePhyAliases(y.getAliases());
+            templatePhyAliasMap.put(x, templateAliases.parseTemplateAliases());
+        });
+
+        return templatePhyAliasMap;
     }
 
     /**
@@ -198,7 +215,7 @@ public class TemplatePhyAliasesManagerImpl implements TemplatePhyAliasesManager 
     public boolean modifyTemplateAliases(String cluster, String templateName,
                                          List<IndexTemplatePhyAlias> templateAliases) throws ESOperateException {
         TemplateConfig templateConfig = fetchTemplateConfig(cluster, templateName);
-        if (templateConfig == null || CollectionUtils.isEmpty(templateAliases)) {
+        if (CollectionUtils.isEmpty(templateAliases)) {
             sLogger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAliases||"
                          + "msg=templateNotFound||cluster={}||template={}",
                 cluster, templateName);
@@ -261,5 +278,22 @@ public class TemplatePhyAliasesManagerImpl implements TemplatePhyAliasesManager 
         }
 
         return templateConfig;
+    }
+
+
+    private Map<String,TemplateConfig> fetchAllTemplateConfig(List<String> clusters) throws ESOperateException {
+        if (CollectionUtils.isEmpty(clusters)) {
+            throw new ESOperateException("非法请求");
+        }
+
+        Map<String,TemplateConfig> templateConfigMap = esTemplateService.syncGetAllTemplates(clusters);
+        if (templateConfigMap == null) {
+            sLogger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
+                            + "msg=templateNotFound||cluster={}",
+                    clusters);
+            throw new ESOperateException("模板配置不存在");
+        }
+
+        return templateConfigMap;
     }
 }

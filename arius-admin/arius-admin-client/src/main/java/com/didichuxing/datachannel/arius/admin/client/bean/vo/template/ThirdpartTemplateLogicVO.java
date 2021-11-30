@@ -8,29 +8,25 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.DataType
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "逻辑模板信息")
 public class ThirdpartTemplateLogicVO extends BaseVO {
-    /**
-     * logic索引id
-     */
+
     @ApiModelProperty("模板ID")
     private Integer    id;
 
-    /**
-     * 索引模板名称
-     */
     @ApiModelProperty("模板名字")
     private String     name;
 
-    /**
-     * appid
-     */
     @ApiModelProperty("所属应用ID")
     private Integer    appId;
 
@@ -38,7 +34,7 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
      * 用户数据类型
      * @see DataTypeEnum
      */
-    @ApiModelProperty("数据类型（1:日志；2:上报；3:rds；6:离线）")
+    @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds；6:离线）")
     private Integer    dataType;
 
     /**
@@ -47,9 +43,6 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     @ApiModelProperty("分区周期")
     private String     dateFormat;
 
-    /**
-     * 数据中心
-     */
     @ApiModelProperty("数据中心")
     private String     dataCenter;
 
@@ -65,27 +58,15 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     @ApiModelProperty("热数据保存天数")
     private Integer    hotTime;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门ID")
     private String     libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门名称")
     private String     libraDepartment;
 
-    /**
-     * 责任人
-     */
     @ApiModelProperty("责任人")
     private String     responsible;
 
-    /**
-     * 时间字段
-     */
     @ApiModelProperty("时间字段")
     private String     dateField;
 
@@ -95,21 +76,12 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     @ApiModelProperty("主键字段")
     private String     idField;
 
-    /**
-     * routing字段
-     */
     @ApiModelProperty("routing字段")
     private String     routingField;
 
-    /**
-     * 表达式
-     */
     @ApiModelProperty("表达式")
     private String     expression;
 
-    /**
-     * 备注
-     */
     @ApiModelProperty("描述")
     private String     desc;
 

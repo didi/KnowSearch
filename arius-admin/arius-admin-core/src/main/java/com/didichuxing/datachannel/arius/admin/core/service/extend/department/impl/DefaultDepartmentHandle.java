@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.remote.department.DepartmentHandl
 public class DefaultDepartmentHandle implements DepartmentHandle {
 
     @Override
-    public Result listDepartment() {
+    public Result<String> listDepartment() {
         return Result.build(Boolean.TRUE, getDefaultDepartment());
     }
 

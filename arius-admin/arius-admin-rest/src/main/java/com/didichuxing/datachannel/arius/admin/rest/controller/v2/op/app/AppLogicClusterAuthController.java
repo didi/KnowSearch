@@ -7,6 +7,10 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.AppLogicClusterAuthVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppLogicClusterAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicClusterAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 
 import io.swagger.annotations.Api;
@@ -39,11 +42,11 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping({ V2_OP + "/app/auth", V3_OP + "/app/auth/cluster" })
-@Api(value = "OP-App逻辑集群权限接口(REST)")
+@Api(tags = "OP-运维侧App逻辑集群权限接口(REST)")
 public class AppLogicClusterAuthController {
 
     @Autowired
-    private AppLogicClusterAuthService authService;
+    private AppClusterLogicAuthService authService;
 
     @Autowired
     private TemplateLogicService       templateLogicService;
@@ -52,29 +55,30 @@ public class AppLogicClusterAuthController {
     @ResponseBody
     @ApiOperation(value = "获取APP的所有逻辑集群权限接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<List<AppLogicClusterAuthDTO>> getLogicClusterAuths(@RequestParam("appId") Integer appId) {
-        return Result.buildSucc(authService.getLogicClusterAuths(appId));
+    public Result<List<AppLogicClusterAuthVO>> getLogicClusterAuths(@RequestParam("appId") Integer appId) {
+        return Result.buildSucc(ConvertUtil.list2List(authService.getAllLogicClusterAuths(appId), AppLogicClusterAuthVO.class));
     }
 
     @GetMapping("/clusterAuths")
     @ResponseBody
     @ApiOperation(value = "获取APP权限接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicClusterId", value = "逻辑集群ID", required = true) })
-    public Result<List<AppLogicClusterAuthDTO>> getClusterAuths(@RequestParam("logicClusterId") Long logicClusterId) {
-        return Result.buildSucc(authService.getLogicClusterAuths(logicClusterId, null));
+    public Result<List<AppLogicClusterAuthVO>> getClusterAuths(@RequestParam("logicClusterId") Long logicClusterId) {
+        return Result.buildSucc(
+            ConvertUtil.list2List(authService.getLogicClusterAuths(logicClusterId, null), AppLogicClusterAuthVO.class));
     }
 
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "增加APP逻辑集群权限接口", notes = "")
-    public Result createLogicClusterAuth(HttpServletRequest request, @RequestBody AppLogicClusterAuthDTO authDTO) {
+    public Result<Void> createLogicClusterAuth(HttpServletRequest request, @RequestBody AppLogicClusterAuthDTO authDTO) {
         return authService.addLogicClusterAuth(authDTO, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/{authId}")
     @ResponseBody
     @ApiOperation(value = "更新APP逻辑集群权限接口", notes = "")
-    public Result modifyLogicClusterAuth(HttpServletRequest request, @PathVariable(value = "authId") Long authId,
+    public Result<Void> modifyLogicClusterAuth(HttpServletRequest request, @PathVariable(value = "authId") Long authId,
                                          @RequestBody AppLogicClusterAuthDTO authDTO) {
         authDTO.setId(authId);
         return authService.updateLogicClusterAuth(authDTO, HttpRequestUtils.getOperator(request));
@@ -83,18 +87,18 @@ public class AppLogicClusterAuthController {
     @DeleteMapping("/{authId}")
     @ResponseBody
     @ApiOperation(value = "删除APP逻辑集群权限接口", notes = "")
-    public Result deleteLogicClusterAuth(HttpServletRequest request, @PathVariable(value = "authId") Long authId) {
+    public Result<Void> deleteLogicClusterAuth(HttpServletRequest request, @PathVariable(value = "authId") Long authId) {
 
-        AppLogicClusterAuthDTO logicClusterAuthDTO = authService.getLogicClusterAuthById(authId);
-        if (logicClusterAuthDTO == null) {
+        AppClusterLogicAuth appClusterLogicAuth = authService.getLogicClusterAuthById(authId);
+        if (appClusterLogicAuth == null) {
             return Result.buildNotExist("权限不存在");
         }
 
-        if (logicClusterAuthDTO.getLogicClusterId() != null) {
+        if (appClusterLogicAuth.getLogicClusterId() != null) {
             List<IndexTemplateLogic> templatesInLogicCluster = templateLogicService.getHasAuthTemplatesInLogicCluster(
-                logicClusterAuthDTO.getAppId(), logicClusterAuthDTO.getLogicClusterId());
-            if (templatesInLogicCluster.size() > 0) {
-                return Result.buildFail("应用在集群上存在有权限的索引，不能删除");
+                    appClusterLogicAuth.getAppId(), appClusterLogicAuth.getLogicClusterId());
+            if (!templatesInLogicCluster.isEmpty()) {
+                return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");
             }
         }
 

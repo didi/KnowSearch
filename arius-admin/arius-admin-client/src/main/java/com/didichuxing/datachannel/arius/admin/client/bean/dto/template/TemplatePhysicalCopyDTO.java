@@ -4,13 +4,17 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/4/3
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "模板复制信息")
 public class TemplatePhysicalCopyDTO extends BaseDTO {
 
@@ -25,7 +29,4 @@ public class TemplatePhysicalCopyDTO extends BaseDTO {
 
     @ApiModelProperty("rack")
     private String  rack;
-
-    @ApiModelProperty("目标集群是否升级模板版本")
-    private Boolean upgrade;
 }

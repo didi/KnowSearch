@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,8 +10,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author d06679
@@ -18,13 +19,15 @@ import com.didichuxing.tunnel.util.log.LogFactory;
  */
 public class IndexNameFactory {
 
+    private IndexNameFactory(){}
+
     private static final ILog    LOGGER             = LogFactory.getLog(IndexNameFactory.class);
 
     private static final Pattern INDEX_NAME_PATTERN = Pattern.compile("(.*)(_v[1-9]\\d*)(.*)");
 
     public static List<String> appendSuffix(List<String> indices, String suffix) {
         if (indices == null) {
-            return null;
+            return new ArrayList<>();
         }
 
         return indices.stream().map(index -> index + suffix).collect(Collectors.toList());
@@ -147,7 +150,7 @@ public class IndexNameFactory {
                 SimpleDateFormat format = new SimpleDateFormat(dateFormatyyyy);
                 return format.parse(indexNameNoVersion.substring(expression.length() - 1));
             } catch (Exception e) {
-                LOGGER.warn("genIndexTimeByIndexName error||expression={}||dateFormat{}||indexNameNoVersion={}",
+                LOGGER.warn("class=IndexNameFactory||method=genIndexTimeByIndexName||expression={}||dateFormat{}||indexNameNoVersion={}",
                     expression, dateFormatyyyy, indexNameNoVersion);
             }
         } else {
@@ -174,7 +177,7 @@ public class IndexNameFactory {
                 }
 
             } catch (Exception e) {
-                LOGGER.warn("genIndexTimeByIndexName error||expression={}||dateFormat{}||indexNameNoVersion={}",
+                LOGGER.warn("class=IndexNameFactory||method=genIndexTimeByIndexName||expression={}||dateFormat{}||indexNameNoVersion={}",
                     expression, dateFormatyyyy, indexNameNoVersion);
             }
         }

@@ -16,7 +16,7 @@ public interface TemplateColdManager {
      * @param cluster
      * @return
      */
-    Result move2ColdNode(String cluster);
+    Result<Boolean> move2ColdNode(String cluster);
 
     /**
      * 获取cold索引

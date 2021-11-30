@@ -228,23 +228,7 @@ public class DslFieldUseCollector extends AbstractMetaDataJob {
         final String queryIndexDate = date;
 
         // 合并一天内访问同一个索引有哪些查询模板
-        Map<String/* indexName*/, Set<String> /*md5s*/> accessIndicesDslMd5Maps = Maps.newHashMap();
-        int taskCount = 24 * 60;
-        for (int i = 0; i < taskCount; ++i) {
-            //  单次查询范围1分钟
-            long start = startDateMils + i * (1 * 60 * 1000);
-            long end = start + 1 * 60 * 1000;
-
-            Map<String/* indexName*/, Set<String> /*md5s*/> maps = gatewayJoinEsDao.aggIndicesDslMd5ByRange(queryIndexDate, start, end);
-            for (Map.Entry<String, Set<String>> entry : maps.entrySet()) {
-                // 过滤掉含有[的索引名称
-                if (entry.getKey().contains("[")) {
-                    LOGGER.warn("class=DslFieldUseCollector||method=runTaskAndGetResult||msg=skip illegal index name {}", entry.getKey());
-                    continue;
-                }
-                accessIndicesDslMd5Maps.computeIfAbsent(entry.getKey(), k -> Sets.newHashSet()).addAll(entry.getValue());
-            }
-        }
+        Map<String, Set<String>> accessIndicesDslMd5Maps = mergeAccessIndicesDslByDay(startDateMils, queryIndexDate);
 
         // 合并查询结果
         Map<String/* indexName*/, DslSearchFieldNameMetric> allSearchFieldNameMetricMap = Maps.newHashMap();
@@ -279,6 +263,27 @@ public class DslFieldUseCollector extends AbstractMetaDataJob {
 
         LOGGER.info("class=DslFieldUseCollector||method=runTaskAndGetResult||msg=allSearchFieldNameMetricMap size {}", allSearchFieldNameMetricMap.size());
         return allSearchFieldNameMetricMap;
+    }
+
+    private Map<String, Set<String>> mergeAccessIndicesDslByDay(long startDateMils, String queryIndexDate) {
+        Map<String/* indexName*/, Set<String> /*md5s*/> accessIndicesDslMd5Maps = Maps.newHashMap();
+        int taskCount = 24 * 60;
+        for (int i = 0; i < taskCount; ++i) {
+            //  单次查询范围1分钟
+            long start = startDateMils + i * (1 * 60 * 1000);
+            long end = start + 1 * 60 * 1000;
+
+            Map<String/* indexName*/, Set<String> /*md5s*/> maps = gatewayJoinEsDao.aggIndicesDslMd5ByRange(queryIndexDate, start, end);
+            for (Map.Entry<String, Set<String>> entry : maps.entrySet()) {
+                // 过滤掉含有[的索引名称
+                if (entry.getKey().contains("[")) {
+                    LOGGER.warn("class=DslFieldUseCollector||method=runTaskAndGetResult||msg=skip illegal index name {}", entry.getKey());
+                    continue;
+                }
+                accessIndicesDslMd5Maps.computeIfAbsent(entry.getKey(), k -> Sets.newHashSet()).addAll(entry.getValue());
+            }
+        }
+        return accessIndicesDslMd5Maps;
     }
 
 

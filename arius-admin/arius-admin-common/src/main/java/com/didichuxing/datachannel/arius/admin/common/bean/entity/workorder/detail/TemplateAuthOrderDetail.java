@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fengqiongfeng
  * @date 2020/8/24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TemplateAuthOrderDetail extends AbstractOrderDetail {
     /**
      * 逻辑模板id

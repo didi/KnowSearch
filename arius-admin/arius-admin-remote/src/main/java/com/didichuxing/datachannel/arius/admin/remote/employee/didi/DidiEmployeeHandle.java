@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,8 +23,8 @@ import com.didichuxing.datachannel.arius.admin.remote.employee.bean.EpHrEmplInfo
 import com.didichuxing.datachannel.arius.admin.remote.employee.bean.EpHrInfoResult;
 import com.didichuxing.datachannel.arius.admin.remote.employee.bean.EpHrMedaInfo;
 import com.didichuxing.datachannel.arius.admin.remote.employee.bean.MainDataStaffInfo;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author linyunan
@@ -31,7 +32,7 @@ import com.didichuxing.tunnel.util.log.LogFactory;
  */
 @Component
 public class DidiEmployeeHandle implements EmployeeHandle {
-    private final ILog LOGGER = LogFactory.getLog(DidiEmployeeHandle.class);
+    private static final ILog LOGGER = LogFactory.getLog(DidiEmployeeHandle.class);
 
     private String     epMdataHttp;
 
@@ -40,18 +41,19 @@ public class DidiEmployeeHandle implements EmployeeHandle {
     private String     epMdataKey;
 
     @Override
-    public Result<EpHrEmplInfoData> getByDomainAccount(String domainAccount) {
+    public <T extends BaseEmInfo> Result<T> getByDomainAccount(String domainAccount) {
         if (StringUtils.isBlank(domainAccount)) {
             return null;
         }
+
         EpHrEmplInfoData infoFromEp = getInfoFromEp(new TypeReference<EpHrInfoResult<EpHrEmplInfoData>>() {
         }, MAIN_DATA_STAFFINO_LADP + domainAccount);
 
-        return Result.buildSucc(infoFromEp);
+        return (Result<T>) Result.buildSucc(infoFromEp);
     }
 
     @Override
-    public Result checkUsers(String domainAccounts) {
+    public Result<Void> checkUsers(String domainAccounts) {
         for (String user : domainAccounts.split(",")) {
             if (validate(user).failed()) {
                 return Result.buildFail();
@@ -61,7 +63,7 @@ public class DidiEmployeeHandle implements EmployeeHandle {
     }
 
     @Override
-    public Result searchOnJobStaffByKeyWord(String keyWord) {
+    public Result<Object> searchOnJobStaffByKeyWord(String keyWord) {
         List<MainDataStaffInfo> mainDataStaffInfos = getInfoFromEp(
             new TypeReference<EpHrInfoResult<List<MainDataStaffInfo>>>() {
             }, MAIN_DATA_ACCOUNT_URK + keyWord);
@@ -111,24 +113,24 @@ public class DidiEmployeeHandle implements EmployeeHandle {
         return null;
     }
 
-    private Result validate(String domainAccount) {
-        if (EnvUtil.isDev() || EnvUtil.isTest() || EnvUtil.isStable()) {
+    private Result<Boolean> validate(String domainAccount) {
+        if (EnvUtil.isDev() || EnvUtil.isTest() || EnvUtil.isStable() || EnvUtil.isPressure()) {
             return Result.buildSucc();
         }
 
         Result<EpHrEmplInfoData> emplResult = getByDomainAccount(domainAccount);
-        if (null == emplResult && null == emplResult.getData()) {
+        if (null == emplResult || null == emplResult.getData()) {
             LOGGER.warn("class=DidiEmployeeHandle||method=validate||domainAccount={}||msg=user name illegal",
                 domainAccount);
             return Result.buildFail();
         }
-
-        if (!EpHrEmplInfoData.USER_ON_LINE.equals(emplResult.getData().getHrStatus())) {
+        EpHrEmplInfoData epHrEmplInfoData = emplResult.getData();
+        if (!EpHrEmplInfoData.USER_ON_LINE.equals(epHrEmplInfoData.getHrStatus())) {
             LOGGER.warn("class=DidiEmployeeHandle||method=validate||domainAccount={}||msg=user name status not online",
                 domainAccount);
             return Result.buildFail();
         }
 
-        return Result.buildSucc();
+        return Result.buildSucc(true);
     }
 }

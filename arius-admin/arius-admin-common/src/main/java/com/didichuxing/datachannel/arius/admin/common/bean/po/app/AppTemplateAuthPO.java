@@ -4,13 +4,17 @@ import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAu
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/4/16
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppTemplateAuthPO extends BasePO implements DigitResponsible {
 
     /**

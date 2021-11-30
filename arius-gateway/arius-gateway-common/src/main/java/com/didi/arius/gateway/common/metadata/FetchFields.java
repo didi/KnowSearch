@@ -1,6 +1,7 @@
 package com.didi.arius.gateway.common.metadata;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
 
 /**
@@ -9,6 +10,7 @@ import org.elasticsearch.search.fetch.source.FetchSourceContext;
 * 
 */
 @Data
+@NoArgsConstructor
 public class FetchFields {
 	/**
 	 * _source信息

@@ -26,6 +26,10 @@ public class SyncMetadataController extends StatController {
     @Autowired
     private DslTemplateService dslTemplateService;
 
+    public SyncMetadataController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(RestRequest.Method.GET, "/_gwadmin/sync/metadata", this);

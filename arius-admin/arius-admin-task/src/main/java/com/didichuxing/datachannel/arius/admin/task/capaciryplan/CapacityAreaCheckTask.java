@@ -25,6 +25,15 @@ public class CapacityAreaCheckTask extends BaseConcurrentCapacityPlanAreaTask {
     }
 
     /**
+     * 任务的线程个数
+     * @return 任务的线程个数
+     */
+    @Override
+    public int poolSize() {
+        return 5;
+    }
+
+    /**
      * 并发度
      *
      * @return
@@ -41,7 +50,7 @@ public class CapacityAreaCheckTask extends BaseConcurrentCapacityPlanAreaTask {
      * @return true/false
      */
     @Override
-    protected Result executeByArea(Long areaId) throws AdminOperateException {
+    protected Result<Void> executeByArea(Long areaId) throws AdminOperateException {
         return capacityPlanAreaService.checkRegionsInArea(areaId);
     }
 

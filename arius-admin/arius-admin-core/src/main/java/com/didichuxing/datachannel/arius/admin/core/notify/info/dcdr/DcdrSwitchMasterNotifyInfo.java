@@ -24,7 +24,7 @@ public class DcdrSwitchMasterNotifyInfo implements NotifyInfo {
 
     private Long               expectMasterPhysicalId;
 
-    private Result             result;
+    private Result<Void>             result;
 
     private String             operator;
 

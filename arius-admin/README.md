@@ -3,7 +3,7 @@
 ## 2. 工程模块组成和划分
 arius-admin-v2由如下10个主要的工程和扩展增值服务组成:
 
-![Logi-EM](./image/clipboard_image_1620149642727.png)
+![Logi-EM](http://116.85.24.226/images/5001.jpg)
 
 
     arius-admin-rest            表现层1，可以直接封装Manager接口暴露成restful接口 

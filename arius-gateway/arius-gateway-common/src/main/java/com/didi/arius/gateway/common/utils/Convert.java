@@ -32,24 +32,29 @@ import java.util.regex.Pattern;
 * 
 */
 public class Convert {
+
+	private Convert(){}
+
 	protected static final Logger logger = LoggerFactory.getLogger(Convert.class);
 	private static String pattern = ".*\\d\\d-*\\d\\d";
 	private static Pattern r = Pattern.compile(pattern);
+	private static final String BASIC = "Basic ";
+	private static final String UN_KNOW = "unknown";
 	
 	public static AuthRequest parseAuth(String authentication) {
 		AuthRequest auth = new AuthRequest();
-		if (!authentication.startsWith("Basic ")) {
+		if (!authentication.startsWith(BASIC)) {
 			return null;
 		}
 		
-		if (authentication.length() == "Basic ".length()) {
+		if (authentication.length() == BASIC.length()) {
 			return null;
 		}
 		
 		String userPasswd;
 		try {
-			userPasswd = new String(Base64.decode(authentication.substring("Basic ".length()).trim()));
-		} catch (Throwable e) {
+			userPasswd = new String(Base64.decode(authentication.substring(BASIC.length()).trim()));
+		} catch (Exception e) {
 			return null;
 		}
 		int pos = userPasswd.indexOf(":");
@@ -61,9 +66,9 @@ public class Convert {
 		String pass = userPasswd.substring(pos+1, userPasswd.length());
 		
 		try {
-			int appid = Integer.valueOf(user);
+			int appid = Integer.parseInt(user);
 			auth.setAppid(appid);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			return null;
 		}
 		
@@ -71,8 +76,8 @@ public class Convert {
 		
 		return auth;
 	}
-	
-	static public String listToString(List<String> list, String conjunction)
+
+	public static String listToString(List<String> list, String conjunction)
 	{
 	   StringBuilder sb = new StringBuilder();
 	   boolean first = true;
@@ -89,60 +94,73 @@ public class Convert {
 	
 	public static FetchSourceContext parseFetchSourceContext(JsonElement sourceContext) {
 		try {
-			List<String> includes = new ArrayList<>(2), excludes = new ArrayList<>(2);
+			List<String> includes = new ArrayList<>(2);
+			List<String> excludes = new ArrayList<>(2);
 			if (sourceContext.isJsonPrimitive()) {
 				JsonPrimitive sourceContextPost = sourceContext.getAsJsonPrimitive();
-				if (sourceContextPost.isBoolean()) {
-					return new FetchSourceContext(sourceContextPost.getAsBoolean());
-				} else if (sourceContextPost.isString()) {
-					return new FetchSourceContext(sourceContextPost.getAsString());
-				}
+				FetchSourceContext fetchContext = getFetchSourceContext(sourceContextPost);
+				if (fetchContext != null) return fetchContext;
 			} else if (sourceContext.isJsonArray()) {
 				includes = new ArrayList<>();
-				JsonArray sourceContextPost = sourceContext.getAsJsonArray();
-				for (int i = 0; i < sourceContextPost.size(); ++i) {
-					includes.add(sourceContextPost.get(i).getAsString());
-				}
+				addInclude(sourceContext, includes);
 			} else if (sourceContext.isJsonObject()) {
-				JsonObject sourceContextPost = sourceContext.getAsJsonObject();
-				JsonElement includesJson = sourceContextPost.get("includes");
-				if (includesJson == null) {
-					includesJson = sourceContextPost.get("include");
-				}
-
-				if (includesJson != null) {
-					if (includesJson.isJsonArray()) {
-						for (int i = 0; i < includesJson.getAsJsonArray().size(); ++i) {
-							includes.add(includesJson.getAsJsonArray().get(i).getAsString());
-						}
-					} else if (includesJson.isJsonPrimitive()) {
-						includes.add(includesJson.getAsString());
-					}
-				}
-
-				JsonElement excludesJson = sourceContextPost.get("excludes");
-				if (excludesJson == null) {
-					excludesJson = sourceContextPost.get("exclude");
-				}
-
-				if (excludesJson != null) {
-					if (excludesJson.isJsonArray()) {
-						for (int i = 0; i < excludesJson.getAsJsonArray().size(); ++i) {
-							excludes.add(excludesJson.getAsJsonArray().get(i).getAsString());
-						}
-					} else if (excludesJson.isJsonPrimitive()) {
-						excludes.add(excludesJson.getAsString());
-					}
-				}
+				addIncludesAndExcludes(sourceContext, includes, excludes);
 			}
 
 			return new FetchSourceContext(includes.toArray(new String[includes.size()]),
 			        excludes.toArray(new String[excludes.size()]));
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			return new FetchSourceContext(true);
 		}
 	}
-	
+
+	private static void addIncludesAndExcludes(JsonElement sourceContext, List<String> includes, List<String> excludes) {
+		JsonObject sourceContextPost = sourceContext.getAsJsonObject();
+		JsonElement includesJson = sourceContextPost.get("includes");
+		if (includesJson == null) {
+			includesJson = sourceContextPost.get("include");
+		}
+
+		if (includesJson != null) {
+			dealJson(includes, includesJson);
+		}
+
+		JsonElement excludesJson = sourceContextPost.get("excludes");
+		if (excludesJson == null) {
+			excludesJson = sourceContextPost.get("exclude");
+		}
+
+		if (excludesJson != null) {
+			dealJson(excludes, excludesJson);
+		}
+	}
+
+	private static void dealJson(List<String> includesOrExcludes, JsonElement includesOrExcludesJson) {
+		if (includesOrExcludesJson.isJsonArray()) {
+			for (int i = 0; i < includesOrExcludesJson.getAsJsonArray().size(); ++i) {
+				includesOrExcludes.add(includesOrExcludesJson.getAsJsonArray().get(i).getAsString());
+			}
+		} else if (includesOrExcludesJson.isJsonPrimitive()) {
+			includesOrExcludes.add(includesOrExcludesJson.getAsString());
+		}
+	}
+
+	private static void addInclude(JsonElement sourceContext, List<String> includes) {
+		JsonArray sourceContextPost = sourceContext.getAsJsonArray();
+		for (int i = 0; i < sourceContextPost.size(); ++i) {
+			includes.add(sourceContextPost.get(i).getAsString());
+		}
+	}
+
+	private static FetchSourceContext getFetchSourceContext(JsonPrimitive sourceContextPost) {
+		if (sourceContextPost.isBoolean()) {
+			return new FetchSourceContext(sourceContextPost.getAsBoolean());
+		} else if (sourceContextPost.isString()) {
+			return new FetchSourceContext(sourceContextPost.getAsString());
+		}
+		return null;
+	}
+
 	public static String[] parseFields(JsonElement fields) {
 		if (fields.isJsonArray()) {
 			JsonArray fieldsPost = fields.getAsJsonArray();
@@ -159,7 +177,7 @@ public class Convert {
 			}
 		}
 		
-		return null;
+		return new String[]{};
 	}
 	
 	public static String getPrefix(String str) {
@@ -184,16 +202,20 @@ public class Convert {
 		} else {
 			String ip = request.getHeader("X-Real-IP");
 		    
-		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+		    if (ipExist(ip)) {
 		    	ip = request.getHeader("X-Forwarded-For");
 		    }
 		    
-		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+		    if (ipExist(ip)) {
 		    	ip = request.getRemoteAddr();
 		    }
 
 		    return ip;
 		}
+	}
+
+	private static boolean ipExist(String ip) {
+		return ip == null || ip.length() == 0 || UN_KNOW.equalsIgnoreCase(ip);
 	}
 
 	public static String getClientIP(RestRequest request) {
@@ -204,11 +226,11 @@ public class Convert {
 		} else {
 			String ip = request.header("X-Real-IP");
 
-			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			if (ipExist(ip)) {
 				ip = request.header("X-Forwarded-For");
 			}
 
-			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			if (ipExist(ip)) {
 				InetSocketAddress address = (InetSocketAddress) request.getRemoteAddress();
 				ip = address.getAddress().getHostAddress();
 			}
@@ -218,46 +240,7 @@ public class Convert {
 	}
 	
 	public static void convertIndices(SearchRequest searchRequest) {
-		String[] indices = searchRequest.indices();
-		if (indices == null) {
-			return ;
-		}
-
-		boolean changed = false;
-		String[] newIndices = new String[indices.length];
-
-		for (int i = 0; i < indices.length; ++i) {
-			String index = indices[i];
-
-			if (index == null || index.length() < 5) {
-				newIndices[i] = index;
-				continue;
-			}
-
-			String suffix = index.substring(index.length() - 5, index.length());
-
-			Matcher m = r.matcher(suffix);
-			if (m.matches()) {
-				String newIndex = index + "*";
-				newIndices[i] = newIndex;
-				changed = true;
-			} else {
-				newIndices[i] = index;
-			}
-		}
-
-		if (changed) {
-			if (logger.isDebugEnabled()) {
-				StringBuffer buffer = new StringBuffer();
-				for (int i = 0; i < newIndices.length; ++i) {
-					buffer.append(newIndices[i]);
-					buffer.append(",");
-				}
-
-				logger.debug("convertIndices||newIndices={}", buffer);
-			}
-			searchRequest.indices(newIndices);
-		}
+    	searchRequest.indices(convertIndices(searchRequest.indices()));
 	}
 
 	public static void convertIndices(ESSearchRequest esSearchRequest) {
@@ -294,7 +277,7 @@ public class Convert {
 		
 		if (changed) {
 			if (logger.isDebugEnabled()) {
-				StringBuffer buffer = new StringBuffer();
+				StringBuilder buffer = new StringBuilder();
 				for (int i = 0; i < newIndices.length; ++i) {
 					buffer.append(newIndices[i]);
 					buffer.append(",");

@@ -130,6 +130,7 @@ public class DslTemplatePO extends BaseESPO {
     private Boolean isFromUserConsole;
     /**
      * 是否强制设置查询限流值
+     * 如果设置为 true，则DSL模版查询限流值更新定时任务就不会修改该模版的查询限流值
      */
     private Boolean forceSetQueryLimit;
     /**

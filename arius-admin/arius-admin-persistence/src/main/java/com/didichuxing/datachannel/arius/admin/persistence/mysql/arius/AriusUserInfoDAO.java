@@ -30,4 +30,6 @@ public interface AriusUserInfoDAO {
     List<AriusUserInfoPO> listByRole(Integer role);
 
     List<AriusUserInfoPO> listByRoles(List<Integer> roles);
+
+    List<AriusUserInfoPO> listByIds(List<Long> ids);
 }

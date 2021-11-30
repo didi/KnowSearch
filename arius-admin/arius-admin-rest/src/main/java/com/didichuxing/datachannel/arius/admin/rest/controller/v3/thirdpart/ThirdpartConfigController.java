@@ -17,7 +17,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  */
 @RestController
 @RequestMapping(V3_THIRD_PART + "/cluster")
-@Api(value = "第三方访问接口(REST)")
+@Api(tags = "第三方访问zeus配置接口(REST)")
 public class ThirdpartConfigController {
 
     @Autowired
@@ -32,8 +32,9 @@ public class ThirdpartConfigController {
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "type_name", value = "配置名称", required = true)})
     public String getConfigDetail(@RequestParam(value = "cluster_name") String cluster,
                                   @RequestParam(value = "engin_name") String engin,
-                                  @RequestParam(value = "type_name") String type) {
-        return esClusterConfigService.getZeusConfigContent(buildESConfigZous(cluster, engin, type)).getData();
+                                  @RequestParam(value = "type_name") String type,
+                                  @RequestParam(value = "config_action")Integer configAction) {
+        return esClusterConfigService.getZeusConfigContent(buildESConfigZous(cluster, engin, type),configAction).getData();
     }
 
     /***********************************************private********************************************************/

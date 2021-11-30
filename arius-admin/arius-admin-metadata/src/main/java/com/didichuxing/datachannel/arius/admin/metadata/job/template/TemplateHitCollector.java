@@ -27,8 +27,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 @Component
 public class TemplateHitCollector extends AbstractMetaDataJob {
 
-    private static final long _ONE_MINUTE = 60 * 1000;
-    private static final Long _ONE_DAY = 24 * 60 * 60 * 1000L;
+    private static final Long ONE_MINUTE = 60 * 1000L;
+    private static final Long ONE_DAY    = 24 * 60 * 60 * 1000L;
 
     @Autowired
     private TemplateHitESDAO templateHitEsDao;
@@ -44,7 +44,7 @@ public class TemplateHitCollector extends AbstractMetaDataJob {
 
     @Override
     public Object handleJobTask(String date) {
-        LOGGER.info("templateHitCollector execute param -> [{}]", date);
+        LOGGER.info("class=TemplateHitCollector||method=handleJobTask||msg=templateHitCollector execute param -> [{}]", date);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("get search field");
@@ -54,7 +54,7 @@ public class TemplateHitCollector extends AbstractMetaDataJob {
 
         Map<String/*clusterName*/, List<IndexTemplatePhyWithLogic>> templateMap = Maps.newHashMap();
 
-        List<IndexTemplatePhyWithLogic> templatePhies = templatePhyService.listTemplateWithLogicWithCache();
+        List<IndexTemplatePhyWithLogic> templatePhies = templatePhyService.listTemplateWithLogic();
 
         for (IndexTemplatePhyWithLogic indexTemplate : templatePhies) {
             templateMap.computeIfAbsent(indexTemplate.getCluster(),
@@ -65,7 +65,7 @@ public class TemplateHitCollector extends AbstractMetaDataJob {
         stopWatch.stop().start("prepare template date");
 
         AllHitMetric allMetric = getAllIndicesMetric(time);
-        LOGGER.info("all metric map:" + JSON.toJSONString(allMetric));
+        LOGGER.info("class=TemplateHitCollector||method=handleJobTask||msg=all metric map:" + JSON.toJSONString(allMetric));
         stopWatch.stop().start("agg template index name hit");
 
         TemplateHitPOMap templateHitPoMap = new TemplateHitPOMap(templateMap, date);
@@ -79,7 +79,7 @@ public class TemplateHitCollector extends AbstractMetaDataJob {
 
         boolean operatorResult = templateHitEsDao.batchInsert(l);
 
-        LOGGER.info("templateHitCollector templateNameHitMap size {}, operatorResult {} cost {}", templateHitPoMap.getMap().size(), operatorResult, stopWatch.stop());
+        LOGGER.info("class=TemplateHitCollector||method=handleJobTask||msg=templateHitCollector templateNameHitMap size {}, operatorResult {} cost {}", templateHitPoMap.getMap().size(), operatorResult, stopWatch.stop());
 
         return JOB_SUCCESS;
     }
@@ -120,18 +120,18 @@ public class TemplateHitCollector extends AbstractMetaDataJob {
         // 获得聚合查询时传入的索引名称
         long s = System.currentTimeMillis();
         allHitMetric.addAggs(gatewayJoinEsDao.getIndicesForAggsDsl(date), false);
-        LOGGER.info("get indices for aggs cost:" + (System.currentTimeMillis() - s));
+        LOGGER.info("class=TemplateHitCollector||method=getAllIndicesMetric||msg=get indices for aggs cost:" + (System.currentTimeMillis() - s));
         s = System.currentTimeMillis();
 
         // 获得查询实际命中索引名称
         long start = time;
-        long end = time + _ONE_DAY;
+        long end = time + ONE_DAY;
         while (start <= end) {
-            long e = start + 3 * _ONE_MINUTE;
+            long e = start + 3 * ONE_MINUTE;
             allHitMetric.addAggs(gatewayJoinEsDao.getIndexForNormalDsl(start, e, date), true);
             start = e;
 
-            LOGGER.info("get index for normal cost:" + (System.currentTimeMillis() - s));
+            LOGGER.info("class=TemplateHitCollector||method=getAllIndicesMetric||msg=get index for normal cost:" + (System.currentTimeMillis() - s));
             s = System.currentTimeMillis();
         }
 

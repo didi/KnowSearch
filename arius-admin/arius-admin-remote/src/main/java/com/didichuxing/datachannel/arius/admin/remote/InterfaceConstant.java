@@ -2,6 +2,8 @@ package com.didichuxing.datachannel.arius.admin.remote;
 
 public class InterfaceConstant {
 
+    private InterfaceConstant(){}
+
     /**
      * es创建多机房索引接口
      */
@@ -173,7 +175,7 @@ public class InterfaceConstant {
     /**
      * 指标数据
      */
-    public static final String N9E_COLLECTOR_SINK_DATA_URL = "/api/transfer/push";
+    public static final String N9E_COLLECTOR_SINK_DATA_URL = "/push";
     public static final String N9E_COLLECTOR_DOWNLOAD_DATA_URL = "/data/query/graph/dashboard/history";
 
     /**

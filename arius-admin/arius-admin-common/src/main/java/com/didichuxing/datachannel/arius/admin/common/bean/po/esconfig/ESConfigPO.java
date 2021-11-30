@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * ES配置包列表
@@ -9,6 +11,8 @@ import lombok.Data;
  * @since 2020-08-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESConfigPO extends BasePO {
     /**
      * ID主键自增

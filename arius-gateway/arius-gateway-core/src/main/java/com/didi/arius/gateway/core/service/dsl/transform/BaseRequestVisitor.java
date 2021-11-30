@@ -3,21 +3,21 @@ package com.didi.arius.gateway.core.service.dsl.transform;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didi.arius.gateway.dsl.dsl.ast.DslNode;
-import com.didi.arius.gateway.dsl.dsl.ast.aggr.AggrTerms;
-import com.didi.arius.gateway.dsl.dsl.ast.aggr.SignificantTerms;
-import com.didi.arius.gateway.dsl.dsl.ast.common.KeyWord;
-import com.didi.arius.gateway.dsl.dsl.ast.common.Node;
-import com.didi.arius.gateway.dsl.dsl.ast.common.key.KeyNode;
-import com.didi.arius.gateway.dsl.dsl.ast.common.logic.*;
-import com.didi.arius.gateway.dsl.dsl.ast.common.multi.NodeList;
-import com.didi.arius.gateway.dsl.dsl.ast.common.multi.NodeMap;
-import com.didi.arius.gateway.dsl.dsl.ast.common.script.Script;
-import com.didi.arius.gateway.dsl.dsl.ast.common.value.ObjectNode;
-import com.didi.arius.gateway.dsl.dsl.ast.query.*;
-import com.didi.arius.gateway.dsl.dsl.ast.root.Sort;
-import com.didi.arius.gateway.dsl.dsl.ast.root.Timeout;
-import com.didi.arius.gateway.dsl.dsl.visitor.basic.OutputVisitor;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.DslNode;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.aggr.AggrTerms;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.aggr.SignificantTerms;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.KeyWord;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.Node;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.key.KeyNode;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.logic.*;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.multi.NodeList;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.multi.NodeMap;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.script.Script;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.common.value.ObjectNode;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.query.*;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.root.Sort;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.root.Timeout;
+import com.didichuxing.datachannel.arius.dsl.common.dsl.visitor.basic.OutputVisitor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,17 @@ import java.util.Map;
 public class BaseRequestVisitor extends OutputVisitor {
 
     protected static final Logger logger = LoggerFactory.getLogger(BaseRequestVisitor.class);
+
+    protected static final String TYPE = "_type";
+
+    protected static final String MATCH_ALL = "match_all";
+
+    protected static final String ORDER = "order";
+
+    protected static final String QUERY = "query";
+
+    protected static final String QUERY_STRING = "query_string";
+
 
     /**
      * match不再支持type，旧版本的三种type中，phrase改为match_phrase查询，
@@ -38,8 +49,9 @@ public class BaseRequestVisitor extends OutputVisitor {
         super.visit(node);
 
         JSONObject obj = (JSONObject) this.ret;
-        for (String key : obj.keySet()) {
-            Object value = obj.get(key);
+        for (Map.Entry<String,Object> entry : obj.entrySet()) {
+            Object value = entry.getValue();
+            String key = entry.getKey();
             if (value instanceof JSONObject) {
                 Object type = ((JSONObject) value).get("type");
                 ((JSONObject) value).remove("type");
@@ -52,8 +64,8 @@ public class BaseRequestVisitor extends OutputVisitor {
 
                 }
 
-                if (key.equals("_type")) {
-                    node.setName("match_all");
+                if (key.equals(TYPE)) {
+                    node.setName(MATCH_ALL);
                     obj.clear();
                     break;
                 }
@@ -85,7 +97,8 @@ public class BaseRequestVisitor extends OutputVisitor {
     }
 
     private void transformSortItem(JSONObject sortItem) {
-        for (String key : sortItem.keySet()) {
+        for (Map.Entry<String,Object> entry : sortItem.entrySet()) {
+            String key = entry.getKey();
             if (key.equals("_geo_distance") || key.equals("_geoDistance")) {
                 continue;
             }
@@ -98,8 +111,8 @@ public class BaseRequestVisitor extends OutputVisitor {
                 }
 
                 // 对排序字段没有指定排序方式时，在低版本中默认为降序，则添加desc
-                if (iObj.containsKey("order") && StringUtils.isBlank(iObj.getString("order"))) {
-                    iObj.put("order", "desc");
+                if (iObj.containsKey(ORDER) && StringUtils.isBlank(iObj.getString(ORDER))) {
+                    iObj.put(ORDER, "desc");
                 }
             }
 
@@ -125,26 +138,15 @@ public class BaseRequestVisitor extends OutputVisitor {
         node.setName("bool");
 
 
-        if (obj.containsKey("query")) {
-            Object query = obj.remove("query");
+        if (obj.containsKey(QUERY)) {
+            Object query = obj.remove(QUERY);
             obj.put("must", query);
-        } else if (obj.containsKey("query_string")) {
-            Object queryString = obj.remove("query_string");
+        } else if (obj.containsKey(QUERY_STRING)) {
+            Object queryString = obj.remove(QUERY_STRING);
             JSONObject query = new JSONObject();
-            query.put("query_string", queryString);
+            query.put(QUERY_STRING, queryString);
             obj.put("must", query);
         }
-
-//            this.ret = new JSONObject();
-//
-//        if (obj.size() != 1 || ((obj.size() == 1 && !obj.containsKey("filter")))) {
-//            ((JSONObject) this.ret).put("must", obj);
-//        }
-//
-//        if (obj.containsKey("filter")) {
-//            Object filter = obj.remove("filter");
-//            ((JSONObject) this.ret).put("filter", filter);
-//        }
     }
 
     /**
@@ -246,8 +248,8 @@ public class BaseRequestVisitor extends OutputVisitor {
         super.visit(node);
         JSONObject obj = (JSONObject) this.ret;
         for (String key : obj.keySet()) {
-            if (key.equals("_type")) {
-                node.setName("match_all");
+            if (key.equals(TYPE)) {
+                node.setName(MATCH_ALL);
                 obj.clear();
                 break;
             }
@@ -259,8 +261,8 @@ public class BaseRequestVisitor extends OutputVisitor {
         super.visit(node);
         JSONObject obj = (JSONObject) this.ret;
         for (String key : obj.keySet()) {
-            if (key.equals("_type")) {
-                node.setName("match_all");
+            if (key.equals(TYPE)) {
+                node.setName(MATCH_ALL);
                 obj.clear();
                 break;
             }
@@ -285,8 +287,8 @@ public class BaseRequestVisitor extends OutputVisitor {
         if (obj.size() == 1) {
             if (obj.containsKey("filter")) {
                 obj = obj.getJSONObject("filter");
-            } else if (obj.containsKey("query")) {
-                obj = obj.getJSONObject("query");
+            } else if (obj.containsKey(QUERY)) {
+                obj = obj.getJSONObject(QUERY);
             }
         }
 
@@ -301,25 +303,28 @@ public class BaseRequestVisitor extends OutputVisitor {
     @Override
     public void visit(And node) {
         super.visit(node);
+        visitByConditionType(node, "must");
+    }
 
+    private void visitByConditionType(KeyWord node, String conditionType) {
         node.setName("bool");
         if (this.ret instanceof JSONArray) {
             JSONObject boolNode = new JSONObject();
-            boolNode.put("must", this.ret);
+            boolNode.put(conditionType, this.ret);
             this.ret = boolNode;
         } else if (this.ret instanceof JSONObject){
             JSONObject obj = (JSONObject) this.ret;
 
             JSONArray allArr = new JSONArray();
-            for (String key : obj.keySet()) {
-                if (obj.get(key) instanceof  JSONArray) {
-                    JSONArray arr = obj.getJSONArray(key);
+            for (Map.Entry<String,Object> entry : obj.entrySet()) {
+                if (entry.getValue() instanceof  JSONArray) {
+                    JSONArray arr = obj.getJSONArray(entry.getKey());
                     allArr.addAll(arr);
                 }
             }
 
             JSONObject boolNode = new JSONObject();
-            boolNode.put("must", allArr);
+            boolNode.put(conditionType, allArr);
             this.ret = boolNode;
         }
     }
@@ -331,29 +336,10 @@ public class BaseRequestVisitor extends OutputVisitor {
     @Override
     public void visit(Or node) {
         super.visit(node);
-
-        node.setName("bool");
-        if (this.ret instanceof JSONArray) {
-            JSONObject boolNode = new JSONObject();
-            boolNode.put("should", this.ret);
-            this.ret = boolNode;
-        } else if (this.ret instanceof JSONObject){
-            JSONObject obj = (JSONObject) this.ret;
-
-            JSONArray allArr = new JSONArray();
-            for (String key : obj.keySet()) {
-                if (obj.get(key) instanceof  JSONArray) {
-                    JSONArray arr = obj.getJSONArray(key);
-                    allArr.addAll(arr);
-                }
-            }
-
-            JSONObject boolNode = new JSONObject();
-            boolNode.put("should", allArr);
-            this.ret = boolNode;
-        }
+        visitByConditionType(node, "should");
     }
 
+    @Override
     public void visit(Script node) {
         super.visit(node);
 
@@ -370,14 +356,15 @@ public class BaseRequestVisitor extends OutputVisitor {
         }
     }
 
+    @Override
     public void visit(Queryquery node) {
         super.visit(node);
 
         if (this.ret instanceof JSONObject) {
             JSONObject obj = (JSONObject) this.ret;
-            if (obj.size() == 1 && obj.containsKey("query_string")) {
-                this.ret = obj.get("query_string");
-                node.setName("query_string");
+            if (obj.size() == 1 && obj.containsKey(QUERY_STRING)) {
+                this.ret = obj.get(QUERY_STRING);
+                node.setName(QUERY_STRING);
             }
         }
     }
@@ -423,10 +410,8 @@ public class BaseRequestVisitor extends OutputVisitor {
             this.ret = array;
         } else if (n instanceof NodeMap) {
             this.ret = parseBoolItem((NodeMap) n);
-        } else if (n instanceof ObjectNode) {
-            if (((ObjectNode) n).value == null) {
-                this.ret = null;
-            }
+        } else if (n instanceof ObjectNode && ((ObjectNode) n).value == null) {
+            this.ret = null;
         }
     }
 
@@ -440,14 +425,14 @@ public class BaseRequestVisitor extends OutputVisitor {
         for (KeyNode kn : map.m.keySet()) {
             Node valueNode = map.m.get(kn);
 
-            if (kn.getValue().equalsIgnoreCase("query")) {
+            if (kn.getValue().equalsIgnoreCase(QUERY)) {
                 valueNode.accept(this);
 
                 JSONObject obj = (JSONObject) this.ret;
 
                 if (valueNode instanceof KeyWord
-                        && ((KeyWord) valueNode).getName().equals("query_string")) {
-                    jsonMap.put("query_string", obj);
+                        && ((KeyWord) valueNode).getName().equals(QUERY_STRING)) {
+                    jsonMap.put(QUERY_STRING, obj);
                 } else if (obj.size() == 1) {
                     Map.Entry<String, Object> entry = obj.entrySet().iterator().next();
                     String key = entry.getKey();

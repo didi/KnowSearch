@@ -17,8 +17,8 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.Capa
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanStatisticsService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
@@ -64,19 +64,19 @@ public class CapacityPlanStatisticsServiceImpl implements CapacityPlanStatistics
      * @return true/false
      */
     @Override
-    public Result statisticsPlanClusterById(Long areaId) {
+    public Result<Void> statisticsPlanClusterById(Long areaId) {
 
         CapacityPlanArea capacityPlanArea = capacityPlanAreaService.getAreaById(areaId);
 
         if (capacityPlanArea == null) {
-            LOGGER.info("method=statisByArea||msg=not-found||areaId={}", areaId);
+            LOGGER.info("class=CapacityPlanStatisticsServiceImpl||method=statisByArea||msg=not-found||areaId={}", areaId);
             return Result.buildNotExist("areaId不存在：" + areaId);
         }
 
         // 获取area下的region
         List<CapacityPlanRegion> regions = capacityPlanRegionService.listRegionsInArea(areaId);
         if (CollectionUtils.isEmpty(regions)) {
-            LOGGER.info("method=statisByArea||msg=no region||areaId={}", areaId);
+            LOGGER.info("class=CapacityPlanStatisticsServiceImpl||method=statisByArea||msg=no region||areaId={}", areaId);
             return Result.buildSucc();
         }
 
@@ -101,15 +101,15 @@ public class CapacityPlanStatisticsServiceImpl implements CapacityPlanStatistics
 
         if (CollectionUtils.isNotEmpty(regionStatis)) {
             if (capacityPlanRegionStatisESDAO.batchInsert(regionStatis)) {
-                LOGGER.info("method=statisByArea||msg=sendSucc||size={}", regionStatis.size());
+                LOGGER.info("class=CapacityPlanStatisticsServiceImpl||method=statisByArea||msg=sendSucc||size={}", regionStatis.size());
             } else {
-                LOGGER.info("method=statisByArea||msg=sendFail||size={}", regionStatis.size());
+                LOGGER.info("class=CapacityPlanStatisticsServiceImpl||method=statisByArea||msg=sendFail||size={}", regionStatis.size());
             }
 
             if (saveRate(areaId, regionStatis)) {
-                LOGGER.info("method=statisByArea||msg=saveRateSucc||size={}", regionStatis.size());
+                LOGGER.info("class=CapacityPlanStatisticsServiceImpl||method=statisByArea||msg=saveRateSucc||size={}", regionStatis.size());
             } else {
-                LOGGER.info("method=statisByArea||msg=saveRateFail||size={}", regionStatis.size());
+                LOGGER.info("class=CapacityPlanStatisticsServiceImpl||method=statisByArea||msg=saveRateFail||size={}", regionStatis.size());
             }
 
         }
@@ -125,14 +125,14 @@ public class CapacityPlanStatisticsServiceImpl implements CapacityPlanStatistics
         // 获取上一个check任务
         CapacityPlanRegionTask lastCheckTask = capacityPlanRegionTaskService.getLastCheckTask(region.getRegionId());
         if (lastCheckTask == null) {
-            return Result.buildFrom(Result.buildParamIllegal("regionId" + region.getRegionId() + "没有找到lastCheckTask"));
+            return Result.buildParamIllegal("regionId" + region.getRegionId() + "没有找到lastCheckTask");
         }
 
         // 当前region能够提供的资源
         Result<List<RackMetaMetric>> rackMetaMetricsResult = clusterNodeManager.meta(region.getClusterName(),
             Sets.newHashSet(region.getRacks().split(",")));
         if (rackMetaMetricsResult.failed()) {
-            return Result.buildFrom(Result.buildParamIllegal("regionId" + region.getRegionId() + "获取meta失败"));
+            return Result.buildParamIllegal("regionId" + region.getRegionId() + "获取meta失败");
         }
         List<RackMetaMetric> rackMetas = rackMetaMetricsResult.getData();
         RegionMetric regionMetric = capacityPlanRegionService.calcRegionMetric(rackMetas);
@@ -191,8 +191,8 @@ public class CapacityPlanStatisticsServiceImpl implements CapacityPlanStatistics
         boolean succ = true;
 
         for (CapacityPlanRegionStatisESPO regionStatis : regionStatises) {
-            double usage = 0.0;
-            double overSold = 0.0;
+            double usage ;
+            double overSold ;
             if (regionStatis.getQuota() != null && regionStatis.getQuota() > 0.0) {
                 // 资源实际使用率
                 usage = regionStatis.getCostQuota() / regionStatis.getQuota();

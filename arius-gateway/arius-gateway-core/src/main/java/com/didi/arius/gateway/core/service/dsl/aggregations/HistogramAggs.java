@@ -18,6 +18,10 @@ public class HistogramAggs extends BucketAggsType {
 	@Autowired
 	private AggsTypes aggsTypes;
 
+	public HistogramAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);
@@ -50,7 +54,7 @@ public class HistogramAggs extends BucketAggsType {
 				int bucket = (int) Math.ceil((double)fieldInfo.getCardinality() / iInterval);
 				aggsBukcetInfo.setBucketNumber(bucket);
 				aggsBukcetInfo.setLastBucketNumber(bucket);
-				aggsBukcetInfo.setMemUsed(bucket * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+				aggsBukcetInfo.setMemUsed((long)bucket * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 				
 				return aggsBukcetInfo;
 			}

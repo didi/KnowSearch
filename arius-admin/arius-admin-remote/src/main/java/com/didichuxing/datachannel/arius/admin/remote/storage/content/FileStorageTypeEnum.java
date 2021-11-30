@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.remote.storage.content;
 
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+
 /**
  * 文件存储枚举
  *
@@ -10,11 +12,11 @@ public enum FileStorageTypeEnum {
                                  /**
                                   * 本地部门信息, 固定为一个部门即可
                                   */
-                                 DEFAULT(1, "defaultFileStorage"),
+                                 DEFAULT(1, "default"),
 
-                                 S3(2, "s3FileStorage"),
+                                 S3(2, "s3"),
 
-                                 GIFT(3, "GiftFileStorageHandle"),
+                                 GIFT(3, "gift"),
 
                                  UNKNOWN(-1, "unknown");
 
@@ -35,16 +37,18 @@ public enum FileStorageTypeEnum {
         return code;
     }
 
-    public static FileStorageTypeEnum valueOfCode(Integer code) {
-        if (code == null) {
+    public static FileStorageTypeEnum valueOfType(String type) {
+        if (AriusObjUtils.isNull(type)) {
             return FileStorageTypeEnum.UNKNOWN;
         }
-        for (FileStorageTypeEnum codeEnum : FileStorageTypeEnum.values()) {
-            if (code.equals(codeEnum.getCode())) {
-                return codeEnum;
+        for (FileStorageTypeEnum typeEnum : FileStorageTypeEnum.values()) {
+            if (type.equals(typeEnum.getType())) {
+                return typeEnum;
             }
         }
 
         return FileStorageTypeEnum.UNKNOWN;
     }
+
+
 }

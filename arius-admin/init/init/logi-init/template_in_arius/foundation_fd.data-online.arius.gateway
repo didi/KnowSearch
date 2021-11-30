@@ -1,0 +1,22 @@
+{
+  "expression": "foundation_fd.data-online.arius.gateway*",
+  "dateFormat": "_yyyy-MM-dd",
+  "dataCenter": "cn",
+  "dataType": 0,
+  "dateField": "logTime",
+  "expireTime": "2",
+  "physicalInfos": [
+    {
+      "cluster": "logi-elasticsearch-7.6.0",
+      "rack": "r2",
+      "resourceId": 63,
+      "role": 1,
+      "shard": "4"
+    }
+  ],
+  "quota": 30,
+  "appId": 1,
+  "responsible": "admin",
+  "name": "foundation_fd.data-online.arius.gateway",
+  "desc": "gateway日志"
+}

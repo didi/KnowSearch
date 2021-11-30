@@ -45,19 +45,6 @@
         where role_cluster_id = #{roleId} and  delete_flag = '0'
     </select>
 
-    <!-- 根据role_cluster_id  查询 -->
-    <select id="listHostNamesByRoleAndclusterId" resultType="string">
-        select  h.hostname from es_role_cluster r  left join es_role_cluster_host h on r.id = h.role_cluster_id
-            where r.elastic_cluster_id = #{clusterId} and r.`role` = #{role} and h.delete_flag = '0'
-    </select>
-
-    <select id="listByRoleAndClusterId" parameterType="map" resultMap="BaseResultMap">
-        select
-        h.id, h.ip, h.hostname, h.cluster, h.role_cluster_id, h.status
-        from es_role_cluster r left join es_role_cluster_host h on r.id = h.role_cluster_id
-        where r.elastic_cluster_id = #{clusterId} and r.`role` = #{role} and h.delete_flag = '0'
-    </select>
-
     <!-- 根据role_cluster_i 和 hostname  修改ip -->
     <update id="updateESRoleClusterHost"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO">
@@ -135,6 +122,16 @@
         </foreach>
     </insert>
 
+    <!--  根据主机名称和角色id删除节点  -->
+    <update id="deleteByHostNameAndRoleId">
+        update es_role_cluster_host
+        set delete_flag = 1
+        where role_cluster_id = #{roleId} and hostname in
+        <foreach collection="hostNames" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+
     <update id="offlineByCluster" parameterType="string">
         update es_role_cluster_host
         set status = 2
@@ -152,6 +149,12 @@
         update es_role_cluster_host
         set delete_flag = 1
         where cluster = #{cluster}
+    </update>
+
+    <update id="restoreByHostNameAndRoleId">
+        update es_role_cluster_host
+        set delete_flag = 0, status = 1
+        where hostname = #{hostname} and role_cluster_id = #{roleId} and delete_flag = 1;
     </update>
 
     <select id="listAll" resultMap="BaseResultMap">
@@ -177,6 +180,9 @@
         select
         <include refid="Base_Column_List"/>
         from es_role_cluster_host where hostname = #{hostname} and role_cluster_id = #{roleId} and delete_flag = 1;
+    </select>
+    <select id="getPodNumberByRoleId" resultType="java.lang.Integer">
+        select count(distinct `hostname`) from es_role_cluster_host where role_cluster_id = #{roleId} and delete_flag = 0;
     </select>
 
     <update id="updateHostValid" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostPO">

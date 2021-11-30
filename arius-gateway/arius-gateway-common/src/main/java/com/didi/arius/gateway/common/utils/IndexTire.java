@@ -105,7 +105,7 @@ public class IndexTire {
 
         if (current.getIndexTemplate() == null) {
             current.setIndexTemplate(indexTemplate);
-            if (current.subNodes() == null || current.subNodes().size() == 0) {
+            if (current.subNodes() == null || current.subNodes().isEmpty()) {
                 current.setEnd(true);
             }
         }
@@ -132,7 +132,7 @@ public class IndexTire {
 
             IndexTemplate subTemplate = scanNodes(child, index);
 
-            if (indexTemplate != null && subTemplate != null && false == indexTemplate.equals(subTemplate)) {
+            if (indexTemplate != null && subTemplate != null && !indexTemplate.equals(subTemplate)) {
                 throw new TooManyIndexException(String.format("search query match more then one index template, index=%s, template 1=%s, template 2=%s", index, indexTemplate.getExpression(), subTemplate.getExpression()));
             }
 
@@ -148,11 +148,11 @@ public class IndexTire {
         if (current.isEnd()) {
             // 已经遍历到模板的末尾
             boolean result = checkIndexMatchTemplate(index, current.getIndexTemplate());
+            IndexTemplate indexTemplate = null;
             if (result) {
-                return current.getIndexTemplate();
-            } else {
-                return null;
+                indexTemplate = current.getIndexTemplate();
             }
+            return indexTemplate;
         }
 
         // 判断是否有带*号的查询，有的话，顺序过滤多个*号，到下一个字符
@@ -220,70 +220,78 @@ public class IndexTire {
         }
 
         if (index.contains("*")) {
-            // 按*号，将index分成多个token
-            Tokens tokens = formTokens(index);
-
-            List<Char> expCharList = IndexTireBuilder.getIndexChars(expression, indexTemplate.getDateFormat());
-
-            Iterator<String> tokenIter = tokens.tokens.iterator();
-            String token = tokenIter.next();
-
-            int tokenPos = 0;
-            if (!tokens.indexStarStart) {
-                boolean startResult = startWithToken(expCharList, token);
-                if (false == startResult) {
-                    return false;
-                }
-
-                tokenPos = token.length();
-            } else {
-                tokenPos = indexOfToken(expCharList, tokenPos, token);
-                if (tokenPos < 0) {
-                    return false;
-                }
-            }
-
-            while (tokenIter.hasNext()) {
-                token = tokenIter.next();
-                tokenPos = indexOfToken(expCharList, tokenPos, token);
-                if (tokenPos < 0) {
-                    return false;
-                }
-            }
-
-            if (tokenPos == expCharList.size() || tokens.indexStarEnd) {
-                return true;
-            } else {
-                return  false;
-            }
+            return matchTemplateByStar(index, indexTemplate, expression);
         } else {
-            if (StringUtils.isEmpty(indexTemplate.getDateFormat())) {
-                // 不是时间后缀的索引，直接比较
-                return index.equals(expression);
-            } else {
-                int pos = index.indexOf(expression);
-                if (pos < 0) {
-                    return false;
-                }
+            return matchTemplateByOther(index, indexTemplate, expression);
+        }
+    }
 
-                pos += expression.length();
+    private static boolean matchTemplateByOther(String index, IndexTemplate indexTemplate, String expression) {
+        if (StringUtils.isEmpty(indexTemplate.getDateFormat())) {
+            // 不是时间后缀的索引，直接比较
+            return index.equals(expression);
+        } else {
+            int pos = index.indexOf(expression);
+            if (pos < 0) {
+                return false;
+            }
 
-                String format = index.substring(pos);
+            pos += expression.length();
 
-                int end = format.indexOf("_v");
+            String format = index.substring(pos);
 
-                if (end > 0) {
-                    format = format.substring(0, end);
-                }
+            int end = format.indexOf("_v");
 
-                try {
-                    DateTime.parse(format, DateTimeFormat.forPattern(indexTemplate.getDateFormat()));
-                    return true;
-                } catch (Throwable e) {
-                    return false;
-                }
+            if (end > 0) {
+                format = format.substring(0, end);
+            }
+
+            try {
+                DateTime.parse(format, DateTimeFormat.forPattern(indexTemplate.getDateFormat()));
+                return true;
+            } catch (Exception e) {
+                return false;
             }
         }
+    }
+
+    private static boolean matchTemplateByStar(String index, IndexTemplate indexTemplate, String expression) {
+        // 按*号，将index分成多个token
+        Tokens tokens = formTokens(index);
+
+        List<Char> expCharList = IndexTireBuilder.getIndexChars(expression, indexTemplate.getDateFormat());
+
+        Iterator<String> tokenIter = tokens.tokenList.iterator();
+        String token = tokenIter.next();
+
+        int tokenPos = 0;
+        if (!tokens.indexStarStart) {
+            boolean startResult = startWithToken(expCharList, token);
+            if (!startResult) {
+                return false;
+            }
+
+            tokenPos = token.length();
+        } else {
+            tokenPos = indexOfToken(expCharList, tokenPos, token);
+            if (tokenPos < 0) {
+                return false;
+            }
+        }
+
+        while (tokenIter.hasNext()) {
+            token = tokenIter.next();
+            tokenPos = indexOfToken(expCharList, tokenPos, token);
+            if (tokenPos < 0) {
+                return false;
+            }
+        }
+
+        boolean res = false;
+        if (tokenPos == expCharList.size() || tokens.indexStarEnd) {
+            res = true;
+        }
+        return res;
     }
 
     private static boolean startWithToken(List<Char> expCharList, String token) {
@@ -306,44 +314,14 @@ public class IndexTire {
             pos++;
         }
 
-        if (missed) {
-            // token没命中exp
-            return false;
-        } else {
-            // token命中了exp，且比exp短
-            return true;
-        }
+        return !missed;
     }
 
     private static int indexOfToken(List<Char> expCharList, int pos, String token) {
         char tokenFirst = token.charAt(0);
         while (pos < expCharList.size()) {
-            Char expC = expCharList.get(pos);
-            if (equalsChar(tokenFirst, expC)) {
-                int tokenPos = 0;
-                int expPos = pos;
-                boolean missed = false;
-                while (tokenPos < token.length()) {
-                    if (expPos >= expCharList.size()) {
-                        // token没命中exp
-                        return -1;
-                    }
-
-                    char tokenC = token.charAt(tokenPos);
-                    expC = expCharList.get(expPos);
-                    if (!equalsChar(tokenC, expC)) {
-                        missed = true;
-                        break;
-                    }
-
-                    tokenPos++;
-                    expPos++;
-                }
-
-                if (false == missed) {
-                    return expPos;
-                }
-            }
+            Integer tokenIndex = getToken(expCharList, pos, token, tokenFirst);
+            if (tokenIndex != null) return tokenIndex;
 
             pos ++;
         }
@@ -352,31 +330,61 @@ public class IndexTire {
         return -1;
     }
 
+    private static Integer getToken(List<Char> expCharList, int pos, String token, char tokenFirst) {
+        Char expC = expCharList.get(pos);
+        if (equalsChar(tokenFirst, expC)) {
+            int tokenPos = 0;
+            int expPos = pos;
+            boolean missed = false;
+            while (tokenPos < token.length()) {
+                if (expPos >= expCharList.size()) {
+                    // token没命中exp
+                    return -1;
+                }
+
+                char tokenC = token.charAt(tokenPos);
+                expC = expCharList.get(expPos);
+                if (!equalsChar(tokenC, expC)) {
+                    missed = true;
+                    break;
+                }
+
+                tokenPos++;
+                expPos++;
+            }
+
+            if (!missed) {
+                return expPos;
+            }
+        }
+        return null;
+    }
+
     private static boolean equalsChar(char a, Char b) {
+        boolean res = false;
         if ((b.type == 0 && a == b.c)
                 || (b.type == 1 && a >= '0' && a <= '9')) {
-            return true;
-        } else {
-            return false;
+            res = true;
         }
+        return res;
     }
 
     private static boolean equalsChar(Char a, Char b) {
+        boolean res = false;
         if ((b.type == 0 && a.type == 0 && a.c == b.c)
                 || (b.type == 1 && a.type == 1)) {
-            return true;
-        } else {
-            return false;
+            res = true;
         }
+        return res;
     }
 
     public static class Tokens {
-        List<String> tokens;
+        List<String> tokenList;
         boolean indexStarEnd;
         boolean indexStarStart;
 
-        public Tokens(List<String> tokens, boolean indexStarEnd, boolean indexStarStart) {
-            this.tokens = tokens;
+        public Tokens(List<String> tokenList, boolean indexStarEnd, boolean indexStarStart) {
+            this.tokenList = tokenList;
             this.indexStarEnd = indexStarEnd;
             this.indexStarStart = indexStarStart;
         }

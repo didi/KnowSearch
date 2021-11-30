@@ -6,10 +6,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
-/**
- * @author d06679
- * @date 2019-06-24
- */
 @Data
 @ToString
 @ApiModel(description = "规划region信息")

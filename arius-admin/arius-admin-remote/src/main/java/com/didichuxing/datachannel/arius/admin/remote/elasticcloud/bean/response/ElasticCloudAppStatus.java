@@ -3,12 +3,18 @@ package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.respons
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.ESAppGroupStatusDTO;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.ESAppHostStatusDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ElasticCloudAppStatus extends BaseDTO {
 
+   private static final long serialVersionUID = 8665383910585087185L;
    /**
     * 容器云任务类型 create(新建)/update(升级、重启)/scale(扩缩容)
     */

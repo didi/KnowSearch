@@ -1,6 +1,9 @@
 package com.didi.arius.gateway.common.consts;
 
 public class QueryConsts {
+
+	private QueryConsts(){}
+
 	public static final String HEAD_AUTHORIZATION = "Authorization";
 	public static final String HEAD_SEARCH_ID = "SEARCH_ID";
 	public static final String HEAD_USER = "username";
@@ -18,7 +21,7 @@ public class QueryConsts {
 	public static final String SPAN_ID = "cspanid";
 	
 	public static final String TOTAL_SEARCH_ID = "all";
-	public static final int TOTAL_APPId_ID = -1;
+	public static final int TOTAL_APPID_ID = -1;
 	
 	public static final String HTTP_ATTR_QUERY_CONTEXT = "queryContext";
 	
@@ -52,7 +55,7 @@ public class QueryConsts {
 	
 	public static final int DATE_HISTOGRAM_DEFAUL_RANGE = 3600000;
 	
-	public static final int MIN_APPID_NUMBER = 5;
+	public static final int MIN_APPID_NUMBER = 1;
 	public static final int MIN_TEMPLATE_NUMBER = 5;
 
 	public static final int SLOW_REQUEST_COST = 30000;
@@ -66,7 +69,7 @@ public class QueryConsts {
 	// 动态配置项，可以跳过多type索引启用映射查询的appid列表
 	public static final String MAPPING_INDEXNAME_WHITE_APPIDS = "mapping.indexname.white.appids";
 
-	public static final long DAY_MILLIS = 24 * 60 * 60 * 1000;
+	public static final long DAY_MILLIS = 24 * 60 * 60 * 1000L;
 	public static final long DEFALUT_INDEX_DAY = 93;
 	public static final long MAX_INDEX_COUNT = 100;
 
@@ -80,4 +83,8 @@ public class QueryConsts {
 	public static final String SEARCH_IGNORE_THROTTLED = "ignore_throttled";
 
 	public static final String GATEWAY_GROUP = "Normal";
+
+	// 动态配置项，通过gateway的索引setting设置接口设置setting时被禁止的setting项
+	public static final String FORBIDDEN_SETTING_PATH = "gateway.forbidden.settings.path";
+
 }

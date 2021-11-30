@@ -1,6 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.constant;
 
 public class RequestPathConsole {
+
+    private RequestPathConsole(){}
+
     public static final String CONSOLE = "/v2/console";
 
     public static final String APP_LOGIN = CONSOLE + "/app/login";

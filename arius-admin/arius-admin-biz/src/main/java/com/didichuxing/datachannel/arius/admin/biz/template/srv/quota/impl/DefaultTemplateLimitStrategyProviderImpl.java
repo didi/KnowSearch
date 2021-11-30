@@ -16,8 +16,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.Physical
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
 import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateLimitStrategyProvider;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author d06679
@@ -88,7 +88,7 @@ public class DefaultTemplateLimitStrategyProviderImpl implements TemplateLimitSt
             strategy.setTpsAdjustPercent(0);
         }
 
-        LOGGER.info("method=defaultTemplateLimitStrategyProvider.provide||cluster={}||template={}||strategy={}",
+        LOGGER.info("class=DefaultTemplateLimitStrategyProviderImpl||method=defaultTemplateLimitStrategyProvider.provide||cluster={}||template={}||strategy={}",
             cluster, template, strategy);
 
         return strategy;

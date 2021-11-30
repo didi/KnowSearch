@@ -4,16 +4,18 @@ import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.metadata.FetchFields;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.es.http.HttpRestHandler;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchResponse;
-import com.didi.arius.gateway.query.SqlElasticRequestBuilder;
+import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.collect.Tuple;
+import org.nlpcn.es4sql.query.SqlElasticRequestBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -25,30 +27,22 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("sqlAction")
 public class SQLAction extends HttpRestHandler {
 
-	public static final String NAME = "sql";
-
 	@Override
 	public String name() {
-		return NAME;
+		return "sql";
 	}
 
 	@Override
 	public void handleRequest(QueryContext queryContext) throws Exception {
 
 		checkFlowLimit(queryContext);
-
-		String sql = queryContext.getPostBody();
-		if (sql.endsWith(";")) {
-			sql = sql.substring(0, sql.length() - 1);
-		}
-
-		SqlElasticRequestBuilder requestBuilder = buildRequest(sql);
+		SqlElasticRequestBuilder requestBuilder = buildRequest(queryContext.getPostBody());
 		SearchRequest searchRequest = (SearchRequest) requestBuilder.request();
 
 		List<String> indices = Arrays.asList(searchRequest.indices());
 		queryContext.setIndices(indices);
 		queryContext.setTypeNames(searchRequest.types());
-		checkIndices(queryContext);
+		checkIndicesAndTemplateBlockRead(queryContext);
 
         ESSearchRequest esSearchRequest = new ESSearchRequest();
         esSearchRequest.indices(searchRequest.indices());
@@ -60,12 +54,12 @@ public class SQLAction extends HttpRestHandler {
             }
 
 		    if (indexTemplate != null) {
-                String dateFrom = queryContext.getRequest().param(RestConsts.SEARCH_DATE_FROM_PARAMS);
-                String dateTo = queryContext.getRequest().param(RestConsts.SEARCH_DATE_TO_PARAMS);
+				if(!isAliasGet(indexTemplate, indices)){
+					String dateFrom = queryContext.getRequest().param(RestConsts.SEARCH_DATE_FROM_PARAMS);
+					String dateTo = queryContext.getRequest().param(RestConsts.SEARCH_DATE_TO_PARAMS);
 
-                String[] newIndices = getQueryIndices(indexTemplate, dateFrom, dateTo);
-
-                esSearchRequest.indices(newIndices);
+					esSearchRequest.indices(getQueryIndices(indexTemplate, dateFrom, dateTo));
+				}
             } else {
 		        indexTemplate = getTemplateByIndexTire(indices, queryContext);
             }
@@ -93,21 +87,9 @@ public class SQLAction extends HttpRestHandler {
 		params.remove(RestConsts.SEARCH_DATE_FROM_PARAMS);
 		params.remove(RestConsts.SEARCH_DATE_TO_PARAMS);
 		params.put(QueryConsts.SEARCH_IGNORE_THROTTLED, "false");
-		if (searchRequest.routing() != null && !params.containsKey("routing")) {
-			params.put("routing", searchRequest.routing());
-		}
-
-		if (searchRequest.scroll() != null && searchRequest.scroll().keepAlive() != null && !params.containsKey("scroll")) {
-			params.put("scroll", searchRequest.scroll().keepAlive().toString());
-		}
+		setRouteAndScroll(searchRequest, params);
 
 		esSearchRequest.setParams(params);
-
-
-//		FetchFields fetchFields = new FetchFields();
-//		String strSource = XContentHelper.convertToJson(searchRequest.source(), false);
-//		BytesReference separateSource = separateFields(strSource, fetchFields);
-//		searchRequest.source(separateSource);
 
         esSearchRequest.putHeader("requestId", queryContext.getRequestId());
         esSearchRequest.putHeader("Authorization", queryContext.getRequest().getHeader("Authorization"));
@@ -115,7 +97,7 @@ public class SQLAction extends HttpRestHandler {
 		// 日期索引加上*号后缀，支持异常索引修复方案
 		Convert.convertIndices(esSearchRequest);
 
-		ESClient client = esClusterService.getClient(queryContext, indexTemplate);
+		ESClient client = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
 		// pre process
 		preSearchProcess(queryContext, client, esSearchRequest);
@@ -124,11 +106,35 @@ public class SQLAction extends HttpRestHandler {
 		queryContext.setFetchFields(fetchFields);
 
 		if (queryContext.isDetailLog()) {
-			statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_request_before||requestId={}||before_cost={}",
-					queryContext.getRequestId(), (System.currentTimeMillis() - queryContext.getRequestTime()));
+			JoinLogContext joinLogContext = queryContext.getJoinLogContext();
+			joinLogContext.setBeforeCost(System.currentTimeMillis() - queryContext.getRequestTime());
 		}
 
 		ActionListener<ESSearchResponse> listener = newSearchListener(queryContext);
 		client.search(esSearchRequest, listener);
+	}
+
+	private void setRouteAndScroll(SearchRequest searchRequest, Map<String, String> params) {
+		if (searchRequest.routing() != null && !params.containsKey("routing")) {
+			params.put("routing", searchRequest.routing());
+		}
+
+		if (searchRequest.scroll() != null && searchRequest.scroll().keepAlive() != null && !params.containsKey("scroll")) {
+			params.put("scroll", searchRequest.scroll().keepAlive().toString());
+		}
+	}
+
+	private boolean isAliasGet(IndexTemplate indexTemplate, List<String> indexs){
+		if(CollectionUtils.isEmpty(indexTemplate.getAliases())){
+			return false;
+		}
+
+		for(String index : indexs){
+			if(indexTemplate.getAliases().contains( index )){
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

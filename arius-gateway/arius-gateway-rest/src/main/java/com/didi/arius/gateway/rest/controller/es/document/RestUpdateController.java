@@ -16,6 +16,11 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestUpdateController extends BaseHttpRestController {
     @Autowired
     private RestUpdateAction restUpdateAction;
+
+    public RestUpdateController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(POST, "/{index}/_update/{id}", this);

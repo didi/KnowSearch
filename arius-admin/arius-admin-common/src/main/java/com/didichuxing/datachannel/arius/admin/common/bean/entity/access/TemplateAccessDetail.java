@@ -37,10 +37,8 @@ public class TemplateAccessDetail {
      */
     @JSONField(serialize = false)
     public boolean isValid() {
-        if (StringUtils.isBlank(templateName) || StringUtils.isBlank(countDate) || StringUtils.isBlank(clusterName)) {
-            return false;
-        }
-
-        return true;
+        return  !(StringUtils.isBlank(templateName)
+                || StringUtils.isBlank(countDate)
+                || StringUtils.isBlank(clusterName));
     }
 }

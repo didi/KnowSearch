@@ -32,6 +32,10 @@ public class RateLimitDetailController extends StatController {
     @Autowired
     private DslTemplateService dslTemplateService;
 
+    public RateLimitDetailController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(RestRequest.Method.GET, "/_gwstat/rateLimitDetail", this);
@@ -45,15 +49,15 @@ public class RateLimitDetailController extends StatController {
 
     @Override
     protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception {
-        int rAppid = request.paramAsInt("appid", QueryConsts.TOTAL_APPId_ID);
+        int rAppid = request.paramAsInt("appid", QueryConsts.TOTAL_APPID_ID);
         Map<Integer, List<RateLimitDetail>> appidDetail = new TreeMap<>();
 
         List<String> dslKeys = dslTemplateService.getDslTemplateKeys();
         for (String dslKey : dslKeys) {
             try {
                 String[] keyArr = dslKey.split("_");
-                int appid = Integer.valueOf(keyArr[0]);
-                if (rAppid != QueryConsts.TOTAL_APPId_ID && rAppid != appid) {
+                int appid = Integer.parseInt(keyArr[0]);
+                if (rAppid != QueryConsts.TOTAL_APPID_ID && rAppid != appid) {
                     continue;
                 }
 
@@ -79,7 +83,7 @@ public class RateLimitDetailController extends StatController {
                     rateLimitDetails.add(rateLimitDetail);
                     appidDetail.put(appid, rateLimitDetails);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.error("unexpect_exception||dslKey={}||e={}", dslKey, Convert.logExceptionStack(e));
             }
         }

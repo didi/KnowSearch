@@ -5,12 +5,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslAnalyzeResu
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Component
+@NoArgsConstructor
 public class DslAnalyzeResultQpsESDAO extends BaseESDAO {
 
     /**

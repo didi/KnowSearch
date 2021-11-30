@@ -17,6 +17,11 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestSpatialSearchController extends BaseHttpRestController {
     @Autowired
     private RestSpatialSearchAction restSpatialSearchAction;
+
+    public RestSpatialSearchController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_spatial_search", this);

@@ -11,7 +11,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfi
 /**
  * @author d06679
  * @date 2019/4/24
+ * @deprecated
  */
+@Deprecated
 @Component
 public class QuotaTool {
 

@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fengqiongfeng
  * @date 2020/8/24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LogicClusterAuthOrderDetail extends AbstractOrderDetail {
     /**
      * 逻辑模板id
@@ -21,7 +25,7 @@ public class LogicClusterAuthOrderDetail extends AbstractOrderDetail {
 
     /**
      * 权限类型
-     * @see AppLogicClusterAuthEnum
+     * @see AppClusterLogicAuthEnum
      */
     private Integer authCode;
 

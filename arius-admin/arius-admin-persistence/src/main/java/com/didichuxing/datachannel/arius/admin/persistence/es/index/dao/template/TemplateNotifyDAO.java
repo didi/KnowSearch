@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateNotifyESPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
+@NoArgsConstructor
 public class TemplateNotifyDAO extends BaseESDAO {
 
     private String index;
@@ -24,7 +26,7 @@ public class TemplateNotifyDAO extends BaseESDAO {
     }
 
     public List<TemplateNotifyESPO> getByLogicTemplIdAndRate(Integer logicTemplateId, String zeroDate, Integer ratio){
-        String realDsl   = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_BY_LOGIC_TEMPLATE_AND_RATE, logicTemplateId, zeroDate, ratio);
+        String realDsl   = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_BY_LOGIC_TEMPLATE_AND_RATE, logicTemplateId, zeroDate, ratio);
         String realIndex = genIndexNameByDate(index);
 
         List<TemplateNotifyESPO> templateNotifyESPOList = gatewayClient.performRequest(realIndex, type, realDsl, TemplateNotifyESPO.class);

@@ -122,7 +122,7 @@ public class NettyHttpServerTransport {
 
     protected String port;
 
-    protected String publishHosts[];
+    protected String[] publishHosts;
 
     protected boolean detailedErrorsEnabled;
 
@@ -148,15 +148,19 @@ public class NettyHttpServerTransport {
     @Autowired
     private NettyHttpController nettyHttpController;
 
+    public NettyHttpServerTransport() {
+        // pass
+    }
+
     public void init() {
         this.settings = Settings.EMPTY;
         this.bigArrays = BigArrays.NON_RECYCLING_INSTANCE;
 
-        if (settings.getAsBoolean("netty.epollBugWorkaround", false)) {
+        if (settings.getAsBoolean("netty.epollBugWorkaround", false).booleanValue()) {
             System.setProperty("org.jboss.netty.epollBugWorkaround", "true");
         }
 
-        ByteSizeValue maxContentLength = settings.getAsBytesSize("http.netty.max_content_length", settings.getAsBytesSize("http.max_content_length", new ByteSizeValue(100, ByteSizeUnit.MB)));
+        ByteSizeValue localMaxContentLength = settings.getAsBytesSize("http.netty.max_content_length", settings.getAsBytesSize("http.max_content_length", new ByteSizeValue(100, ByteSizeUnit.MB)));
         this.maxChunkSize = settings.getAsBytesSize("http.netty.max_chunk_size", settings.getAsBytesSize("http.max_chunk_size", new ByteSizeValue(8, ByteSizeUnit.KB)));
         this.maxHeaderSize = settings.getAsBytesSize("http.netty.max_header_size", settings.getAsBytesSize("http.max_header_size", new ByteSizeValue(8, ByteSizeUnit.KB)));
         this.maxInitialLineLength = settings.getAsBytesSize("http.netty.max_initial_line_length", settings.getAsBytesSize("http.max_initial_line_length", new ByteSizeValue(8, ByteSizeUnit.KB)));
@@ -177,11 +181,11 @@ public class NettyHttpServerTransport {
         this.tcpReceiveBufferSize = settings.getAsBytesSize("http.netty.tcp_receive_buffer_size", settings.getAsBytesSize(TCP_RECEIVE_BUFFER_SIZE, TCP_DEFAULT_RECEIVE_BUFFER_SIZE));
         this.detailedErrorsEnabled = settings.getAsBoolean(SETTING_HTTP_DETAILED_ERRORS_ENABLED, true);
 
-        long defaultReceiverPredictor = 512 * 1024;
+        long defaultReceiverPredictor = 512 * 1024L;
         if (JvmInfo.jvmInfo().getMem().getDirectMemoryMax().bytes() > 0) {
             // we can guess a better default...
             long l = (long) ((0.3 * JvmInfo.jvmInfo().getMem().getDirectMemoryMax().bytes()) / workerCount);
-            defaultReceiverPredictor = Math.min(defaultReceiverPredictor, Math.max(l, 64 * 1024));
+            defaultReceiverPredictor = Math.min(defaultReceiverPredictor, Math.max(l, 64 * 1024L));
         }
 
         // See AdaptiveReceiveBufferSizePredictor#DEFAULT_XXX for default values in netty..., we can use higher ones for us, even fixed one
@@ -200,11 +204,11 @@ public class NettyHttpServerTransport {
         this.corsConfig = buildCorsConfig(settings);
 
         // validate max content length
-        if (maxContentLength.bytes() > Integer.MAX_VALUE) {
-            logger.warn("maxContentLength[" + maxContentLength + "] set to high value, resetting it to [100mb]");
-            maxContentLength = new ByteSizeValue(100, ByteSizeUnit.MB);
+        if (localMaxContentLength.bytes() > Integer.MAX_VALUE) {
+            logger.warn("maxContentLength[{}] set to high value, resetting it to [100mb]", localMaxContentLength);
+            localMaxContentLength = new ByteSizeValue(100, ByteSizeUnit.MB);
         }
-        this.maxContentLength = maxContentLength;
+        this.maxContentLength = localMaxContentLength;
 
         logger.debug("using max_chunk_size[{}], max_header_size[{}], max_initial_line_length[{}], max_content_length[{}], receive_predictor[{}->{}], pipelining[{}], pipelining_max_events[{}]",
                 maxChunkSize, maxHeaderSize, maxInitialLineLength, this.maxContentLength, receivePredictorMin, receivePredictorMax, pipelining, pipeliningMaxEvents);
@@ -259,7 +263,7 @@ public class NettyHttpServerTransport {
     }
 
     private CorsConfig buildCorsConfig(Settings settings) {
-        if (settings.getAsBoolean(SETTING_CORS_ENABLED, false) == false) {
+        if (!settings.getAsBoolean(SETTING_CORS_ENABLED, false).booleanValue()) {
             return CorsConfigBuilder.forOrigins().disable().build();
         }
         String origin = settings.get(SETTING_CORS_ALLOW_ORIGIN);
@@ -276,7 +280,7 @@ public class NettyHttpServerTransport {
                 builder = CorsConfigBuilder.forPattern(p);
             }
         }
-        if (settings.getAsBoolean(SETTING_CORS_ALLOW_CREDENTIALS, false)) {
+        if (settings.getAsBoolean(SETTING_CORS_ALLOW_CREDENTIALS, false).booleanValue()) {
             builder.allowCredentials();
         }
         String[] strMethods = settings.getAsArray(SETTING_CORS_ALLOW_METHODS, DEFAULT_CORS_METHODS);
@@ -315,7 +319,7 @@ public class NettyHttpServerTransport {
         nettyHttpController.dispatchRequest(request, channel);
     }
 
-    protected void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+    protected void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
         if (e.getCause() instanceof ReadTimeoutException) {
             if (logger.isTraceEnabled()) {
                 logger.trace("Connection timeout [{}]", ctx.getChannel().getRemoteAddress());
@@ -323,10 +327,10 @@ public class NettyHttpServerTransport {
             ctx.getChannel().close();
         } else {
             if (!NetworkExceptionHelper.isCloseConnectionException(e.getCause())) {
-                logger.warn("Caught exception while handling client http traffic, closing connection {}", e.getCause(), ctx.getChannel());
+                logger.warn("Caught exception while handling client http traffic, closing connection", e.getCause());
                 ctx.getChannel().close();
             } else {
-                logger.debug("Caught exception while handling client http traffic, closing connection {}", e.getCause(), ctx.getChannel());
+                logger.debug("Caught exception while handling client http traffic, closing connection", e.getCause());
                 ctx.getChannel().close();
             }
         }
@@ -375,7 +379,7 @@ public class NettyHttpServerTransport {
             if (transport.compression) {
                 pipeline.addLast("encoder_compress", new HttpContentCompressor(transport.compressionLevel));
             }
-            if (transport.settings().getAsBoolean(SETTING_CORS_ENABLED, false)) {
+            if (transport.settings().getAsBoolean(SETTING_CORS_ENABLED, false).booleanValue()) {
                 pipeline.addLast("cors", new CorsHandler(transport.getCorsConfig()));
             }
             if (transport.pipelining) {

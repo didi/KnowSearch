@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayJoinLogService;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,7 +38,7 @@ public class AppManagerImpl implements AppManager {
      * 登陆APP接口
      */
     @Override
-    public Result login(HttpServletRequest request, ConsoleAppLoginDTO loginDTO) {
+    public Result<Void> login(HttpServletRequest request, ConsoleAppLoginDTO loginDTO) {
         return appService.login(loginDTO.getAppId(), loginDTO.getVerifyCode(), HttpRequestUtils.getOperator(request));
     }
 
@@ -49,11 +50,21 @@ public class AppManagerImpl implements AppManager {
                                                                    @RequestParam("user") String user) {
         String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
         if (!GET_USER_APPID_LIST_TICKET.equals(ticket)) {
-            return Result.buildFrom(Result.buildParamIllegal("ticket错误"));
+            return Result.buildParamIllegal("ticket错误");
         }
 
         return Result.buildSucc(
                 ConvertUtil.list2List(appService.getUserLoginWithoutCodeApps(user), ConsoleAppWithVerifyCodeVO.class));
+    }
+
+    @Override
+    public Result<List<String>> listNames() {
+        return Result.buildSucc(appService.listApps().parallelStream().map(App::getName).collect(Collectors.toList()));
+    }
+
+    @Override
+    public Result<List<String>> listIds() {
+        return Result.buildSucc(appService.listApps().parallelStream().map(App::getId).map(String::valueOf).collect(Collectors.toList()));
     }
 
     /**
@@ -61,14 +72,14 @@ public class AppManagerImpl implements AppManager {
      */
     @Override
     public Result<List<ConsoleAppVO>> list() {
-        return Result.buildSucc(ConvertUtil.list2List(appService.getApps(), ConsoleAppVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(appService.listApps(), ConsoleAppVO.class));
     }
 
     /**
      * 编辑APP接口
      */
     @Override
-    public Result update(HttpServletRequest request, ConsoleAppDTO appDTO) {
+    public Result<Void> update(HttpServletRequest request, ConsoleAppDTO appDTO) {
         return appService.editApp(ConvertUtil.obj2Obj(appDTO, AppDTO.class), HttpRequestUtils.getOperator(request));
     }
 
@@ -84,10 +95,10 @@ public class AppManagerImpl implements AppManager {
      * 获取访问次数接口
      */
     @Override
-    public Result update(Integer appId) {
+    public Result<Long> accessCount(Integer appId) {
         App app = appService.getAppById(appId);
         if (app == null) {
-            return Result.buildFrom(Result.buildNotExist("应用不存在"));
+            return Result.buildNotExist("应用不存在");
         }
 
         Date nowDate = new Date();
@@ -100,7 +111,7 @@ public class AppManagerImpl implements AppManager {
      * 删除APP
      */
     @Override
-    public Result update(HttpServletRequest request, @RequestParam("appId") Integer appId) {
+    public Result<Void> delete(HttpServletRequest request, @RequestParam("appId") Integer appId) {
         return appService.deleteAppById(appId, HttpRequestUtils.getOperator(request));
     }
 }

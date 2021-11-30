@@ -19,34 +19,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AppTemplateAuthDTO extends BaseDTO {
 
-    /**
-     * 主键
-     */
     @ApiModelProperty("ID")
     private Long    id;
 
-    /**
-     * appid
-     */
     @ApiModelProperty("应用ID")
     private Integer appId;
 
-    /**
-     * 模板ID
-     */
     @ApiModelProperty("模板ID")
     private Integer templateId;
 
     /**
-     * 权限类型  读写  读
      * @see AppTemplateAuthEnum
      */
     @ApiModelProperty("权限类型（1:管理；2:读写；3:读）")
     private Integer type;
 
-    /**
-     * 责任人列表
-     */
     @ApiModelProperty("责任人")
     private String  responsible;
 

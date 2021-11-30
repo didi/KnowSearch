@@ -14,7 +14,7 @@ public class DegreeSearchCost extends AbstractDegreeIndicator {
 
         realTimeSearchCostPO.setAvgSearchCostTime(searchCostTime);
 
-        double score = 0.0;
+        double score;
 
         if (searchCostTime <= 0) {
             score = 100.0;

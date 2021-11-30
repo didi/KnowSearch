@@ -14,7 +14,7 @@ import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.mo
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description ="集群索引中的统计信息")
+@ApiModel(description = "集群索引中的统计信息")
 public class ESIndexStats extends BaseESPO {
     /**
      * 统计的时间戳，单位：毫秒
@@ -56,8 +56,10 @@ public class ESIndexStats extends BaseESPO {
      */
     private Map<String, String> metrics;
 
-    public void putMetrics(String key, String value){
-        if(null == metrics){metrics = new HashMap<>();}
+    public void putMetrics(String key, String value) {
+        if (null == metrics) {
+            metrics = new HashMap<>();
+        }
 
         metrics.put(key, value);
     }

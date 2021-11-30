@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 
 /**
@@ -27,7 +28,7 @@ public class Tuple<T, V> {
         return v1;
     }
 
-    public Tuple setV1(T v1) {
+    public Tuple<T, V> setV1(T v1) {
         this.v1 = v1;
         return this;
     }
@@ -36,7 +37,7 @@ public class Tuple<T, V> {
         return v2;
     }
 
-    public Tuple setV2(V v2) {
+    public Tuple<T, V> setV2(V v2) {
         this.v2 = v2;
         return this;
     }
@@ -58,7 +59,4 @@ public class Tuple<T, V> {
         result = 31 * result + (v2 != null ? v2.hashCode() : 0);
         return result;
     }
-
-
-
 }

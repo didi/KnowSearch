@@ -23,7 +23,7 @@ public interface CommonManager {
      * @param param
      * @return
      */
-    Result addOperateRecord(OperateRecordDTO param);
+    Result<Void> addOperateRecord(OperateRecordDTO param);
 
     /**
      * 获取逻辑集群列表
@@ -59,7 +59,7 @@ public interface CommonManager {
      * @return
      * @throws UnsupportedEncodingException
      */
-    Result verifyApp(HttpServletRequest request, Integer appId, String appSecret) throws UnsupportedEncodingException;
+    Result<Void> verifyApp(HttpServletRequest request, Integer appId, String appSecret) throws UnsupportedEncodingException;
 
     /**
      * 获取物理集群列表接口

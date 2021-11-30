@@ -15,9 +15,9 @@ import java.util.HashMap;
  * 
  */
 public class ActionManager {
-	private static HashMap<String, Class<? extends TransportRequest>> actionRequestMap = new HashMap<String, Class<? extends TransportRequest>>();
+	private static HashMap<String, Class<? extends TransportRequest>> actionRequestMap = new HashMap<>();
 
-	private static HashMap<Class<? extends TransportRequest>, String> requestActionMap = new HashMap<Class<? extends TransportRequest>, String>();
+	private static HashMap<Class<? extends TransportRequest>, String> requestActionMap = new HashMap<>();
 
 	static {
 		ActionManager.regist(GetAction.NAME, GetRequest.class);
@@ -25,9 +25,14 @@ public class ActionManager {
 		ActionManager.regist(TransportLivenessAction.NAME, LivenessRequest.class);
 	}
 
+	private ActionManager() {
+		// pass
+	}
+
 	public static void regist(String action, Class<? extends TransportRequest> cls) {
-		if (actionRequestMap.containsKey(action) || requestActionMap.containsKey(cls))
+		if (actionRequestMap.containsKey(action) || requestActionMap.containsKey(cls)){
 			throw new IllegalArgumentException("Action " + action + " already exists");
+		}
 		actionRequestMap.put(action, cls);
 		requestActionMap.put(cls, action);
 	}

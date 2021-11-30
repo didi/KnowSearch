@@ -1,13 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmCloudOpreateActionEnum.*;
-import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum.RUNNING;
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ESCloudClusterCreateParamConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterConstant.INVALID_VALUE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterConstant.SYN_ODIN_STATUS_MAX_RETRY_TIMES;
-
-import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
@@ -20,51 +12,61 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESCluster
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ESCloudClusterCreateParamConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.ElasticCloudRemoteService;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.request.*;
-import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response.*;
+import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response.ElasticCloudAppStatus;
+import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response.ElasticCloudPod;
+import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response.ElasticCloudStatus;
 import com.didichuxing.datachannel.arius.admin.remote.monitor.RemoteMonitorService;
 import com.google.common.collect.Lists;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmCloudOpreateActionEnum.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum.RUNNING;
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.INVALID_VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.SYN_ODIN_STATUS_MAX_RETRY_TIMES;
+
+@NoArgsConstructor
 @Service("ecmDockerHandler")
 public class EcmDockerHandler extends AbstractEcmBaseHandle {
     @Autowired
-    private ESRoleClusterService      roleClusterService;
+    private RoleClusterService roleClusterService;
 
     @Autowired
     private ESPluginService           esPluginService;
 
     @Autowired
-    private ESRoleClusterHostService  esRoleClusterHostService;
+    private RoleClusterHostService roleClusterHostService;
 
     @Autowired
     private ElasticCloudRemoteService elasticCloudRemoteService;
 
     @Autowired
-    private ESClusterPhyService       esClusterPhyService;
+    private ClusterPhyService esClusterPhyService;
 
     @Autowired
     private ESPackageService          esPackageService;
@@ -81,15 +83,15 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
     }
 
     @Override
-    public Result saveESCluster(List<EcmParamBase> ecmParamBaseList) {
+    public Result<Long> saveESCluster(List<EcmParamBase> ecmParamBaseList) {
         List<ElasticCloudCreateActionParam> elasticCloudCreateActionParamList = new ArrayList<>();
 
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
             ElasticCloudCreateActionParam elasticCloudCreateActionParam = (ElasticCloudCreateActionParam) ecmParamBase;
             // 检查参数是否合理
-            Result fieldCheckResult = elasticCloudCreateActionParam.validateFiledIllegal();
+            Result<Void> fieldCheckResult = elasticCloudCreateActionParam.validateFiledIllegal();
             if (fieldCheckResult.failed()) {
-                return fieldCheckResult;
+                return Result.buildFrom(fieldCheckResult);
             }
             elasticCloudCreateActionParamList.add(elasticCloudCreateActionParam);
         }
@@ -98,7 +100,7 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         Result<ElasticCloudCreateActionParam> elasticCloudCreateActionParamResult = persistClusterPOAndSupplyField(
             elasticCloudCreateActionParamList.get(0));
         if (elasticCloudCreateActionParamResult.failed()) {
-            return Result.buildFail(elasticCloudCreateActionParamResult.getMessage());
+            return Result.buildFrom(elasticCloudCreateActionParamResult);
         }
         for (ElasticCloudCreateActionParam elasticCloudCreateAction : elasticCloudCreateActionParamList) {
             elasticCloudCreateAction.setPhyClusterId(elasticCloudCreateActionParamResult.getData().getPhyClusterId());
@@ -133,65 +135,68 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         if (actionParamBase == null) {
             return Result.buildParamIllegal("ECM参数列表为空");
         }
+
         ElasticCloudCreateActionParam elasticCloudCreateActionParam = (ElasticCloudCreateActionParam) actionParamBase;
         String namespace = elasticCloudCreateActionParam.namespace();
 
         //创建odin父节点
-        Result result = buildFatherOdinNode(elasticCloudCreateActionParam);
+        Result<Void> result = buildFatherOdinNode(elasticCloudCreateActionParam);
         if (result.failed()) {
             LOGGER.info(
                 "class=EcmDockerHandler||method=startESCluster||subMethod=buildFatherOdinNode||clusterId={}||namespace={}",
-                actionParamBase.getPhyClusterId(),
-                JSON.toJSONString(elasticCloudCreateActionParam.getPhyClusterName() + "."
-                                  + elasticCloudCreateActionParam.getNsTree()));
-            //return result;
+                actionParamBase.getPhyClusterId(), elasticCloudCreateActionParam.getNsTree());
+            return Result.buildFrom(result);
         }
 
         // 创建odin节点
-        Result createTreeNodeResult = odinRemoteService.createTreeNode(namespace,
-            ESCloudClusterCreateParamConstant.ODIN_CATEGORY_SERVICE, namespace, ODIN_CATEGORY_LEVEL_2);
+        Result<Void> createTreeNodeResult = odinRemoteService.createTreeNode(namespace,
+            CloudClusterCreateParamConstant.ODIN_CATEGORY_SERVICE, namespace, ODIN_CATEGORY_LEVEL_2);
         if (createTreeNodeResult.failed()) {
-            //   return createTreeNodeResult;
+               return Result.buildFrom(createTreeNodeResult);
         }
 
         // 构造容器云请求参数
         Result<ElasticCloudCreateParamDTO> buildParamResult = buildElasticCloudCreateParamDTO(
             elasticCloudCreateActionParam);
         if (buildParamResult.failed()) {
-            // return Result.buildFail(buildParamResult.getMessage());
+             return Result.buildFrom(buildParamResult);
         }
 
         // 创建容器云集群
         Result<ElasticCloudAppStatus> createClusterResult = elasticCloudRemoteService
             .createAndStartAll(buildParamResult.getData(), namespace, elasticCloudCreateActionParam.getIdc());
         if (createClusterResult.failed()) {
-            return Result.buildFail(createClusterResult.getMessage());
+            return Result.buildFrom(createClusterResult);
         }
 
         return Result.buildSucc(new EcmOperateAppBase(createClusterResult.getData().getTaskId()));
     }
 
     @Override
-    public Result scaleESCluster(EcmParamBase actionParamBase) {
+    public Result<EcmOperateAppBase> scaleESCluster(EcmParamBase actionParamBase) {
         return elasticCloudRemoteService.scaleAndExecuteAll((ElasticCloudScaleActionParam) actionParamBase);
     }
 
     @Override
-    public Result upgradeESCluster(EcmParamBase actionParamBase) {
+    public Result<EcmOperateAppBase> upgradeESCluster(EcmParamBase actionParamBase) {
         return elasticCloudRemoteService.upgradeOrRestartByGroup((ElasticCloudCommonActionParam) actionParamBase);
     }
 
     @Override
-    public Result restartESCluster(EcmParamBase actionParamBase) {
+    public Result<EcmOperateAppBase> restartESCluster(EcmParamBase actionParamBase) {
         return elasticCloudRemoteService.upgradeOrRestartByGroup((ElasticCloudCommonActionParam) actionParamBase);
     }
 
     @Override
-    public Result removeESCluster(EcmParamBase actionParamBase) {
+    public Result<EcmOperateAppBase> removeESCluster(EcmParamBase actionParamBase) {
         ElasticCloudCommonActionParam commonActionParam = (ElasticCloudCommonActionParam) actionParamBase;
         try {
             //等待1秒删除机器
             Thread.sleep(1000L);
+        } catch (InterruptedException e) {
+            LOGGER.error("class=ElasticClusterServiceImpl||method=removeElasticCluster||role={}||errMsg={}",
+                    commonActionParam.getRoleName(), e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             LOGGER.error("class=ElasticClusterServiceImpl||method=removeElasticCluster||role={}||errMsg={}",
                 commonActionParam.getRoleName(), e);
@@ -207,7 +212,7 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
     }
 
     @Override
-    public Result infoESCluster(EcmParamBase actionParamBase) {
+    public Result<String> infoESCluster(EcmParamBase actionParamBase) {
         return elasticCloudRemoteService.getClusterInfo((ElasticCloudCommonActionParam) actionParamBase);
     }
 
@@ -245,22 +250,21 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
             }
         }
 
-        if (isUpdateAction(cloudStatus)) {
-            if (CollectionUtils.isNotEmpty(cloudStatus.getPods())
+        if (isUpdateAction(cloudStatus)
+            && CollectionUtils.isNotEmpty(cloudStatus.getPods())
                 && CollectionUtils.isNotEmpty(cloudStatus.getHostStatus())) {
-                //重启、升级转化ECMTask状态, 获取hostStatus(ready、updating、updated)
-                List<ElasticCloudPod> pods = cloudStatus.getPods();
-                cloudStatus.getHostStatus().stream().filter(Objects::nonNull).forEach(hostStatus -> {
-                    String podIp = pods.stream()
-                        .filter(r -> !AriusObjUtils.isNull(r) && r.getPodHostname().equals(hostStatus.getHost()))
-                        .map(ElasticCloudPod::getPodIp).collect(Collectors.toList()).get(0);
+            //重启、升级转化ECMTask状态, 获取hostStatus(ready、updating、updated)
+            List<ElasticCloudPod> pods = cloudStatus.getPods();
+            cloudStatus.getHostStatus().stream().filter(Objects::nonNull).forEach(hostStatus -> {
+                String podIp = pods.stream()
+                    .filter(r -> !AriusObjUtils.isNull(r) && r.getPodHostname().equals(hostStatus.getHost()))
+                    .map(ElasticCloudPod::getPodIp).collect(Collectors.toList()).get(0);
 
-                    EcmTaskStatus ecmTaskStatus = hostStatus.convert2EcmTaskStatus(cloudStatus.getTaskId(),
-                        cloudStatus.getState());
-                    ecmTaskStatus.setPodIp(podIp);
-                    ecmTaskStatuses.add(ecmTaskStatus);
-                });
-            }
+                EcmTaskStatus ecmTaskStatus = hostStatus.convert2EcmTaskStatus(cloudStatus.getTaskId(),
+                    cloudStatus.getState());
+                ecmTaskStatus.setPodIp(podIp);
+                ecmTaskStatuses.add(ecmTaskStatus);
+            });
         }
 
         return Result.buildSucc(mergeEcmTaskStatus(actionParamBase, ecmTaskStatuses, cloudStatus));
@@ -284,12 +288,12 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
             Set<String> remoteHostsName = remoteStatuses.stream().filter(Objects::nonNull)
                 .map(EcmTaskStatus::getHostname).collect(Collectors.toSet());
 
-            List<ESRoleClusterHost> clusterHostsFromDb = esRoleClusterHostService
+            List<RoleClusterHost> clusterHostsFromDb = roleClusterHostService
                 .getByRoleAndClusterId(paramBase.getPhyClusterId(), paramBase.getRoleName());
 
             List<String> clusterHostNamesFromDb = clusterHostsFromDb.stream()
                 .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isBlack(r.getIp()))
-                .map(ESRoleClusterHost::getHostname).collect(Collectors.toList());
+                .map(RoleClusterHost::getHostname).collect(Collectors.toList());
 
             if (clusterHostNamesFromDb.size() > remoteStatuses.size()) {
                 //缩容, 获取减少机器的状态
@@ -340,22 +344,13 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
                 }
 
                 //print repeat times
-                LOGGER.info("clpass=EcmDockerHandler||method=fetchRemoteStatus||clusterId={}||"
+                LOGGER.info("class=EcmDockerHandler||method=fetchRemoteStatus||clusterId={}||"
                             + "roleClusterName={}||retryTimes={}",
                     paramBase.getPhyClusterId(), paramBase.getPhyClusterName(), retryTimes);
 
                 //Status check
-                if (result.failed()) {
-                    continue;
-                }
-                ElasticCloudStatus elasticCloudStatus = result.getData();
-                if (AriusObjUtils.isNull(elasticCloudStatus)) {
-                    continue;
-                }
-                ElasticCloudAppStatus cloudStatus = elasticCloudStatus.getStatus();
-                if (AriusObjUtils.isNull(cloudStatus)) {
-                    continue;
-                }
+                ElasticCloudAppStatus cloudStatus = getElasticCloudAppStatus(result);
+                if (cloudStatus == null) continue;
 
                 //shrink operation needs to wait for completion
                 if (hasWaitStatusDone(cloudStatus, orderType)) {
@@ -366,6 +361,10 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
                 finallyCloudStatus = cloudStatus;
                 break;
 
+            } catch(InterruptedException e) {
+                LOGGER.error("class=EcmDockerHandler||method=postHandle||clusterId={}||roleClusterName={}||error={}",
+                        paramBase.getPhyClusterId(), paramBase.getPhyClusterName(), e);
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 LOGGER.error("class=EcmDockerHandler||method=postHandle||clusterId={}||roleClusterName={}||error={}",
                     paramBase.getPhyClusterId(), paramBase.getPhyClusterName(), e);
@@ -381,10 +380,25 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         return finallyCloudStatus;
     }
 
+    private ElasticCloudAppStatus getElasticCloudAppStatus(Result<ElasticCloudStatus> result) {
+        if (result.failed()) {
+            return null;
+        }
+        ElasticCloudStatus elasticCloudStatus = result.getData();
+        if (AriusObjUtils.isNull(elasticCloudStatus)) {
+            return null;
+        }
+        ElasticCloudAppStatus cloudStatus = elasticCloudStatus.getStatus();
+        if (AriusObjUtils.isNull(cloudStatus)) {
+            return null;
+        }
+        return cloudStatus;
+    }
+
     private boolean hasWaitStatusDone(ElasticCloudAppStatus cloudStatus, Integer orderType) {
         return EcmTaskTypeEnum.SHRINK.getCode() == orderType
-               && (ESClusterConstant.CLOUD_DONE_STATUS.equals(cloudStatus.getState())
-                   || ESClusterConstant.CLOUD_FAILED_STATUS.equals(cloudStatus.getState()));
+               && (ClusterConstant.CLOUD_DONE_STATUS.equals(cloudStatus.getState())
+                   || ClusterConstant.CLOUD_FAILED_STATUS.equals(cloudStatus.getState()));
     }
 
     private Result<ElasticCloudCreateParamDTO> buildElasticCloudCreateParamDTO(ElasticCloudCreateActionParam elasticCloudCreateActionParam) {
@@ -400,7 +414,7 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         Result<ElasticCloudSpecInfoDTO> spaceInfoResult = buildElasticCloudCreateParamSpecInfoDTO(
             elasticCloudCreateActionParam);
         if (spaceInfoResult.failed()) {
-            return Result.buildFail(spaceInfoResult.getMessage());
+            return Result.buildFrom(spaceInfoResult);
         }
         elasticCloudCreateParamDTO.setSpecInfo(spaceInfoResult.getData());
         elasticCloudCreateParamDTO.setPodCount(elasticCloudCreateActionParam.getNodeNumber());
@@ -415,7 +429,7 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         //检查client、data节点是否有master节点
         String masterList = "";
         if (!elasticCloudCreateActionParam.getRoleName().equals(MASTER_NODE.getDesc())) {
-            List<String> masterHostNames = esRoleClusterHostService
+            List<String> masterHostNames = roleClusterHostService
                 .getHostNamesByRoleAndClusterId(elasticCloudCreateActionParam.getPhyClusterId(), MASTER_NODE.getDesc());
             if (CollectionUtils.isEmpty(masterHostNames)) {
                 return Result.buildNotExist("master-node is no exist, failed to create the cluster");
@@ -425,7 +439,7 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
 
         String[] splitMachineSpec = elasticCloudCreateActionParam.getMachineSpec().split("-");
         //创建集群的磁盘大小，无单位
-        int diskSize = Integer.parseInt(splitMachineSpec[2].replace(ESCloudClusterCreateParamConstant.DISK_SUFFIX, ""));
+        int diskSize = Integer.parseInt(splitMachineSpec[2].replace(CloudClusterCreateParamConstant.DISK_SUFFIX, ""));
 
         ElasticCloudSpecInfoDTO elasticCloudCreateParamSpecInfoDTO = new ElasticCloudSpecInfoDTO();
         elasticCloudCreateParamSpecInfoDTO.setDeployTimeout(CLOUD_CLUSTER_DEPLOY_TIMEOUT_START);
@@ -438,7 +452,7 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         elasticCloudCreateParamSpecInfoDTO.setDeployConcurrency(1);
 
         elasticCloudCreateParamSpecInfoDTO.setVolumes(Arrays.asList(new ElasticCloudVolumeDTO(diskSize,
-            ESCloudClusterCreateParamConstant.VOLUME_TYPE_HOSTPATH, CLOUD_CLUSTER_VOLUME_PATH)));
+            CloudClusterCreateParamConstant.VOLUME_TYPE_HOSTPATH, CLOUD_CLUSTER_VOLUME_PATH)));
 
         elasticCloudCreateParamSpecInfoDTO.setEnvs(Arrays.asList(
             //pod 与k8s 之间的心跳时间
@@ -454,15 +468,15 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         return Result.buildSucc(elasticCloudCreateParamSpecInfoDTO);
     }
 
-    private Result buildFatherOdinNode(ElasticCloudCreateActionParam elasticCloudCreateActionParam) {
+    private Result<Void> buildFatherOdinNode(ElasticCloudCreateActionParam elasticCloudCreateActionParam) {
         if (elasticCloudCreateActionParam.getRoleName().equals(MASTER_NODE.getDesc())) {
             String namespace = elasticCloudCreateActionParam.getPhyClusterName() + "."
                                + elasticCloudCreateActionParam.getNsTree();
             // 创建odin父节点
-            Result createTreeNodeResult = odinRemoteService.createTreeNode(namespace,
-                ESCloudClusterCreateParamConstant.ODIN_CATEGORY_GROUP, namespace, ODIN_CATEGORY_LEVEL_1);
+            Result<Void> createTreeNodeResult = odinRemoteService.createTreeNode(namespace,
+                CloudClusterCreateParamConstant.ODIN_CATEGORY_GROUP, namespace, ODIN_CATEGORY_LEVEL_1);
             if (createTreeNodeResult.failed()) {
-                return Result.buildFail(createTreeNodeResult.getMessage());
+                return Result.buildFrom(createTreeNodeResult);
             }
         }
         return Result.buildSucc();
@@ -477,12 +491,12 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
         esClusterDTO.setPackageId(esPackage.getId());
 
         esClusterDTO.setPlugIds(buildEsClusterPlugins(esClusterDTO));
-        esClusterDTO.setHttpAddress(ESClusterConstant.DEFAULT_HTTP_ADDRESS);
-        esClusterDTO.setTemplateSrvs(ESClusterConstant.DEFAULT_CLUSTER_TEMPLATE_SRVS);
+        esClusterDTO.setHttpAddress(ClusterConstant.DEFAULT_HTTP_ADDRESS);
+        esClusterDTO.setTemplateSrvs(ClusterConstant.DEFAULT_CLUSTER_TEMPLATE_SRVS);
 
-        Result clusterResult = esClusterPhyService.createCluster(esClusterDTO, param.getCreator());
+        Result<Boolean> clusterResult = esClusterPhyService.createCluster(esClusterDTO, param.getCreator());
         if (clusterResult.failed()) {
-            return Result.buildFail(clusterResult.getMessage());
+            return Result.buildFrom(clusterResult);
         }
         param.setPhyClusterId(esClusterDTO.getId().longValue());
         param.setImageName(esPackage.getUrl());
@@ -491,7 +505,7 @@ public class EcmDockerHandler extends AbstractEcmBaseHandle {
     }
 
     private String buildEsClusterPlugins(ESClusterDTO esClusterDTO) {
-        String defaultPlugins = StringUtils.defaultString(esPluginService.getAllSysDefaultPlugins(), "");
+        String defaultPlugins = StringUtils.defaultString(esPluginService.getAllSysDefaultPluginIds(), "");
 
         if (StringUtils.isNotEmpty(esClusterDTO.getPlugIds())) {
             defaultPlugins = defaultPlugins + "," + esClusterDTO.getPlugIds();

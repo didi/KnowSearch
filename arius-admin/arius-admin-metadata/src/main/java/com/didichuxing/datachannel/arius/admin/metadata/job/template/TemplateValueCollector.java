@@ -1,9 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.template;
 
+import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.TemplateAccessCountPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateValuePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateValueRecordPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
@@ -43,6 +45,8 @@ public class TemplateValueCollector extends AbstractMetaDataJob {
     @Autowired
     private TemplateValueRecordESDAO templateValueRecordESDAO;
 
+    private static final String DESC = "模板价值统计任务";
+
     @Override
     public Object handleJobTask(String params) {
         LOGGER.info("class=StatisticsTemplateValueJobHandler||method=handleJobTask||msg={} task start", getTaskDesc());
@@ -79,9 +83,9 @@ public class TemplateValueCollector extends AbstractMetaDataJob {
             }).collect( Collectors.toList());
             templateValueRecordESDAO.batchInsert(recordPOS);
 
-            LOGGER.info("method=handleJobTask||msg=save template value succ||size={}", templateValuePOS.size());
+            LOGGER.info("class=TemplateValueCollector||method=handleJobTask||msg=save template value succ||size={}", templateValuePOS.size());
         } else {
-            LOGGER.warn("method=handleJobTask||msg=save template value fail||size={}", templateValuePOS.size());
+            LOGGER.warn("class=TemplateValueCollector||method=handleJobTask||msg=save template value fail||size={}", templateValuePOS.size());
         }
 
         return JOB_SUCCESS;
@@ -89,6 +93,7 @@ public class TemplateValueCollector extends AbstractMetaDataJob {
 
     /**
      * 统计模板的价值分  索引价值(满分100) = 基数 + 索引访问量得分 + 索引存储得分
+     * <p>
      *
      * @param template 模板信息
      * @return po
@@ -174,7 +179,7 @@ public class TemplateValueCollector extends AbstractMetaDataJob {
         List<TemplateAccessCountPO> list = templateAccessESDAO.getTemplateAccessLastNDayByLogicTemplateId(template.getId(), 7);
 
         if (CollectionUtils.isEmpty(list)) {
-            throw new RuntimeException("get template access count fail, " + template.getName());
+            throw new AriusRunTimeException("get template access count fail, " + template.getName(), ResultType.FAIL);
         }
 
         long sum = 0L;
@@ -197,6 +202,6 @@ public class TemplateValueCollector extends AbstractMetaDataJob {
     }
 
     private String getTaskDesc() {
-        return "模板价值统计任务";
+        return DESC;
     }
 }

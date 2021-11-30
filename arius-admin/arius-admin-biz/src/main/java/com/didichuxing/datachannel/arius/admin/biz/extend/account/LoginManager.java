@@ -14,12 +14,12 @@ public interface LoginManager {
 	/**
 	 * 登录校验
 	 */
-	Result loginAuthenticateAndGetUserInfo(HttpServletRequest request, HttpServletResponse response, LoginDTO loginDTO);
+	Result<Boolean> loginAuthenticateAndGetUserInfo(HttpServletRequest request, HttpServletResponse response, LoginDTO loginDTO);
 
 	/**
 	 * 登出
 	 */
-	Result logout(HttpServletRequest request, HttpServletResponse response);
+	Result<Boolean> logout(HttpServletRequest request, HttpServletResponse response);
 
 	/**
 	 * 注册

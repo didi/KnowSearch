@@ -1,8 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity;
 
 import com.google.common.collect.Maps;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Map;

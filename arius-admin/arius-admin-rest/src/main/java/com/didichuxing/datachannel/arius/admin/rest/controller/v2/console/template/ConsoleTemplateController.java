@@ -59,9 +59,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 import io.swagger.annotations.Api;
@@ -75,10 +76,12 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-索引接口(REST)")
+@Api(tags = "Console-用户侧索引模板接口(REST)")
 public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
+
+    private static final String INDEX_NOT_EXISTS_TIPS = "索引不存在";
 
     @Autowired
     private AppService               appService;
@@ -114,7 +117,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             .fetchConsoleTemplates(templateLogicManager.getAllTemplatesAggregate(AdminConstant.DEFAULT_APP_ID));
 
         if (CollectionUtils.isNotEmpty(consoleTemplates)) {
-            Map<Integer, App> apps = ConvertUtil.list2Map(appService.getApps(), App::getId);
+            Map<Integer, App> apps = ConvertUtil.list2Map(appService.listApps(), App::getId);
             for (ConsoleTemplateVO consoleTemplate : consoleTemplates) {
                 templateSamples.add(getConsoleSample(consoleTemplate, apps));
             }
@@ -130,7 +133,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "appId", required = false) Integer appId,
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
 
-        return Result.buildSucc(templateLogicManager.getConsoleTemplates(appId));
+        return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(appId));
     }
 
     @GetMapping("/get")
@@ -143,7 +146,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             .getLogicTemplateWithCluster(logicId);
 
         if (null == indexTemplateLogicWithCluster) {
-            return Result.buildFrom(Result.buildFail("模板对应资源不存在!"));
+            return Result.buildFail("模板对应资源不存在!");
         }
 
         ConsoleTemplateDetailVO consoleTemplateDetail = ConvertUtil.obj2Obj(indexTemplateLogicWithCluster,
@@ -160,14 +163,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
         consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getAppId()));
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
-        consoleTemplateDetail.setValue(fetchLogicTemplateValue(logicId));
 
-        Result checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
-        if (checkAuthResult.success()) {
-            consoleTemplateDetail.setEditable(true);
-        } else {
-            consoleTemplateDetail.setEditable(false);
-        }
+        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
+        consoleTemplateDetail.setEditable(checkAuthResult.success());
 
         return Result.buildSucc(consoleTemplateDetail);
     }
@@ -175,9 +173,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "用户编辑模板接口", notes = "支持修改数据类型、责任人、备注")
-    public Result modifyConsoleTemplate(HttpServletRequest request,
+    public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
-        return templateLogicService.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateLogicDTO.class),
+        return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateLogicDTO.class),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -188,7 +186,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
         IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
         if (templateLogic == null) {
-            return Result.buildFrom(Result.buildParamIllegal("索引不存在"));
+            return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
         }
 
         ConsoleTemplateCapacityVO templateCapacityVO = ConvertUtil.obj2Obj(templateLogic,
@@ -208,7 +206,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
-            return Result.buildParamIllegal("索引不存在");
+            return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
         }
 
         if (!templateLogicWithPhysical.hasPhysicals()) {
@@ -230,9 +228,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "清理索引信息接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
-    public Result clearLogicTemplateIndices(HttpServletRequest request,
+    public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
                                             @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
-        Result checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtils.getAppId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -240,16 +238,16 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         return clusterLogicManager.clearIndices(clearDTO, HttpRequestUtils.getOperator(request));
     }
 
-    //TODO: lyn 与下面 /deleteInfo 合并
     @GetMapping("/deleteInfo")
     @ResponseBody
-    @ApiOperation(value = "获取索引下线信息接口", notes = "")
+    @ApiOperation(value = "获取将要索引下线信息接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) {
+        //与上清理索引信息接口实现合并
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
             .getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
-            return Result.buildParamIllegal("索引不存在");
+            return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
         }
 
         ConsoleTemplateDeleteVO consoleTemplateDeleteVO = new ConsoleTemplateDeleteVO();
@@ -271,13 +269,13 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "下线索引信息接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result deleteTemplate(HttpServletRequest request,
+    public Result<Void> deleteTemplate(HttpServletRequest request,
                                  @RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        Result checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-        return templateLogicService.delTemplate(logicId, HttpRequestUtils.getOperator(request));
+        return templateLogicManager.delTemplate(logicId, HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/indices/list")
@@ -289,7 +287,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
         App app = appService.getAppById(appId);
         if (null == app) {
-            return Result.buildFrom(Result.buildNotExist("应用不存在"));
+            return Result.buildNotExist("应用不存在");
         }
 
         return templateLogicService.getLogicTemplatesByAppId(appId);
@@ -310,7 +308,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "将对应模板转让给新的appid", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "tgtAppId", value = "目标应用", required = true) })
-    public Result turnOverLogicTemplate(HttpServletRequest request, @RequestParam("logicId") Integer logicId,
+    public Result<Void> turnOverLogicTemplate(HttpServletRequest request, @RequestParam("logicId") Integer logicId,
                                         @RequestParam("tgtAppId") Integer tgtAppId) {
         IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
         if (null == templateLogic) {
@@ -334,7 +332,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
             .getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
-            return Result.buildFrom(Result.buildParamIllegal("索引不存在"));
+            return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
         }
 
         List<CatIndexResult> catIndexResults = Lists.newArrayList();
@@ -345,7 +343,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                 catIndexResults.addAll(esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
                     physicalMaster.getExpression()));
             } catch (Exception e) {
-                LOGGER.warn("method=TemplateCyclicalRollInfoVO||logicId={}||errMsg={}", logicId, e.getMessage(), e);
+                LOGGER.warn("class=ConsoleTemplateController||method=TemplateCyclicalRollInfoVO||logicId={}||errMsg={}", logicId, e.getMessage(), e);
             }
         }
 

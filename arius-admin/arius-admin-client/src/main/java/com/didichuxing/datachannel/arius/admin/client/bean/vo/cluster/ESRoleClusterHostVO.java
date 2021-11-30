@@ -5,13 +5,17 @@ import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESCluste
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * es集群节点信息,信息是同步自es集群
  * @author d06679
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "节点信息")
 public class ESRoleClusterHostVO extends BaseVO {
 
@@ -27,8 +31,11 @@ public class ESRoleClusterHostVO extends BaseVO {
     @ApiModelProperty("主机ip")
     private String  ip;
 
-    @ApiModelProperty("集成名称")
+    @ApiModelProperty("物理集群名称")
     private String  cluster;
+
+    @ApiModelProperty("逻辑集群名称")
+    private String clusterLogicNames;
 
     @ApiModelProperty("端口")
     private String  port;

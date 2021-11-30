@@ -3,10 +3,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.list2List;
 import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
-import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
-import com.didichuxing.datachannel.arius.admin.remote.protocol.LoginProtocolHandle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,34 +17,34 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.LogicClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.arius.AriusUserInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.remote.protocol.LoginProtocolHandle;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-/**
- * @author d06679
- * @date 2019/3/18
- */
 @Service
 public class AriusUserInfoServiceImpl implements AriusUserInfoService {
 
@@ -81,8 +77,7 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
      */
     @PostConstruct
     public void refreshCache() {
-        LOGGER
-            .info("class=AriusUserInfoServiceImpl||method=refreshCache||AriusUserInfoServiceImpl refreshCache start.");
+        LOGGER.info("class=AriusUserInfoServiceImpl||method=refreshCache||AriusUserInfoServiceImpl refreshCache start.");
         idNameCache.clear();
 
         try {
@@ -113,21 +108,24 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
      * @return userId
      */
     @Override
-    public Long save(AriusUserInfoDTO userInfoDTO) {
-        checkParam(userInfoDTO);
+    public Result<Long> save(AriusUserInfoDTO userInfoDTO) {
+        Result<Void> checkParamResult = checkParam(userInfoDTO);
+        if(checkParamResult.failed()) {
+            return Result.buildFrom(checkParamResult);
+        }
 
         // 已经保存过直接返回id
         AriusUserInfo oldUserInfo = getByDomainAccount(userInfoDTO.getDomainAccount());
         if (oldUserInfo != null) {
             LOGGER.info("class=AriusUserInfoServiceImpl||method=save||domainAccout={}||msg=domain account has exist!",
                 userInfoDTO.getDomainAccount());
-            return oldUserInfo.getId();
+            return Result.buildSucc(oldUserInfo.getId());
         }
 
         AriusUserInfoPO ariusUserInfoPO = obj2Obj(userInfoDTO, AriusUserInfoPO.class);
         ariusUserInfoDAO.insert(ariusUserInfoPO);
 
-        return ariusUserInfoPO.getId();
+        return Result.buildSucc(ariusUserInfoPO.getId());
     }
 
     /**
@@ -151,7 +149,11 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
             infoDTO.setMobile("");
             infoDTO.setStatus(AriusUserStatusEnum.NORMAL.getCode());
             infoDTO.setRole(AriusUserRoleEnum.NORMAL.getRole());
-            userIds.add(save(infoDTO));
+
+            Result<Long> ret = save(infoDTO);
+            if (ret.success()) {
+                userIds.add(ret.getData());
+            }
         }
 
         return userIds;
@@ -228,7 +230,7 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
                 }
                 List<AriusUserInfo> dupUserInfos = Lists.newArrayList(infos);
 
-                LOGGER.info("method=processUserDuplicate||name={}||size={}", name, dupUserInfos.size());
+                LOGGER.info("class=AriusUserInfoServiceImpl||method=processUserDuplicate||name={}||size={}", name, dupUserInfos.size());
 
                 AriusUserInfo finalUserInfo = dupUserInfos.get(0);
                 List<AriusUserInfo> shouldDelUserInfos = dupUserInfos.subList(1, dupUserInfos.size());
@@ -238,11 +240,11 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
                     processTemplate(userInfo.getId(), finalUserInfo.getId());
 
                     delete(userInfo.getId());
-                    LOGGER.info("method=processUserDuplicate||name={}||id={}||msg=deleted", name, userInfo.getId());
+                    LOGGER.info("class=AriusUserInfoServiceImpl||method=processUserDuplicate||name={}||id={}||msg=deleted", name, userInfo.getId());
                 }
             } catch (Exception e) {
                 succ = false;
-                LOGGER.info("method=processUserDuplicate||name={}||errMsg={}", name, e.getMessage(), e);
+                LOGGER.info("class=AriusUserInfoServiceImpl||method=processUserDuplicate||name={}||errMsg={}", name, e.getMessage(), e);
             }
         }
 
@@ -259,7 +261,7 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
     }
 
     @Override
-    public Boolean isExist(String userName) {
+    public boolean isExist(String userName) {
         return ariusUserInfoDAO.getByName(userName) != null;
     }
 
@@ -289,6 +291,11 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
     @Override
     public List<AriusUserInfo> listByRoles(List<Integer> roles) {
         return list2List(ariusUserInfoDAO.listByRoles(roles), AriusUserInfo.class);
+    }
+
+    @Override
+    public List<AriusUserInfo> listByIds(List<Long> ids) {
+        return list2List(ariusUserInfoDAO.listByIds(ids), AriusUserInfo.class);
     }
 
     @Override
@@ -351,14 +358,14 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
     }
 
     @Override
-    public Result syncUserInfoToDbFromLoginProtocol(LoginDTO loginDTO, String protocolType) {
+    public Result<Void> syncUserInfoToDbFromLoginProtocol(LoginDTO loginDTO, String protocolType) {
 
         LoginProtocolHandle loginProtocolHandle = (LoginProtocolHandle) handleFactory.getByHandlerNamePer(protocolType);
 
         AriusUserInfo userInfo = loginProtocolHandle.getUserInfoFromLoginProtocol(obj2Obj(loginDTO, Login.class));
 
-        boolean succ = 0 != save(ConvertUtil.obj2Obj(userInfo, AriusUserInfoDTO.class));
-        if (!succ) {
+        Result<Long> ret = save(obj2Obj(userInfo, AriusUserInfoDTO.class));
+        if (ret.failed()) {
             LOGGER.warn(
                 "class=AriusUserInfoServiceImpl||method=syncUserInfoToDbFromLoginProtocol||loginUserName={}||msg=fail to sync user info",
                 loginDTO.getDomainAccount());
@@ -389,7 +396,7 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
                 param.setResponsible(String.join(",", respList));
                 templateLogicDAO.update(param);
 
-                LOGGER.info("method=processTemplate||template={}||srcResp={}||tgtResp={}", po.getName(),
+                LOGGER.info("class=AriusUserInfoServiceImpl||method=processTemplate||template={}||srcResp={}||tgtResp={}", po.getName(),
                     po.getResponsible(), param.getResponsible());
             });
         }
@@ -399,7 +406,7 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
         String srcRespIdStr = String.valueOf(srcRespId);
         String tgtRespIdStr = String.valueOf(tgtRespId);
 
-        List<LogicClusterPO> resourcePOs = logicClusterDAO.listByResponsible(srcRespIdStr);
+        List<ClusterLogicPO> resourcePOs = logicClusterDAO.listByResponsible(srcRespIdStr);
 
         if (CollectionUtils.isNotEmpty(resourcePOs)) {
             resourcePOs.forEach(po -> {
@@ -410,12 +417,12 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
                     }
                 }
 
-                LogicClusterPO param = new LogicClusterPO();
+                ClusterLogicPO param = new ClusterLogicPO();
                 param.setId(po.getId());
                 param.setResponsible(String.join(",", respList));
                 logicClusterDAO.update(param);
 
-                LOGGER.info("method=processResource||cluster={}||srcResp={}||tgtResp={}", po.getName(),
+                LOGGER.info("class=AriusUserInfoServiceImpl||method=processResource||cluster={}||srcResp={}||tgtResp={}", po.getName(),
                     po.getResponsible(), param.getResponsible());
             });
         }
@@ -442,13 +449,13 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
                 param.setResponsible(String.join(",", respList));
                 appDAO.update(param);
 
-                LOGGER.info("method=processApp||app={}||srcResp={}||tgtResp={}", po.getName(), po.getResponsible(),
+                LOGGER.info("class=AriusUserInfoServiceImpl||method=processApp||app={}||srcResp={}||tgtResp={}", po.getName(), po.getResponsible(),
                     param.getResponsible());
             });
         }
     }
 
-    private Result checkParam(AriusUserInfoDTO userInfoDTO) {
+    private Result<Void> checkParam(AriusUserInfoDTO userInfoDTO) {
         if (AriusObjUtils.isNull(userInfoDTO)) {
             return Result.buildParamIllegal("用户信息为空");
         }
@@ -461,15 +468,10 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
         if (AriusObjUtils.isNull(userInfoDTO.getDomainAccount())) {
             return Result.buildParamIllegal("域账号为空");
         }
-        if (AriusObjUtils.isNull(userInfoDTO.getEmail())) {
-            return Result.buildParamIllegal("邮箱为空");
-        }
-        if (AriusObjUtils.isNull(userInfoDTO.getMobile())) {
-            return Result.buildParamIllegal("手机号为空");
-        }
         if (AriusObjUtils.isNull(userInfoDTO.getStatus())) {
             return Result.buildParamIllegal("状态为空");
         }
+
         return Result.buildSucc();
     }
 
@@ -499,22 +501,26 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
         if (StringUtils.isNotBlank(formattedData)) {
             if (formattedData.contains("[")) {
                 try {
-                    toAddressList = JSONArray.parseArray(formattedData, String.class);
+                    toAddressList = JSON.parseArray(formattedData, String.class);
                 } catch (Exception e) {
-                    LOGGER.info("method=parseArrays||errMsg=invalidUserAccount||formattedData={}", formattedData);
+                    LOGGER.info("class=AriusUserInfoServiceImpl||method=parseArrays||errMsg=invalidUserAccount||formattedData={}", formattedData);
                 }
             } else {
-                for (String address : formattedData.split(",")) {
-                    if (StringUtils.isNotBlank(address)) {
-                        if (address.contains("\"")) {
-                            address = address.replace("\"", "");
-                        }
-                        toAddressList.add(address);
-                    }
-                }
+                handleFormattedData(formattedData, toAddressList);
             }
 
         }
         return toAddressList;
+    }
+
+    private void handleFormattedData(String formattedData, List<String> toAddressList) {
+        for (String address : formattedData.split(",")) {
+            if (StringUtils.isNotBlank(address)) {
+                if (address.contains("\"")) {
+                    address = address.replace("\"", "");
+                }
+                toAddressList.add(address);
+            }
+        }
     }
 }

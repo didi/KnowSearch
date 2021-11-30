@@ -25,6 +25,15 @@ public class CopyIndexMapping2TemplateTask extends BaseConcurrentClusterTask {
     }
 
     /**
+     * 任务的线程个数
+     * @return 任务的线程个数
+     */
+    @Override
+    public int poolSize() {
+        return 20;
+    }
+
+    /**
      * 并发度
      *
      * @return

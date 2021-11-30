@@ -4,7 +4,9 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.List;
  * @date 2019/4/3
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @ApiModel(description = "模板dcdr链路信息")
 public class TemplatePhysicalDCDRDTO extends BaseDTO {

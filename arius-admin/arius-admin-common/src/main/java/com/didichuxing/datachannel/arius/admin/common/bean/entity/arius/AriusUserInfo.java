@@ -1,17 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.arius;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserStatusEnum;
-
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/18
  */
 @Data
-public class AriusUserInfo extends BaseEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+public class AriusUserInfo extends BaseEmInfo {
     /**
      * 主键
      */

@@ -9,4 +9,5 @@ public class NotifyConstant {
 
     public static final String IGNORE_ANTI_FATIGUE_BIZ_ID = "IGNORE_ANTI_FATIGUE";
 
+    private NotifyConstant() {}
 }

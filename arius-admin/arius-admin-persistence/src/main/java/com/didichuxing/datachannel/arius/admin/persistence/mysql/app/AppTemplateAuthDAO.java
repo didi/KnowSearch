@@ -22,7 +22,11 @@ public interface AppTemplateAuthDAO {
 
     int delete(Long authId);
 
+    int deleteByTemplate(Integer templateId);
+
     List<AppTemplateAuthPO> listWithRwAuthsByAppId(int appId);
+
+    AppTemplateAuthPO getByTemplateId(Integer templateId);
 
     AppTemplateAuthPO getById(Long authId);
 
@@ -38,5 +42,6 @@ public interface AppTemplateAuthDAO {
     List<AppTemplateAuthPO> listWithRwAuths();
 
     List<AppTemplateAuthPO> listWithOwnerAuths();
+
 
 }

@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.remote.employee.content;
 
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+
 /**
  * @author linyunan
  * @date 2021-05-14
@@ -10,7 +12,7 @@ public enum EmployeeTypeEnum {
                                */
                               DEFAULT(1, "defaultEmployee"),
 
-                              DIDI(2, "didiEmployee"),
+                              DIDI(2, "didi"),
 
                               UNKNOWN(-1, "unknown");
 
@@ -31,12 +33,12 @@ public enum EmployeeTypeEnum {
         return code;
     }
 
-    public static EmployeeTypeEnum valueOfCode(Integer code) {
-        if (code == null) {
+    public static EmployeeTypeEnum valueOfType(String type) {
+        if (AriusObjUtils.isNull(type)) {
             return EmployeeTypeEnum.UNKNOWN;
         }
         for (EmployeeTypeEnum codeEnum : EmployeeTypeEnum.values()) {
-            if (code.equals(codeEnum.getCode())) {
+            if (type.equals(codeEnum.getType())) {
                 return codeEnum;
             }
         }

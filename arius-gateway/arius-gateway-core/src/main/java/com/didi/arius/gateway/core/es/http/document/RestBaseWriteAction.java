@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public abstract class RestBaseWriteAction extends HttpRestHandler {
-    protected static final Logger logger = LoggerFactory.getLogger(HttpRestHandler.class);
+    protected static final Logger logger = LoggerFactory.getLogger(RestBaseWriteAction.class);
 
     protected static final int OPER_INDEX                   = 100001;
     protected static final int OPER_UPDATE                  = 100002;
@@ -44,9 +44,11 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
     protected static final int OPER_DELETE                  = 100005;
     protected static final int OPER_BULK                    = 100000;
     protected static final String WRITE_TIME_FIELD          = "es_index_time";
-    protected static final List<String> timePatterns = Arrays.asList("yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss.SSS Z", "yyyy-MM-dd'T'HH:mm:ssZ");
+    protected static final List<String> timePatterns = Arrays.asList("yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy-MM-dd HH:mm:ss.SSS Z", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy/MM/dd HH:mm:ss", "epoch_second", "epoch_millis", "yyyy-MM-dd");
 
-    private final long MILLIS_ZONE_OFFSET = LocalDateTime.of(1970, 1, 1, 0, 0, 0,
+    protected static final long MILLIS_ZONE_OFFSET = LocalDateTime.of(1970, 1, 1, 0, 0, 0,
             0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     private LoadingCache<Long, Map<String, String>> dayFormatCache = CacheBuilder.newBuilder().concurrencyLevel(20).expireAfterWrite(5,
             TimeUnit.MINUTES).initialCapacity(60).maximumSize(100).recordStats().build(new CacheLoader<Long, Map<String, String>>() {
@@ -65,14 +67,19 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
         String[]  indicesArr = Strings.splitStringByCommaToArray(request.param("index"));
         List<String> indices = Lists.newArrayList(indicesArr);
         queryContext.setIndices(indices);
-        if (isNeededCheckIndices()) {
-            checkWriteIndices(queryContext);
-        }
 
-        handleInterRequest(queryContext, request, channel);
+        if (isOriginCluster(queryContext)) {
+            handleOriginClusterRequest(queryContext);
+        } else {
+            if (isNeededCheckIndices()) {
+                checkWriteIndicesAndTemplateBlockWrite(queryContext);
+            }
+
+            handleInterRequest(queryContext, request, channel);
+        }
     }
 
-    abstract protected void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel) throws Exception;
+    protected abstract void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel) throws Exception;
 
 
     public   String getIndexName(IndexTemplate indexTemplate, Map<String, Object> source) {
@@ -98,14 +105,7 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
                     messageTime = ((Long) timeObj) * 1000;
                 }
             } else {
-                for (String timePattern : timePatterns) {
-                    try {
-                        messageTime = DateTime.parse(timeValue, DateTimeFormat.forPattern(timePattern)).getMillis();
-                        break;
-                    } catch (Throwable e) {
-                        // pass
-                    }
-                }
+                messageTime = getMessageTime(messageTime, timeValue);
             }
 
             if (messageTime == 0) {
@@ -118,17 +118,28 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
         return getIndexNameWithDate(indexTemplate, messageTime);
     }
 
-    protected String getIndexNameWithDate(IndexTemplate indexTemplate, long time) {
-        if (indexTemplate.getExpireTime() > 0) {
-            // 配置了过期时间字段，则需要判断是否过期，或者过于超前
-            if (time < System.currentTimeMillis() - indexTemplate.getExpireTime() * QueryConsts.DAY_MILLIS
-                    || time > System.currentTimeMillis() + 2 * QueryConsts.DAY_MILLIS) {
-                throw new IndexDateFieldException(String.format("index time expire,index=%s, time=%d", indexTemplate.getExpression(), time));
+    private long getMessageTime(long messageTime, String timeValue) {
+        for (String timePattern : timePatterns) {
+            try {
+                messageTime = DateTime.parse(timeValue, DateTimeFormat.forPattern(timePattern)).getMillis();
+                break;
+            } catch (Exception e) {
+                // pass
             }
+        }
+        return messageTime;
+    }
+
+    protected String getIndexNameWithDate(IndexTemplate indexTemplate, long time) {
+        // 配置了过期时间字段，则需要判断是否过期，或者过于超前
+        if (indexTemplate.getExpireTime() > 0 &&
+                (time < System.currentTimeMillis() - indexTemplate.getExpireTime() * QueryConsts.DAY_MILLIS
+                    || time > System.currentTimeMillis() + 2 * QueryConsts.DAY_MILLIS)) {
+            throw new IndexDateFieldException(String.format("index time expire,index=%s, time=%d", indexTemplate.getExpression(), time));
         }
 
         // 需要校准时区之差对应的时间
-        long key = (time - this.MILLIS_ZONE_OFFSET) / QueryConsts.DAY_MILLIS;
+        long key = (time - MILLIS_ZONE_OFFSET) / QueryConsts.DAY_MILLIS;
         String indexExpression = indexTemplate.getExpression();
         String indexNameDateTime = null;
         String dateFormat = indexTemplate.getDateFormat().replace('Y', 'y');
@@ -170,7 +181,7 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
                     format2DayValueMap.put(dateFormat, indexNameDateTime);
                 }
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LogGather.recordErrorLog("LoadingCacheField_" + indexExpression, "Failed to get key ", e);
         }
 
@@ -208,7 +219,7 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
                 indexTemplate.setInternal(true);
 
                 TemplateClusterInfo templateClusterInfo = new TemplateClusterInfo();
-                templateClusterInfo.setCluster(esRestClientService.getAdminClient().getClusterName());
+                templateClusterInfo.setCluster(esRestClientService.getAdminClient(actionName).getClusterName());
                 indexTemplate.setMasterInfo(templateClusterInfo);
                 return indexTemplate;
             } else if (AppUtil.isAdminAppid(queryContext.getAppDetail())) {

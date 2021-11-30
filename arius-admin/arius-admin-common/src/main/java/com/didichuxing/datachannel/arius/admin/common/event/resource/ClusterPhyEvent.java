@@ -5,7 +5,29 @@ package com.didichuxing.datachannel.arius.admin.common.event.resource;
  */
 public class ClusterPhyEvent extends ClusterEvent {
 
-	public ClusterPhyEvent(Object source) {
-		super(source);
-	}
+    private String  clusterPhyName;
+
+    private Integer appId;
+
+    public ClusterPhyEvent(String clusterPhyName, Integer appId) {
+        super(clusterPhyName);
+        this.clusterPhyName = clusterPhyName;
+        this.appId = appId;
+    }
+
+    public String getClusterPhyName() {
+        return clusterPhyName;
+    }
+
+    public void setClusterPhyName(String clusterPhyName) {
+        this.clusterPhyName = clusterPhyName;
+    }
+
+    public Integer getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Integer appId) {
+        this.appId = appId;
+    }
 }

@@ -1,19 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppUserInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppUserInfoDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author d06679
@@ -35,7 +33,7 @@ public class AppUserInfoServiceImpl implements AppUserInfoService {
      * @return
      */
     @Override
-    public boolean record(Integer appId, String userName) {
+    public boolean recordAppidAndUser(Integer appId, String userName) {
         if (appId == null || StringUtils.isBlank(userName)) {
             LOGGER.warn("record app user param illegal");
             return false;

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.app;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppLogicClusterAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppClusterLogicAuthPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -13,24 +13,26 @@ import java.util.List;
 @Repository
 public interface AppLogicClusterAuthDAO {
 
-    List<AppLogicClusterAuthPO> listByCondition(AppLogicClusterAuthPO param);
+    List<AppClusterLogicAuthPO> listByCondition(AppClusterLogicAuthPO param);
 
-    int insert(AppLogicClusterAuthPO param);
+    int insert(AppClusterLogicAuthPO param);
 
-    int update(AppLogicClusterAuthPO param);
+    int update(AppClusterLogicAuthPO param);
 
     int delete(Long authId);
 
-    List<AppLogicClusterAuthPO> listByAppId(int appId);
+    int deleteByLogicClusterId(Long logicClusterId);
 
-    List<AppLogicClusterAuthPO> listWithRauthByAppId(int appId);
+    List<AppClusterLogicAuthPO> listByAppId(int appId);
 
-    AppLogicClusterAuthPO getById(Long authId);
+    List<AppClusterLogicAuthPO> listWithAccessByAppId(int appId);
 
-    AppLogicClusterAuthPO getByAppIdAndLogicCluseterId(@Param("appId") Integer appId,
+    AppClusterLogicAuthPO getById(Long authId);
+
+    AppClusterLogicAuthPO getByAppIdAndLogicCluseterId(@Param("appId") Integer appId,
                                                        @Param("logicClusterId") Long logicClusterId);
 
-    AppLogicClusterAuthPO getByAppIdAndLogicClusterIdAndType(@Param("appId") Integer appId,
+    AppClusterLogicAuthPO getByAppIdAndLogicClusterIdAndType(@Param("appId") Integer appId,
                                                              @Param("logicClusterId") Long logicClusterId,
                                                              @Param("type") Integer type);
 }

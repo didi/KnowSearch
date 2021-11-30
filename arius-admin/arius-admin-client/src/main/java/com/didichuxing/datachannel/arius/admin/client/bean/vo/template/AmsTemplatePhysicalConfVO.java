@@ -3,11 +3,15 @@ package com.didichuxing.datachannel.arius.admin.client.bean.vo.template;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "多type索引模板映射信息")
 public class AmsTemplatePhysicalConfVO extends BaseVO {
 

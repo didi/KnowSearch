@@ -2,7 +2,9 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.det
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,6 +13,8 @@ import java.util.List;
  * @date 2020/8/24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClusterOpNewHostOrderDetail extends AbstractOrderDetail {
 
     /**

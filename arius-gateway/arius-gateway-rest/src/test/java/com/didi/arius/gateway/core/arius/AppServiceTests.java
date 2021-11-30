@@ -33,23 +33,20 @@ public class AppServiceTests {
 
     @Test
     public void testGetAppDetail() throws InterruptedException {
-        Thread.sleep(1000L);
         final AppDetail appDetail = appService.getAppDetail(5);
         System.out.println(JSON.toJSONString(appDetail));
-        assertEquals(appDetail != null, true);
+        assertEquals(true, appDetail != null);
     }
 
     @Test
     public void testGetAppDetails() throws InterruptedException {
-        Thread.sleep(1000L);
         final Map<Integer, AppDetail> appDetails = appService.getAppDetails();
         System.out.println(JSON.toJSONString(appDetails));
-        assertEquals(appDetails != null, true);
+        assertEquals(true, appDetails != null);
     }
 
     @Test
     public void testGetAppDetailFromIp() throws InterruptedException {
-        Thread.sleep(1000L);
         final AppDetail appDetailFromIp = appService.getAppDetailFromIp("127.0.0.1");
         System.out.println(JSON.toJSONString(appDetailFromIp));
     }

@@ -8,9 +8,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+
 import com.google.common.collect.Lists;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_APP_ID;
 
 /**
  * http请求操作类
@@ -18,13 +22,16 @@ import com.google.common.collect.Lists;
  */
 public class HttpRequestUtils {
 
-    private static final ILog  LOGGER    = LogFactory.getLog(HttpRequestUtils.class);
+    private HttpRequestUtils() {
+    }
 
-    public static final String USER      = "X-SSO-USER";
+    private static final ILog   LOGGER         = LogFactory.getLog(HttpRequestUtils.class);
 
-    public static final String PASSWORD  = "password";
+    public static final String  USER           = "X-SSO-USER";
 
-    public static final String APPID     = "X-ARIUS-APP-ID";
+    public static final String  PASSWORD       = "password";
+
+    public static final String  APP_ID          = "X-ARIUS-APP-ID";
 
     public static String getFromHeader(HttpServletRequest request, String key, String defaultValue) {
         Object value = request.getHeader(key);
@@ -44,7 +51,7 @@ public class HttpRequestUtils {
             }
         }
 
-        if (ValidateUtils.isEmptyList(passwords)) {
+        if (AriusObjUtils.isEmptyList(passwords)) {
             throw new OperateForbiddenException("请在请求cookie中携带用户密码:password");
         }
         return passwords.get(0);
@@ -59,7 +66,7 @@ public class HttpRequestUtils {
     }
 
     public static Integer getAppId(HttpServletRequest request, int defaultAppid) {
-        String appidStr = request.getHeader(APPID);
+        String appidStr = request.getHeader(APP_ID);
 
         if (StringUtils.isBlank(appidStr)) {
             return defaultAppid;
@@ -69,10 +76,10 @@ public class HttpRequestUtils {
     }
 
     public static Integer getAppId(HttpServletRequest request) {
-        String appidStr = request.getHeader(APPID);
+        String appidStr = request.getHeader(APP_ID);
 
         if (StringUtils.isBlank(appidStr)) {
-            return null;
+            return DEFAULT_APP_ID;
         }
 
         try {

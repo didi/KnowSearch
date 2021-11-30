@@ -4,14 +4,18 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.DataType
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
-public class IndexTemplateLogic extends BaseEntity implements StringResponsible {
+@NoArgsConstructor
+@AllArgsConstructor
+public class IndexTemplateLogic extends BaseEntity implements StringResponsible, Comparable<IndexTemplateLogic> {
 
     private Integer id;
 
@@ -79,7 +83,7 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible 
     /**
      * 时间字段的格式
      */
-    private String dateFieldFormat;
+    private String  dateFieldFormat;
 
     /**
      * id字段
@@ -107,7 +111,24 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible 
     private Double  quota;
 
     /**
+     * 写入限流值，
+     * writeRateLimit = 0 禁止写入，
+     * writeRateLimit = -1 不限流，
+     * writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档
+     */
+    private Integer writeRateLimit;
+
+    /**
      * pipeline
      */
     private String  ingestPipeline;
+
+    @Override
+    public int compareTo(IndexTemplateLogic o) {
+        if (null == o) {
+            return 0;
+        }
+
+        return o.getId().intValue() - this.getId().intValue();
+    }
 }

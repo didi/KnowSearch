@@ -6,7 +6,7 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 
 /**
  * ES集群工具类
@@ -16,12 +16,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ES
  */
 public interface ClusterNodeManager {
     /**
-     * 物理集群节点转换
+     * 逻辑集群节点转换
      *
      * @param clusterNodes       物理集群节点
      * @return
      */
-    List<ESRoleClusterHostVO> convertClusterNodes(List<ESRoleClusterHost> clusterNodes);
+    List<ESRoleClusterHostVO> convertClusterLogicNodes(List<RoleClusterHost> clusterNodes);
 
     /**
      * 获取rack的资源统计信息
@@ -30,7 +30,7 @@ public interface ClusterNodeManager {
      * @param racks       racks
      * @return list
      */
-     Result<List<RackMetaMetric>> metaAndMetric(String clusterName, Collection<String> racks);
+    Result<List<RackMetaMetric>> metaAndMetric(String clusterName, Collection<String> racks);
 
     /**
      * 获取rack的元信息
@@ -39,5 +39,13 @@ public interface ClusterNodeManager {
      * @param racks       rack
      * @return list
      */
-     Result<List<RackMetaMetric>> meta(String clusterName, Collection<String> racks);
+    Result<List<RackMetaMetric>> meta(String clusterName, Collection<String> racks);
+
+    /**
+     * 物理集群节点转换
+     * @param nodesInfo
+     * @param clusterPhyName 物理集群名称
+     * @return
+     */
+    List<ESRoleClusterHostVO> convertClusterPhyNodes(List<RoleClusterHost> nodesInfo, String clusterPhyName);
 }

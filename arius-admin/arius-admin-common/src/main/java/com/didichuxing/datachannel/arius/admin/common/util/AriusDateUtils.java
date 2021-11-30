@@ -16,6 +16,9 @@ import org.apache.commons.lang3.time.DateUtils;
  */
 public class AriusDateUtils {
 
+    private static final String FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private AriusDateUtils(){}
+
     public static Long date2Long(Date time, String formatStr) {
 
         if (time == null) {
@@ -200,7 +203,7 @@ public class AriusDateUtils {
         } else {
             String newformat;
             if (StringUtils.isBlank(newFormatStr)) {
-                newformat = "yyyy-MM-dd HH:mm:ss";
+                newformat = FORMAT;
             } else {
                 newformat = newFormatStr;
             }
@@ -211,7 +214,7 @@ public class AriusDateUtils {
     }
 
     public static String getDateTimeStr(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT);
         return sdf.format(new Date(time));
     }
 
@@ -221,7 +224,7 @@ public class AriusDateUtils {
         } else {
             String newformat;
             if (StringUtils.isBlank(newFormatStr)) {
-                newformat = "yyyy-MM-dd HH:mm:ss";
+                newformat = FORMAT;
             } else {
                 newformat = newFormatStr;
             }

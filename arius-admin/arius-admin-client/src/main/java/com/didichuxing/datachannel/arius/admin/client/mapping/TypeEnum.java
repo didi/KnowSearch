@@ -19,7 +19,7 @@ public enum TypeEnum {
     NUMERIC("numeric", "numeric"),
 
     // 布尔类型
-    Boolean("boolean", "boolean"),
+    BOOLEAN("boolean", "boolean"),
 
     KEYWORD("keyword", "keyword"),
 

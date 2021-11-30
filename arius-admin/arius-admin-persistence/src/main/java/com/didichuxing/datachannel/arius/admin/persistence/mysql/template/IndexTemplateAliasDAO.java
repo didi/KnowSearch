@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.template;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO;
@@ -18,5 +19,9 @@ public interface IndexTemplateAliasDAO {
     List<TemplateAliasPO> listAll();
 
     List<TemplateAliasPO> listByTemplateId(int logicId);
+
+    int insert(TemplateAliasPO param);
+
+    int delete(@Param("logicId") Integer logicId, @Param("name") String name);
 
 }

@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.ecm;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * ES集群对应角色集群
@@ -9,6 +11,8 @@ import lombok.Data;
  * @since 2020-08-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESRoleClusterPO extends BasePO {
     private static final long serialVersionUID = 1L;
 

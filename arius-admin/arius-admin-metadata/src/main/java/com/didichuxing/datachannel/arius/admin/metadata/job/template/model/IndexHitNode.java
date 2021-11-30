@@ -25,9 +25,7 @@ public class IndexHitNode {
         return !StringUtils.isBlank(template.getLogicTemplate().getDateFormat());
     }
 
-    private static final long _ONE_MINUTE = 60 * 1000;
-    private static final Long _ONE_HOUR = 60 * 60 * 1000L;
-    private static final Long _ONE_DAY = 24 * 60 * 60 * 1000L;
+    private static final Long ONE_DAY = 24 * 60 * 60 * 1000L;
 
     /**
      * 获取索引物理名称集合，在索引过期范围内
@@ -54,7 +52,7 @@ public class IndexHitNode {
 
         String prefix = getNameFromExpress(template.getExpression());
         for (int i = 0; i <= expireTime; i++) {
-            Long t = time - i * _ONE_DAY;
+            Long t = time - i * ONE_DAY;
 
             SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
             String indexName = prefix + sdf.format(new Date(t));
@@ -108,11 +106,7 @@ public class IndexHitNode {
         }
 
         String name = getNameFromExpress(template.getExpression());
-        if (IndexNameUtils.indexExpMatch(name, indices)) {
-            return true;
-        }
-
-        return false;
+        return IndexNameUtils.indexExpMatch(name, indices);
     }
 
 

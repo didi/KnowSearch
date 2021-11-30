@@ -20,14 +20,14 @@ public class AriusIndexTemplateSetting implements Serializable {
     @ApiModelProperty("分词器")
     private JSONObject         analysis;
 
-    public static String       ANALYSIS_KEY_PREFIX     = "index.analysis.";
+    private static final String       ANALYSIS_KEY_PREFIX     = "index.analysis.";
 
-    public static String       ANALYZER_KEY            = "analyzer";
-    public static String       TOKENIZER_KEY           = "tokenizer";
-    public static String       CHAR_FILTER_KEY         = "char_filter";
-    public static String       FILTER_KEY              = "filter";
+    private static final String       ANALYZER_KEY            = "analyzer";
+    private static final String       TOKENIZER_KEY           = "tokenizer";
+    private static final String       CHAR_FILTER_KEY         = "char_filter";
+    private static final String       FILTER_KEY              = "filter";
 
-    public static List<String> ANALYSIS_SUPPORTED_KEYS = Arrays.asList(ANALYZER_KEY, TOKENIZER_KEY, CHAR_FILTER_KEY,
+    private static final List<String> ANALYSIS_SUPPORTED_KEYS = Arrays.asList(ANALYZER_KEY, TOKENIZER_KEY, CHAR_FILTER_KEY,
         FILTER_KEY);
 
     /**
@@ -39,7 +39,9 @@ public class AriusIndexTemplateSetting implements Serializable {
             Map<String, String> reAnalysisDict = new HashMap<>();
 
             Map<String, String> analysisDict = flat(analysis);
-            for (String analysisKey : analysisDict.keySet()) {
+
+            for(Map.Entry<String, String> entry : analysisDict.entrySet()){
+                String analysisKey = entry.getKey();
                 reAnalysisDict.put(ANALYSIS_KEY_PREFIX + analysisKey, analysisDict.get(analysisKey));
             }
 
@@ -56,17 +58,20 @@ public class AriusIndexTemplateSetting implements Serializable {
             return ret;
         }
 
-        for (String key : obj.keySet()) {
+        for(Map.Entry<String, Object> entry : obj.entrySet()){
+            String key = entry.getKey();
             Object o = obj.get(key);
 
             JSONObject json = parseJsonObject(o);
             if (json != null) {
                 Map<String, String> m = flat(json);
-                for (String k : m.keySet()) {
-                    ret.put(key.replaceAll("\\.", "#") + "." + k, m.get(k));
+
+                for(Map.Entry<String, String> fEntry : m.entrySet()){
+                    String k = fEntry.getKey();
+                    ret.put(key.replace(".", "#") + "." + k, m.get(k));
                 }
             } else {
-                ret.put(key.replaceAll("\\.", "#"), o.toString());
+                ret.put(key.replace(".", "#"), o.toString());
             }
         }
 
@@ -83,12 +88,10 @@ public class AriusIndexTemplateSetting implements Serializable {
             return (JSONObject) o;
         } else {
             try {
-                return JSONObject.parseObject(JSON.toJSONString(o));
+                return JSON.parseObject(JSON.toJSONString(o));
             } catch (JSONException e) {
-                System.out.println("object: " + o + ", e: " + e);
+                return null;
             }
         }
-
-        return null;
     }
 }

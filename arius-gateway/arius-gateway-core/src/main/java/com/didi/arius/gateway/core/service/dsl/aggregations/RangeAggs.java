@@ -6,6 +6,7 @@ import com.didi.arius.gateway.common.metadata.FieldInfo;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +15,13 @@ import java.util.Map;
 
 
 @Component("rangeAggs")
+@NoArgsConstructor
 public class RangeAggs extends BucketAggsType {
 	private String name = "range";
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);
@@ -35,7 +37,7 @@ public class RangeAggs extends BucketAggsType {
 			int size = jsonRanges.size();
 			aggsBukcetInfo.setBucketNumber(size);
 			aggsBukcetInfo.setLastBucketNumber(size);
-			aggsBukcetInfo.setMemUsed(size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+			aggsBukcetInfo.setMemUsed((long)size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 			
 			return aggsBukcetInfo;
 		} else {

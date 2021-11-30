@@ -25,6 +25,10 @@ import java.util.Map;
 public class GatewayJoinPO extends BaseESPO {
 
     /**
+     * 请求path
+     */
+    private String uri;
+    /**
      * 请求id
      */
     private String requestId;

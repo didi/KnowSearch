@@ -7,7 +7,9 @@ import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESCluste
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 /**
@@ -16,21 +18,17 @@ import lombok.Data;
  * @since 2020-08-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "ES角色集群信息")
 public class ESRoleClusterVO extends BaseVO {
     private static final long serialVersionUID = 1L;
 
     private Long id;
 
-    /**
-     * 集群ID
-     */
     @ApiModelProperty("集群ID")
     private Long elasticClusterId;
 
-    /**
-     * role集群名称
-     */
     @ApiModelProperty("role集群名称")
     private String roleClusterName;
 
@@ -41,27 +39,15 @@ public class ESRoleClusterVO extends BaseVO {
     @ApiModelProperty("集群角色(masternode/datanode/clientnode)")
     private String role;
 
-    /**
-     * pod数量
-     */
     @ApiModelProperty("pod数量")
     private Integer podNumber;
 
-    /**
-     * 单机实例数
-     */
     @ApiModelProperty("单机实例数")
     private Integer pidCount;
 
-    /**
-     * 机器规格
-     */
     @ApiModelProperty("机器规格")
     private String machineSpec;
 
-    /**
-     * 角色名下角色列表
-     */
     @ApiModelProperty("角色名下角色列表")
     private List<ESRoleClusterHostVO> esRoleClusterHostVO;
 

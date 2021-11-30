@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author lyn
  * @date 2020-12-29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESConfig extends BaseEntity {
     /**
      * ID主键自增

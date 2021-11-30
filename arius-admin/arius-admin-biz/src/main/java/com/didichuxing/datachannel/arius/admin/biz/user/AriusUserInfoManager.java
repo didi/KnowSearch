@@ -20,17 +20,17 @@ public interface AriusUserInfoManager {
 	/**
 	 * 校验用户名称合法性
 	 */
-	Result checkUserNameValid(String userName);
+	Result<Void> checkUserNameValid(String userName);
 
 	/**
 	 * 编辑用户信息, 不更新密码
 	 */
-	Result editUsersInfoVO(AriusUserInfoDTO ariusUserInfoDTO);
+	Result<Void> editUsersInfoVO(AriusUserInfoDTO ariusUserInfoDTO);
 
 	/**
 	 * 更新用户密码
 	 */
-	Result editUsersPassword(EditUserPasswordDTO editUserPasswordDTO);
+	Result<Void> editUsersPassword(EditUserPasswordDTO editUserPasswordDTO);
 
 	/**
 	 * 获取单个用户信息

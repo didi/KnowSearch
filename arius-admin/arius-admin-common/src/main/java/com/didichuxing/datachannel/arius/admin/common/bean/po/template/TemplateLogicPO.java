@@ -4,13 +4,17 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.DataType
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TemplateLogicPO extends BasePO implements DigitResponsible {
 
     private Integer id;
@@ -100,6 +104,14 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
      * 规格 单位台
      */
     private Double  quota;
+
+    /**
+     * 写入限流值，
+     * writeRateLimit = 0 禁止写入，
+     * writeRateLimit = -1 不限流，
+     * writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档
+     */
+    private Integer writeRateLimit;
 
     /**
      * pipeline

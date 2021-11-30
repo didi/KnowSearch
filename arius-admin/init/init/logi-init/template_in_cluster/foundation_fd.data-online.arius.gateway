@@ -1,0 +1,561 @@
+{
+  "order": 10,
+  "index_patterns": [
+    "foundation_fd.data-online.arius.gateway*"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "4",
+      "routing": {
+        "allocation": {
+          "include": {
+            "rack": ""
+          }
+        }
+      },
+      "mapping": {
+        "single_type": "true"
+      }
+    }
+  },
+  "mappings": {
+    "numeric_detection": false,
+    "properties": {
+      "exception": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "cluster": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "expressionMap size": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "kOffset": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and level ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "responseLen": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "type": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "isTimedOut": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and process_id>0 and area ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "dslTemplate": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "caller_func": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "searchId": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "x-username": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and deal_status in (3) and sub_business ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "action": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "tookInMillis": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "aliasesMap size": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "method": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "ip": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "grpcmethod": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "uniqueKey": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "index": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "queryString": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "_FLINK_DATA_TIME": {
+        "type": "long"
+      },
+      "requestLen": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "field": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "extractLevel": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "user_id": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "qps": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "totalHits": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "queryLimit": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "metrics": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "before_cost": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "order_id": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "status": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "traceid": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "isUrgent": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and area ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "DIDIENV_ODIN_SU": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "logOffset": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "isUrgent') and status ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      " did": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "failedShards": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "result": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "uid": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "routing": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "client_node": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "requestId": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "sinkTime": {
+        "format": "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+        "type": "date"
+      },
+      "clusterName": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "key": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "timestamp": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "remoteAddr": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and channel in (1) and sub_business ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "collectTime": {
+        "format": "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+        "type": "date"
+      },
+      "lastBucketNumber": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "kPartition": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "err": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "e": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "alias_size": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and group_id in (1536) and user_id": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "uri": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "url": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "logTime": {
+        "format": "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+        "type": "date"
+      },
+      "spanid": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "DictTags' ) and (extra ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "indices": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "postBody": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "grpcserver": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "appid": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "extra_source": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "postBodyLen": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "logid": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      " passenger_phone": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "logID": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "proc_time": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "scorllId": {
+        "type": "keyword"
+      },
+      "logicId": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "msg": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and complaint_result ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "pid": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "threshold": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "source": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "clientVersion": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "dal": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "method_name": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "hintContent": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "cspanid": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and process_id ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "host": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "from": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "chargeSeq": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and process_id>0 and user_id": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "group": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "clientHost": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "dltag": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "errname": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and group_id in (1614) and user_id": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "cleanTime": {
+        "format": "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+        "type": "date"
+      },
+      "logName": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "name": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "memUsed": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and sub_business ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "dsl": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and user_id": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and channel in (11) and user_id": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "request": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "code": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and occupy_user ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and channel in (10) and area ": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "odinLeaf": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "' ) and occupy_user": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "clusterId": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "locale": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "content": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "totalShards": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "scrollId": {
+        "type": "keyword"
+      },
+      "aggsLevel": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "_FLINK_SINK_TIME": {
+        "type": "long"
+      },
+      "addr": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "dslTemplateKey": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "isAboutSex": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "sal": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "types": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "cost": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "appName": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "aggsBukcetInfo": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "message": {
+        "ignore_above": 2048,
+        "index": false,
+        "type": "keyword",
+        "doc_values": false
+      },
+      "_msg": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "kTopic": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "args": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "referrer": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "response": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "user": {
+        "ignore_above": 512,
+        "type": "keyword"
+      }
+    }
+  },
+  "aliases": {}
+}

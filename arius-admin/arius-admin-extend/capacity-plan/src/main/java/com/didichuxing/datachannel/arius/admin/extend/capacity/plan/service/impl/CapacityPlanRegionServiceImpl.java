@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.imp
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.RegionMetric;
@@ -10,8 +9,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateMetaMetric;
 import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -27,19 +25,14 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanAreaDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.OpenPhyClusterPlanDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.*;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.po.CapacityPlanRegionInfoPO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component.RegionResourceManager;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component.RegionResourceMover;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanAreaStatusEnum;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.dao.mysql.CapacityPlanRegionInfoDAO;
@@ -47,8 +40,6 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.notify.mail.
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanAreaService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -77,14 +68,10 @@ import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.const
 import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskStatusEnum.*;
 import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskTypeEnum.*;
 
-/**
- * @author d06679
- * @date 2019-06-24
- */
 @Service
 public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements CapacityPlanRegionService, ApplicationListener<ResourceItemMissEvent> {
 
-    private static final ILog sLogger = LogFactory.getLog(CapacityPlanRegionServiceImpl.class);
+    private static final String REGION_NOT_EXIST = "region不存在";
 
     @Autowired
     private RegionResourceManager regionResourceManager;
@@ -105,22 +92,13 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
     private NotifyService notifyService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
-
-    @Autowired
-    private ESClusterPhyService esClusterPhyService;
-
-    @Autowired
-    private ESRegionRackService regionRackService;
+    private RegionRackService regionRackService;
 
     @Autowired
     private QuotaTool quotaTool;
 
     @Autowired
     private CapacityPlanRegionInfoDAO capacityPlanRegionInfoDAO;
-
-    @Autowired
-    private TemplatePhyManager templatePhyManager;
 
     private final Map<String, ReentrantLock> clusterLock = new ConcurrentHashMap<>();
 
@@ -223,7 +201,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
 
     @Override
-    public Result createRegionCapacityInfo(CapacityPlanRegionDTO capacityPlanRegionDTO, String operator) {
+    public Result<Void> createRegionCapacityInfo(CapacityPlanRegionDTO capacityPlanRegionDTO, String operator) {
         CapacityPlanRegionInfoPO regionInfoPO = new CapacityPlanRegionInfoPO();
         regionInfoPO.setRegionId(capacityPlanRegionDTO.getRegionId());
         regionInfoPO.setConfigJson(capacityPlanRegionDTO.getConfigJson());
@@ -241,7 +219,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
     }
 
     @Override
-    public Result deleteRegionCapacityInfo(Long regionId, String operator) {
+    public Result<Void> deleteRegionCapacityInfo(Long regionId, String operator) {
 
         CapacityPlanRegionInfoPO regionInfoPO =  capacityPlanRegionInfoDAO.getByRegionId(regionId);
         if (regionInfoPO == null){
@@ -263,7 +241,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @return result
      */
     @Override
-    public Result editRegion(CapacityPlanRegionDTO regionDTO, String operator) {
+    public Result<Void> editRegion(CapacityPlanRegionDTO regionDTO, String operator) {
 
         // 检查更新参数
         if (AriusObjUtils.isNull(regionDTO)) {
@@ -277,7 +255,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         CapacityPlanRegion oldCapacityPlanRegion = getRegionById(regionDTO.getRegionId());
 
         if (oldCapacityPlanRegion == null) {
-            return Result.buildNotExist("region不存在");
+            return Result.buildNotExist(REGION_NOT_EXIST);
         }
 
         // 更新rack
@@ -342,9 +320,9 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
     public Result<List<CapacityPlanRegionBalanceItem>> balanceRegion(Long areaId, boolean exe) {
 
         // 检查索引服务开启
-        Result checkResult = checkTemplateSrvOpen(areaId);
+        Result<Void> checkResult = checkTemplateSrvOpen(areaId);
         if (checkResult.failed()) {
-            return checkResult;
+            return Result.buildFail(checkResult.getMessage());
         }
 
         // 获取area下的region
@@ -355,12 +333,12 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(regions)) {
-            return Result.buildFrom(Result.buildFail("area中没有region或者region的利用率没有统计"));
+            return Result.buildFail("area中没有region或者region的利用率没有统计");
         }
 
         // 计算region的利用率的平均值
         Double usageAvg = calRegionAverageUsage(regions);
-        sLogger.info("method=balanceRegion||areaId={}||usageAvg={}", areaId, usageAvg);
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=balanceRegion||areaId={}||usageAvg={}", areaId, usageAvg);
 
         // 利用率过大于均值的region
         List<CapacityPlanRegion> tooBigLists = regions.stream()
@@ -371,13 +349,13 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             .filter(region -> (region.getUsage() < usageAvg * 0.9))
             .collect(Collectors.toList());
 
-        sLogger.info("method=balanceRegion||areaId={}||tooBigLists={}||tooSmallLists={}", areaId,
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=balanceRegion||areaId={}||tooBigLists={}||tooSmallLists={}", areaId,
             tooBigLists.stream().map(CapacityPlanRegion::getRegionId).collect(Collectors.toList()),
             tooSmallLists.stream().map(CapacityPlanRegion::getRegionId).collect(Collectors.toList()));
 
         // 同时存利用率过大、过小的region才需要均衡
         if (CollectionUtils.isEmpty(tooBigLists) || CollectionUtils.isEmpty(tooSmallLists)) {
-            return Result.buildFrom(Result.buildSucWithTips("area中region是均匀的"));
+            return Result.buildSucWithTips("area中region是均匀的");
         }
 
         List<CapacityPlanRegionBalanceItem> result = Lists.newArrayList();
@@ -394,7 +372,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                     // 执行实际的均衡操作，将模板移动到利用率低的模板
                     moveTemplateToTgtRegion(item);
                 } catch (Exception e) {
-                    sLogger.warn("method=balanceRegion||item={}||errMsg={}", item, e.getMessage(), e);
+                    LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=balanceRegion||item={}||errMsg={}", item, e.getMessage(), e);
                 }
             }
         }
@@ -415,13 +393,13 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
         CapacityPlanRegion region = getRegionById(regionId);
         if (region == null) {
-            return Result.buildNotExist("region不存在");
+            return Result.buildNotExist(REGION_NOT_EXIST);
         }
 
         // 检查索引服务开启
-        Result checkResult = checkTemplateSrvOpen(region);
+        Result<Void> checkResult = checkTemplateSrvOpen(region);
         if (checkResult.failed()) {
-            return checkResult;
+            return Result.buildFail(checkResult.getMessage());
         }
 
         CapacityPlanConfig regionConfig = region.getConfig();
@@ -439,40 +417,6 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         }
 
         return result;
-    }
-
-    @Override
-    public Result openPhyClusterCapacityPlanFlags(String phyClusterName, String operator) {
-        if (!esClusterPhyService.isClusterExists(phyClusterName)) {
-            return Result.buildNotExist(String.format("物理集群%s不存在", phyClusterName));
-        }
-
-        List<CapacityPlanArea> areas = capacityPlanAreaService.listAreasByPhyCluster(phyClusterName);
-        for (CapacityPlanArea area : areas) {
-            CapacityPlanAreaDTO areaDTO = new CapacityPlanAreaDTO();
-            areaDTO.setId(area.getId());
-            areaDTO.setStatus(CapacityPlanAreaStatusEnum.PLANING.getCode());
-            capacityPlanAreaService.modifyPlanArea(areaDTO, operator);
-        }
-
-        return Result.buildSucc();
-    }
-
-    @Override
-    public Result closePhyClusterCapacityPlanFlags(String phyClusterName, String operator) {
-        if (!esClusterPhyService.isClusterExists(phyClusterName)) {
-            return Result.buildNotExist(String.format("物理集群%s不存在", phyClusterName));
-        }
-
-        List<CapacityPlanArea> areas = capacityPlanAreaService.listAreasByPhyCluster(phyClusterName);
-        for (CapacityPlanArea area : areas) {
-            CapacityPlanAreaDTO areaDTO = new CapacityPlanAreaDTO();
-            areaDTO.setId(area.getId());
-            areaDTO.setStatus(CapacityPlanAreaStatusEnum.SUSPEND.getCode());
-            capacityPlanAreaService.modifyPlanArea(areaDTO, operator);
-        }
-
-        return Result.buildSucc();
     }
 
     /**
@@ -508,14 +452,14 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @return result
      */
     @Override
-    public Result planRegion(Long regionId) throws ESOperateException {
+    public Result<Void> planRegion(Long regionId) throws ESOperateException {
         CapacityPlanRegion region = getRegionById(regionId);
         if (region == null) {
-            return Result.buildNotExist("region不存在");
+            return Result.buildNotExist(REGION_NOT_EXIST);
         }
 
         // 检查索引服务开启
-        Result checkResult = checkTemplateSrvOpen(region);
+        Result<Void> checkResult = checkTemplateSrvOpen(region);
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -523,13 +467,13 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         CapacityPlanRegionContext regionPlanContext = new CapacityPlanRegionContext(PLAN.getCode(), region);
         Resource resourceGap = regionResourceManager.getIntervalResourceGap(regionPlanContext);
 
-        sLogger.info("method=planRegion||regionId={}||resourceGap={}", regionId, resourceGap);
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=planRegion||regionId={}||resourceGap={}", regionId, resourceGap);
 
         //保存模板的factor和group
         if (regionResourceMover.saveTemplateCapacityConfig(regionPlanContext)) {
-            sLogger.info("method=planRegion||regionId={}||msg=saveTemplateCapacityConfig succ", regionId);
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=planRegion||regionId={}||msg=saveTemplateCapacityConfig succ", regionId);
         } else {
-            sLogger.warn("method=planRegion||regionId={}||msg=saveTemplateCapacityConfig fail", regionId);
+            LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=planRegion||regionId={}||msg=saveTemplateCapacityConfig fail", regionId);
         }
 
         // 任务需要调整的rack
@@ -555,7 +499,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             Double needDecreaseMem = Math.max(resourceGap.getMem(), currentResourceGap.getMem());
             Double needDecreaseDisk = Math.max(resourceGap.getDisk(), currentResourceGap.getDisk());
 
-            sLogger.info("method=planRegion||regionId={}||templateResourceGap={}||currentResourceGap={}" +
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=planRegion||regionId={}||templateResourceGap={}||currentResourceGap={}" +
                     "||needDecreaseCpu={}||needDecreaseMem={}||needDecreaseDisk={}",
                 regionId, resourceGap, currentResourceGap,
                 needDecreaseCpu, needDecreaseMem, needDecreaseDisk);
@@ -570,12 +514,12 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
         // 跟新region的free量
         Double freeQuota = computeRegionFreeQuota(regionPlanContext);
-        sLogger.info("method=planRegion||regionId={}||freeQuota={}", regionId, freeQuota);
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=planRegion||regionId={}||freeQuota={}", regionId, freeQuota);
         editRegionFreeQuota(regionId, freeQuota);
 
         // 保存任务信息
         if (!capacityPlanRegionTaskService.saveTask(typeEnum, regionPlanContext, deltaRack, statusEnum)) {
-            sLogger.warn("method=planRegion||regionId={}||msg=save to db fail", regionId);
+            LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=planRegion||regionId={}||msg=save to db fail", regionId);
         }
 
         if (statusEnum == FINISHED || statusEnum == DATA_MOVING) {
@@ -591,20 +535,20 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @return result
      */
     @Override
-    public Result checkRegion(Long regionId) {
+    public Result<Void> checkRegion(Long regionId) {
 
         CapacityPlanRegion region = getRegionById(regionId);
         if (region == null) {
-            return Result.buildNotExist("region不存在");
+            return Result.buildNotExist(REGION_NOT_EXIST);
         }
 
         // 检查索引服务开启
-        Result checkResult = checkTemplateSrvOpen(region);
+        Result<Void> checkResult = checkTemplateSrvOpen(region);
         if (checkResult.failed()) {
             return checkResult;
         }
 
-        Result checkParamResult = validateRegionRacks(region);
+        Result<Void> checkParamResult = validateRegionRacks(region);
         if (checkParamResult.failed()) {
             return checkParamResult;
         }
@@ -624,7 +568,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         if (resourceGap.getCpu() > 0.0 || resourceGap.getDisk() > 0.0) {
             // 扩容
             statusEnum = increaseRegion(regionPlanContext, resourceGap, deltaRack);
-            sLogger.info("method=checkRegion||regionId={}||freeQuota={}||msg=region increase", regionId, 0.0);
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=checkRegion||regionId={}||freeQuota={}||msg=region increase", regionId, 0.0);
             // 计算具体的free
             editRegionFreeQuota(regionId, 0.0);
             typeEnum = INCREASE;
@@ -632,7 +576,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
         // 保存任务信息
         if (!capacityPlanRegionTaskService.saveTask(typeEnum, regionPlanContext, deltaRack, statusEnum)) {
-            sLogger.warn("method=checkRegion||regionId={}||msg=save to db fail", regionId);
+            LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=checkRegion||regionId={}||msg=save to db fail", regionId);
         }
 
         if (statusEnum == FINISHED) {
@@ -731,7 +675,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @param region Region
      * @return
      */
-    private Result validateRegionRacks(CapacityPlanRegion region) {
+    private Result<Void> validateRegionRacks(CapacityPlanRegion region) {
         List<CapacityPlanRegion> regions = listRegionsInArea(region.getAreaId());
 
         Collection<String> racks = RackUtils.racks2List(region.getRacks());
@@ -746,8 +690,6 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             }
         }
 
-        // TODO ZHZ 应该检查每个region的rack与模板的rack是否一致，不一致的就改为一致
-
         return Result.buildSucc();
     }
 
@@ -757,14 +699,14 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @return result
      */
     @Override
-    public Result moveShard(Long regionId, boolean shouldUpdateIndex) {
+    public Result<Void> moveShard(Long regionId, boolean shouldUpdateIndex) {
         CapacityPlanRegion region = getRegionById(regionId);
         if (region == null) {
-            return Result.buildNotExist("region不存在");
+            return Result.buildNotExist(REGION_NOT_EXIST);
         }
 
         // 检查索引服务开启
-        Result checkResult = checkTemplateSrvOpen(region);
+        Result<Void> checkResult = checkTemplateSrvOpen(region);
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -856,54 +798,58 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      */
     @Override
     public void onApplicationEvent(ResourceItemMissEvent event) {
-        sLogger.info("method=onApplicationEvent||meg=process cluster item miss");
+        LOGGER.info("method=onApplicationEvent||meg=process cluster item miss");
 
-        List<ESClusterLogicRackInfo> items = event.getItems();
-        Multimap<Long, ESClusterLogicRackInfo> resourceId2ResourceLogicItemMultiMap = ConvertUtil.list2MulMap(items,
-            ESClusterLogicRackInfo::getLogicClusterId);
+        List<ClusterLogicRackInfo> items = event.getItems();
+        Multimap<Long, ClusterLogicRackInfo> resourceId2ResourceLogicItemMultiMap = ConvertUtil.list2MulMap(items,
+            ClusterLogicRackInfo::getLogicClusterId);
 
 
         for (Long resourceId : resourceId2ResourceLogicItemMultiMap.keySet()) {
-            Collection<ESClusterLogicRackInfo> resourceItems = resourceId2ResourceLogicItemMultiMap.get(resourceId);
+            Collection<ClusterLogicRackInfo> resourceItems = resourceId2ResourceLogicItemMultiMap.get(resourceId);
 
-            Multimap<String, ESClusterLogicRackInfo> cluster2ResourceLogicItemMultiMap = ConvertUtil
-                .list2MulMap(Lists.newArrayList(resourceItems), ESClusterLogicRackInfo::getPhyClusterName);
+            Multimap<String, ClusterLogicRackInfo> cluster2ResourceLogicItemMultiMap = ConvertUtil
+                .list2MulMap(Lists.newArrayList(resourceItems), ClusterLogicRackInfo::getPhyClusterName);
 
             for (String cluster : cluster2ResourceLogicItemMultiMap.keySet()) {
-                Collection<ESClusterLogicRackInfo> resourceClusterItems = cluster2ResourceLogicItemMultiMap.get(cluster);
-                Set<String> missRackSet = resourceClusterItems.stream().map(ESClusterLogicRackInfo::getRack)
+                Collection<ClusterLogicRackInfo> resourceClusterItems = cluster2ResourceLogicItemMultiMap.get(cluster);
+                Set<String> missRackSet = resourceClusterItems.stream().map(ClusterLogicRackInfo::getRack)
                     .collect(Collectors.toSet());
 
 
-                sLogger.info("method=onApplicationEvent||resourceId={}||cluster={}||missRack={}", resourceId, cluster,
+                LOGGER.info("class=CapacityPlanRegionServiceImpl||method=onApplicationEvent||resourceId={}||cluster={}||missRack={}", resourceId, cluster,
                     missRackSet);
 
                 List<CapacityPlanRegion> regions = getRegionsByLogicAndPhyCluster(resourceId, cluster);
 
                 if (CollectionUtils.isEmpty(regions)) {
-                    sLogger.info("method=onApplicationEvent||resourceId={}||cluster={}||msg=no region planed",
+                    LOGGER.info("class=CapacityPlanRegionServiceImpl||method=onApplicationEvent||resourceId={}||cluster={}||msg=no region planed",
                         resourceId, cluster);
                     continue;
                 }
 
-                for (CapacityPlanRegion region : regions) {
-                    if (hasIntersect(region.getRacks(), missRackSet)) {
-                        String tgtRacks = RackUtils.list2Racks(RackUtils.racks2List(region.getRacks()).stream()
-                            .filter(rack -> !missRackSet.contains(rack)).collect(Collectors.toList()));
-                        if (modifyRegionRacks(region.getRegionId(), tgtRacks)) {
-                            sLogger.info(
-                                "method=onApplicationEvent||msg=region rack edit succ||regionId={}||srcRack={}||tgtRack={}",
-                                region.getRegionId(), region.getRacks(), tgtRacks);
-                        } else {
-                            sLogger.warn(
-                                "method=onApplicationEvent||msg=region rack edit fail||regionId={}||srcRack={}||tgtRack={}",
-                                region.getRegionId(), region.getRacks(), tgtRacks);
-                        }
-                    }
-                }
+                handleRegions(missRackSet, regions);
 
             }
 
+        }
+    }
+
+    private void handleRegions(Set<String> missRackSet, List<CapacityPlanRegion> regions) {
+        for (CapacityPlanRegion region : regions) {
+            if (hasIntersect(region.getRacks(), missRackSet)) {
+                String tgtRacks = RackUtils.list2Racks(RackUtils.racks2List(region.getRacks()).stream()
+                    .filter(rack -> !missRackSet.contains(rack)).collect(Collectors.toList()));
+                if (modifyRegionRacks(region.getRegionId(), tgtRacks)) {
+                    LOGGER.info(
+                        "class=CapacityPlanRegionServiceImpl||method=onApplicationEvent||msg=region rack edit succ||regionId={}||srcRack={}||tgtRack={}",
+                        region.getRegionId(), region.getRacks(), tgtRacks);
+                } else {
+                    LOGGER.warn(
+                        "class=CapacityPlanRegionServiceImpl||method=onApplicationEvent||msg=region rack edit fail||regionId={}||srcRack={}||tgtRack={}",
+                        region.getRegionId(), region.getRacks(), tgtRacks);
+                }
+            }
         }
     }
 
@@ -959,7 +905,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
         try {
             if (!tryLock(region.getClusterName())) {
-                sLogger.info("method=regionIncrease||regionId={}||msg=lock fail", region.getRegionId());
+                LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||msg=lock fail", region.getRegionId());
                 return OP_ES_ERROR;
             }
 
@@ -973,8 +919,8 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                 increaseRacks
                     .addAll(getRacksDecreasingTask(region, decreasingTask, resourceGap, capacityPlanConfig));
                 if (capacityPlanRegionTaskService.finishTask(decreasingTask.getId())) {
-                    sLogger.info(
-                        "method=regionIncrease||regionId={}||msg=finish decreasing task succ||decreasingTaskId={}",
+                    LOGGER.info(
+                        "class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||msg=finish decreasing task succ||decreasingTaskId={}",
                         region.getRegionId(), decreasingTask.getId());
                 } else {
                     throw new AdminTaskException("结束缩容任务失败：taskId: " + decreasingTask.getId());
@@ -990,13 +936,13 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                 if (CollectionUtils.isEmpty(freeRacks)) {
                     // 获取不到，空闲资源不足
                     resourceEnough = false;
-                    sLogger.warn("method=regionIncrease||regionId={}||cluster={}||msg=get cluster free rack fail",
+                    LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||cluster={}||msg=get cluster free rack fail",
                         region.getRegionId(), region.getClusterName());
                 } else {
                     List<String> rackNames = freeRacks.stream().map(RackMetaMetric::getName)
                         .collect(Collectors.toList());
-                    sLogger.info(
-                        "method=regionIncrease||regionId={}||msg=get cluster free rack succ||cluster={}||rackNames={}",
+                    LOGGER.info(
+                        "class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||msg=get cluster free rack succ||cluster={}||rackNames={}",
                         region.getRegionId(), region.getClusterName(), rackNames);
                     increaseRacks.addAll(rackNames);
                 }
@@ -1006,18 +952,18 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
             if (resourceEnough) {
                 if (regionResourceMover.increase(regionPlanContext, increaseRacks)) {
-                    sLogger.info("method=regionIncrease||regionId={}||msg=move2ColdNode shard succ when increase",
+                    LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||msg=move2ColdNode shard succ when increase",
                         region.getRegionId());
                 } else {
                     statusEnum = OP_ES_ERROR;
-                    sLogger.warn("method=regionIncrease||regionId={}||msg=move2ColdNode shard fail when increase",
+                    LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||msg=move2ColdNode shard fail when increase",
                         region.getRegionId());
                 }
             }
 
             // 扩容任务可以直接将rack修改掉
             String tgtRack = RackUtils.append(region.getRacks(), increaseRacks);
-            sLogger.info("method=regionIncrease||regionId={}||tgtRack={}", region.getRegionId(), tgtRack);
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||tgtRack={}", region.getRegionId(), tgtRack);
             modifyRegionRacks(region.getRegionId(), tgtRack);
 
             notifyService.send(
@@ -1048,7 +994,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
         try {
             if (!tryLock(region.getClusterName())) {
-                sLogger.info("method=regionDecrease||regionId={}||msg=lock fail", region.getRegionId());
+                LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionDecrease||regionId={}||msg=lock fail", region.getRegionId());
                 return OP_ES_ERROR;
             }
 
@@ -1071,16 +1017,16 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                 resourceGap.setDisk(resourceGap.getDisk() + rackMetaMetric.getTotalDiskG());
             }
 
-            sLogger.info("method=regionDecrease||regionId={}||decreaseRacks={}", region.getRegionId(), decreaseRacks);
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionDecrease||regionId={}||decreaseRacks={}", region.getRegionId(), decreaseRacks);
 
             // 缩容任务，需要数据搬迁完成后修改region的状态
             CapacityPlanRegionTaskStatusEnum statusEnum = DATA_MOVING;
 
             if (regionResourceMover.decrease(regionPlanContext, decreaseRacks)) {
-                sLogger.info("method=regionDecrease||regionId={}||msg=move2ColdNode shard succ when decrease", region.getRegionId());
+                LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionDecrease||regionId={}||msg=move2ColdNode shard succ when decrease", region.getRegionId());
             } else {
                 statusEnum = OP_ES_ERROR;
-                sLogger.warn("method=regionDecrease||regionId={}||msg=move2ColdNode shard fail when decrease", region.getRegionId());
+                LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=regionDecrease||regionId={}||msg=move2ColdNode shard fail when decrease", region.getRegionId());
             }
 
             notifyService.send(
@@ -1112,7 +1058,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         Result<List<RackMetaMetric>> rackMetaMetricsResult = clusterNodeManager.metaAndMetric(
             region.getClusterName(), deltaRack);
 
-        sLogger.info("method=regionIncrease||regionId={}||dataMovingRack={}", region.getRegionId(), deltaRack);
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||dataMovingRack={}", region.getRegionId(), deltaRack);
 
         if (rackMetaMetricsResult.failed()) {
             throw new AmsRemoteException("恢复上次任务失败：" + rackMetaMetricsResult.getMessage());
@@ -1128,7 +1074,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         resourceGap.setCpu(resourceGap.getCpu() - cpuCountProvide);
         resourceGap.setDisk(resourceGap.getDisk() - diskProvide);
 
-        sLogger.info("method=acquireFromDecreasingTask||regionId={}||cpuCountProvide={}||diskProvide={}||resourceGap={}",
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=acquireFromDecreasingTask||regionId={}||cpuCountProvide={}||diskProvide={}||resourceGap={}",
             region.getRegionId(), cpuCountProvide, diskProvide, resourceGap);
 
         return deltaRack;
@@ -1152,7 +1098,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             return Lists.newArrayList();
         }
 
-        sLogger.info("method=getAreaFreeRacksWithGap||cluster={}||freeRacks={}", capacityPlanCluster.getClusterName(),
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=getAreaFreeRacksWithGap||cluster={}||freeRacks={}", capacityPlanCluster.getClusterName(),
             freeRacks);
 
         Result<List<RackMetaMetric>> rackMetaMetricsResult = clusterNodeManager.meta(capacityPlanCluster.getClusterName(),
@@ -1182,91 +1128,6 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         }
 
         return assignedRacks;
-    }
-
-    /**
-     * 校验Region
-     * @param regionDTO Region详情
-     * @return
-     */
-    private Result validateRegionParams(CapacityPlanRegionDTO regionDTO) {
-        if (AriusObjUtils.isNull(regionDTO)) {
-            return Result.buildParamIllegal("region为空");
-        }
-
-        if (StringUtils.isBlank(regionDTO.getClusterName())) {
-            return Result.buildParamIllegal("物理集群名称不能为空");
-        }
-
-        if (AriusObjUtils.isNull(regionDTO.getRacks())) {
-            return Result.buildParamIllegal("rack为空");
-        }
-
-        return Result.buildSucc();
-    }
-
-    /**
-     * 校验Racks是否合理
-     * @param planClusterId 规划集群ID
-     * @param racks         Rack列表
-     * @return
-     */
-    private boolean validatePlanClusterRacks(Long planClusterId, String racks) {
-        // TODO: change this logic.
-
-        CapacityPlanArea capacityPlanCluster = capacityPlanAreaService.getAreaById(planClusterId);
-
-        if (!esClusterPhyService.isRacksExists(capacityPlanCluster.getClusterName(), racks)) {
-            return false;
-        }
-
-        if (!isValidRacks(capacityPlanCluster.getResourceId(),
-            capacityPlanCluster.getClusterName(), racks)) {
-            return false;
-        }
-
-        Set<String> rackUsedSet = capacityPlanAreaService.listAreaUsedRacks(planClusterId);
-
-        return !hasIntersect(racks, rackUsedSet);
-    }
-
-    /**
-     * Racks是否都合理
-     * @param logicClusterId 逻辑集群ID
-     * @param clusterName    物理集群名称
-     * @param racks          Rack列表
-     * @return
-     */
-    private boolean isValidRacks(Long logicClusterId, String clusterName, String racks) {
-        Map<String, ESClusterLogicRackInfo> rack2ResourceLogicItemMap = ConvertUtil.list2Map(
-            getClusterRacks(logicClusterId, clusterName),
-            ESClusterLogicRackInfo::getRack);
-
-        for (String rack : RackUtils.racks2List(racks)) {
-            if (!rack2ResourceLogicItemMap.containsKey(rack)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * 获取逻辑集群Rack列表
-     * @param logicClusterId 逻辑集群ID
-     * @param clusterName    物理集群名称
-     * @return
-     */
-    private List<ESClusterLogicRackInfo> getClusterRacks(Long logicClusterId, String clusterName) {
-        List<ESClusterLogicRackInfo> logicClusterRacks = new ArrayList<>();
-        if (logicClusterId != null && StringUtils.isNotBlank(clusterName)) {
-            logicClusterRacks = regionRackService.listLogicClusterRacks(logicClusterId);
-
-            logicClusterRacks = logicClusterRacks.stream()
-                .filter(item -> item.getPhyClusterName().equals(clusterName)).collect(Collectors.toList());
-        }
-
-        return logicClusterRacks;
     }
 
     /**
@@ -1327,14 +1188,11 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @return
      */
     private boolean tryLock(String clusterName) {
-        ReentrantLock lock = clusterLock.get(clusterName);
-        if (lock == null) {
-            lock = new ReentrantLock();
-            clusterLock.put(clusterName, lock);
-        }
+        ReentrantLock lock = clusterLock.computeIfAbsent(clusterName, k -> new ReentrantLock());
         try {
             return lock.tryLock(10L, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return false;
         }
     }
@@ -1379,7 +1237,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         // 需要均衡出的quota量
         double quotaExport = getRegionQuotas(tooBigRegion) * (tooBigRegion.getUsage() - usageAvg);
 
-        sLogger.info("method=doBalance||areaId={}||regionId={}||quotaExport={}",
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=doBalance||areaId={}||regionId={}||quotaExport={}",
             tooBigRegion.getLogicClusterId(), tooBigRegion.getRegionId(), quotaExport);
 
         List<CapacityPlanRegionBalanceItem> result = Lists.newArrayList();
@@ -1391,7 +1249,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             }
 
             if (quotaExport <= 0.02) {
-                sLogger.info("method=doBalance||areaId={}||regionId={}||quotaExport={}||msg=export finish",
+                LOGGER.info("class=CapacityPlanRegionServiceImpl||method=doBalance||areaId={}||regionId={}||quotaExport={}||msg=export finish",
                     tooBigRegion.getLogicClusterId(), tooBigRegion.getRegionId(), quotaExport);
                 break;
             }
@@ -1405,16 +1263,16 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                 tooBigRegion.setUsage(tooBigRegion.getUsage() - (templateHotQuota / getRegionQuotas(tooBigRegion)));
                 tgtRegion.setUsage(tgtRegion.getUsage() + (templateHotQuota / getRegionQuotas(tgtRegion)));
                 result.add(buildRegionBalance(tooBigRegion, template, tgtRegion));
-                sLogger.info(
-                    "method=doBalance||areaId={}||regionId={}||quotaExport={}||template={}||itemHotQuota={}||tgtRegionUsage={}",
+                LOGGER.info(
+                    "class=CapacityPlanRegionServiceImpl||method=doBalance||areaId={}||regionId={}||quotaExport={}||template={}||itemHotQuota={}||tgtRegionUsage={}",
                     tooBigRegion.getLogicClusterId(), tooBigRegion.getRegionId(), quotaExport, template.getTemplateName(), templateHotQuota,
                     tgtRegion.getUsage());
             }
         }
 
         if (quotaExport > 0.02) {
-            sLogger.info(
-                "method=doBalance||areaId={}||regionId={}||quotaExport={}||msg=export finish by item or small tooBigRegion not enough ",
+            LOGGER.info(
+                "class=CapacityPlanRegionServiceImpl||method=doBalance||areaId={}||regionId={}||quotaExport={}||msg=export finish by item or small tooBigRegion not enough ",
                 tooBigRegion.getLogicClusterId(), tooBigRegion.getRegionId(), quotaExport);
         }
 
@@ -1427,7 +1285,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @return
      */
     private double getRegionQuotas(CapacityPlanRegion region) {
-        return RackUtils.racks2List(region.getRacks()).size() * 2;
+        return RackUtils.racks2List(region.getRacks()).size() * 2d;
     }
 
     /**
@@ -1490,10 +1348,10 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      */
     private void moveTemplateToTgtRegion(CapacityPlanRegionBalanceItem item) throws ESOperateException {
 
-        Result editResult = templatePhyManager.editTemplateRackWithoutCheck(item.getTemplateId(),
+        Result<Void> editResult = templatePhyManager.editTemplateRackWithoutCheck(item.getTemplateId(),
             item.getTgtRegion().getRacks(), AriusUser.CAPACITY_PLAN.getDesc(), 3);
 
-        sLogger.info("method=moveTemplateToTgtRegion||template={}||srcRack={}||targetRack={}||editResult={}",
+        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=moveTemplateToTgtRegion||template={}||srcRack={}||targetRack={}||editResult={}",
             item.getTemplateId(), item.getSrcRegion().getRacks(), item.getTgtRegion().getRacks(), editResult);
 
         if (editResult.success()) {
@@ -1508,10 +1366,10 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             editRegionUsage(srcRegion.getRegionId(), srcRegion.getUsage());
             editRegionUsage(tgtRegion.getRegionId(), tgtRegion.getUsage());
 
-            Result upgradeResult = templatePhyManager.upgradeTemplateVersion(item.getTemplateId(),
+            Result<Void> upgradeResult = templatePhyManager.upgradeTemplateVersion(item.getTemplateId(),
                 AriusUser.CAPACITY_PLAN.getDesc(), 3);
 
-            sLogger.info("method=moveTemplateToTgtRegion||template={}||upgradeResult={}", item.getTemplateId(),
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=moveTemplateToTgtRegion||template={}||upgradeResult={}", item.getTemplateId(),
                 upgradeResult);
         }
     }
@@ -1587,7 +1445,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             // 计算满足热存还需要增加的空间
             double diskGap = calHotDiskExtraDemand(matchedRacks, hotDiskG, regionConfig);
 
-            sLogger.info("method=doSplit||template={}||hotDiskG={}||matchedRacks={}", template.getTemplateName(),
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=doSplit||template={}||hotDiskG={}||matchedRacks={}", template.getTemplateName(),
                 hotDiskG, matchedRacks);
 
             // 资源不足
@@ -1676,20 +1534,20 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             for (CapacityPlanRegionSplitResult regionSplitResult : rack2ResultMultiMap.get(regionRack)) {
                 try {
                     // 修改模板的racks
-                    Result editResult = templatePhyManager.editTemplateRackWithoutCheck(
+                    Result<Void> editResult = templatePhyManager.editTemplateRackWithoutCheck(
                         regionSplitResult.getPhysicalId(), regionSplitResult.getTgtRack(),
                         AriusUser.CAPACITY_PLAN.getDesc(), 3);
 
-                    sLogger.info("method=exeRegionSplitResult||template={}||srcRack={}||targetRack={}||editResult={}",
+                    LOGGER.info("class=CapacityPlanRegionServiceImpl||method=exeRegionSplitResult||template={}||srcRack={}||targetRack={}||editResult={}",
                         regionSplitResult.getPhysicalId(), region.getRacks(), regionSplitResult.getTgtRack(),
                         editResult);
 
                     if (editResult.success()) {
                         // 模板升版本
-                        Result upgradeResult = templatePhyManager.upgradeTemplateVersion(
+                        Result<Void> upgradeResult = templatePhyManager.upgradeTemplateVersion(
                             regionSplitResult.getPhysicalId(), AriusUser.CAPACITY_PLAN.getDesc(), 3);
 
-                        sLogger.info("method=exeRegionSplitResult||template={}||upgradeResult={}",
+                        LOGGER.info("class=CapacityPlanRegionServiceImpl||method=exeRegionSplitResult||template={}||upgradeResult={}",
                             regionSplitResult.getPhysicalId(), upgradeResult);
 
                         regionSplitResult.setExeResult(true);
@@ -1697,7 +1555,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                         regionSplitResult.setExeResult(false);
                     }
                 } catch (Exception e) {
-                    sLogger.error(
+                    LOGGER.error(
                         "class=CapacityPlanRegionServiceImpl||method=exeRegionSplitResult||physicalId={}||errMsg={}",
                         regionSplitResult.getPhysicalId(), e.getMessage(), e);
                 }
@@ -1715,7 +1573,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                 rack2ResultMultiMap.get(regionRacks).size() > 1 ? 1 : 0,
                 AriusUser.CAPACITY_PLAN.getDesc());
 
-            sLogger.info("method=exeRegionSplitResult||rack={}||addRegionResult={}", regionRacks, createAndBindRegionResult);
+            LOGGER.info("class=CapacityPlanRegionServiceImpl||method=exeRegionSplitResult||rack={}||addRegionResult={}", regionRacks, createAndBindRegionResult);
         }
     }
 
@@ -1724,7 +1582,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @param areaId 容量规划areaId
      * @return
      */
-    private Result checkTemplateSrvOpen(Long areaId) {
+    private Result<Void> checkTemplateSrvOpen(Long areaId) {
         CapacityPlanArea capacityPlanArea = capacityPlanAreaService.getAreaById(areaId);
 
         if (capacityPlanArea == null) {
@@ -1744,10 +1602,10 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @param capacityPlanRegion 容量规划region
      * @return
      */
-    private Result checkTemplateSrvOpen(CapacityPlanRegion capacityPlanRegion) {
+    private Result<Void> checkTemplateSrvOpen(CapacityPlanRegion capacityPlanRegion) {
 
         if (capacityPlanRegion == null) {
-            return Result.buildFail("region不存在");
+            return Result.buildFail(REGION_NOT_EXIST);
         }
 
 
@@ -1757,27 +1615,4 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
         return Result.buildSucc();
     }
-
-    /**
-     * 校验开启集群容量规划参数
-     * @param openPhyClusterPlanDTO 开启容量规划功能参数
-     * @return
-     */
-    private Result validateRegionsFlagsParams(OpenPhyClusterPlanDTO openPhyClusterPlanDTO) {
-        if (AriusObjUtils.isNull(openPhyClusterPlanDTO)) {
-            return Result.buildParamIllegal("容量规划内容不能为空");
-        }
-
-        if (StringUtils.isBlank(openPhyClusterPlanDTO.getCluster())) {
-            return Result.buildParamIllegal("容量规划目标集群不能为空");
-        }
-
-        ESClusterPhy clusterPhy = esClusterPhyService.getClusterByName(openPhyClusterPlanDTO.getCluster());
-        if (clusterPhy == null) {
-            return Result.buildParamIllegal("容量规划目标集群不存在");
-        }
-
-        return Result.buildSucc();
-    }
-
 }

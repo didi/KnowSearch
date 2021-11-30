@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.resource;
 
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class CollectClusterNodeSettingFromEsTask extends BaseConcurrentClusterTask {
 
     @Autowired
-    private ESRoleClusterHostService esRoleClusterHostService;
+    private RoleClusterHostService roleClusterHostService;
 
     /**
      * 获取任务名称
@@ -25,6 +25,15 @@ public class CollectClusterNodeSettingFromEsTask extends BaseConcurrentClusterTa
     @Override
     public String getTaskName() {
         return "采集集群节点信息";
+    }
+
+    /**
+     * 任务的线程个数
+     * @return 任务的线程个数
+     */
+    @Override
+    public int poolSize() {
+        return 3;
     }
 
     /**
@@ -49,7 +58,6 @@ public class CollectClusterNodeSettingFromEsTask extends BaseConcurrentClusterTa
      */
     @Override
     public boolean executeByCluster(String cluster) {
-        return esRoleClusterHostService.collectClusterNodeSettings(cluster);
+        return roleClusterHostService.collectClusterNodeSettings(cluster);
     }
-
 }

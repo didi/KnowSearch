@@ -1,11 +1,11 @@
 package com.didi.arius.gateway.core.service.impl;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.enums.RunModeEnum;
 import com.didi.arius.gateway.common.metadata.ESCluster;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +14,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static org.apache.commons.lang.StringUtils.*;
+
 /**
  * @author fitz
  * @date 2021/5/26 5:38 下午
  */
 @Service
 public class ESRestClientServiceImpl implements ESRestClientService {
+    protected static final Logger logger = LoggerFactory.getLogger( ESRestClientServiceImpl.class);
     protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
 
     private static final int DEFAULT_MAX_CONN_PER_ROUTE = 500;
@@ -34,63 +37,58 @@ public class ESRestClientServiceImpl implements ESRestClientService {
     private QueryConfig queryConfig;
 
     @Override
-    public ESClient getClient(String clusterName) {
-        return getClientStrict(clusterName);
+    public ESClient getClient(String clusterName, String actionName) {
+        return getClientStrict(clusterName, actionName);
     }
 
     @Override
-    public ESClient getClientStrict(String clusterName) {
-        ESCluster esCluster = esClusterMap.get(clusterName);
-        if (esCluster == null || esCluster.getEsClient() == null) {
+    public ESClient getClientStrict(String clusterName, String actionName) {
+        ESCluster dataCenter = esClusterMap.get(clusterName);
+        if (dataCenter == null) {
             return null;
         }
+        ESClient esClient = dataCenter.getEsClient();
+        if (dataCenter.getWriteAction().contains(actionName)) {
+            esClient = dataCenter.getEsWriteClient();
+            bootLogger.debug("assign action[{}], request action[{}] is write, write client host:[{}]",
+                    dataCenter.getWriteAction(), actionName, esClient.getNodes());
+        }
+        return esClient;
 
-        return esCluster.getEsClient();
     }
 
     @Override
-    public ESClient getAdminClient() {
-        return Objects.requireNonNull( esClusterMap.get(queryConfig.getAdminClusterName())).getEsClient();
+    public ESClient getAdminClient(String actionName) {
+        Objects.requireNonNull(esClusterMap.get(queryConfig.getAdminClusterName()));
+        return getClient(queryConfig.getAdminClusterName(), actionName);
+
     }
 
     @Override
     public void resetClients(Map<String, ESCluster> newDataCenterMap) {
-        if (newDataCenterMap == null || newDataCenterMap.isEmpty()) {return;}
-
+        if (newDataCenterMap == null || newDataCenterMap.isEmpty()) return;
         List<String> noNeedClose = new ArrayList<>();
         for (Map.Entry<String, ESCluster> entry : newDataCenterMap.entrySet()) {
             String newClusterName = entry.getKey();
-            ESCluster newESCluster = entry.getValue();
+            ESCluster newDataCenter = entry.getValue();
             try {
                 if (this.esClusterMap.containsKey(newClusterName)) {
-                    ESCluster oldESCluster = this.esClusterMap.get(newClusterName);
-                    ESClient esClient = oldESCluster.getEsClient();
-                    if (esClient != null && oldESCluster.getHttpAddress().equals( newESCluster.getHttpAddress())) {
-                        esClient.setEsVersion( newESCluster.getEsVersion());
-                        newESCluster.setEsClient(esClient);
-                        noNeedClose.add(newClusterName);
-                        continue;
-                    }
+                    if (alreadyInitialCenter(noNeedClose, newClusterName, newDataCenter)) continue;
                 }
-                bootLogger.info("add http dateCenter, cluster={}||addr={}", newESCluster.getCluster(), newESCluster.getHttpAddress());
-                initClient( newESCluster );
+                bootLogger.info("add http dateCenter, cluster={}||addr={}", newDataCenter.getCluster(), newDataCenter.getHttpAddress());
+                initClient(newDataCenter);
             } catch (Exception e) {
-                bootLogger.warn("add http dateCenter, cluster={}||addr={}", newESCluster.getCluster(), newESCluster.getHttpAddress(), e);
+                bootLogger.warn("add http dateCenter, cluster={}||addr={}", newDataCenter.getCluster(), newDataCenter.getHttpAddress(), e);
             }
         }
-
         final Map<String, ESCluster> oldDataCenterMap = this.esClusterMap;
         this.esClusterMap = Collections.unmodifiableMap(newDataCenterMap);
 
         for (Map.Entry<String, ESCluster> entry : oldDataCenterMap.entrySet()) {
             if (noNeedClose.contains(entry.getKey()) == false) {
-                try {
-                    entry.getValue().getEsClient().close();
-                } catch (Exception e) {
-                    bootLogger.warn("delete http dateCenter, cluster={}||addr={}", entry.getKey(), entry.getValue().getHttpAddress(), e);
-                }
+                closeOldClient(entry);
             }
-            entry.getValue().setEsClient(null);
+            /*entry.getValue().setEsClient(null);*/
         }
     }
 
@@ -99,39 +97,102 @@ public class ESRestClientServiceImpl implements ESRestClientService {
         return esClusterMap;
     }
 
-    /************************************************************** private method **************************************************************/
-    private void initClient(ESCluster esCluster) {
-        if (esCluster.getEsClient() != null) {
-            esCluster.getEsClient().close();
+    private void closeOldClient(Map.Entry<String, ESCluster> entry) {
+        try {
+            entry.getValue().getEsClient().close();
+            if (null != entry.getValue().getEsWriteClient()) {
+                entry.getValue().getEsWriteClient().close();
+            }
+        } catch (Exception e) {
+            bootLogger.warn("delete http dateCenter, cluster={}||addr={}", entry.getKey(), entry.getValue().getHttpAddress(), e);
         }
+    }
 
-        ESClient client = new ESClient( esCluster.getCluster(), esCluster.getEsVersion());
+    private boolean alreadyInitialCenter(List<String> noNeedClose, String newClusterName, ESCluster newDataCenter) {
+        ESCluster oldDataCenter = this.esClusterMap.get(newClusterName);
+        ESClient esClient = oldDataCenter.getEsClient();
+        ESClient esWriteClient = oldDataCenter.getEsWriteClient();
+        if (isEqualAddress(oldDataCenter.getHttpAddress(), newDataCenter.getHttpAddress()) &&
+                isEqualAddress(oldDataCenter.getHttpWriteAddress(), newDataCenter.getHttpWriteAddress()) &&
+                oldDataCenter.getRunMode() == newDataCenter.getRunMode()) {
+            esClient.setEsVersion(newDataCenter.getEsVersion());
+            if (null != esWriteClient) {
+                esWriteClient.setEsVersion(newDataCenter.getEsVersion());
+            }
+            newDataCenter.setEsWriteClient(esWriteClient);
+            newDataCenter.setEsClient(esClient);
+            noNeedClose.add(newClusterName);
+            return true;
+        }
+        return false;
+    }
+
+    private void initClient(ESCluster dataCenter) {
+        initReadClient(dataCenter);
+        if (dataCenter.getRunMode() == RunModeEnum.READ_WRITE_SPLIT.getRunMode()) {
+            initWriteClient(dataCenter);
+        }
+    }
+
+    private void initReadClient(ESCluster dataCenter) {
+        ESClient esOldClient = dataCenter.getEsClient();
+        dataCenter.setEsClient(getEsClient(dataCenter, dataCenter.getHttpAddress()));
+        if (null != esOldClient) {
+            esOldClient.close();
+        }
+    }
+
+    private void initWriteClient(ESCluster dataCenter) {
+        ESClient esOldWriteClient = dataCenter.getEsWriteClient();
+        dataCenter.setEsWriteClient(getEsClient(dataCenter, dataCenter.getHttpWriteAddress()));
+        if (null != esOldWriteClient) {
+            esOldWriteClient.close();
+        }
+    }
+
+    private ESClient getEsClient(ESCluster dataCenter, String addr) {
+        ESClient client = new ESClient(dataCenter.getCluster(), dataCenter.getEsVersion());
         client.setMax_conn_per_router(DEFAULT_MAX_CONN_PER_ROUTE);
         client.setMax_conn_total(DEFAULT_MAX_CONN_TOTAL);
+
         client.setSocket_timeout_millis(queryConfig.getEsSocketTimeout());
-
-        String addr = esCluster.getHttpAddress();
-
-        String[] hosts = StringUtils.split(addr, COMMA);
+        String[] hosts = split(addr, COMMA);
         for (int i = 0; i < hosts.length; ++i) {
             String clusterNode = hosts[i];
 
-            String hostName = StringUtils.substringBeforeLast(clusterNode, COLON);
-            String port = StringUtils.substringAfterLast(clusterNode, COLON);
-            bootLogger.info("adding http client node={}||clusterName={}", clusterNode, esCluster.getCluster());
+            String hostName = substringBeforeLast(clusterNode, COLON);
+            String port = substringAfterLast(clusterNode, COLON);
+            bootLogger.info("adding http client node={}||clusterName={}", clusterNode, dataCenter.getCluster());
             try {
                 client.addHttpHost(hostName, Integer.valueOf(port));
-            } catch (Throwable e) {
-                bootLogger.error("adding exception, http client node={}||clusterName={}", clusterNode, esCluster.getCluster(), e);
+            } catch (Exception e) {
+                bootLogger.error("adding exception, http client node={}||clusterName={}", clusterNode, dataCenter.getCluster(), e);
             }
         }
+
+        //TODO 暂时注释，暂不使用库里的默认值，只是用请求中携带的auth，如果test环境出现问题说明有action没有下传auth到es
+		/*if (!Strings.isEmpty(dataCenter.getPassword())) {
+			client.setBasicAuth(dataCenter.getPassword());
+		}*/
 
         if (!client.getEsVersion().startsWith(QueryConsts.ES_VERSION_2_PREFIX)) {
             client.addHeader(new BasicHeader("content-type", "application/json"));
         }
 
         client.start();
+        return client;
+    }
 
-        esCluster.setEsClient(client);
+    public boolean isEqualAddress(String oneAddress, String otherAddress) {
+        if (null == oneAddress && null == otherAddress) {
+            return true;
+        }
+        if (null == oneAddress || null == otherAddress) {
+            return false;
+        }
+        if (oneAddress.equals(otherAddress)) {
+            return true;
+        }
+        return false;
     }
 }

@@ -14,18 +14,24 @@ import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
 @Component
 public class DefaultFileStorageHandle implements FileStorageHandle {
 
+    private static final String MSG = "仅商业版支持";
     @Override
     public Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile) {
-        throw new UnsupportedOperationException("仅商业版支持");
+        throw new UnsupportedOperationException(MSG);
     }
 
     @Override
-    public Result<MultipartFile> download(String fileName, String fileMd5) {
-        throw new UnsupportedOperationException("仅商业版支持");
+    public Result<MultipartFile> download(String fileName) {
+        throw new UnsupportedOperationException(MSG);
+    }
+
+    @Override
+    public Result<Void> remove(String fileName) {
+        throw new UnsupportedOperationException(MSG);
     }
 
     @Override
     public String getDownloadBaseUrl() {
-        throw new UnsupportedOperationException("仅商业版支持");
+        throw new UnsupportedOperationException(MSG);
     }
 }

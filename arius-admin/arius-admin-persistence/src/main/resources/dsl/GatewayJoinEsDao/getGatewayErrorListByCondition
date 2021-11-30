@@ -1,0 +1,34 @@
+{
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": "boolMustDsl",
+      "must_not": [
+        {
+          "prefix": {
+            "indices": {
+              "value": "."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "indiceSample",
+    "dsl",
+    "exceptionName",
+    "timeStamp",
+    "indices",
+    "uri",
+    "requestId"
+  ],
+  "sort": [
+    {
+      "timeStamp": {
+        "order": "desc"
+      }
+    }
+  ]
+}

@@ -22,13 +22,14 @@ public interface FileStorageHandle extends BaseHandle {
     /**
      * 下载文件
      * @param fileName 文件名
-     * @param fileMd5 文件md5
      * @return 文件
      */
-    Result<MultipartFile> download(String fileName, String fileMd5);
+    Result<MultipartFile> download(String fileName);
 
-    /**
-     * 下载base地址
-     */
+    Result<Void> remove(String fileName);
+
+        /**
+         * 下载base地址
+         */
     String getDownloadBaseUrl();
 }

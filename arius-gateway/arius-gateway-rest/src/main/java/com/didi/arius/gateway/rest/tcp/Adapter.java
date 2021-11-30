@@ -79,12 +79,12 @@ public class Adapter implements TransportServiceAdapter {
 
 	@Override
 	public void raiseNodeConnected(DiscoveryNode node) {
-
+		//pass
 	}
 
 	@Override
 	public void raiseNodeDisconnected(DiscoveryNode node) {
-
+		//pass
 	}
 	
     protected void traceReceivedRequest(long requestId, String action) {

@@ -6,7 +6,6 @@ import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.tcp.ActionController;
 import com.didi.arius.gateway.core.es.tcp.ActionHandler;
 import com.didi.arius.gateway.core.service.RequestStatsService;
-import com.google.common.base.Charsets;
 import org.apache.lucene.util.IOUtils;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -35,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.CancelledKeyException;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
@@ -88,7 +88,7 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
 		}
 		ChannelBuffer buffer = (ChannelBuffer) m;
 		int size = buffer.getInt(buffer.readerIndex() - 4);
-		transportServiceAdapter.received(size + 6);
+		transportServiceAdapter.received((long)size + 6);
 
 		// we have additional bytes to read, outside of the header
 		boolean hasMessageBytesToRead = (size - (NettyHeader.HEADER_SIZE - 6)) != 0;
@@ -100,7 +100,6 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
 		// handler, where it copies to a fresh
 		// buffer, or in the cumlation buffer, which is cleaned each time
 		StreamInput streamIn = ChannelBufferStreamInputFactory.create(buffer, size);
-		boolean success = false;
 		try {
 			long requestId = streamIn.readLong();
 			byte status = streamIn.readByte();
@@ -148,11 +147,7 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
 			}
 		} finally {
 			try {
-				if (success) {
-					IOUtils.close(streamIn);
-				} else {
-					IOUtils.closeWhileHandlingException(streamIn);
-				}
+				IOUtils.closeWhileHandlingException(streamIn);
 			} finally {
 				// Set the expected position of the buffer, no matter what
 				// happened
@@ -228,32 +223,32 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
-		logger.info("client connect,client:" + ctx.getChannel().getRemoteAddress());
+		logger.info("client connect,client:{}", ctx.getChannel().getRemoteAddress());
 	}
 	
 	@Override
 	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-		logger.info("client disconnect,clent:" + ctx.getChannel().getRemoteAddress());
+		logger.info("client disconnect,clent:{}", ctx.getChannel().getRemoteAddress());
 	}
 	
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
         if (isCloseConnectionException(e.getCause())) {
-            logger.trace("close connection exception caught on transport layer [{}], disconnecting from relevant node", e.getCause(), ctx.getChannel());
+            logger.trace("close connection exception caught on transport layer , disconnecting from relevant node", e.getCause());
             // close the channel, which will cause a node to be disconnected if relevant
             ctx.getChannel().close();
         } else if (isConnectException(e.getCause())) {
-            logger.trace("connect exception caught on transport layer [{}]", e.getCause(), ctx.getChannel());
+            logger.trace("connect exception caught on transport layer", e.getCause());
             // close the channel as safe measure, which will cause a node to be disconnected if relevant
             ctx.getChannel().close();
         } else if (e.getCause() instanceof CancelledKeyException) {
-            logger.trace("cancelled key exception caught on transport layer [{}], disconnecting from relevant node", e.getCause(), ctx.getChannel());
+            logger.trace("cancelled key exception caught on transport layer, disconnecting from relevant node", e.getCause());
             // close the channel as safe measure, which will cause a node to be disconnected if relevant
             ctx.getChannel().close();
         } else if (e.getCause() instanceof SizeHeaderFrameDecoder.HttpOnTransportException) {
             // in case we are able to return data, serialize the exception content and sent it back to the client
             if (ctx.getChannel().isOpen()) {
-                ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(e.getCause().getMessage().getBytes(Charsets.UTF_8));
+                ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(e.getCause().getMessage().getBytes(StandardCharsets.UTF_8));
                 ChannelFuture channelFuture = ctx.getChannel().write(buffer);
                 channelFuture.addListener(new ChannelFutureListener() {
                     @Override
@@ -263,7 +258,7 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
                 });
             }
         } else {
-            logger.warn("exception caught on transport layer [{}], closing connection", e.getCause(), ctx.getChannel());
+            logger.warn("exception caught on transport layer, closing connection", e.getCause());
             // close the channel, which will cause a node to be disconnected if relevant
             ctx.getChannel().close();
         }

@@ -1,17 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexSizePO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexSizeESDAO;
-import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexSizePO;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexSizeESDAO;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils.indexExpMatch;
@@ -46,12 +45,12 @@ public class IndexSizeCollector extends AbstractMetaDataJob {
     private TemplatePhyService templatePhyService;
 
     @Autowired
-    private ESClusterPhyService phyClusterService;
+    private ClusterPhyService phyClusterService;
 
     @Autowired
     private ESIndexService          esIndexService;
 
-    private final static FutureUtil futureUtil = FutureUtil.init("QueryStatisticsCollector");
+    private static final FutureUtil<List<IndexSizePO>> futureUtil = FutureUtil.init("QueryStatisticsCollector");
 
     /**
      * 处理采集任务
@@ -74,32 +73,35 @@ public class IndexSizeCollector extends AbstractMetaDataJob {
             indexTemplateMap.computeIfAbsent(indexTemplate.getName(), templateName -> Lists.newArrayList()).add(indexTemplate);
         }
 
-        List<ESClusterPhy> esClusterPhies = phyClusterService.listAllClusters();
-        for(ESClusterPhy esClusterPhy : esClusterPhies){
-            futureUtil.callableTask((Callable<List<IndexSizePO>>) () -> {
-                Map<String, IndexNodes> indexStatsMap = esIndexService.getIndexNodes(esClusterPhy.getCluster(), null);
-                return parseCatIndicesResult(esClusterPhy.getCluster(), indexStatsMap, indexTemplateMap);
+        List<ClusterPhy> esClusterPhies = phyClusterService.listAllClusters();
+        for(ClusterPhy clusterPhy : esClusterPhies){
+            futureUtil.callableTask(() -> {
+                Map<String, IndexNodes> indexStatsMap = esIndexService.syncGetIndexNodes(clusterPhy.getCluster(), null);
+                return parseCatIndicesResult(clusterPhy.getCluster(), indexStatsMap, indexTemplateMap);
             } );
         }
 
-        List<IndexSizePO> indexSizePOS = futureUtil.waitResult();
+        List<List<IndexSizePO>> indexSizePOSList = futureUtil.waitResult();
+        List<IndexSizePO>       allIndexSizePOs  = new ArrayList<>();
 
         // 当前时间戳转换为当前日期，作为文档写入时间
         String sinkDate = DateTimeUtil.getDateStr(System.currentTimeMillis());
-        for(IndexSizePO item : indexSizePOS){
-            // 如果时间字段不符合
-            if (!item.isVaildDate()) {
-                LOGGER.error("class=IndexSizeCollector||method=handleJobTask||errMsg=invalid date {}, {}", item.getDate(), item);
-                // iterator.remove();
+        for(List<IndexSizePO> indexSizePOS : indexSizePOSList){
+            allIndexSizePOs.addAll(indexSizePOS);
+            for(IndexSizePO item : indexSizePOS){
+                // 如果时间字段不符合
+                if (!item.isVaildDate()) {
+                    LOGGER.error("class=IndexSizeCollector||method=handleJobTask||errMsg=invalid date {}, {}", item.getDate(), item);
+                }
+                // 设置写入时间
+                item.setSinkDate(sinkDate);
             }
-            // 设置写入时间
-            item.setSinkDate(sinkDate);
         }
 
-        boolean operatorResult = indexSizeEsDao.batchInsert(indexSizePOS);
+        boolean operatorResult = indexSizeEsDao.batchInsert(allIndexSizePOs);
 
         LOGGER.info("class=IndexSizeCollector||method=handleJobTask||msg=operatorResult {}, IndexSizePOList size {}, cost {}",
-                operatorResult, indexSizePOS.size(), stopWatch.stop().toString());
+                operatorResult, indexSizePOSList.size(), stopWatch.stop().toString());
 
         return JOB_SUCCESS;
     }
@@ -113,20 +115,19 @@ public class IndexSizeCollector extends AbstractMetaDataJob {
      */
     public List<IndexSizePO> parseCatIndicesResult(String clusterName, Map<String, IndexNodes> indexStatsMap,
                                                    Map<String, List<IndexTemplatePhyWithLogic>> indexTemplateMap) {
-        List<IndexSizePO> IndexSizePOList = Lists.newArrayList();
+        List<IndexSizePO> indexSizePOS = Lists.newArrayList();
 
         if (indexStatsMap == null) {
-            return IndexSizePOList;
+            return indexSizePOS;
         }
 
         LOGGER.info("class=IndexSizeCollector||method=parseCatIndicesResult||msg=clusterName -> {}, has {} index", clusterName, indexStatsMap.size());
 
         // 相同索引名称前缀的不同版本
         Map<String, List<IndexSizePO>> indexNameVersionMap = Maps.newHashMap();
-        IndexSizePO IndexSizePO = null;
-        String indexName = "";
-        int versionPos = 0;
-        IndexNodes indexNodes = null;
+        IndexSizePO indexSizePO;
+        String indexName;
+        IndexNodes indexNodes;
 
         for (Map.Entry<String, IndexNodes> entry : indexStatsMap.entrySet()) {
 
@@ -138,107 +139,121 @@ public class IndexSizeCollector extends AbstractMetaDataJob {
                 continue;
             }
 
-            IndexSizePO = new IndexSizePO();
+            indexSizePO = new IndexSizePO();
 
-            IndexSizePO.setIndexName(indexName).setDocsCount(indexNodes.getPrimaries().getDocs().getCount()).setClusterName(clusterName);
+            indexSizePO.setIndexName(indexName).setDocsCount(indexNodes.getPrimaries().getDocs().getCount()).setClusterName(clusterName);
             // 主shard大小，单位字节
-            IndexSizePO.setPrimaryStoreSize(indexNodes.getPrimaries().getStore().getSizeInBytes());
-            IndexSizePO.setUnitStoreSize(SizeUtil.getUnitSize(indexNodes.getPrimaries().getStore().getSizeInBytes()));
+            indexSizePO.setPrimaryStoreSize(indexNodes.getPrimaries().getStore().getSizeInBytes());
+            indexSizePO.setUnitStoreSize(SizeUtil.getUnitSize(indexNodes.getPrimaries().getStore().getSizeInBytes()));
             // 索引大小，包括副本(如果有的话)，单位是字节
-            IndexSizePO.setTotalStoreSize(indexNodes.getTotal().getStore().getSizeInBytes());
-            IndexSizePO.setUnitTotalStoreSize(SizeUtil.getUnitSize(indexNodes.getTotal().getStore().getSizeInBytes()));
+            indexSizePO.setTotalStoreSize(indexNodes.getTotal().getStore().getSizeInBytes());
+            indexSizePO.setUnitTotalStoreSize(SizeUtil.getUnitSize(indexNodes.getTotal().getStore().getSizeInBytes()));
 
             String templateName = "";
             Set<String> matchIndexTemplateNameSet = matchIndexTemplateWithIndexName(indexName, indexTemplateMap);
             if (matchIndexTemplateNameSet.isEmpty()) {
-                LOGGER.error("class=IndexSizeCollector||method=parseCatIndicesResult||errMsg=clusterName -> {}, indexName -> [{}] not match any indexTemplate or alias", clusterName, indexName);
+                LOGGER.warn("class=IndexSizeCollector||method=parseCatIndicesResult||errMsg=clusterName -> {}, indexName -> [{}] not match any indexTemplate or alias", clusterName, indexName);
             } else if (matchIndexTemplateNameSet.size() > 1) {
                 // 匹配到多个索引模板时取索引模板字符串最长的
                 templateName = Lists.newArrayList(matchIndexTemplateNameSet).get(0);
-                LOGGER.error("class=IndexSizeCollector||method=parseCatIndicesResult||errMsg=clusterName -> {}, indexName -> [{}] match {} indexTemplate or alias, {}, match first {}",
+                LOGGER.warn("class=IndexSizeCollector||method=parseCatIndicesResult||errMsg=clusterName -> {}, indexName -> [{}] match {} indexTemplate or alias, {}, match first {}",
                         clusterName, indexName, matchIndexTemplateNameSet.size(), matchIndexTemplateNameSet, templateName);
             } else {
                 templateName = Lists.newArrayList(matchIndexTemplateNameSet).get(0);
             }
 
             if (StringUtils.isNotBlank(templateName)) {
-                List<IndexTemplatePhyWithLogic> templates = indexTemplateMap.get(templateName);
-                if (CollectionUtils.isEmpty(templates)) {
-                    continue;
-                }
-
-                IndexTemplatePhyWithLogic templateInfoResponse = templates.get(0);
-
-                String date = indexName.replaceAll(templateInfoResponse.getExpression().replaceAll("\\*", ""), "");
-                // 如果日期中包含版本信息，需要与其他索引版本进行合并
-                versionPos = date.lastIndexOf("_v");
-
-                if (versionPos > 0) {
-                    date = date.substring(0, versionPos);
-                    List<IndexSizePO> IndexSizePOs = indexNameVersionMap.computeIfAbsent(templateName.concat(date), k -> new LinkedList<>());
-
-                    IndexSizePO.setDate(DateTimeUtil.getIndexDate(indexName, date, templateInfoResponse.getLogicTemplate().getDateFormat()));
-                    IndexSizePO.setTemplateName(templateName);
-                    IndexSizePOs.add(IndexSizePO);
-
-                } else {
-                    IndexSizePO.setDate(DateTimeUtil.getIndexDate(indexName, date, templateInfoResponse.getLogicTemplate().getDateFormat()));
-                    IndexSizePO.setTemplateName(templateName);
-                    IndexSizePOList.add(IndexSizePO);
-                }
+                handleTemplateNameIsNotNull(indexTemplateMap, indexSizePOS, indexNameVersionMap, indexSizePO, indexName, templateName);
 
             } else {
                 // 没有找到索引模板以索引名称为索引模板名称
-                IndexSizePO.setTemplateName(indexName);
-                IndexSizePOList.add(IndexSizePO);
+                indexSizePO.setTemplateName(indexName);
+                indexSizePOS.add(indexSizePO);
             }
         }
 
 
         // 存在不同版本的索引
         if (!indexNameVersionMap.isEmpty()) {
-            Iterator<IndexSizePO> iterator = IndexSizePOList.iterator();
-            while (iterator.hasNext()) {
-                IndexSizePO item = iterator.next();
-                // 如果在版本map中存在，则从原队列中移除，并加入到map中。例如 存在index_YYYY-MM-dd,index_YYYY-MM-dd_v1,index_YYYY-MM-dd_v2索引，需要把index_YYYY-MM-dd归入到index_YYYY-MM-dd这个key的list中进行合并大小
-                if (indexNameVersionMap.containsKey(item.getIndexName())) {
-                    indexNameVersionMap.get(item.getIndexName()).add(item);
-                    iterator.remove();
-                }
-            }
+            mergeIndex(clusterName, indexSizePOS, indexNameVersionMap);
+        }
 
-            for (Map.Entry<String, List<IndexSizePO>> entry : indexNameVersionMap.entrySet()) {
-                List<IndexSizePO> items = entry.getValue();
-                IndexSizePO = new IndexSizePO();
-                IndexSizePO.setDate(items.get(0).getDate());
-                IndexSizePO.setTemplateName(items.get(0).getTemplateName());
-                IndexSizePO.setClusterName(clusterName);
-                IndexSizePO.setIndexName(entry.getKey());
+        return indexSizePOS;
+    }
 
-                // 文档个数和大小进行合并
-                Long indexDoc = 0L;
-                Long storeSize = 0L;
-                Long totalSize = 0L;
-
-                for (IndexSizePO indexSize : items) {
-                    indexDoc += indexSize.getDocsCount();
-                    storeSize += indexSize.getPrimaryStoreSize();
-                    totalSize += indexSize.getTotalStoreSize();
-                }
-
-                IndexSizePO.setDocsCount(indexDoc);
-                // 主shard大小，单位字节
-                IndexSizePO.setPrimaryStoreSize(storeSize);
-                IndexSizePO.setUnitStoreSize(SizeUtil.getUnitSize(storeSize));
-                // 索引大小，包括副本(如果有的话)，单位是字节
-                IndexSizePO.setTotalStoreSize(totalSize);
-                IndexSizePO.setUnitTotalStoreSize(SizeUtil.getUnitSize(totalSize));
-
-                IndexSizePOList.add(IndexSizePO);
+    private void mergeIndex(String clusterName, List<IndexSizePO> indexSizePOS, Map<String, List<IndexSizePO>> indexNameVersionMap) {
+        IndexSizePO indexSizePO;
+        Iterator<IndexSizePO> iterator = indexSizePOS.iterator();
+        while (iterator.hasNext()) {
+            IndexSizePO item = iterator.next();
+            // 如果在版本map中存在，则从原队列中移除，并加入到map中。例如 存在index_YYYY-MM-dd,index_YYYY-MM-dd_v1,index_YYYY-MM-dd_v2索引，需要把index_YYYY-MM-dd归入到index_YYYY-MM-dd这个key的list中进行合并大小
+            if (indexNameVersionMap.containsKey(item.getIndexName())) {
+                indexNameVersionMap.get(item.getIndexName()).add(item);
+                iterator.remove();
             }
         }
 
-        return IndexSizePOList;
+        for (Map.Entry<String, List<IndexSizePO>> entry : indexNameVersionMap.entrySet()) {
+            List<IndexSizePO> items = entry.getValue();
+            indexSizePO = new IndexSizePO();
+            indexSizePO.setDate(items.get(0).getDate());
+            indexSizePO.setTemplateName(items.get(0).getTemplateName());
+            indexSizePO.setClusterName(clusterName);
+            indexSizePO.setIndexName(entry.getKey());
+
+            // 文档个数和大小进行合并
+            Long indexDoc = 0L;
+            Long storeSize = 0L;
+            Long totalSize = 0L;
+
+            for (IndexSizePO indexSize : items) {
+                indexDoc += indexSize.getDocsCount();
+                storeSize += indexSize.getPrimaryStoreSize();
+                totalSize += indexSize.getTotalStoreSize();
+            }
+
+            indexSizePO.setDocsCount(indexDoc);
+            // 主shard大小，单位字节
+            indexSizePO.setPrimaryStoreSize(storeSize);
+            indexSizePO.setUnitStoreSize(SizeUtil.getUnitSize(storeSize));
+            // 索引大小，包括副本(如果有的话)，单位是字节
+            indexSizePO.setTotalStoreSize(totalSize);
+            indexSizePO.setUnitTotalStoreSize(SizeUtil.getUnitSize(totalSize));
+
+            indexSizePOS.add(indexSizePO);
+        }
+    }
+
+    private void handleTemplateNameIsNotNull(Map<String, List<IndexTemplatePhyWithLogic>> indexTemplateMap,
+                                             List<IndexSizePO> indexSizePOS,
+                                             Map<String, List<IndexSizePO>> indexNameVersionMap,
+                                             IndexSizePO indexSizePO,
+                                             String indexName, String templateName) {
+        int versionPos;
+        List<IndexTemplatePhyWithLogic> templates = indexTemplateMap.get(templateName);
+        if (CollectionUtils.isEmpty(templates)) {
+            return;
+        }
+
+        IndexTemplatePhyWithLogic templateInfoResponse = templates.get(0);
+
+        String date = indexName.replaceAll(templateInfoResponse.getExpression().replace("*", ""), "");
+        // 如果日期中包含版本信息，需要与其他索引版本进行合并
+        versionPos = date.lastIndexOf("_v");
+
+        if (versionPos > 0) {
+            date = date.substring(0, versionPos);
+            List<IndexSizePO> indexSizePOList = indexNameVersionMap.computeIfAbsent(templateName.concat(date), k -> new LinkedList<>());
+
+            indexSizePO.setDate(DateTimeUtil.getIndexDate(indexName, date, templateInfoResponse.getLogicTemplate().getDateFormat()));
+            indexSizePO.setTemplateName(templateName);
+            indexSizePOList.add(indexSizePO);
+
+        } else {
+            indexSizePO.setDate(DateTimeUtil.getIndexDate(indexName, date, templateInfoResponse.getLogicTemplate().getDateFormat()));
+            indexSizePO.setTemplateName(templateName);
+            indexSizePOS.add(indexSizePO);
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.didi.arius.gateway.common.metadata;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
 * @author weizijun
@@ -8,6 +9,7 @@ import lombok.Data;
 * 
 */
 @Data
+@NoArgsConstructor
 public class AuthRequest {
 	private int appid;
 	private String appsecret;

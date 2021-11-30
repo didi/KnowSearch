@@ -29,11 +29,6 @@ public class CapacityPlanRegion {
     private Long               logicClusterId;
 
     /**
-     * 物理Region ID
-     */
-    // private Long               phyRegionId;
-
-    /**
      * 集群名字
      */
     private String             clusterName;
@@ -62,11 +57,6 @@ public class CapacityPlanRegion {
      * 1 可以接工单  0 不可以接工单
      */
     private Integer            share;
-
-    /**
-     * 状态
-     */
-    // private Integer            status;
 
     /**
      * 利用率

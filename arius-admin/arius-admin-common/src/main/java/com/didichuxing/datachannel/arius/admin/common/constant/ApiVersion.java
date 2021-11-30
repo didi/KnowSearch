@@ -5,13 +5,20 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
  * @date 2019/4/24
  */
 public class ApiVersion {
+
+    private ApiVersion(){}
+
     public static final String V1                = "/v1";
 
     public static final String V2                = "/v2";
 
+    public static final String V3                = "/v3";
+
     public static final String V2_OP             = "/v2/op";
 
     public static final String V3_OP             = "/v3/op";
+
+    public static final String AMS_API_V3        = "/ams/api/v3";
 
     public static final String V2_CONSOLE        = "/v2/console";
 

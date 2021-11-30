@@ -32,7 +32,7 @@ public interface WorkTaskHandler extends BaseHandle {
      * @param workTask 任务
      * @return result
      */
-    Result process(WorkTask workTask, Integer step, String status, String expandData);
+    Result<Void> process(WorkTask workTask, Integer step, String status, String expandData);
 
     /**
      * 获取任务详细信息

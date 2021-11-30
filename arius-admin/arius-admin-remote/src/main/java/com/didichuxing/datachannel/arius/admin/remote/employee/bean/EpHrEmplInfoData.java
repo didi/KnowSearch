@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.employee.bean;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,9 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EpHrEmplInfoData {
-    public static String USER_ON_LINE  = "A";
-    public static String USER_OFF_LINE = "I";
+public class EpHrEmplInfoData extends BaseEmInfo {
+    public static final String USER_ON_LINE  = "A";
+    public static final String USER_OFF_LINE = "I";
 
     /**
      * 工号

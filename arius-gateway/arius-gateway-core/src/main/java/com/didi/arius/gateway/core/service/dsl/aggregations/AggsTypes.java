@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Component("aggsTypes")
 public class AggsTypes {
-	private Map<String, AggsType> aggsTypeMap = new HashMap<String, AggsType>();
+	private Map<String, AggsType> aggsTypeMap = new HashMap<>();
 	
 	public void putAggsType(String name, AggsType aggsType) {
 		aggsTypeMap.put(name, aggsType);

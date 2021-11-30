@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.client.constant.task;
 
-import org.apache.commons.lang3.StringUtils;
-
 public enum WorkTaskDCDRProgressEnum {
                                       /**创建DCDR链路*/
                                       STEP_0(0, "创建DCDR链路"),
@@ -41,19 +39,6 @@ public enum WorkTaskDCDRProgressEnum {
 
     public String getValue() {
         return value;
-    }
-
-    public static WorkTaskDCDRProgressEnum valueOfProgress(String progress) {
-        if (StringUtils.isBlank(progress)) {
-            return WorkTaskDCDRProgressEnum.UNKNOWN;
-        }
-        for (WorkTaskDCDRProgressEnum progressEnum : WorkTaskDCDRProgressEnum.values()) {
-            if (progress.equals(progressEnum.getProgress())) {
-                return progressEnum;
-            }
-        }
-
-        return WorkTaskDCDRProgressEnum.UNKNOWN;
     }
 
 }

@@ -16,9 +16,10 @@ public interface ESClusterConfigService {
     /**
      * 获取宙斯ES执行脚本配置内容
      * @param esZeusConfigDTO
+     * @param configAction 配置项动作
      * @return
      */
-    Result<String> getZeusConfigContent(ESZeusConfigDTO esZeusConfigDTO);
+    Result<String> getZeusConfigContent(ESZeusConfigDTO esZeusConfigDTO, Integer configAction);
 
     /**
      * 根据集群id获取配置
@@ -80,21 +81,21 @@ public interface ESClusterConfigService {
      * @param operator
      * @return
      */
-    Result deleteEsClusterConfig(Long configId, String operator);
+    Result<Void> deleteEsClusterConfig(Long configId, String operator);
 
     /**
      * 设置配置为无效
      * @param id
      * @return
      */
-    Result setConfigValid(Long id);
+    Result<Void> setConfigValid(Long id);
 
     /**
      * 设置原始配置为无效
      * @param esConfig
      * @return
      */
-    Result setOldConfigInvalid(ESConfig esConfig);
+    Result<Void> setOldConfigInvalid(ESConfig esConfig);
 
     /**
      * 修改配置详情
@@ -102,5 +103,14 @@ public interface ESClusterConfigService {
      * @param operator
      * @return
      */
-    Result editConfigDesc(ESConfigDTO param, String operator);
+    Result<Void> editConfigDesc(ESConfigDTO param, String operator);
+
+    /**
+     * 删除固定集群角色配置类型下的配置信息
+     * @param clusterId 物理集群id
+     * @param typeName 配置类型
+     * @param enginName 角色名称
+     * @return
+     */
+    Result<Void> deleteByClusterIdAndTypeAndEngin(Long clusterId, String typeName, String enginName);
 }

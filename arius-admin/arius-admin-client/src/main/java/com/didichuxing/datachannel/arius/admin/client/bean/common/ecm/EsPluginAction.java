@@ -2,11 +2,15 @@ package com.didichuxing.datachannel.arius.admin.client.bean.common.ecm;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class EsPluginAction {
+public class EsPluginAction implements Serializable {
 
     /**
      * plugin操作类型

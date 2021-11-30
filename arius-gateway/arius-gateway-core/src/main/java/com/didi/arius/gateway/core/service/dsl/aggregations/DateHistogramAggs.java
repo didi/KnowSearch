@@ -21,25 +21,29 @@ public class DateHistogramAggs extends BucketAggsType {
 	private String name = "date_histogram";
 	
 	public static final ImmutableMap<String, TimeValue> DATE_FIELD_UNITS;
+
+	protected static final String DATE_AGG_INTERVAL = "DateHistogramAggs.interval";
+
+	protected static final long DAY_MILLS = 24 * 60 * 60 * 1000L;
 	
     static {
         DATE_FIELD_UNITS = MapBuilder.<String, TimeValue>newMapBuilder()
-                .put("year", new TimeValue(365 * 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS))
-                .put("1y", new TimeValue(365 * 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS))
-                .put("quarter", new TimeValue(90 * 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS))
-                .put("1q", new TimeValue(90 * 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS))
-                .put("month", new TimeValue(30 * 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS))
-                .put("1M", new TimeValue(30 * 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS))
-                .put("week", TimeValue.parseTimeValue("1w", null, "DateHistogramAggs.interval"))
-                .put("1w", TimeValue.parseTimeValue("1w", null, "DateHistogramAggs.interval"))
-                .put("day", TimeValue.parseTimeValue("1d", null, "DateHistogramAggs.interval"))
-                .put("1d", TimeValue.parseTimeValue("1d", null, "DateHistogramAggs.interval"))
-                .put("hour", TimeValue.parseTimeValue("1h", null, "DateHistogramAggs.interval"))
-                .put("1h", TimeValue.parseTimeValue("1h", null, "DateHistogramAggs.interval"))
-                .put("minute", TimeValue.parseTimeValue("1m", null, "DateHistogramAggs.interval"))
-                .put("1m", TimeValue.parseTimeValue("1m", null, "DateHistogramAggs.interval"))
-                .put("second", TimeValue.parseTimeValue("1s", null, "DateHistogramAggs.interval"))
-                .put("1s", TimeValue.parseTimeValue("1s", null, "DateHistogramAggs.interval"))
+                .put("year", new TimeValue(365 * DAY_MILLS, TimeUnit.MILLISECONDS))
+                .put("1y", new TimeValue(365 * DAY_MILLS, TimeUnit.MILLISECONDS))
+                .put("quarter", new TimeValue(90 * DAY_MILLS, TimeUnit.MILLISECONDS))
+                .put("1q", new TimeValue(90 * DAY_MILLS, TimeUnit.MILLISECONDS))
+                .put("month", new TimeValue(30 * DAY_MILLS, TimeUnit.MILLISECONDS))
+                .put("1M", new TimeValue(30 * DAY_MILLS, TimeUnit.MILLISECONDS))
+                .put("week", TimeValue.parseTimeValue("1w", null, DATE_AGG_INTERVAL))
+                .put("1w", TimeValue.parseTimeValue("1w", null, DATE_AGG_INTERVAL))
+                .put("day", TimeValue.parseTimeValue("1d", null, DATE_AGG_INTERVAL))
+                .put("1d", TimeValue.parseTimeValue("1d", null, DATE_AGG_INTERVAL))
+                .put("hour", TimeValue.parseTimeValue("1h", null, DATE_AGG_INTERVAL))
+                .put("1h", TimeValue.parseTimeValue("1h", null, DATE_AGG_INTERVAL))
+                .put("minute", TimeValue.parseTimeValue("1m", null, DATE_AGG_INTERVAL))
+                .put("1m", TimeValue.parseTimeValue("1m", null, DATE_AGG_INTERVAL))
+                .put("second", TimeValue.parseTimeValue("1s", null, DATE_AGG_INTERVAL))
+                .put("1s", TimeValue.parseTimeValue("1s", null, DATE_AGG_INTERVAL))
                 .immutableMap();
     }
 	
@@ -50,7 +54,11 @@ public class DateHistogramAggs extends BucketAggsType {
 	public void init() {
 		aggsTypes.putAggsType(name, this);
 	}
-	
+
+	public DateHistogramAggs() {
+		// pass
+	}
+
 	@Override
 	public AggsBukcetInfo computeAggsType(JsonObject item, Map<String, FieldInfo> mergedMappings) {
 		JsonElement interval = item.get("interval");
@@ -101,7 +109,7 @@ public class DateHistogramAggs extends BucketAggsType {
 		
 		aggsBukcetInfo.setBucketNumber(bucket);
 		aggsBukcetInfo.setLastBucketNumber(bucket);
-		aggsBukcetInfo.setMemUsed(bucket * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+		aggsBukcetInfo.setMemUsed((long)bucket * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 		
 		return aggsBukcetInfo;	
 	}

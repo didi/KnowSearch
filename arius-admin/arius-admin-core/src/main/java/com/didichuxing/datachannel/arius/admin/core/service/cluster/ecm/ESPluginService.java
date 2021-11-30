@@ -7,11 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginP
 
 import java.util.List;
 
-/**
- * ES插件包管理 服务类
- * @author didi
- * @since 2020-08-24
- */
 public interface ESPluginService {
 
     /**
@@ -36,10 +31,10 @@ public interface ESPluginService {
      * @param esPluginDTO ES插件
      * @return result
      */
-    Result<ESPluginPO> addESPlugin(ESPluginDTO esPluginDTO);
+    Result<Long> addESPlugin(ESPluginDTO esPluginDTO);
 
     /**
-     * 修改 plugin
+     * 修改 plugin （只允许修改描述信息）
      *
      * @param esPluginDTO ES插件
      * @return ESPluginPO
@@ -63,19 +58,11 @@ public interface ESPluginService {
     Result<Long> deletePluginById(Long id, String operator);
 
     /**
-     * 根据pluginIds 查询plugin列表
-     *
-     * @param pluginIds 插件IDs
-     * @return result
-     */
-    List<ESPluginPO> listPluginBelongClus(List<String> pluginIds, String name);
-
-    /**
      * 获取全部系统默认插件
      *
      * @return result
      */
-    String getAllSysDefaultPlugins();
+    String getAllSysDefaultPluginIds();
 
     /**
      * 根据集群名称获取关联插件
@@ -89,22 +76,6 @@ public interface ESPluginService {
      * @param  param ES插件的集合
      * @return result
      */
-    Result addESPlugins(List<ESPluginDTO> param);
-
-    /**
-     * 将es插件置为已安装
-     *
-     * @param id
-     * @return
-     */
-    Result installESPlugin(Long id);
-
-    /**
-     * 将es插件置为未安装
-     *
-     * @param id
-     * @return
-     */
-    Result uninstallESPlugin(Long id);
+    Result<Void> addESPlugins(List<ESPluginDTO> param);
 
 }

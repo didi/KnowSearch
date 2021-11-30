@@ -4,19 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.didi</groupId>
-        <artifactId>arius-gateway</artifactId>
-        <version>${revision}</version>
+        <artifactId>arius-gateway-v2</artifactId>
+        <version>${version}</version>
     </parent>
 
     <artifactId>arius-gateway-common</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.didi</groupId>
-            <artifactId>arius-gateway-dependency</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -56,6 +50,10 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.didichuxing.datachannel</groupId>
+            <artifactId>metrics</artifactId>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch</groupId>

@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping(V2_OP + "/template/logic/dcdr")
-@Api(value = "es集群模板接口(REST)")
+@Api(tags = "es集群逻辑模板Dcdr接口(REST)")
 public class TemplateLogicDcdrController {
 
     @Autowired
@@ -49,10 +49,10 @@ public class TemplateLogicDcdrController {
     @ApiOperation(value = "DCDR主从切换接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "expectMasterPhysicalId", value = "期望的主", required = true)})
-    public Result dcdrSwitchMasterSlave(HttpServletRequest request, @RequestParam(value = "logicId") Integer logicId,
+    public Result<Void> dcdrSwitchMasterSlave(HttpServletRequest request, @RequestParam(value = "logicId") Integer logicId,
                                         @RequestParam(value = "expectMasterPhysicalId") Long expectMasterPhysicalId) {
         String operator = HttpRequestUtils.getOperator(request);
-        Result result = templateDcdrManager.dcdrSwitchMasterSlave(logicId, expectMasterPhysicalId, 1, operator);
+        Result<Void> result = templateDcdrManager.dcdrSwitchMasterSlave(logicId, expectMasterPhysicalId, 1, operator);
 
         notifyService.send(
                 NotifyTaskTypeEnum.OP_DCDR_SWITCH_MASTER,
@@ -69,11 +69,11 @@ public class TemplateLogicDcdrController {
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "expectMasterPhysicalId", value = "期望的主", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "operator", value = "操作人", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "step", value = "执行进度", required = true)})
-    public Result switchMasterSlaveWithStep(@RequestParam(value = "logicId") Integer logicId,
+    public Result<Void> switchMasterSlaveWithStep(@RequestParam(value = "logicId") Integer logicId,
                                             @RequestParam(value = "expectMasterPhysicalId") Long expectMasterPhysicalId,
                                             @RequestParam(value = "operator") String operator,
                                             @RequestParam(value = "step") int step) {
-        Result result = templateDcdrManager.dcdrSwitchMasterSlave(logicId, expectMasterPhysicalId, step, operator);
+        Result<Void> result = templateDcdrManager.dcdrSwitchMasterSlave(logicId, expectMasterPhysicalId, step, operator);
 
         notifyService.send(
                 NotifyTaskTypeEnum.OP_DCDR_SWITCH_MASTER,
@@ -87,7 +87,7 @@ public class TemplateLogicDcdrController {
     @ResponseBody
     @ApiOperation(value = "DCDR链路创建接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true)})
-    public Result createDcdr(HttpServletRequest request,
+    public Result<Void> createDcdr(HttpServletRequest request,
                              @RequestParam(value = "logicId") Integer logicId) throws AdminOperateException {
         return templateDcdrManager.createDcdr(logicId, HttpRequestUtils.getOperator(request));
     }
@@ -96,7 +96,7 @@ public class TemplateLogicDcdrController {
     @ResponseBody
     @ApiOperation(value = "DCDR链路删除接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true)})
-    public Result deleteDcdr(HttpServletRequest request,
+    public Result<Void> deleteDcdr(HttpServletRequest request,
                              @RequestParam(value = "logicId") Integer logicId) throws AdminOperateException {
         return templateDcdrManager.deleteDcdr(logicId, HttpRequestUtils.getOperator(request));
     }

@@ -20,6 +20,10 @@ public class EnvUtil {
         return type == EnvType.DEV;
     }
 
+    public static boolean isPressure() {
+        return type == EnvType.PRESSURE;
+    }
+
     public static boolean isTest() {
         return type == EnvType.TEST;
     }
@@ -55,9 +59,11 @@ public class EnvUtil {
                 type = EnvType.TEST;
             } else if (profile.contains("stable")) {
                 type = EnvType.STABLE;
+            } else if (profile.contains("pressure")) {
+                type = EnvType.PRESSURE;
             } else if (profile.contains("pre")) {
                 type = EnvType.PRECN;
-            } else if (profile.contains("online")) {
+            }else if (profile.contains("online")) {
                 type = EnvType.ONLINECN;
             }
 
@@ -86,6 +92,7 @@ public class EnvUtil {
         TEST("test"),
         STABLE("stable"),
         PRECN("pre"),
+        PRESSURE("pressure"),
         ONLINECN("online");
 
         private String str;

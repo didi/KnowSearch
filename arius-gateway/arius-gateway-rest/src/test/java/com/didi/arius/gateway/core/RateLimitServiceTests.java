@@ -14,6 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AriusGatewayApplication.class)
 public class RateLimitServiceTests {
@@ -29,6 +31,7 @@ public class RateLimitServiceTests {
     @Test
     public void testAddByteIn() {
         rateLimitService.addByteIn(50L);
+
     }
 
     @Test

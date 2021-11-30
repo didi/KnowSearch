@@ -13,21 +13,16 @@
     <artifactId>arius-admin-persistence</artifactId>
 
     <dependencies>
-        
+
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>
             <artifactId>arius-admin-common</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.jsqlparser</groupId>
-            <artifactId>jsqlparser</artifactId>
-            <version>0.9.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -35,19 +30,20 @@
             <artifactId>druid</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
-        </dependency>
+        </dependency>-->
 
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
         </dependency>
 
+        <!-- logi -->
         <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>elasticsearch-didi-internal-client</artifactId>
+            <groupId>io.github.zqrferrari</groupId>
+            <artifactId>logi-elasticsearch-client</artifactId>
         </dependency>
 
     </dependencies>

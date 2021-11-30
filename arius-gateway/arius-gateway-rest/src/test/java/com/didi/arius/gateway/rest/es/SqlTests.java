@@ -54,7 +54,7 @@ public class SqlTests {
         System.out.println(res);
         //{"took":1,"timed_out":false,"_shards":{"total":16,"successful":16,"failed":0},"hits":{"total":5,"max_score":1.0,"hits":[{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"1","_score":1.0,"_source":{"name":"fitz1","age":1,"es_index_time":1623132760300,"timestamp":"2021-05-23 19:06:13"}}]}}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("hits") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("hits") != null);
     }
 
     /**

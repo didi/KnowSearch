@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 
 /**
  * 物理模板的mapping服务
@@ -19,9 +19,9 @@ public interface TemplatePhyMappingManager {
      * @param mappings mappings
      * @return result
      */
-    Result updateMapping(String cluster, String template, String mappings);
+    Result<Void> updateMapping(String cluster, String template, String mappings);
 
-    Result updateMappingAndMerge(String cluster, String template, String mappings, Set<String> removeFields);
+    Result<Void> updateMappingAndMerge(String cluster, String template, String mappings, Set<String> removeFields);
 
     /**
      * 校验模板mapping 模板还不存在
@@ -30,7 +30,7 @@ public interface TemplatePhyMappingManager {
      * @param ariusTypeProperty 属性列表
      * @return Result
      */
-    Result checkMappingForNew(String template, AriusTypeProperty ariusTypeProperty);
+    Result<Void> checkMappingForNew(String template, AriusTypeProperty ariusTypeProperty);
 
     /**
      * 校验模板mapping 模板已经存在
@@ -39,7 +39,7 @@ public interface TemplatePhyMappingManager {
      * @param mappings mapping
      * @return result
      */
-    Result checkMapping(String cluster, String template, String mappings, boolean doMerge);
+    Result<Void> checkMapping(String cluster, String template, String mappings, boolean doMerge);
 
     /**
      * 获取模板mapping
@@ -56,7 +56,7 @@ public interface TemplatePhyMappingManager {
      * @param dataFormat 模板名中的时间格式
      * @return result
      */
-    Result addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
+    Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
                            MappingConfig mappingConfig);
 
     /**

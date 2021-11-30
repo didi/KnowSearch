@@ -1,9 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common.ecm;
 
+import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EcmTaskDetail {
     /**
      * ID主键自增
@@ -36,6 +43,7 @@ public class EcmTaskDetail {
 
     /**
      * 状态
+     * @see com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum
      */
     private String  status;
 
@@ -44,4 +52,14 @@ public class EcmTaskDetail {
      */
     @ApiModelProperty("容器云/物理机 接口返回任务ID")
     private Long    taskId;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
 }

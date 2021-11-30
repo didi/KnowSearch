@@ -11,7 +11,7 @@ public abstract class LogicTemplateEvent extends TemplateEvent {
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public LogicTemplateEvent(Object source) {
+    protected LogicTemplateEvent(Object source) {
         super(source);
     }
 }

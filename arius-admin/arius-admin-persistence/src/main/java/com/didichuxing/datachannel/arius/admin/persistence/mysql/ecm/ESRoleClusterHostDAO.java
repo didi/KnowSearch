@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -19,12 +19,6 @@ public interface ESRoleClusterHostDAO {
     ESRoleClusterHostPO getById(Long id);
 
     List<String> listHostNamesByRoleId(String roleId);
-
-    List<String> listHostNamesByRoleAndclusterId(@Param("clusterId") Long clusterId,
-                                                 @Param("role") String role);
-
-    List<ESRoleClusterHostPO> listByRoleAndClusterId(@Param("clusterId") Long clusterId,
-                                                     @Param("role") String role);
 
     List<ESRoleClusterHostPO> listByRoleClusterId(Long roleClusterId);
 
@@ -48,14 +42,21 @@ public interface ESRoleClusterHostDAO {
 
     int deleteByCluster(String cluster);
 
+    int restoreByHostNameAndRoleId(@Param("hostname") String hostname,
+                                  @Param("roleId") Long roleId);
+
     List<ESRoleClusterHostPO> listAll();
 
     ESRoleClusterHostPO getByHostName(String hostName);
 
     int delete(Long id);
 
+    int deleteByHostNameAndRoleId(@Param("hostNames") List<String> hostnames, @Param("roleId") Long roleId);
+
     ESRoleClusterHostPO getDeleteHostByHostNameAnRoleId(@Param("hostname") String hostname,
                                                         @Param("roleId") Long roleId);
 
-    int updateHostValid(ESRoleClusterHost param);
+    int updateHostValid(RoleClusterHost param);
+
+    int getPodNumberByRoleId(@Param("roleId") Long roleId);
 }

@@ -37,13 +37,9 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 
-/**
- * @author d06679
- * @date 2017/10/23
- */
 @RestController
 @RequestMapping(V2_OP + "/template/logic")
-@Api(value = "es集群模板接口(REST)")
+@Api(tags = "es集群逻辑模板接口(REST)")
 public class TemplateLogicOpController {
 
     @Autowired
@@ -80,11 +76,14 @@ public class TemplateLogicOpController {
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板列表接口", notes = "")
     public Result<List<OpLogicTemplateVO>> list(@RequestBody IndexTemplateLogicDTO param) {
-        if (StringUtils.isBlank(param.getDataCenter())) {
-            param.setDataCenter(EnvUtil.getDC().getCode());
-        }
-        return Result
-            .buildSucc(ConvertUtil.list2List(templateLogicService.getLogicTemplates(param), OpLogicTemplateVO.class));
+        return getLogicTemplateList(param);
+    }
+
+    @GetMapping("")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑模板列表接口", notes = "")
+    public Result<List<OpLogicTemplateVO>> getLogicTemplates(@RequestParam IndexTemplateLogicDTO param) {
+        return getLogicTemplateList(param);
     }
 
     @GetMapping("/listByHasAuthCluster")
@@ -113,7 +112,7 @@ public class TemplateLogicOpController {
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板列表接口", notes = "模糊查询接口")
     public Result<List<OpLogicTemplateVO>> query(@RequestBody IndexTemplateLogicDTO param) {
-        return Result.buildSucc(ConvertUtil.list2List(templateLogicService.fuzzyLogicTemplatesByTemplateName(param),
+        return Result.buildSucc(ConvertUtil.list2List(templateLogicService.fuzzyLogicTemplatesByCondition(param),
             OpLogicTemplateVO.class));
     }
 
@@ -153,7 +152,7 @@ public class TemplateLogicOpController {
     public Result<IndexTemplateLogicAllVO> getAll(@RequestParam("logicId") Integer logicId) {
         IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
         if (templateLogic == null) {
-            return Result.buildFrom(Result.buildNotExist("模板不存在"));
+            return Result.buildNotExist("模板不存在");
         }
 
         IndexTemplateLogicAllVO logicAllVO = ConvertUtil.obj2Obj(templateLogic, IndexTemplateLogicAllVO.class);
@@ -181,9 +180,9 @@ public class TemplateLogicOpController {
     @ResponseBody
     @ApiOperation(value = "删除逻辑模板接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true) })
-    public Result delete(HttpServletRequest request,
+    public Result<Void> delete(HttpServletRequest request,
                          @RequestParam(value = "logicId") Integer logicId) throws AdminOperateException {
-        return templateLogicService.delTemplate(logicId, HttpRequestUtils.getOperator(request));
+        return templateLogicManager.delTemplate(logicId, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/add")
@@ -197,18 +196,18 @@ public class TemplateLogicOpController {
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑逻辑模板接口", notes = "")
-    public Result edit(HttpServletRequest request,
+    public Result<Void> edit(HttpServletRequest request,
                        @RequestBody IndexTemplateLogicDTO param) throws AdminOperateException {
         // 不允许修改表达式
         param.setExpression(null);
-        return templateLogicService.editTemplate(param, HttpRequestUtils.getOperator(request));
+        return templateLogicManager.editTemplate(param, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/switchMasterSlave")
     @ResponseBody
     @ApiOperation(value = "主从切换接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true) })
-    public Result switchMasterSlave(HttpServletRequest request, @RequestParam(value = "logicId") Integer logicId,
+    public Result<Void> switchMasterSlave(HttpServletRequest request, @RequestParam(value = "logicId") Integer logicId,
                                     @RequestParam(value = "expectMasterPhysicalId") Long expectMasterPhysicalId) {
         return templatePhyManager.switchMasterSlave(logicId, expectMasterPhysicalId,
             HttpRequestUtils.getOperator(request));
@@ -226,14 +225,14 @@ public class TemplateLogicOpController {
     @PutMapping("/config/update")
     @ResponseBody
     @ApiOperation(value = "编辑逻辑模板配置接口", notes = "")
-    public Result updateConfig(HttpServletRequest request, @RequestBody IndexTemplateConfigDTO configDTO) {
+    public Result<Void> updateConfig(HttpServletRequest request, @RequestBody IndexTemplateConfigDTO configDTO) {
         return templateLogicService.updateTemplateConfig(configDTO, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/checkMeta")
     @ResponseBody
     @ApiOperation(value = "元数据校验接口", notes = "")
-    public Result checkMeta() {
+    public Result<Void> checkMeta() {
         return Result.build(templateLogicManager.checkAllLogicTemplatesMeta());
     }
 
@@ -241,7 +240,7 @@ public class TemplateLogicOpController {
     @ResponseBody
     @ApiOperation(value = "修复模板pipeline", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true) })
-    public Result repairPipeline(HttpServletRequest request,
+    public Result<Void> repairPipeline(HttpServletRequest request,
                                  @RequestParam(value = "logicId") Integer logicId) throws ESOperateException {
         return templatePipelineManager.repairPipeline(logicId);
     }
@@ -249,7 +248,7 @@ public class TemplateLogicOpController {
     @PostMapping("/editName")
     @ResponseBody
     @ApiOperation(value = "编辑逻辑模板名称接口", notes = "")
-    public Result editName(HttpServletRequest request,
+    public Result<Void> editName(HttpServletRequest request,
                            @RequestBody IndexTemplateLogicDTO param) throws AdminOperateException {
         return templateLogicService.editTemplateName(param, HttpRequestUtils.getOperator(request));
     }
@@ -258,20 +257,15 @@ public class TemplateLogicOpController {
     @ResponseBody
     @ApiOperation(value = "调整Pipeline限流值", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true) })
-    public Result adjustPipelineRateLimit(@RequestParam(value = "logicId") Integer logicId) {
+    public Result<Void> adjustPipelineRateLimit(@RequestParam(value = "logicId") Integer logicId) {
         return Result.build(templateLimitManager.adjustPipelineRateLimit(logicId));
     }
 
-    // *************************************** RESTFUL  API ***************************************
-
-    @GetMapping("")
-    @ResponseBody
-    @ApiOperation(value = "获取逻辑模板列表接口", notes = "")
-    public Result<List<OpLogicTemplateVO>> getLogicTemplates(@RequestParam IndexTemplateLogicDTO param) {
+    private Result<List<OpLogicTemplateVO>> getLogicTemplateList(IndexTemplateLogicDTO param){
         if (StringUtils.isBlank(param.getDataCenter())) {
             param.setDataCenter(EnvUtil.getDC().getCode());
         }
         return Result
-            .buildSucc(ConvertUtil.list2List(templateLogicService.getLogicTemplates(param), OpLogicTemplateVO.class));
+                .buildSucc(ConvertUtil.list2List(templateLogicService.getLogicTemplates(param), OpLogicTemplateVO.class));
     }
 }

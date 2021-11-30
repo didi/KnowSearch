@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterTemplateSrvVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -18,7 +18,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 @RestController
 @RequestMapping(V3_OP + "/phy/cluster/templateSrv")
-@Api(value = "es集群资源接口(REST)")
+@Api(tags = "ES物理集群索引服务接口(REST)")
 public class ESPhyClusterTemplateSrvController {
 
     @Autowired
@@ -28,7 +28,7 @@ public class ESPhyClusterTemplateSrvController {
     @ResponseBody
     @ApiOperation(value = "获取集群当前已经开启的索引服务", notes = "")
     public Result<List<ESClusterTemplateSrvVO>> list(@PathVariable String clusterName) {
-        Result<List<ESClusterTemplateSrv>> listResult = templateSrvManager.getPhyClusterTemplateSrv(clusterName);
+        Result<List<ClusterTemplateSrv>> listResult = templateSrvManager.getPhyClusterTemplateSrv(clusterName);
 
         if (listResult.failed()) {
             return Result.buildFail(listResult.getMessage());
@@ -41,7 +41,7 @@ public class ESPhyClusterTemplateSrvController {
     @ResponseBody
     @ApiOperation(value = "获取集群可供选择的索引服务", notes = "")
     public Result<List<ESClusterTemplateSrvVO>> listSelect(@PathVariable String clusterName) {
-        Result<List<ESClusterTemplateSrv>> listResult = templateSrvManager.getPhyClusterSelectableTemplateSrv(clusterName);
+        Result<List<ClusterTemplateSrv>> listResult = templateSrvManager.getPhyClusterSelectableTemplateSrv(clusterName);
 
         if (listResult.failed()) {
             return Result.buildFail(listResult.getMessage());

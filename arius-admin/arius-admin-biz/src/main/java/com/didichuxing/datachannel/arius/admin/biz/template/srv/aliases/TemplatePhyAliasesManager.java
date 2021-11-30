@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 物理模板别名服务类
@@ -18,6 +19,14 @@ public interface TemplatePhyAliasesManager {
      * @return
      */
     List<IndexTemplatePhyAlias> fetchTemplateAliases(String cluster, String templateName) throws ESOperateException;
+
+    /**
+     * 获取所有模板别名列表
+     * @param clusters 集群名
+     * @return
+     * @throws ESOperateException
+     */
+    Map<String, List<IndexTemplatePhyAlias>> fetchAllTemplateAliases(List<String> clusters) throws ESOperateException;
 
     /**
      * 创建模板别名

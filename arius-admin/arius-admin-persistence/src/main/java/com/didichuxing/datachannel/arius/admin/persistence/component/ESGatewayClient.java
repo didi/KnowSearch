@@ -2,26 +2,28 @@ package com.didichuxing.datachannel.arius.admin.persistence.component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusGatewayException;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.gateway.document.ESGetRequest;
-import com.didichuxing.datachannel.arius.elasticsearch.client.gateway.document.ESGetResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.query.query.ESQueryRequest;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.query.query.ESQueryRequestBuilder;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.query.scroll.ESQueryScrollRequest;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.ESQueryResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggrMap;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.gateway.document.ESGetRequest;
+import com.didiglobal.logi.elasticsearch.client.gateway.document.ESGetResponse;
+import com.didiglobal.logi.elasticsearch.client.gateway.document.ESIndexRequest;
+import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
+import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequestBuilder;
+import com.didiglobal.logi.elasticsearch.client.request.query.scroll.ESQueryScrollRequest;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -38,6 +40,7 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -48,9 +51,11 @@ import java.util.function.Function;
  * es的查询类操作需要通过ESGatewayClient, 访问gateway的客户端，
  */
 @Component
+@NoArgsConstructor
+@Data
 public class ESGatewayClient {
 
-    private final ILog                                           LOGGER                = LogFactory
+    private static final ILog                                   LOGGER                = LogFactory
         .getLog(ESGatewayClient.class);
 
     /**
@@ -63,6 +68,9 @@ public class ESGatewayClient {
      */
     @Value("${es.gateway.port}")
     private Integer                                              gatewayPort;
+
+    @Value("${es.client.io.thread.count:0}")
+    private Integer                                              ioThreadCount;
 
     /**
      * 访问索引的appid
@@ -105,7 +113,7 @@ public class ESGatewayClient {
         String[] passwords = StringUtils.splitByWholeSeparatorPreserveAllTokens(password, COMMA);
 
         if (appids == null || passwords == null || appids.length != passwords.length) {
-            throw new RuntimeException("please check cn gateway appid,password");
+            throw new AriusGatewayException("please check cn gateway appid,password");
         }
 
         // 构建认证信息的header
@@ -156,11 +164,10 @@ public class ESGatewayClient {
             gatewayClientTuple = getGatewayClientByDataCenterAndIndexName(clusterName, indexName);
 
             return gatewayClientTuple.v2().prepareSQL(sql).get(new TimeValue(120, TimeUnit.SECONDS));
-
         } catch (Exception e) {
             LOGGER.warn(
-                "class=GatewayClient||method=performSQLRequest||dataCenter={}||appId={}||clusterName={}||sql={}||md5={}||errMsg=query error. ",
-                EnvUtil.getDC(), gatewayClientTuple.v1(), clusterName, sql, CommonUtils.getMD5(orginalQuery), e);
+                "class=GatewayClient||method=performSQLRequest||dataCenter={}||gatewayClientTuple={}||clusterName={}||sql={}||md5={}||errMsg=query error. ",
+                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, sql, CommonUtils.getMD5(orginalQuery), e);
             return null;
         }
     }
@@ -276,6 +283,29 @@ public class ESGatewayClient {
     }
 
     /**
+     * 根据dsl语句写数据
+     *
+     * @param templateName 模版名称
+     * @param typeName 类型
+     * @param dsl 数据
+     */
+    public void performWriteRequest(String templateName, String typeName, String dsl) {
+        performWriteRequest(null, templateName, typeName, dsl);
+    }
+
+    /**
+     * 根据dsl语句写数据
+     *
+     * @param clusterName 集群名字
+     * @param templateName 模版名称（目前通过gateway写入只支持传模版，不能具体某一个日期的索引）
+     * @param typeName 类型
+     * @param dsl 数据
+     */
+    public void performWriteRequest(String clusterName, String templateName, String typeName, String dsl) {
+        doWrite(clusterName, templateName, new ESIndexRequest().index(templateName).type(typeName).source(dsl));
+    }
+
+    /**
      * 根据查询语句获取数据
      *
      * @param indexName
@@ -289,12 +319,12 @@ public class ESGatewayClient {
         ESQueryResponse esQueryResponse = doQuery(clusterName, indexName,
             new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl).clazz(clzz));
         if (esQueryResponse == null) {
-            return null;
+            return new ArrayList<>();
         }
 
         List<Object> objectList = esQueryResponse.getSourceList();
         if (CollectionUtils.isEmpty(objectList)) {
-            return null;
+            return new ArrayList<>();
         }
 
         List<T> hits = Lists.newLinkedList();
@@ -318,10 +348,10 @@ public class ESGatewayClient {
                 new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl));
         } while (tryTimes-- > 0 && null == esQueryResponse);
 
-        //        if(!EnvUtil.isOnline()){
+        if(!EnvUtil.isOnline()){
         LOGGER.warn("class=GatewayClient||method=performRequest||dataCenter={}||indexName={}||queryDsl={}||ret={}",
             EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
-        //        }
+                }
 
         return func.apply(esQueryResponse);
     }
@@ -461,8 +491,8 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> Tuple<Long, List<T>> performRequestListAndGetTotalCount(String indexName, String typeName, String queryDsl, Class<T> clzz) {
-        ESQueryResponse esQueryResponse = doQuery(null, indexName,
+    public <T> Tuple<Long, List<T>> performRequestListAndGetTotalCount(String clusterName,String indexName, String typeName, String queryDsl, Class<T> clzz) {
+        ESQueryResponse esQueryResponse = doQuery(clusterName, indexName,
                 new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl).clazz(clzz));
         if (esQueryResponse == null) {
             return null;
@@ -667,10 +697,12 @@ public class ESGatewayClient {
         }
 
         long totalCount = Long
-            .valueOf(esQueryResponse.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString());
+            .parseLong(esQueryResponse.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString());
         int scrollCnt = (int) Math.ceil((double) totalCount / scrollSize);
 
         for (int scrollIndex = 0; scrollIndex < scrollCnt - 1; ++scrollIndex) {
+            if (esQueryResponse == null) {continue;}
+
             String scrollId = esQueryResponse.getUnusedMap().get("_scroll_id").toString();
 
             try {
@@ -680,10 +712,6 @@ public class ESGatewayClient {
                 LOGGER.warn(
                     "class=GatewayClient||method=queryWithScroll||dataCenter={}||scrollId={}||errMsg=query error. ",
                         EnvUtil.getDC(), scrollId, e);
-            }
-
-            if (esQueryResponse == null) {
-                continue;
             }
         }
 
@@ -724,8 +752,8 @@ public class ESGatewayClient {
             response = gatewayClientTuple.v2().get(request).actionGet(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             LOGGER.warn(
-                "class=GatewayClient||method=doGet||dataCenter={}||appId={}||indexName={}||typeName={}||id={}||errMsg=get error. ",
-                    EnvUtil.getDC(), gatewayClientTuple.v1(), indexName, typeName, id, e);
+                "class=GatewayClient||method=doGet||dataCenter={}||gatewayClientTuple={}||indexName={}||typeName={}||id={}||errMsg=get error. ",
+                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), indexName, typeName, id, e);
         }
 
         if (response == null) {
@@ -734,7 +762,7 @@ public class ESGatewayClient {
 
         T obj = null;
         try {
-            obj = JSONObject.parseObject(JSON.toJSONString(response.getSource()), clzz);
+            obj = JSON.parseObject(JSON.toJSONString(response.getSource()), clzz);
         } catch (JSONException e) {
             LOGGER.warn(
                 "class=GatewayClient||method=doGet||dataCenter={}||indexName={}||typeName={}||id={}||clzz={}||errMsg=fail to parse json. ",
@@ -759,10 +787,29 @@ public class ESGatewayClient {
         } catch (Exception e) {
             String queryDsl = bytesReferenceConvertDsl(queryRequest.source());
             LOGGER.warn(
-                "class=GatewayClient||method=doQuery||dataCenter={}||appId={}||clusterName={}||indexName={}||queryDsl={}||md5={}||errMsg=query error. ",
-                    EnvUtil.getDC(), gatewayClientTuple.v1(), clusterName, queryRequest.indices(), queryDsl,
+                "class=GatewayClient||method=doQuery||dataCenter={}||gatewayClientTuple={}||clusterName={}||indexName={}||queryDsl={}||md5={}||errMsg=query error. ",
+                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, queryRequest.indices(), queryDsl,
                 CommonUtils.getMD5(queryDsl), e);
             return null;
+        }
+    }
+
+    /**
+     * @param clusterName 集群名字
+     * @param templateName 模版名称（目前通过gateway写入只支持传模版，不能具体某一个日期的索引）
+     * @param indexRequest indexRequest
+     */
+    private void doWrite(String clusterName, String templateName, ESIndexRequest indexRequest) {
+        Tuple<String, ESClient> gatewayClientTuple = null;
+        try {
+            gatewayClientTuple = getGatewayClientByDataCenterAndIndexName(clusterName, templateName);
+            gatewayClientTuple.v2().index(indexRequest);
+        } catch (Exception e) {
+            String dsl = bytesReferenceConvertDsl(indexRequest.source());
+            LOGGER.warn(
+                    "class=GatewayClient||method=doWrite||dataCenter={}||gatewayClientTuple={}||clusterName={}||indexName={}||queryDsl={}||md5={}||errMsg=query error. ",
+                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, indexRequest.index(), dsl,
+                    CommonUtils.getMD5(dsl), e);
         }
     }
 
@@ -836,11 +883,20 @@ public class ESGatewayClient {
                 if (StringUtils.isNotBlank(clusterName)) {
                     esClient.setClusterName(clusterName);
                 }
+
+                if (ioThreadCount > 0) {
+                    esClient.setIoThreadCount(ioThreadCount);
+                }
+
                 // 配置http超时
                 esClient.setRequestConfigCallback(builder -> builder.setConnectTimeout(10000).setSocketTimeout(120000)
                     .setConnectionRequestTimeout(120000));
                 esClient.start();
             } catch (Exception e) {
+                if(null != esClient){
+                    esClient.close();
+                }
+
                 LOGGER.error("class=ESGatewayClient||method=buildGateWayClient||errMsg={}||url={}||port={}",
                     e.getMessage(), url, port, e);
                 return null;

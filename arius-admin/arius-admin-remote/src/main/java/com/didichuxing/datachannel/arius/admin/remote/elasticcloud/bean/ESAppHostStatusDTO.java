@@ -3,11 +3,16 @@ package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.ElasticCloudHostStatusEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ESAppHostStatusDTO extends BaseDTO {
 
+    private static final long serialVersionUID = -6512263309120853724L;
     /**
      * 分组
      */

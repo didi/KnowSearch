@@ -57,7 +57,7 @@ public class DocumentTests {
         System.out.println(res);
         //{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"41","_version":3,"_shards":{"total":2,"failed":0,"successful":2},"result":"deleted","_seq_no":2,"_primary_term":1,"found":true}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("_shards") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("_shards") != null);
     }
 
     /**
@@ -79,7 +79,7 @@ public class DocumentTests {
         System.out.println(res);
         //{"_index":"cn_record.arius.template.value_2021-06","_type":"_doc","_id":"DKHM83kBmWfLM8BR_GVW","_version":1,"_shards":{"total":2,"failed":0,"successful":2},"result":"created","_seq_no":0,"_primary_term":1,"created":true}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("_shards") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("_shards") != null);
     }
 
     /**
@@ -101,7 +101,7 @@ public class DocumentTests {
         System.out.println(res);
         //{"_index":"cn_record.arius.template.value_2021-06","_type":"_doc","_id":"DKHM83kBmWfLM8BR_GVW","_version":1,"_shards":{"total":2,"failed":0,"successful":2},"result":"created","_seq_no":0,"_primary_term":1,"created":true}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("_shards") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("_shards") != null);
     }
 
     /**
@@ -123,7 +123,7 @@ public class DocumentTests {
         System.out.println(res);
         //{"_index":"cn_record.arius.template.value_2021-06","_type":"_doc","_id":"15","_version":1,"_shards":{"total":2,"failed":0,"successful":2},"result":"created","_seq_no":0,"_primary_term":1,"created":true}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("_shards") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("_shards") != null);
     }
 
     /**
@@ -145,7 +145,7 @@ public class DocumentTests {
         System.out.println(res);
         //{"_index":"cn_record.arius.template.value_2021-06","_type":"_doc","_id":"16","_version":1,"_shards":{"total":2,"failed":0,"successful":2},"result":"created","_seq_no":1,"_primary_term":1,"created":true}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("_shards") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("_shards") != null);
     }
 
     /**
@@ -165,7 +165,7 @@ public class DocumentTests {
         System.out.println(res);
         //{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"11","_version":2,"_shards":{"total":2,"failed":0,"successful":2},"result":"updated","_seq_no":2,"_primary_term":1}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("_shards") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("_shards") != null);
     }
 
     /**
@@ -185,7 +185,7 @@ public class DocumentTests {
         System.out.println(res);
         //{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"11","_version":5,"_shards":{"total":2,"failed":0,"successful":2},"result":"updated","_seq_no":5,"_primary_term":1}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONObject("_shards") != null, true);
+        assertEquals(true, jsonObject.getJSONObject("_shards") != null);
     }
 
 

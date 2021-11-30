@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.notify;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ public interface MailContent {
     List<String> getToAddrList();
 
     default List<String> getCcAddrList() {
-        return null;
+        return Collections.emptyList();
     }
 
 }

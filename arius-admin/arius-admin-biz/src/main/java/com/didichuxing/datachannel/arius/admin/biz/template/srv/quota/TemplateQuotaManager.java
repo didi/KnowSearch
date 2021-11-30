@@ -71,6 +71,11 @@ public interface TemplateQuotaManager {
      */
     String getCtlRange(String cluster, String racks);
 
+    /**
+     *
+     * @param logicId
+     * @return
+     */
     String getCtlRange(Integer logicId);
 
     /**
@@ -86,6 +91,10 @@ public interface TemplateQuotaManager {
      */
     List<ESTemplateQuotaUsage> listAll();
 
+    /**
+     *
+     * @return
+     */
     List<ESTemplateQuotaUsage> listAllTemplateQuotaUsageWithCache();
 
     /**

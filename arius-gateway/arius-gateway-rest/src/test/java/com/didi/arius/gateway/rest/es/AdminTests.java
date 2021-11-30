@@ -31,7 +31,7 @@ public class AdminTests {
 
     @Before
     public void setUp() {
-        String appid = "100000000";
+        String appid = "1";
         String appsecret = "azAWiJhxkho33ac";
         String token = Base64.getEncoder().encodeToString((appid + ":" + appsecret).getBytes(StandardCharsets.UTF_8));
         headerParams = new HashMap<>();
@@ -47,7 +47,7 @@ public class AdminTests {
     @Test
     public void testRestIndicesController() throws IOException {
         String res = HttpClient.forward(HOST+"/_cat/indices", "GET", null, headerParams, null);
-        assertEquals(res, "not support!");
+        assertEquals("not support!", res);
         String res2 = HttpClient.forward(HOST+"/_cat/indices/" + INDEX_NAME, "GET", null, headerParams, null);
         System.out.println(res2);
     }
@@ -62,13 +62,13 @@ public class AdminTests {
         String res = HttpClient.forward(HOST+"/_cluster/health", "GET", null, headerParams, null);
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getIntValue("active_shards") > 0, true);
+        assertEquals(true, jsonObject.getIntValue("active_shards") > 0);
 
 
         String res2 = HttpClient.forward(HOST+"/_cluster/health/" + INDEX_NAME, "GET", null, headerParams, null);
         System.out.println(res2);
         JSONObject jsonObject2 = JSON.parseObject(res2);
-        assertEquals(jsonObject2.getIntValue("active_shards") > 0, true);
+        assertEquals(true, jsonObject2.getIntValue("active_shards") > 0);
     }
 
     /**
@@ -92,7 +92,7 @@ public class AdminTests {
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
         Integer total = jsonObject.getJSONObject("_nodes").getInteger("total");
-        assertEquals(total > 0, true);
+        assertEquals(true, total > 0);
     }
 
     /**
@@ -105,7 +105,7 @@ public class AdminTests {
         String res = HttpClient.forward(HOST+"/_cluster/settings", "PUT", bodyform, headerParams, null);
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getBoolean("acknowledged"), true);
+        assertEquals(true, jsonObject.getBoolean("acknowledged"));
     }
 
     /**
@@ -138,7 +138,7 @@ public class AdminTests {
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
         JSONObject indexJson = jsonObject.getJSONObject(INDEX_NAME);
-        assertEquals(indexJson != null, true);
+        assertEquals(true, indexJson != null);
 
     }
 
@@ -159,7 +159,7 @@ public class AdminTests {
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
         JSONObject indexJson = jsonObject.getJSONObject(INDEX_NAME);
-        assertEquals(indexJson != null, true);
+        assertEquals(true, indexJson != null);
 
     }
 
@@ -191,7 +191,7 @@ public class AdminTests {
         System.out.println(res);
         JSONObject jsonObject = JSON.parseObject(res);
         Boolean b = jsonObject.getBoolean("acknowledged");
-        assertEquals(b, true);
+        assertEquals(true, b);
 
     }
 

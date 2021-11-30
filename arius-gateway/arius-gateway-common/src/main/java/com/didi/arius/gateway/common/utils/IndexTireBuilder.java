@@ -23,7 +23,7 @@ public class IndexTireBuilder {
             List<IndexTire.Char> chars = getIndexChars(expression, indexTemplate.getDateFormat());
             indexTire.insert(chars, indexTemplate);
 
-            if (false == StringUtils.isEmpty(indexTemplate.getDateFormat())) {
+            if (!StringUtils.isEmpty(indexTemplate.getDateFormat())) {
                 List<IndexTire.Char> expChars = getIndexChars(expression, null);
                 indexTire.insert(expChars, indexTemplate);
             }
@@ -46,7 +46,7 @@ public class IndexTireBuilder {
             chars.add(new IndexTire.Char(expression.charAt(i), 0));
         }
 
-        if (false == StringUtils.isEmpty(dateFormat)) {
+        if (!StringUtils.isEmpty(dateFormat)) {
             for (int i = 0 ; i < dateFormat.length(); ++i) {
                 char c = dateFormat.charAt(i);
                 switch (c) {

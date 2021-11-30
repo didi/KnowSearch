@@ -8,13 +8,18 @@ import java.lang.reflect.Method;
 import java.util.Random;
 
 public class RandomGenerator {
+
+    private RandomGenerator(){}
+
+    private static final Random random = new Random();
+
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RandomGenerator.class);
 
     public static Integer randomInt(int low, int high) {
         if (high <= low) {
             throw new IllegalArgumentException("bound should be higher");
         }
-        Random random = new Random();
         return low + random.nextInt(high - low);
     }
 
@@ -22,7 +27,6 @@ public class RandomGenerator {
         if (high <= low) {
             throw new IllegalArgumentException("bound should be higher");
         }
-        Random random = new Random();
         return random.nextDouble() * (high - low) + low;
     }
 
@@ -35,7 +39,6 @@ public class RandomGenerator {
     }
 
     public static char randomWritableChar() {
-        Random random = new Random();
         return (char) (33 + random.nextInt(94));
     }
 
@@ -46,9 +49,9 @@ public class RandomGenerator {
             int index = new Random().nextInt(ts.length);
             return ts[index];
         } catch (NoSuchMethodException e) {
-            LOGGER.error("get enum failed", e);
+            LOGGER.error("class=RandomGenerator||method=randomFromEnum||errMsg=get enum failed", e);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            LOGGER.error("", e);
+            LOGGER.error("class=RandomGenerator||method=randomFromEnum||errMsg=", e);
         }
         return null;
     }

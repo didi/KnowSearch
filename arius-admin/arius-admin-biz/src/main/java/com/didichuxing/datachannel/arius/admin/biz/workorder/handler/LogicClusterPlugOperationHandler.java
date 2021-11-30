@@ -5,14 +5,14 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicCluste
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterPlugOperationOrderDetail;
@@ -22,17 +22,17 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicClusterAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.LogicClusterPluginNotify;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -48,30 +48,30 @@ import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskType
 public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private AppLogicClusterAuthService appLogicClusterAuthService;
+    private AppClusterLogicAuthService appClusterLogicAuthService;
 
     @Autowired
-    private ESRegionRackService        rackService;
+    private RegionRackService rackService;
 
     @Autowired
-    private ESClusterPhyService        esClusterPhyService;
+    private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private ESClusterLogicService      esClusterLogicService;
+    private ClusterLogicService clusterLogicService;
 
     @Autowired
     private EcmTaskManager             ecmTaskManager;
 
     @Autowired
-    private ESRoleClusterService       esRoleClusterService;
+    private RoleClusterService roleClusterService;
 
     @Autowired
-    private EcmHandleService           ecmHandleService;
+    private EcmHandleService ecmHandleService;
 
     protected static final ILog        LOGGER = LogFactory.getLog(LogicClusterPlugOperationHandler.class);
 
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         LogicClusterPlugOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPlugOperationContent.class);
 
@@ -79,8 +79,8 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("物理集群id为空！");
         }
 
-        ESClusterLogic esClusterLogic = esClusterLogicService.getLogicClusterById(content.getLogicClusterId());
-        if (esClusterLogic == null) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getLogicClusterId());
+        if (clusterLogic == null) {
             return Result.buildParamIllegal("集群不存在");
         }
 
@@ -101,11 +101,11 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         LogicClusterPlugOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPlugOperationContent.class);
 
-        AppLogicClusterAuthEnum logicClusterAuthEnum = appLogicClusterAuthService
+        AppClusterLogicAuthEnum logicClusterAuthEnum = appClusterLogicAuthService
             .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), content.getLogicClusterId());
 
         switch (logicClusterAuthEnum) {
@@ -121,63 +121,26 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         LogicClusterPlugOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPlugOperationContent.class);
 
         List<Integer> clusterStrIdList = rackService.listPhysicClusterId(content.getLogicClusterId());
         for (Integer clusterId : clusterStrIdList) {
-            Result result = editClusterAndSave2WorkOrderTask(clusterId, workOrder, content);
+            Result<EcmTaskDTO> result = editClusterAndSave2WorkOrderTask(clusterId, workOrder, content);
             if (result.failed()) {
-                return result;
+                return Result.buildFrom(result);
             }
         }
 
         sendNotify(WORK_ORDER_LOGIC_CLUSTER_PLUGIN,
             new LogicClusterPluginNotify(workOrder.getSubmitorAppid(), content.getLogicClusterName(), approver),
             Arrays.asList(workOrder.getSubmitor()));
-        return Result.buildSucc();
-    }
-
-    private Result<EcmTaskDTO> editClusterAndSave2WorkOrderTask(Integer clusterId, WorkOrder workOrder,
-                                                                LogicClusterPlugOperationContent content) {
-        EcmTaskDTO esEcmTaskDTO = new EcmTaskDTO();
-
-        ESClusterPhy esClusterPhy = esClusterPhyService.getClusterById(Integer.valueOf(clusterId));
-        esEcmTaskDTO.setPhysicClusterId(esClusterPhy.getId().longValue());
-
-        List<ESRoleCluster> esRoleClusterList = esRoleClusterService.getAllRoleClusterByClusterId(esClusterPhy.getId());
-        if (CollectionUtils.isEmpty(esRoleClusterList)) {
-            return Result.buildFail("物理集群角色不存在");
-        }
-
-        List<String> roleNameList = new ArrayList<>();
-        for (ESRoleCluster esRoleCluster : esRoleClusterList) {
-            roleNameList.add(esRoleCluster.getRole());
-        }
-
-        esEcmTaskDTO.setWorkOrderId(workOrder.getId());
-        esEcmTaskDTO.setTitle(workOrder.getTitle());
-        esEcmTaskDTO.setOrderType(EcmTaskTypeEnum.PLUG_OPERATION.getCode());
-        esEcmTaskDTO.setEcmParamBaseList(ecmHandleService.buildEcmParamBaseList(clusterId, roleNameList).getData());
-        esEcmTaskDTO.setClusterNodeRole(ListUtils.strList2String(roleNameList));
-        esEcmTaskDTO.setCreator(workOrder.getSubmitor());
-        esEcmTaskDTO.setType(esClusterPhy.getType());
-        ecmTaskManager.saveEcmTask(esEcmTaskDTO);
-
-        List<Long> plugIdList = ListUtils.string2LongList(esClusterPhy.getPlugIds());
-        if (OperationTypeEnum.INSTALL.getCode().equals(content.getOperationType())) {
-            plugIdList.addAll(ListUtils.string2LongList(content.getPlugIds()));
-        } else {
-            plugIdList.removeAll(ListUtils.string2LongList(content.getPlugIds()));
-        }
-        esClusterPhy.setPlugIds(ListUtils.longList2String(plugIdList.stream().distinct().collect(Collectors.toList())));
-        esClusterPhyService.editCluster(ConvertUtil.obj2Obj(esClusterPhy, ESClusterDTO.class), workOrder.getSubmitor());
         return Result.buildSucc();
     }
 
@@ -199,10 +162,48 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
+    }
+
+    private Result<EcmTaskDTO> editClusterAndSave2WorkOrderTask(Integer clusterId, WorkOrder workOrder,
+                                                                LogicClusterPlugOperationContent content) {
+        EcmTaskDTO esEcmTaskDTO = new EcmTaskDTO();
+
+        ClusterPhy clusterPhy = esClusterPhyService.getClusterById(clusterId);
+        esEcmTaskDTO.setPhysicClusterId(clusterPhy.getId().longValue());
+
+        List<RoleCluster> roleClusterList = roleClusterService.getAllRoleClusterByClusterId(
+                clusterPhy.getId());
+        if (CollectionUtils.isEmpty(roleClusterList)) {
+            return Result.buildFail("物理集群角色不存在");
+        }
+
+        List<String> roleNameList = new ArrayList<>();
+        for (RoleCluster roleCluster : roleClusterList) {
+            roleNameList.add(roleCluster.getRole());
+        }
+
+        esEcmTaskDTO.setWorkOrderId(workOrder.getId());
+        esEcmTaskDTO.setTitle(workOrder.getTitle());
+        esEcmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());
+        esEcmTaskDTO.setEcmParamBaseList(ecmHandleService.buildEcmParamBaseList(clusterId, roleNameList).getData());
+        esEcmTaskDTO.setClusterNodeRole(ListUtils.strList2String(roleNameList));
+        esEcmTaskDTO.setCreator(workOrder.getSubmitor());
+        esEcmTaskDTO.setType(clusterPhy.getType());
+        ecmTaskManager.saveEcmTask(esEcmTaskDTO);
+
+        List<Long> plugIdList = ListUtils.string2LongList(clusterPhy.getPlugIds());
+        if (OperationTypeEnum.INSTALL.getCode().equals(content.getOperationType())) {
+            plugIdList.addAll(ListUtils.string2LongList(content.getPlugIds()));
+        } else {
+            plugIdList.removeAll(ListUtils.string2LongList(content.getPlugIds()));
+        }
+        clusterPhy.setPlugIds(ListUtils.longList2String(plugIdList.stream().distinct().collect(Collectors.toList())));
+        esClusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ESClusterDTO.class), workOrder.getSubmitor());
+        return Result.buildSucc();
     }
 }

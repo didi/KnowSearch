@@ -17,7 +17,7 @@ public interface SecurityUserService {
      * @param retryCount  重试次数
      * @return result
      */
-    Result appendUserRoles(String cluster, String userName, String roleName, Integer appId,
+    Result<Boolean> appendUserRoles(String cluster, String userName, String roleName, Integer appId,
                            int retryCount) throws ESOperateException;
 
     /**
@@ -29,7 +29,7 @@ public interface SecurityUserService {
      * @param retryCount  重试次数
      * @return result
      */
-    Result deleteUserRoles(String cluster, String userName, String roleName, int retryCount) throws ESOperateException;
+    Result<Boolean> deleteUserRoles(String cluster, String userName, String roleName, int retryCount) throws ESOperateException;
 
     /**
      * 确保用户拥有制定权限
@@ -39,7 +39,7 @@ public interface SecurityUserService {
      * @param appId appid
      * @return result
      */
-    Result ensureUserHasAuth(String cluster, String userName, String roleName, Integer appId);
+    Result<Boolean> ensureUserHasAuth(String cluster, String userName, String roleName, Integer appId);
 
     /**
      * 修改密码
@@ -49,6 +49,6 @@ public interface SecurityUserService {
      * @param retryCount retryCount
      * @return
      */
-    Result changePasswordIfExist(String cluster, String userName, String verifyCode,
+    Result<Boolean> changePasswordIfExist(String cluster, String userName, String verifyCode,
                                  int retryCount) throws ESOperateException;
 }

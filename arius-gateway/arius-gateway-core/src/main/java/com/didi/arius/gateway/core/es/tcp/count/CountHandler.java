@@ -42,7 +42,7 @@ public class CountHandler extends ActionHandler {
 		String[] newIndices = Convert.convertIndices(countRequest.indices());
 		countRequest.indices(newIndices);
 
-        ActionListener<CountResponse> listener = new ActionListenerImpl<CountResponse>(actionContext);	
+        ActionListener<CountResponse> listener = new ActionListenerImpl<>(actionContext);
         esTcpClientService.getClient(actionContext.getCluster()).count(countRequest, new RetryListener<>(this, actionContext, listener, retryTimes));
 	}
 

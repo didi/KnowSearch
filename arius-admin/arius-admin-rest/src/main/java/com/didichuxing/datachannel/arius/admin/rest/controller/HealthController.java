@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController("healthController")
 @RequestMapping("/health")
-@Api(description = "web应用探活接口(REST)")
+@Api("web应用探活接口(REST)")
 public class HealthController {
 
     /**

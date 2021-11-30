@@ -1,24 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.impl;
 
+import com.baomidou.mybatisplus.extension.api.R;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmTaskDetail;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmTaskDetailProgress;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ESRoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDetailPO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ValidateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESRoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDetailDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -40,22 +41,22 @@ import java.util.stream.Collectors;
  */
 @Service
 public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
-    private final static Logger      LOGGER = LoggerFactory.getLogger( EcmTaskDetailManagerImpl.class);
+    private static final Logger      LOGGER = LoggerFactory.getLogger( EcmTaskDetailManagerImpl.class);
 
     @Autowired
     private EcmTaskDetailDAO         ecmTaskDetailDAO;
 
     @Autowired
-    private ESRoleClusterService     esRoleClusterService;
+    private RoleClusterService roleClusterService;
 
     @Autowired
     private EcmTaskManager ecmTaskManager;
 
     @Autowired
-    private EcmHandleService         ecmHandleService;
+    private EcmHandleService ecmHandleService;
 
     @Autowired
-    private ESRoleClusterHostService esRoleClusterHostService;
+    private RoleClusterHostService roleClusterHostService;
 
     @Override
     public int replace(EcmTaskDetail ecmTaskDetail) {
@@ -65,6 +66,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
     @Override
     public Result<Long> saveEcmTaskDetail(EcmTaskDetail esEcmTaskDetail) {
         EcmTaskDetailPO ecmTaskDetailPo = ConvertUtil.obj2Obj(esEcmTaskDetail, EcmTaskDetailPO.class);
+        initEcmTaskDetailParam(ecmTaskDetailPo);
         boolean succ = (1 == ecmTaskDetailDAO.save(ecmTaskDetailPo));
         return Result.build(succ, ecmTaskDetailPo.getId());
     }
@@ -143,14 +145,14 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
     }
 
     @Override
-    public Result getTaskDetailLog(Long detailId, String operator) {
+    public Result<EcmSubTaskLog> getTaskDetailLog(Long detailId, String operator) {
         EcmTaskDetailPO ecmTaskDetailPO = ecmTaskDetailDAO.getById(detailId);
-        if (ValidateUtils.isNull(ecmTaskDetailPO)) {
+        if (AriusObjUtils.isNull(ecmTaskDetailPO)) {
             return Result.buildFail("工单子任务不存在");
         }
 
         EcmTask ecmTask = ecmTaskManager.getEcmTask(ecmTaskDetailPO.getWorkOrderTaskId());
-        if (ValidateUtils.isNull(ecmTask)) {
+        if (AriusObjUtils.isNull(ecmTask)) {
             return Result.buildFail("任务不存在");
         }
 
@@ -171,7 +173,18 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
     }
 
     @Override
-    public Result editEcmTaskDetail(EcmTaskDetail buildEcmTaskDetail) {
+    public Result<Void> deleteEcmTaskDetailsByTaskOrder(Long workOrderTaskId) {
+        try {
+            ecmTaskDetailDAO.deleteEcmTaskDetailsByTaskOrder(workOrderTaskId);
+        } catch (Exception e) {
+            LOGGER.error("class=EcmTaskDetailManagerImpl||method=deleteEcmTaskDetailsByTaskOrder||errMsg={}",e);
+            return Result.buildFail("根据工单任务id删除对应任务详情信息失败");
+        }
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Long> editEcmTaskDetail(EcmTaskDetail buildEcmTaskDetail) {
         boolean succ = 1 == ecmTaskDetailDAO.update(ConvertUtil.obj2Obj(buildEcmTaskDetail, EcmTaskDetailPO.class));
         return Result.build(succ, buildEcmTaskDetail.getId());
     }
@@ -198,6 +211,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
         //1.获取工单总量
         Integer sum = ecmParamBases.stream().filter(r -> !AriusObjUtils.isNull(r) && r.getNodeNumber() != 0)
             .mapToInt(EcmParamBase::getNodeNumber).sum();
+        ecmTaskDetailProgress.setSum(sum.longValue());
 
         //2.状态计算
         if (EcmTaskTypeEnum.NEW.getCode() == ecmTask.getOrderType()
@@ -205,7 +219,6 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
             || EcmTaskTypeEnum.RESTART.getCode() == ecmTask.getOrderType()) {
             ecmParamBases.stream().filter(Objects::nonNull).forEachOrdered(ecmParam -> ecmTaskDetailProgress
                 .getRoleNameTaskDetailMap().put(ecmParam.getRoleName(), Lists.newArrayList()));
-            ecmTaskDetailProgress.setSum(sum.longValue());
         }
 
         //扩缩容获取变化的机器
@@ -217,9 +230,6 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
                     .forEachOrdered(ecmParam -> {
                         ecmTaskDetailProgress.getRoleNameTaskDetailMap().put(ecmParam.getRoleName(),
                             Lists.newArrayList());
-
-                        ecmTaskDetailProgress
-                            .setSum(ecmTaskDetailProgress.getSum() + buildChangeTaskDetail(ecmParam, e).longValue());
                     });
             }
         }
@@ -232,21 +242,15 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
     }
 
     /*****************************************************private*********************************************************/
-
-    private Integer buildChangeTaskDetail(EcmParamBase ecmParam, Map.Entry<String, List<String>> e) {
-        return Math.abs(ecmParam.getNodeNumber()
-                        - e.getValue().stream().filter(Objects::nonNull).collect(Collectors.toList()).size());
-    }
-
-    private Map<String, List<String>> getClusterHostNamesFromDbMap(int clusterId) {
-        List<ESRoleCluster> roles = esRoleClusterService.getAllRoleClusterByClusterId(clusterId);
+    private Map</*角色属性*/String, /*角色对应的主机ip列表*/List<String>> getClusterHostNamesFromDbMap(int clusterId) {
+        List<RoleCluster> roles = roleClusterService.getAllRoleClusterByClusterId(clusterId);
         if (CollectionUtils.isEmpty(roles)) {
             return Maps.newHashMap();
         }
 
         Map<String, List<String>> role2HostNamesMap = Maps.newHashMap();
         roles.stream().filter(Objects::nonNull).forEachOrdered(role -> {
-            List<ESRoleClusterHost> clusterHosts = esRoleClusterHostService.getByRoleClusterId(role.getId());
+            List<RoleClusterHost> clusterHosts = roleClusterHostService.getByRoleClusterId(role.getId());
             if (CollectionUtils.isEmpty(clusterHosts)) {
                 LOGGER.warn("class=||method=getEcmTaskDetailInfo||msg=the cluster hosts is empty");
                 return;
@@ -254,7 +258,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
 
             List<String> clusterHostNames = clusterHosts.stream()
                 .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isBlack(r.getIp()))
-                .map(ESRoleClusterHost::getHostname).collect(Collectors.toList());
+                .map(RoleClusterHost::getHostname).collect(Collectors.toList());
             if (CollectionUtils.isEmpty(clusterHostNames)) {
                 LOGGER.warn("class=||method=getEcmTaskDetailInfo||msg=the cluster hosts name is empty");
                 return;
@@ -264,5 +268,14 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
         });
 
         return role2HostNamesMap;
+    }
+
+    private  void initEcmTaskDetailParam(EcmTaskDetailPO ecmTaskDetailPo) {
+        if(ecmTaskDetailPo.getGrp() == null) {
+            ecmTaskDetailPo.setGrp(0);
+        }
+        if(ecmTaskDetailPo.getIdx() == null) {
+            ecmTaskDetailPo.setIdx(0);
+        }
     }
 }

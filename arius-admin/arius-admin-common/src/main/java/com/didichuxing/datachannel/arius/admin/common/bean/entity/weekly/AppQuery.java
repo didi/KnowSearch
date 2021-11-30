@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.weekly;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -10,6 +12,8 @@ import java.util.List;
  * @date: 2020-03-15 19:56
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppQuery extends BaseEntity {
     /**
      * 模板名称

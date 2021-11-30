@@ -28,6 +28,11 @@ public class RateLimitInfoController extends StatController {
     public static final String NAME = "rateLimitInfo";
     @Autowired
     private DslTemplateService dslTemplateService;
+
+    public RateLimitInfoController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(RestRequest.Method.GET, "/_gwstat/rateLimitInfo", this);
@@ -46,7 +51,7 @@ public class RateLimitInfoController extends StatController {
         List<String> dslKeys = dslTemplateService.getDslTemplateKeys();
         for (String dslKey : dslKeys) {
             try {
-                int appid = Integer.valueOf(dslKey.split("_")[0]);
+                int appid = Integer.parseInt(dslKey.split("_")[0]);
                 if (appidStats.containsKey(appid)) {
                     RateLimitStat rateLimitStat = appidStats.get(appid);
                     rateLimitStat.setDslCount(rateLimitStat.getDslCount() + 1);
@@ -67,7 +72,7 @@ public class RateLimitInfoController extends StatController {
                         appidStats.put(appid, rateLimitStat);
                     }
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.error("unexpect_exception||dslKey={}||e={}", dslKey, Convert.logExceptionStack(e));
             }
         }
@@ -75,7 +80,7 @@ public class RateLimitInfoController extends StatController {
         List<String> newDslKeys = dslTemplateService.getNewDslTemplateKeys();
         for (String dslKey : newDslKeys) {
             try {
-                int appid = Integer.valueOf(dslKey.split("_")[0]);
+                int appid = Integer.parseInt(dslKey.split("_")[0]);
                 if (appidStats.containsKey(appid)) {
                     RateLimitStat rateLimitStat = appidStats.get(appid);
                     rateLimitStat.setNewDslCount(rateLimitStat.getNewDslCount() + 1);
@@ -96,7 +101,7 @@ public class RateLimitInfoController extends StatController {
                         appidStats.put(appid, rateLimitStat);
                     }
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.error("unexpect_exception||dslKey={}||e={}", dslKey, Convert.logExceptionStack(e));
             }
         }

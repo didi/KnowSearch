@@ -2,13 +2,17 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author lyn
  * @date 2021-01-12
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESPackage extends BaseEntity {
 
     private Long id;

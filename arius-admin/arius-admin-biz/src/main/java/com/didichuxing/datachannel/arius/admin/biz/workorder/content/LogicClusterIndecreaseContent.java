@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class LogicClusterIndecreaseContent extends BaseContent {
     /**
      * 逻辑集群名称

@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common.ecm;
 
-import com.alibaba.fastjson.annotation.JSONType;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.List;
  * @date 2021-01-21
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class EsConfigAction implements Serializable {
 
@@ -24,8 +24,8 @@ public class EsConfigAction implements Serializable {
     private Integer    actionType;
 
     /**
-     * 无效Es集群配置id
+     * actionType = ADD、EDIT 时，表示的是变更之后的配置id, actionType = DELETE 时， 表示的是需要删除的配置id
      */
-    private List<Long> invalidEsConfigIds;
+    private List<Long> actionEsConfigIds;
 
 }

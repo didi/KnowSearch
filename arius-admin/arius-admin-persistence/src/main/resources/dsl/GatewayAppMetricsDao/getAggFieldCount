@@ -1,0 +1,34 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "group_by_app": {
+      "terms": {
+        "field": "appid"
+      },
+      "aggs": {
+        "group_by_timeStamp": {
+          "date_histogram": {
+            "field": "timeStamp",
+            "interval": "%s",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 0
+          }
+        }
+      }
+    }
+  }
+}

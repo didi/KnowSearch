@@ -5,17 +5,17 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESConfigD
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESZeusConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterConfigDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     private static final ILog    LOGGER                  = LogFactory.getLog(ESClusterConfigServiceImpl.class);
 
     @Autowired
-    private ESClusterPhyService  esClusterPhyService;
+    private ClusterPhyService esClusterPhyService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -52,25 +52,47 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
 
     private static final Long    SYSTEM_CLUSTER_ID       = 1L;
 
+    private static final Integer DEFAULT_CONFIG_VERSION = 1;
+
     @Override
-    public Result<String> getZeusConfigContent(ESZeusConfigDTO esZeusConfigDTO) {
-        Result r = preCheck(esZeusConfigDTO);
+    public Result<String> getZeusConfigContent(ESZeusConfigDTO esZeusConfigDTO, Integer configAction) {
+        Result<Void> r = preCheck(esZeusConfigDTO);
         if (r.failed()) {
-            return r;
+            return Result.buildFrom(r);
         }
 
-        ESClusterPhy esClusterPhy = esClusterPhyService.getClusterByName(esZeusConfigDTO.getClusterName());
-        if (AriusObjUtils.isNull(esClusterPhy)) {
+        ClusterPhy clusterPhy = esClusterPhyService.getClusterByName(esZeusConfigDTO.getClusterName());
+        if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildFail("es clusterPhy is empty");
         }
 
-        ESConfig esConfig = getByClusterIdAndTypeAndEngin(esClusterPhy.getId().longValue(),
-            esZeusConfigDTO.getTypeName(), esZeusConfigDTO.getEnginName());
-        if (AriusObjUtils.isNull(esConfig) || AriusObjUtils.isBlack(esConfig.getConfigData())) {
-            return Result.buildFail("es config is empty");
+        if (configAction.equals(EsConfigActionEnum.DELETE.getCode())) {
+            return Result.buildSucc();
         }
 
-        return Result.build(Boolean.TRUE, esConfig.getConfigData());
+        if (configAction.equals(EDIT.getCode())) {
+            ESConfigPO oldESConfigPO = esClusterConfigDAO.getByClusterIdAndTypeAndEngin(clusterPhy.getId().longValue(),
+                    esZeusConfigDTO.getTypeName(), esZeusConfigDTO.getEnginName());
+            if (AriusObjUtils.isNull(oldESConfigPO) || AriusObjUtils.isNull(oldESConfigPO.getVersionConfig())) {
+                return Result.buildFail("old es config is empty");
+            }
+            ESConfigPO newESConfigPO = esClusterConfigDAO.getByClusterIdAndTypeAndEnginAndVersion(clusterPhy.getId().longValue(),
+                    esZeusConfigDTO.getTypeName(), esZeusConfigDTO.getEnginName(), oldESConfigPO.getVersionConfig() + 1);
+            if (AriusObjUtils.isNull(newESConfigPO) || AriusObjUtils.isBlack(newESConfigPO.getConfigData())) {
+                return Result.buildFail("es config is empty");
+            }
+            return Result.build(Boolean.TRUE, newESConfigPO.getConfigData());
+        }
+
+        if (configAction.equals(ADD.getCode())) {
+            ESConfigPO esConfigPO = esClusterConfigDAO.getByClusterIdAndTypeAndEnginAndVersion(clusterPhy.getId().longValue(),
+                    esZeusConfigDTO.getTypeName(), esZeusConfigDTO.getEnginName(), DEFAULT_CONFIG_VERSION);
+            if (AriusObjUtils.isNull(esConfigPO) || AriusObjUtils.isBlack(esConfigPO.getConfigData())) {
+                return Result.buildFail("es config is empty");
+            }
+            return Result.build(Boolean.TRUE, esConfigPO.getConfigData());
+        }
+        return Result.buildFail();
     }
 
     @Override
@@ -118,13 +140,17 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Long> esClusterConfigAction(ESConfigDTO param, EsConfigActionEnum actionEnum, String operator) {
-        Result r = checkParam(param, operator, actionEnum);
+        Result<Void> r = checkParam(param, operator, actionEnum);
         if (r.failed()) {
-            return r;
+            return Result.buildFrom(r);
         }
-        initEsClusterConfig(param, actionEnum);
+        param.setVersionConfig(DEFAULT_CONFIG_VERSION);
+        if (EDIT.getCode() == actionEnum.getCode()) {
+            ESConfig esConfig = getEsClusterConfigById(param.getId());
+            param.setVersionConfig(esConfig.getVersionConfig() + 1);
+        }
         ESConfigPO esConfigPo = ConvertUtil.obj2Obj(param, ESConfigPO.class);
-        boolean success = (1 == esClusterConfigDAO.insert(esConfigPo));
+        boolean success = (1 == esClusterConfigDAO.insertSelective(esConfigPo));
         if (success) {
             operateRecordService.save(ES_CLUSTER_CONFIG, CLUSTER_CONFIG, param.getId(), "", operator);
             return Result.buildSucc(esConfigPo.getId());
@@ -154,7 +180,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result deleteEsClusterConfig(Long configId, String operator) {
+    public Result<Void> deleteEsClusterConfig(Long configId, String operator) {
         boolean success = (1 == esClusterConfigDAO.delete(configId));
         if (success) {
             operateRecordService.save(ES_CLUSTER_CONFIG, OperationEnum.DELETE, configId, "", operator);
@@ -165,7 +191,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     }
 
     @Override
-    public Result setConfigValid(Long id) {
+    public Result<Void> setConfigValid(Long id) {
         boolean success = 1 == esClusterConfigDAO.updateConfigValidById(id);
         if (success) {
             return Result.buildSucc();
@@ -175,8 +201,8 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result editConfigDesc(ESConfigDTO param, String operator) {
-        Result result = checkEditConfigValid(param);
+    public Result<Void> editConfigDesc(ESConfigDTO param, String operator) {
+        Result<Void> result = checkEditConfigValid(param);
         if (result.failed()) {
             return result;
         }
@@ -197,7 +223,18 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     }
 
     @Override
-    public Result setOldConfigInvalid(ESConfig esConfig) {
+    public Result<Void> deleteByClusterIdAndTypeAndEngin(Long clusterId, String typeName, String enginName) {
+        try {
+            esClusterConfigDAO.deleteByClusterIdAndTypeAndEngin(clusterId, typeName, enginName);
+            return Result.buildSucc("集群角色下对应类型的配置已删除");
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterConfigServiceImpl||method=deleteByClusterIdAndTypeAndEngin||msg={}", e.getStackTrace());
+        }
+        return Result.buildFail();
+    }
+
+    @Override
+    public Result<Void> setOldConfigInvalid(ESConfig esConfig) {
         int oldVersion = esConfig.getVersionConfig() - 1;
         ESConfigPO esConfigPo = esClusterConfigDAO.getByClusterIdAndTypeAndEnginAndVersion(esConfig.getClusterId(),
             esConfig.getTypeName(), esConfig.getEnginName(), oldVersion);
@@ -214,7 +251,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     }
 
     /*************************************************private**********************************************************/
-    private Result preCheck(ESZeusConfigDTO esZeusConfigDTO) {
+    private Result<Void> preCheck(ESZeusConfigDTO esZeusConfigDTO) {
         if (AriusObjUtils.isBlack(esZeusConfigDTO.getClusterName())) {
             return Result.buildFail("cluster name is empty");
         }
@@ -230,50 +267,11 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
         return Result.buildSucc();
     }
 
-    private void initEsClusterConfig(ESConfigDTO param, EsConfigActionEnum actionEnum) {
+    private Result<Void> checkParam(ESConfigDTO param, String operator, EsConfigActionEnum actionEnum) {
         if (ADD.getCode() == actionEnum.getCode()) {
-            param.setSelected(0);
-            param.setVersionConfig(1);
-            param.setVersionTag("");
-            if (AriusObjUtils.isNullStr(param.getDesc())) {
-                param.setDesc("");
-            }
-        } else if (EDIT.getCode() == actionEnum.getCode()) {
-            ESConfig esConfig = getEsClusterConfigById(param.getId());
-            param.setVersionConfig(esConfig.getVersionConfig() + 1);
-            param.setSelected(0);
-            param.setVersionTag("");
-            param.setId(null);
-            if (AriusObjUtils.isNullStr(param.getDesc())) {
-                param.setDesc("");
-            }
-        }
-    }
-
-    private Result checkParam(ESConfigDTO param, String operator, EsConfigActionEnum actionEnum) {
-        if (ADD.getCode() == actionEnum.getCode()) {
-            if (AriusObjUtils.isNull(param)) {
-                return Result.buildParamIllegal("esConfigDTO is empty");
-            }
-
-            if (AriusObjUtils.isBlack(operator)) {
-                return Result.buildParamIllegal("operator is empty");
-            }
-
-            if (AriusObjUtils.isBlack(param.getConfigData())) {
-                return Result.buildParamIllegal("config data is empty");
-            }
-
-            if (AriusObjUtils.isBlack(param.getEnginName())) {
-                return Result.buildParamIllegal("engin name is empty");
-            }
-
-            if (AriusObjUtils.isBlack(param.getTypeName())) {
-                return Result.buildParamIllegal("type name is empty");
-            }
-
-            if (AriusObjUtils.isNull(param.getClusterId())) {
-                return Result.buildParamIllegal("clusterId name is empty");
+            Result<Void> esConfigDTOIsEmpty = isEmpty(param, operator);
+            if (esConfigDTOIsEmpty.failed()) {
+                return esConfigDTOIsEmpty;
             }
 
             if (!AriusObjUtils.isNull(esClusterConfigDAO.getByClusterIdAndTypeAndEngin(param.getClusterId(),
@@ -298,13 +296,36 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
         return Result.buildSucc();
     }
 
-    private Result checkEditConfigValid(ESConfigDTO param) {
-        if (AriusObjUtils.isNull(param.getId())) {
-            return Result.buildParamIllegal("集群配置Id为空");
+    private Result<Void> isEmpty(ESConfigDTO param, String operator) {
+        if (AriusObjUtils.isNull(param)) {
+            return Result.buildParamIllegal("esConfigDTO is empty");
         }
 
-        if (AriusObjUtils.isBlack(param.getDesc())) {
-            return Result.buildParamIllegal("集群配置详情为空");
+        if (AriusObjUtils.isBlack(operator)) {
+            return Result.buildParamIllegal("operator is empty");
+        }
+
+        if (AriusObjUtils.isBlack(param.getConfigData())) {
+            return Result.buildParamIllegal("config data is empty");
+        }
+
+        if (AriusObjUtils.isBlack(param.getEnginName())) {
+            return Result.buildParamIllegal("engin name is empty");
+        }
+
+        if (AriusObjUtils.isBlack(param.getTypeName())) {
+            return Result.buildParamIllegal("type name is empty");
+        }
+
+        if (AriusObjUtils.isNull(param.getClusterId())) {
+            return Result.buildParamIllegal("clusterId name is empty");
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkEditConfigValid(ESConfigDTO param) {
+        if (AriusObjUtils.isNull(param.getId())) {
+            return Result.buildParamIllegal("集群配置Id为空");
         }
 
         ESConfigPO esConfig = esClusterConfigDAO.getById(param.getId());

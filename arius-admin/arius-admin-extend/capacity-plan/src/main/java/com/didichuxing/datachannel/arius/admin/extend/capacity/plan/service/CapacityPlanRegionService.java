@@ -13,10 +13,6 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.
 
 import java.util.List;
 
-/**
- * @author d06679
- * @date 2019-06-24
- */
 public interface CapacityPlanRegionService {
 
     /**
@@ -38,14 +34,14 @@ public interface CapacityPlanRegionService {
      * @param capacityPlanRegionDTO capacityPlanRegionDTO
      * @return
      */
-    Result createRegionCapacityInfo(CapacityPlanRegionDTO capacityPlanRegionDTO, String operator);
+    Result<Void> createRegionCapacityInfo(CapacityPlanRegionDTO capacityPlanRegionDTO, String operator);
 
     /**
      * 删除容量信息记录
      * @param regionId regionId
      * @return
      */
-    Result deleteRegionCapacityInfo(Long regionId, String operator);
+    Result<Void> deleteRegionCapacityInfo(Long regionId, String operator);
 
     /**
      * 修改一个region，只支持racks（旧版）, share, configJson, freeQuota, usage的修改
@@ -53,7 +49,7 @@ public interface CapacityPlanRegionService {
      * @param operator 操作者
      * @return result
      */
-    Result editRegion(CapacityPlanRegionDTO regionDTO, String operator);
+    Result<Void> editRegion(CapacityPlanRegionDTO regionDTO, String operator);
 
     /**
      * 修改一个region的freeQuota
@@ -76,14 +72,14 @@ public interface CapacityPlanRegionService {
      * @return result
      * @throws ESOperateException 操作异常
      */
-    Result planRegion(Long regionId) throws ESOperateException;
+    Result<Void> planRegion(Long regionId) throws ESOperateException;
 
     /**
      * 检查一个region的资源，需要检查当前region的资源是否足够
      * @param regionId  regionId
      * @return result
      */
-    Result checkRegion(Long regionId);
+    Result<Void> checkRegion(Long regionId);
 
     /**
      * 平衡region
@@ -107,7 +103,7 @@ public interface CapacityPlanRegionService {
      * @param shouldUpdateIndex 是否更新索引元数据信息
      * @return result
      */
-    Result moveShard(Long regionId, boolean shouldUpdateIndex);
+    Result<Void> moveShard(Long regionId, boolean shouldUpdateIndex);
 
     /**
      * 获取region资源信息
@@ -144,22 +140,6 @@ public interface CapacityPlanRegionService {
      * @return true/false
      */
     boolean modifyRegionMetrics(Long regionId, double usage, double overSold);
-
-    /**
-     * 开启物理集群容量规划功能（开启物理集群所属的容量规划area的容量规划功能）
-     * @param phyClusterName 物理集群名
-     * @param operator 操作人
-     * @return
-     */
-    Result openPhyClusterCapacityPlanFlags(String phyClusterName, String operator);
-
-    /**
-     * 关闭物理集群容量规划功能（关闭物理集群所属的容量规划area的容量规划功能）
-     * @param phyClusterName 物理集群名
-     * @param operator 操作人
-     * @return
-     */
-    Result closePhyClusterCapacityPlanFlags(String phyClusterName, String operator);
 
     /**
      * 获取Region rack Metrics信息

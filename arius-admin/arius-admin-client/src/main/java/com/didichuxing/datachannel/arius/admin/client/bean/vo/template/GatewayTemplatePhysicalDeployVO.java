@@ -5,13 +5,17 @@ import java.util.Set;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "模板信息")
 public class GatewayTemplatePhysicalDeployVO {
 

@@ -14,11 +14,12 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ResultWorkOrder;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
-import com.didichuxing.datachannel.arius.admin.common.exception.BaseRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.exception.WorkOrderOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  *
@@ -36,9 +37,9 @@ public class ExceptionHandleController implements ThrowsAdvice {
     }
 
     @ExceptionHandler(ESOperateException.class)
-    public Result handleESOperateException(ESOperateException e) {
-        LOGGER.warn("arius es rest process error.", e);
-        Result result = Result.build(ES_OPERATE_ERROR);
+    public Result<Object> handleESOperateException(ESOperateException e) {
+        LOGGER.warn("class=ExceptionHandleController||method=handleESOperateException||msg=arius es rest process error.", e);
+        Result<Object> result = Result.build(ES_OPERATE_ERROR);
         StringBuilder stringBuilder = new StringBuilder(e.getMessage());
         Throwable throwable = e.getCause();
         while (throwable != null) {
@@ -51,37 +52,37 @@ public class ExceptionHandleController implements ThrowsAdvice {
     }
 
     @ExceptionHandler(BaseException.class)
-    public Result handleBaseException(BaseException e) {
+    public Result<Object> handleBaseException(BaseException e) {
         return handlerExceptionWithResult(e, e.getResultType());
     }
 
-    @ExceptionHandler(BaseRunTimeException.class)
-    public Result handleBaseRunTimeException(BaseRunTimeException e) {
+    @ExceptionHandler(AriusRunTimeException.class)
+    public Result<Object> handleBaseRunTimeException(AriusRunTimeException e) {
         return handlerExceptionWithResult(e, e.getResultType());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public Result handleIllegalArgumentException(IllegalArgumentException e) {
-        LOGGER.warn("Illegal Argument error ", e);
-        Result result = Result.build(ResultType.ILLEGAL_PARAMS);
+    public Result<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+        LOGGER.warn("class=ExceptionHandleController||method=handleIllegalArgumentException||msg=Illegal Argument error ", e);
+        Result<Object> result = Result.build(ResultType.ILLEGAL_PARAMS);
         result.setMessage(e.getMessage());
         return result;
     }
 
     @ExceptionHandler(Exception.class)
-    public Result handleException(Exception e) {
-        LOGGER.warn("arius admin process error||errMsg={}", e.getMessage(), e);
-        LOGGER.warn("arius admin process error||errStack={}", e.getStackTrace());
-        Result result = Result.build(ResultType.FAIL);
+    public Result<Object> handleException(Exception e) {
+        LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errMsg={}", e.getMessage(), e);
+        LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errStack={}", e.getStackTrace());
+        Result<Object> result = Result.build(ResultType.FAIL);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());
         }
         return result;
     }
 
-    private Result handlerExceptionWithResult(Exception e, ResultType resultType) {
-        LOGGER.warn("arius admin rest process error.", e);
-        Result result = Result.build(resultType);
+    private Result<Object> handlerExceptionWithResult(Exception e, ResultType resultType) {
+        LOGGER.warn("class=ExceptionHandleController||method=handlerExceptionWithResult||arius admin rest process error.", e);
+        Result<Object> result = Result.build(resultType);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());
         }

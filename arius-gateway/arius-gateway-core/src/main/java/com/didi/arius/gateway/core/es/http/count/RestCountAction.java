@@ -50,11 +50,9 @@ import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 @Component("restCountAction")
 public class RestCountAction extends ESAction {
 
-	public static final String NAME = "count";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "count";
 	}
 	
 
@@ -84,12 +82,14 @@ public class RestCountAction extends ESAction {
             }
 
             if (indexTemplate != null) {
-                String dateFrom = queryContext.getRequest().param(RestConsts.SEARCH_DATE_FROM_PARAMS);
-                String dateTo = queryContext.getRequest().param(RestConsts.SEARCH_DATE_TO_PARAMS);
+                if(!isAliasGet(indexTemplate, indices)){
+                    String dateFrom = queryContext.getRequest().param(RestConsts.SEARCH_DATE_FROM_PARAMS);
+                    String dateTo = queryContext.getRequest().param(RestConsts.SEARCH_DATE_TO_PARAMS);
 
-                String[] newIndices = getQueryIndices(indexTemplate, dateFrom, dateTo);
+                    String[] newIndicesArray = getQueryIndices(indexTemplate, dateFrom, dateTo);
 
-                esSearchRequest.indices(newIndices);
+                    esSearchRequest.indices(newIndicesArray);
+                }
             } else {
                 indexTemplate = getTemplateByIndexTire(indices, queryContext);
             }
@@ -97,20 +97,20 @@ public class RestCountAction extends ESAction {
             // 该索引模板需要根据type名称进行映射到对应的索引模板
             if (isNeedChangeIndexName(queryContext, indexTemplate)) {
 
-                Tuple<IndexTemplate/*dest template*/, String[]/*dest indexNames*/> changeResult =
+                Tuple<IndexTemplate/*dest template*/, String[]/*dest indexNames*/> changeRes =
                         handleChangeIndexName(queryContext, indexTemplate, esSearchRequest.indices(), esSearchRequest.types());
 
                 // 替换查询语句中的索引名称
-                esSearchRequest.indices(changeResult.v2());
+                esSearchRequest.indices(changeRes.v2());
                 // 再替换索引模板对象
-                indexTemplate = changeResult.v1();
+                indexTemplate = changeRes.v1();
             }
         }
 
         // 日期索引加上*号后缀，支持异常索引修复方案
         Convert.convertIndices(esSearchRequest);
 
-        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate);
+        ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
         // pre process
         preSearchProcess(queryContext, readClient, esSearchRequest);
@@ -120,7 +120,7 @@ public class RestCountAction extends ESAction {
             public void onResponse(ESSearchResponse response) {
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("count", response.getHits().getTotal());
+                jsonObject.put(name(), response.getHits().getTotal());
                 jsonObject.put("_shards", response.getShards());
 
                 super.onResponse(new BytesRestResponse(RestStatus.OK, XContentType.JSON.restContentType(), jsonObject.toJSONString()));

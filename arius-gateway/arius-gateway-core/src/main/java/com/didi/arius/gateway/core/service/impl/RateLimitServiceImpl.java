@@ -10,6 +10,7 @@ import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.RateLimitService;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
+@NoArgsConstructor
 public class RateLimitServiceImpl implements RateLimitService, ApplicationListener<PostResponseEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(RateLimitServiceImpl.class);
@@ -57,7 +59,7 @@ public class RateLimitServiceImpl implements RateLimitService, ApplicationListen
     @PostConstruct
     public void init(){
         cacheTotalAreaFlow();
-        threadPool.submitScheduleAtFixTask(() -> calFlowLimit(), flowSchedulePeriod, flowSchedulePeriod);
+        threadPool.submitScheduleAtFixTask(this::calFlowLimit, flowSchedulePeriod, flowSchedulePeriod);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class RateLimitServiceImpl implements RateLimitService, ApplicationListen
         FlowController flowController = getFlowController(appid);
         boolean isRelaxedIn = flowController.addUpIn(searchId, in);
         boolean isRelaxedOut = flowController.addUpOut(searchId, out);
-        if (false == isRelaxedIn || false == isRelaxedOut) {
+        if (!isRelaxedIn || !isRelaxedOut) {
             String areaId = FlowController.formAreaId(appid, searchId);
             initFlowLimit(areaId);
         }
@@ -170,19 +172,14 @@ public class RateLimitServiceImpl implements RateLimitService, ApplicationListen
         areaFlow.setOps(ops);
         areaFlow.setStatus(FlowStatus.DOWN);
 
-        String areaId = FlowController.formAreaId(QueryConsts.TOTAL_APPId_ID, QueryConsts.TOTAL_SEARCH_ID);
+        String areaId = FlowController.formAreaId(QueryConsts.TOTAL_APPID_ID, QueryConsts.TOTAL_SEARCH_ID);
         AreaFlowCache.getInstance().setAreaFlow(areaId, areaFlow);
     }
 
     private FlowController getFlowController(int appid) {
         if (!flowControllerMap.containsKey(appid)) {
             synchronized (flowControllerMap) {
-                if (!flowControllerMap.containsKey(appid)) {
-                    FlowController flowController = new FlowController(appid, flowSchedulePeriod);
-                    flowControllerMap.put(appid, flowController);
-
-                    logger.info("add appid={} to flow controller", appid);
-                }
+                flowControllerMap.computeIfAbsent(appid, i -> new FlowController(appid, flowSchedulePeriod));
             }
         }
 

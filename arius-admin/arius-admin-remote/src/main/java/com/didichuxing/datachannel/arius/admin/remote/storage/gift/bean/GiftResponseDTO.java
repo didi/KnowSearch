@@ -1,40 +1,36 @@
 package com.didichuxing.datachannel.arius.admin.remote.storage.gift.bean;
 
-/**
- * @author linyunan
- * @date 2021-05-21
- */
+import com.alibaba.fastjson.annotation.JSONField;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class GiftResponseDTO {
 
-    private Integer creation_time;
+    @JSONField(name = "creation_time")
+    private Integer creationTime;
 
-    private String  download_url;
+    @JSONField(name = "download_url")
+    private String  downloadUrl;
 
-    private Integer file_size;
+    @JSONField(name = "file_size")
+    private Integer fileSize;
 
-    private String  download_url_https;
+    @JSONField(name = "download_url_https")
+    private String  downloadUrlHttps;
 
-    private Integer status_code;
+    @JSONField(name = "status_code")
+    private Integer statusCode;
 
+    @JSONField(name = "md5")
     private String  md5;
 
-    private String  resource_key;
+    @JSONField(name = "resource_key")
+    private String  resourceKey;
 
+    @JSONField(name = "status")
     private String  status;
-
-    public String getDownload_url() {
-        return download_url;
-    }
-
-    public Integer getStatus_code() {
-        return status_code;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 }

@@ -32,13 +32,13 @@ import java.util.Set;
 final class MethodHandlers {
 
     private final String path;
-    private final Map<RestRequest.Method, IRestHandler> methodHandlers;
+    private final Map<RestRequest.Method, IRestHandler> restHandlerMap;
 
     MethodHandlers(String path, IRestHandler handler, RestRequest.Method... methods) {
         this.path = path;
-        this.methodHandlers = new HashMap<>(methods.length);
+        this.restHandlerMap = new HashMap<>(methods.length);
         for (RestRequest.Method method : methods) {
-            methodHandlers.put(method, handler);
+            restHandlerMap.put(method, handler);
         }
     }
 
@@ -48,7 +48,7 @@ final class MethodHandlers {
      */
     MethodHandlers addMethods(IRestHandler handler, RestRequest.Method... methods) {
         for (RestRequest.Method method : methods) {
-            IRestHandler existing = methodHandlers.putIfAbsent(method, handler);
+            IRestHandler existing = restHandlerMap.putIfAbsent(method, handler);
             if (existing != null) {
                 throw new IllegalArgumentException("Cannot replace existing handler for [" + path + "] for method: " + method);
             }
@@ -61,13 +61,13 @@ final class MethodHandlers {
      */
     @Nullable
     IRestHandler getHandler(RestRequest.Method method) {
-        return methodHandlers.get(method);
+        return restHandlerMap.get(method);
     }
 
     /**
      * Return a set of all valid HTTP methods for the particular path
      */
     Set<RestRequest.Method> getValidMethods() {
-        return methodHandlers.keySet();
+        return restHandlerMap.keySet();
     }
 }

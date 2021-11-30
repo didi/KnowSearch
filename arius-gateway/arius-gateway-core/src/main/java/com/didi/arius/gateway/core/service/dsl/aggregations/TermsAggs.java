@@ -5,6 +5,7 @@ import com.didi.arius.gateway.common.metadata.AggsBukcetInfo;
 import com.didi.arius.gateway.common.metadata.FieldInfo;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,13 +13,14 @@ import javax.annotation.PostConstruct;
 import java.util.Map;
 
 @Component("termsAggs")
+@NoArgsConstructor
 public class TermsAggs extends BucketAggsType {
 
 	private String name = "terms";
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);
@@ -38,7 +40,7 @@ public class TermsAggs extends BucketAggsType {
 				int bucketNumber = Math.max(1, fieldInfo.getCardinality());
 				aggsBukcetInfo.setBucketNumber(bucketNumber);
 				
-				aggsBukcetInfo.setMemUsed(bucketNumber * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+				aggsBukcetInfo.setMemUsed((long)bucketNumber * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 			}
 		}
 		

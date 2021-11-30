@@ -85,4 +85,10 @@
             set delete_flag = 1
             where elastic_cluster_id = #{clusterId}
     </update>
+
+    <update id="deleteRoleClusterByCluterIdAndRole">
+        update es_role_cluster
+        set delete_flag = 1
+        where elastic_cluster_id = #{clusterId} and `role` = #{role}
+    </update>
 </mapper>

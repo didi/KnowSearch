@@ -4,7 +4,9 @@ import com.didi.arius.gateway.common.metadata.AppDetail;
 
 public class AppUtil {
 
+    private AppUtil(){}
+
     public static boolean isAdminAppid(AppDetail appDetail) {
-        return appDetail == null ? false : appDetail.getIsRoot() == 1;
+        return (appDetail != null) && appDetail.getIsRoot() == 1;
     }
 }

@@ -28,7 +28,6 @@ public class DynamicConfigServiceTests {
 
     @Test
     public void testIsWhiteAppid() throws InterruptedException {
-        Thread.sleep(1000L);
         final boolean detailLogFlag = dynamicConfigService.isWhiteAppid(100000000);
         System.out.println(detailLogFlag);
     }

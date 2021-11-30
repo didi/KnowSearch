@@ -65,9 +65,9 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isRDOrOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
@@ -81,7 +81,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
@@ -132,7 +132,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
      * 验证用户是否有该工单权限
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
@@ -167,7 +167,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -178,17 +178,17 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
-        Result result = templateLogicService.turnOverLogicTemplate(content.getId(), content.getTgtAppId(),
+        Result<Void> result = templateLogicService.turnOverLogicTemplate(content.getId(), content.getTgtAppId(),
             content.getTgtResponsible(), workOrder.getSubmitor());
 
         sendNotify(WORK_ORDER_TEMPLATE_TRANSFER,
             new TemplateTransferNotify(workOrder.getSubmitorAppid(), content.getTgtAppId(), content.getName()),
             Arrays.asList(workOrder.getSubmitor()));
 
-        return result;
+        return Result.buildFrom(result);
     }
 }

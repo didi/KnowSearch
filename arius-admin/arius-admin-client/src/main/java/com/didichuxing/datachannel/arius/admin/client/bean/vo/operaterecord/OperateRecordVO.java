@@ -7,18 +7,19 @@ import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.Mod
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/14
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OperateRecordVO extends BaseVO {
 
-    /**
-     * 主键
-     */
     @ApiModelProperty("记录ID")
     private Integer id;
 
@@ -40,15 +41,9 @@ public class OperateRecordVO extends BaseVO {
     @ApiModelProperty("操作")
     private String  operate;
 
-    /**
-     * 操作业务id String类型
-     */
     @ApiModelProperty("业务ID")
     private String  bizId;
 
-    /**
-     * 操作描述
-     */
     @ApiModelProperty("操作内容")
     private String  content;
 
@@ -58,9 +53,6 @@ public class OperateRecordVO extends BaseVO {
     @ApiModelProperty("操作人")
     private String  operator;
 
-    /**
-     * 操作时间
-     */
     @ApiModelProperty("操作时间")
     private Date    operateTime;
 

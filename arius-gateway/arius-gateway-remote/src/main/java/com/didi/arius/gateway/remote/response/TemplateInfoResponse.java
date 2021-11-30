@@ -1,6 +1,7 @@
 package com.didi.arius.gateway.remote.response;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
 * 
 */
 @Data
+@NoArgsConstructor
 public class TemplateInfoResponse {
 	private int id;
 	private String expression;

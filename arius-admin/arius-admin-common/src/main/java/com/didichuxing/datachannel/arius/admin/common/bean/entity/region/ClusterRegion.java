@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.region;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -11,6 +13,8 @@ import lombok.ToString;
  */
 @Data
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClusterRegion extends BaseEntity {
     /**
      * region ID

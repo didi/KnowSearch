@@ -35,7 +35,7 @@ public class AppRequestStatsController extends StatController {
 
     @Override
     protected void handleAriusRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception {
-        int appid = request.paramAsInt("appid", QueryConsts.TOTAL_APPId_ID);
+        int appid = request.paramAsInt("appid", QueryConsts.TOTAL_APPID_ID);
         String searchId = request.param("searchid");
         String res = "";
 

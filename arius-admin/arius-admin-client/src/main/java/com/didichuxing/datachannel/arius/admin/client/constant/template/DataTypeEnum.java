@@ -5,16 +5,20 @@ package com.didichuxing.datachannel.arius.admin.client.constant.template;
  * @date 2019/3/29
  */
 public enum DataTypeEnum {
-                          /**日志数据*/
-                          LOG(1, "日志数据", "log"),
+    /**
+     * 日志数据
+     */
+    SYSTEM(0, "系统数据", "system"),
 
-                          OLAP(2, "用户上报数据", "olap"),
+    LOG(1, "日志数据", "log"),
 
-                          BINLOG(3, "RDS数据", "binlog"),
+    OLAP(2, "用户上报数据", "olap"),
 
-                          OFFLINE(6, "离线导入数据", "offline"),
+    BINLOG(3, "RDS数据", "binlog"),
 
-                          UNKNOWN(-1, "未知", "");
+    OFFLINE(4, "离线导入数据", "offline"),
+
+    UNKNOWN(-1, "未知", "");
 
     DataTypeEnum(int code, String desc, String label) {
         this.code = code;
@@ -22,7 +26,7 @@ public enum DataTypeEnum {
         this.label = label;
     }
 
-    private int    code;
+    private int code;
 
     private String desc;
 
@@ -51,6 +55,19 @@ public enum DataTypeEnum {
         }
 
         return DataTypeEnum.UNKNOWN;
+    }
+
+    public static boolean isExit(Integer code) {
+        if (code == null) {
+            return false;
+        }
+        for (DataTypeEnum state : DataTypeEnum.values()) {
+            if (state.getCode() == code) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

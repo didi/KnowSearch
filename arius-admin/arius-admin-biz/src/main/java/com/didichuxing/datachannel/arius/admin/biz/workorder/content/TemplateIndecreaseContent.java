@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 模板扩缩容
@@ -8,6 +9,7 @@ import lombok.Data;
  * @date 2019/5/7
  */
 @Data
+@NoArgsConstructor
 public class TemplateIndecreaseContent extends BaseContent {
 
     private Integer id;

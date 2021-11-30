@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.enums.TemplateBlockTypeEnum;
+import com.didi.arius.gateway.common.exception.InvalidParameterException;
+import com.didi.arius.gateway.common.exception.TemplateBlockException;
 import com.didi.arius.gateway.common.exception.TooManyIndexException;
 import com.didi.arius.gateway.common.metadata.*;
 import com.didi.arius.gateway.common.utils.IndexTire;
@@ -11,6 +14,7 @@ import com.didi.arius.gateway.common.utils.IndexTireBuilder;
 import com.didi.arius.gateway.common.utils.Regex;
 import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.ESRestClientService;
+import com.didi.arius.gateway.core.service.arius.AppService;
 import com.didi.arius.gateway.core.service.arius.ESClusterService;
 import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
@@ -19,6 +23,8 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectResponse
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.*;
 import com.google.common.collect.Maps;
+import lombok.NoArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.elasticsearch.gateway.GatewayException;
 import org.elasticsearch.index.IndexNotFoundException;
@@ -32,7 +38,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.*;
 
+import static com.didi.arius.gateway.common.utils.AppUtil.isAdminAppid;
+
 @Service
+@NoArgsConstructor
 public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     private static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
@@ -40,6 +49,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Autowired
     private AriusAdminRemoteService ariusAdminRemoteService;
+
+    @Autowired
+    private AppService appService;
 
     @Autowired
     private ESClusterService esClusterService;
@@ -61,10 +73,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private Map<String, IndexTemplate>  indexTemplateMap = new HashMap<>();
     private Map<String, String>         indexToAlias     = new HashMap<>();
 
-
     @PostConstruct
     public void init(){
-        threadPool.submitScheduleAtFixTask( () -> resetIndexTemplateInfo(), 0, schedulePeriod );
+        threadPool.submitScheduleAtFixTask(this::resetIndexTemplateInfo, 20, schedulePeriod);
     }
 
     @Override
@@ -98,9 +109,24 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public void resetIndexTemplateInfo(){
-        resetTemplateDetail();
-        resetTemplateInfo();
-        resetIndexAlias();
+        try {
+            resetTemplateDetail();
+        } catch (Exception e) {
+            bootLogger.error("resetTemplateDetail error", e);
+        }
+
+        try {
+            resetTemplateInfo();
+        } catch (Exception e) {
+            bootLogger.error("resetTemplateInfo error", e);
+        }
+
+        try {
+            resetIndexAlias();
+        } catch (Exception e) {
+            bootLogger.error("resetIndexAlias error", e);
+        }
+
     }
 
     @Override
@@ -214,11 +240,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             templateInfo.setNeedSource(needSource);
             templateInfo.setVersion(templateInfoResponse.getVersion());
 
-            if (oldExpressionMap != null) {
-                if (oldExpressionMap.containsKey(templateInfoResponse.getExpression())) {
-                    TemplateInfo oldTemplateInfo = oldExpressionMap.get(templateInfoResponse.getExpression());
-                    templateInfo.setMappings(oldTemplateInfo.getMappings());
-                }
+            if (oldExpressionMap != null && oldExpressionMap.containsKey(templateInfoResponse.getExpression())) {
+                TemplateInfo oldTemplateInfo = oldExpressionMap.get(templateInfoResponse.getExpression());
+                templateInfo.setMappings(oldTemplateInfo.getMappings());
             }
 
             expressionMap.put(templateInfoResponse.getExpression(), templateInfo);
@@ -256,33 +280,27 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             indexTemplate.setExpression(indexTemplateResponse.getBaseInfo().getExpression());
             indexTemplate.setIsDefaultRouting(indexTemplateResponse.getBaseInfo().getIsDefaultRouting());
             indexTemplate.setVersion(indexTemplateResponse.getBaseInfo().getVersion());
-            indexTemplate.setDeployStatus(IndexTemplate.DeployStatus.IntegerToStatus(indexTemplateResponse.getBaseInfo().getDeployStatus()));
+            indexTemplate.setDeployStatus(IndexTemplate.DeployStatus.integerToStatus(indexTemplateResponse.getBaseInfo().getDeployStatus()));
             indexTemplate.setAliases(indexTemplateResponse.getBaseInfo().getAliases());
             indexTemplate.setIngestPipeline(indexTemplateResponse.getBaseInfo().getIngestPipeline());
+            indexTemplate.setBlockRead(null == indexTemplateResponse.getBaseInfo().getBlockRead() ? false :
+                    indexTemplateResponse.getBaseInfo().getBlockRead());
+            indexTemplate.setBlockWrite(null == indexTemplateResponse.getBaseInfo().getBlockWrite() ? false :
+                    indexTemplateResponse.getBaseInfo().getBlockWrite());
+
 
             TemplateClusterInfo masterInfo = new TemplateClusterInfo();
 
             masterInfo.setAccessApps(indexTemplateResponse.getMasterInfo().getAccessApps() == null ? new HashSet<>() : new HashSet<>(indexTemplateResponse.getMasterInfo().getAccessApps()));
             masterInfo.setCluster(indexTemplateResponse.getMasterInfo().getCluster());
             masterInfo.setTopic(indexTemplateResponse.getMasterInfo().getTopic());
-            masterInfo.setMappingIndexNameEnable( Objects.isNull(indexTemplateResponse.getMasterInfo().getMappingIndexNameEnable()) ? false : indexTemplateResponse.getMasterInfo().getMappingIndexNameEnable());
+            masterInfo.setMappingIndexNameEnable(!Objects.isNull(indexTemplateResponse.getMasterInfo().getMappingIndexNameEnable()) && indexTemplateResponse.getMasterInfo().getMappingIndexNameEnable());
             masterInfo.setTypeIndexMapping( MapUtils.isEmpty(indexTemplateResponse.getMasterInfo().getTypeIndexMapping()) ? Maps.newHashMap() : indexTemplateResponse.getMasterInfo().getTypeIndexMapping());
 
             indexTemplate.setMasterInfo(masterInfo);
             List<TemplateClusterInfo> slaveInfos = new ArrayList<>();
 
-            if (indexTemplateResponse.getSlaveInfos() != null && indexTemplateResponse.getSlaveInfos().size() > 0) {
-                for (SlaveInfoResponse slaveInfoResponse : indexTemplateResponse.getSlaveInfos()) {
-                    TemplateClusterInfo slaveInfo = new TemplateClusterInfo();
-                    slaveInfo.setAccessApps(slaveInfoResponse.getAccessApps() == null ? new HashSet<>() : new HashSet<>(slaveInfoResponse.getAccessApps()));
-                    slaveInfo.setCluster(slaveInfoResponse.getCluster());
-                    slaveInfo.setTopic(slaveInfoResponse.getTopic());
-                    slaveInfo.setMappingIndexNameEnable(Objects.isNull(slaveInfoResponse.getMappingIndexNameEnable()) ? false : slaveInfoResponse.getMappingIndexNameEnable());
-                    slaveInfo.setTypeIndexMapping(MapUtils.isEmpty(slaveInfoResponse.getTypeIndexMapping()) ? Maps.newHashMap() : slaveInfoResponse.getTypeIndexMapping());
-
-                    slaveInfos.add(slaveInfo);
-                }
-            }
+            dealSlaveInfos(indexTemplateResponse, slaveInfos);
             indexTemplate.setSlaveInfos(slaveInfos);
 
             String expression = indexTemplate.getExpression();
@@ -291,6 +309,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             }
 
             newIndexTemplateMap.put(expression, indexTemplate);
+
+            if(CollectionUtils.isNotEmpty(indexTemplate.getAliases())){
+                for(String alias : indexTemplate.getAliases()){
+                    newIndexTemplateMap.put(alias, indexTemplate);
+                }
+            }
+
         }
 
         bootLogger.info("resetTemplateInfo add indexTemplateMap size={}", response.getData().size());
@@ -300,40 +325,57 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         IndexTireBuilder builder = new IndexTireBuilder(indexTemplateMap);
         indexTire = builder.build();
 
-        bootLogger.info("resetTemplateInfo end, newIndexTemplateMap size={}", indexTemplateMap.size());
+        String indexTemplateLog = JSON.toJSONString(indexTemplateMap);
+        bootLogger.info("resetTemplateInfo end, newIndexTemplateMap size={}, detail={}", indexTemplateMap.size(), indexTemplateLog);
     }
 
-    private void resetIndexAlias() {
-        if (esRestClientService.getESClusterMap() != null) {
-            Map<String, String> newIndexToAlias = new HashMap<>();
-            for (Map.Entry<String, ESCluster> entry : esRestClientService.getESClusterMap().entrySet()) {
-                ESCluster esCluster = entry.getValue();
+    private void dealSlaveInfos(IndexTemplateResponse indexTemplateResponse, List<TemplateClusterInfo> slaveInfos) {
+        if (indexTemplateResponse.getSlaveInfos() != null && !indexTemplateResponse.getSlaveInfos().isEmpty()) {
+            for (SlaveInfoResponse slaveInfoResponse : indexTemplateResponse.getSlaveInfos()) {
+                TemplateClusterInfo slaveInfo = new TemplateClusterInfo();
+                slaveInfo.setAccessApps(slaveInfoResponse.getAccessApps() == null ? new HashSet<>() : new HashSet<>(slaveInfoResponse.getAccessApps()));
+                slaveInfo.setCluster(slaveInfoResponse.getCluster());
+                slaveInfo.setTopic(slaveInfoResponse.getTopic());
+                slaveInfo.setMappingIndexNameEnable(!Objects.isNull(slaveInfoResponse.getMappingIndexNameEnable()) && slaveInfoResponse.getMappingIndexNameEnable());
+                slaveInfo.setTypeIndexMapping(MapUtils.isEmpty(slaveInfoResponse.getTypeIndexMapping()) ? Maps.newHashMap() : slaveInfoResponse.getTypeIndexMapping());
 
-                try {
-                    if (esCluster.getType() == ESCluster.Type.INDEX) {
-                        JSONArray alias = getAliasList( esCluster.getEsClient());
-
-                        bootLogger.info("get_alias_list||cluster={}||alias_size={}", esCluster.getCluster(), alias.size());
-
-                        for (int i = 0; i < alias.size(); ++i) {
-                            JSONObject item = alias.getJSONObject(i);
-                            String strAlias = item.getString("alias");
-                            String index = item.getString("index");
-
-                            newIndexToAlias.put(index, strAlias);
-                        }
-                    }
-                } catch (Exception e) {
-                    bootLogger.error("cluster={}", esCluster.getCluster(), e);
-                }
+                slaveInfos.add(slaveInfo);
             }
-
-            this.indexToAlias = newIndexToAlias;
-            bootLogger.info("get_alias_list_done||alias_size={}", indexToAlias.size());
         }
     }
 
-    private JSONArray getAliasList(ESClient esClient) throws Exception {
+    private void resetIndexAlias() {
+        if (MapUtils.isEmpty(esRestClientService.getESClusterMap())) {
+            return;
+        }
+        Map<String, String> newIndexToAlias = new HashMap<>();
+        for (Map.Entry<String, ESCluster> entry : esRestClientService.getESClusterMap().entrySet()) {
+            ESCluster esCluster = entry.getValue();
+            if (esCluster.getType() != ESCluster.Type.INDEX) {
+                continue;
+            }
+            try {
+                JSONArray alias = getAliasList(esCluster.getEsClient());
+
+                bootLogger.info("get_alias_list||cluster={}||alias_size={}", esCluster.getCluster(), alias.size());
+
+                for (int i = 0; i < alias.size(); ++i) {
+                    JSONObject item = alias.getJSONObject(i);
+                    String strAlias = item.getString("alias");
+                    String index = item.getString("index");
+
+                    newIndexToAlias.put(index, strAlias);
+                }
+            } catch (Exception e) {
+                bootLogger.error("cluster={}", esCluster.getCluster(), e);
+            }
+        }
+
+        this.indexToAlias = newIndexToAlias;
+        bootLogger.info("get_alias_list_done||alias_size={}", indexToAlias.size());
+    }
+
+    private JSONArray getAliasList(ESClient esClient) {
         DirectRequest directRequest = new DirectRequest("GET", "_cat/aliases");
         Map<String, String> params = new HashMap<>();
         params.put("h", "alias,index");
@@ -356,16 +398,14 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     private TemplateInfo getAliasesMatch(String indexName, String cluster) {
-        Map<String, Map<String, TemplateInfo>> templateAliasesMap = getTemplateAliasMap();
+        Map<String, Map<String, TemplateInfo>> templateAliasesMapInfo = getTemplateAliasMap();
 
-        if (templateAliasesMap.get(cluster) != null) {
-            Map<String, TemplateInfo> aliasesMap = templateAliasesMap.get(cluster);
+        if (templateAliasesMapInfo.get(cluster) != null) {
+            Map<String, TemplateInfo> aliasesMap = templateAliasesMapInfo.get(cluster);
             TemplateInfo templateInfo = aliasesMap.get(indexName);
-            if (templateInfo != null) {
-                return templateInfo;
-            }
+            return templateInfo;
         } else {
-            for(Map.Entry<String, Map<String, TemplateInfo>> entry : templateAliasesMap.entrySet()) {
+            for(Map.Entry<String, Map<String, TemplateInfo>> entry : templateAliasesMapInfo.entrySet()) {
                 Map<String, TemplateInfo> aliasesMap = entry.getValue();
                 TemplateInfo templateInfo = aliasesMap.get(indexName);
                 if (templateInfo != null) {
@@ -378,41 +418,201 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     private TemplateInfo getExpressionMatch(String indexName, String cluster) {
-        Map<String, Map<String, TemplateInfo>> templateExpressionMap = getTemplateExpressionMap();
+        Map<String, Map<String, TemplateInfo>> templateExpressionMapInfo = getTemplateExpressionMap();
 
-        if (templateExpressionMap.get(cluster) != null) {
-            Map<String, TemplateInfo> expressionMap = templateExpressionMap.get(cluster);
+        if (templateExpressionMapInfo.get(cluster) != null) {
+            Map<String, TemplateInfo> expressionMap = templateExpressionMapInfo.get(cluster);
             TemplateInfo templateInfo = expressionMap.get(indexName);
             if (templateInfo != null) {
                 return templateInfo;
             }
-
-            for (Map.Entry<String, TemplateInfo> entry : expressionMap.entrySet()) {
-                String expression = entry.getKey();
-                if (expression.endsWith("*")) {
-                    if (indexName.startsWith(expression.substring(0, expression.length()-1))) {
-                        return entry.getValue();
-                    }
-                } else if (expression.equals(indexName)) {
-                    return entry.getValue();
-                }
-            }
+            return getTemplateInfoByIndexName(indexName, expressionMap);
         } else {
-            for(Map.Entry<String, Map<String, TemplateInfo>> entry : templateExpressionMap.entrySet()) {
+            for(Map.Entry<String, Map<String, TemplateInfo>> entry : templateExpressionMapInfo.entrySet()) {
                 Map<String, TemplateInfo> expressionMap = entry.getValue();
-                for (Map.Entry<String, TemplateInfo> inEntry : expressionMap.entrySet()) {
-                    String expression = inEntry.getKey();
-                    if (expression.endsWith("*")) {
-                        if (indexName.startsWith(expression.substring(0, expression.length()-1))) {
-                            return inEntry.getValue();
-                        }
-                    } else if (expression.equals(indexName)) {
-                        return inEntry.getValue();
-                    }
+                TemplateInfo templateInfo = getTemplateInfoByIndexName(indexName, expressionMap);
+                if (null != templateInfo) {
+                    return templateInfo;
                 }
             }
         }
 
         return null;
     }
+
+    private TemplateInfo getTemplateInfoByIndexName(String indexName, Map<String, TemplateInfo> expressionMap) {
+        for (Map.Entry<String, TemplateInfo> entry : expressionMap.entrySet()) {
+            String expression = entry.getKey();
+            if (expression.endsWith("*")) {
+                if (indexName.startsWith(expression.substring(0, expression.length() - 1))) {
+                    return entry.getValue();
+                }
+            } else if (expression.equals(indexName)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean addTemplateAlias(int appid, int templateId, String templateName, String aliasName){
+        //1、调admin接口增加模板别名
+        TemplateAlias templateAlias = new TemplateAlias();
+        templateAlias.setLogicId(templateId);
+        templateAlias.setName(aliasName);
+
+        TempaletAliasResponse response = ariusAdminRemoteService.addAdminTemplateAlias(templateAlias);
+		if(null == response || null == response.getData() || !response.getData()){
+            logger.error("addTemplateAlias error, response={}, templateAlias={}", JSON.toJSONString(response),
+                    JSON.toJSONString(templateAlias));
+            return false;
+		}
+
+        AppDetail appDetail = appService.getAppDetail(appid);
+        if(null == appDetail){
+            return false;
+        }
+
+        IndexTemplate indexTemplate = indexTemplateMap.get(templateName);
+        if(null == indexTemplate){
+            return false;
+        }
+
+        //2、更新appDetails信息
+        if(null != appDetail.getIndexExp() &&
+                appDetail.getIndexExp().contains(templateName)){
+            appDetail.getIndexExp().add(aliasName);
+        }
+
+        if(null != appDetail.getWindexExp() &&
+                appDetail.getWindexExp().contains(templateName)){
+            appDetail.getWindexExp().add(aliasName);
+        }
+
+        //3、更新indexTemplateMap信息
+        if(null == indexTemplate.getAliases()){
+            List<String> aliass = new ArrayList<>();
+            aliass.add(aliasName);
+
+            indexTemplate.setAliases(aliass);
+        }else {
+            indexTemplate.getAliases().add(aliasName);
+        }
+
+        indexTemplateMap.put(aliasName, indexTemplate);
+
+        return true;
+    }
+
+    @Override
+    public boolean delTemplateAlias(int appid, int templateId, String templateName, String aliasName){
+        //1、调admin接口删除模板别名
+        TemplateAlias templateAlias = new TemplateAlias();
+        templateAlias.setLogicId(templateId);
+        templateAlias.setName(aliasName);
+
+        TempaletAliasResponse response = ariusAdminRemoteService.delAdminTemplateAlias(templateAlias);
+		if(null == response || null == response.getData() || !response.getData()){
+            logger.error("deleteTemplateAlias error, response={}, templateAlias={}", JSON.toJSONString(response),
+                    JSON.toJSONString(templateAlias));
+            return false;
+		}
+
+        AppDetail appDetail = appService.getAppDetail(appid);
+        if(null == appDetail){
+            return false;
+        }
+
+        IndexTemplate indexTemplate = indexTemplateMap.get(templateName);
+        if(null == indexTemplate){
+            return false;
+        }
+
+        //2、更新appDetails信息
+        if(null != appDetail.getIndexExp() &&
+                appDetail.getIndexExp().contains(aliasName)){
+            appDetail.getIndexExp().remove(aliasName);
+        }
+
+        if(null != appDetail.getWindexExp() &&
+                appDetail.getWindexExp().contains(aliasName)){
+            appDetail.getWindexExp().remove(aliasName);
+        }
+
+        //3、更新indexTemplateMap信息
+        if(null != indexTemplate.getAliases()){
+            indexTemplate.getAliases().remove(aliasName);
+        }
+
+        indexTemplateMap.remove(aliasName);
+
+        return true;
+    }
+
+    @Override
+    public void checkTemplateExist(List<String> indices) {
+        if (indices == null || indices.isEmpty()) {
+            throw new InvalidParameterException("no index to query");
+        }
+        for (String index : indices) {
+            if (index.startsWith(".")) {
+                continue;
+            }
+            IndexTemplate indexTemplate = getIndexTemplateByTire(index);
+            if (indexTemplate == null) {
+                String alias = getIndexAlias(index);
+                if (alias != null) {
+                    indexTemplate = getIndexTemplateByTire(alias);
+                }
+            }
+
+            if (indexTemplate == null) {
+                throw new IndexNotFoundException("query can't find index template exception,index=" + index);
+            }
+        }
+    }
+
+    @Override
+    public void checkTemplateBlock(List<String> indices, AppDetail appDetail, TemplateBlockTypeEnum blockTypeEnum) throws IndexNotFoundException {
+        if (indices == null || indices.isEmpty()) {
+            throw new InvalidParameterException("no index to query");
+        }
+        for (String index : indices) {
+            if (index.startsWith(".")) {
+                continue;
+            }
+            IndexTemplate indexTemplate = getIndexTemplateByTire(index);
+            if (indexTemplate == null) {
+                String alias = getIndexAlias(index);
+                if (alias != null) {
+                    indexTemplate = getIndexTemplateByTire(alias);
+                }
+            }
+
+            if (indexTemplate == null) {
+                throw new IndexNotFoundException(String.format("query can't find index template exception, index=%s", index));
+            }
+
+            if (!isAdminAppid(appDetail)) {
+                checkBlockType(blockTypeEnum, index, indexTemplate);
+            }
+        }
+    }
+
+    private void checkBlockType(TemplateBlockTypeEnum blockTypeEnum, String index, IndexTemplate indexTemplate) {
+        switch (blockTypeEnum) {
+            case READ_BLOCK_TYPE:
+                if (indexTemplate.getBlockRead()) {
+                    throw new TemplateBlockException(String.format("index[%s] block read", index));
+                }
+                break;
+            case WRITE_WRITE_TYPE:
+                if (indexTemplate.getBlockWrite()) {
+                    throw new TemplateBlockException(String.format("index[%s] block write", index));
+                }
+                break;
+            default:
+        }
+    }
+
 }

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.ExtendServiceFactory;
@@ -20,13 +21,19 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
 import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateLimitStrategyProvider;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 import static com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MAX;
 import static com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MIN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_LIMIT_W;
+
+/**
+ * 招行内部去掉基于es节点负载的动态限流策略
+ * @modifer zhaoqingrong
+ * @date 2021-06-22
+ */
 
 /**
  * 实现基于es节点负载的动态限流
@@ -39,22 +46,25 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
 
     private static final ILog             LOGGER                    = LogFactory.getLog( TemplateLimitManagerImpl.class);
 
-    private static final Double           RACK_CPU_USED_PERCENT_AVG = 68.0;
+    private static final Double           RACK_CPU_USED_PERCENT_AVG = 80.0;
 
     @Autowired
-    private ClusterNodeManager clusterNodeManager;
+    private TemplateQuotaManager            templateQuotaManager;
 
     @Autowired
-    private TemplatePhyStatisManager templatePhyStatisManager;
+    private ClusterNodeManager              clusterNodeManager;
 
     @Autowired
-    private TemplatePipelineManager templatePipelineManager;
+    private TemplatePhyStatisManager        templatePhyStatisManager;
 
     @Autowired
-    private ExtendServiceFactory          extendServiceFactory;
+    private TemplatePipelineManager         templatePipelineManager;
 
     @Autowired
-    private ESIndexService                esIndexService;
+    private ExtendServiceFactory            extendServiceFactory;
+
+    @Autowired
+    private ESIndexService                  esIndexService;
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -68,7 +78,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
      * @return result
      */
     @Override
-    public Result stopIndexWrite(Long physicalId) throws ESOperateException {
+    public Result<Void> stopIndexWrite(Long physicalId) throws ESOperateException {
         IndexTemplatePhy templatePhysical = templatePhyService.getTemplateById(physicalId);
         if (templatePhysical == null) {
             return Result.buildNotExist("模板不存在");
@@ -89,7 +99,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
      * @return result
      */
     @Override
-    public Result startIndexWrite(Long physicalId) throws ESOperateException {
+    public Result<Void> startIndexWrite(Long physicalId) throws ESOperateException {
         IndexTemplatePhy templatePhysical = templatePhyService.getTemplateById(physicalId);
         if (templatePhysical == null) {
             return Result.buildNotExist("模板不存在");
@@ -99,7 +109,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
     }
 
     @Override
-    public Result blockIndexWrite(String cluster, List<String> indices, boolean block) throws ESOperateException {
+    public Result<Void> blockIndexWrite(String cluster, List<String> indices, boolean block) throws ESOperateException {
         if (CollectionUtils.isEmpty(indices)) {
             return Result.buildNotExist("没有索引");
         }
@@ -170,34 +180,38 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
         for (IndexTemplatePhy physical : physicals) {
             try {
                 GetTemplateLimitStrategyContext getTemplateLimitStrategyContext = new GetTemplateLimitStrategyContext();
-                TemplateLimitStrategy strategy = getTemplateLimitStrategy(physical.getCluster(), physical.getName(),
-                    interval, getTemplateLimitStrategyContext);
+                TemplateLimitStrategy strategy;
 
-                if (strategy.getTpsAdjustPercent() > 0 && !getTemplateLimitStrategyContext.isRateLimited()) {
-                    PhysicalTemplateTpsMetric templateTpsMetric = getTemplateLimitStrategyContext
-                        .getPhysicalTemplateTpsMetric();
-                    if (templateTpsMetric == null) {
-                        LOGGER.info(
-                            "class=ESClusterPhyServiceImpl||method=adjustPipeLineRateLimit||logicId={}||template={}||msg=not limit and templateTpsMetric is null",
-                            logicId, physical.getName());
-                    } else {
-                        LOGGER.info(
-                            "class=ESClusterPhyServiceImpl||method=adjustPipeLineRateLimit||logicId={}||template={}||currentTps={}||currentFailTps={}||msg=not limit",
-                            logicId, physical.getName(),
-                            getTemplateLimitStrategyContext.getPhysicalTemplateTpsMetric().getCurrentTps(),
-                            getTemplateLimitStrategyContext.getPhysicalTemplateTpsMetric().getCurrentFailCount());
+                if(templateQuotaManager.enableClt(physical.getLogicId())){
+                    strategy = getTemplateLimitStrategy(physical.getCluster(), physical.getName(),
+                            interval, getTemplateLimitStrategyContext);
+
+                    if (strategy.getTpsAdjustPercent() > 0 && !getTemplateLimitStrategyContext.isRateLimited()) {
+                        PhysicalTemplateTpsMetric templateTpsMetric = getTemplateLimitStrategyContext
+                                .getPhysicalTemplateTpsMetric();
+                        if (templateTpsMetric == null) {
+                            LOGGER.info(
+                                    "class=ESClusterPhyServiceImpl||method=adjustPipeLineRateLimit||logicId={}||template={}||msg=not limit and templateTpsMetric is null",
+                                    logicId, physical.getName());
+                        } else {
+                            LOGGER.info(
+                                    "class=ESClusterPhyServiceImpl||method=adjustPipeLineRateLimit||logicId={}||template={}||currentTps={}||currentFailTps={}||msg=not limit",
+                                    logicId, physical.getName(),
+                                    getTemplateLimitStrategyContext.getPhysicalTemplateTpsMetric().getCurrentTps(),
+                                    getTemplateLimitStrategyContext.getPhysicalTemplateTpsMetric().getCurrentFailCount());
+                        }
+
+                        succCount++;
+                        continue;
                     }
 
-                    succCount++;
-                    continue;
-                }
-
-                if (templatePipelineManager.editRateLimitByPercent(physical, strategy.getTpsAdjustPercent())) {
-                    succCount++;
-                } else {
-                    LOGGER.warn(
-                        "class=ESClusterPhyServiceImpl||method=adjustPipeLineRateLimit||logicId={}||template={}||msg=adjustPipeLineRateLimit fail",
-                        logicId, physical.getName());
+                    if (templatePipelineManager.editRateLimitByPercent(physical, strategy.getTpsAdjustPercent())) {
+                        succCount++;
+                    } else {
+                        LOGGER.warn(
+                                "class=ESClusterPhyServiceImpl||method=adjustPipeLineRateLimit||logicId={}||template={}||msg=adjustPipeLineRateLimit fail",
+                                logicId, physical.getName());
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.error(
@@ -223,6 +237,10 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
                                          GetTemplateLimitStrategyContext context) {
 
         IndexTemplatePhy templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
+
+        if (templatePhysical == null || !templateQuotaManager.enableClt(templatePhysical.getLogicId())) {
+            return TemplateLimitStrategy.buildDefault();
+        }
 
         long now = System.currentTimeMillis();
         long startTime = now - interval;
@@ -251,7 +269,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
         Double templateTpsCurrent = templateTpsMetricResult.getData().getCurrentTps();
         Double rackCpuUsedPercentAvg = getRackCpuUsedPercentAvg(rackMetaMetricResult.getData());
 
-        if (templateTpsMax == null || templateTpsCurrent == null || rackCpuUsedPercentAvg == null) {
+        if (templateTpsMax == null || templateTpsCurrent == null) {
             return TemplateLimitStrategy.buildDefault();
         }
 
@@ -283,8 +301,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
 
     /**************************************** private method ****************************************************/
     private Double getRackCpuUsedPercentAvg(List<RackMetaMetric> metaMetrics) {
-
-        if (metaMetrics.size() == 0) {
+        if (metaMetrics.isEmpty()) {
             return 0.0;
         }
 

@@ -10,7 +10,7 @@ public abstract class PhysicalTemplateEvent extends TemplateEvent {
 
     private IndexTemplateLogicWithPhyTemplates logicWithPhysical;
 
-    public PhysicalTemplateEvent(Object source, IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+    protected PhysicalTemplateEvent(Object source, IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
         super(source);
         this.logicWithPhysical = logicWithPhysical;
     }

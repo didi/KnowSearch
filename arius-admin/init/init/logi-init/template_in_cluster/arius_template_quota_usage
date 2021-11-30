@@ -1,0 +1,69 @@
+{
+  "order": 10,
+  "index_patterns": [
+    "arius_template_quota_usage"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "4",
+      "routing": {
+        "allocation": {
+          "include": {
+            "rack": ""
+          }
+        }
+      },
+      "mapping": {
+        "single_type": "true"
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "template": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "dataCenter": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "quotaCpuCount": {
+        "type": "float"
+      },
+      "quotaCpuUsage": {
+        "type": "float"
+      },
+      "actualDiskG": {
+        "type": "float"
+      },
+      "quotaDiskG": {
+        "type": "float"
+      },
+      "actualCpuCount": {
+        "type": "float"
+      },
+      "appId": {
+        "type": "long"
+      },
+      "quota": {
+        "type": "float"
+      },
+      "key": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "logicClusters": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "logicId": {
+        "type": "long"
+      },
+      "quotaDiskUsage": {
+        "type": "float"
+      }
+    }
+  },
+  "aliases": {}
+}

@@ -6,13 +6,17 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "物理模板信息")
 public class IndexTemplatePhysicalDTO extends BaseDTO {
 
@@ -60,6 +64,15 @@ public class IndexTemplatePhysicalDTO extends BaseDTO {
 
     @ApiModelProperty("逻辑集群ID")
     private Long                           resourceId;
+
+    /**
+     * 写入限流值，
+     * writeRateLimit = 0 禁止写入，
+     * writeRateLimit = -1 不限流，
+     * writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档
+     */
+    @ApiModelProperty("写入限流值")
+    private Integer                        writeRateLimit;
 
     @ApiModelProperty("物理模板列表")
     private List<IndexTemplatePhysicalDTO> physicalInfos;

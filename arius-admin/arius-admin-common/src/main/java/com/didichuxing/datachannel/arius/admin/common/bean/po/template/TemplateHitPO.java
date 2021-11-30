@@ -2,15 +2,18 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
@@ -43,15 +46,15 @@ public class TemplateHitPO extends BaseESPO {
      */
     private long useTime;
 
-    private long _1DayCount=0;
+    private long day1Count =0;
 
-    private long _3DayCount=0;
+    private long day3Count =0;
 
-    private long _7DayCount=0;
+    private long day7Count =0;
 
-    private long _30DayCount=0;
+    private long day30Count =0;
 
-    private long _allDayCount=0;
+    private long dayAllCount=0;
 
     /**
      * 索引名称命中次数统计
@@ -73,9 +76,7 @@ public class TemplateHitPO extends BaseESPO {
     }
 
     public void addCount(String indexName, long count) {
-        if (!hitIndexMap.containsKey(indexName)) {
-            hitIndexMap.put(indexName, 0L);
-        }
+        hitIndexMap.putIfAbsent(indexName, 0L);
 
         Long value = hitIndexMap.get(indexName);
         hitIndexMap.put(indexName, value + count);
@@ -84,7 +85,7 @@ public class TemplateHitPO extends BaseESPO {
     @JSONField(serialize = false)
     @Override
     public String getKey() {
-        return String.format("%s_%d_%s", EnvUtil.getStr(), id, date.replaceAll(" ", "_"));
+        return String.format("%s_%d_%s", EnvUtil.getStr(), id, date.replace(" ", "_"));
     }
 
     @JSONField(serialize = false)
@@ -94,17 +95,18 @@ public class TemplateHitPO extends BaseESPO {
         }
 
         Map<String, Long> m = templateHitPO.hitIndexMap;
-        for (String index : m.keySet()) {
-            if (!this.hitIndexMap.containsKey(index)) {
-                this.hitIndexMap.put(index, 0L);
-            }
+        for (Map.Entry<String, Long> entry : m.entrySet()) {
+            String index = entry.getKey();
+            Long count = entry.getValue();
 
-            this.hitIndexMap.put(index, this.hitIndexMap.get(index) + m.get(index));
+            hitIndexMap.putIfAbsent(index, 0L);
+
+            this.hitIndexMap.put(index, this.hitIndexMap.get(index) + count);
         }
     }
 
     // 统计当天，3天，7天，30天，全部的查询次数
-    private static final Long _ONE_DAY = 24 * 60 * 60 * 1000L;
+    private static final Long ONE_DAY = 24 * 60 * 60 * 1000L;
     public void setSumHits(String express, String timeFormat) {
         try {
             if (!express.endsWith("*") || timeFormat == null || timeFormat.trim().length() == 0) {
@@ -126,51 +128,48 @@ public class TemplateHitPO extends BaseESPO {
             }
 
             sdf = new SimpleDateFormat(timeFormat);
+            handleHitIndexMap(express, sdf, dateTime, extraSdf, length);
 
-            for (String index : hitIndexMap.keySet()) {
-                String dataStr = index.substring(length);
-                Long count = hitIndexMap.get(index);
-                if(count==null) {
-                    continue;
-                }
+        } catch (Exception t) {
+            LOGGER.error("class=TemplateHitPO||method=setSumHits||errMsg=get used day num error, express:{}, format:{}, hitPO:{}", express, timeFormat, JSON.toJSONString(this), t);
+        }
+    }
 
-                Long time=null;
-                try {
-                    time = sdf.parse(dataStr).getTime();
-                } catch (Throwable t) {
-                    if(extraSdf!=null) {
-                        time = extraSdf.parse(dataStr).getTime();
-                    }
-                }
-
-                if(time==null) {
-                    LOGGER.error("parser time error, indexName:" + index + ", express:" + express);
-                    continue;
-                }
-
-                Long gap = dateTime - time;
-                int day = (int) (gap/_ONE_DAY);
-                _allDayCount+=count;
-
-                if(day<30) {
-                    _30DayCount+=count;
-                }
-
-                if(day<7) {
-                    _7DayCount+=count;
-                }
-
-                if(day<3) {
-                    _3DayCount+=count;
-                }
-
-                if(day<1) {
-                    _1DayCount+=count;
-                }
+    private void handleHitIndexMap(String express, SimpleDateFormat sdf, Long dateTime, SimpleDateFormat extraSdf, int length) throws ParseException {
+        for (Map.Entry<String, Long> entry : hitIndexMap.entrySet()) {
+            String index = entry.getKey();
+            String dataStr = index.substring(length);
+            Long count = entry.getValue();
+            if(count==null) {
+                continue;
             }
 
-        } catch (Throwable t) {
-            LOGGER.error("get used day num error, express:{}, format:{}, hitPO:{}", express, timeFormat, JSON.toJSONString(this), t);
+            Long time = getTime(sdf, extraSdf, dataStr);
+
+            if(time==null) {
+                LOGGER.error("class=TemplateHitPO||method=handleHitIndexMap||errMsg=parser time error, indexName:" + index + ", express:" + express);
+                continue;
+            }
+
+            Long gap = dateTime - time;
+            int day = (int) (gap/ ONE_DAY);
+            dayAllCount+=count;
+
+            if(day<30) {
+                day30Count +=count;
+            }
+
+            if(day<7) {
+                day7Count +=count;
+            }
+
+            if(day<3) {
+                day3Count +=count;
+            }
+
+            if(day<1) {
+                day1Count +=count;
+            }
         }
     }
 
@@ -199,24 +198,18 @@ public class TemplateHitPO extends BaseESPO {
 
             sdf = new SimpleDateFormat(timeFormat);
             Long maxGap = 0L;
-            for (String index : hitIndexMap.keySet()) {
+            for (Map.Entry<String, Long> entry : hitIndexMap.entrySet()) {
+                String index = entry.getKey();
                 String dataStr = index.substring(length);
-                Long count = hitIndexMap.get(index);
+                Long count = entry.getValue();
                 if(count!=null && count<maxQpsPerDay) {
                     continue;
                 }
 
-                Long time=null;
-                try {
-                    time = sdf.parse(dataStr).getTime();
-                } catch (Throwable t) {
-                    if(extraSdf!=null) {
-                        time = extraSdf.parse(dataStr).getTime();
-                    }
-                }
+                Long time = getTime(sdf, extraSdf, dataStr);
 
                 if(time==null) {
-                    throw new Exception("parse time error");
+                    throw new BaseException("parse time error", ResultType.FAIL);
                 }
 
                 Long gap = dateTime - time;
@@ -224,11 +217,22 @@ public class TemplateHitPO extends BaseESPO {
                     maxGap = gap;
                 }
             }
-
             return maxGap;
-        } catch (Throwable t) {
-            LOGGER.error("get used day num error, express:{}, format:{}, hitPO:{}", express, timeFormat, JSON.toJSONString(this), t);
+        } catch (Exception t) {
+            LOGGER.error("class=TemplateHitPO||method=getUsedDayNum||errMsg=get used day num error express:{}, format:{}, hitPO:{}", express, timeFormat, JSON.toJSONString(this), t);
             return -1;
         }
+    }
+
+    private Long getTime(SimpleDateFormat sdf, SimpleDateFormat extraSdf, String dataStr) throws ParseException {
+        Long time = null;
+        try {
+            time = sdf.parse(dataStr).getTime();
+        } catch (Exception t) {
+            if (extraSdf != null) {
+                time = extraSdf.parse(dataStr).getTime();
+            }
+        }
+        return time;
     }
 }

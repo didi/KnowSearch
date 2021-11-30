@@ -5,7 +5,6 @@ import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.es.http.StatAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import org.elasticsearch.Build;
-import org.elasticsearch.Version;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestChannel;
@@ -24,19 +23,17 @@ import static org.elasticsearch.rest.RestRequest.Method.HEAD;
 @Component("restMainAction")
 public class RestMainAction extends StatAction {
 
-	public static final String NAME = "main";
-	
 	@Override
 	public String name() {
-		return NAME;
+		return "main";
 	}
-	
-//	@Autowired
-//	private GatewayInfo info;
+
 	@Value("${gateway.cluster.name}")
 	private String gatewayClusterName;
-	
-	private final Version version = Version.CURRENT;
+
+	public RestMainAction() {
+		// pass
+	}
 
 	@Override
 	public void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception {
@@ -46,27 +43,27 @@ public class RestMainAction extends StatAction {
 		if (request.method() == HEAD) {
 			sendDirectResponse(queryContext, new BytesRestResponse(status));
 		} else {
-	        XContentBuilder builder = channel.newBuilder();
+			try (XContentBuilder builder = channel.newBuilder()) {
+				// Default to pretty printing, but allow ?pretty=false to disable
+				if (!request.hasParam("pretty")) {
+					builder.prettyPrint().lfAtEnd();
+				}
 
-	        // Default to pretty printing, but allow ?pretty=false to disable
-	        if (!request.hasParam("pretty")) {
-	            builder.prettyPrint().lfAtEnd();
-	        }
+				builder.startObject();
+				builder.field("name", "elasticsearch gateway " + RestConsts.GATEWAY_VERSION);
+				builder.field("cluster_name", null != client ? client.getClusterName() : gatewayClusterName);
+				builder.startObject("version")
+						.field("number", null != client ? client.getEsVersion() : "6.6.1")
+						.field("build_hash", Build.CURRENT.hash())
+						.field("build_timestamp", Build.CURRENT.timestamp())
+						.field("build_snapshot", false)
+						.field("lucene_version", "7.6.0")
+						.endObject();
+				builder.field("tagline", "You Know, for Search");
+				builder.endObject();
 
-	        builder.startObject();
-	        builder.field("name", "elasticsearch gateway " + RestConsts.GATEWAY_VERSION);
-	        builder.field("cluster_name", gatewayClusterName);
-	        builder.startObject("version")
-		        .field("number", "6.6.1")
-		        .field("build_hash", Build.CURRENT.hash())
-		        .field("build_timestamp", Build.CURRENT.timestamp())
-		        .field("build_snapshot", false)
-		        .field("lucene_version", "7.6.0")
-		        .endObject();
-			builder.field("tagline", "You Know, for Search");
-			builder.endObject();
-
-			sendDirectResponse(queryContext, new BytesRestResponse(status, builder));
+				sendDirectResponse(queryContext, new BytesRestResponse(status, builder));
+			}
 		}
         
 	}

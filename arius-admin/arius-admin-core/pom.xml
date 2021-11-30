@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>25.1-jre</version>
+            <version>30.0-jre</version>
         </dependency>
 
         <dependency>
@@ -52,9 +52,10 @@
             <version>4.1</version>
         </dependency>
 
+        <!-- logi -->
         <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>elasticsearch-didi-internal-client</artifactId>
+            <groupId>io.github.zqrferrari</groupId>
+            <artifactId>logi-elasticsearch-client</artifactId>
         </dependency>
 
         <dependency>
@@ -62,5 +63,11 @@
             <artifactId>commons-email</artifactId>
             <version>1.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+
     </dependencies>
 </project>

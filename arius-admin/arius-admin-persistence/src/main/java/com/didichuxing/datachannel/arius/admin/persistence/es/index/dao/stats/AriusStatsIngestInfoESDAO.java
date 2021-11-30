@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.ESQueryResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggr;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -81,21 +81,25 @@ public class AriusStatsIngestInfoESDAO extends BaseAriusStatsESDAO {
 
             if (esAggrMap != null && esAggrMap.containsKey("groupByTemplateId")) {
                 ESAggr groupByTemplateIdESAggr = esAggrMap.get("groupByTemplateId");
-                if (groupByTemplateIdESAggr != null && CollectionUtils.isNotEmpty(groupByTemplateIdESAggr.getBucketList())) {
-
-                    for (ESBucket esBucket : groupByTemplateIdESAggr.getBucketList()) {
-                        Long templateId = Long.valueOf(esBucket.getUnusedMap().get("key").toString());
-                        String avgCountStr = "0.0";
-                        ESAggr avgCountAggr = esBucket.getAggrMap().get("avg_count_templateId");
-                        if (avgCountAggr != null && avgCountAggr.getUnusedMap() != null && avgCountAggr.getUnusedMap().get("value") != null) {
-                            avgCountStr = avgCountAggr.getUnusedMap().get("value").toString();
-                        }
-                        currentFailCountMap.put(templateId, Double.valueOf(avgCountStr));
-                    }
-                }
+                handleBucketList(currentFailCountMap, groupByTemplateIdESAggr);
             }
         }
 
         return currentFailCountMap;
+    }
+
+    private void handleBucketList(Map<Long, Double> currentFailCountMap, ESAggr groupByTemplateIdESAggr) {
+        if (groupByTemplateIdESAggr != null && CollectionUtils.isNotEmpty(groupByTemplateIdESAggr.getBucketList())) {
+
+            for (ESBucket esBucket : groupByTemplateIdESAggr.getBucketList()) {
+                Long templateId = Long.valueOf(esBucket.getUnusedMap().get("key").toString());
+                String avgCountStr = "0.0";
+                ESAggr avgCountAggr = esBucket.getAggrMap().get("avg_count_templateId");
+                if (avgCountAggr != null && avgCountAggr.getUnusedMap() != null && avgCountAggr.getUnusedMap().get("value") != null) {
+                    avgCountStr = avgCountAggr.getUnusedMap().get("value").toString();
+                }
+                currentFailCountMap.put(templateId, Double.valueOf(avgCountStr));
+            }
+        }
     }
 }

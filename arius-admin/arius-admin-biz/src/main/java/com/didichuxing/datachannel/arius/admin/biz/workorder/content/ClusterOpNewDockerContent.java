@@ -3,10 +3,12 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleDocker;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicLevelEnum;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class ClusterOpNewDockerContent extends ClusterOpBaseContent {
 
     /**

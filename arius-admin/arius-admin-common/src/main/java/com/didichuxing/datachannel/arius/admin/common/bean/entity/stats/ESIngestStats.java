@@ -58,8 +58,10 @@ public class ESIngestStats extends BaseESPO {
      */
     private Map<String, String> metrics;
 
-    public void putMetrics(String key, String value){
-        if(null == metrics){metrics = new HashMap<>();}
+    public void putMetrics(String key, String value) {
+        if (null == metrics) {
+            metrics = new HashMap<>();
+        }
 
         metrics.put(key, value);
     }

@@ -20,6 +20,7 @@ public interface EcmTaskDAO {
 
     List<EcmTaskPO> listUndoWorkOrderTaskByClusterId(Long physicClusterId);
 
-    // todo 去掉 running，只查询处于 waiting状态的工单任务
-    EcmTaskPO getRunningWorkOrderTaskByClusterId(Integer physicClusterId);
+    EcmTaskPO getUsefulWorkOrderTaskByClusterId(Integer physicClusterId);
+
+    List<EcmTaskPO> listRunningTasks();
 }

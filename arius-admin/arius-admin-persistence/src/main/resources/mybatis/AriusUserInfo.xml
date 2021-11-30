@@ -102,4 +102,13 @@
         role in
         <foreach collection="list" item="id" open="(" separator="," close=")">#{id}</foreach>
     </select>
+
+    <select id="listByIds" parameterType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_user_info
+        where
+        id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
 </mapper>

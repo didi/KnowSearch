@@ -13,6 +13,10 @@ public class RestSQLExplainController extends BaseHttpRestController {
     @Autowired
     private SQLExplainAction sqlExplainAction;
 
+    public RestSQLExplainController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler( RestRequest.Method.GET, "/_sql/explain", this);

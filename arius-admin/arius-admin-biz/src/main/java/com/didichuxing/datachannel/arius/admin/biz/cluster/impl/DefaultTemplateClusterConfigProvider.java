@@ -15,7 +15,6 @@ public class DefaultTemplateClusterConfigProvider implements TemplateClusterConf
 
     @Override
     public Result<TemplateResourceConfig> getTemplateResourceConfig(Long physicalId) {
-        // TODO ZHZ 获取配置
         return Result.buildSucc(new TemplateResourceConfig());
     }
 

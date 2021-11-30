@@ -56,39 +56,44 @@ public class GetHandler extends ActionHandler {
     	final int indexVersion = indexTemplateService.getIndexVersion(index, actionContext.getCluster());
     	if (indexVersion > 0) {
     		MultiGetRequest multiGetRequest = getVersionRequest(indexVersion, getRequest);
-    		
-    		ActionListener<MultiGetResponse> listener = new ActionListenerImpl<MultiGetResponse>(actionContext) {
-            	@Override
-            	public void onResponse(MultiGetResponse response) {
-                    GetResponse getResponse = null;
-                    for (MultiGetItemResponse itemResponse : response.getResponses()) {
-                    	if (itemResponse == null) {
-                    		continue;
-                    	}
-                    	
-                    	if (itemResponse.getResponse() != null && itemResponse.getResponse().isExists()) {
-                    		getResponse = itemResponse.getResponse();
-                    		break;
-                    	}
-                    	
-                    	getResponse = itemResponse.getResponse();
-                    }
 
-                    if (getResponse == null) {
-                    	GetResult getResult = new GetResult(getRequest.index(), getRequest.type(), getRequest.id(), -1, false, null, null);
-                    	getResponse = new GetResponse(getResult);
-                    }
-					ActionListener<GetResponse> listener = new ActionListenerImpl<GetResponse>(actionContext);
-					listener.onResponse(getResponse);
-				}
-    		};	
-    		
-    		esTcpClientService.getClient(actionContext.getCluster()).multiGet(multiGetRequest, listener);
+			ActionListener<MultiGetResponse> listener = getListener(actionContext, getRequest);
+
+			esTcpClientService.getClient(actionContext.getCluster()).multiGet(multiGetRequest, listener);
     	} else {
-    		ActionListener<GetResponse> listener = new ActionListenerImpl<GetResponse>(actionContext);
+    		ActionListener<GetResponse> listener = new ActionListenerImpl<>(actionContext);
             esTcpClientService.getClient(actionContext.getCluster()).get(getRequest, new RetryListener<>(this, actionContext, listener, retryTimes));
     	}
 	}
+
+	private ActionListener<MultiGetResponse> getListener(ActionContext actionContext, GetRequest getRequest) {
+		return new ActionListenerImpl<MultiGetResponse>(actionContext) {
+			@Override
+			public void onResponse(MultiGetResponse response) {
+				GetResponse getResponse = null;
+				for (MultiGetItemResponse itemResponse : response.getResponses()) {
+					if (itemResponse == null) {
+						continue;
+					}
+
+					if (itemResponse.getResponse() != null && itemResponse.getResponse().isExists()) {
+						getResponse = itemResponse.getResponse();
+						break;
+					}
+
+					getResponse = itemResponse.getResponse();
+				}
+
+				if (getResponse == null) {
+					GetResult getResult = new GetResult(getRequest.index(), getRequest.type(), getRequest.id(), -1, false, null, null);
+					getResponse = new GetResponse(getResult);
+				}
+				ActionListener<GetResponse> listener = new ActionListenerImpl<>(actionContext);
+				listener.onResponse(getResponse);
+			}
+		};
+	}
+
 	@Override
 	protected Class<? extends TransportRequest> getRequestClass() {
 		return GetRequest.class;

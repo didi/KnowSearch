@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -35,11 +35,11 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V3_OP + "/logic/cluster/region")
-@Api(value = "逻辑集群region接口(REST)")
+@Api(tags = "ES逻辑集群region接口(REST)")
 public class ESLogicClusterRegionController {
 
     @Autowired
-    private ESRegionRackService  esRegionRackService;
+    private RegionRackService    regionRackService;
 
     @Autowired
     private ClusterRegionManager clusterRegionManager;
@@ -50,7 +50,7 @@ public class ESLogicClusterRegionController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "logicClusterId", value = "logicClusterId", required = true) })
     public Result<List<ClusterRegionVO>> listLogicClusterRegions(@RequestParam("logicClusterId") Long logicClusterId) {
 
-        List<ClusterRegion> regions = esRegionRackService.listLogicClusterRegions(logicClusterId);
+        List<ClusterRegion> regions = regionRackService.listLogicClusterRegions(logicClusterId);
         return Result.buildSucc(clusterRegionManager.buildLogicClusterRegionVO(regions));
     }
 
@@ -58,15 +58,15 @@ public class ESLogicClusterRegionController {
     @ResponseBody
     @ApiOperation(value = "解绑逻辑集群region接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    public Result cancelBindingLogicClusterRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
+    public Result<Void> cancelBindingLogicClusterRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
 
-        return esRegionRackService.unbindRegion(regionId, HttpRequestUtils.getOperator(request));
+        return clusterRegionManager.unbindRegion(regionId, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "绑定逻辑集群region接口", notes = "")
-    public Result<Long> bindingLogicClusterRegion(HttpServletRequest request,
+    public Result<Void> bindingLogicClusterRegion(HttpServletRequest request,
                                                   @RequestBody ESLogicClusterWithRegionDTO param) {
         return clusterRegionManager.batchBindRegionToClusterLogic(param, HttpRequestUtils.getOperator(request),
             Boolean.FALSE);

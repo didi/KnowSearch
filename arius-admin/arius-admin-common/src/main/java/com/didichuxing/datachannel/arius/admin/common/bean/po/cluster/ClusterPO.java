@@ -5,13 +5,17 @@ import org.apache.commons.lang3.StringUtils;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/19
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClusterPO extends BasePO {
 
     /**
@@ -114,7 +118,25 @@ public class ClusterPO extends BasePO {
      */
     private String  password;
 
-    public boolean equals(ClusterPO other) {
+    /**
+     * client运行模式，读写共享还是读写分离
+     */
+    private Integer runMode;
+
+    /**
+     * 读写分离时候，指定action（获取写client）
+     */
+    private String writeAction;
+
+    /**
+     * 健康状态 1 green 2 yellow 3 red -1 未知
+     */
+    private Integer health;
+
+    @Override
+    public boolean equals(Object o) {
+        ClusterPO other = (ClusterPO)o;
+
         if (other == null) {
             return false;
         } else if (StringUtils.isNotBlank(httpAddress) && !httpAddress.equals(other.getHttpAddress())) {

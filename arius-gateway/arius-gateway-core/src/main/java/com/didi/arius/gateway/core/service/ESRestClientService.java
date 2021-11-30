@@ -16,7 +16,7 @@ public interface ESRestClientService {
      * @param clusterName
      * @return
      */
-    ESClient getClient(String clusterName);
+    ESClient getClient(String clusterName, String actionName);
 
     /**
      *
@@ -24,13 +24,13 @@ public interface ESRestClientService {
      * @param clusterName
      * @return
      */
-    ESClient getClientStrict(String clusterName);
+    ESClient getClientStrict(String clusterName, String actionName);
 
     /**
      * 获取admin权限的esClient
      * @return
      */
-    ESClient getAdminClient();
+    ESClient getAdminClient(String actionName);
 
     /**
      * 更新Map中的esClient客户端，并关掉废弃的esClient

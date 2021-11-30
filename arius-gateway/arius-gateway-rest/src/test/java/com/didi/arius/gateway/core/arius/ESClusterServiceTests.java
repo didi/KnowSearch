@@ -1,6 +1,7 @@
 package com.didi.arius.gateway.core.arius;
 
 import com.alibaba.fastjson.JSON;
+import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.metadata.*;
 import com.didi.arius.gateway.core.service.arius.ESClusterService;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
@@ -35,7 +36,7 @@ public class ESClusterServiceTests {
     public void testGetDetailLogFlag(){
         final Map<String, ESCluster> stringESClusterMap = esClusterService.listESCluster();
         System.out.println(JSON.toJSONString(stringESClusterMap));
-        assertEquals(stringESClusterMap != null, true);
+        assertEquals(true, stringESClusterMap != null);
     }
 
     @Test
@@ -46,9 +47,9 @@ public class ESClusterServiceTests {
     @Test
     public void testGetClient(){
         QueryContext queryContext = buildQueryContext();
-        final ESClient client = esClusterService.getClient(queryContext);
+        final ESClient client = esClusterService.getClient(queryContext, RestConsts.NULL_ACTION);
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
     }
 
     @Test
@@ -58,17 +59,17 @@ public class ESClusterServiceTests {
         TemplateClusterInfo templateClusterInfo = new TemplateClusterInfo();
         templateClusterInfo.setCluster(clusterName);
         indexTemplate.setMasterInfo(templateClusterInfo);
-        final ESClient client = esClusterService.getClient(queryContext, indexTemplate);
+        final ESClient client = esClusterService.getClient(queryContext, indexTemplate, RestConsts.NULL_ACTION);
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
     }
 
     @Test
     public void testGetClientFromCluster(){
         QueryContext queryContext = buildQueryContext();
-        final ESClient client = esClusterService.getClientFromCluster(queryContext, clusterName);
+        final ESClient client = esClusterService.getClientFromCluster(queryContext, clusterName, RestConsts.NULL_ACTION);
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
     }
 
     @Test
@@ -77,9 +78,9 @@ public class ESClusterServiceTests {
         TemplateClusterInfo templateClusterInfo = new TemplateClusterInfo();
         templateClusterInfo.setCluster(clusterName);
         indexTemplate.setMasterInfo(templateClusterInfo);
-        final ESClient client = esClusterService.getWriteClient(indexTemplate);
+        final ESClient client = esClusterService.getWriteClient(indexTemplate, RestConsts.NULL_ACTION);
         System.out.println(JSON.toJSONString(client));
-        assertEquals(client != null, true);
+        assertEquals(true, client != null);
     }
 
 

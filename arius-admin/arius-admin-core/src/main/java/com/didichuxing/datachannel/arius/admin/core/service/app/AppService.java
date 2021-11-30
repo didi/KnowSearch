@@ -5,17 +5,12 @@ import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppLogicClusterAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 
-/**
- * 应用服务
- * @author d06679
- * @date 2019/3/13
- */
 public interface AppService {
 
     /**
@@ -36,7 +31,13 @@ public interface AppService {
      * 查询app详细信息
      * @return 返回app列表
      */
-    List<App> getApps();
+    List<App> listApps();
+
+    /**
+     * 查询app详细信息
+     * @return
+     */
+    List<App> listAppWithCache();
 
     /**
      * 查询app详细信息
@@ -58,7 +59,7 @@ public interface AppService {
      * @param operation 是否校验null参数;  新建的时候需要校验,编辑的时候不需要校验
      * @return  参数合法返回
      */
-    Result validateApp(AppDTO appDTO, OperationEnum operation);
+    Result<Void> validateApp(AppDTO appDTO, OperationEnum operation);
 
     /**
      * 编辑APP
@@ -66,7 +67,7 @@ public interface AppService {
      * @param operator 操作人 邮箱前缀
      * @return 成功 true  失败 false
      */
-    Result editApp(AppDTO appDTO, String operator);
+    Result<Void> editApp(AppDTO appDTO, String operator);
 
     /**
      * 删除APP
@@ -74,7 +75,7 @@ public interface AppService {
      * @param operator 操作人 邮箱前缀
      * @return 成功 true  失败 false
      */
-    Result deleteAppById(int appId, String operator);
+    Result<Void> deleteAppById(int appId, String operator);
 
     /**
      * 初始化APP配置
@@ -82,7 +83,7 @@ public interface AppService {
      * @return 成功 true  失败false
      *
      */
-    Result initConfig(Integer appId);
+    Result<Void> initConfig(Integer appId);
 
     /**
      * 获取app id配置信息
@@ -92,12 +93,24 @@ public interface AppService {
     AppConfig getAppConfig(int appId);
 
     /**
+     * listConfig
+     * @return
+     */
+    List<AppConfig> listConfig();
+
+    /**
+     * listConfigWithCache
+     * @return
+     */
+    List<AppConfig> listConfigWithCache();
+
+    /**
      * 修改APP配置
      * @param configDTO 配置信息
      * @param operator 操作人
      * @return 成功 true  失败  false
      */
-    Result updateAppConfig(AppConfigDTO configDTO, String operator);
+    Result<Void> updateAppConfig(AppConfigDTO configDTO, String operator);
 
     /**
      * 校验app id是否存在
@@ -118,7 +131,7 @@ public interface AppService {
      * @param operator 登陆人
      * @return result
      */
-    Result login(Integer appId, String verifyCode, String operator);
+    Result<Void> login(Integer appId, String verifyCode, String operator);
 
     /**
      * 校验验证码
@@ -126,7 +139,7 @@ public interface AppService {
      * @param verifyCode 验证码
      * @return result
      */
-    Result verifyAppCode(Integer appId, String verifyCode);
+    Result<Void> verifyAppCode(Integer appId, String verifyCode);
 
     /**
      * 查询用户可以免密登陆的APP列表,包含校验码谨慎使用
@@ -134,12 +147,6 @@ public interface AppService {
      * @return appList 
      */
     List<App> getUserLoginWithoutCodeApps(String user);
-
-    /**
-     * 获取所有应用的配置
-     * @return list
-     */
-    List<AppConfig> getAppConfigs();
 
     /**
      * 根据责任人查询
@@ -162,5 +169,5 @@ public interface AppService {
      * @param lowestLogicClusterAuth 需要拥有的最低逻辑集群权限
      * @return 对logicClusterId指定的集群权限大于lowestLogicClusterAuth的APP
      */
-    List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, AppLogicClusterAuthEnum lowestLogicClusterAuth);
+    List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, AppClusterLogicAuthEnum lowestLogicClusterAuth);
 }

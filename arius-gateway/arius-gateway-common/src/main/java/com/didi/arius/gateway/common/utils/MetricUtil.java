@@ -1,10 +1,13 @@
 package com.didi.arius.gateway.common.utils;
 
-import com.didi.arius.gateway.metrics.MetricsSource;
-import com.didi.arius.gateway.metrics.MetricsSystem;
-import com.didi.arius.gateway.metrics.lib.DefaultMetricsSystem;
+import com.didichuxing.datachannel.metrics.MetricsSource;
+import com.didichuxing.datachannel.metrics.MetricsSystem;
+import com.didichuxing.datachannel.metrics.lib.DefaultMetricsSystem;
 
 public class MetricUtil {
+
+	private MetricUtil(){}
+
 	private static final String METRIC_PREFIX = "arius";
 
 	private static MetricsSystem metricsSystem;

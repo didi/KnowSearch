@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,21 +13,17 @@ import java.util.Map;
 import java.util.Set;
 
 public class ClusterHitNode {
+    private static final ILog LOGGER = LogFactory.getLog(ClusterHitNode.class);
 
-
-    private final ILog LOGGER = LogFactory.getLog(ClusterHitNode.class);
-
-    private String clusterName;
     private Map<String/*templateName*/, IndexHitNode> templateHitNodeMap = new HashMap<>();
     private Map<String/*alias*/, Set<String/*index*/>> aliasMap;
     private Map<String/*indexName*/, IndexHitNode> indexHitNodeMap = new HashMap<>();
 
 
     public ClusterHitNode(long time, String clusterName, List<IndexTemplatePhyWithLogic> templates, ESClusterService esClusterService) {
-        this.clusterName = clusterName;
-        this.aliasMap = esClusterService.getAliasMap(clusterName);
+        this.aliasMap = esClusterService.syncGetAliasMap(clusterName);
 
-        LOGGER.info("cluster:{}, alias:{}", clusterName, JSON.toJSONString(aliasMap));
+        LOGGER.info("class=ClusterHitNode||method=ClusterHitNode||msg=cluster:{}, alias:{}", clusterName, JSON.toJSONString(aliasMap));
 
         if (templates != null) {
             for (IndexTemplatePhyWithLogic template : templates) {
@@ -39,14 +35,15 @@ public class ClusterHitNode {
             }
         }
 
-        for (String template : templateHitNodeMap.keySet()) {
-            IndexHitNode indexHitNode = templateHitNodeMap.get(template);
-            Set<String> indexDateNames = indexHitNode.getIndexDateNames(time);
-            LOGGER.info("cluster:{}, template:{}, indexSize:{}", clusterName, template, indexDateNames.size());
+        for(Map.Entry<String, IndexHitNode> entry : templateHitNodeMap.entrySet()){
+            String template = entry.getKey();
+            IndexHitNode indexHitNode   = templateHitNodeMap.get(template);
+            Set<String>  indexDateNames = indexHitNode.getIndexDateNames(time);
+            LOGGER.info("class=ClusterHitNode||method=ClusterHitNode||msg=cluster:{}, template:{}, indexSize:{}", clusterName, template, indexDateNames.size());
 
             for (String index : indexDateNames) {
                 if (indexHitNodeMap.containsKey(index)) {
-                    LOGGER.error("two template have same index, cluster:{}, index:{}, template1:{}, template2:{}",
+                    LOGGER.error("class=ClusterHitNode||method=ClusterHitNode||errMsg=two template have same index, cluster:{}, index:{}, template1:{}, template2:{}",
                             clusterName, index, indexHitNode.getName(), indexHitNodeMap.get(index).getName());
                 }
 
@@ -66,7 +63,7 @@ public class ClusterHitNode {
     public boolean matchIndex(String index, Long count, TemplateHitPOMap templateHitPoMap, String date, boolean isAlias) {
         IndexHitNode indexHitNode = indexHitNodeMap.get(index);
         if (indexHitNode != null) {
-            templateHitPoMap.addData(indexHitNode.getTemplate(), index, count, date);
+            templateHitPoMap.addData(indexHitNode.getTemplate(), index, count);
             return true;
         }
 
@@ -74,16 +71,17 @@ public class ClusterHitNode {
         index = IndexNameUtils.removeVersion(index);
         indexHitNode = indexHitNodeMap.get(index);
         if (indexHitNode != null) {
-            templateHitPoMap.addData(indexHitNode.getTemplate(), index, count, date);
+            templateHitPoMap.addData(indexHitNode.getTemplate(), index, count);
             return true;
         }
 
         // 处理特殊的模版
-        for (String template : templateHitNodeMap.keySet()) {
+        for(Map.Entry<String/*templateName*/, IndexHitNode> entry : templateHitNodeMap.entrySet()){
+            String template = entry.getKey();
             IndexHitNode ihn = templateHitNodeMap.get(template);
             if (ihn.matchIndex(index)) {
                 indexHitNode = ihn;
-                templateHitPoMap.addData(indexHitNode.getTemplate(), index, count, date);
+                templateHitPoMap.addData(indexHitNode.getTemplate(), index, count);
             }
         }
         if (indexHitNode != null) {
@@ -101,11 +99,7 @@ public class ClusterHitNode {
             }
         }
 
-        if (match) {
-            return true;
-        }
-
-        return false;
+        return match;
     }
 
     /**
@@ -123,25 +117,35 @@ public class ClusterHitNode {
         }
 
         boolean match = false;
-        for (String indexName : indexHitNodeMap.keySet()) {
-            IndexHitNode indexHitNode = indexHitNodeMap.get(indexName);
-            if (IndexNameUtils.indexExpMatch(indexName, indices)) {
-                templateHitPoMap.addData(indexHitNode.getTemplate(), indexName, count, date);
-                match = true;
-            }
-        }
+        match = matchIndexHit(indices, count, templateHitPoMap, match);
 
         // 尝试特殊匹配
-        for (String template : templateHitNodeMap.keySet()) {
-            IndexHitNode ihn = templateHitNodeMap.get(template);
-            if (ihn.matchIndices(indices)) {
-                templateHitPoMap.addData(ihn.getTemplate(), ihn.getTemplate().getName(), count, date);
+        match = matchTemplateHit(indices, count, templateHitPoMap, match);
+
+        // 尝试匹配别名
+        match = matchAlias(indices, count, templateHitPoMap, date, match);
+
+        match = matchExcluteVersionTail(indices, count, templateHitPoMap, date, match);
+
+        return match;
+    }
+
+    private boolean matchExcluteVersionTail(String indices, Long count, TemplateHitPOMap templateHitPoMap, String date, boolean match) {
+        if (!match && indices.length() > 2) {
+            // 去除末尾的版本信息在试试看
+            String oldIndices = indices;
+            indices = IndexNameUtils.removeVersion(indices.substring(0, indices.length() - 1)) + "*";
+            if (!oldIndices.equalsIgnoreCase(indices) &&
+                matchIndices(indices, count, templateHitPoMap, date)) {
                 match = true;
             }
         }
+        return match;
+    }
 
-        // 尝试匹配别名
-        for (String alias : aliasMap.keySet()) {
+    private boolean matchAlias(String indices, Long count, TemplateHitPOMap templateHitPoMap, String date, boolean match) {
+        for(Map.Entry<String/*alias*/, Set<String/*index*/>> entry : aliasMap.entrySet()){
+            String alias = entry.getKey();
             if (IndexNameUtils.indexExpMatch(alias, indices)) {
                 Set<String> aliasIndexs = aliasMap.get(alias);
                 for (String aliasIndex : aliasIndexs) {
@@ -151,18 +155,30 @@ public class ClusterHitNode {
                 }
             }
         }
+        return match;
+    }
 
-        if (!match && indices.length() > 2) {
-            // 去除末尾的版本信息在试试看
-            String oldIndices = indices;
-            indices = IndexNameUtils.removeVersion(indices.substring(0, indices.length() - 1)) + "*";
-            if (!oldIndices.equalsIgnoreCase(indices)) {
-                if (matchIndices(indices, count, templateHitPoMap, date)) {
-                    match = true;
-                }
+    private boolean matchTemplateHit(String indices, Long count, TemplateHitPOMap templateHitPoMap, boolean match) {
+        for(Map.Entry<String/*templateName*/, IndexHitNode> entry : templateHitNodeMap.entrySet()){
+            String template = entry.getKey();
+            IndexHitNode ihn = templateHitNodeMap.get(template);
+            if (ihn.matchIndices(indices)) {
+                templateHitPoMap.addData(ihn.getTemplate(), ihn.getTemplate().getName(), count);
+                match = true;
             }
         }
+        return match;
+    }
 
+    private boolean matchIndexHit(String indices, Long count, TemplateHitPOMap templateHitPoMap, boolean match) {
+        for(Map.Entry<String/*indexName*/, IndexHitNode> entry : indexHitNodeMap.entrySet()){
+            String indexName = entry.getKey();
+            IndexHitNode indexHitNode = indexHitNodeMap.get(indexName);
+            if (IndexNameUtils.indexExpMatch(indexName, indices)) {
+                templateHitPoMap.addData(indexHitNode.getTemplate(), indexName, count);
+                match = true;
+            }
+        }
         return match;
     }
 

@@ -5,13 +5,17 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.DataType
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "模板修改信息")
 public class ConsoleTemplateUpdateDTO extends BaseDTO {
 
@@ -19,38 +23,23 @@ public class ConsoleTemplateUpdateDTO extends BaseDTO {
     private Integer id;
 
     /**
-     * 用户数据类型
      * @see DataTypeEnum
      */
-    @ApiModelProperty("数据类型（1:日志；2:用户上报；3:RDS；6：离线导入）")
+    @ApiModelProperty("数据类型（0:系统 1:日志；2:用户上报；3:RDS；6：离线导入）")
     private Integer dataType;
 
-    /**
-     * 模板shard数量设置
-     */
     @ApiModelProperty("shard数量")
     private Integer shardNum;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门ID")
     private String  libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门名称")
     private String  libraDepartment;
-    /**
-     * 责任人
-     */
+
     @ApiModelProperty("责任人")
     private String  responsible;
 
-    /**
-     * 备注
-     */
     @ApiModelProperty("备注")
     private String  desc;
 

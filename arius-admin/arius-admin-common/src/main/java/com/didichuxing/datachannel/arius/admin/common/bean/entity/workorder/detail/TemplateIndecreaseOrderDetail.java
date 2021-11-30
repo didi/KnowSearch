@@ -1,8 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TemplateIndecreaseOrderDetail extends AbstractOrderDetail {
     private Integer id;
 

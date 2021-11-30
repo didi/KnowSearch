@@ -41,9 +41,10 @@ public class MultiSearchHandler extends BaseSearchHandler {
 		MultiSearchRequest multiSearchRequest = (MultiSearchRequest) actionContext.getRequest();
 		final List<SearchRequest> requests = multiSearchRequest.requests();
 		final List<FetchFields> fetchFieldsList = new ArrayList<>(multiSearchRequest.requests().size());
-		List<String> indices = new ArrayList<String>();
+		List<String> indices = new ArrayList<>();
 		for (SearchRequest searchRequest : requests) {
-			statLogger.info(buildSearchRequestLog(actionContext, searchRequest));
+			String log = buildSearchRequestLog(actionContext, searchRequest);
+			statLogger.info(log);
 			
 			if (searchRequest.source() != null && searchRequest.source().length() > queryConfig.getDslMaxLength()) {
 				throw new QueryDslLengthException(String.format("query length(%d) > %d exception", searchRequest.source().length(), queryConfig.getDslMaxLength()));
@@ -65,28 +66,39 @@ public class MultiSearchHandler extends BaseSearchHandler {
 			fetchFieldsList.add(fetchFields);
 		}
 		appService.checkIndices(actionContext, indices);
-		
-		ActionListener<MultiSearchResponse> listener = new ActionListenerImpl<MultiSearchResponse>(actionContext){
+
+		ActionListener<MultiSearchResponse> listener = getMultiSearchResponseActionListener(actionContext, requests);
+
+		multiSearchRequest.putHeader("requestId", actionContext.getRequestId());
+        multiSearchRequest.putHeader("Authorization", actionContext.getRequest().getHeader("Authorization"));
+        
+		esTcpClientService.getClient(actionContext.getCluster()).multiSearch(multiSearchRequest, new RetryListener<>(this, actionContext, listener, retryTimes));
+	}
+
+	private ActionListener<MultiSearchResponse> getMultiSearchResponseActionListener(ActionContext actionContext, List<SearchRequest> requests) {
+		return new ActionListenerImpl<MultiSearchResponse>(actionContext){
         	@Override
         	public void onResponse(MultiSearchResponse multiSearchResponse) {
         		statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_tcp_search_query||appid={}||requestId={}||cost={}", actionContext.getAppid(), actionContext.getRequestId(), (System.currentTimeMillis()-actionContext.getRequestTime()));
-        		
-				Item items[] = multiSearchResponse.getResponses();
+
+				Item[] items = multiSearchResponse.getResponses();
 				for (int i = 0; i < items.length; i++) {
 					SearchResponse searchResponse = items[i].getResponse();
-					
+
 					if (searchResponse == null) {
 						statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_tcp_search_response||appid={}||requestId={}", actionContext.getAppid(), actionContext.getRequestId());
 						continue;
 					}
-					
-					statLogger.info(buildSearchResponseLog(actionContext, searchResponse));
-					
+
+					String log = buildSearchResponseLog(actionContext, searchResponse);
+					statLogger.info(log);
+
 					if (searchResponse.getTookInMillis() > queryConfig.getSearchSlowlogThresholdMills()) {
 						SearchRequest searchRequest = requests.get(i);
-						statLogger.warn(buildSearchSlowlog(actionContext, searchRequest, searchResponse));
+						log = buildSearchSlowlog(actionContext, searchRequest, searchResponse);
+						statLogger.warn(log);
 					}
-					
+
 	    			if (searchResponse.getFailedShards() > 0) {
 						StringBuilder stringBuilder = new StringBuilder("search response has some failed,appid="+actionContext.getAppid()+",requestId="+actionContext.getRequestId()+",number="+searchResponse.getFailedShards()+" reasons:\n");
 						int count = 0;
@@ -99,18 +111,14 @@ public class MultiSearchHandler extends BaseSearchHandler {
 								break;
 							}
 						}
-						logger.warn(stringBuilder.toString());
+						log = stringBuilder.toString();
+						logger.warn(log);
 	    			}
-	    			
+
 				}
 				super.onResponse(multiSearchResponse);
         	}
         };
-        
-        multiSearchRequest.putHeader("requestId", actionContext.getRequestId());
-        multiSearchRequest.putHeader("Authorization", actionContext.getRequest().getHeader("Authorization"));
-        
-		esTcpClientService.getClient(actionContext.getCluster()).multiSearch(multiSearchRequest, new RetryListener<>(this, actionContext, listener, retryTimes));
 	}
 
 	@Override

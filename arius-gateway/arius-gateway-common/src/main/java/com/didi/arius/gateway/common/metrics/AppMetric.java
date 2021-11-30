@@ -21,7 +21,7 @@ public class AppMetric {
 	private ConcurrentMap<String, SearchMetric> searchsMetricMap = new ConcurrentHashMap<>();
 	
 	public void incr(String searchId, String actionName, RestStatus restStatus, long cost) {
-		if (searchId.equals(QueryConsts.TOTAL_SEARCH_ID) == false) {
+		if (!searchId.equals(QueryConsts.TOTAL_SEARCH_ID)) {
 			incr(QueryConsts.TOTAL_SEARCH_ID, actionName, restStatus, cost);
 		}
 		

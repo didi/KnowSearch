@@ -5,8 +5,8 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.didichuxing.datachannel.arius.admin.common.util.AriusGSON;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusJSON;
 
 /**
  *
@@ -44,19 +44,7 @@ public class RestTool {
     public <T> T postObjectWithRawContent(String url, Object postBody, HttpHeaders headers, Class<T> resultType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(postBody, headers),
             String.class);
-        return AriusGSON.toObject(result.getBody(), resultType);
-    }
-
-    /**
-     * POST请求
-     * @param url 请求地址
-     * @param requestEntity 请求内容Entity
-     * @param resultType 返回类型
-     * @param <T> 泛型T
-     * @return T
-     */
-    public <T> T postEntity(String url, HttpEntity requestEntity, Class<T> resultType) {
-        return restTemplate.postForObject(url, requestEntity, resultType);
+        return AriusJSON.toObject(result.getBody(), resultType);
     }
 
     /**
@@ -70,8 +58,8 @@ public class RestTool {
     public <T> T postObjectWithJsonContent(String url, Object request, Type responseType) {
         HttpHeaders jsonHead = getJsonContentHeaders();
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST,
-            new HttpEntity<Object>(AriusGSON.toString(request), jsonHead), String.class);
-        return AriusGSON.toObject(result.getBody(), responseType);
+            new HttpEntity<Object>(AriusJSON.toString(request), jsonHead), String.class);
+        return AriusJSON.toObject(result.getBody(), responseType);
     }
 
     /**
@@ -85,8 +73,8 @@ public class RestTool {
     public <T> T postObjectWithJsonContentAndHeader(String url, Map<String, String> headers, Object request,
                                                     Type responseType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST,
-            new HttpEntity<Object>(AriusGSON.toString(request), getJsonContentHeaders(headers)), String.class);
-        return AriusGSON.toObject(result.getBody(), responseType);
+            new HttpEntity<Object>(AriusJSON.toString(request), getJsonContentHeaders(headers)), String.class);
+        return AriusJSON.toObject(result.getBody(), responseType);
     }
 
     /**
@@ -99,7 +87,7 @@ public class RestTool {
      */
     public <T> T getObjectWithJsonContent(String url, Map<String, ?> params, Type resultType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, null, String.class, params);
-        return AriusGSON.toObject(result.getBody(), resultType);
+        return AriusJSON.toObject(result.getBody(), resultType);
     }
 
     /**
@@ -113,7 +101,7 @@ public class RestTool {
     public <T> T getForObject(String url, HttpHeaders headers, Type resultType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, headers),
             String.class);
-        return AriusGSON.toObject(result.getBody(), resultType);
+        return AriusJSON.toObject(result.getBody(), resultType);
     }
 
 
@@ -130,7 +118,7 @@ public class RestTool {
                                               Map<String, ?> params, Type resultType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET,
             new HttpEntity<>(null, getJsonContentHeaders(headers)), String.class, params);
-        return AriusGSON.toObject(result.getBody(), resultType);
+        return AriusJSON.toObject(result.getBody(), resultType);
     }
 
     /**
@@ -176,9 +164,8 @@ public class RestTool {
             return url;
         }
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
-        for (Map.Entry<String, ?> entry : params.entrySet()) {
-            builder.queryParam(entry.getKey(), entry.getValue());
-        }
+
+
         return builder.toUriString();
     }
 
@@ -203,8 +190,8 @@ public class RestTool {
     public <T> T deleteWithParamsAndHeader(String url, Map<String, String> headers,
                                               Map<String, ?> params, Type resultType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.DELETE,
-            new HttpEntity<>(null, getJsonContentHeaders(headers)), String.class, params);
-        return AriusGSON.toObject(result.getBody(), resultType);
+            new HttpEntity<>(params, getJsonContentHeaders(headers)), String.class);
+        return AriusJSON.toObject(result.getBody(), resultType);
     }
 
     /**
@@ -218,7 +205,7 @@ public class RestTool {
         HttpHeaders headers = getJsonContentHeaders();
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, headers),
             String.class);
-        return AriusGSON.toObject(result.getBody(), resultType);
+        return AriusJSON.toObject(result.getBody(), resultType);
     }
 
     /**
@@ -255,7 +242,7 @@ public class RestTool {
     public <T> T putJsonForObject(String url, Object request, Class<T> responseType) {
         HttpHeaders jsonHead = getJsonContentHeaders();
         ResponseEntity<T> responseEntity = restTemplate.exchange(url, HttpMethod.PUT,
-            new HttpEntity<Object>(AriusGSON.toString(request), jsonHead), responseType);
+            new HttpEntity<Object>(AriusJSON.toString(request), jsonHead), responseType);
         return responseEntity.getBody();
     }
 
@@ -269,8 +256,8 @@ public class RestTool {
      */
     public <T> T putForObject(String url, Object request, Type responseType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.PUT,
-            new HttpEntity<>(AriusGSON.toString(request)), String.class);
-        return AriusGSON.toObject(result.getBody(), responseType);
+            new HttpEntity<>(AriusJSON.toString(request)), String.class);
+        return AriusJSON.toObject(result.getBody(), responseType);
     }
 
     /**
@@ -284,8 +271,8 @@ public class RestTool {
     public <T> T putObjectWithJsonContentAndHeader(String url, Map<String, String> headers, Object request,
                                                    Type responseType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.PUT,
-            new HttpEntity<Object>(AriusGSON.toString(request), getJsonContentHeaders(headers)), String.class);
-        return AriusGSON.toObject(result.getBody(), responseType);
+            new HttpEntity<Object>(AriusJSON.toString(request), getJsonContentHeaders(headers)), String.class);
+        return AriusJSON.toObject(result.getBody(), responseType);
     }
 
 }

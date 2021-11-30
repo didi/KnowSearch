@@ -3,14 +3,15 @@ package com.didichuxing.datachannel.arius.admin.rest.swagger;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -28,29 +29,27 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * Swagger配置类
- *
- * @author d06679
- * @date 2019/3/12
  */
 @Configuration
 @EnableSwagger2
+@NoArgsConstructor
 public class SwaggerConfiguration {
 
     private static final ILog   LOGGER = LogFactory.getLog(SwaggerConfiguration.class);
 
-    private static List<String> ENVS   = Lists.newArrayList();
+    private static List<String> envs = Lists.newArrayList();
 
     @Value("${swagger.enable:false}")
     private boolean enable;
 
     @Bean
     public Docket createRestApi() {
-        String envStr = String.join(",", Lists.newArrayList(ENVS));
+        String envStr = String.join(",", Lists.newArrayList(envs));
         if (!envStr.contains(EnvUtil.EnvType.TEST.getStr()) && !envStr.contains(EnvUtil.EnvType.DEV.getStr())) {
             return new Docket(DocumentationType.SWAGGER_2).enable(enable);
         }
 
-        LOGGER.info("swagger started||env={}", envStr);
+        LOGGER.info("class=SwaggerConfiguration||method=createRestApi||swagger started||env={}", envStr);
 
         ParameterBuilder ticketPar = new ParameterBuilder();
         List<Parameter> pars = new ArrayList<>();
@@ -78,8 +77,8 @@ public class SwaggerConfiguration {
      * @return
      */
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("AriusAdmin接口文档").description(String.format("当前环境:%s", ENVS))
-            .version("1.0_" + String.join(",", ENVS)).build();
+        return new ApiInfoBuilder().title("AriusAdmin接口文档").description(String.format("当前环境:%s", envs ))
+            .version("1.0_" + String.join(",", envs )).build();
     }
 
     public static void initEnv(String[] args) {
@@ -91,12 +90,12 @@ public class SwaggerConfiguration {
             for (String arg : args) {
                 String[] argArr = arg.split("=");
                 if (argArr[0].toLowerCase().contains("spring.profiles.active")) {
-                    ENVS.add(argArr[1]);
+                    envs.add(argArr[1]);
                 }
             }
-            LOGGER.info("swagger||env={}", ENVS);
+            LOGGER.info("class=SwaggerConfiguration||method=initEnv||swagger||env={}", envs );
         } catch (Exception e) {
-            LOGGER.warn("initEnv error||args={}", args, e);
+            LOGGER.warn("class=SwaggerConfiguration||method=initEnv||initEnv error||args={}", args, e);
         }
     }
 

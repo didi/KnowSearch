@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.login;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
 import com.didichuxing.datachannel.arius.admin.BaseContextTests;
-import com.didichuxing.datachannel.arius.admin.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.constant.RequestPathThirdpart;
 import com.didichuxing.datachannel.arius.admin.source.AriusDataSource;
@@ -15,7 +15,7 @@ public class LoginTest extends BaseContextTests {
 
     /**
      * 登录采用rsa加密
-     *
+     ki
      * @throws Exception
      */
     @BeforeAll

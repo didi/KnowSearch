@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.handler;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskDCDRProgressEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskStatusEnum;
@@ -8,13 +10,11 @@ import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskType
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.AbstractTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTaskDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +66,7 @@ public class DcdrWorkTaskHandler implements WorkTaskHandler {
 
         workTask.setDeleteFlag(false);
         workTask.setStatus(WorkTaskStatusEnum.RUNNING.getStatus());
-        workTask.setExpandData(JSONObject.toJSONString(taskDetail));
+        workTask.setExpandData(JSON.toJSONString(taskDetail));
         workTask.setTitle(templateLogicWithPhysical.getName() + WorkTaskTypeEnum.TEMPLATE_DCDR.getMessage());
         workTaskManager.insert(workTask);
 
@@ -79,18 +79,18 @@ public class DcdrWorkTaskHandler implements WorkTaskHandler {
     }
 
     @Override
-    public Result process(WorkTask workTask, Integer step, String status, String expandData) {
+    public Result<Void> process(WorkTask workTask, Integer step, String status, String expandData) {
         Result<WorkTask> result = workTaskManager.getById(workTask.getId());
         if (result.failed()) {
-            return result;
+            return Result.buildFrom(result);
         }
         WorkTask updateWorkTask = result.getData();
-        DCDRTaskDetail detail = JSONObject.parseObject(updateWorkTask.getExpandData(), DCDRTaskDetail.class);
+        DCDRTaskDetail detail = JSON.parseObject(updateWorkTask.getExpandData(), DCDRTaskDetail.class);
         detail.setStatus(status);
         detail.setTaskProgress(step);
-        updateWorkTask.setExpandData(JSONObject.toJSONString(detail));
+        updateWorkTask.setExpandData(JSON.toJSONString(detail));
         if (WorkTaskStatusEnum.FAILED.getStatus().equals(status)
-            || step == WorkTaskDCDRProgressEnum.STEP_9.getProgress()) {
+            || step.equals(WorkTaskDCDRProgressEnum.STEP_9.getProgress())) {
             updateWorkTask.setStatus(status);
         }
 
@@ -101,7 +101,7 @@ public class DcdrWorkTaskHandler implements WorkTaskHandler {
 
     @Override
     public AbstractTaskDetail getTaskDetail(String extensions) {
-        return JSONObject.parseObject(extensions, DCDRTaskDetail.class);
+        return JSON.parseObject(extensions, DCDRTaskDetail.class);
     }
 
 }

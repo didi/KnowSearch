@@ -13,24 +13,16 @@ import java.util.Date;
 @NoArgsConstructor
 @ApiModel(value = "TemplateLabelVO", description = "索引标签")
 public class TemplateLabelVO {
-    /**
-     * 索引模板id
-     */
+
     @ApiModelProperty(value = "索引模板id")
     private Integer indexTemplateId;
-    /**
-     * 标签id，有一定的规则
-     */
+
     @ApiModelProperty(value = "标签id，有一定的规则")
     private String labelId;
-    /**
-     * 标签名称
-     */
+
     @ApiModelProperty(value = "标签名称")
     private String labelName;
-    /**
-     * 标记时间
-     */
+
     @ApiModelProperty(value = "标记时间")
     private Date markTime;
 }

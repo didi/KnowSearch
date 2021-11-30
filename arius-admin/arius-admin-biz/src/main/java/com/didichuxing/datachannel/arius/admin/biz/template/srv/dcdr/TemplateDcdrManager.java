@@ -19,7 +19,7 @@ public interface TemplateDcdrManager {
      * @return result
      * @throws ESOperateException
      */
-    Result createDcdr(Integer logicId, String operator) throws ESOperateException;
+    Result<Void> createDcdr(Integer logicId, String operator) throws ESOperateException;
 
     /**
      * createPhyDcdr
@@ -28,7 +28,7 @@ public interface TemplateDcdrManager {
      * @return
      * @throws ESOperateException
      */
-    Result createPhyDcdr(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException;
+    Result<Void> createPhyDcdr(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException;
 
     /**
      * 删除dcdr
@@ -37,7 +37,7 @@ public interface TemplateDcdrManager {
      * @return result
      * @throws ESOperateException
      */
-    Result deleteDcdr(Integer logicId, String operator) throws ESOperateException;
+    Result<Void> deleteDcdr(Integer logicId, String operator) throws ESOperateException;
 
     /**
      * deletePhyDcdr
@@ -46,7 +46,7 @@ public interface TemplateDcdrManager {
      * @return
      * @throws ESOperateException
      */
-    Result deletePhyDcdr(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException;
+    Result<Void> deletePhyDcdr(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException;
 
     /**
      * dcdr主从切换
@@ -55,7 +55,7 @@ public interface TemplateDcdrManager {
      * @param operator 操作人
      * @return result
      */
-    Result dcdrSwitchMasterSlave(Integer logicId, Long expectMasterPhysicalId, int step, String operator);
+    Result<Void> dcdrSwitchMasterSlave(Integer logicId, Long expectMasterPhysicalId, int step, String operator);
 
     /**
      * 创建dcdr模板

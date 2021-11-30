@@ -67,9 +67,9 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isRDOrOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
@@ -81,7 +81,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         TemplateQueryDslContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateQueryDslContent.class);
 
@@ -125,7 +125,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         TemplateQueryDslContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateQueryDslContent.class);
 
@@ -148,7 +148,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -159,7 +159,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         TemplateQueryDslContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateQueryDslContent.class);
 
@@ -172,12 +172,12 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
 
         // 修改模板quota及保存时长信息
         AuditDsls auditDsls = new AuditDsls(workOrder.getSubmitorAppid(), workOrder.getSubmitor(), dslInfos);
-        Result result = dslStatisService.auditDsl(auditDsls);
+        Result<String> result = dslStatisService.auditDsl(auditDsls);
 
         sendNotify(WORK_ORDER_TEMPLATE_QUERY_DSL,
             new TemplateQueryDslNotify(workOrder.getSubmitorAppid(), content.getName()),
             Arrays.asList(workOrder.getSubmitor()));
 
-        return result;
+        return Result.buildFrom(result);
     }
 }

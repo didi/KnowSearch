@@ -13,6 +13,10 @@ public class RestSQLController extends BaseHttpRestController {
     @Autowired
     private SQLAction sqlAction;
 
+    public RestSQLController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(RestRequest.Method.GET, "/_sql", this);

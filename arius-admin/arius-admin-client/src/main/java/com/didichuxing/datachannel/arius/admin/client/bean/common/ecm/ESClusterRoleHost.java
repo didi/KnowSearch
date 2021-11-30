@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common.ecm;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,12 +11,22 @@ import lombok.NoArgsConstructor;
 public class ESClusterRoleHost {
 
     /**
-     * 主机名或IP
+     * ip:port 主機名:port = hostname:port
      */
-    private String hostname;
+    private String address;
 
     /**
      * 角色名称
      */
     private String role;
+
+    /**
+     * IP、主機名
+     */
+    private String hostname;
+
+    /**
+     * 端口号
+     */
+    private String port;
 }

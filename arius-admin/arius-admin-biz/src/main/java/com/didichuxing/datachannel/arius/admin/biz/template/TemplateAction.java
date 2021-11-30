@@ -30,7 +30,7 @@ public interface TemplateAction {
      * @param submitor 操作人
      * @return result
      */
-    Result indecreaseWithAutoDistributeResource(Integer logicId, Integer expectExpireTime, Double expectQuota,
+    Result<Void> indecreaseWithAutoDistributeResource(Integer logicId, Integer expectExpireTime, Double expectQuota,
                                                 String submitor) throws AdminOperateException;
 
     /**

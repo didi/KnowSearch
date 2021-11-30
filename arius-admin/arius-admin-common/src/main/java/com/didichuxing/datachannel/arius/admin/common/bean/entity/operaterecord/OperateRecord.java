@@ -6,7 +6,9 @@ import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.Mod
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -15,6 +17,8 @@ import lombok.Data;
  * @date 2019/3/14
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OperateRecord extends BaseEntity {
 
     /**

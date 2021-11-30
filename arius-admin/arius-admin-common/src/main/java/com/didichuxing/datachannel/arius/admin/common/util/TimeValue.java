@@ -8,8 +8,8 @@ import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  *
@@ -263,7 +263,7 @@ public class TimeValue {
             }
             return new TimeValue(millis, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.warn("parseTimeValue error", e);
+            LOGGER.warn("class=TimeValue||method=parseTimeValue||msg=parseTimeValue error:{}", e);
             return defaultValue;
         }
     }

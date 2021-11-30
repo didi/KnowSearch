@@ -1,16 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.listener;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @Author: lanxinzheng
@@ -29,17 +30,19 @@ public class RegionDeleteEventListener implements ApplicationListener<RegionDele
     private CapacityPlanRegionTaskService capacityPlanRegionTaskService;
 
     @Autowired
-    private ClusterContextManager clusterContextManager;
+    private ClusterContextManager         clusterContextManager;
 
     @Override
     public void onApplicationEvent(RegionDeleteEvent regionDeleteEvent) {
-        //更新集群校验模型
-        clusterContextManager.flushClusterContext();
-
         ClusterRegion deletedRegion = regionDeleteEvent.getClusterRegion();
+        if (null == deletedRegion) {
+            return;
+        }
+
+        clusterContextManager.flushClusterContextByClusterRegion(deletedRegion);
 
         // 删除容量信息记录
-        Result delResult = capacityPlanRegionService.deleteRegionCapacityInfo(deletedRegion.getId(),
+        Result<Void> delResult = capacityPlanRegionService.deleteRegionCapacityInfo(deletedRegion.getId(),
             regionDeleteEvent.getOperator());
 
         if (delResult.success()) {

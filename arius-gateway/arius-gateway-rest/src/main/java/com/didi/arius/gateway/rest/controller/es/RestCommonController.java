@@ -13,6 +13,10 @@ public class RestCommonController extends ESBaseController {
     @Autowired
     private RestCommonAction restCommonAction;
 
+    public RestCommonController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(DELETE, "/_ccr/auto_follow/{name}", this);
@@ -46,12 +50,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(DELETE, "/_xpack/security/role_mapping/{name}", this);
         controller.registerHandler(DELETE, "/_xpack/security/user/{username}", this);
         controller.registerHandler(DELETE, "/_xpack/watcher/watch/{id}", this);
-        controller.registerHandler(DELETE, "/{index}/_alias/{name}", this);
-        controller.registerHandler(DELETE, "/{index}/_aliases/{name}", this);
-        controller.registerHandler(GET, "/_alias", this);
-        controller.registerHandler(GET, "/_alias/{name}", this);
-        controller.registerHandler(GET, "/_aliases", this);
-        controller.registerHandler(GET, "/_analyze", this);
         controller.registerHandler(GET, "/_cache/clear", this);
         controller.registerHandler(GET, "/_cat", this);
         controller.registerHandler(GET, "/_cat/aliases", this);
@@ -152,7 +150,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(GET, "/_noop_search", this);
         controller.registerHandler(GET, "/_protected", this);
         controller.registerHandler(GET, "/_recovery", this);
-        controller.registerHandler(GET, "/_refresh", this);
         controller.registerHandler(GET, "/_render/template", this);
         controller.registerHandler(GET, "/_render/template/{id}", this);
         controller.registerHandler(GET, "/_rollup/data/{id}", this);
@@ -179,8 +176,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(GET, "/_security/user/{username}", this);
         controller.registerHandler(GET, "/_security/user/{username}/_has_privileges", this);
         controller.registerHandler(GET, "/_segments", this);
-        controller.registerHandler(GET, "/_settings", this);
-        controller.registerHandler(GET, "/_settings/{name}", this);
         controller.registerHandler(GET, "/_shard_stores", this);
         controller.registerHandler(GET, "/_slm/policy", this);
         controller.registerHandler(GET, "/_slm/policy/{name}", this);
@@ -240,9 +235,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(GET, "/_xpack/watcher/watch/{id}", this);
         controller.registerHandler(GET, "/{index}", this);
         controller.registerHandler(GET, "/{index}/{type}", this);
-        controller.registerHandler(GET, "/{index}/_alias", this);
-        controller.registerHandler(GET, "/{index}/_alias/{name}", this);
-        controller.registerHandler(GET, "/{index}/_analyze", this);
         controller.registerHandler(GET, "/{index}/_cache/clear", this);
         controller.registerHandler(GET, "/{index}/_ccr/info", this);
         controller.registerHandler(GET, "/{index}/_ccr/stats", this);
@@ -257,14 +249,10 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(GET, "/{index}/_rank_eval", this);
         controller.registerHandler(GET, "/{index}/_noop_search", this);
         controller.registerHandler(GET, "/{index}/_recovery", this);
-        controller.registerHandler(GET, "/{index}/_refresh", this);
         controller.registerHandler(GET, "/{index}/_reload_search_analyzers", this);
         controller.registerHandler(GET, "/{index}/_rollup/data", this);
         controller.registerHandler(GET, "/{index}/_search_shards", this);
         controller.registerHandler(GET, "/{index}/_segments", this);
-        controller.registerHandler(GET, "/{index}/_setting/{name}", this);
-        controller.registerHandler(GET, "/{index}/_settings", this);
-        controller.registerHandler(GET, "/{index}/_settings/{name}", this);
         controller.registerHandler(GET, "/{index}/_shard_stores", this);
         controller.registerHandler(GET, "/{index}/_stats", this);
         controller.registerHandler(GET, "/{index}/_stats/{metric}", this);
@@ -288,17 +276,9 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(GET, "_remote/info", this);
         controller.registerHandler(GET, "_rollup_search", this);
         controller.registerHandler(GET, "{index}/_rollup_search", this);
-        controller.registerHandler(HEAD, "/_alias/{name}", this);
         controller.registerHandler(HEAD, "/_template/{index}", this);
         controller.registerHandler(HEAD, "/_xpack", this);
         controller.registerHandler(HEAD, "/{index}", this);
-        controller.registerHandler(HEAD, "/{index}/_alias", this);
-        controller.registerHandler(HEAD, "/{index}/_alias/{name}", this);
-        controller.registerHandler(HEAD, "/{index}/_mapping/{type}", this);
-        controller.registerHandler(POST, "/_alias/{name}", this);
-        controller.registerHandler(POST, "/_aliases", this);
-        controller.registerHandler(POST, "/_aliases/{name}", this);
-        controller.registerHandler(POST, "/_analyze", this);
         controller.registerHandler(POST, "/_cache/clear", this);
         controller.registerHandler(POST, "/_cat/example", this);
         controller.registerHandler(POST, "/_ccr/auto_follow/{name}/pause", this);
@@ -329,9 +309,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(POST, "/_license", this);
         controller.registerHandler(POST, "/_license/start_basic", this);
         controller.registerHandler(POST, "/_license/start_trial", this);
-        controller.registerHandler(POST, "/_mapping/check", this);
-        controller.registerHandler(POST, "/_mapping/{type}", this);
-        controller.registerHandler(POST, "/_mappings/{type}", this);
         controller.registerHandler(POST, "/_monitoring/bulk", this);
         controller.registerHandler(POST, "/_mtermvectors", this);
         controller.registerHandler(POST, "/_nodes/reload_secure_settings", this);
@@ -340,7 +317,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(POST, "/_noop_search", this);
         controller.registerHandler(POST, "/_open", this);
         controller.registerHandler(POST, "/_rank_eval", this);
-        controller.registerHandler(POST, "/_refresh", this);
         controller.registerHandler(POST, "/_reindex", this);
         controller.registerHandler(POST, "/_reindex/{taskId}/_rethrottle", this);
         controller.registerHandler(POST, "/_render/template", this);
@@ -436,9 +412,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(POST, "/_xpack/watcher/watch/{id}/_activate", this);
         controller.registerHandler(POST, "/_xpack/watcher/watch/{id}/_deactivate", this);
         controller.registerHandler(POST, "/_xpack/watcher/watch/{id}/_execute", this);
-        controller.registerHandler(POST, "/{index}/_alias/{name}", this);
-        controller.registerHandler(POST, "/{index}/_aliases/{name}", this);
-        controller.registerHandler(POST, "/{index}/_analyze", this);
         controller.registerHandler(POST, "/{index}/_cache/clear", this);
         controller.registerHandler(POST, "/{index}/_ccr/forget_follower", this);
         controller.registerHandler(POST, "/{index}/_ccr/pause_follow", this);
@@ -446,7 +419,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(POST, "/{index}/_ccr/unfollow", this);
         controller.registerHandler(POST, "/{index}/_clone/{target}", this);
         controller.registerHandler(POST, "/{index}/_close", this);
-        controller.registerHandler(POST, "/{index}/_delete_by_query", this);
         controller.registerHandler(POST, "/{index}/_explain/{id}", this);
         controller.registerHandler(POST, "/{index}/_field_caps", this);
         controller.registerHandler(POST, "/{index}/_flush", this);
@@ -456,16 +428,11 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(POST, "/{index}/_graph/explore", this);
         controller.registerHandler(POST, "/{index}/_ilm/remove", this);
         controller.registerHandler(POST, "/{index}/_ilm/retry", this);
-        controller.registerHandler(POST, "/{index}/_mapping/", this);
-        controller.registerHandler(POST, "/{index}/_mapping/{type}", this);
-        controller.registerHandler(POST, "/{index}/_mappings/", this);
-        controller.registerHandler(POST, "/{index}/_mappings/{type}", this);
         controller.registerHandler(POST, "/{index}/_mtermvectors", this);
         controller.registerHandler(POST, "/{index}/_noop_bulk", this);
         controller.registerHandler(POST, "/{index}/_noop_search", this);
         controller.registerHandler(POST, "/{index}/_open", this);
         controller.registerHandler(POST, "/{index}/_rank_eval", this);
-        controller.registerHandler(POST, "/{index}/_refresh", this);
         controller.registerHandler(POST, "/{index}/_reload_search_analyzers", this);
         controller.registerHandler(POST, "/{index}/_rollover", this);
         controller.registerHandler(POST, "/{index}/_rollover/{new_index}", this);
@@ -475,21 +442,15 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(POST, "/{index}/_termvectors", this);
         controller.registerHandler(POST, "/{index}/_termvectors/{id}", this);
         controller.registerHandler(POST, "/{index}/_unfreeze", this);
-        controller.registerHandler(POST, "/{index}/_update_by_query", this);
         controller.registerHandler(POST, "/{index}/_upgrade", this);
         controller.registerHandler(POST, "/{index}/_validate/query", this);
         controller.registerHandler(POST, "/{index}/_xpack/graph/_explore", this);
-        controller.registerHandler(POST, "/{index}/{type}/_delete_by_query", this);
         controller.registerHandler(POST, "/{index}/{type}/_graph/explore", this);
-        controller.registerHandler(POST, "/{index}/{type}/_mapping", this);
-        controller.registerHandler(POST, "/{index}/{type}/_mapping/check", this);
-        controller.registerHandler(POST, "/{index}/{type}/_mappings", this);
         controller.registerHandler(POST, "/{index}/{type}/_mtermvectors", this);
         controller.registerHandler(POST, "/{index}/{type}/_noop_bulk", this);
         controller.registerHandler(POST, "/{index}/{type}/_noop_search", this);
         controller.registerHandler(POST, "/{index}/{type}/_termvector", this);
         controller.registerHandler(POST, "/{index}/{type}/_termvectors", this);
-        controller.registerHandler(POST, "/{index}/{type}/_update_by_query", this);
         controller.registerHandler(POST, "/{index}/{type}/_validate/query", this);
         controller.registerHandler(POST, "/{index}/{type}/_xpack/graph/_explore", this);
         controller.registerHandler(POST, "/{index}/{type}/{id}/_explain", this);
@@ -498,9 +459,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(POST, "_rollup_search", this);
         controller.registerHandler(POST, "{index}/_rollup_search", this);
         controller.registerHandler(POST, "_xpack/migration/upgrade/{index}", this);
-        controller.registerHandler(PUT, "/_alias", this);
-        controller.registerHandler(PUT, "/_alias/{name}", this);
-        controller.registerHandler(PUT, "/_aliases/{name}", this);
         controller.registerHandler(PUT, "/_ccr/auto_follow/{name}", this);
         controller.registerHandler(PUT, "/_dcdr/auto_replication/{name}", this);
         controller.registerHandler(PUT, "/_dcdr/{index}/replication/create", this);
@@ -509,9 +467,6 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(PUT, "/_ilm/policy/{name}", this);
         controller.registerHandler(PUT, "/_ingest/pipeline/{id}", this);
         controller.registerHandler(PUT, "/_license", this);
-        controller.registerHandler(PUT, "/_mapping/check", this);
-        controller.registerHandler(PUT, "/_mapping/{type}", this);
-        controller.registerHandler(PUT, "/_mappings/{type}", this);
         controller.registerHandler(PUT, "/_noop_bulk", this);
         controller.registerHandler(PUT, "/_monitoring/bulk", this);
         controller.registerHandler(PUT, "/_rollup/job/{id}", this);
@@ -558,23 +513,87 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(PUT, "/_xpack/watcher/watch/{id}/_activate", this);
         controller.registerHandler(PUT, "/_xpack/watcher/watch/{id}/_deactivate", this);
         controller.registerHandler(PUT, "/_xpack/watcher/watch/{id}/_execute", this);
-        controller.registerHandler(PUT, "/{index}/_alias", this);
-        controller.registerHandler(PUT, "/{index}/_alias/{name}", this);
-        controller.registerHandler(PUT, "/{index}/_aliases", this);
-        controller.registerHandler(PUT, "/{index}/_aliases/{name}", this);
         controller.registerHandler(PUT, "/{index}/_ccr/follow", this);
         controller.registerHandler(PUT, "/{index}/_clone/{target}", this);
-        controller.registerHandler(PUT, "/{index}/_mapping/", this);
-        controller.registerHandler(PUT, "/{index}/_mapping/{type}", this);
-        controller.registerHandler(PUT, "/{index}/_mappings/", this);
-        controller.registerHandler(PUT, "/{index}/_mappings/{type}", this);
         controller.registerHandler(PUT, "/{index}/_noop_bulk", this);
         controller.registerHandler(PUT, "/{index}/_shrink/{target}", this);
         controller.registerHandler(PUT, "/{index}/_split/{target}", this);
-        controller.registerHandler(PUT, "/{index}/{type}/_mapping", this);
-        controller.registerHandler(PUT, "/{index}/{type}/_mapping/check", this);
-        controller.registerHandler(PUT, "/{index}/{type}/_mappings", this);
         controller.registerHandler(PUT, "/{index}/{type}/_noop_bulk", this);
+
+        controller.registerHandler(GET, "/_analyze", this);
+        controller.registerHandler(POST, "/_analyze", this);
+
+        controller.registerHandler(GET, "/_settings", this);
+        controller.registerHandler(GET, "/_settings/{name}", this);
+
+        controller.registerHandler(POST, "/_mapping/check", this);
+        controller.registerHandler(PUT, "/_mapping/check", this);
+
+        controller.registerHandler(GET, "/_alias", this);
+        controller.registerHandler(GET, "/_alias/{name}", this);
+        controller.registerHandler(GET, "/_aliases", this);
+
+        controller.registerHandler(PUT, "/_alias", this);
+        controller.registerHandler(PUT, "/_alias/{name}", this);
+        controller.registerHandler(PUT, "/_aliases/{name}", this);
+        controller.registerHandler(POST, "/_alias/{name}", this);
+        controller.registerHandler(POST, "/_aliases", this);
+        controller.registerHandler(POST, "/_aliases/{name}", this);
+        controller.registerHandler(HEAD, "/_alias/{name}", this);
+
+        controller.registerHandler(PUT, "/_mapping/{type}", this);
+        controller.registerHandler(PUT, "/_mappings/{type}", this);
+        controller.registerHandler(POST, "/_mapping/{type}", this);
+        controller.registerHandler(POST, "/_mappings/{type}", this);
+
+        controller.registerHandler(GET, "/_refresh", this);
+        controller.registerHandler(POST, "/_refresh", this);
+
+//        controller.registerHandler(POST, "/{index}/_analyze", this);
+//        controller.registerHandler(GET, "/{index}/_analyze", this);
+//
+//        controller.registerHandler(GET, "/{index}/_setting/{name}", this);
+//        controller.registerHandler(GET, "/{index}/_settings", this);
+//        controller.registerHandler(GET, "/{index}/_settings/{name}", this);
+//
+//        controller.registerHandler(POST, "/{index}/{type}/_mapping/check", this);
+//        controller.registerHandler(PUT, "/{index}/{type}/_mapping/check", this);
+//        controller.registerHandler(DELETE, "/{index}/_alias/{name}", this);
+//        controller.registerHandler(DELETE, "/{index}/_aliases/{name}", this);
+//        controller.registerHandler(POST, "/{index}/_alias/{name}", this);
+//        controller.registerHandler(POST, "/{index}/_aliases/{name}", this);
+//        controller.registerHandler(PUT, "/{index}/_alias", this);
+//        controller.registerHandler(PUT, "/{index}/_alias/{name}", this);
+//        controller.registerHandler(PUT, "/{index}/_aliases", this);
+//        controller.registerHandler(PUT, "/{index}/_aliases/{name}", this);
+//
+//        controller.registerHandler(HEAD, "/{index}/_alias", this);
+//        controller.registerHandler(HEAD, "/{index}/_alias/{name}", this);
+//        controller.registerHandler(GET, "/{index}/_alias", this);
+//        controller.registerHandler(GET, "/{index}/_alias/{name}", this);
+//
+//        controller.registerHandler(PUT, "/{index}/_mapping/", this);
+//        controller.registerHandler(PUT, "/{index}/_mapping/{type}", this);
+//        controller.registerHandler(PUT, "/{index}/_mappings/", this);
+//        controller.registerHandler(PUT, "/{index}/_mappings/{type}", this);
+//        controller.registerHandler(PUT, "/{index}/{type}/_mapping", this);
+//        controller.registerHandler(PUT, "/{index}/{type}/_mappings", this);
+//        controller.registerHandler(POST, "/{index}/{type}/_mapping", this);
+//        controller.registerHandler(POST, "/{index}/{type}/_mappings", this);
+//        controller.registerHandler(POST, "/{index}/_mapping/", this);
+//        controller.registerHandler(POST, "/{index}/_mapping/{type}", this);
+//        controller.registerHandler(POST, "/{index}/_mappings/", this);
+//        controller.registerHandler(POST, "/{index}/_mappings/{type}", this);
+//        controller.registerHandler(HEAD, "/{index}/_mapping/{type}", this);
+//
+//        controller.registerHandler(GET, "/{index}/_refresh", this);
+//        controller.registerHandler(POST, "/{index}/_refresh", this);
+//
+//        controller.registerHandler(POST, "/{index}/_delete_by_query", this);
+//        controller.registerHandler(POST, "/{index}/{type}/_delete_by_query", this);
+//
+//        controller.registerHandler(POST, "/{index}/_update_by_query", this);
+//        controller.registerHandler(POST, "/{index}/{type}/_update_by_query", this);
     }
 
     @Override

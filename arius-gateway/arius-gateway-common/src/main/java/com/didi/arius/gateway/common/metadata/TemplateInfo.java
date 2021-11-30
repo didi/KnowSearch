@@ -1,11 +1,13 @@
 package com.didi.arius.gateway.common.metadata;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
 public class TemplateInfo {
 	/**
 	 * 是否需要message

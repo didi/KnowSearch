@@ -43,21 +43,21 @@ public class NormalUserInfoController {
     @GetMapping("{userName}/check")
     @ResponseBody
     @ApiOperation(value = "用户名称是否合法")
-    public Result checkUserNameValid(@PathVariable String userName) {
+    public Result<Void> checkUserNameValid(@PathVariable String userName) {
         return ariusUserInfoManager.checkUserNameValid(userName);
     }
 
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "编辑用户信息",notes = "不包含密码")
-    public Result editUsersInfoVO(@RequestBody AriusUserInfoDTO ariusUserInfoDTO) {
+    public Result<Void> editUsersInfoVO(@RequestBody AriusUserInfoDTO ariusUserInfoDTO) {
         return ariusUserInfoManager.editUsersInfoVO(ariusUserInfoDTO);
     }
 
     @PutMapping("password")
     @ResponseBody
     @ApiOperation(value = "编辑用户密码")
-    public Result editUsersPassword(@RequestBody EditUserPasswordDTO editUserPasswordDTO) {
+    public Result<Void> editUsersPassword(@RequestBody EditUserPasswordDTO editUserPasswordDTO) {
         return ariusUserInfoManager.editUsersPassword(editUserPasswordDTO);
     }
 

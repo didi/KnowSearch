@@ -1,12 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fengqiongfeng
  * @date 2020/8/24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LogicClusterPlugOperationOrderDetail extends AbstractOrderDetail {
     /**
      * 操作类型 3:安装 4：卸载

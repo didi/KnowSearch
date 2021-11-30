@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.client.constant.operaterecord;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -66,6 +68,10 @@ public enum ModuleEnum {
 
                         ES_CLUSTER_JOIN(24, "集群接入"),
 
+                        INDEX_OP(25, "索引管理"),
+
+                        INDEX_BLOCK_SETTING(26, "索引阻塞配置"),
+
                         UNKNOWN(-1, "unknown");
 
     ModuleEnum(int code, String desc) {
@@ -116,6 +122,19 @@ public enum ModuleEnum {
         }
 
         return false;
+    }
+
+    public static List<Map<String, Object>> getAllAriusConfigs() {
+        List<Map<String, Object>> objects = Lists.newArrayList();
+        for (ModuleEnum moduleEnum : ModuleEnum.values()) {
+            if (moduleEnum.getCode() == -1) {
+                continue;
+            }
+
+            objects.add(moduleEnum.toMap());
+        }
+
+        return objects;
     }
 
 }

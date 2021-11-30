@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -12,6 +14,8 @@ import lombok.ToString;
  */
 @Data
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClusterRegionPO extends BasePO {
     /**
      * region ID

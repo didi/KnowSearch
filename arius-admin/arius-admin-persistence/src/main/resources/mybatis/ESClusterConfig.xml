@@ -16,14 +16,14 @@
         <result column="create_time"    property="createTime" />
         <result column="update_time"    property="updateTime" />
         <result column="delete_flag"    property="deleteFlag" />
-</resultMap>
+    </resultMap>
 
-        <!-- 通用查询结果列 -->
-<sql id="Base_Column_List">
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
         id, cluster_id, type_name, engin_name, config_data, `desc`, version_tag, version_config, selected,create_time,update_time, delete_flag
     </sql>
 
-        <!-- 保存 Es配置信息 -->
+    <!-- 保存 Es配置信息 -->
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO" useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_config
@@ -34,16 +34,16 @@
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO">
         update es_config
-        <trim prefix="set" prefixOverrides=",">
-            <if test="clusterId != null">,cluster_id = #{clusterId}</if>
-            <if test="typeName != null">,type_name = #{typeName}</if>
-            <if test="enginName != null">,engin_name = #{enginName}</if>
-            <if test="configData != null">,config_data = #{configData}</if>
-            <if test="desc != null">,`desc` = #{desc}</if>
-            <if test="versionTag != null">,version_tag = #{versionTag}</if>
-            <if test="versionConfig != null">,version_config = #{versionConfig}</if>
-            <if test="selected != null">,selected = #{selected}</if>
-        </trim>
+        <set>
+            <if test="clusterId != null">cluster_id = #{clusterId},</if>
+            <if test="typeName != null">type_name = #{typeName},</if>
+            <if test="enginName != null">engin_name = #{enginName},</if>
+            <if test="configData != null">config_data = #{configData},</if>
+            <if test="desc != null">`desc` = #{desc},</if>
+            <if test="versionTag != null">version_tag = #{versionTag},</if>
+            <if test="versionConfig != null">version_config = #{versionConfig},</if>
+            <if test="selected != null">selected = #{selected},</if>
+        </set>
         where id = #{id}
     </update>
 
@@ -83,6 +83,12 @@
         where id = #{id}
     </delete>
 
+    <delete id="deleteByClusterIdAndTypeAndEngin">
+        update es_config
+        set delete_flag = 1, selected = 0
+        where cluster_id = #{clusterId} and type_name = #{type} and engin_name = #{engin}
+    </delete>
+
     <select id="getByClusterIdAndTypeAndEnginAndVersion" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
@@ -96,4 +102,44 @@
         set selected = 1
         where id = #{id}
     </update>
+    <insert id="insertSelective" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into es_config
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="clusterId != null">
+                cluster_id,
+            </if>
+            <if test="typeName != null">
+                type_name,
+            </if>
+            <if test="enginName != null">
+                engin_name,
+            </if>
+            <if test="configData != null">
+                config_data,
+            </if>
+            <if test="desc != null">
+                `desc`,
+            </if>
+            version_config,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="clusterId != null">
+                #{clusterId},
+            </if>
+            <if test="typeName != null">
+                #{typeName},
+            </if>
+            <if test="enginName != null">
+                #{enginName},
+            </if>
+            <if test="configData != null">
+                #{configData},
+            </if>
+            <if test="desc != null">
+                #{desc},
+            </if>
+                #{versionConfig},
+        </trim>
+    </insert>
 </mapper>

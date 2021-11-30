@@ -1,93 +1,93 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.storage.impl;
 
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
 import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author linyunan
  * @date 2021-05-19
  */
 @Service
+@NoArgsConstructor
 public class FileStorageServiceImpl implements FileStorageService {
 
     private static final ILog LOGGER = LogFactory.getLog(FileStorageServiceImpl.class);
 
     @Autowired
-    private HandleFactory     handleFactory;
+    private HandleFactory handleFactory;
 
-    @Override
-    public Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile,
-                                 FileStorageTypeEnum typeEnum) {
+    @Value("${extend.fileStorage}")
+    private String fileStorageType;
 
-        Result<String> getFileStorageTypeResult = getFileStorageType(typeEnum);
-        if (getFileStorageTypeResult.failed()) {
-            return getFileStorageTypeResult;
+    @PostConstruct
+    public void fileStorageTypeCheck() {
+        FileStorageTypeEnum fileStorageTypeEnum = FileStorageTypeEnum.valueOfType(fileStorageType);
+        if (fileStorageTypeEnum.getCode().equals(FileStorageTypeEnum.UNKNOWN.getCode())) {
+            LOGGER.error("class=FileStorageServiceImpl||method=fileStorageTypeCheck||fileStorageType={}", fileStorageTypeEnum);
         }
-
-        String fileStorageType = getFileStorageTypeResult.getData();
-
-        LOGGER.info("class=FileStorageServiceImpl||method=upload||fileStorageType={}", fileStorageType);
-
-        FileStorageHandle fileStorageHandle = (FileStorageHandle) handleFactory.getByHandlerNamePer(fileStorageType);
-
-        return fileStorageHandle.upload(fileName, fileMd5, uploadFile);
     }
 
     @Override
-    public Result download(String fileName, String fileMd5, FileStorageTypeEnum typeEnum) {
-
-        Result<String> getFileStorageTypeResult = getFileStorageType(typeEnum);
-        if (getFileStorageTypeResult.failed()) {
-            return getFileStorageTypeResult;
+    public Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile) {
+        Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
+        if (result.failed()) {
+            LOGGER.info("class=FileStorageServiceImpl||method=upload||fileStorageType={}", fileStorageType);
+            return Result.buildFrom(result);
         }
-
-        String fileStorageType = getFileStorageTypeResult.getData();
-
-        LOGGER.info("class=FileStorageServiceImpl||method=download||fileStorageType={}", fileStorageType);
-
-        FileStorageHandle fileStorageHandle = (FileStorageHandle) handleFactory.getByHandlerNamePer(fileStorageType);
-
-        return fileStorageHandle.download(fileName, fileMd5);
+        return result.getData().upload(fileName, fileMd5, uploadFile);
     }
 
     @Override
-    public Result<String> getDownloadBaseUrl(FileStorageTypeEnum typeEnum) {
-
-        Result<String> getFileStorageTypeResult = getFileStorageType(typeEnum);
-        if (getFileStorageTypeResult.failed()) {
-            return getFileStorageTypeResult;
+    public Result<Void> remove(String fileName) {
+        Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
+        if (result.failed()) {
+            LOGGER.info("class=FileStorageServiceImpl||method=remove||fileStorageType={}", fileStorageType);
+            return Result.buildFrom(result);
         }
+        return result.getData().remove(fileName);
+    }
 
-        String fileStorageType = getFileStorageTypeResult.getData();
+    @Override
+    public Result<MultipartFile> download(String fileName) {
+        Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
+        if (result.failed()) {
+            LOGGER.info("class=FileStorageServiceImpl||method=download||fileStorageType={}", fileStorageType);
+            return Result.buildFrom(result);
+        }
+        return result.getData().download(fileName);
+    }
 
-        LOGGER.info("class=FileStorageServiceImpl||method=getDownloadBaseUrl||fileStorageType={}", fileStorageType);
-
-        FileStorageHandle fileStorageHandle = (FileStorageHandle) handleFactory.getByHandlerNamePer(fileStorageType);
-
-        return Result.build(Boolean.TRUE, fileStorageHandle.getDownloadBaseUrl());
+    @Override
+    public Result<String> getDownloadBaseUrl() {
+        Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
+        if (result.failed()) {
+            LOGGER.info("class=FileStorageServiceImpl||method=getDownloadBaseUrl||fileStorageType={}", fileStorageType);
+            return Result.buildFrom(result);
+        }
+        return Result.build(Boolean.TRUE, result.getData().getDownloadBaseUrl());
     }
 
     /*****************************************private*************************************************************/
 
-    private Result<String> getFileStorageType(FileStorageTypeEnum typeEnum) {
-        if (AriusObjUtils.isNull(typeEnum)) {
-            return Result.build(Boolean.TRUE, FileStorageTypeEnum.DEFAULT.getType());
+    private Result<FileStorageHandle> getFileStorageHandleByType(String fileStorageType) {
+        if (FileStorageTypeEnum.valueOfType(fileStorageType).getCode() == -1) {
+            return Result.buildFail(String.format("获取 %s 类型出错", fileStorageType));
         }
-
-        if (FileStorageTypeEnum.valueOfCode(typeEnum.getCode()).getCode() == -1) {
-            return Result.buildFail(String.format("获取 %s 类型出错", typeEnum.getType()));
-        }
-
-        return Result.build(Boolean.TRUE, FileStorageTypeEnum.valueOfCode(typeEnum.getCode()).getType());
+        LOGGER.info("class=FileStorageServiceImpl||method=getDownloadBaseUrl||fileStorageType={}", fileStorageType);
+        FileStorageHandle fileStorageHandle = (FileStorageHandle) handleFactory.getByHandlerNamePer(fileStorageType);
+        return Result.buildSucc(fileStorageHandle);
     }
 }

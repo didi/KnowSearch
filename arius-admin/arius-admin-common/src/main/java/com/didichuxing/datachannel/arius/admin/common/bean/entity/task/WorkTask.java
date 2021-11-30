@@ -1,15 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.task;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fengqiongfeng
  * @date 2020/12/21
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class WorkTask extends BaseEntity {
     /**
      * 序列化版本号
@@ -48,16 +50,6 @@ public class WorkTask extends BaseEntity {
      * 创建人
      */
     private String creator;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     /**
      * 标记删除

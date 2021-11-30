@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class DateUtil {
+
+    private DateUtil(){}
+
     protected static final List<String> timePatterns = Arrays.asList( "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss.SSS Z", "yyyy-MM-dd'T'HH:mm:ssZ");
 
     private static final long MILLIS_ZONE_OFFSET = LocalDateTime.of(1970, 1, 1, 0, 0, 0,
@@ -49,8 +52,8 @@ public class DateUtil {
                 try {
                     messageTime = DateTime.parse(date, DateTimeFormat.forPattern(timePattern)).getMillis();
                     break;
-                } catch (Throwable e) {
-                    // pass
+                } catch (Exception e) {
+                    //pass
                 }
             }
         }
@@ -100,8 +103,8 @@ public class DateUtil {
                     format2DayValueMap.put(dateFormat, dateFormatTime);
                 }
             }
-        } catch (Throwable e) {
-
+        } catch (Exception e) {
+            //pass
         }
 
         return dateFormatTime;
@@ -152,7 +155,7 @@ public class DateUtil {
             }
         }
 
-        if (false == endSuffix.equals(lastSuffix)) {
+        if (!endSuffix.equals(lastSuffix)) {
             suffixes.add(endSuffix);
         }
 

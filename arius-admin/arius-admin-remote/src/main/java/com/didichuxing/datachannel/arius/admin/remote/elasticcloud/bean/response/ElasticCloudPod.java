@@ -2,13 +2,19 @@ package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.respons
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.ElasticCloudHostStatusEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class ElasticCloudPod {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ElasticCloudPod implements Serializable {
 
+    private static final long serialVersionUID = -354600549219545742L;
     /**
      * pod名称
      */

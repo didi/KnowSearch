@@ -1,17 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckWhiteListPO;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.cluster.HealthCheckESDAO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.CheckItem.*;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem.*;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
  *
  */
 @Component
+@NoArgsConstructor
 public class ClusterHealthCheckJobHandler extends AbstractMetaDataJob {
 
     @Autowired
@@ -37,7 +39,7 @@ public class ClusterHealthCheckJobHandler extends AbstractMetaDataJob {
     private TemplatePhyService templatePhyService;
 
     @Autowired
-    private ESClusterPhyService phyClusterService;
+    private ClusterPhyService phyClusterService;
 
     @Autowired
     private AriusStatsIndexInfoESDAO ariusStatsInfoEsDao;
@@ -78,12 +80,12 @@ public class ClusterHealthCheckJobHandler extends AbstractMetaDataJob {
 
         List<ICheckerItem> checkerItems  = genCheckItems();
 
-        List<ESClusterPhy> esClusterPhies = phyClusterService.listAllClusters();
+        List<ClusterPhy> esClusterPhies = phyClusterService.listAllClusters();
 
         List<HealthCheckWhiteListPO> checkWhiteListPos = new ArrayList<>();
 
-        for(ESClusterPhy esClusterPhy : esClusterPhies){
-            String   clustr   = esClusterPhy.getCluster();
+        for(ClusterPhy clusterPhy : esClusterPhies){
+            String   clustr   = clusterPhy.getCluster();
             ESClient esClient = esOpClient.getESClient(clustr);
 
             List<IndexTemplatePhy> indexTemplatePhies = templatePhyService.getTemplateByClusterAndStatus(clustr, 1);

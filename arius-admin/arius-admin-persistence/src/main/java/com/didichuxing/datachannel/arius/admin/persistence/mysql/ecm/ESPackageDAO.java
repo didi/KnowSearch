@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.esPackage.ESPackagePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;

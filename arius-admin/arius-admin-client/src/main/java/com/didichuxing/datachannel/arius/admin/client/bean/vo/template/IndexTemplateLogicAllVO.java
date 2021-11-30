@@ -10,34 +10,29 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.DataType
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "模板信息（详细）")
 public class IndexTemplateLogicAllVO extends BaseVO {
 
     @ApiModelProperty("模板ID")
     private Integer                       id;
 
-    /**
-     * 索引模板名称
-     */
     @ApiModelProperty("模板名字")
     private String                        name;
 
-    /**
-     * appId
-     */
     @ApiModelProperty("索引所属应用ID")
     private Integer                       appId;
 
-    /**
-     * appName
-     */
     @ApiModelProperty("索引所属应用名称")
     private String                       appName;
 
@@ -45,7 +40,7 @@ public class IndexTemplateLogicAllVO extends BaseVO {
      * 用户数据类型
      * @see DataTypeEnum
      */
-    @ApiModelProperty("数据类型（1:日志；2:上报；3:rds；6:离线）")
+    @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds；6:离线）")
     private Integer                       dataType;
 
     @ApiModelProperty("数据类型")
@@ -75,32 +70,18 @@ public class IndexTemplateLogicAllVO extends BaseVO {
     @ApiModelProperty("热数据保存天数")
     private Integer                       hotTime;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门ID")
     private String                        libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
     @ApiModelProperty("成本部门名称")
     private String                        libraDepartment;
-    /**
-     * 责任人
-     */
+
     @ApiModelProperty("责任人")
     private String                        responsible;
 
-    /**
-     * 时间字段
-     */
     @ApiModelProperty("时间字段")
     private String                        dateField;
 
-    /**
-     * 时间字段的格式
-     */
     @ApiModelProperty("时间字段格式")
     private String                        dateFieldFormat;
 
@@ -110,21 +91,12 @@ public class IndexTemplateLogicAllVO extends BaseVO {
     @ApiModelProperty("主键字段")
     private String                        idField;
 
-    /**
-     * routing字段
-     */
     @ApiModelProperty("routing字段")
     private String                        routingField;
 
-    /**
-     * 表达式
-     */
     @ApiModelProperty("表达式")
     private String                        expression;
 
-    /**
-     * 备注
-     */
     @ApiModelProperty("描述")
     private String                        desc;
 
@@ -134,21 +106,18 @@ public class IndexTemplateLogicAllVO extends BaseVO {
     @ApiModelProperty("配额")
     private Double                        quota;
 
-    /**
-     * 创建时间
-     */
+    @ApiModelProperty("写入限流值，" +
+            "writeRateLimit = 0 禁止写入；" +
+            "writeRateLimit = -1 不限流；" +
+            "writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档")
+    private Integer writeRateLimit;
+
     @ApiModelProperty("创建时间")
     private Date                          createTime;
 
-    /**
-     * 更新时间
-     */
     @ApiModelProperty("修改时间")
     private Date                          updateTime;
 
-    /**
-     * 物理模板信息
-     */
     @ApiModelProperty("物理模板信息")
     private List<IndexTemplatePhysicalVO> physicalVOS;
 

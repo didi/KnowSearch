@@ -19,7 +19,11 @@ public class FiltersAggs extends BucketAggsType {
 	
 	@Autowired
 	private AggsTypes aggsTypes;
-	
+
+	public FiltersAggs() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		aggsTypes.putAggsType(name, this);
@@ -36,7 +40,7 @@ public class FiltersAggs extends BucketAggsType {
 				int size = jsonFilters.entrySet().size();
 				aggsBukcetInfo.setBucketNumber(size);
 				aggsBukcetInfo.setLastBucketNumber(size);
-				aggsBukcetInfo.setMemUsed(size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+				aggsBukcetInfo.setMemUsed((long)size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 				
 				return aggsBukcetInfo;
 			} else if (filters.isJsonArray()) {
@@ -44,7 +48,7 @@ public class FiltersAggs extends BucketAggsType {
 				int size = jsonRanges.size();
 				aggsBukcetInfo.setBucketNumber(size);
 				aggsBukcetInfo.setLastBucketNumber(size);
-				aggsBukcetInfo.setMemUsed(size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
+				aggsBukcetInfo.setMemUsed((long)size * QueryConsts.AGGS_BUCKET_MEM_UNIT);
 				
 				return aggsBukcetInfo;
 			} else {

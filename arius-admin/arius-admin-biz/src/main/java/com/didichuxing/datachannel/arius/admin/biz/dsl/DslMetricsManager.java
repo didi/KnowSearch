@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DslMetricsVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DslTemplateVO;
 
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.SearchDslTemplateResponseVO;
 import java.util.List;
 
 public interface DslMetricsManager {
@@ -14,7 +15,7 @@ public interface DslMetricsManager {
      * @param endDate 结束时刻
      * @return list
      */
-    Result<List<DslTemplateVO>> getDSLMetricsInfoByAppId(Long appId, Long startDate, Long endDate);
+    Result<List<DslTemplateVO>> getDSLMetricsInfoByAppId(Integer appId, Long startDate, Long endDate);
 
     /**
      * 获取批量dslMetrics接口
@@ -24,5 +25,17 @@ public interface DslMetricsManager {
      * @param endDate 结束时刻
      * @return list
      */
-    Result<List<DslMetricsVO>> getDetailMetrics(int appId, String dslTemplateMd5, Long startDate, Long endDate);
+    Result<List<DslMetricsVO>> getDetailMetrics(Integer appId, String dslTemplateMd5, Long startDate, Long endDate);
+
+    /**
+     * 根据查询条件获取查询模板数据
+     *
+     * @param appId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Result<SearchDslTemplateResponseVO> getDslTemplateByCondition(Integer appId, String searchKeyword, String dslTag,
+                                                                  String sortInfo, Long from, Long size, Long startDate,
+                                                                  Long endDate);
 }

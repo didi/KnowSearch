@@ -1,6 +1,7 @@
 package com.didi.arius.gateway.common.metadata;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.elasticsearch.transport.TransportChannel;
 import org.elasticsearch.transport.TransportRequest;
 
@@ -10,6 +11,7 @@ import org.elasticsearch.transport.TransportRequest;
  * 记录tcp请求的上下文信息
  */
 @Data
+@NoArgsConstructor
 public class ActionContext extends BaseContext {
     /**
      * tcp request

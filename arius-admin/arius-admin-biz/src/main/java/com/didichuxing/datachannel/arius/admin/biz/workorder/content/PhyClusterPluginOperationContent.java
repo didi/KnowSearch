@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class PhyClusterPluginOperationContent extends BaseContent {
 
     /**
@@ -18,7 +20,7 @@ public class PhyClusterPluginOperationContent extends BaseContent {
      */
     private String  pluginFileName;
     /**
-     * 插件在s3上的地址
+     * 插件在文件仓库上的地址
      */
-    private String  S3url;
+    private String url;
 }

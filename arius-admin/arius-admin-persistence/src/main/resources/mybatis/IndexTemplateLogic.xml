@@ -20,6 +20,7 @@
         <result column="expression" jdbcType="VARCHAR" property="expression"/>
         <result column="desc" jdbcType="VARCHAR" property="desc"/>
         <result column="quota" jdbcType="DECIMAL" property="quota"/>
+        <result column="write_rate_limit" jdbcType="INTEGER" property="writeRateLimit"/>
         <result column="app_id" jdbcType="INTEGER" property="appId"/>
         <result column="ingest_pipeline" jdbcType="VARCHAR" property="ingestPipeline"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -29,7 +30,7 @@
     <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, app_id, ingest_pipeline, create_time, update_time
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline, create_time, update_time
     </sql>
 
     <select id="listByCondition"
@@ -53,7 +54,30 @@
         <include refid="Base_Column_List"/>
         from index_template
         where is_active = 1
-        <if test="name != null">and `name` like concat('%,', #{name},',%'))</if>
+        <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
+        <if test="dataType != null"> and `data_type` = #{dataType}</if>
+        order by id desc
+    </select>
+
+    <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template
+        where is_active = 1
+        <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
+        <if test="dataType != null"> and `data_type` = #{dataType}</if>
+        order by id desc
+        limit #{from}, #{size}
+    </select>
+
+    <select id="getTotalHitByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO" resultType="long">
+        select
+        count(1)
+        from index_template
+        where is_active = 1
+        <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
+        <if test="dataType != null"> and `data_type` = #{dataType}</if>
         order by id desc
     </select>
 
@@ -74,11 +98,11 @@
         insert into index_template
         (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, app_id, ingest_pipeline)
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
          #{libraDepartmentId}, #{libraDepartment}, #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
-         #{routingField}, #{expression}, #{desc}, #{quota}, #{appId}, #{ingestPipeline})
+         #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{appId}, #{ingestPipeline})
     </insert>
 
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
@@ -128,6 +152,7 @@
             <if test="dateField != null">,date_field = #{dateField}</if>
             <if test="expression != null">,expression = #{expression}</if>
             <if test="desc != null">,`desc` = #{desc}</if>
+            <if test="writeRateLimit != null">,write_rate_limit = #{writeRateLimit}</if>
             <if test="quota != null">,quota = #{quota}</if>
             <if test="ingestPipeline != null">,ingest_pipeline = #{ingestPipeline}</if>
         </trim>
@@ -160,9 +185,9 @@
         <include refid="Base_Column_List"/>
         from index_template
         where is_active = 1 and (responsible = #{responsible}
-        or responsible like concat(#{responsible},',%')
-        or responsible like concat('%,', #{responsible})
-        or responsible like concat('%,', #{responsible},',%'))
+        or responsible like CONCAT(#{responsible},',%')
+        or responsible like CONCAT('%,', #{responsible})
+        or responsible like CONCAT('%,', #{responsible},',%'))
     </select>
 
 </mapper>

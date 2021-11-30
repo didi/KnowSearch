@@ -38,7 +38,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping(V2_CONSOLE + "/template")
-@Api(value = "Console-索引接口(REST)")
+@Api(tags = "Console-用户侧索引模板mapping接口(REST)")
 public class ConsoleTemplateSchemaController extends BaseConsoleTemplateController {
 
     @Autowired
@@ -68,7 +68,7 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     @ResponseBody
     @ApiOperation(value = "获取索引Schema信息接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateSchemaVO> getSchema(@RequestParam("logicId") Integer logicId) throws Exception {
+    public Result<ConsoleTemplateSchemaVO> getSchema(@RequestParam("logicId") Integer logicId) {
         Result<IndexTemplateLogicWithMapping> result = templateLogicMappingManager.getTemplateWithMapping(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
@@ -76,7 +76,7 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
 
         IndexTemplateLogicWithMapping templateLogicWithMapping = result.getData();
         if (templateLogicWithMapping == null) {
-            return Result.buildFrom(Result.buildParamIllegal("索引不存在"));
+            return Result.buildParamIllegal("索引不存在");
         }
 
         fillSpecialField(templateLogicWithMapping);
@@ -89,10 +89,10 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     @ResponseBody
     @ApiOperation(value = "更新索引Schema信息接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
-    public Result modifySchema(HttpServletRequest request,
+    public Result<Void> modifySchema(HttpServletRequest request,
                                @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
 
-        Result checkAuthResult = checkAppAuth(schemaDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(schemaDTO.getLogicId(), HttpRequestUtils.getAppId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -104,7 +104,7 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     @ResponseBody
     @ApiOperation(value = "获取索引Schema优化信息接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateSchemaOptimizeVO> getSchemaOptimize(@RequestParam("logicId") Integer logicId) throws Exception {
+    public Result<ConsoleTemplateSchemaOptimizeVO> getSchemaOptimize(@RequestParam("logicId") Integer logicId){
         Result<List<MappingOptimize>> result = templateLogicMappingManager.getTemplateMappingOptimize(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
@@ -124,9 +124,9 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     @ResponseBody
     @ApiOperation(value = "mapping优化执行", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
-    public Result modifySchema(HttpServletRequest request, @RequestBody ConsoleTemplateSchemaOptimizeDTO optimizeDTO) {
+    public Result<Void> modifySchema(HttpServletRequest request, @RequestBody ConsoleTemplateSchemaOptimizeDTO optimizeDTO) {
 
-        Result checkAuthResult = checkAppAuth(optimizeDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(optimizeDTO.getLogicId(), HttpRequestUtils.getAppId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }

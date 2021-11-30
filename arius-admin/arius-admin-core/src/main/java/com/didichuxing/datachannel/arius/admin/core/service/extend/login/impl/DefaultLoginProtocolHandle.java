@@ -27,7 +27,7 @@ public class DefaultLoginProtocolHandle implements LoginProtocolHandle {
     private RSATool              rsaTool;
 
     @Override
-    public Result doAuthentication(Login login) {
+    public Result<Void> doAuthentication(Login login) {
         AriusUserInfo userInfo = ariusUserInfoService.getByDomainAccount(login.getDomainAccount());
         if (AriusObjUtils.isNull(userInfo)) {
             return Result.buildFail("登录失败, 请确认用户是否注册");
@@ -35,7 +35,7 @@ public class DefaultLoginProtocolHandle implements LoginProtocolHandle {
 
         Result<String> decryptResult = rsaTool.decrypt(login.getPassword());
         if (decryptResult.failed()) {
-            return decryptResult;
+            return Result.buildFrom(decryptResult);
         }
 
         if (!Objects.equals(userInfo.getPassword(), decryptResult.getData())) {

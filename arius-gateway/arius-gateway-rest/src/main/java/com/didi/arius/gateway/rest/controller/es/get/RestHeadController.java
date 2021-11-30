@@ -16,8 +16,14 @@ import static org.elasticsearch.rest.RestRequest.Method.HEAD;
 public class RestHeadController extends BaseHttpRestController {
     @Autowired
     private RestHeadAction restHeadAction;
+
+    public RestHeadController() {
+        // pass
+    }
+
     @Override
     protected void register() {
+        controller.registerHandler(HEAD, "/{index}/_doc/{id}", this);
         controller.registerHandler(HEAD, "/{index}/{type}/{id}", this);
         controller.registerHandler(HEAD, "/{index}/{type}/{id}/_source", this);
     }

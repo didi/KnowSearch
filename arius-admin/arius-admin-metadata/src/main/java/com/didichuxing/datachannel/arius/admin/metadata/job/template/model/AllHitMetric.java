@@ -1,22 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.template.model;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class AllHitMetric {
-    private final ILog LOGGER = LogFactory.getLog(AllHitMetric.class);
-
     private Map<String, MetricNode> hitMap = new HashMap<>();
 
     private Map<String, MetricNode> aggsMap = new HashMap<>();
 
 
     public void addAggs(Map<String, Long> m,  boolean isHit) {
-        for(String key : m.keySet()) {
-            addCount(key, m.get(key), isHit);
+        for (Map.Entry<String, Long> entry : m.entrySet()) {
+            addCount(entry.getKey(), entry.getValue(), isHit);
         }
     }
 
@@ -32,11 +27,7 @@ public class AllHitMetric {
             map = aggsMap;
         }
 
-
-        if (!map.containsKey(key)) {
-            map.put(key, new MetricNode());
-        }
-
+        map.computeIfAbsent(key, k -> new MetricNode());
 
         map.get(key).add(count);
     }

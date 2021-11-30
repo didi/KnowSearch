@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public abstract class TemplateEvent extends ApplicationEvent {
 
-    public TemplateEvent(Object source) {
+    protected TemplateEvent(Object source) {
         super(source);
     }
 }

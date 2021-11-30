@@ -67,7 +67,7 @@ public class DslAggsAnalyzerServiceTests {
         final AggsBukcetInfo aggsBukcetInfo = dslAggsAnalyzerService.checkAggs(aggsObject, 0, Maps.newHashMap(), new AggsAnalyzerContext());
         System.out.println(JSON.toJSONString(aggsBukcetInfo));
         //{"bucketNumber":0,"bucketType":"BUCKET","lastBucket":true,"lastBucketNumber":0,"memUsed":0}
-        assertEquals(aggsBukcetInfo != null, true);
+        assertEquals(true, aggsBukcetInfo != null);
     }
 
     @Test

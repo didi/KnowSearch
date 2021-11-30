@@ -54,6 +54,10 @@ public class DslAggsAnalyzerServiceImpl implements DslAggsAnalyzerService {
     @Autowired
     private AggsTypes aggsTypes;
 
+    public DslAggsAnalyzerServiceImpl() {
+        // pass
+    }
+
     @Override
     public boolean analyze(BaseContext baseContext, BytesReference source, String[] indices, String cluster) {
         try {
@@ -84,12 +88,7 @@ public class DslAggsAnalyzerServiceImpl implements DslAggsAnalyzerService {
 
             AggsAnalyzerContext context = new AggsAnalyzerContext();
             AggsBukcetInfo aggsBukcetInfo;
-            try {
-                aggsBukcetInfo = checkAggs(aggsObject, 0, mergedMappings, context);
-            } catch (Throwable e) {
-                logger.warn("analyzeAggs unexcept exception", Convert.logExceptionStack(e));
-                aggsBukcetInfo = AggsBukcetInfo.createSingleBucket();
-            }
+            aggsBukcetInfo = getAggsBukcetInfo(aggsObject, mergedMappings, context);
 
             statLogger.info(QueryConsts.DLFLAG_PREFIX + "aggs_detail||requestId={}||aggsLevel={}||aggsBukcetInfo={}", baseContext.getRequestId(), context.getMaxLevel(), aggsBukcetInfo);
 
@@ -124,12 +123,23 @@ public class DslAggsAnalyzerServiceImpl implements DslAggsAnalyzerService {
             }
 
         } catch (IOException e) {
-            logger.warn("analyzeAggs convertToJson exception", Convert.logExceptionStack(e));
+            logger.warn("analyzeAggs convertToJson exception, {}", Convert.logExceptionStack(e));
         } catch (JsonParseException e) {
-            logger.warn("analyzeAggs json parse exception", Convert.logExceptionStack(e));
+            logger.warn("analyzeAggs json parse exception, {}", Convert.logExceptionStack(e));
         }
 
         return true;
+    }
+
+    private AggsBukcetInfo getAggsBukcetInfo(JsonObject aggsObject, Map<String, FieldInfo> mergedMappings, AggsAnalyzerContext context) {
+        AggsBukcetInfo aggsBukcetInfo;
+        try {
+            aggsBukcetInfo = checkAggs(aggsObject, 0, mergedMappings, context);
+        } catch (Exception e) {
+            logger.warn("analyzeAggs unexcept exception, {}", Convert.logExceptionStack(e));
+            aggsBukcetInfo = AggsBukcetInfo.createSingleBucket();
+        }
+        return aggsBukcetInfo;
     }
 
     @Override
@@ -140,12 +150,12 @@ public class DslAggsAnalyzerServiceImpl implements DslAggsAnalyzerService {
             } else {
                 return true;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (e instanceof AggsParseException) {
                 logger.warn(QueryConsts.DLFLAG_PREFIX + "anaylizeAggs_forbidden||appid={}||requestId={}||dslTemplateKey={}", baseContext.getAppid(), baseContext.getRequestId(), baseContext.getDslTemplateKey());
             }
 
-            if (false == queryConfig.isCheckForbidden()) {
+            if (!queryConfig.isCheckForbidden()) {
                 throw e;
             } else {
                 return true;
@@ -284,7 +294,7 @@ public class DslAggsAnalyzerServiceImpl implements DslAggsAnalyzerService {
                         JsonObject item = entry.getValue().getAsJsonObject();
                         return aggsType.computeAggsType(item, mergedMappings);
                     } else {
-                        logger.info("aggs_type_not_support||field={}||content={}", field, aggsItem.toString());
+                        logger.info("aggs_type_not_support||field={}||content={}", field, aggsItem);
                         return AggsBukcetInfo.createSingleMetrics();
                     }
             }

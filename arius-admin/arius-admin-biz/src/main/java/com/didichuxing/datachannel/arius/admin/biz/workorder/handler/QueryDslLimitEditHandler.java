@@ -59,9 +59,9 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isRDOrOP(userName)) {
-            return Result.buildSucc(true);
+            return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
@@ -75,7 +75,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         QueryDslLimitEditContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             QueryDslLimitEditContent.class);
 
@@ -109,7 +109,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateConsoleAuth(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -120,7 +120,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result validateParam(WorkOrder workOrder) {
+    protected Result<Void> validateParam(WorkOrder workOrder) {
         return Result.buildSucc();
     }
 
@@ -131,7 +131,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result doProcessAgree(WorkOrder workOrder, String approver) {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         QueryDslLimitEditContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             QueryDslLimitEditContent.class);
 
@@ -143,7 +143,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
         List<DslQueryLimit> dslQueryLimitList = new ArrayList<>();
         dslQueryLimitList.add(dslQueryLimit);
 
-        Result result = dslStatisService.batchUpdateQueryLimit(dslQueryLimitList, approver);
+        Result<Boolean> result = dslStatisService.batchUpdateQueryLimit(dslQueryLimitList, approver);
 
         sendNotify(WORK_ORDER_QUERY_DSL_LIMIT,
             new QuryDslLimitNotify(workOrder.getSubmitorAppid(), content.getDslTemplate()),
@@ -153,6 +153,6 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
             return Result.buildFail("模版扩缩容失败！");
         }
 
-        return result;
+        return Result.buildFrom(result);
     }
 }

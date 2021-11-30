@@ -22,7 +22,7 @@ public interface WorkTaskManager {
      * @return Result
      * @throws AdminOperateException 异常
      */
-    Result addTask(WorkTaskDTO workTaskDTO);
+    Result<WorkTask> addTask(WorkTaskDTO workTaskDTO);
 
     /**
      * 判断一个任务是否存在
@@ -67,7 +67,7 @@ public interface WorkTaskManager {
      * @param processDTO 任务
      * @return Result
      */
-    Result processTask(WorkTaskProcessDTO processDTO);
+    Result<Void> processTask(WorkTaskProcessDTO processDTO);
 
     /**
      * 通过businessKey获取最新的任务

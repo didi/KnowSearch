@@ -17,6 +17,11 @@ import static org.elasticsearch.rest.RestRequest.Method.PUT;
 public class RestBulkController extends BaseHttpRestController {
     @Autowired
     private RestBulkAction restBulkAction;
+
+    public RestBulkController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(POST, "/_bulk", this);

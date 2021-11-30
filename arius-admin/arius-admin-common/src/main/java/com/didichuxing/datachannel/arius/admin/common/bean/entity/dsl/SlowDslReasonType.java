@@ -33,7 +33,7 @@ public enum SlowDslReasonType {
         this.type = type;
     }
 
-    private final static Map<String, SlowDslReasonType> TYPE_MAP;
+    private static final Map<String, SlowDslReasonType> TYPE_MAP;
 
     static {
         Map<String, SlowDslReasonType> typeMap = new HashMap<>();

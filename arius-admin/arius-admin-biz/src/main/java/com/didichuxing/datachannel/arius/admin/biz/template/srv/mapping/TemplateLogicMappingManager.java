@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.MappingOptimize;
@@ -24,7 +25,7 @@ public interface TemplateLogicMappingManager {
      * @throws Exception
      * @return 模板信息  不存在返回null
      */
-    Result<IndexTemplateLogicWithMapping> getTemplateWithMapping(Integer logicId) throws Exception;
+    Result<IndexTemplateLogicWithMapping> getTemplateWithMapping(Integer logicId);
 
     /**
      * 更新
@@ -32,7 +33,7 @@ public interface TemplateLogicMappingManager {
      * @param fields fields
      * @return result
      */
-    Result updateFields(Integer logicId, List<Field> fields, Set<String> removeFields);
+    Result<Void> updateFields(Integer logicId, List<Field> fields, Set<String> removeFields);
 
     /**
      * 校验模板field
@@ -41,7 +42,7 @@ public interface TemplateLogicMappingManager {
      * @param fields 属性列表
      * @return Result
      */
-    Result checkFields(Integer logicId, List<Field> fields);
+    Result<Void> checkFields(Integer logicId, List<Field> fields);
 
     /**
      * 更新
@@ -49,7 +50,7 @@ public interface TemplateLogicMappingManager {
      * @param ariusTypeProperty mapping
      * @return result
      */
-    Result updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty);
+    Result<Void> updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty);
 
     /**
      * updateProperties
@@ -57,7 +58,7 @@ public interface TemplateLogicMappingManager {
      * @param properties
      * @return
      */
-    Result updateProperties(Integer logicId, List<AriusTypeProperty> properties);
+    Result<Void> updateProperties(Integer logicId, List<AriusTypeProperty> properties);
 
     /**
      * field装AriusTypeProperty
@@ -79,7 +80,7 @@ public interface TemplateLogicMappingManager {
      * @param operator 操作人
      * @return result
      */
-    Result modifySchemaOptimize(ConsoleTemplateSchemaOptimizeDTO optimizeDTO, String operator);
+    Result<Void> modifySchemaOptimize(ConsoleTemplateSchemaOptimizeDTO optimizeDTO, String operator);
 
     /**
      * 修改模板schema
@@ -87,5 +88,5 @@ public interface TemplateLogicMappingManager {
      * @param operator 操作人
      * @return result
      */
-    Result modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException;
+    Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException;
 }

@@ -37,4 +37,6 @@ public interface EcmTaskDetailDAO {
 
     EcmTaskDetailPO getByWorkOderIdAndHostName(@Param("workOrderTaskId") Long workOrderId,
                                                @Param("hostname") String hostname);
+
+    int deleteEcmTaskDetailsByTaskOrder(Long workOrderTaskId);
 }

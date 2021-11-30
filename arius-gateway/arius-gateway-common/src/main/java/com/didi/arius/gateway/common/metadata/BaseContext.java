@@ -3,10 +3,12 @@ package com.didi.arius.gateway.common.metadata;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestRequest.Method;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
@@ -17,7 +19,8 @@ import java.util.concurrent.Semaphore;
  * 上下文信息基类
  */
 @Data
-public abstract class BaseContext {
+@NoArgsConstructor
+public abstract class BaseContext implements Serializable {
     /**
      * 上下文请求id
      */
@@ -150,6 +153,11 @@ public abstract class BaseContext {
      * httpResponse最大长度参考
      */
     private int maxHttpResponseLength;
+
+    /**
+     * 日志上下文
+     */
+    private JoinLogContext joinLogContext;
 
 
     public void setAppDetail(AppDetail appDetail) {

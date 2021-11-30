@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.didi</groupId>
-        <artifactId>arius-gateway</artifactId>
-        <version>${revision}</version>
+        <artifactId>arius-gateway-v2</artifactId>
+        <version>${version}</version>
     </parent>
 
     <artifactId>arius-gateway-core</artifactId>
@@ -14,34 +14,26 @@
     <dependencies>
         <dependency>
             <groupId>com.didi</groupId>
-            <artifactId>arius-gateway-dependency</artifactId>
-            <version>${revision}</version>
-
-        </dependency>
-        <dependency>
-            <groupId>com.didi</groupId>
             <artifactId>arius-gateway-common</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.didi</groupId>
             <artifactId>arius-gateway-remote</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.nlpcn</groupId>
-            <artifactId>elasticsearch-sql</artifactId>
+            <artifactId>elasticsearch-sql-didi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.didichuxing.datachannel</groupId>
+            <artifactId>dsl-parse</artifactId>
+        </dependency>
+
+
     </dependencies>
 
 </project>

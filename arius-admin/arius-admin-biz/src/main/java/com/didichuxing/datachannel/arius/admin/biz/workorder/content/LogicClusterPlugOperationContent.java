@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class LogicClusterPlugOperationContent extends BaseContent {
     /**
      * 操作类型 3:安装 4：卸载

@@ -1,7 +1,11 @@
 package com.didichuxing.datachannel.arius.admin;
 
 import com.didichuxing.datachannel.arius.admin.rest.AriusAdminApplication;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,19 +27,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class AriusAdminApplicationTests {
     @Value(value = "${admin.port.web}")
-    private int              port;
+    private int           port;
 
     @Value(value = "${admin.contextPath}")
-    private String           contextPath;
+    private String        contextPath;
 
-    @Autowired
-    protected TestRestTemplate restTemplate;
-
-    protected String           baseUrl;
+    protected String      baseUrl;
 
     protected HttpHeaders headers;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         baseUrl = String.format("http://localhost:%d", port) + contextPath;
         System.out.println(String.format("port is : [%d]", port));
@@ -45,8 +46,8 @@ public class AriusAdminApplicationTests {
     }
 
     @Test
-    public void contextLoads() {
-
+    public void test() {
+        Assertions.assertTrue(StringUtils.isNotBlank(contextPath));
     }
 
 }

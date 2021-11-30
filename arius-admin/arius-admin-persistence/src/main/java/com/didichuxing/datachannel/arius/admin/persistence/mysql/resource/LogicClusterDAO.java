@@ -6,7 +6,7 @@ import java.util.Set;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.LogicClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
 
 /**
  * 逻辑集群DAO
@@ -16,25 +16,31 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.LogicClust
 @Repository
 public interface LogicClusterDAO {
 
-    List<LogicClusterPO> listByCondition(LogicClusterPO param);
+    List<ClusterLogicPO> listByCondition(ClusterLogicPO param);
 
-    int insert(LogicClusterPO param);
+    int insert(ClusterLogicPO param);
 
-    int update(LogicClusterPO param);
+    int update(ClusterLogicPO param);
 
     int delete(Long id);
 
-    LogicClusterPO getById(Long id);
+    ClusterLogicPO getById(Long id);
 
-    List<LogicClusterPO> listByIds(@Param("ids") Set<Long> ids);
+    List<ClusterLogicPO> listByIds(@Param("ids") Set<Long> ids);
 
-    LogicClusterPO getByName(String name);
+    ClusterLogicPO getByName(String name);
 
-    LogicClusterPO getLastCommon();
+    ClusterLogicPO getLastCommon();
 
-    List<LogicClusterPO> listByAppId(Integer appId);
+    List<ClusterLogicPO> listByAppId(Integer appId);
 
-    List<LogicClusterPO> listAll();
+    List<ClusterLogicPO> listAll();
 
-    List<LogicClusterPO> listByResponsible(String responsible);
+    List<ClusterLogicPO> listByResponsible(String responsible);
+
+    List<ClusterLogicPO> pagingByCondition(@Param("name") String name,  @Param("appId") Integer appId,
+                                           @Param("type") Integer type, @Param("health") Integer health,
+                                           @Param("from") Long from,    @Param("size") Long size);
+
+    Long getTotalHitByCondition(ClusterLogicPO param);
 }

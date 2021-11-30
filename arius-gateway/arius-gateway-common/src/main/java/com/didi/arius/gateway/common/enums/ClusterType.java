@@ -1,5 +1,9 @@
 package com.didi.arius.gateway.common.enums;
 
+/**
+ * @deprecated (when, why, refactoring advice...)
+ */
+@Deprecated
 public enum ClusterType {
 
     INDEX(0),
@@ -11,7 +15,7 @@ public enum ClusterType {
         this.type = type;
     }
 
-    public static ClusterType IntegerToType(int code) {
+    public static ClusterType integerToType(int code) {
         for (ClusterType type : ClusterType.values()) {
             if (type.type == code) {
                 return type;

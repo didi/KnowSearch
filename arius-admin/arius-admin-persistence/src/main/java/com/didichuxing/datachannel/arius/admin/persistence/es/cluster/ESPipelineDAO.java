@@ -1,27 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;
+import com.didiglobal.logi.elasticsearch.client.response.ingest.ESDeletePipelineResponse;
+import com.didiglobal.logi.elasticsearch.client.response.ingest.ESGetPipelineResponse;
+import com.didiglobal.logi.elasticsearch.client.response.ingest.ESPutPipelineResponse;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPipelineProcessor;
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.ingest.Pipeline;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.ingest.ESDeletePipelineResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.ingest.ESGetPipelineResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.ingest.ESPutPipelineResponse;
-import com.google.common.collect.Lists;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
 
 /**
  * @author d06679
@@ -29,8 +25,6 @@ import com.google.common.collect.Lists;
  */
 @Repository
 public class ESPipelineDAO extends BaseESDAO {
-
-    private static final ILog  LOGGER                            = LogFactory.getLog(ESPipelineDAO.class);
 
     public static final String INDEX_TEMPLATE_PROCESSOR          = "index_template";
     public static final String THROTTLE_PROCESSOR                = "throttle";
@@ -46,8 +40,19 @@ public class ESPipelineDAO extends BaseESDAO {
     public static final String SECOND_TIME_FIELD_ES_FORMAT       = "UNIX";
     public static final String MS_TIME_FIELD_PLATFORM_FORMAT     = "epoch_millis";
     public static final String SECOND_TIME_FIELD_PLATFORM_FORMAT = "epoch_seconds";
-    public static final String FLINK_DATE_TIME                   = "_FLINK_DATA_TIME";
-    public static final String TEMPLATE_FLINK_DATE_TIME          = "logTime";
+    public static final int    FILE_BEATS_PROCESSOR_INDEX        = 0;
+    public static final Set<String>        FILE_BEATS_PIPELINE_ID_SET        = new HashSet<>();
+    public static final List<JSONObject>   FILE_BEATS_PROCESSOR              = new ArrayList<>();
+
+    static {
+        FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"grok\":{\"field\":\"message\",\"patterns\":[\"%{GREEDYDATA}] {%{GREEDYDATA:message}\"]}}"));
+        FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"set\":{\"field\":\"message\",\"value\":\"{ {{{message}}}\"}}"));
+        FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"json\":{\"field\":\"message\",\"add_to_root\":true}}"));
+        FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"remove\":{\"field\":[\"message\",\"@timestamp\",\"flag\"],\"ignore_missing\":true}}"));
+
+        FILE_BEATS_PIPELINE_ID_SET.add("arius.gateway.join");
+        FILE_BEATS_PIPELINE_ID_SET.add("cn_arius_gateway_metrics");
+    }
 
     /**
      * 创建
@@ -84,8 +89,11 @@ public class ESPipelineDAO extends BaseESDAO {
         }
 
         pipeline.setDescription(pipelineId);
-        pipeline.setProcessors(buildProcessors(dateField, dateFieldFormat, dateFormat, expireDay, version, rateLimit,
-            idField, routingField, pipeline.getProcessors()));
+        pipeline.setProcessors(buildProcessors(dateField, dateFieldFormat, dateFormat, expireDay, version, rateLimit, pipeline.getProcessors()));
+
+        if (FILE_BEATS_PIPELINE_ID_SET.contains(pipelineId)) {
+            pipeline.getProcessors().addAll(FILE_BEATS_PROCESSOR_INDEX, FILE_BEATS_PROCESSOR);
+        }
 
         ESPutPipelineResponse response = client.admin().indices().preparePutPipeline().setPipelineId(pipelineId)
             .setPipeline(pipeline).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
@@ -121,7 +129,11 @@ public class ESPipelineDAO extends BaseESDAO {
             if (pipeline == null) {
                 return null;
             }
-            return JSON.parseObject(JSON.toJSONString(pipeline.getProcessors().get(0)), ESPipelineProcessor.class);
+            JSONObject process = pipeline.getProcessors().get(0);
+            if (FILE_BEATS_PIPELINE_ID_SET.contains(pipelineId)) {
+                process = pipeline.getProcessors().get(4);
+            }
+            return JSON.parseObject(JSON.toJSONString(process), ESPipelineProcessor.class);
         } catch (Exception e) {
             return null;
         }
@@ -144,8 +156,7 @@ public class ESPipelineDAO extends BaseESDAO {
     }
 
     private List<JSONObject> buildProcessors(String dateField, String dateFieldFormat, String indexNameFormat,
-                                             Integer expireDay, Integer indexVersion, Integer rateLimit, String idField,
-                                             String routingField, List<JSONObject> oldProcessors) {
+                                             Integer expireDay, Integer indexVersion, Integer rateLimit, List<JSONObject> oldProcessors) {
 
         if (MS_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
             dateFieldFormat = MS_TIME_FIELD_ES_FORMAT;
@@ -166,11 +177,6 @@ public class ESPipelineDAO extends BaseESDAO {
         JSONObject indexTemplateProcessor = pipelineProcessors.getJSONObject(INDEX_TEMPLATE_PROCESSOR);
         // 分区创建的
         if (StringUtils.isNoneBlank(indexNameFormat)) {
-            // 日志类型设置pipeline时，时间字段设置为_FLINK_DATA_TIME
-            if (TEMPLATE_FLINK_DATE_TIME.equals(dateField)) {
-                dateField = FLINK_DATE_TIME;
-                dateFieldFormat = MS_TIME_FIELD_ES_FORMAT;
-            }
             indexTemplateProcessor.put(DATE_FIELD, dateField);
             if (StringUtils.isNotBlank(dateFieldFormat)) {
                 indexTemplateProcessor.put(DATE_FIELD_FORMAT, dateFieldFormat);

@@ -15,10 +15,12 @@ import com.google.common.collect.Sets;
  */
 public class AriusUserUtil {
 
+    private AriusUserUtil(){}
+
     public static String userIds2Str(Collection<Long> userIds) {
 
         if (CollectionUtils.isEmpty(userIds)) {
-            return "";
+            return null;
         }
 
         List<String> userIdStrs = userIds.stream().map(String::valueOf).collect(Collectors.toList());

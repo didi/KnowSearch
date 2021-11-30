@@ -38,7 +38,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V3_OP + "/capacity/plan")
-@Api(value = "容量规划接口(REST)")
+@Api(tags = "容量规划接口(REST)")
 public class CapacityPlanV3Controller {
 
     @Autowired
@@ -54,7 +54,7 @@ public class CapacityPlanV3Controller {
     @ResponseBody
     @ApiOperation(value = "规划region接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    public Result planClusterRegion(@RequestParam("regionId") Long regionId) throws ESOperateException {
+    public Result<Void> planClusterRegion(@RequestParam("regionId") Long regionId) throws ESOperateException {
         return capacityPlanRegionService.planRegion(regionId);
     }
 
@@ -62,7 +62,7 @@ public class CapacityPlanV3Controller {
     @ResponseBody
     @ApiOperation(value = "纠正集群region-模板资源接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    public Result moveShardClusterRegion(@RequestParam("regionId") Long regionId) {
+    public Result<Void> moveShardClusterRegion(@RequestParam("regionId") Long regionId) {
         // 搬迁一个region内所有的索引到当前region的rack
         return capacityPlanRegionService.moveShard(regionId, true);
     }
@@ -72,7 +72,7 @@ public class CapacityPlanV3Controller {
     @ApiOperation(value = "纠正集群region-模板资源接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "boolean", name = "moveIndex", value = "moveIndex", required = true) })
-    public Result moveTemplateClusterRegion(@RequestParam("regionId") Long regionId,
+    public Result<Void> moveTemplateClusterRegion(@RequestParam("regionId") Long regionId,
                                             @RequestParam("moveIndex") Boolean moveIndex) {
         return capacityPlanRegionService.moveShard(regionId, moveIndex);
     }
@@ -92,14 +92,14 @@ public class CapacityPlanV3Controller {
     @ResponseBody
     @ApiOperation(value = "执行初始化规划集群region任务接口", notes = "执行容量规划任务")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "taskId", value = "任务ID", required = true) })
-    public Result exeClusterRegionTask(@RequestParam("taskId") Long taskId) {
+    public Result<Void> exeClusterRegionTask(@RequestParam("taskId") Long taskId) {
         return capacityPlanRegionTaskService.exeInitTask(taskId);
     }
 
     @PutMapping("/region/task/check")
     @ResponseBody
     @ApiOperation(value = "检查规划任务是否完成接口", notes = "")
-    public Result checkClusterRegionTask() {
+    public Result<Void> checkClusterRegionTask() {
         return capacityPlanRegionTaskService.checkTasks();
     }
 
@@ -116,7 +116,7 @@ public class CapacityPlanV3Controller {
     @ResponseBody
     @ApiOperation(value = "拆分region", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true),
-                         @ApiImplicitParam(paramType = "query", dataType = "Boolean", name = "exe", value = "是否生效", defaultValue = "false") })
+                         @ApiImplicitParam(paramType = "query", dataType = "BOOLEAN", name = "exe", value = "是否生效", defaultValue = "false") })
     public Result<List<CapacityPlanRegionSplitResult>> splitRegion(@RequestParam("regionId") Long regionId,
                                                                    @RequestParam("exe") boolean exe) {
 
@@ -127,7 +127,7 @@ public class CapacityPlanV3Controller {
     @ResponseBody
     @ApiOperation(value = "检查集群region接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    public Result checkClusterRegion(@RequestParam("regionId") Long regionId) {
+    public Result<Void> checkClusterRegion(@RequestParam("regionId") Long regionId) {
         return capacityPlanRegionService.checkRegion(regionId);
     }
 
@@ -135,7 +135,7 @@ public class CapacityPlanV3Controller {
     @ResponseBody
     @ApiOperation(value = "开启物理集群容量规划功能", notes = "开启物理集群所属的容量规划area的容量规划功能")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "phyClusterName", value = "物理集群名", required = true) })
-    public Result openPhyClusterCapacityPlanFlags(HttpServletRequest request,
+    public Result<Boolean> openPhyClusterCapacityPlanFlags(HttpServletRequest request,
                                                   @RequestParam("phyClusterName") String phyClusterName) {
 
         // 容量规划开关统一到索引服务
@@ -147,7 +147,7 @@ public class CapacityPlanV3Controller {
     @ResponseBody
     @ApiOperation(value = "关闭物理集群容量规划功能", notes = "关闭物理集群所属的容量规划area的容量规划功能")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "phyClusterName", value = "物理集群名", required = true) })
-    public Result closePhyClusterCapacityPlanFlags(HttpServletRequest request,
+    public Result<Boolean> closePhyClusterCapacityPlanFlags(HttpServletRequest request,
                                                    @RequestParam("phyClusterName") String phyClusterName) {
 
         return templateSrvManager.delTemplateSrv(phyClusterName,

@@ -18,13 +18,9 @@ import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
-/**
- * @author d06679
- * @date 2019/5/15
- */
 @RestController
 @RequestMapping(V2_CONSOLE + "/app")
-@Api(value = "Console-APP相关接口(REST)")
+@Api(tags = "Console-用户侧APP相关接口(REST)")
 public class ConsoleAppController {
 
     @Autowired
@@ -33,7 +29,7 @@ public class ConsoleAppController {
     @PutMapping("/login")
     @ResponseBody
     @ApiOperation(value = "登陆APP接口", notes = "")
-    public Result login(HttpServletRequest request, @RequestBody ConsoleAppLoginDTO loginDTO) {
+    public Result<Void> login(HttpServletRequest request, @RequestBody ConsoleAppLoginDTO loginDTO) {
         return appManager.login(request, loginDTO);
     }
 
@@ -57,9 +53,8 @@ public class ConsoleAppController {
     @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "编辑APP接口", notes = "支持修改责任人、部门信息、备注")
-    public Result update(HttpServletRequest request, @RequestBody ConsoleAppDTO appDTO) {
+    public Result<Void> update(HttpServletRequest request, @RequestBody ConsoleAppDTO appDTO) {
         return appManager.update(request, appDTO);
-
     }
 
     @GetMapping("/get")
@@ -74,15 +69,14 @@ public class ConsoleAppController {
     @ResponseBody
     @ApiOperation(value = "获取访问次数接口", notes = "获取最近一段时间的访问次数")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result update(@RequestParam("appId") Integer appId) {
-        return appManager.update(appId);
-
+    public Result<Long> update(@RequestParam("appId") Integer appId) {
+        return appManager.accessCount(appId);
     }
 
     @DeleteMapping("/delete")
     @ResponseBody
     @ApiOperation(value = "删除APP", notes = "删除APP")
-    public Result update(HttpServletRequest request, @RequestParam("appId") Integer appId) {
-        return appManager.update(request, appId);
+    public Result<Void> delete(HttpServletRequest request, @RequestParam("appId") Integer appId) {
+        return appManager.delete(request, appId);
     }
 }

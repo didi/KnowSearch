@@ -4,13 +4,17 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019-09-03
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ESTemplateQuotaUsagePO extends BaseESPO {
 
     /**

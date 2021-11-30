@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.context.ApplicationEvent;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogicRackInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 
 /**
  * @author d06679
@@ -12,14 +12,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClus
  */
 public class ResourceItemMissEvent extends ApplicationEvent {
 
-    private List<ESClusterLogicRackInfo> items;
+    private List<ClusterLogicRackInfo> items;
 
-    public ResourceItemMissEvent(Object source, List<ESClusterLogicRackInfo> items) {
+    public ResourceItemMissEvent(Object source, List<ClusterLogicRackInfo> items) {
         super(source);
         this.items = items;
     }
 
-    public List<ESClusterLogicRackInfo> getItems() {
+    public List<ClusterLogicRackInfo> getItems() {
         return items;
     }
 }

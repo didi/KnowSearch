@@ -14,7 +14,7 @@ public interface AppManager {
     /**
      * 登陆APP接口
      */
-    Result login(HttpServletRequest request, ConsoleAppLoginDTO loginDTO);
+    Result<Void> login(HttpServletRequest request, ConsoleAppLoginDTO loginDTO);
 
     /**
      * 查询用户可以免密登陆的APP接口,该接口包含APP的校验码等敏感信息,需要调用方提供ticket
@@ -27,9 +27,19 @@ public interface AppManager {
     Result<List<ConsoleAppVO>> list();
 
     /**
+     * APP列表接口
+     */
+    Result<List<String>> listNames();
+
+    /**
+     * APP列表接口
+     */
+    Result<List<String>> listIds();
+
+    /**
      * 编辑APP接口
      */
-    Result update(HttpServletRequest request, ConsoleAppDTO appDTO);
+    Result<Void> update(HttpServletRequest request, ConsoleAppDTO appDTO);
 
     /**
      * 获取APP详情接口
@@ -39,10 +49,10 @@ public interface AppManager {
     /**
      * 获取访问次数接口
      */
-    Result update(Integer appId);
+    Result<Long> accessCount(Integer appId);
 
     /**
      * 删除APP
      */
-    Result update(HttpServletRequest request, Integer appId);
+    Result<Void> delete(HttpServletRequest request, Integer appId);
 }

@@ -1,6 +1,8 @@
 package com.didi.arius.gateway.core.service.arius.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.enums.RunModeEnum;
 import com.didi.arius.gateway.common.exception.ClusterNotFoundException;
 import com.didi.arius.gateway.common.metadata.*;
 import com.didi.arius.gateway.core.component.QueryConfig;
@@ -12,6 +14,9 @@ import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.DataCenterListResponse;
 import com.didi.arius.gateway.remote.response.DataCenterResponse;
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +25,20 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.DEFAULT_WRITE_ACTION;
 import static com.didi.arius.gateway.common.utils.CommonUtil.isSearchKibana;
 
 @Service
+@NoArgsConstructor
 public class ESClusterServiceImpl implements ESClusterService {
+    protected static final Logger logger = LoggerFactory.getLogger(ESClusterServiceImpl.class);
     protected static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
+    public static final String CLUSTER_NOT_FOUND = "cluster not found:";
+    public static final String COLON = ":";
+    public static final String COMMA = ",";
 
     @Autowired
     private AriusAdminRemoteService ariusAdminRemoteService;
@@ -47,12 +59,11 @@ public class ESClusterServiceImpl implements ESClusterService {
     private long schedulePeriod;
 
     private Map<String, ESCluster> esClusterMap = new HashMap<>();
-
     private Map<String, MetaVersion> versionMap = new HashMap<>();
 
     @PostConstruct
     public void init(){
-        threadPool.submitScheduleAtFixTask( () -> resetESClusaterInfo(), 0, schedulePeriod);
+        threadPool.submitScheduleAtFixTask(this::resetESClusaterInfo, 0, schedulePeriod);
     }
 
     @Override
@@ -62,31 +73,27 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public MetaVersion getMetaVersionByCluster(String cluster){
-        MetaVersion metaVersion = versionMap.get(cluster);
-        if(null == metaVersion){
-            metaVersion = new MetaVersion();
-            versionMap.put(cluster, metaVersion);
-        }
-
-        return metaVersion;
+        return versionMap.computeIfAbsent( cluster, s -> new MetaVersion() );
     }
 
     @Override
     public void resetESClusaterInfo(){
-        resetESClusterMap();
+        try {
+            resetESClusterMap();
+        } catch (Exception e) {
+            bootLogger.error("resetESClusterMap error", e);
+        }
     }
 
     @Override
-    public ESClient getClient(QueryContext queryContext) {
-        ESClient client = esRestClientService.getClient(queryContext.getCluster());
+    public ESClient getClient(QueryContext queryContext, String actionName) {
+        ESClient client = esRestClientService.getClient(queryContext.getCluster(), actionName);
 
         if (isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
-            client = esRestClientService.getAdminClient();
+            client = esRestClientService.getAdminClient(actionName);
         } else if (queryContext.getClusterId() != null){
-            client = esRestClientService.getClientStrict(queryContext.getClusterId());
-            if (client == null) {
-                throw new ClusterNotFoundException("cluster not found:" + queryContext.getClusterId());
-            }
+            client = esRestClientService.getClientStrict(queryContext.getClusterId(), actionName);
+            validClient(client, queryContext.getClusterId());
         }
 
         queryContext.setClient(client);
@@ -98,22 +105,22 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ESClient getClient(QueryContext queryContext, IndexTemplate indexTemplate) {
-        ESClient client = esRestClientService.getClient(queryContext.getCluster());
+    public ESClient getClient(QueryContext queryContext, IndexTemplate indexTemplate, String actionName) {
+        ESClient client = esRestClientService.getClient(queryContext.getCluster(), actionName);
         String clusterName = queryContext.getCluster();
 
         if (isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
-            client = esRestClientService.getAdminClient();
+            client = esRestClientService.getAdminClient(actionName);
             clusterName = queryConfig.getAdminClusterName();
         } else if (queryContext.getClusterId() != null){
-            client = esRestClientService.getClientStrict(queryContext.getClusterId());
+            client = esRestClientService.getClientStrict(queryContext.getClusterId(), actionName);
             clusterName = queryContext.getClusterId();
         } else if (indexTemplate != null) {
             boolean findSlave = false;
-            if (indexTemplate.getSlaveInfos() != null && indexTemplate.getSlaveInfos().size() > 0) {
+            if (indexTemplate.getSlaveInfos() != null && !indexTemplate.getSlaveInfos().isEmpty()) {
                 for (TemplateClusterInfo info : indexTemplate.getSlaveInfos()) {
                     if (info.getAccessApps().contains(queryContext.getAppid())) {
-                        client = esRestClientService.getClient(info.getCluster());
+                        client = esRestClientService.getClient(info.getCluster(), actionName);
                         clusterName = info.getCluster();
                         findSlave = true;
                         break;
@@ -121,15 +128,13 @@ public class ESClusterServiceImpl implements ESClusterService {
                 }
             }
 
-            if (false == findSlave) {
-                client = esRestClientService.getClient(indexTemplate.getMasterInfo().getCluster());
+            if (!findSlave) {
+                client = esRestClientService.getClient(indexTemplate.getMasterInfo().getCluster(), actionName);
                 clusterName = indexTemplate.getMasterInfo().getCluster();
             }
         }
 
-        if (client == null) {
-            throw new ClusterNotFoundException("cluster not found:" + clusterName);
-        }
+        validClient(client, clusterName);
 
         queryContext.setClient(client);
         queryContext.setClusterName(client.getClusterName());
@@ -137,13 +142,17 @@ public class ESClusterServiceImpl implements ESClusterService {
         return client;
     }
 
-    @Override
-    public ESClient getClientFromCluster(QueryContext queryContext, String clusterName) {
-        ESClient readClient = esRestClientService.getClient(clusterName);
-
-        if (readClient == null) {
-            throw new ClusterNotFoundException("cluster not found:" + clusterName);
+    private void validClient(ESClient client, String clusterName) {
+        if (client == null) {
+            throw new ClusterNotFoundException(CLUSTER_NOT_FOUND + clusterName);
         }
+    }
+
+    @Override
+    public ESClient getClientFromCluster(QueryContext queryContext, String clusterName, String actionName) {
+        ESClient readClient = esRestClientService.getClient(clusterName, actionName);
+
+        validClient(readClient, clusterName);
 
         queryContext.setClient(readClient);
         queryContext.setClusterName(readClient.getClusterName());
@@ -152,13 +161,11 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ESClient getWriteClient(IndexTemplate indexTemplate) {
+    public ESClient getWriteClient(IndexTemplate indexTemplate, String actionName) {
         String masterCluster = indexTemplate.getMasterInfo().getCluster();
-        ESClient writeClient = esRestClientService.getClient(masterCluster);
+        ESClient writeClient = esRestClientService.getClient(masterCluster, actionName);
 
-        if (writeClient == null) {
-            throw new ClusterNotFoundException("cluster not found:" + masterCluster);
-        }
+        validClient(writeClient, masterCluster);
 
         return writeClient;
     }
@@ -180,14 +187,14 @@ public class ESClusterServiceImpl implements ESClusterService {
             ESCluster esCluster = new ESCluster();
             esCluster.setCluster(dataCenterResponse.getCluster());
             esCluster.setReadAddress(dataCenterResponse.getReadAddress());
+            esCluster.setHttpAddress(dataCenterResponse.getHttpAddress());
+            esCluster.setHttpWriteAddress(dataCenterResponse.getHttpWriteAddress());
+            esCluster.setRunMode(dataCenterResponse.getRunMode());
+            initWriteAction(dataCenterResponse, esCluster);
+            bootLogger.info("dataCenter httpAddress[{}] httpWriteAddress[{}] runMode[{}] writeAction[{}]", esCluster.getHttpAddress(),
+                    esCluster.getHttpWriteAddress(), esCluster.getRunMode(), esCluster.getWriteAction());
 
-            if (queryConfig.getRunMode().equals( QueryConsts.GATEWAY_WRITE_MODE)) {
-                esCluster.setHttpAddress(dataCenterResponse.getHttpWriteAddress());
-            } else {
-                esCluster.setHttpAddress(dataCenterResponse.getHttpAddress());
-            }
-
-            esCluster.setType( ESCluster.Type.IntegerToType(dataCenterResponse.getType()));
+            esCluster.setType( ESCluster.Type.integerToType(dataCenterResponse.getType()));
 
             if (dataCenterResponse.getEsVersion() == null || dataCenterResponse.getEsVersion().equals("")) {
                 esCluster.setEsVersion(QueryConsts.DEFAULT_ES_VERSION);
@@ -198,7 +205,7 @@ public class ESClusterServiceImpl implements ESClusterService {
 
             newESClusterMap.put(esCluster.getCluster(), esCluster );
 
-            if (false == versionMap.containsKey(dataCenterResponse.getCluster())) {
+            if (!versionMap.containsKey(dataCenterResponse.getCluster())) {
                 MetaVersion version = new MetaVersion();
                 versionMap.put(esCluster.getCluster(), version);
             }
@@ -207,11 +214,30 @@ public class ESClusterServiceImpl implements ESClusterService {
         bootLogger.info("resetESClusterMap done,old esClusterMap size={}, new esClusterMap size={}", esClusterMap.size(), newESClusterMap.size());
 
         esClusterMap = newESClusterMap;
+
+        String esClusterLog = JSON.toJSONString(esClusterMap);
+        bootLogger.info("esClusterMap now {}", esClusterLog);
+
         initESClient(newESClusterMap);
     }
 
     private void initESClient(Map<String, ESCluster> newESClusterMap){
         esTcpClientService.resetClients(newESClusterMap);
         esRestClientService.resetClients(newESClusterMap);
+    }
+
+    /**
+     * 初始化读写分离的writeAction
+     * @param dataCenterResponse admin返回的response
+     * @param dataCenter 构建的数据中心
+     */
+    private void initWriteAction(DataCenterResponse dataCenterResponse, ESCluster dataCenter) {
+        if (dataCenterResponse.getRunMode() == RunModeEnum.READ_WRITE_SPLIT.getRunMode()) {
+            dataCenter.setWriteAction(Strings.isNullOrEmpty(dataCenterResponse.getWriteAction()) ?
+                    DEFAULT_WRITE_ACTION :
+                    Sets.newHashSet(dataCenterResponse.getWriteAction().split(COMMA)));
+        } else {
+            dataCenter.setWriteAction(new HashSet<>());
+        }
     }
 }

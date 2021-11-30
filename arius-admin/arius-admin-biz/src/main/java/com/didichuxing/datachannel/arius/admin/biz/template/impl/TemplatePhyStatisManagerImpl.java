@@ -1,43 +1,42 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.AppIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateHealthDegreeRecordVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateValueRecordVO;
+import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
+import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateHealthDegreeService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.*;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author d06679
@@ -58,10 +57,10 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     private TemplateSattisService       templateSattisService;
 
     @Autowired
-    private ESClusterLogicService     esClusterLogicService;
+    private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private ESRegionRackService       esRegionRackService;
+    private RegionRackService regionRackService;
 
     @Autowired
     private TemplateHealthDegreeService templateHealthDegreeService;
@@ -182,7 +181,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
 
         IndexTemplatePhy templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
         if (templatePhysical == null) {
-            return Result.buildFrom(Result.buildNotExist("模板不存在"));
+            return Result.buildNotExist("模板不存在");
         }
 
         Result<LogicTemplateTpsMetric> result = templateSattisService
@@ -194,16 +193,16 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
 
         LogicTemplateTpsMetric logicTemplateTpsMetric = result.getData();
         if (logicTemplateTpsMetric.getMaxTps() == null) {
-            return Result.buildFrom(Result.build(ResultType.AMS_SERVER_ERROR.getCode(), "maxTps缺失"));
+            return Result.build(ResultType.AMS_SERVER_ERROR.getCode(), "maxTps缺失");
         }
 
         if (logicTemplateTpsMetric.getCurrentTpsMap() == null
             || !logicTemplateTpsMetric.getCurrentTpsMap().containsKey(templatePhysical.getId())) {
-            return Result.buildFrom(Result.build(ResultType.AMS_SERVER_ERROR.getCode(), "物理模板currentTps缺失"));
+            return Result.build(ResultType.AMS_SERVER_ERROR.getCode(), "物理模板currentTps缺失");
         }
 
         if (logicTemplateTpsMetric.getCurrentFailCountMap() == null) {
-            return Result.buildFrom(Result.build(ResultType.AMS_SERVER_ERROR.getCode(), "物理模板currentFailCountMap缺失"));
+            return Result.build(ResultType.AMS_SERVER_ERROR.getCode(), "物理模板currentFailCountMap缺失");
         }
 
         PhysicalTemplateTpsMetric tpsMetric = new PhysicalTemplateTpsMetric();
@@ -267,17 +266,17 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
         Result<List<TemplateMetric>> result = templateSattisService.getTemplateMetrics(cluster, names, startTime,
             endTime);
         if (result.failed()) {
-            return Result.buildFrom(Result.buildParamIllegal("获取模板统计指标失败"));
+            return Result.buildParamIllegal("获取模板统计指标失败");
         }
 
         if (physicalIds.size() != result.getData().size()) {
-            LOGGER.warn("method=mataAndMetricByPhysical||physicalIdsSize={}||resultSize={}", physicalIds.size(),
+            LOGGER.warn("class=TemplatePhyStatisManagerImpl||method=mataAndMetricByPhysical||physicalIdsSize={}||resultSize={}", physicalIds.size(),
                 result.getData().size());
         }
 
-        Result checkResult = checkTemplateMetrics(result.getData());
+        Result<Void> checkResult = checkTemplateMetrics(result.getData());
         if (checkResult.failed()) {
-            return Result.buildFrom(Result.buildParamIllegal("AMS模板统计结果非法：" + checkResult.getMessage()));
+            return Result.buildParamIllegal("AMS模板统计结果非法：" + checkResult.getMessage());
         }
 
         Map<String, TemplateMetric> name2TemplateMetricMap = ConvertUtil.list2Map(result.getData(),
@@ -316,75 +315,73 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
                                 / templateMetaMetric.getSumDocCount();
             cpuByIndex = cpuByIndex * (sizePerDoc / resourceConfig.getDocSizeBaseline());
         }
-        //        Double cpuByQuery = (templateMetaMetric.getMaxQueryTime() + templateMetaMetric.getMaxScrollTime())
-        //                            / resourceConfig.getQueryTimePerCpu();
-
-        // Double cpuByQuery = templateMetaMetric.getMaxQueryTime() / resourceConfig.getQueryTimePerCpu();
-
-        // templateMetaMetric.setActualCpuCount(cpuByIndex + cpuByQuery);
 
         templateMetaMetric.setActualCpuCount(cpuByIndex);
     }
 
-    private Result checkTemplateMetrics(List<TemplateMetric> data) {
+    private Result<Void> checkTemplateMetrics(List<TemplateMetric> data) {
         for (TemplateMetric templateMetric : data) {
-            if (AriusObjUtils.isNull(templateMetric.getTemplate())) {
-                return Result.buildParamIllegal("模板名字为空");
-            }
+            Result<Void> result = checkTemplateMetric(templateMetric);
+            if (result.failed()) {return result;}
+        }
+        return Result.buildSucc();
+    }
 
-            if (AriusObjUtils.isNull(templateMetric.getSumIndexSizeG())) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumIndexSizeG为空");
-            }
-
-            if (AriusObjUtils.isNull(templateMetric.getMaxIndexSizeG())) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxIndexSizeG为空");
-            }
-
-            if (AriusObjUtils.isNull(templateMetric.getSumDocCount())) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumDocCount为空");
-            }
-
-            if (AriusObjUtils.isNull(templateMetric.getMaxIndexDocCount())) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxIndexDocCount为空");
-            }
-
-            if (AriusObjUtils.isNull(templateMetric.getMaxTps())) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxTps为空");
-            }
-
-            if (AriusObjUtils.isNull(templateMetric.getMaxQueryTime())) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxQueryTime为空");
-            }
-
-            if (AriusObjUtils.isNull(templateMetric.getMaxScrollTime())) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxScrollTime为空");
-            }
-
-            if (templateMetric.getSumIndexSizeG() > 0.001 && templateMetric.getSumDocCount() <= 0) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumDocCount非法");
-            }
-
-            if (templateMetric.getSumDocCount() > 0 && templateMetric.getSumIndexSizeG() <= 0) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumIndexSizeG非法");
-            }
-
-            if (templateMetric.getMaxTps() > 0 && templateMetric.getSumIndexSizeG() <= 0) {
-                return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumIndexSizeG非法");
-            }
-
+    private Result<Void> checkTemplateMetric(TemplateMetric templateMetric) {
+        if (AriusObjUtils.isNull(templateMetric.getTemplate())) {
+            return Result.buildParamIllegal("模板名字为空");
         }
 
+        if (AriusObjUtils.isNull(templateMetric.getSumIndexSizeG())) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumIndexSizeG为空");
+        }
+
+        if (AriusObjUtils.isNull(templateMetric.getMaxIndexSizeG())) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxIndexSizeG为空");
+        }
+
+        if (AriusObjUtils.isNull(templateMetric.getSumDocCount())) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumDocCount为空");
+        }
+
+        if (AriusObjUtils.isNull(templateMetric.getMaxIndexDocCount())) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxIndexDocCount为空");
+        }
+
+        if (AriusObjUtils.isNull(templateMetric.getMaxTps())) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxTps为空");
+        }
+
+        if (AriusObjUtils.isNull(templateMetric.getMaxQueryTime())) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxQueryTime为空");
+        }
+
+        if (AriusObjUtils.isNull(templateMetric.getMaxScrollTime())) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的maxScrollTime为空");
+        }
+
+        if (templateMetric.getSumIndexSizeG() > 0.001 && templateMetric.getSumDocCount() <= 0) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumDocCount非法");
+        }
+
+        if (templateMetric.getSumDocCount() > 0 && templateMetric.getSumIndexSizeG() <= 0) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumIndexSizeG非法");
+        }
+
+        if (templateMetric.getMaxTps() > 0 && templateMetric.getSumIndexSizeG() <= 0) {
+            return Result.buildParamIllegal(templateMetric.getTemplate() + "的sumIndexSizeG非法");
+        }
         return Result.buildSucc();
     }
 
     private Map<Long, LogicResourceConfig> genPhysicalId2ResourceConfigMap(List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics) {
-        List<ESClusterLogicRackInfo> logicClusterRacks = esRegionRackService.listAllLogicClusterRacks();
-        Map<String, ESClusterLogicRackInfo> clusterRack2ResourceIdMap = ConvertUtil.list2Map(logicClusterRacks,
+        List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listAllLogicClusterRacks();
+        Map<String, ClusterLogicRackInfo> clusterRack2ResourceIdMap = ConvertUtil.list2Map(logicClusterRacks,
             item -> item.getPhyClusterName() + "@" + item.getRack());
 
-        List<ESClusterLogic> logicClusters = esClusterLogicService.listAllLogicClusters();
-        Map<Long, ESClusterLogic> resourceId2ResourceLogicMap = ConvertUtil.list2Map(logicClusters,
-            ESClusterLogic::getId);
+        List<ClusterLogic> logicClusters = clusterLogicService.listAllClusterLogics();
+        Map<Long, ClusterLogic> resourceId2ResourceLogicMap = ConvertUtil.list2Map(logicClusters,
+            ClusterLogic::getId);
 
         Map<Long, LogicResourceConfig> result = Maps.newHashMap();
 
@@ -392,10 +389,10 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
             for (String rack : physical.getRack().split(AdminConstant.RACK_COMMA)) {
                 String key = physical.getCluster() + "@" + rack;
                 if (clusterRack2ResourceIdMap.containsKey(key)) {
-                    ESClusterLogic esClusterLogic = resourceId2ResourceLogicMap
+                    ClusterLogic clusterLogic = resourceId2ResourceLogicMap
                         .get(clusterRack2ResourceIdMap.get(key).getLogicClusterId());
                     result.put(physical.getId(),
-                        esClusterLogicService.genLogicClusterConfig(esClusterLogic.getConfigJson()));
+                        clusterLogicService.genClusterLogicConfig(clusterLogic.getConfigJson()));
                     break;
                 }
             }

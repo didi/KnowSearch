@@ -13,11 +13,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusUserUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 
 /**
- * @author d06679
  * 用于带responsible的类型转换,要求po必须实现DigitResponsible方法;entity类实现StringResponsible方法
  * 数据保存数据库时,目标类类是po,会将责任人编码
  * 获取平台数据时,目标类是entity,会将责任人解码;Service层对外输出的类都必须是entity
- * @date 2019/3/18
  */
 @Component
 public class ResponsibleConvertTool {
@@ -30,13 +28,9 @@ public class ResponsibleConvertTool {
      * @param resp pos列表
      */
     private void id2Str(StringResponsible resp) {
-        try {
-            String str = ariusUserInfoService.getUserByIds(resp.getResponsible());
-            if (StringUtils.isNotBlank(str)) {
-                resp.setResponsible(str);
-            }
-        } catch (Exception e) {
-
+        String str = ariusUserInfoService.getUserByIds(resp.getResponsible());
+        if (StringUtils.isNotBlank(str)) {
+            resp.setResponsible(str);
         }
     }
 
@@ -45,7 +39,10 @@ public class ResponsibleConvertTool {
      * @param resp pos列表
      */
     private void str2Id(DigitResponsible resp) {
-        resp.setResponsible(AriusUserUtil.userIds2Str(ariusUserInfoService.saveByUsers(resp.getResponsible())));
+        String strResponsible = AriusUserUtil.userIds2Str(ariusUserInfoService.saveByUsers(resp.getResponsible()));
+        if(StringUtils.isNotBlank(strResponsible)){
+            resp.setResponsible(strResponsible);
+        }
     }
 
     /**
@@ -55,8 +52,8 @@ public class ResponsibleConvertTool {
      * @param <T>
      * @return
      */
-    public <T> List<T> list2List(List list, Class<T> tClass) {
-        return ConvertUtil.list2List(list, tClass, (tgtO) -> {
+    public <T,R> List<T> list2List(List<R> list, Class<T> tClass) {
+        return ConvertUtil.list2List(list, tClass, tgtO -> {
             if (tgtO instanceof StringResponsible) {
                 id2Str((StringResponsible) tgtO);
             } else if (tgtO instanceof DigitResponsible) {
@@ -73,7 +70,7 @@ public class ResponsibleConvertTool {
      * @return
      */
     public <T> T obj2Obj(final Object srcObj, Class<T> tgtClass) {
-        return ConvertUtil.obj2Obj(srcObj, tgtClass, (tgtO) -> {
+        return ConvertUtil.obj2Obj(srcObj, tgtClass, tgtO -> {
             if (tgtO instanceof StringResponsible) {
                 id2Str((StringResponsible) tgtO);
             } else if (tgtO instanceof DigitResponsible) {

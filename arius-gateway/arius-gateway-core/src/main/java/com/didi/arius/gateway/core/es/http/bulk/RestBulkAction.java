@@ -2,7 +2,6 @@ package com.didi.arius.gateway.core.es.http.bulk;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.exception.InvalidParameterException;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.QueryContext;
@@ -21,6 +20,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+
 /**
  * <pre>
  * { "index" : { "_index" : "test", "_type" : "type1", "_id" : "1" }
@@ -33,11 +34,9 @@ import java.util.*;
 @Component
 public class RestBulkAction extends RestBaseWriteAction {
 
-    public static final String NAME = "bulk";
-
     @Override
     public String name() {
-        return NAME;
+        return "bulk";
     }
 
     @Override
@@ -70,12 +69,12 @@ public class RestBulkAction extends RestBaseWriteAction {
         }
 
         queryContext.setIndices(Arrays.asList(defaultIndex));
-        checkWriteIndices(queryContext);
+        checkWriteIndicesAndTemplateBlockWrite(queryContext);
 
         IndexTemplate indexTemplate = getAndCheckIndexTemplate(defaultIndex, queryContext);
 
         // 获取写入的client
-        ESClient writeClient = esClusterService.getWriteClient(indexTemplate);
+        ESClient writeClient = esClusterService.getWriteClient(indexTemplate, actionName);
 
         String uri = queryContext.getUri();
         String queryString = queryContext.getQueryString() == null ? "" : queryContext.getQueryString();
@@ -99,9 +98,8 @@ public class RestBulkAction extends RestBaseWriteAction {
             @Override
             public void onResponse(DirectResponse response) {
                 long currentTime = System.currentTimeMillis();
-                if (statLogger.isDebugEnabled()) {
-                    statLogger.debug(QueryConsts.DLFLAG_PREFIX + "bulk_es_response||requestId={}||cost={}", queryContext.getRequestId(), currentTime - queryContext.getRequestTime());
-                }
+                setWriteLog(queryContext, indexTemplate, response,
+                        currentTime, queryConfig.isWriteLogContentOpen());
 
                 metricsService.addIndexMetrics(indexTemplate.getExpression(), name(), currentTime - queryContext.getRequestTime(), queryContext.getPostBody().length(), response.getResponseContent().length());
 

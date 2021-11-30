@@ -28,10 +28,10 @@ public class AriusUserInfoManagerImpl implements AriusUserInfoManager {
     @Autowired
     private RSATool              rsaTool;
 
-    private final static int     USER_NAME_MAX_LENGTH = 50;
+    private static final int     USER_NAME_MAX_LENGTH = 50;
 
     @Override
-    public Result checkUserNameValid(String userName) {
+    public Result<Void> checkUserNameValid(String userName) {
         if (userName.length() > USER_NAME_MAX_LENGTH) {
             return Result.buildFail(String.format("用户名称长度超过%s", USER_NAME_MAX_LENGTH));
         }
@@ -48,7 +48,7 @@ public class AriusUserInfoManagerImpl implements AriusUserInfoManager {
     }
 
     @Override
-    public Result editUsersPassword(EditUserPasswordDTO editUserPasswordDTO) {
+    public Result<Void> editUsersPassword(EditUserPasswordDTO editUserPasswordDTO) {
         if (AriusObjUtils.isNull(editUserPasswordDTO)) {
             return Result.buildParamIllegal("参数为空");
         }
@@ -61,11 +61,11 @@ public class AriusUserInfoManagerImpl implements AriusUserInfoManager {
         //解码
         Result<String> oldPassWordResult = rsaTool.decrypt(editUserPasswordDTO.getOldPassWord());
         if (oldPassWordResult.failed()) {
-            return oldPassWordResult;
+            return Result.buildFrom(oldPassWordResult);
         }
         Result<String> newPassWordResult = rsaTool.decrypt(editUserPasswordDTO.getNewPassWord());
         if (newPassWordResult.failed()) {
-            return newPassWordResult;
+            return Result.buildFrom(newPassWordResult);
         }
 
         String oldPassWord = oldPassWordResult.getData();
@@ -85,7 +85,7 @@ public class AriusUserInfoManagerImpl implements AriusUserInfoManager {
     }
 
     @Override
-    public Result editUsersInfoVO(AriusUserInfoDTO ariusUserInfoDTO) {
+    public Result<Void> editUsersInfoVO(AriusUserInfoDTO ariusUserInfoDTO) {
         if (AriusObjUtils.isNull(ariusUserInfoDTO)) {
             return Result.buildParamIllegal("参数为空");
         }

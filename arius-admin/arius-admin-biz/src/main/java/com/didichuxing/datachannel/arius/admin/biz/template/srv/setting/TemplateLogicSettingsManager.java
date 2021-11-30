@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
 /**
@@ -19,7 +20,7 @@ public interface TemplateLogicSettingsManager {
      * @return Result
      * @throws AdminOperateException
      */
-    Result modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException;
+    Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException;
 
     /**
      * 获取逻辑模板settings
@@ -27,7 +28,7 @@ public interface TemplateLogicSettingsManager {
      * @return
      * @throws AdminOperateException
      */
-    Result getSettings(Integer logicId) throws AdminOperateException;
+    Result<IndexTemplatePhySettings> getSettings(Integer logicId) throws AdminOperateException;
 
     /**
      * 更新settings信息
@@ -35,12 +36,12 @@ public interface TemplateLogicSettingsManager {
      * @param settings settings
      * @return
      */
-    Result updateSettings(Integer logicId, AriusIndexTemplateSetting settings);
+    Result<Void> updateSettings(Integer logicId, AriusIndexTemplateSetting settings);
 
     /**
      * 更加逻辑ID获取Settings
      * @param logicId 逻辑ID
      * @return
      */
-    Result getTemplateSettings(Integer logicId);
+    Result<IndexTemplatePhySettings> getTemplateSettings(Integer logicId);
 }

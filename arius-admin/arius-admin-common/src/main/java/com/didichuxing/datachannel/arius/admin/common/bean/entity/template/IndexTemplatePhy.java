@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
-import java.util.Date;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -17,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class IndexTemplatePhy extends BaseEntity {
 
     /**
@@ -82,17 +83,6 @@ public class IndexTemplatePhy extends BaseEntity {
     private String config;
 
     /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
-
-
-    /**
      * 获取并且解析config
      * @return
      */
@@ -102,6 +92,7 @@ public class IndexTemplatePhy extends BaseEntity {
             try {
                 physicalConfig = JSON.parseObject(config, IndexTemplatePhysicalConfig.class);
             } catch (Exception e) {
+                return null;
             }
         }
         return physicalConfig;

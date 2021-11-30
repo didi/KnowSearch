@@ -13,6 +13,6 @@ public interface CapacityPlanStatisticsService {
      * @param planClusterId planClusterId
      * @return true/false
      */
-    Result statisticsPlanClusterById(Long planClusterId);
+    Result<Void> statisticsPlanClusterById(Long planClusterId);
 
 }

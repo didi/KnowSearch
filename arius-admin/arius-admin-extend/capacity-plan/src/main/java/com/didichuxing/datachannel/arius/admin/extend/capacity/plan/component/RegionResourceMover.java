@@ -1,23 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
@@ -25,13 +12,24 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
 
 /**
  * @author d06679
@@ -103,7 +101,7 @@ public class RegionResourceMover {
         Set<String> hasPluginClusterSet = Sets.newHashSet(ariusConfigInfoService
             .stringSetting(CAPACITY_PLAN_CONFIG_GROUP, CAPACITY_PLAN_HAS_PLUGIN_CLUSTER, "").split(","));
         if (!hasPluginClusterSet.contains(context.getRegion().getClusterName())) {
-            LOGGER.info("method=saveTemplateCapacityConfig||cluster={}||msg=no plugin",
+            LOGGER.info("class=RegionResourceMover||method=saveTemplateCapacityConfig||cluster={}||msg=no plugin",
                 context.getRegion().getClusterName());
             return true;
         }
@@ -133,17 +131,17 @@ public class RegionResourceMover {
                 if (esTemplateService.syncUpsertSetting(templateMetaMetric.getCluster(),
                     templateMetaMetric.getTemplateName(), setting, 10)) {
                     LOGGER.info(
-                        "method=saveTemplateCapacityConfig||template={}||group={}||factor={}||msg=save to es succ",
+                        "class=RegionResourceMover||method=saveTemplateCapacityConfig||template={}||group={}||factor={}||msg=save to es succ",
                         templateMetaMetric.getTemplateName(), group, factor);
                 } else {
                     succ = false;
                     LOGGER.warn(
-                        "method=saveTemplateCapacityConfig||template={}||group={}||factor={}||msg=save to es fail",
+                        "class=RegionResourceMover||method=saveTemplateCapacityConfig||template={}||group={}||factor={}||msg=save to es fail",
                         templateMetaMetric.getTemplateName(), group, factor);
                 }
             } catch (Exception e) {
                 succ = false;
-                LOGGER.warn("method=saveTemplateCapacityConfig||template={}||errMsg={}",
+                LOGGER.warn("class=RegionResourceMover||method=saveTemplateCapacityConfig||template={}||errMsg={}",
                     templateMetaMetric.getTemplateName(), e.getMessage(), e);
             }
         }
@@ -162,8 +160,6 @@ public class RegionResourceMover {
             templateLogicService.updateTemplateShardFactorIfGreater(templatePhysical.getLogicId(),
                 computeTemplateFactor(templateMetaMetric, context.getRegion().getConfig()),
                 AriusUser.CAPACITY_PLAN.getDesc());
-
-            // TODO ZHZ 修改今天索引的factor
         }
     }
 
@@ -194,7 +190,7 @@ public class RegionResourceMover {
         for (TemplateMetaMetric templateMetaMetric : templateMetaMetrics) {
 
             try {
-                Result updateTemplateResult = templatePhyManager.editTemplateRackWithoutCheck(
+                Result<Void> updateTemplateResult = templatePhyManager.editTemplateRackWithoutCheck(
                     templateMetaMetric.getPhysicalId(), tgtRack, AriusUser.CAPACITY_PLAN.getDesc(), 20);
                 if (updateTemplateResult.failed()) {
                     LOGGER.error(
@@ -202,7 +198,7 @@ public class RegionResourceMover {
                         updateTemplateResult.getMessage(), templateMetaMetric.getPhysicalId(), tgtRack);
                     success = false;
                 } else {
-                    LOGGER.info("method=moveShard||physicalId={}||tgtRack={}", templateMetaMetric.getPhysicalId(),
+                    LOGGER.info("class=RegionResourceMover||method=moveShard||physicalId={}||tgtRack={}", templateMetaMetric.getPhysicalId(),
                         tgtRack);
                 }
             } catch (Exception e) {
@@ -215,7 +211,7 @@ public class RegionResourceMover {
                 // 更新索引的rack
                 try {
                     if (templateColdManager.updateHotIndexRack(templateMetaMetric.getPhysicalId(), tgtRack, 20)) {
-                        LOGGER.info("method=moveShard||physicalId={}||tgtRack={}||msg=update succ",
+                        LOGGER.info("class=RegionResourceMover||method=moveShard||physicalId={}||tgtRack={}||msg=update succ",
                             templateMetaMetric.getPhysicalId(), tgtRack);
                     } else {
                         LOGGER.error(
@@ -244,15 +240,12 @@ public class RegionResourceMover {
      * @return factor
      */
     private Double computeTemplateFactor(TemplateMetaMetric templateMetaMetric, CapacityPlanConfig config) {
-
-        // TODO ZHZ 需要考虑quota的量
-
         double factorByDisk = templateMetaMetric.getMaxIndexSizeG() / templateMetaMetric.getShardNum()
                               / templateMetaMetric.getReplicaNum() / config.getCostDiskPerShardG();
         double factorByCpu = templateMetaMetric.getCombinedCpuCount() / templateMetaMetric.getShardNum()
                              / templateMetaMetric.getReplicaNum() / config.getCostCpuPerShard();
 
-        LOGGER.info("method=computeShardFactor||templateName={}||factorByDisk={}||factorByCpu={}",
+        LOGGER.info("class=RegionResourceMover||method=computeShardFactor||templateName={}||factorByDisk={}||factorByCpu={}",
             templateMetaMetric.getTemplateName(), factorByDisk, factorByCpu);
 
         double factor = Math.max(factorByDisk, factorByCpu);
@@ -266,23 +259,5 @@ public class RegionResourceMover {
         }
 
         return factor;
-    }
-
-    /**
-     * 集群模板的shard个数
-     * @param templateMetaMetric 指标
-     * @param config 配置
-     * @return shardNum
-     */
-    private Integer computeTemplateShardNum(TemplateMetaMetric templateMetaMetric, CapacityPlanConfig config) {
-        int shardByDisk = (int) Math.ceil(templateMetaMetric.getMaxIndexSizeG() / AdminConstant.G_PER_SHARD);
-        int shardByDocCount = (int) Math.ceil(templateMetaMetric.getMaxIndexDocCount() / config.getDocCountPerShard());
-        int shard = Math.max(shardByDisk, shardByDocCount);
-
-        if (shard < 1) {
-            shard = 1;
-        }
-
-        return shard;
     }
 }

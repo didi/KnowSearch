@@ -3,10 +3,12 @@ package com.didi.arius.gateway.remote.response;
 
 import com.google.gson.annotations.Expose;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class BaseInfoResponse {
 
     /**
@@ -37,4 +39,8 @@ public class BaseInfoResponse {
     private String ingestPipeline;
 
     private List<String> aliases;
+
+    private Boolean blockRead;
+
+    private Boolean blockWrite;
 }

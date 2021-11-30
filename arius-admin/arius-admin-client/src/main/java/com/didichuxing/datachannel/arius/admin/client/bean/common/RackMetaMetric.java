@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -8,6 +10,8 @@ import lombok.ToString;
  * @date 2019-06-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
 public class RackMetaMetric {
 

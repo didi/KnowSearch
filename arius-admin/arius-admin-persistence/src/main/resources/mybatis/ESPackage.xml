@@ -3,7 +3,7 @@
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPackageDAO">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.esPackage.ESPackagePO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO">
         <id column="id"              property="id" />
         <result column="url"         property="url" />
         <result column="es_version"  property="esVersion" />
@@ -31,7 +31,7 @@
     </select>
 
     <!-- 保存 Es程序包 -->
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esPackage.ESPackagePO" useGeneratedKeys="true"
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO" useGeneratedKeys="true"
             keyColumn="id" keyProperty="id" >
         insert into es_package
         ( url, es_version, creator, manifest,`desc`, create_time,  delete_flag)
@@ -41,7 +41,7 @@
 
     <!-- 根据ID  修改程序包 -->
     <update id="update"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esPackage.ESPackagePO"  >
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO"  >
         update es_package
         <trim prefix="set" prefixOverrides=",">
             <if test="url != null">,`url` = #{url}</if>

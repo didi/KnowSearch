@@ -4,15 +4,15 @@ import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.ExtendServiceFac
 import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateDistributedRack;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,27 +32,27 @@ public class DistributorUtils {
     private static final ILog     LOGGER = LogFactory.getLog(DistributorUtils.class);
 
     @Autowired
-    private ESClusterPhyService   esClusterPhyService;
+    private ClusterPhyService     esClusterPhyService;
 
     @Autowired
-    private ESClusterLogicService esClusterLogicService;
+    private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private ESRegionRackService   esRegionRackService;
+    private RegionRackService regionRackService;
 
     @Autowired
-    private ExtendServiceFactory extendServiceFactory;
+    private ExtendServiceFactory  extendServiceFactory;
 
     /**
-     * 通过IDC获取集群名称列表
+     * 获取集群名称列表
      * @return
      */
     public List<String> fetchClusterNames() {
         List<String> clusterNames = null;
             clusterNames = new ArrayList<>();
-            List<ESClusterPhy> esClusterPhies = esClusterPhyService.listAllClusters();
-            for (ESClusterPhy esClusterPhy : esClusterPhies) {
-                clusterNames.add(esClusterPhy.getCluster());
+            List<ClusterPhy> esClusterPhies = esClusterPhyService.listAllClusters();
+            for (ClusterPhy clusterPhy : esClusterPhies) {
+                clusterNames.add(clusterPhy.getCluster());
             }
         return clusterNames;
     }
@@ -71,7 +71,7 @@ public class DistributorUtils {
         if (extendResult.success()) {
             extendDistributor = extendResult.getData();
         } else {
-            LOGGER.warn("method=getTemplateResourceInner||msg=extendDistributor not find");
+            LOGGER.warn("class=DistributorUtils||method=getTemplateResourceInner||msg=extendDistributor not find");
         }
 
         TemplateClusterDistributor defaultDistributor = extendServiceFactory
@@ -87,20 +87,20 @@ public class DistributorUtils {
         }
 
         if (distributedRackResult.failed()) {
-            return Result.buildFrom(distributedRackResult);
+            return distributedRackResult;
         }
 
         return distributedRackResult;
     }
 
-    public Result validateAndGetLogicItems(Long resourceId) {
+    public Result<List<ClusterLogicRackInfo>> validateAndGetLogicItems(Long resourceId) {
         if (!isLogicClusterExists(resourceId)) {
-            return Result.buildFrom(Result.buildNotExist("逻辑资源不存在"));
+            return Result.buildNotExist("逻辑资源不存在");
         }
 
-        List<ESClusterLogicRackInfo> items = esRegionRackService.listLogicClusterRacks(resourceId);
+        List<ClusterLogicRackInfo> items = regionRackService.listLogicClusterRacks(resourceId);
         if (CollectionUtils.isEmpty(items)) {
-            return Result.buildFrom(Result.buildNotExist("逻辑资源没有对应的物理资源"));
+            return Result.buildNotExist("逻辑资源没有对应的物理资源");
         }
 
         return Result.buildSucc(items);
@@ -112,10 +112,7 @@ public class DistributorUtils {
      * @return
      */
     public boolean isLogicClusterExists(Long logicClusterId) {
-        ESClusterLogic esClusterLogic = esClusterLogicService.getLogicClusterById(logicClusterId);
-        if (esClusterLogic == null) {
-            return false;
-        }
-        return true;
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+        return (null != clusterLogic);
     }
 }

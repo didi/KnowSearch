@@ -1,29 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.workorder.BpmAuditTypeEnum.AGREE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.workorder.BpmAuditTypeEnum.DISAGREE;
-
-import com.alibaba.fastjson.JSONObject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.host.HostsParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.OrderTypeVO;
@@ -31,12 +16,16 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderSub
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.user.AriusUserInfoVO;
+import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
@@ -46,11 +35,25 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ValidateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.client.constant.workorder.BpmAuditTypeEnum.AGREE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.workorder.BpmAuditTypeEnum.DISAGREE;
 
 /**
  * @author d06679
@@ -70,22 +73,26 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     private AppService           appService;
 
     @Autowired
-    private WorkOrderDAO orderDao;
+    private WorkOrderDAO         orderDao;
 
     @Autowired
     private AriusUserInfoService ariusUserInfoService;
 
     @Autowired
-    private EcmTaskDAO               ecmTaskDao;
+    private EcmTaskDAO           ecmTaskDao;
 
     @Autowired
-    private ESClusterPhyService      esClusterPhyService;
+    private ClusterPhyService    esClusterPhyService;
 
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
         List<OrderTypeVO> orderTypeVOS = new ArrayList<>();
 
         for (WorkOrderTypeEnum elem : WorkOrderTypeEnum.values()) {
+            if (WorkOrderTypeEnum.UNKNOWN.getName().equals(elem.getName())) {
+                continue;
+            }
+
             orderTypeVOS.add(new OrderTypeVO(elem.getName(), elem.getMessage()));
         }
 
@@ -95,15 +102,16 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public Result<WorkOrderSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
 
-        LOGGER.info("method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
-            ConvertUtil.obj2Json(workOrderDTO), EnvUtil.getStr(), workOrderDTO.getDataCenter());
-
-        Result submitValidResult = checkSubmitValid(workOrderDTO);
-        if (submitValidResult.failed()) {
-            return submitValidResult;
-        }
+        String workOrderJSONString = JSON.toJSONString(workOrderDTO);
+        LOGGER.info("class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
+            workOrderJSONString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
 
         initWorkOrderDTO(workOrderDTO);
+
+        Result<Void> submitValidResult = checkSubmitValid(workOrderDTO);
+        if (submitValidResult.failed()) {
+            return Result.buildFrom(submitValidResult);
+        }
 
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(workOrderDTO.getType());
 
@@ -116,8 +124,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result process(WorkOrderProcessDTO processDTO) {
-        Result checkProcessResult = checkProcessValid(processDTO);
+    public Result<Void> process(WorkOrderProcessDTO processDTO) {
+        Result<Void> checkProcessResult = checkProcessValid(processDTO);
         if (checkProcessResult.failed()) {
             return checkProcessResult;
         }
@@ -176,13 +184,13 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         try {
             return orderDao.list();
         } catch (Exception e) {
-            LOGGER.error("class=WorkOrderManagerImpl||method=list||id={}||msg=get all order failed!", e);
+            LOGGER.error("class=WorkOrderManagerImpl||method=list||msg=get all order failed!", e);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
-    public Result cancelOrder(Long id, String userName) {
+    public Result<Void> cancelOrder(Long id, String userName) {
         try {
             WorkOrderPO orderPO = orderDao.getById(id);
             if (AriusObjUtils.isNull(orderPO)) {
@@ -198,14 +206,14 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             }
 
         } catch (Exception e) {
-            LOGGER.error("class=WorkOrderManagerImpl||method=cancelOrder||id={}||msg=cancel order failed!", e);
+            LOGGER.error("class=WorkOrderManagerImpl||method=cancelOrder||id={}||msg=cancel order failed!", id, e);
             return Result.buildFail(ResultType.FAIL.getMessage());
         }
         return Result.buildFail(ResultType.FAIL.getMessage());
     }
 
     @Override
-    public Result processOrder(WorkOrderPO order) {
+    public Result<Void> processOrder(WorkOrderPO order) {
         try {
             WorkOrderPO orderPO = orderDao.getById(order.getId());
             if (AriusObjUtils.isNull(orderPO)) {
@@ -215,7 +223,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 return Result.buildSucc();
             }
         } catch (Exception e) {
-            LOGGER.error("class=WorkOrderManagerImpl||method=processOrder||id={}||msg=cancel order failed!", e);
+            LOGGER.error("class=WorkOrderManagerImpl||method=processOrder||id={}||msg=cancel order failed!",
+                order.getId(), e);
             return Result.buildFail(ResultType.FAIL.getMessage());
         }
         return Result.buildFail(ResultType.FAIL.getMessage());
@@ -279,31 +288,14 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         if (ariusUserInfoService.isOPByDomainAccount(userName) || ariusUserInfoService.isRDByDomainAccount(userName)) {
             return orderList;
         } else {
-            orderList = orderList.stream().filter((orderDO) -> {
-                try {
-                    WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderDO.getType());
-
-                    AbstractOrderDetail abstractOrderDetail = handler.getOrderDetail(orderDO.getExtensions());
-                    List<AriusUserInfo> ariusUserInfos = handler.getApproverList(abstractOrderDetail);
-
-                    for (AriusUserInfo ariusUserInfo : ariusUserInfos) {
-                        if (userName.equals(ariusUserInfo.getDomainAccount())) {
-                            return true;
-                        }
-                    }
-                } catch (Exception e) {
-                    LOGGER.warn("class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=exception!",
-                        userName, e);
-                }
-                return false;
-            }).collect(Collectors.toList());
+            orderList = handleOrderList(userName, orderList);
         }
         return orderList;
     }
 
     @Override
     public OrderDetail getBaseDetail(WorkOrderPO orderPO) {
-        if (ValidateUtils.isNull(orderPO)) {
+        if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }
 
@@ -357,9 +349,42 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return Result.buildSucc(ConvertUtil.list2List(orderDOList, WorkOrderVO.class));
     }
 
+    @Override
+    public Result<String> getClusterTaskInfo(String cluster) {
+        if (AriusObjUtils.isBlack(cluster)) {
+            return Result.buildFail("cluster name 为空");
+        }
+
+        ClusterPhy clusterPhy = esClusterPhyService.getClusterByName(cluster);
+        if (AriusObjUtils.isNull(clusterPhy)) {
+            return Result.buildFail("不存在cluster name=" + cluster + "的物理集群");
+        }
+
+        EcmTask task = ConvertUtil.obj2Obj(ecmTaskDao.getUsefulWorkOrderTaskByClusterId(clusterPhy.getId()),
+                EcmTask.class);
+        if (AriusObjUtils.isNull(task)) {
+            return Result.buildFail("当前集群没有待执行的工单任务");
+        }
+
+        List<EcmParamBase> ecmParamBases = WorkOrderTaskConverter.convert2EcmParamBaseList(task);
+        if(CollectionUtils.isEmpty(ecmParamBases)) {
+            return Result.buildFail("当前任务没有工单数据");
+        }
+        HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBases.get(0);
+        if(AriusObjUtils.isNull(hostsParamBase.getEsPluginAction())) {
+            return Result.buildFail("当前没有集群插件操作的工单任务");
+        }
+
+        OrderDetailBaseVO orderDetailBaseVO = getById(task.getWorkOrderId()).getData();
+        PhyClusterPluginOperationContent content = ConvertUtil.str2ObjByJson(orderDetailBaseVO.getDetail(),
+                PhyClusterPluginOperationContent.class);
+
+        return Result.build(Boolean.TRUE, JSON.toJSONString(content));
+    }
+
     /*****************************************private*****************************************************/
 
-    private Result checkSubmitValid(WorkOrderDTO workOrderDTO) {
+    private Result<Void> checkSubmitValid(WorkOrderDTO workOrderDTO) {
 
         if (AriusObjUtils.isNull(workOrderDTO.getType())) {
             return Result.buildParamIllegal("工单类型为空");
@@ -367,10 +392,6 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
 
         if (AriusObjUtils.isNull(workOrderDTO.getContentObj())) {
             return Result.buildParamIllegal("工单内容为空");
-        }
-
-        if (AriusObjUtils.isNull(workOrderDTO.getSubmitor())) {
-            return Result.buildParamIllegal("提交人为空");
         }
 
         WorkOrderTypeEnum typeEnum = WorkOrderTypeEnum.valueOfName(workOrderDTO.getType());
@@ -409,7 +430,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return vo;
     }
 
-    private Result checkProcessValid(WorkOrderProcessDTO processDTO) {
+    private Result<Void> checkProcessValid(WorkOrderProcessDTO processDTO) {
         if (AriusObjUtils.isNull(processDTO)) {
             return Result.buildParamIllegal("处理工单不存在");
         }
@@ -421,12 +442,11 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return Result.buildSucc();
     }
 
-    private Result doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
-
+    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderPO.getType());
 
-        Result checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());
-        if (processDTO.getCheckAuthority() && checkAuthResult.failed()) {
+        Result<Void> checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());
+        if (processDTO.getCheckAuthority().booleanValue() && checkAuthResult.failed()) {
             return checkAuthResult;
         }
 
@@ -443,7 +463,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
 
         } catch (AdminOperateException e) {
             LOGGER.error("class=WorkOrderController||method=doProcessByWorkOrderHandle||errMsg={}", e.getMessage(), e);
-            return Result.buildFail(e.getMessage());
+            return Result.buildFail("操作失败, 请联系管理员");
         }
 
         return Result.buildFail("审批结果非法");
@@ -473,9 +493,10 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         baseVO.setAppDeptName(orderDetail.getAppDeptName());
         baseVO.setApplicant(ConvertUtil.obj2Obj(orderDetail.getApplicant(), AriusUserInfoVO.class));
         baseVO.setApplicantAppId(orderDetail.getApplicantAppId());
+        baseVO.setApplicantAppName(getApplicantAppName(orderDetail.getApplicantAppId()));
         baseVO.setApproverList(ConvertUtil.list2List(orderDetail.getApproverList(), AriusUserInfoVO.class));
-        baseVO.setCreateTime(orderDetail.getCreateTime());
         baseVO.setFinishTime(orderDetail.getFinishTime());
+        baseVO.setCreateTime(orderDetail.getCreateTime());
         baseVO.setTitle(orderDetail.getTitle());
         baseVO.setOpinion(orderDetail.getOpinion());
         baseVO.setDescription(orderDetail.getDescription());
@@ -484,27 +505,38 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return baseVO;
     }
 
-    @Override
-    // todo 名字加plugin
-    public Result<String> getClusterTaskInfo(String cluster) {
-        if (AriusObjUtils.isBlack(cluster)) {
-            return Result.buildFail("cluster_name 为空");
-        }
-        ESClusterPhy esClusterPhy = esClusterPhyService.getClusterByName(cluster);
-        if (AriusObjUtils.isNull(esClusterPhy)) {
-            return Result.buildFail("不存在cluster_name=" + cluster + "的物理集群");
-        }
-        EcmTask task = ConvertUtil.obj2Obj(ecmTaskDao.getRunningWorkOrderTaskByClusterId(esClusterPhy.getId()), EcmTask.class);
-        if (AriusObjUtils.isNull(task)) {
-            return Result.buildFail("当前集群没有待执行的工单任务");
-        }
-        if (task.getOrderType() != EcmTaskTypeEnum.PLUG_OPERATION.getCode()) {
-            return Result.buildFail("当前没有集群插件操作的工单任务");
-        }
-        OrderDetailBaseVO orderDetailBaseVO = getById(task.getWorkOrderId()).getData();
-        PhyClusterPluginOperationContent content = ConvertUtil.str2ObjByJson(orderDetailBaseVO.getDetail(),
-                PhyClusterPluginOperationContent.class);
+    private List<WorkOrderPO> handleOrderList(String userName, List<WorkOrderPO> orderList) {
+        orderList = orderList.stream().filter(orderDO -> {
+            try {
+                WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderDO.getType());
 
-        return Result.build(Boolean.TRUE, JSON.toJSONString(content));
+                AbstractOrderDetail abstractOrderDetail = handler.getOrderDetail(orderDO.getExtensions());
+                if (null == abstractOrderDetail) {
+                    return false;
+                }
+
+                List<AriusUserInfo> ariusUserInfos = handler.getApproverList(abstractOrderDetail);
+
+                for (AriusUserInfo ariusUserInfo : ariusUserInfos) {
+                    if (userName.equals(ariusUserInfo.getDomainAccount())) {
+                        return true;
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warn("class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=exception!",
+                    userName, e);
+            }
+            return false;
+        }).collect(Collectors.toList());
+        return orderList;
+    }
+
+    private String getApplicantAppName(Integer applicantAppId) {
+        App app = appService.getAppById(applicantAppId);
+        if (null != app) {
+            return app.getName();
+        }
+
+        return null;
     }
 }

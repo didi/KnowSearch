@@ -54,7 +54,7 @@ public interface CapacityPlanAreaService {
      * @param operator 操作者
      * @return result
      */
-    Result modifyPlanArea(CapacityPlanAreaDTO areaDTO, String operator);
+    Result<Void> modifyPlanArea(CapacityPlanAreaDTO areaDTO, String operator);
 
     /**
      * 删除规划的集群
@@ -62,7 +62,7 @@ public interface CapacityPlanAreaService {
      * @param operator 操作者
      * @return result
      */
-    Result deletePlanArea(Long areaId, String operator);
+    Result<Void> deletePlanArea(Long areaId, String operator);
 
     /**
      * 初始化一个集群的region，将没有绑定成region的racks根据racks上分布的模板绑定成region
@@ -110,14 +110,14 @@ public interface CapacityPlanAreaService {
      * @throws ESOperateException 操作异常
      * @return true/false
      */
-    Result planRegionsInArea(Long areaId) throws ESOperateException;
+    Result<Void> planRegionsInArea(Long areaId) throws ESOperateException;
 
     /**
      * 容量检查
      * @param areaId areaId
      * @return true/false
      */
-    Result checkRegionsInArea(Long areaId);
+    Result<Void> checkRegionsInArea(Long areaId);
 
     /**
      * 容量均衡

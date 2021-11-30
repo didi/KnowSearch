@@ -17,6 +17,11 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestMultiSearchController extends BaseHttpRestController {
     @Autowired
     private RestMultiSearchAction restMultiSearchAction;
+
+    public RestMultiSearchController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/_msearch", this);

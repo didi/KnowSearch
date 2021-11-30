@@ -3,8 +3,9 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplateValue;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -14,6 +15,8 @@ import java.io.Serializable;
  * @date 2020/09/11
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class IndexTemplateLogicAggregate implements Serializable {
 
     /**

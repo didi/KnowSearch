@@ -2,9 +2,13 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.notify;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotifyHistoryPO extends BasePO {
 
     /**

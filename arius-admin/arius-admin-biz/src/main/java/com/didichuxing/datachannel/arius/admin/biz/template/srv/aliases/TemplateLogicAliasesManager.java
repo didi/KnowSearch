@@ -6,6 +6,8 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.alias.Co
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 
 import java.util.List;
 
@@ -19,6 +21,12 @@ public interface TemplateLogicAliasesManager {
 
     /**
      * 获取别名
+     * @return list
+     */
+    List<IndexTemplateAlias> listAlias(List<IndexTemplateLogicWithPhyTemplates> templateLogicList);
+
+    /**
+     * 获取别名
      * @param logicId logicId
      * @return list
      */
@@ -29,7 +37,7 @@ public interface TemplateLogicAliasesManager {
      * @param logicId
      * @return
      */
-    Result getAliases(Integer logicId);
+    Result<List<IndexTemplatePhyAlias>> getAliases(Integer logicId);
 
     /**
      * createAliases
@@ -37,7 +45,7 @@ public interface TemplateLogicAliasesManager {
      * @param operator
      * @return
      */
-    Result createAliases(ConsoleLogicTemplateAliasesDTO aliases, String operator);
+    Result<Void> createAliases(ConsoleLogicTemplateAliasesDTO aliases, String operator);
 
     /**
      * modifyAliases
@@ -45,7 +53,7 @@ public interface TemplateLogicAliasesManager {
      * @param operator
      * @return
      */
-    Result modifyAliases(ConsoleLogicTemplateAliasesDTO aliases, String operator);
+    Result<Void> modifyAliases(ConsoleLogicTemplateAliasesDTO aliases, String operator);
 
     /**
      * deleteTemplateAliases
@@ -53,7 +61,7 @@ public interface TemplateLogicAliasesManager {
      * @param operator
      * @return
      */
-    Result deleteTemplateAliases(ConsoleLogicTemplateDeleteAliasesDTO deleteAliasesDTO, String operator);
+    Result<Void> deleteTemplateAliases(ConsoleLogicTemplateDeleteAliasesDTO deleteAliasesDTO, String operator);
 
     /**
      * getAllTemplateAliasesByAppid
@@ -67,7 +75,7 @@ public interface TemplateLogicAliasesManager {
      * @param logicId 逻辑ID
      * @return
      */
-    Result fetchTemplateAliasesByLogicId(Integer logicId);
+    Result<List<IndexTemplatePhyAlias>> fetchTemplateAliasesByLogicId(Integer logicId);
 
     /**
      * 创建逻辑索引模板别名
@@ -75,7 +83,7 @@ public interface TemplateLogicAliasesManager {
      * @param aliases 别名列表
      * @return
      */
-    Result createTemplateAliases(Integer logicId, List<ConsoleAliasDTO> aliases);
+    Result<Void> createTemplateAliases(Integer logicId, List<ConsoleAliasDTO> aliases);
 
     /**
      * 更新逻辑模板别名
@@ -83,7 +91,7 @@ public interface TemplateLogicAliasesManager {
      * @param aliases 别名列表
      * @return
      */
-    Result modifyTemplateAliases(Integer logicId, List<ConsoleAliasDTO> aliases);
+    Result<Void> modifyTemplateAliases(Integer logicId, List<ConsoleAliasDTO> aliases);
 
     /**
      * 删除模板别名列表
@@ -91,5 +99,5 @@ public interface TemplateLogicAliasesManager {
      * @param aliases 别名列表
      * @return
      */
-    Result deleteTemplateAliases(Integer logicId, List<String> aliases);
+    Result<Void> deleteTemplateAliases(Integer logicId, List<String> aliases);
 }

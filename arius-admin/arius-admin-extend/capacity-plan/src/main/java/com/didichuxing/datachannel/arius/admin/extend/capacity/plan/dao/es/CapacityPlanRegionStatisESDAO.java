@@ -28,7 +28,6 @@ public class CapacityPlanRegionStatisESDAO extends BaseESDAO {
      * @return true/false
      */
     public boolean batchInsert(List<CapacityPlanRegionStatisESPO> statisESPOS) {
-        String realIndexName = IndexNameFactory.getNoVersion(dataCentreUtil.getAriusTemplateCapacityPlanRegionStatis() + "*", "_yyyy-MM", 0);
         return updateClient.batchInsert(indexName, AdminConstant.DEFAULT_TYPE, statisESPOS);
     }
 }

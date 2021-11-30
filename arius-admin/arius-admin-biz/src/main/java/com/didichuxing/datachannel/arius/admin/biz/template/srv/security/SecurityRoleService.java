@@ -19,7 +19,7 @@ public interface SecurityRoleService {
      * @return result
      * @throws ESOperateException
      */
-    Result createRoleIfAbsent(String cluster, String roleName, String expression, Set<String> privilegeSet,
+    Result<Boolean> createRoleIfAbsent(String cluster, String roleName, String expression, Set<String> privilegeSet,
                               int retryCount) throws ESOperateException;
 
     /**
@@ -30,5 +30,5 @@ public interface SecurityRoleService {
      * @param privilegeSet 权限集合
      * @return result
      */
-    Result ensureRoleExist(String cluster, String roleName, String expression, Set<String> privilegeSet);
+    Result<Boolean> ensureRoleExist(String cluster, String roleName, String expression, Set<String> privilegeSet);
 }

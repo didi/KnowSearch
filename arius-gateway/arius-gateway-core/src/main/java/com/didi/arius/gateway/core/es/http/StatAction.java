@@ -21,27 +21,29 @@ public abstract class StatAction extends HttpRestHandler {
 
 	@Override
 	public void handleRequest(QueryContext queryContext) throws Exception {
-		// checkToken(queryContext);
 
-		ESClient client = esClusterService.getClient(queryContext);
+		ESClient client = esClusterService.getClient(queryContext, actionName);
 
-		if (queryContext.getRequest().param("index") != null) {
-			String index = queryContext.getRequest().param("index");
-			String[] indicesArr = Strings.splitStringByCommaToArray(index);
-			List<String> indices = Lists.newArrayList(indicesArr);
-			queryContext.setIndices(indices);
+		if (isOriginCluster(queryContext)) {
+			handleOriginClusterRequest(queryContext);
+		} else {
+			if (queryContext.getRequest().param("index") != null) {
+				String index = queryContext.getRequest().param("index");
+				String[] indicesArr = Strings.splitStringByCommaToArray(index);
+				List<String> indicesList = Lists.newArrayList(indicesArr);
+				queryContext.setIndices(indicesList);
 
-			checkIndices(queryContext);
+				checkIndices(queryContext);
 
-			if (isIndexType(queryContext)) {
-				IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
+				if (isIndexType(queryContext)) {
+					IndexTemplate indexTemplate = getTemplateByIndexTire(indicesList, queryContext);
 
-				client = esClusterService.getClient(queryContext, indexTemplate);
+					client = esClusterService.getClient(queryContext, indexTemplate, actionName);
+				}
 			}
+			handleInterRequest(queryContext, queryContext.getRequest(), queryContext.getChannel(), client);
 		}
-		
-		handleInterRequest(queryContext, queryContext.getRequest(), queryContext.getChannel(), client);
 	}
 
-	abstract protected void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception;
+	protected abstract void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client) throws Exception;
 }

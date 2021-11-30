@@ -4,8 +4,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateH
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggr;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@NoArgsConstructor
 public class TemplateHitESDAO extends BaseESDAO {
 
     /**
@@ -34,11 +36,11 @@ public class TemplateHitESDAO extends BaseESDAO {
     /**
      * 批量保存查询模板命中信息
      *
-     * @param TemplateHitPOList
+     * @param templateHitPOS
      * @return
      */
-    public boolean batchInsert(List<TemplateHitPO> TemplateHitPOList) {
-        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, TemplateHitPOList);
+    public boolean batchInsert(List<TemplateHitPO> templateHitPOS) {
+        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, templateHitPOS);
     }
 
 
@@ -55,7 +57,7 @@ public class TemplateHitESDAO extends BaseESDAO {
         try {
             ESAggr aggr = esAggrMap.getEsAggrMap().get("NAME");
             return Double.valueOf(aggr.getUnusedMap().get("value").toString()).longValue();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             return -1;
         }
     }
@@ -67,9 +69,9 @@ public class TemplateHitESDAO extends BaseESDAO {
 
         List<TemplateHitPO> hits = gatewayClient.performRequest(index, typeName, dsl, TemplateHitPO.class);
         if (hits == null) {
-            LOGGER.error("class=TemplateHitEsDao||method=getByTemplate||indexName={}||queryDsl={}||errMsg=list is empty",
+            LOGGER.error("class=TemplateHitEsDao||method=getByDate||indexName={}||queryDsl={}||errMsg=list is empty",
                     index, dsl);
-            return null;
+            return new ArrayList<>();
         }
 
         return hits;
@@ -84,7 +86,7 @@ public class TemplateHitESDAO extends BaseESDAO {
         if (hits == null) {
             LOGGER.error("class=TemplateHitEsDao||method=getByTemplate||indexName={}||queryDsl={}||errMsg=list is empty",
                     index, dsl);
-            return null;
+            return new ArrayList<>();
         }
 
         // 合并数据
@@ -108,7 +110,7 @@ public class TemplateHitESDAO extends BaseESDAO {
         if (hits == null) {
             LOGGER.error("class=TemplateHitEsDao||method=getByTemplate||indexName={}||queryDsl={}||errMsg=list is empty",
                     index, dsl);
-            return null;
+            return new ArrayList<>();
         }
 
         return hits;

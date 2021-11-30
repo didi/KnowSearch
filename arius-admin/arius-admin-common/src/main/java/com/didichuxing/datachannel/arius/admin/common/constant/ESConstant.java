@@ -7,6 +7,9 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
  * @modified By D10865
  */
 public class ESConstant {
+
+    private ESConstant(){}
+
     public static final  String AGG_KEY = "key";
 
     public static final  String AGG_KEY_AS_STRING = "key_as_string";

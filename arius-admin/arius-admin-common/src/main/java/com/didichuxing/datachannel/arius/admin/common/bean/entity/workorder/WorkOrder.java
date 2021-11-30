@@ -2,13 +2,17 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/4/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class WorkOrder extends BaseEntity {
     /**
      * id

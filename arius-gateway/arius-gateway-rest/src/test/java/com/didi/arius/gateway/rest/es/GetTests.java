@@ -52,7 +52,7 @@ public class GetTests {
         //{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"11","_version":3,"_shards":{"total":2,"failed":0,"successful":2},"result":"deleted","_seq_no":2,"_primary_term":1,"found":true}
         //{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"111","found":false}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getBoolean("found") != null, true);
+        assertEquals(true, jsonObject.getBoolean("found") != null);
     }
 
     /**
@@ -66,7 +66,7 @@ public class GetTests {
         //{"name":"法外狂徒张三少 ","es_index_time":1623295368686,"age":25,"timestamp":"2021-05-10 10:16:13"}
         //{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"111","found":false}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject != null, true);
+        assertEquals(true, jsonObject != null);
     }
 
     /**
@@ -96,7 +96,7 @@ public class GetTests {
         System.out.println(res);
         //{"docs":[{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"1","_version":1,"found":true,"_source":{"name":"fitz1","age":1,"es_index_time":1623132760300,"timestamp":"2021-05-23 19:06:13"},"_seq_no":0,"_primary_term":1},{"_index":"cn_record.arius.template.value_2021-05","_type":"_doc","_id":"11","_version":6,"found":true,"_source":{"name":"法外狂徒张三少 ","es_index_time":1623295368686,"age":25,"timestamp":"2021-05-10 10:16:13"},"_seq_no":6,"_primary_term":1}]}
         JSONObject jsonObject = JSON.parseObject(res);
-        assertEquals(jsonObject.getJSONArray("docs").size() >= 0, true);
+        assertEquals(true, jsonObject.getJSONArray("docs").size() >= 0);
 
     }
 

@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * 物理机的集群扩缩容操作
  */
 @Data
+@NoArgsConstructor
 public class ClusterOpIndecreaseHostContent extends ClusterOpBaseContent {
     /**
      * 物理集群id

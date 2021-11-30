@@ -14,8 +14,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.config.AriusConfigInfoDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -44,6 +44,8 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
     private static final ILog                LOGGER      = LogFactory.getLog(AriusConfigInfoServiceImpl.class);
 
+    private static final String NOT_EXIST = "配置不存在";
+
     @Autowired
     private AriusConfigInfoDAO               configInfoDAO;
 
@@ -62,11 +64,11 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Integer> addConfig(AriusConfigInfoDTO configInfoDTO, String operator) {
-        Result checkResult = checkParam(configInfoDTO);
+        Result<Void> checkResult = checkParam(configInfoDTO);
         if (checkResult.failed()) {
             LOGGER.warn("class=AriusConfigInfoServiceImpl||method=addConfig||msg={}||msg=check fail!",
                 checkResult.getMessage());
-            return checkResult;
+            return Result.buildFrom(checkResult);
         }
 
         initConfig(configInfoDTO);
@@ -80,7 +82,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         AriusConfigInfoPO param = ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class);
         boolean succ = (1 == configInfoDAO.insert(param));
         if (succ) {
-            operateRecordService.save(CONFIG, ADD, param.getId(), "", operator);
+            operateRecordService.save(CONFIG, ADD, param.getId(),
+                String.format("新增平台配置, 配置组:%s, 配置名称%s", configInfoDTO.getValueGroup(), configInfoDTO.getValueName()),
+                operator);
         }
         return Result.build(succ,param.getId());
     }
@@ -93,15 +97,17 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result delConfig(Integer configId, String operator) {
+    public Result<Void> delConfig(Integer configId, String operator) {
         AriusConfigInfoPO configInfoPO = configInfoDAO.getbyId(configId);
         if (configInfoPO == null) {
-            return Result.buildNotExist("配置不存在");
+            return Result.buildNotExist(NOT_EXIST);
         }
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, AriusConfigStatusEnum.DELETED.getCode()));
         if (succ) {
-            operateRecordService.save(CONFIG, DELETE, configId, "", operator);
+            operateRecordService.save(CONFIG, DELETE, configId,
+                String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName()),
+                operator);
         }
 
         return Result.build(succ);
@@ -115,17 +121,14 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result  editConfig(AriusConfigInfoDTO configInfoDTO, String operator) {
+    public Result<Void>  editConfig(AriusConfigInfoDTO configInfoDTO, String operator) {
         if (AriusObjUtils.isNull(configInfoDTO.getId())) {
             return Result.buildParamIllegal("配置ID为空");
-        }
-        if (AriusObjUtils.isNullStr(configInfoDTO.getValue())) {
-            return Result.buildParamIllegal("值为空");
         }
 
         AriusConfigInfoPO configInfoPO = configInfoDAO.getbyId(configInfoDTO.getId());
         if (configInfoPO == null) {
-            return Result.buildNotExist("配置不存在");
+            return Result.buildNotExist(NOT_EXIST);
         }
 
         AriusConfigInfoPO param = new AriusConfigInfoPO();
@@ -136,7 +139,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         boolean succ = (1 == configInfoDAO.update(param));
 
         if (succ) {
-            operateRecordService.save(CONFIG, EDIT, param.getId(), AriusObjUtils.findChanged(configInfoPO, param),
+            operateRecordService.save(CONFIG, EDIT, param.getId(),
+                String.format("编辑平台配置, 配置组:%s, 配置名称%s, 配置值:", configInfoPO.getValueGroup(), configInfoPO.getValueName())
+                                                                   + AriusObjUtils.findChanged(configInfoPO, param),
                 operator);
         }
 
@@ -152,10 +157,10 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result switchConfig(Integer configId, Integer status, String operator) {
+    public Result<Void> switchConfig(Integer configId, Integer status, String operator) {
         AriusConfigInfoPO configInfoPO = configInfoDAO.getbyId(configId);
         if (configInfoPO == null) {
-            return Result.buildNotExist("配置不存在");
+            return Result.buildNotExist(NOT_EXIST);
         }
 
         AriusConfigStatusEnum statusEnum = AriusConfigStatusEnum.valueOf(status);
@@ -165,7 +170,8 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, status));
         if (succ) {
-            operateRecordService.save(CONFIG, SWITCH, configId, "", operator);
+            operateRecordService.save(CONFIG, SWITCH, configId, String.format("平台配置%s, 配置组:%s, 配置名称%s",
+                statusEnum.getDesc(), configInfoPO.getValueGroup(), configInfoPO.getValueName()), operator);
         }
 
         return Result.build(succ);
@@ -224,14 +230,15 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      * NotExistExceptio 配置不存在
      */
     @Override
-    public Result updateValueByGroupAndName(String group, String name, String value) {
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> updateValueByGroupAndName(String group, String name, String value) {
         if (value == null) {
             return Result.buildParamIllegal("值为空");
         }
 
         AriusConfigInfoPO configInfoPO = getByGroupAndNameFromDB(group, name);
         if (configInfoPO == null) {
-            return Result.buildNotExist("配置不存在");
+            return Result.buildNotExist(NOT_EXIST);
         }
 
         AriusConfigInfoDTO param = new AriusConfigInfoDTO();
@@ -249,6 +256,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      * @return 成功 true  失败 false
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result upsertValueByGroupAndName(String group, String name, String value) {
         AriusConfigInfoPO configInfoPO = getByGroupAndNameFromDB(group, name);
 
@@ -422,7 +430,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
     }
 
     /******************************************* private method **************************************************/
-    private Result checkParam(AriusConfigInfoDTO configInfoDTO) {
+    private Result<Void> checkParam(AriusConfigInfoDTO configInfoDTO) {
         if (AriusObjUtils.isNull(configInfoDTO)) {
             return Result.buildParamIllegal("配置信息为空");
         }

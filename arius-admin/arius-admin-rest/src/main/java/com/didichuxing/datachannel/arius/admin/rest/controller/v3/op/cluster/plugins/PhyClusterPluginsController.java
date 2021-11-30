@@ -1,16 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.plugins;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPluginsManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESPluginVO;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -23,44 +31,40 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  */
 @RestController
 @RequestMapping({V3_OP + "/cluster/phy/plugins"})
-@Api(tags = "es物理集群插件接口")
+@Api(tags = "ES物理集群插件接口")
 public class PhyClusterPluginsController {
 
-    private final ESClusterPhyService esClusterPhyService;
-    private final ESPluginService   esPluginService;
+    @Autowired
+    private ClusterPhyManager clusterPhyManager;
 
     @Autowired
-    public PhyClusterPluginsController(ESClusterPhyService esClusterPhyService,
-                                       ESPluginService   esPluginService) {
-        this.esClusterPhyService = esClusterPhyService;
-        this.esPluginService = esPluginService;
-    }
+    private ClusterPluginsManager clusterPluginsManager;
 
     @GetMapping("/{cluster}/get")
     @ResponseBody
     @ApiOperation(value = "获取ES集群插件列表")
     public Result<List<ESPluginVO>> pluginList(@PathVariable(value = "cluster") String cluster) {
-        return Result.buildSucc(ConvertUtil.list2List(esClusterPhyService.listClusterPlugins(cluster), ESPluginVO.class));
+        return clusterPhyManager.listPlugins(cluster);
     }
 
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "上传插件")
-    public Result add(List<ESPluginDTO> param) {
-        return esPluginService.addESPlugins(param);
+    public Result<Long> add(ESPluginDTO param) {
+        return clusterPluginsManager.batchAddPlugins(param);
     }
 
     @DeleteMapping("/{pluginId}")
     @ResponseBody
     @ApiOperation(value = "删除ES本地插件信息")
-    public Result deleteEsClusterConfig(HttpServletRequest request, @PathVariable(value = "pluginId") Long pluginId) {
-        return esPluginService.deletePluginById(pluginId, HttpRequestUtils.getOperator(request));
+    public Result<Long> deleteEsClusterConfig(HttpServletRequest request, @PathVariable(value = "pluginId") Long pluginId) {
+        return clusterPluginsManager.deletePluginById(pluginId, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("")
     @ResponseBody
-    @ApiOperation(value = "编辑本地插件信息")
-    public Result edit(HttpServletRequest request, @RequestBody ESPluginDTO esPluginDTO) {
-        return esPluginService.updateESPluginDesc(esPluginDTO, HttpRequestUtils.getOperator(request));
+    @ApiOperation(value = "编辑本地插件描述")
+    public Result<ESPluginPO> edit(HttpServletRequest request, @RequestBody ESPluginDTO esPluginDTO) {
+        return clusterPluginsManager.editPluginDesc(esPluginDTO, HttpRequestUtils.getOperator(request));
     }
 }

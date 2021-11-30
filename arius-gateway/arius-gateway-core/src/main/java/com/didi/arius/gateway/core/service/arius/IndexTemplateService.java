@@ -1,6 +1,8 @@
 package com.didi.arius.gateway.core.service.arius;
 
+import com.didi.arius.gateway.common.enums.TemplateBlockTypeEnum;
 import com.didi.arius.gateway.common.exception.TooManyIndexException;
+import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.metadata.TemplateInfo;
@@ -73,4 +75,39 @@ public interface IndexTemplateService {
      * @throws TooManyIndexException
      */
     IndexTemplate getTemplateByIndexTire(List<String> indices, QueryContext queryContext) throws IndexNotFoundException, TooManyIndexException;
+
+    /**
+     *  增加模板别名
+     * @param appid
+     * @param templateId
+     * @param templateName
+     * @param aliasName
+     * @return
+     */
+    public boolean addTemplateAlias(int appid, int templateId, String templateName, String aliasName);
+
+    /**
+     * 删除模板别名
+     * @param appid
+     * @param templateId
+     * @param templateName
+     * @param aliasName
+     * @return
+     */
+    public boolean delTemplateAlias(int appid, int templateId, String templateName, String aliasName);
+
+    /**
+     * 校验模板存在
+     * @param indices
+     * @throws Exception
+     */
+    public void checkTemplateExist(List<String> indices);
+
+    /**
+     * 检查模板是否block
+     * @param indices 索引
+     * @param appDetail app
+     * @param blockTypeEnum 类型
+     */
+    public void checkTemplateBlock(List<String> indices, AppDetail appDetail, TemplateBlockTypeEnum blockTypeEnum);
 }

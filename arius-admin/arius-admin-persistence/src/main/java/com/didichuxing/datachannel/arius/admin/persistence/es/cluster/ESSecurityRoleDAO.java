@@ -1,30 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
+import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.request.security.SecurityRole;
+import com.didiglobal.logi.elasticsearch.client.request.security.SecurityRoleIndex;
+import com.didiglobal.logi.elasticsearch.client.response.security.ESGetSecurityRoleResponse;
+import com.didiglobal.logi.elasticsearch.client.response.security.ESPutSecurityRoleResponse;
+import com.google.common.collect.Lists;
+import org.springframework.stereotype.Repository;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.elasticsearch.client.ESClient;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.security.SecurityRole;
-import com.didichuxing.datachannel.arius.elasticsearch.client.request.security.SecurityRoleIndex;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.security.ESGetSecurityRoleResponse;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.security.ESPutSecurityRoleResponse;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.google.common.collect.Lists;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
 
 /**
  * @author didi
  */
 @Repository
 public class ESSecurityRoleDAO extends BaseESDAO {
-
-    private static final ILog LOGGER = LogFactory.getLog(ESSecurityRoleDAO.class);
 
     /**
      * 获取角色
@@ -52,7 +47,7 @@ public class ESSecurityRoleDAO extends BaseESDAO {
         ESClient client = esOpClient.getESClient(cluster);
         ESPutSecurityRoleResponse response = client.admin().indices().preparePutSecurityRole().setName(roleName)
             .setRole(buildRole(expression, privilegeSet)).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        LOGGER.info("method=putRole||cluster={}||roleName={}||response={}", cluster, roleName,
+        LOGGER.info("class=ESSecurityRoleDAO||method=putRole||cluster={}||roleName={}||response={}", cluster, roleName,
             response.getRole().toJSONString());
         return true;
     }

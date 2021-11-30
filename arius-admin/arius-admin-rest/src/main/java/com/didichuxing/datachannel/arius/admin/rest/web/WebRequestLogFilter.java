@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.rest.web;
 
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.didichuxing.tunnel.util.log.common.Constants;
-import com.didichuxing.tunnel.util.log.common.TraceContext;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.log.common.Constants;
+import com.didiglobal.logi.log.common.TraceContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -38,7 +39,8 @@ public class WebRequestLogFilter implements Ordered, Filter {
     private static final Set<String> REQ_BODY_EXCLUDE_URLS = new HashSet<>();
     private static final Set<String> RESP_BODY_EXCLUDE_URLS = new HashSet<>();
     private static final Set<String> RESP_BODY_EXCLUDE_URLS_PREFER = new HashSet<>();
-    private static Boolean RESP_LOG_ENABLE = Boolean.TRUE;
+
+    private Boolean respLogEnable = Boolean.TRUE;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException,
@@ -49,7 +51,6 @@ public class WebRequestLogFilter implements Ordered, Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
         // spring 的ContentCachingRequestWrapper存在bug，无法读取request body
-        // ContentCachingRequestWrapper wrapperRequest = new ContentCachingRequestWrapper(request);
         TranslateHttpServletRequestWrapper wrapperRequest = new TranslateHttpServletRequestWrapper(request);
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
 
@@ -90,7 +91,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
     }
 
     private void logResponse(long begin, ContentCachingResponseWrapper wrapperResponse, String requestUrl) {
-        if (!RESP_LOG_ENABLE) {
+        if (!respLogEnable.booleanValue()) {
             return;
         }
 
@@ -105,7 +106,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
         } else {
             responseBody = getResponseBody(wrapperResponse);
         }
-        RESP_LOGGER.info("response||responseBody={}||timeCost={}", responseBody, (System.currentTimeMillis() - begin));
+        RESP_LOGGER.info("class=WebRequestLogFilter||method=logResponse||response||responseBody={}||timeCost={}", responseBody, (System.currentTimeMillis() - begin));
     }
 
     private void logRequest(TranslateHttpServletRequestWrapper request, String requestUrl) {
@@ -120,9 +121,9 @@ public class WebRequestLogFilter implements Ordered, Filter {
         } else {
             requestBody = getRequestBody(request);
         }
-        LOGGER.info("request||url={}||method={}||remoteAddr={}||headers={}||urlParams={}||body={}",
+        LOGGER.info("class=WebRequestLogFilter||method=logRequest||request||url={}||method={}||remoteAddr={}||headers={}||urlParams={}||body={}",
                 request.getRequestURI(), request.getMethod(), URLHelper.getIpAddr(request), headers,
-                request.getQueryString(), requestBody, "UTF-8");
+                request.getQueryString(), requestBody, StandardCharsets.UTF_8);
     }
 
     @Override
@@ -132,7 +133,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
         initExcludeUrl(filterConfig, EXCLUDE_RESPONSE_BODY_URLS, RESP_BODY_EXCLUDE_URLS);
         initExcludeUrl(filterConfig, EXCLUDE_RESPONSE_BODY_URLS_PREFER, RESP_BODY_EXCLUDE_URLS_PREFER);
         if (filterConfig.getInitParameter(RESPONSE_LOG_ENABLE) != null) {
-            RESP_LOG_ENABLE = Boolean.valueOf(filterConfig.getInitParameter(RESPONSE_LOG_ENABLE));
+            respLogEnable = Boolean.valueOf(filterConfig.getInitParameter(RESPONSE_LOG_ENABLE));
         }
     }
 
@@ -151,11 +152,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
                 try {
                     payload = new String(buf, 0, buf.length, wrapper.getCharacterEncoding());
                 } catch (UnsupportedEncodingException e) {
-                    try {
-                        payload = new String(buf, 0, buf.length, "UTF-8");
-                    } catch (UnsupportedEncodingException e1) {
-                        payload = "Unknown";
-                    }
+                    payload = new String(buf, 0, buf.length, StandardCharsets.UTF_8);
                 }
                 return payload;
             }
@@ -179,7 +176,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
      */
     private String getRequestBody(TranslateHttpServletRequestWrapper request) {
         try {
-            String body = IOUtils.toString(request.getInputStream(), "UTF-8");
+            String body = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
             return body.replace("\n", "");
         } catch (Exception e) {
             return "";
@@ -210,7 +207,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
 
     @Override
     public void destroy() {
-
+        // doNothing
     }
 
     @Override

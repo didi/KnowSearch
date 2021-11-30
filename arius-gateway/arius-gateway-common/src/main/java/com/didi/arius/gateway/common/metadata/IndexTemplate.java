@@ -2,10 +2,12 @@
 package com.didi.arius.gateway.common.metadata;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class IndexTemplate {
 
     /**
@@ -59,6 +61,16 @@ public class IndexTemplate {
     private List<String> aliases;
 
     /**
+     * 是否禁读
+     */
+    private Boolean blockRead;
+
+    /**
+     * 是否禁写
+     */
+    private Boolean blockWrite;
+
+    /**
      * master模板信息
      */
     private TemplateClusterInfo masterInfo;
@@ -83,7 +95,7 @@ public class IndexTemplate {
             this.type = type;
         }
 
-        public static DeployStatus IntegerToStatus(int code) {
+        public static DeployStatus integerToStatus(int code) {
             for (DeployStatus status : DeployStatus.values()) {
                 if (status.type == code) {
                     return status;

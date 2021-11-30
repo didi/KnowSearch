@@ -3,17 +3,26 @@ package com.didichuxing.datachannel.arius.admin.client.bean.common;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
  * @date 2019/3/29
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class IndexTemplatePhysicalConfig {
 
     /**
-     * pipeline限流值
+     * 人工设置的pipeline限流值
+     */
+    private Integer                                         manualPipeLineRateLimit;
+
+    /**
+     * 动态pipeline限流值，pipeLineRateLimit 必须小于 manualPipeLineRateLimit
      */
     private Integer                                         pipeLineRateLimit;
 

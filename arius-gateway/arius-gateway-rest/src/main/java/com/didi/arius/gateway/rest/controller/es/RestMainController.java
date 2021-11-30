@@ -17,6 +17,11 @@ import static org.elasticsearch.rest.RestRequest.Method.HEAD;
 public class RestMainController extends BaseHttpRestController {
     @Autowired
     private RestMainAction restMainAction;
+
+    public RestMainController() {
+        // pass
+    }
+
     @Override
     protected void register() {
         controller.registerHandler(GET, "/", this);

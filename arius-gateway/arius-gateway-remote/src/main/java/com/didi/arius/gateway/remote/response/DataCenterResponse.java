@@ -1,12 +1,14 @@
 package com.didi.arius.gateway.remote.response;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author weizijun
  * @date：2016年10月31日
  */
 @Data
+@NoArgsConstructor
 public class DataCenterResponse {
     /**
      *
@@ -48,5 +50,8 @@ public class DataCenterResponse {
      *
      */
     private String password;
+
+    private int runMode;
+    private String writeAction;
 
 }

@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -19,8 +21,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
@@ -37,6 +39,38 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     private OperateRecordDAO  operateRecordDAO;
 
     /**
+     * 操作日志，每个类别，保留的最近操作日志数
+     */
+    private static final int SAVE_RECENT_NUM = 1000;
+
+    /**
+     * 0 0 1 * * ?
+     * 每天凌晨1点执行该方法
+     * 定时删除操作日志，保留不同分类指定数量的最近操作日志
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    private void scheduledDeletionOldOperateRecord() {
+        LOGGER.info("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg=操作日志定时删除任务开始执行");
+        // 获取所有的分类
+        OperationEnum[] operationEnums = OperationEnum.values();
+        List<OperateRecordPO> deleteList = new ArrayList<>();
+        for(OperationEnum operationEnum : operationEnums) {
+            // 获取每一个分类倒数第 N 条数据
+            int moduleId = operationEnum.getCode();
+            OperateRecordPO operateRecordPO = operateRecordDAO.selectDescTopNByModuleId(moduleId, SAVE_RECENT_NUM);
+            if(operateRecordPO == null) {
+                // 说明这个分类数据一共不超过 N 条
+                continue;
+            }
+            deleteList.add(operateRecordPO);
+        }
+        for(OperateRecordPO operateRecordPO : deleteList) {
+            // 删除该类别中，比指定id小的数据
+            operateRecordDAO.deleteByModuleIdAndLessThanId(operateRecordPO.getModuleId(), operateRecordPO.getId());
+        }
+    }
+
+    /**
      * 根据指定的查询条件查询
      * @param condt 查询条件dto
      * @return 操作记录列表
@@ -46,7 +80,6 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         if (condt == null) {
             return Lists.newArrayList();
         }
-
         List<OperateRecordPO> pos = operateRecordDAO.listByCondition(ConvertUtil.obj2Obj(condt, OperateRecordPO.class));
         return ConvertUtil.list2List(pos, OperateRecord.class);
     }
@@ -61,7 +94,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      * @return result
      */
     @Override
-    public Result save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content,
+    public Result<Void> save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content,
                        String operator) {
         return save(moduleEnum.getCode(), operationEnum.getCode(), String.valueOf(bizId), content, operator);
     }
@@ -76,7 +109,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      * @return result
      */
     @Override
-    public Result save(int moduleId, int operateId, String bizId, String content, String operator) {
+    public Result<Void> save(int moduleId, int operateId, String bizId, String content, String operator) {
         if (operator == null) {
             operator = AriusUser.UNKNOWN.getDesc();
         }
@@ -92,8 +125,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     }
 
     @Override
-    public Result save(OperateRecordDTO param) {
-        Result checkResult = checkParam(param);
+    public Result<Void> save(OperateRecordDTO param) {
+        Result<Void> checkResult = checkParam(param);
 
         if (checkResult.failed()) {
             LOGGER.warn("class=OperateRecordServiceImpl||method=save||msg={}||msg=check fail!",
@@ -101,10 +134,9 @@ public class OperateRecordServiceImpl implements OperateRecordService {
             return checkResult;
         }
 
-        if (OperationEnum.EDIT.getCode() == param.getOperateId()) {
-            if (AriusObjUtils.isNull(param.getContent())) {
-                return Result.buildSucc();
-            }
+        if (OperationEnum.EDIT.getCode() == param.getOperateId()
+            && AriusObjUtils.isNull(param.getContent())) {
+            return Result.buildSucc();
         }
 
         return Result.build(operateRecordDAO.insert(ConvertUtil.obj2Obj(param, OperateRecordPO.class)) == 1);
@@ -137,7 +169,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     }
 
     /******************************************* private method **************************************************/
-    private Result checkParam(OperateRecordDTO param) {
+    private Result<Void> checkParam(OperateRecordDTO param) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("记录为空");
         }

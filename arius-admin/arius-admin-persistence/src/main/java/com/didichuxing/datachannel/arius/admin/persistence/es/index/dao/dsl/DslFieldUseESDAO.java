@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +15,13 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@NoArgsConstructor
 public class DslFieldUseESDAO extends BaseESDAO {
 
     /**
      * 查询中使用字段的索引名称
      */
-    public String indexName;
+    private String indexName;
     /**
      * type名称
      */

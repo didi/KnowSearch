@@ -1,16 +1,16 @@
 package com.didi.arius.gateway.common.metadata;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author weizijun
  * @date：2016年8月18日
  */
 @Data
+@NoArgsConstructor
 public class AppDetail {
     private int id;
 
@@ -63,14 +63,10 @@ public class AppDetail {
 
     private Integer isRoot;
 
-    public int getId() {
-        return id;
-    }
-
-
-    public static enum RequestType {
-        Cluster(0),
-        Index(1);
+    public enum RequestType {
+        CLUSTER(0),
+        INDEX(1),
+        Origin_Cluster(2);
 
         int type;
 
@@ -78,13 +74,13 @@ public class AppDetail {
             this.type = type;
         }
 
-        public static RequestType IntegerToType(int code) {
+        public static RequestType integerToType(int code) {
             for (RequestType type : RequestType.values()) {
                 if (type.type == code) {
                     return type;
                 }
             }
-            return Cluster;
+            return CLUSTER;
         }
     }
 }

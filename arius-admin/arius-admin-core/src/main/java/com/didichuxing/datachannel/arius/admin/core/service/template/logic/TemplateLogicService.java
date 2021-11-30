@@ -32,9 +32,21 @@ public interface TemplateLogicService {
     /**
      * 模糊查询
      * @param param 模糊查询条件
-     * @return
+     * @return      List<IndexTemplateLogic>
      */
-    List<IndexTemplateLogic> fuzzyLogicTemplatesByTemplateName(IndexTemplateLogicDTO param);
+    List<IndexTemplateLogic> fuzzyLogicTemplatesByCondition(IndexTemplateLogicDTO param);
+
+    /**
+     * 模糊分页查询模板列表信息
+     */
+    List<IndexTemplateLogic> pagingGetLogicTemplatesByCondition(IndexTemplateLogicDTO param);
+
+    /**
+     * 模糊查询统计总命中数, 用于前端分页
+     * @param param 模糊查询条件
+     * @return      查询总命中数
+     */
+    Long fuzzyLogicTemplatesHitByCondition(IndexTemplateLogicDTO param);
 
     /**
      * 根据名字查询
@@ -57,7 +69,7 @@ public interface TemplateLogicService {
      * @return result
      * @throws AdminOperateException
      */
-    Result delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
+    Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
 
     /**
      * 校验模板参数是否合法
@@ -65,7 +77,7 @@ public interface TemplateLogicService {
      * @param operation 操作
      * @return result
      */
-    Result validateTemplate(IndexTemplateLogicDTO param, OperationEnum operation);
+    Result<Void> validateTemplate(IndexTemplateLogicDTO param, OperationEnum operation);
 
     /**
      * 编辑逻辑模板
@@ -74,7 +86,14 @@ public interface TemplateLogicService {
      * @return result
      * @throws AdminOperateException 操作es失败
      */
-    Result editTemplate(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+    Result<Void> editTemplate(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+
+    /**
+     * 添加逻辑模板而不需要参数校验
+     * @param param 索引逻辑模板参数
+     * @return result
+     */
+    Result<Void> addTemplateWithoutCheck(IndexTemplateLogicDTO param);
 
     /**
      * 获取模板配置信息
@@ -89,7 +108,15 @@ public interface TemplateLogicService {
      * @param operator 操作人
      * @return result
      */
-    Result updateTemplateConfig(IndexTemplateConfigDTO configDTO, String operator);
+    Result<Void> updateTemplateConfig(IndexTemplateConfigDTO configDTO, String operator);
+
+    /**
+     * 记录模板配置
+     *
+     * @param indexTemplateConfig 索引模板配置
+     * @return result
+     */
+    Result<Void> insertTemplateConfig(IndexTemplateConfig indexTemplateConfig);
 
     /**
      * 更新模板配置
@@ -139,19 +166,6 @@ public interface TemplateLogicService {
     Map<Integer, IndexTemplateLogic> getLogicTemplatesMapByIds(List<Integer> logicTemplateIds);
 
     /**
-     * listTemplateMapWithCache
-     * @return
-     */
-    Map<Integer, IndexTemplateLogic> getLogicTemplateMappingsWithCache();
-
-    /**
-     * 获取Cache中保存的逻辑模板列表
-     * listIndexTemplateLogicWithCache
-     * @return
-     */
-    List<IndexTemplateLogic> getLogicTemplatesWithCache();
-
-    /**
      * 根据appId查询模板
      * @param appId appId
      * @return list
@@ -181,8 +195,8 @@ public interface TemplateLogicService {
      * @return Result
      * @throws AdminOperateException
      */
-    Result turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
-                                 String operator) throws AdminOperateException;
+    Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
+                                       String operator) throws AdminOperateException;
 
     /**
      * 获取每个模板的部署个数
@@ -211,7 +225,7 @@ public interface TemplateLogicService {
      * @return result
      * @throws AdminOperateException
      */
-    Result editTemplateName(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+    Result<Void> editTemplateName(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
 
     /**
      * 获取APP有权限的集群下的所有逻辑模板.

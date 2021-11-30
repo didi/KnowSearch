@@ -27,7 +27,7 @@ public interface AriusUserInfoService {
      * @param userInfoDTO 用户信息
      * @return userId
      */
-    Long save(AriusUserInfoDTO userInfoDTO);
+    Result<Long> save(AriusUserInfoDTO userInfoDTO);
 
     /**
      * 保存一波用户信息
@@ -78,7 +78,7 @@ public interface AriusUserInfoService {
     /**
      * 是否存在
      */
-    Boolean isExist(String userName);
+    boolean isExist(String userName);
 
     /**
      * 根据用户名获取用户信息
@@ -91,6 +91,12 @@ public interface AriusUserInfoService {
       * @return
      */
     List<AriusUserInfo> listByRoles(List<Integer> roles);
+
+    /**
+     * 根据ID批量查找人员列表
+     * @return
+     */
+    List<AriusUserInfo> listByIds(List<Long> ids);
 
     /**
      * 根据关键字搜索用户信息
@@ -129,5 +135,5 @@ public interface AriusUserInfoService {
      * 同步登录协议中的用户信息到本地用户表
      * @param protocolType 登录协议类型
      */
-    Result syncUserInfoToDbFromLoginProtocol(LoginDTO loginDTO, String protocolType);
+    Result<Void> syncUserInfoToDbFromLoginProtocol(LoginDTO loginDTO, String protocolType);
 }

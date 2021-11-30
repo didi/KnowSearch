@@ -11,8 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionCreateEvent;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @Author: lanxinzheng
@@ -28,21 +28,21 @@ public class RegionCreateEventListener implements ApplicationListener<RegionCrea
     private CapacityPlanRegionService capacityPlanRegionService;
 
     @Autowired
-    private ClusterContextManager clusterContextManager;
+    private ClusterContextManager     clusterContextManager;
 
     @Override
     public void onApplicationEvent(RegionCreateEvent regionCreateEvent) {
-        //更新集群校验模型
-        clusterContextManager.flushClusterContext();
-
         ClusterRegion region = regionCreateEvent.getClusterRegion();
+        if (null == region) {
+            return;
+        }
+        clusterContextManager.flushClusterContextByClusterRegion(region);
 
         // 创建容量信息记录
         CapacityPlanRegionDTO capacityPlanRegionDTO = new CapacityPlanRegionDTO();
         capacityPlanRegionDTO.setRegionId(region.getId());
         capacityPlanRegionDTO.setConfigJson("");
         capacityPlanRegionDTO.setFreeQuota(0.0);
-        // capacityPlanRegionDTO.setUsage(0.0);
         if (regionCreateEvent.getShare() == null) {
             // 初始不加入容量规划
             capacityPlanRegionDTO.setShare(AdminConstant.YES);
@@ -50,7 +50,7 @@ public class RegionCreateEventListener implements ApplicationListener<RegionCrea
             capacityPlanRegionDTO.setShare(regionCreateEvent.getShare());
         }
 
-        Result createResult = capacityPlanRegionService.createRegionCapacityInfo(capacityPlanRegionDTO,
+        Result<Void> createResult = capacityPlanRegionService.createRegionCapacityInfo(capacityPlanRegionDTO,
             regionCreateEvent.getOperator());
 
         LOGGER.info(

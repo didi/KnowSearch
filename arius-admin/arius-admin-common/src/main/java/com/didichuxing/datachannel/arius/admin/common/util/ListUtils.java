@@ -14,6 +14,9 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2019/7/30.
  */
 public class ListUtils {
+
+    private ListUtils(){}
+
     // 分隔符
     private static final String SEPARATOR = ",";
 
@@ -106,5 +109,14 @@ public class ListUtils {
         strSet = strSet.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
 
         return StringUtils.join(strSet, SEPARATOR);
+    }
+
+    public static String[] strList2StringArray(List<String> strList) {
+        String[] stringArr = new String[strList.size()];
+        for (int i = 0; i < strList.size(); i++) {
+            stringArr[i] = strList.get(i);
+        }
+
+        return stringArr;
     }
 }

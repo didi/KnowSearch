@@ -1,17 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.*;
 
 /**
  * @author d06679
@@ -19,16 +14,18 @@ import com.google.common.collect.Sets;
  */
 public class RackUtils {
 
+    private RackUtils(){}
+
     public static String merge(String srcRack, String tgtRack) {
-        if (StringUtils.isBlank(srcRack) && StringUtils.isBlank(tgtRack)) {
+        if (StringUtils.isEmpty(srcRack) && StringUtils.isEmpty(tgtRack)) {
             return "";
         }
 
-        if (StringUtils.isBlank(srcRack)) {
+        if (StringUtils.isEmpty(srcRack)) {
             return tgtRack;
         }
 
-        if (StringUtils.isBlank(tgtRack)) {
+        if (StringUtils.isEmpty(tgtRack)) {
             return srcRack;
         }
 
@@ -43,9 +40,8 @@ public class RackUtils {
     }
 
     public static String append(String srcRack, Collection<String> appendRacks) {
-
-        if (srcRack == null && CollectionUtils.isEmpty(appendRacks)) {
-            return "";
+        if(StringUtils.isEmpty(srcRack)){
+            return String.join(AdminConstant.RACK_COMMA, appendRacks);
         }
 
         if (CollectionUtils.isEmpty(appendRacks)) {
@@ -124,7 +120,7 @@ public class RackUtils {
      * @return true/false
      */
     public static boolean hasIntersect(String racks, String rackPool) {
-        if (StringUtils.isBlank(rackPool)) {
+        if (StringUtils.isEmpty(rackPool)) {
             return false;
         }
 
@@ -185,7 +181,7 @@ public class RackUtils {
     }
 
     public static Set<String> racks2Set(String racks) {
-        if (StringUtils.isBlank(racks)) {
+        if (StringUtils.isEmpty(racks)) {
             return new HashSet<>();
         }
 
@@ -193,7 +189,7 @@ public class RackUtils {
     }
 
     public static List<String> racks2List(String racks) {
-        if (StringUtils.isBlank(racks)) {
+        if (StringUtils.isEmpty(racks)) {
             return new ArrayList<>();
         }
 

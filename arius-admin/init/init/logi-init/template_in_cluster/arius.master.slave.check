@@ -1,0 +1,53 @@
+{
+  "order": 10,
+  "index_patterns": [
+    "arius.master.slave.check"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "4",
+      "routing": {
+        "allocation": {
+          "include": {
+            "rack": ""
+          }
+        }
+      },
+      "mapping": {
+        "single_type": "true"
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "equal": {
+        "type": "boolean"
+      },
+      "date": {
+        "format": "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+        "type": "date"
+      },
+      "reason": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "slaveCluster": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "data": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "templateName": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "masterCluster": {
+        "ignore_above": 512,
+        "type": "keyword"
+      }
+    }
+  },
+  "aliases": {}
+}

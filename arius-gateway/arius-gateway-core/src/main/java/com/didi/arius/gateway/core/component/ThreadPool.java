@@ -17,7 +17,11 @@ public class ThreadPool {
 	private int searchQueueSize = 1000;
 	
 	private Executor searchExecutor;
-	
+
+	public ThreadPool() {
+		// pass
+	}
+
 	@PostConstruct
 	public void init() {
 		scheduleThreadPool = Executors.newScheduledThreadPool(
@@ -47,14 +51,6 @@ class DeamondThreadFactory implements ThreadFactory {
 				.setThreadNameDeterminer( (currentThreadName, proposedThreadName) -> currentThreadName );
 	}
 
-	public DeamondThreadFactory(String prefix) {
-		SecurityManager s = System.getSecurityManager();
-		group = (s != null) ? s.getThreadGroup() : Thread.currentThread()
-				.getThreadGroup();
-		namePrefix = prefix + "-pool-" + poolNumber.getAndIncrement()
-				+ "-";
-	}
-
 	@Override
 	public Thread newThread(Runnable r) {
 		Thread t = new Thread(group, r, namePrefix
@@ -64,5 +60,13 @@ class DeamondThreadFactory implements ThreadFactory {
 		if (t.getPriority() != Thread.NORM_PRIORITY)
 			t.setPriority(Thread.NORM_PRIORITY);
 		return t;
-	};
+	}
+
+	public DeamondThreadFactory(String prefix) {
+		SecurityManager s = System.getSecurityManager();
+		group = (s != null) ? s.getThreadGroup() : Thread.currentThread()
+				.getThreadGroup();
+		namePrefix = prefix + "-pool-" + poolNumber.getAndIncrement()
+				+ "-";
+	}
 }

@@ -2,13 +2,13 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType.NO_CAPACITY_PLAN;
 
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import java.util.List;
 import java.util.UUID;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicClusterAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ESClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.biz.component.DistributorUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateDistri
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateResourceConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -29,8 +29,8 @@ import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterC
 import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author d06679
@@ -51,13 +51,13 @@ public class TemplateActionImpl implements TemplateAction {
     private ExtendServiceFactory       extendServiceFactory;
 
     @Autowired
-    private ESClusterLogicService      esClusterLogicService;
+    private ClusterLogicService clusterLogicService;
 
     @Autowired
     private DistributorUtils           distributorUtils;
 
     @Autowired
-    private AppLogicClusterAuthService logicClusterAuthService;
+    private AppClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
     private TemplateLogicManager       templateLogicManager;
@@ -75,66 +75,16 @@ public class TemplateActionImpl implements TemplateAction {
                                                             String operator) throws AdminOperateException {
         // 必须指定物理模板
         if (CollectionUtils.isEmpty(logicDTO.getPhysicalInfos())) {
-            return Result.buildFrom(Result.buildFail("未指定物理模板"));
+            return Result.buildFail("未指定物理模板");
         }
 
-        // todo:IndexTemplateLogicDTO中需要加上逻辑集群id
-        // 在DB添加字段时一起梳理更改，目前先通过物理模板获取
         Long logicClusterId = logicDTO.getPhysicalInfos().get(0).getResourceId();
         if (!logicClusterAuthService.canCreateLogicTemplate(logicDTO.getAppId(), logicClusterId)) {
-            return Result.buildFrom(
-                Result.buildFail(String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", logicDTO.getAppId(), logicClusterId)));
+            return Result.buildFail(String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", logicDTO.getAppId(), logicClusterId));
         }
 
-        double quota = logicDTO.getQuota();
+        return handleCreateWithAutoDistributeResource(logicDTO, operator);
 
-        List<IndexTemplatePhysicalDTO> physicalInfos = logicDTO.getPhysicalInfos();
-
-        int indexDefaultWriterSetFlags = -1;
-        for (IndexTemplatePhysicalDTO physicalDTO : physicalInfos) {
-            if (StringUtils.isNotBlank(physicalDTO.getCluster()) && physicalDTO.getRack() != null) {
-                if (physicalDTO.getDefaultWriterFlags() == null) {
-                    physicalDTO.setDefaultWriterFlags(true);
-                }
-
-                if (StringUtils.isBlank(physicalDTO.getGroupId())) {
-                    physicalDTO.setGroupId(UUID.randomUUID().toString());
-                }
-
-                continue;
-            }
-
-            if (indexDefaultWriterSetFlags == -1) {
-                indexDefaultWriterSetFlags = 0;
-            }
-
-            Result<TemplateDistributedRack> distributedRackResult = distributorUtils
-                .getTemplateDistributedRack(physicalDTO.getResourceId(), quota);
-
-            if (distributedRackResult.failed()) {
-                LOGGER.warn("method=createWithAutoDistributeResource||msg=distributedRackResult fail");
-                return Result.buildFrom(distributedRackResult);
-            }
-
-            physicalDTO.setCluster(distributedRackResult.getData().getCluster());
-            physicalDTO.setRack(distributedRackResult.getData().getRack());
-            physicalDTO.setDefaultWriterFlags(false);
-
-            if (indexDefaultWriterSetFlags <= 0 && distributedRackResult.getData().isResourceMatched()) {
-                physicalDTO.setDefaultWriterFlags(true);
-                indexDefaultWriterSetFlags = 1;
-            }
-
-            if (StringUtils.isBlank(physicalDTO.getGroupId())) {
-                physicalDTO.setGroupId(UUID.randomUUID().toString());
-            }
-        }
-
-        if (indexDefaultWriterSetFlags == 0) {
-            return Result.buildFrom(Result.buildFail("集群空闲资源不足"));
-        }
-
-        return templateLogicManager.createLogicTemplate(logicDTO, operator);
     }
 
     /**
@@ -147,7 +97,7 @@ public class TemplateActionImpl implements TemplateAction {
      * @return result
      */
     @Override
-    public Result indecreaseWithAutoDistributeResource(Integer logicId, Integer expectExpireTime, Double expectQuota,
+    public Result<Void> indecreaseWithAutoDistributeResource(Integer logicId, Integer expectExpireTime, Double expectQuota,
                                                        String submitor) throws AdminOperateException {
         IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
 
@@ -161,28 +111,26 @@ public class TemplateActionImpl implements TemplateAction {
         logicDTO.setQuota(expectQuota);
 
         List<IndexTemplatePhy> templatePhysicals = templatePhyService.getTemplateByLogicId(logicId);
-        if (!CollectionUtils.isEmpty(templatePhysicals)) {
-            if (expectQuota > templateLogic.getQuota()) {
-                double deltaQuota = (expectQuota - templateLogic.getQuota()) / templatePhysicals.size();
-                if (deltaQuota > 0) {
-                    for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-                        ESClusterLogic esClusterLogic = esClusterLogicService
-                            .getLogicClusterByRack(templatePhysical.getCluster(), templatePhysical.getRack());
-                        Result<TemplateDistributedRack> distributorResult = increaseTemplateDistributedRack(
-                            esClusterLogic.getId(), templatePhysical.getCluster(), templatePhysical.getRack(),
-                            deltaQuota);
-                        if (distributorResult.failed()) {
-                            LOGGER.warn(
-                                "method=indecreaseWithAutoDistributeResource||resourceId={}||quota={}||msg=acquire cluster fail: {}",
-                                esClusterLogic.getId(), deltaQuota, distributorResult.getMessage());
-                            return distributorResult;
-                        }
+        if (!CollectionUtils.isEmpty(templatePhysicals) && (expectQuota > templateLogic.getQuota())) {
+            double deltaQuota = (expectQuota - templateLogic.getQuota()) / templatePhysicals.size();
+            if (deltaQuota > 0) {
+                for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+                    ClusterLogic clusterLogic = clusterLogicService
+                        .getClusterLogicByRack(templatePhysical.getCluster(), templatePhysical.getRack());
+                    Result<TemplateDistributedRack> distributorResult = increaseTemplateDistributedRack(
+                        clusterLogic.getId(), templatePhysical.getCluster(), templatePhysical.getRack(),
+                        deltaQuota);
+                    if (distributorResult.failed()) {
+                        LOGGER.warn(
+                            "class=TemplateActionImpl||method=indecreaseWithAutoDistributeResource||resourceId={}||quota={}||msg=acquire cluster fail: {}",
+                            clusterLogic.getId(), deltaQuota, distributorResult.getMessage());
+                        return Result.buildFrom(distributorResult);
                     }
-                } else {
-                    LOGGER.info(
-                        "method=indecreaseWithAutoDistributeResource||logicId={}||deltaQuota={}||msg=deltaQuota < 0",
-                        logicId, deltaQuota);
                 }
+            } else {
+                LOGGER.info(
+                    "class=TemplateActionImpl||method=indecreaseWithAutoDistributeResource||logicId={}||deltaQuota={}||msg=deltaQuota < 0",
+                    logicId, deltaQuota);
             }
         }
 
@@ -204,7 +152,7 @@ public class TemplateActionImpl implements TemplateAction {
         if (extendResult.success()) {
             extendConfigProvider = extendResult.getData();
         } else {
-            LOGGER.warn("method=createWithAutoDistributeResource||msg=extendConfigProvider not find");
+            LOGGER.warn("class=TemplateActionImpl||method=createWithAutoDistributeResource||msg=extendConfigProvider not find");
         }
 
         TemplateClusterConfigProvider defaultConfigProvider = extendServiceFactory
@@ -227,6 +175,7 @@ public class TemplateActionImpl implements TemplateAction {
         return configResult.getData();
     }
 
+    /**************************************** private methods ****************************************/
     /**
      * 扩容使用
      * @param resourceId 资源
@@ -243,7 +192,7 @@ public class TemplateActionImpl implements TemplateAction {
         if (extendResult.success()) {
             extendDistributor = extendResult.getData();
         } else {
-            LOGGER.warn("method=getTemplateResourceInner||msg=extendDistributor not find");
+            LOGGER.warn("class=TemplateActionImpl||method=getTemplateResourceInner||msg=extendDistributor not find");
         }
 
         TemplateClusterDistributor defaultDistributor = extendServiceFactory
@@ -259,10 +208,52 @@ public class TemplateActionImpl implements TemplateAction {
         }
 
         if (distributedRackResult.failed()) {
-            return Result.buildFrom(distributedRackResult);
+            return distributedRackResult;
         }
 
         return distributedRackResult;
+    }
+
+    private Result<Integer> handleCreateWithAutoDistributeResource(IndexTemplateLogicDTO logicDTO, String operator) throws AdminOperateException {
+        int indexDefaultWriterSetFlags = -1;
+        for (IndexTemplatePhysicalDTO physicalDTO : logicDTO.getPhysicalInfos()) {
+            if (StringUtils.isNotBlank(physicalDTO.getCluster()) && physicalDTO.getRack() != null) {
+                handleIndexTemplatePhysical(physicalDTO);
+                continue;
+            }
+            if (indexDefaultWriterSetFlags == -1) {
+                indexDefaultWriterSetFlags = 0;
+            }
+            Result<TemplateDistributedRack> distributedRackResult = distributorUtils.getTemplateDistributedRack(physicalDTO.getResourceId(), logicDTO.getQuota());
+            if (distributedRackResult.failed()) {
+                LOGGER.warn("class=TemplateActionImpl||method=createWithAutoDistributeResource||msg=distributedRackResult fail");
+                return Result.buildFrom(distributedRackResult);
+            }
+            physicalDTO.setCluster(distributedRackResult.getData().getCluster());
+            physicalDTO.setRack(distributedRackResult.getData().getRack());
+            physicalDTO.setDefaultWriterFlags(false);
+            if (indexDefaultWriterSetFlags <= 0 && distributedRackResult.getData().isResourceMatched()) {
+                physicalDTO.setDefaultWriterFlags(true);
+                indexDefaultWriterSetFlags = 1;
+            }
+            if (StringUtils.isBlank(physicalDTO.getGroupId())) {
+                physicalDTO.setGroupId(UUID.randomUUID().toString());
+            }
+        }
+        if (indexDefaultWriterSetFlags == 0) {
+            return Result.buildFail("集群空闲资源不足");
+        }
+
+        return templateLogicManager.createLogicTemplate(logicDTO, operator);
+    }
+
+    private void handleIndexTemplatePhysical(IndexTemplatePhysicalDTO physicalDTO) {
+        if (physicalDTO.getDefaultWriterFlags() == null) {
+            physicalDTO.setDefaultWriterFlags(true);
+        }
+        if (StringUtils.isBlank(physicalDTO.getGroupId())) {
+            physicalDTO.setGroupId(UUID.randomUUID().toString());
+        }
     }
 
 }

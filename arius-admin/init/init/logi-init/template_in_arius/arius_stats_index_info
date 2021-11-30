@@ -1,0 +1,22 @@
+{
+  "expression": "arius_stats_index_info*",
+  "dateFormat": "_yyyy-MM-dd",
+  "dataCenter": "cn",
+  "dataType": 0,
+  "dateField": "timestamp",
+  "expireTime": "180",
+  "physicalInfos": [
+    {
+      "cluster": "logi-elasticsearch-7.6.0",
+      "rack": "r2",
+      "resourceId": 63,
+      "role": 1,
+      "shard": "4"
+    }
+  ],
+  "quota": 30,
+  "appId": 1,
+  "responsible": "admin",
+  "name": "arius_stats_index_info",
+  "desc": ""
+}

@@ -4,12 +4,11 @@ package com.didichuxing.datachannel.arius.admin.common.constant.template;
  * @author didi
  */
 public enum TemplateLabelLevelEnum {
-    GREEN("1", "green"),
+                                    GREEN("1", "green"),
 
-    YELLOW("2", "yellow"),
+                                    YELLOW("2", "yellow"),
 
-    RED("3", "red");
-
+                                    RED("3", "red");
 
     private String id;
 
@@ -27,4 +26,6 @@ public enum TemplateLabelLevelEnum {
     public String getLevel() {
         return level;
     }
+
+
 }

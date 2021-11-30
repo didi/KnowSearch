@@ -12,8 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.impl.AppServiceImpl;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
+
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +63,7 @@ public class AppServiceTest extends AriusAdminApplicationTests {
     public void before() {
         MockitoAnnotations.openMocks(this);
         Result result = Result.buildSucc();
-        Mockito.when(employeeService.checkUsers(Mockito.any(), Mockito.any())).thenReturn(result);
+        Mockito.when(employeeService.checkUsers(Mockito.any())).thenReturn(result);
     }
 
     private AppPO getAppPO() {
@@ -242,7 +243,7 @@ public class AppServiceTest extends AriusAdminApplicationTests {
         appDAO.insert(appPO2);
         appDAO.delete(appPO2.getId());
 
-        List<App> appList = service.getApps();
+        List<App> appList = service.listApps();
         List<Integer> idList = appList.stream().map(App::getId).collect(Collectors.toList());
         Assertions.assertTrue(idList.contains(appPO.getId()));
         Assertions.assertTrue(idList.contains(appPO1.getId()));

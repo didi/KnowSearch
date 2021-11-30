@@ -1,0 +1,44 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "queryRequest": false
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "appid": %d
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "group_by_field": {
+      "terms": {
+        "field": "gatewayNode"
+      },
+      "aggs": {
+        "group_by_timeStamp": {
+          "date_histogram": {
+            "field": "timeStamp",
+            "interval": "%s",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 0
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,35 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.COPY;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.DELETE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.SWITCH_MASTER_SLAVE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cache.CacheGlobalNamesContent.CACHE_GLOBAL_NAME;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_INDEX_INCLUDE_RACK;
 
-import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.google.common.collect.Maps;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,36 +32,31 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplatePhyVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplatePhysicalStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.notify.info.cluster.ClusterTemplatePhysicalMetaErrorNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplatePhysicalMetaErrorNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ESClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ESRegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -81,13 +64,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Templ
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
-import com.didichuxing.datachannel.arius.elasticsearch.client.response.setting.template.TemplateConfig;
-import com.didichuxing.tunnel.util.log.ILog;
-import com.didichuxing.tunnel.util.log.LogFactory;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -102,14 +83,17 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private static final Integer        EXPIRE_INDEX_NOT_DELETE   = 2;
     private static final Integer        INDEX_ALL_ERR             = TOMORROW_INDEX_NOT_CREATE + EXPIRE_INDEX_NOT_DELETE;
 
-    @Autowired
-    private IndexTemplatePhysicalDAO    indexTemplatePhysicalDAO;
+    private static final String TEMPLATE_PHYSICAL_ID_IS_NULL = "物理模板id为空";
+
+    private static final String TEMPLATE_PHYSICAL_NOT_EXISTS = "物理模板不存在";
+
+    private static final String CHECK_FAIL_MSG = "check fail||msg={}";
 
     @Autowired
     private OperateRecordService        operateRecordService;
 
     @Autowired
-    private ESClusterPhyService         esClusterPhyService;
+    private ClusterPhyService           clusterPhyService;
 
     @Autowired
     private TemplateLabelService        templateLabelService;
@@ -124,7 +108,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private TemplateShardManager        templateShardManager;
 
     @Autowired
-    private ESRegionRackService         esRegionRackService;
+    private RegionRackService           regionRackService;
 
     @Autowired
     private TemplateLogicService        templateLogicService;
@@ -142,37 +126,23 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
 
     @Autowired
-    private CacheSwitch                 cacheSwitch;
-
-    @Autowired
     private AppService                  appService;
 
-    private FutureUtil                  futureUtil                = FutureUtil.init("TemplatePhyManagerImpl");
-
-    private final Cache<Integer, List<ConsoleTemplatePhyVO>> consoleTemplatePhyVOSCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
-
-    /**
-     * 元数据校验
-     *
-     * @return
-     */
     @Override
     public boolean checkMeta() {
         List<IndexTemplatePhy> templatePhysicals = templatePhyService.listTemplate();
 
-        List<IndexTemplateLogic> templateLogics = templateLogicService.getLogicTemplatesWithCache();
+        List<IndexTemplateLogic> templateLogics = templateLogicService.getAllLogicTemplates();
         Map<Integer, IndexTemplateLogic> logicId2IndexTemplateLogicMap = ConvertUtil.list2Map(templateLogics,
                 IndexTemplateLogic::getId);
 
         Multimap<String, IndexTemplatePhy> cluster2IndexTemplatePhysicalMultiMap = ConvertUtil
                 .list2MulMap(templatePhysicals, IndexTemplatePhy::getCluster);
 
-        Set<String> esClusters = esClusterPhyService.listAllClusters().stream().map( ESClusterPhy::getCluster)
+        Set<String> esClusters = clusterPhyService.listAllClusters().stream().map( ClusterPhy::getCluster)
                 .collect( Collectors.toSet());
 
         for (String cluster : cluster2IndexTemplatePhysicalMultiMap.keySet()) {
-
             int tomorrowIndexNotCreateCount = 0;
             int expireIndexNotDeleteCount = 0;
 
@@ -180,11 +150,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
             for (IndexTemplatePhy templatePhysical : clusterTemplates) {
                 try {
-                    Result result = checkMetaInner(templatePhysical, logicId2IndexTemplateLogicMap, esClusters);
+                    Result<Void> result = checkMetaInner(templatePhysical, logicId2IndexTemplateLogicMap, esClusters);
                     if (result.success()) {
-                        LOGGER.info("method=metaCheck||msg=succ||physicalId={}", templatePhysical.getId());
+                        LOGGER.info("class=TemplatePhyManagerImpl||method=metaCheck||msg=succ||physicalId={}", templatePhysical.getId());
                     } else {
-                        LOGGER.warn("method=metaCheck||msg=fail||physicalId={}||failMsg={}", templatePhysical.getId(),
+                        LOGGER.warn("class=TemplatePhyManagerImpl||method=metaCheck||msg=fail||physicalId={}||failMsg={}", templatePhysical.getId(),
                                 result.getMessage());
                         notifyService.send( NotifyTaskTypeEnum.TEMPLATE_PHYSICAL_META_ERROR,
                                 new TemplatePhysicalMetaErrorNotifyInfo(templatePhysical, result.getMessage()),
@@ -223,39 +193,34 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return true;
     }
 
-    /**
-     * 元数据同步
-     *
-     * @param physicalId
-     * @return
-     */
     @Override
     public void syncMeta(Long physicalId, int retryCount) throws ESOperateException {
 
         // 从数据库获取物理模板
-        TemplatePhysicalPO physicalPO = indexTemplatePhysicalDAO.getById(physicalId);
-        if (physicalPO == null) {
+        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(physicalId);
+        if (indexTemplatePhy == null) {
             return;
         }
 
         // 从ES集群获取模板配置
-        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(physicalPO.getCluster(),
-                physicalPO.getName());
+        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(indexTemplatePhy.getCluster(),
+                indexTemplatePhy.getName());
 
         if (templateConfig == null) {
             // es集群中还没有模板，创建
-            esTemplateService.syncCreate(physicalPO.getCluster(), physicalPO.getName(), physicalPO.getExpression(),
-                    physicalPO.getRack(), physicalPO.getShard(), physicalPO.getShardRouting(), retryCount);
+            esTemplateService.syncCreate(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), indexTemplatePhy.getExpression(),
+                    indexTemplatePhy.getRack(), indexTemplatePhy.getShard(), indexTemplatePhy.getShardRouting(), retryCount);
 
         } else {
             // 校验表达式
-            if (!physicalPO.getExpression().equals(templateConfig.getTemplate())) {
+            if (
+                    !indexTemplatePhy.getExpression().equals(templateConfig.getTemplate()) &&
+                            esTemplateService.syncUpdateExpression(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
+                                    indexTemplatePhy.getExpression(), retryCount)
+            ) {
                 // 表达式不同（表达式发生变化），同步到ES集群
-                if (esTemplateService.syncUpdateExpression(physicalPO.getCluster(), physicalPO.getName(),
-                        physicalPO.getExpression(), retryCount)) {
-                    LOGGER.info("method=syncMeta||msg=syncUpdateExpression succ||template={}||srcExp={}||tgtExp={}",
-                            physicalPO.getName(), templateConfig.getTemplate(), physicalPO.getExpression());
-                }
+                LOGGER.info("class=TemplatePhyManagerImpl||method=syncMeta||msg=syncUpdateExpression succ||template={}||srcExp={}||tgtExp={}",
+                        indexTemplatePhy.getName(), templateConfig.getTemplate(), indexTemplatePhy.getExpression());
             }
 
             // 标志shard或rack是否需要修改
@@ -265,84 +230,50 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             String shardNum = settings.get(INDEX_SHARD_NUM);
 
             // 校验shard个数
-            if (!String.valueOf(physicalPO.getShard()).equals(shardNum)) {
+            if (!String.valueOf(indexTemplatePhy.getShard()).equals(shardNum)) {
                 editShardOrRack = true;
-                shardNum = String.valueOf(physicalPO.getShard());
+                shardNum = String.valueOf(indexTemplatePhy.getShard());
             }
 
             // 校验rack
-            if (StringUtils.isNotBlank(physicalPO.getRack())) {
-                if (!settings.containsKey(TEMPLATE_INDEX_INCLUDE_RACK)
-                        || !physicalPO.getRack().equals(settings.get(TEMPLATE_INDEX_INCLUDE_RACK))) {
-                    editShardOrRack = true;
-                    rack = physicalPO.getRack();
-                }
+            if (
+                    StringUtils.isNotBlank(indexTemplatePhy.getRack()) &&
+                            (!settings.containsKey(TEMPLATE_INDEX_INCLUDE_RACK)
+                                    || !indexTemplatePhy.getRack().equals(settings.get(TEMPLATE_INDEX_INCLUDE_RACK)))
+            ) {
+                editShardOrRack = true;
+                rack = indexTemplatePhy.getRack();
             }
 
-            if (editShardOrRack) {
+            if (editShardOrRack && esTemplateService.syncUpdateRackAndShard(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), rack,
+                    Integer.valueOf(shardNum), indexTemplatePhy.getShardRouting(), retryCount)) {
                 // 同步变化到ES集群
-                if (esTemplateService.syncUpdateRackAndShard(physicalPO.getCluster(), physicalPO.getName(), rack,
-                        Integer.valueOf(shardNum), physicalPO.getShardRouting(), retryCount)) {
                     LOGGER.info(
-                            "method=syncMeta||msg=syncUpdateRackAndShard succ||template={}||srcRack={}||srcShard={}||tgtRack={}||tgtShard={}",
-                            physicalPO.getName(), settings.get(TEMPLATE_INDEX_INCLUDE_RACK), settings.get(INDEX_SHARD_NUM),
+                            "class=TemplatePhyManagerImpl||method=syncMeta||msg=syncUpdateRackAndShard succ||template={}||srcRack={}||srcShard={}||tgtRack={}||tgtShard={}",
+                            indexTemplatePhy.getName(), settings.get(TEMPLATE_INDEX_INCLUDE_RACK), settings.get(INDEX_SHARD_NUM),
                             rack, shardNum);
-                }
             }
         }
     }
 
-    /**
-     * 删除
-     *
-     * @param physicalId 物理模板id
-     * @param operator   操作人
-     * @return result
-     */
+    @Override
+    public Result<Void> delTemplate(Long physicalId, String operator) throws ESOperateException {
+        return templatePhyService.delTemplate(physicalId, operator);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result delTemplate(Long physicalId, String operator) throws ESOperateException {
-        TemplatePhysicalPO oldPO = indexTemplatePhysicalDAO.getById(physicalId);
-        if (oldPO == null) {
-            return Result.buildNotExist("template not exist");
-        }
-
-        boolean succ = 1 == indexTemplatePhysicalDAO.updateStatus(physicalId,
-                TemplatePhysicalStatusEnum.INDEX_DELETING.getCode());
-        if (succ) {
-            // 删除集群中的模板
-            esTemplateService.syncDelete(oldPO.getCluster(), oldPO.getName(), 0);
-
-            operateRecordService.save(TEMPLATE, DELETE, oldPO.getLogicId(), "删除" + oldPO.getCluster() + "物理模板",
-                    operator);
-
-            SpringTool.publish(new PhysicalTemplateDeleteEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplatePhy.class),
-                    templateLogicService.getLogicTemplateWithPhysicalsById(oldPO.getLogicId())));
-        }
-
-        return Result.build(succ);
-    }
-
-    /**
-     * 删除
-     *
-     * @param logicId  id
-     * @param operator 操作人
-     * @return result
-     * @throws ESOperateException e
-     */
-    @Override
-    public Result delTemplateByLogicId(Integer logicId, String operator) throws ESOperateException {
-        List<TemplatePhysicalPO> physicalPOs = indexTemplatePhysicalDAO.listByLogicId(logicId);
+    public Result<Void> delTemplateByLogicId(Integer logicId, String operator) throws ESOperateException {
+        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(logicId);
 
         boolean succ = true;
-        if (CollectionUtils.isEmpty(physicalPOs)) {
-            LOGGER.info("method=delTemplateByLogicId||logicId={}||msg=template no physical info!", logicId);
+        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
+            LOGGER.info("class=TemplatePhyManagerImpl||method=delTemplateByLogicId||logicId={}||msg=template no physical info!", logicId);
         } else {
-            LOGGER.info("method=delTemplateByLogicId||logicId={}||physicalSize={}||msg=template has physical info!",
-                    logicId, physicalPOs.size());
-            for (TemplatePhysicalPO physicalPO : physicalPOs) {
-                if (delTemplate(physicalPO.getId(), operator).failed()) {
+            LOGGER.info("class=TemplatePhyManagerImpl||method=delTemplateByLogicId||logicId={}||physicalSize={}||msg=template has physical info!",
+                    logicId, indexTemplatePhys.size());
+            for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
+                if (delTemplate(indexTemplatePhy.getId(), operator).failed()) {
                     succ = false;
                 }
 
@@ -352,199 +283,132 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.build(succ);
     }
 
-    /**
-     * 升版本
-     * <p>
-     * 1、修改数据库中的版本号
-     * 2、删除原版本明天的索引,如果指定了rack就按着rack创建,否则在源rack上创建
-     * 3、创建新版本明天的索引,按着模板rack创建
-     *
-     * @param param    参数
-     * @param operator 操作人
-     * @return result
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException {
-        Result checkResult = checkUpgradeParam(param);
+    public Result<Void> upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException {
+        Result<Void> checkResult = checkUpgradeParam(param);
         if (checkResult.failed()) {
-            LOGGER.warn("check fail||msg={}", checkResult.getMessage());
+            LOGGER.warn("class=TemplatePhyManagerImpl||method=upgradeTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
         }
 
         return upgradeTemplateWithCheck(param, operator, 0);
     }
 
-    /**
-     * 复制 只在目标集群建立模板即可,模板管理的资源都是与逻辑模板id管理,与物理模板没有关系
-     *
-     * @param param    参数
-     * @param operator 操作人
-     * @return result
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result copyTemplate(TemplatePhysicalCopyDTO param, String operator) throws AdminOperateException {
-        Result checkResult = checkCopyParam(param);
+    public Result<Boolean> upgradeMultipleTemplate(List<TemplatePhysicalUpgradeDTO> params,
+                                                   String operator) throws ESOperateException {
+        if (CollectionUtils.isEmpty(params)) {
+            Result.buildFail("参数为空");
+        }
+
+        for (TemplatePhysicalUpgradeDTO param : params) {
+            Result<Void> ret = upgradeTemplate(param, operator);
+            if (ret.failed()) {
+                throw new ESOperateException("升级失败");
+            }
+        }
+        return Result.buildSucc(true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> copyTemplate(TemplatePhysicalCopyDTO param, String operator) throws AdminOperateException {
+        Result<Void> checkResult = checkCopyParam(param);
         if (checkResult.failed()) {
-            LOGGER.warn("check fail||msg={}", checkResult.getMessage());
+            LOGGER.warn("class=TemplatePhyManagerImpl||method=copyTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
         }
 
-        // 默认升级
-        if (param.getUpgrade() == null) {
-            param.setUpgrade(true);
-        }
-
-        TemplatePhysicalPO srcPhysicalPO = indexTemplatePhysicalDAO.getById(param.getPhysicalId());
-        IndexTemplatePhysicalDTO tgtTemplateParam = ConvertUtil.obj2Obj(srcPhysicalPO, IndexTemplatePhysicalDTO.class);
+        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
+        IndexTemplatePhysicalDTO tgtTemplateParam = ConvertUtil.obj2Obj(indexTemplatePhy, IndexTemplatePhysicalDTO.class);
         tgtTemplateParam.setCluster(param.getCluster());
         tgtTemplateParam.setRack(param.getRack());
         tgtTemplateParam.setRole(SLAVE.getCode());
-        tgtTemplateParam.setVersion(srcPhysicalPO.getVersion());
+        tgtTemplateParam.setShard(param.getShard());
+        tgtTemplateParam.setVersion(indexTemplatePhy.getVersion());
 
         Result<Long> addResult = addTemplateWithoutCheck(tgtTemplateParam);
         if (addResult.failed()) {
-            return addResult;
+            return Result.buildFrom(addResult);
         }
 
         // 记录操作记录
-        operateRecordService.save(TEMPLATE, COPY, srcPhysicalPO.getLogicId(),
-                "复制" + srcPhysicalPO.getCluster() + "物理模板至" + param.getCluster(), operator);
+        operateRecordService.save(TEMPLATE, COPY, indexTemplatePhy.getLogicId(),
+                "复制" + indexTemplatePhy.getCluster() + "物理模板至" + param.getCluster(), operator);
 
-        if (Boolean.TRUE.equals(param.getUpgrade())) {
-            TemplatePhysicalUpgradeDTO upgradeParam = new TemplatePhysicalUpgradeDTO();
-            upgradeParam.setPhysicalId(addResult.getData());
-            upgradeParam.setVersion(srcPhysicalPO.getVersion());
-            Result upgradeResult = upgradeTemplateWithCheck(upgradeParam, operator, 0);
-            if (upgradeResult.failed()) {
-                throw new AdminOperateException("目标集群升级版本异常:" + upgradeResult.getMessage());
-            }
-        }
-
-        if (esTemplateService.syncCopyMappingAndAlias(srcPhysicalPO.getCluster(), srcPhysicalPO.getName(),
+        if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
                 tgtTemplateParam.getCluster(), tgtTemplateParam.getName(), 0)) {
-            LOGGER.info("methood=copyTemplate||TemplatePhysicalCopyDTO={}||msg=syncCopyMappingAndAlias succ", param);
+            LOGGER.info("class=TemplatePhyManagerImpl||methood=copyTemplate||TemplatePhysicalCopyDTO={}||msg=syncCopyMappingAndAlias succ", param);
         } else {
-            LOGGER.warn("methood=copyTemplate||TemplatePhysicalCopyDTO={}||msg=syncCopyMappingAndAlias fail", param);
+            LOGGER.warn("class=TemplatePhyManagerImpl||methood=copyTemplate||TemplatePhysicalCopyDTO={}||msg=syncCopyMappingAndAlias fail", param);
         }
 
         return Result.buildSucWithTips("模板部署集群变更!请注意模板APP是否可以使用修改后的集群rack\n模板复制后请确认逻辑模板quota是否充足");
     }
 
-    /**
-     * 删除
-     *
-     * @param param    参数
-     * @param operator 操作人
-     * @return result
-     */
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result editTemplate(IndexTemplatePhysicalDTO param, String operator) throws ESOperateException {
-        Result checkResult = validateTemplate(param, EDIT);
+    public Result<Void> editTemplate(IndexTemplatePhysicalDTO param, String operator) throws ESOperateException {
+        Result<Void> checkResult = validateTemplate(param, EDIT);
         if (checkResult.failed()) {
-            LOGGER.warn("check fail||msg={}", checkResult.getMessage());
+            LOGGER.warn("class=TemplatePhyManagerImpl||method=editTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
         }
 
         return editTemplateWithoutCheck(param, operator, 0);
     }
 
-    /**
-     * 校验物理模板信息
-     *
-     * @param param     参数
-     * @param operation 操作
-     * @return result
-     */
     @Override
-    public Result validateTemplate(IndexTemplatePhysicalDTO param, OperationEnum operation) {
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Boolean> editMultipleTemplate(List<IndexTemplatePhysicalDTO> params,
+                                                String operator) throws ESOperateException {
+        if (CollectionUtils.isEmpty(params)) {
+            Result.buildFail("参数为空");
+        }
+
+        for (IndexTemplatePhysicalDTO param : params) {
+            Result<Void> ret = editTemplate(param, operator);
+            if (ret.failed()) {
+                throw new ESOperateException(String.format("编辑模板:%s失败", param.getName()));
+            }
+        }
+
+        return Result.buildSucc(true);
+    }
+
+    @Override
+    public Result<Void> validateTemplate(IndexTemplatePhysicalDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("物理模板参数为空");
         }
         if (operation == OperationEnum.ADD) {
-            if (AriusObjUtils.isNull(param.getLogicId())) {
-                return Result.buildParamIllegal("逻辑模板id为空");
-            }
-            if (AriusObjUtils.isNull(param.getCluster())) {
-                return Result.buildParamIllegal("集群为空");
-            }
-
-            if (AriusObjUtils.isNull(param.getShard())) {
-                return Result.buildParamIllegal("shard为空");
-            }
-            if (AriusObjUtils.isNull(param.getRole())) {
-                return Result.buildParamIllegal("模板角色为空");
-            }
-
-            TemplatePhysicalPO physicalPO = indexTemplatePhysicalDAO.getByClusterAndName(param.getCluster(),
-                    param.getName());
-            if (physicalPO != null) {
-                return Result.buildDuplicate("物理模板已经存在");
-            }
+            Result<Void> result = handleValidateTemplateAdd(param);
+            if (result.failed()) {return result;}
         } else if (operation == EDIT) {
-            if (AriusObjUtils.isNull(param.getId())) {
-                return Result.buildParamIllegal("物理模板id为空");
-            }
-            TemplatePhysicalPO physicalPO = indexTemplatePhysicalDAO.getById(param.getId());
-            if (physicalPO == null) {
-                return Result.buildNotExist("物理模板不存在");
-            }
+            Result<Void> result = handleValidateTemplateEdit(param);
+            if (result.failed()) {return result;}
         }
 
-        if (param.getCluster() != null) {
-            if (!esClusterPhyService.isClusterExists(param.getCluster())) {
-                return Result.buildParamIllegal("集群不存在");
-            }
-        }
-        if (StringUtils.isNotEmpty(param.getRack())) {
-            if (!esClusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
-                return Result.buildParamIllegal("集群rack不存在");
-            }
-            // 校验rack匹配且只匹配到一个region
-            if (esRegionRackService.countRackMatchedRegion(param.getCluster(), param.getRack()) != 1) {
-                return Result.buildParamIllegal("集群rack不符合逻辑集群规划");
-            }
-        }
-        if (param.getShard() != null) {
-            if (param.getShard() < 1) {
-                return Result.buildParamIllegal("shard个数非法");
-            }
-        }
-        if (param.getRole() != null) {
-            if (TemplateDeployRoleEnum.UNKNOWN.equals(TemplateDeployRoleEnum.valueOf(param.getRole()))) {
-                return Result.buildParamIllegal("模板角色非法");
-            }
-        }
-        if (param.getLogicId() != null && !Objects.equals(param.getLogicId(), NOT_CHECK)) {
-            IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(param.getLogicId());
-            if (logic == null) {
-                return Result.buildNotExist("逻辑模板不存在");
-            }
-        }
+        Result<Void> result = handleValidateTemplate(param);
+        if (result.failed()) {return result;}
 
         return Result.buildSucc();
     }
 
-    /**
-     * 批量校验物理模板信息
-     *
-     * @param params    参数
-     * @param operation 操作
-     * @return result
-     */
     @Override
-    public Result validateTemplates(List<IndexTemplatePhysicalDTO> params, OperationEnum operation) {
+    public Result<Void> validateTemplates(List<IndexTemplatePhysicalDTO> params, OperationEnum operation) {
         if (AriusObjUtils.isNull(params)) {
             return Result.buildParamIllegal("物理模板信息为空");
         }
 
         Set<String> deployClusterSet = Sets.newTreeSet();
         for (IndexTemplatePhysicalDTO param : params) {
-            Result checkResult = validateTemplate(param, operation);
+            Result<Void> checkResult = validateTemplate(param, operation);
             if (checkResult.failed()) {
-                LOGGER.warn("check fail||msg={}", checkResult.getMessage());
+                LOGGER.warn("class=TemplatePhyManagerImpl||method=validateTemplates||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
                 checkResult
                         .setMessage(checkResult.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());
                 return checkResult;
@@ -561,16 +425,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.buildSucc();
     }
 
-    /**
-     * 批量新增物理模板
-     *
-     * @param logicId       逻辑模板id
-     * @param physicalInfos 物理模板信息
-     * @return result
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result addTemplatesWithoutCheck(Integer logicId,
+    public Result<Void> addTemplatesWithoutCheck(Integer logicId,
                                            List<IndexTemplatePhysicalDTO> physicalInfos) throws ESOperateException {
         for (IndexTemplatePhysicalDTO param : physicalInfos) {
             param.setLogicId(logicId);
@@ -578,22 +435,16 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             Result<Long> result = addTemplateWithoutCheck(param);
             if (result.failed()) {
                 result.setMessage(result.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());
-                return result;
+                return Result.buildFrom(result);
             }
         }
         return Result.buildSucc();
     }
 
-    /**
-     * 新建
-     *
-     * @param param 模板参数
-     * @return result
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalDTO param) throws ESOperateException {
-        if(null != indexTemplatePhysicalDAO.getByClusterAndName(param.getCluster(), param.getName())){
+        if (null != templatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName())) {
             return Result.buildParamIllegal("索引已经存在");
         }
 
@@ -601,76 +452,44 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
         // 为了解决写入的长尾问题，引擎增加了逻辑shard的概念，这里需要计算逻辑shard的值，并调整源shard个数
         templateShardManager.initShardRoutingAndAdjustShard(param);
-
-        TemplatePhysicalPO newTemplate = ConvertUtil.obj2Obj(param, TemplatePhysicalPO.class);
-        boolean succ = (1 == indexTemplatePhysicalDAO.insert(newTemplate));
-        if (succ) {
+        Result<Long> result = templatePhyService.insert(param);
+        Long physicalId = result.getData();
+        if (result.success()) {
             //删除数据库中历史的脏数据
-            indexTemplatePhysicalDAO.deleteDirtyByClusterAndName(newTemplate.getCluster(), newTemplate.getName());
-
+            templatePhyService.deleteDirtyByClusterAndName(param.getCluster(), param.getName());
             IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(param.getLogicId());
 
             esTemplateService.syncCreate(param.getCluster(), param.getName(), logic.getExpression(), param.getRack(),
                     param.getShard(), param.getShardRouting(), 0);
 
-            SpringTool.publish(new PhysicalTemplateAddEvent(this,
-                    ConvertUtil.obj2Obj(indexTemplatePhysicalDAO.getById(newTemplate.getId()), IndexTemplatePhy.class),
+            SpringTool.publish(new PhysicalTemplateAddEvent(this, templatePhyService.getTemplateById(physicalId),
                     buildIndexTemplateLogicWithPhysicalForNew(param)));
         }
 
-        return Result.buildSucc(newTemplate.getId());
+        return Result.buildSucc(physicalId);
     }
 
-    /**
-     * 修改由于逻辑模板修改而物理模板需要同步修改的属性
-     * <p>
-     * 目前有:
-     * expression
-     *
-     * @param param    参数
-     * @param operator 操作人
-     * @return result
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result editTemplateFromLogic(IndexTemplateLogicDTO param, String operator) throws ESOperateException {
-        List<TemplatePhysicalPO> physicalPOs = indexTemplatePhysicalDAO.listByLogicId(param.getId());
-        if (CollectionUtils.isEmpty(physicalPOs)) {
+    public Result<Void> editTemplateFromLogic(IndexTemplateLogicDTO param, String operator) throws ESOperateException {
+        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(param.getId());
+        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
             return Result.buildSucc();
         }
 
-        for (TemplatePhysicalPO physicalPO : physicalPOs) {
-            if (AriusObjUtils.isChanged(param.getExpression(), physicalPO.getExpression())) {
-                TemplatePhysicalPO updateParam = new TemplatePhysicalPO();
-                updateParam.setId(physicalPO.getId());
-                updateParam.setExpression(param.getExpression());
-                boolean succeed = (1 == indexTemplatePhysicalDAO.update(updateParam));
-                if (succeed) {
-                    esTemplateService.syncUpdateExpression(physicalPO.getCluster(), physicalPO.getName(),
-                            param.getExpression(), 0);
-                } else {
-                    LOGGER.warn("editTemplateFromLogic fail||physicalId={}||expression={}", physicalPO.getId(),
-                            param.getExpression());
-                    return Result.build(false);
+        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
+            if (AriusObjUtils.isChanged(param.getExpression(), indexTemplatePhy.getExpression())) {
+                Result<Void> result = templatePhyService.updateTemplateExpression(indexTemplatePhy, param.getExpression(), operator);
+                if (result.failed()) {
+                    return result;
                 }
             }
 
             if (isValidShardNum(param.getShardNum())
-                    && AriusObjUtils.isChanged(param.getShardNum(), physicalPO.getShard())) {
-                TemplatePhysicalPO updateParam = new TemplatePhysicalPO();
-                updateParam.setId(physicalPO.getId());
-                updateParam.setShard(param.getShardNum());
-                boolean succeed = 1 == indexTemplatePhysicalDAO.update(updateParam);
-                if (succeed) {
-                    LOGGER.info("editTemplateFromLogic succeed||physicalId={}||preShardNum={}||currentShardNum={}",
-                            physicalPO.getId(), physicalPO.getShard(), param.getShardNum());
-
-                    esTemplateService.syncUpdateRackAndShard(physicalPO.getCluster(), physicalPO.getName(),
-                            physicalPO.getRack(), param.getShardNum(), physicalPO.getShardRouting(), 0);
-                } else {
-                    LOGGER.warn("editTemplateFromLogic fail||physicalId={}||expression={}", physicalPO.getId(),
-                            param.getExpression());
-                    return Result.build(false);
+                    && AriusObjUtils.isChanged(param.getShardNum(), indexTemplatePhy.getShard())) {
+                Result<Void> result = templatePhyService.updateTemplateShardNum(indexTemplatePhy, param.getShardNum(), operator);
+                if (result.failed()) {
+                    return result;
                 }
             }
         }
@@ -678,40 +497,32 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.buildSucc();
     }
 
-    /**
-     * 主从切换
-     *
-     * @param logicId                逻辑模板id
-     * @param expectMasterPhysicalId 期望的主
-     * @param operator               操作人
-     * @return result
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result switchMasterSlave(Integer logicId, Long expectMasterPhysicalId, String operator) {
-        List<TemplatePhysicalPO> physicalPOS = indexTemplatePhysicalDAO.listByLogicId(logicId);
-        if (CollectionUtils.isEmpty(physicalPOS)) {
+    public Result<Void> switchMasterSlave(Integer logicId, Long expectMasterPhysicalId, String operator) {
+        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(logicId);
+        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
             return Result.buildNotExist("模板不存在");
         }
 
-        TemplatePhysicalPO oldMaster = null;
-        TemplatePhysicalPO newMaster = null;
+        IndexTemplatePhy oldMaster = null;
+        IndexTemplatePhy newMaster = null;
 
-        for (TemplatePhysicalPO physicalPO : physicalPOS) {
-            if (physicalPO.getRole().equals(MASTER.getCode())) {
+        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
+            if (indexTemplatePhy.getRole().equals(MASTER.getCode())) {
                 if (oldMaster != null) {
                     LOGGER.error(
                             "class=TemplatePhyServiceImpl||method=switchMasterSlave||errMsg=no master||logicId={}",
                             logicId);
                 }
-                oldMaster = physicalPO;
+                oldMaster = indexTemplatePhy;
             } else {
                 if (expectMasterPhysicalId == null && newMaster == null) {
-                    newMaster = physicalPO;
+                    newMaster = indexTemplatePhy;
                 }
 
-                if (physicalPO.getId().equals(expectMasterPhysicalId)) {
-                    newMaster = physicalPO;
+                if (indexTemplatePhy.getId().equals(expectMasterPhysicalId)) {
+                    newMaster = indexTemplatePhy;
                 }
             }
         }
@@ -720,21 +531,16 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildNotExist("无法确定新的主");
         }
 
-        TemplatePhysicalPO param = new TemplatePhysicalPO();
         boolean succ = true;
 
         if (oldMaster == null) {
             LOGGER.error("class=TemplatePhyServiceImpl||method=switchMasterSlave||errMsg=no master||logicId={}",
                     logicId);
         } else {
-            param.setId(oldMaster.getId());
-            param.setRole(SLAVE.getCode());
-            succ = succ && 1 == indexTemplatePhysicalDAO.update(param);
+            succ = templatePhyService.updateTemplateRole(oldMaster,SLAVE,operator).success();
         }
 
-        param.setId(newMaster.getId());
-        param.setRole(MASTER.getCode());
-        succ = succ && (1 == indexTemplatePhysicalDAO.update(param));
+        succ = succ && (templatePhyService.updateTemplateRole(newMaster,MASTER,operator).success());
 
         if (succ) {
             operateRecordService.save(TEMPLATE, SWITCH_MASTER_SLAVE, logicId,
@@ -745,16 +551,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.build(succ);
     }
 
-    /**
-     * 更新模板的rack和shard
-     *
-     * @param physicalId 物理模板的id
-     * @param tgtRack    rack
-     * @return result
-     * @throws ESOperateException
-     */
     @Override
-    public Result editTemplateRackWithoutCheck(Long physicalId, String tgtRack, String operator,
+    public Result<Void> editTemplateRackWithoutCheck(Long physicalId, String tgtRack, String operator,
                                                int retryCount) throws ESOperateException {
         IndexTemplatePhysicalDTO updateParam = new IndexTemplatePhysicalDTO();
         updateParam.setId(physicalId);
@@ -762,62 +560,54 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return editTemplateWithoutCheck(updateParam, operator, retryCount);
     }
 
-    /**
-     * 升级模板
-     *
-     * @param physicalId physicalId
-     * @return reuslt
-     */
     @Override
-    public Result upgradeTemplateVersion(Long physicalId, String operator, int retryCount) throws ESOperateException {
-        TemplatePhysicalPO physicalPO = indexTemplatePhysicalDAO.getById(physicalId);
-        if (physicalPO == null) {
+    public Result<Void> upgradeTemplateVersion(Long physicalId, String operator, int retryCount) throws ESOperateException {
+        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(physicalId);
+        if (indexTemplatePhy == null) {
             return Result.buildNotExist("模板不存在");
         }
 
-        int version = physicalPO.getVersion() + 1;
+        int version = indexTemplatePhy.getVersion() + 1;
         if (version > 9) {
             version = 0;
         }
 
         IndexTemplatePhysicalDTO updateParam = new IndexTemplatePhysicalDTO();
-        updateParam.setId(physicalPO.getId());
+        updateParam.setId(indexTemplatePhy.getId());
         updateParam.setVersion(version);
         return editTemplateWithoutCheck(updateParam, operator, retryCount);
     }
 
     @Override
-    public Result editTemplateWithoutCheck(IndexTemplatePhysicalDTO param, String operator,
+    public Result<Void> editTemplateWithoutCheck(IndexTemplatePhysicalDTO param, String operator,
                                            int retryCount) throws ESOperateException {
-        TemplatePhysicalPO oldPO = indexTemplatePhysicalDAO.getById(param.getId());
+        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getId());
 
-        if (param.getShard() != null && !oldPO.getShard().equals(param.getShard())) {
+        if (param.getShard() != null && !oldIndexTemplatePhy.getShard().equals(param.getShard())) {
             templateShardManager.initShardRoutingAndAdjustShard(param);
         }
 
-        TemplatePhysicalPO updateParam = ConvertUtil.obj2Obj(param, TemplatePhysicalPO.class);
-
-        boolean succ = 1 == indexTemplatePhysicalDAO.update(updateParam);
+        boolean succ = templatePhyService.update(param).success();
         String tips = "";
         if (succ) {
-            if (AriusObjUtils.isChanged(param.getRack(), oldPO.getRack())
-                    || AriusObjUtils.isChanged(param.getShard(), oldPO.getShard())) {
-                esTemplateService.syncUpdateRackAndShard(oldPO.getCluster(), oldPO.getName(), param.getRack(),
+            if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())
+                    || AriusObjUtils.isChanged(param.getShard(), oldIndexTemplatePhy.getShard())) {
+                esTemplateService.syncUpdateRackAndShard(oldIndexTemplatePhy.getCluster(), oldIndexTemplatePhy.getName(), param.getRack(),
                         param.getShard(), param.getShardRouting(), retryCount);
-                if (AriusObjUtils.isChanged(param.getRack(), oldPO.getRack())) {
+                if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())) {
                     tips = "模板部署rack变更!请注意模板APP是否可以使用修改后的rack";
                 }
             }
             // 记录操作记录
-            String editContent = AriusObjUtils.findChanged(oldPO, updateParam);
+            String editContent = AriusObjUtils.findChanged(oldIndexTemplatePhy, param);
             if (StringUtils.isNotBlank(editContent)) {
-                operateRecordService.save(TEMPLATE, EDIT, oldPO.getLogicId(),
-                        "修改" + oldPO.getCluster() + "物理模板:" + editContent, operator);
+                operateRecordService.save(TEMPLATE, EDIT, oldIndexTemplatePhy.getLogicId(),
+                        "修改" + oldIndexTemplatePhy.getCluster() + "物理模板:" + editContent, operator);
             }
 
-            SpringTool.publish(new PhysicalTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplatePhy.class),
-                    templatePhyService.getTemplateById(oldPO.getId()),
-                    templateLogicService.getLogicTemplateWithPhysicalsById(oldPO.getLogicId())));
+            SpringTool.publish(new PhysicalTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldIndexTemplatePhy, IndexTemplatePhy.class),
+                    templatePhyService.getTemplateById(oldIndexTemplatePhy.getId()),
+                    templateLogicService.getLogicTemplateWithPhysicalsById(oldIndexTemplatePhy.getLogicId())));
         }
 
         return Result.buildWithTips(succ, tips);
@@ -839,54 +629,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
             List<String> indices = templatePhyService.getMatchIndexNames(physicalWithLogic.getId());
             if (CollectionUtils.isEmpty(indices)) {
-                LOGGER.info("method=getIndexByBeforeDay||template={}||msg=no match indices", logicTemplate.getName());
+                LOGGER.info("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||msg=no match indices", logicTemplate.getName());
                 return Sets.newHashSet();
             }
 
-            Set<String> finalIndexSet = Sets.newHashSet();
-            for (String indexName : indices) {
-                if (StringUtils.isBlank(indexName)) {
-                    continue;
-                }
-
-                Date indexTime = IndexNameFactory.genIndexTimeByIndexName(
-                        genIndexNameClear(indexName, logicTemplate.getExpression()), logicTemplate.getExpression(),
-                        logicTemplate.getDateFormat());
-
-                if (indexTime == null) {
-                    LOGGER.warn(
-                            "method=getIndexByBeforeDay||template={}||indexName={}||msg=template parse index time fail",
-                            logicTemplate.getName(), indexName);
-                    continue;
-                }
-
-                if (TemplateUtils.isSaveByMonth(logicTemplate.getDateFormat())) {
-                    // 需要将索引时间定为当月的最后一天 确保最后一天的数据能被保留到保存时长
-                    indexTime = AriusDateUtils.getLastDayOfTheMonth(indexTime);
-                }
-
-                if (needOperateAhead(physicalWithLogic)) {
-                    int aheadSeconds = ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP,
-                            "operate.index.ahead.seconds", 2 * 60 * 60);
-                    indexTime = AriusDateUtils.getBeforeSeconds(indexTime, aheadSeconds);
-                }
-
-                long timeIntervalDay = (System.currentTimeMillis() - indexTime.getTime()) / MILLIS_PER_DAY;
-                if (timeIntervalDay < days) {
-                    LOGGER.info(
-                            "method=getIndexByBeforeDay||template={}||indexName={}||timeIntervalDay={}||msg=index not match",
-                            logicTemplate.getName(), indexName, timeIntervalDay);
-                    continue;
-                }
-
-                LOGGER.info("method=getIndexByBeforeDay||indexName={}||indexTime={}||timeIntervalDay={}", indexName,
-                        indexTime, timeIntervalDay);
-
-                finalIndexSet.add(indexName);
-            }
-            return finalIndexSet;
+            return getFinalIndexSet(physicalWithLogic, days, logicTemplate, indices);
         } catch (Exception e) {
-            LOGGER.warn("method=getIndexByBeforeDay||templateName={}||errMsg={}", physicalWithLogic.getName(),
+            LOGGER.warn("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||templateName={}||errMsg={}", physicalWithLogic.getName(),
                     e.getMessage(), e);
         }
 
@@ -894,8 +643,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_GLOBAL_NAME, key = "#appId + '@' + #param.cluster + '@' + 'getConsoleTemplatePhyVOS'")
     public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhysicalDTO param, Integer appId) {
-
         List<ConsoleTemplatePhyVO> consoleTemplatePhyVOS = ConvertUtil.list2List(templatePhyService.getByCondt(param),
             ConsoleTemplatePhyVO.class);
 
@@ -905,17 +654,32 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOSFromCache(IndexTemplatePhysicalDTO param, Integer appId) {
-        if (cacheSwitch.physicalTemplateCacheEnable()) {
-            try {
-                return consoleTemplatePhyVOSCache.get(appId,
-                    () -> getConsoleTemplatePhyVOS(param, appId));
-            } catch (ExecutionException e) {
-                return getConsoleTemplatePhyVOS(param, appId);
-            }
+    public List<String> getTemplatePhyNames(Integer appId) {
+        return getConsoleTemplatePhyVOS(null, appId).parallelStream().map(ConsoleTemplatePhyVO::getName)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getCanCopyTemplatePhyClusterPhyNames(Long templatePhyId) {
+        List<String> canCopyClusterPhyNames = Lists.newArrayList();
+        IndexTemplatePhy templatePhy = templatePhyService.getTemplateById(templatePhyId);
+        if (null != templatePhy && null != templatePhy.getCluster()) {
+            clusterPhyService.listAllClusters()
+                    .stream()
+                    .filter(clusterPhy -> !templatePhy.getCluster().equals(clusterPhy.getCluster()))
+                    .forEach(clusterPhy -> canCopyClusterPhyNames.add(clusterPhy.getCluster()));
         }
 
-        return getConsoleTemplatePhyVOS(param, appId);
+        return canCopyClusterPhyNames;
+    }
+
+    @Override
+    public Result<List<IndexTemplatePhysicalVO>> getTemplatePhies(Integer logicId) {
+        if (!templateLogicService.exist(logicId)) {
+            return Result.buildFail("模板Id不存在");
+        }
+        return Result.buildSucc(
+            ConvertUtil.list2List(templatePhyService.getTemplateByLogicId(logicId), IndexTemplatePhysicalVO.class));
     }
 
     /**************************************** private method ****************************************************/
@@ -955,77 +719,76 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         param.setConfig(JSON.toJSONString(indexTemplatePhysicalConfig));
     }
 
-    private Result checkUpgradeParam(TemplatePhysicalUpgradeDTO param) {
+    private Result<Void> checkUpgradeParam(TemplatePhysicalUpgradeDTO param) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("模板升版本信息为空");
         }
         if (AriusObjUtils.isNull(param.getPhysicalId())) {
-            return Result.buildParamIllegal("物理模板id为空");
+            return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
         }
         if (AriusObjUtils.isNull(param.getVersion())) {
             return Result.buildParamIllegal("物理模板版本为空");
         }
 
-        TemplatePhysicalPO oldPO = indexTemplatePhysicalDAO.getById(param.getPhysicalId());
-        if (oldPO == null) {
-            return Result.buildNotExist("物理模板不存在");
+        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
+        if (oldIndexTemplatePhy == null) {
+            return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
         }
-        if (Objects.equals(param.getVersion(), oldPO.getVersion())
-                || (param.getVersion() > 0 && param.getVersion() < oldPO.getVersion())) {
+        if (Objects.equals(param.getVersion(), oldIndexTemplatePhy.getVersion())
+                || (param.getVersion() > 0 && param.getVersion() < oldIndexTemplatePhy.getVersion())) {
             return Result.buildParamIllegal("物理模板版本非法");
         }
-        if (param.getRack() != null) {
-            if (!esClusterPhyService.isRacksExists(oldPO.getCluster(), param.getRack())) {
-                return Result.buildParamIllegal("物理模板rack非法");
-            }
+        if (param.getRack() != null && !clusterPhyService.isRacksExists(oldIndexTemplatePhy.getCluster(), param.getRack())) {
+            return Result.buildParamIllegal("物理模板rack非法");
         }
         if (param.getShard() != null) {
-            if (param.getShard() < 1) {
-                return Result.buildParamIllegal("shard个数非法");
+            if (param.getShard() >= 1) {
+                return Result.buildSucc();
             }
+            return Result.buildParamIllegal("shard个数非法");
         }
 
         return Result.buildSucc();
     }
 
-    private Result upgradeTemplateWithCheck(TemplatePhysicalUpgradeDTO param, String operator,
+    private Result<Void> upgradeTemplateWithCheck(TemplatePhysicalUpgradeDTO param, String operator,
                                             int retryCount) throws ESOperateException {
-        TemplatePhysicalPO physicalPO = indexTemplatePhysicalDAO.getById(param.getPhysicalId());
-        if (templateLabelService.hasDeleteDoc(physicalPO.getLogicId())) {
+        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
+        if (templateLabelService.hasDeleteDoc(indexTemplatePhy.getLogicId())) {
             return Result.buildParamIllegal("模板有删除操作,禁止升版本");
         }
 
-        IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(physicalPO.getLogicId());
+        IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(indexTemplatePhy.getLogicId());
 
         if (TemplateUtils.isOnly1Index(logic.getExpression())) {
             return Result.buildParamIllegal("不是分区创建的索引，不能升版本");
         }
 
-        LOGGER.info("upgradeTemplate||name={}||rack={}||shard={}||version={}", logic.getName(), param.getRack(),
+        LOGGER.info("class=TemplatePhyManagerImpl||method=upgradeTemplateWithCheck||name={}||rack={}||shard={}||version={}", logic.getName(), param.getRack(),
                 param.getShard(), param.getVersion());
 
         IndexTemplatePhysicalDTO updateParam = new IndexTemplatePhysicalDTO();
-        updateParam.setId(physicalPO.getId());
+        updateParam.setId(indexTemplatePhy.getId());
         updateParam.setRack(param.getRack());
         updateParam.setShard(param.getShard());
         updateParam.setVersion(param.getVersion());
-        Result editResult = editTemplateWithoutCheck(updateParam, operator, retryCount);
+        Result<Void> editResult = editTemplateWithoutCheck(updateParam, operator, retryCount);
 
         if (editResult.failed()) {
             return editResult;
         }
 
-        templatePreCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(physicalPO.getId(), 3);
+        templatePreCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), 3);
 
         return Result.buildSucc();
     }
 
-    private Result checkCopyParam(TemplatePhysicalCopyDTO param) {
+    private Result<Void> checkCopyParam(TemplatePhysicalCopyDTO param) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("复制参数为空");
         }
         if (AriusObjUtils.isNull(param.getPhysicalId())) {
-            return Result.buildParamIllegal("物理模板id为空");
+            return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
         }
         if (AriusObjUtils.isNull(param.getCluster())) {
             return Result.buildParamIllegal("目标集群为空");
@@ -1034,21 +797,21 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildParamIllegal("shard为空");
         }
 
-        TemplatePhysicalPO oldPO = indexTemplatePhysicalDAO.getById(param.getPhysicalId());
-        if (oldPO == null) {
-            return Result.buildNotExist("物理模板不存在");
+        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
+        if (oldIndexTemplatePhy == null) {
+            return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
         }
 
-        if (!esClusterPhyService.isClusterExists(param.getCluster())) {
+        if (!clusterPhyService.isClusterExists(param.getCluster())) {
             return Result.buildNotExist("目标集群不存在");
         }
 
-        if (oldPO.getCluster().equals(param.getCluster())) {
+        if (oldIndexTemplatePhy.getCluster().equals(param.getCluster())) {
             return Result.buildParamIllegal("目标集群不能与源集群相同");
         }
 
         if (StringUtils.isNotEmpty(param.getRack())
-                && !esClusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
+                && !clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
             return Result.buildNotExist("rack不存在");
         }
 
@@ -1065,10 +828,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return clusterSet.contains(physicalWithLogic.getCluster());
     }
 
-    private Result checkMetaInner(IndexTemplatePhy templatePhysical,
+    private Result<Void> checkMetaInner(IndexTemplatePhy templatePhysical,
                                   Map<Integer, IndexTemplateLogic> logicId2IndexTemplateLogicMap,
                                   Set<String> esClusters) {
-
         List<String> errMsgs = Lists.newArrayList();
 
         if (!esClusters.contains(templatePhysical.getCluster())) {
@@ -1107,13 +869,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                     templateLogic.getDateFormat(), -1 * templateLogic.getExpireTime());
 
             if (!indices.contains(tomorrowIndexName)) {
-                LOGGER.warn("method=checkIndexCreateAndExpire||cluster={}||template={}||msg=TOMORROW_INDEX_NOT_CREATE",
+                LOGGER.warn("class=TemplatePhyManagerImpl||method=checkIndexCreateAndExpire||cluster={}||template={}||msg=TOMORROW_INDEX_NOT_CREATE",
                         templatePhysical.getCluster(), templatePhysical.getName());
                 result = result + TOMORROW_INDEX_NOT_CREATE;
             }
 
             if (TemplateUtils.isSaveByDay(templateLogic.getDateFormat()) && indices.contains(expireIndexName)) {
-                LOGGER.warn("method=checkIndexCreateAndExpire||cluster={}||template={}||msg=EXPIRE_INDEX_NOT_DELETE",
+                LOGGER.warn("class=TemplatePhyManagerImpl||method=checkIndexCreateAndExpire||cluster={}||template={}||msg=EXPIRE_INDEX_NOT_DELETE",
                         templatePhysical.getCluster(), templatePhysical.getName());
                 result = result + EXPIRE_INDEX_NOT_DELETE;
             }
@@ -1138,10 +900,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
      * @return
      */
     private boolean isValidShardNum(Integer shardNum) {
-        if (shardNum != null && shardNum > 0) {
-            return true;
-        }
-        return false;
+        return  (shardNum != null && shardNum > 0);
     }
 
     private void buildConsoleTemplatePhyVO(List<ConsoleTemplatePhyVO> params, Integer currentAppId) {
@@ -1158,41 +917,152 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 continue;
             }
 
-            //设置归属项目信息
-            Integer appIdFromLogicTemplate = logicTemplate.getAppId();
-            if (!AriusObjUtils.isNull(appIdFromLogicTemplate)) {
-                consoleTemplatePhyVO.setAppId(appIdFromLogicTemplate);
-
-                if (appId2AppNameMap.containsKey(appIdFromLogicTemplate)) {
-                    consoleTemplatePhyVO.setAppName(appId2AppNameMap.get(logicTemplate.getAppId()));
-                } else {
-                    String appName = appService.getAppName(logicTemplate.getAppId());
-                    if (!AriusObjUtils.isNull(appName)) {
-                        consoleTemplatePhyVO.setAppName(appName);
-                        appId2AppNameMap.put(appIdFromLogicTemplate, appName);
-                    }
-                }
-            }
-
-            //设置逻辑模板名称
-            consoleTemplatePhyVO.setLogicName(logicTemplate.getName());
-
-            //设置描述信息, 是否要加一列描述信息
-            consoleTemplatePhyVO.setMemo(logicTemplate.getDesc());
-
-            //设置权限
-            if (AriusObjUtils.isNull(currentAppId)) {
-                consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.NO_PERMISSION.getCode());
-                continue;
-            }
-            if (currentAppId.equals(appIdFromLogicTemplate)) {
-                consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.OWN.getCode());
-            } else {
-                AppTemplateAuthEnum authEnum = appLogicTemplateAuthService.getAuthEnumByAppIdAndLogicId(currentAppId,
-                        appIdFromLogicTemplate);
-                consoleTemplatePhyVO.setAuthType(authEnum.getCode());
-            }
+            handleIndexTemplateLogic(currentAppId, appId2AppNameMap, consoleTemplatePhyVO, logicTemplate);
 
         }
+    }
+
+    private void handleIndexTemplateLogic(Integer currentAppId, Map<Integer, String> appId2AppNameMap, ConsoleTemplatePhyVO consoleTemplatePhyVO, IndexTemplateLogic logicTemplate) {
+        //设置归属项目信息
+        Integer appIdFromLogicTemplate = logicTemplate.getAppId();
+        if (!AriusObjUtils.isNull(appIdFromLogicTemplate)) {
+            consoleTemplatePhyVO.setAppId(appIdFromLogicTemplate);
+
+            if (appId2AppNameMap.containsKey(appIdFromLogicTemplate)) {
+                consoleTemplatePhyVO.setAppName(appId2AppNameMap.get(logicTemplate.getAppId()));
+            } else {
+                String appName = appService.getAppName(logicTemplate.getAppId());
+                if (!AriusObjUtils.isNull(appName)) {
+                    consoleTemplatePhyVO.setAppName(appName);
+                    appId2AppNameMap.put(appIdFromLogicTemplate, appName);
+                }
+            }
+        }
+
+        //设置逻辑模板名称
+        consoleTemplatePhyVO.setLogicName(logicTemplate.getName());
+
+        //设置描述信息, 是否要加一列描述信息
+        consoleTemplatePhyVO.setMemo(logicTemplate.getDesc());
+
+        //设置权限
+        if (AriusObjUtils.isNull(currentAppId)) {
+            consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.NO_PERMISSION.getCode());
+            return;
+        }
+        if (currentAppId.equals(appIdFromLogicTemplate)) {
+            consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.OWN.getCode());
+        } else {
+            AppTemplateAuthEnum authEnum = appLogicTemplateAuthService.getAuthEnumByAppIdAndLogicId(currentAppId,
+                    appIdFromLogicTemplate);
+            consoleTemplatePhyVO.setAuthType(authEnum.getCode());
+        }
+    }
+
+    private Result<Void> handleValidateTemplate(IndexTemplatePhysicalDTO param) {
+        if (param.getCluster() != null && !clusterPhyService.isClusterExists(param.getCluster())) {
+            return Result.buildParamIllegal("集群不存在");
+        }
+        if (StringUtils.isNotEmpty(param.getRack())) {
+            if (!clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
+                return Result.buildParamIllegal("集群rack不存在");
+            }
+           /* // 校验rack匹配且只匹配到一个region
+            if (regionRackService.countRackMatchedRegion(param.getCluster(), param.getRack()) != 1) {
+                return Result.buildParamIllegal("集群rack不符合逻辑集群规划");
+            }*/
+        }
+        if (param.getShard() != null && param.getShard() < 1) {
+            return Result.buildParamIllegal("shard个数非法");
+        }
+        if (param.getRole() != null
+                && TemplateDeployRoleEnum.UNKNOWN.equals(TemplateDeployRoleEnum.valueOf(param.getRole()))) {
+            return Result.buildParamIllegal("模板角色非法");
+        }
+        if (param.getLogicId() != null && !Objects.equals(param.getLogicId(), NOT_CHECK)) {
+            IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(param.getLogicId());
+            if (logic == null) {
+                return Result.buildNotExist("逻辑模板不存在");
+            }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplateEdit(IndexTemplatePhysicalDTO param) {
+        if (AriusObjUtils.isNull(param.getId())) {
+            return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
+        }
+        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(param.getId());
+        if (indexTemplatePhy == null) {
+            return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplateAdd(IndexTemplatePhysicalDTO param) {
+        if (AriusObjUtils.isNull(param.getLogicId())) {
+            return Result.buildParamIllegal("逻辑模板id为空");
+        }
+        if (AriusObjUtils.isNull(param.getCluster())) {
+            return Result.buildParamIllegal("集群为空");
+        }
+
+        if (AriusObjUtils.isNull(param.getShard())) {
+            return Result.buildParamIllegal("shard为空");
+        }
+        if (AriusObjUtils.isNull(param.getRole())) {
+            return Result.buildParamIllegal("模板角色为空");
+        }
+
+        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName());
+        if (indexTemplatePhy != null) {
+            return Result.buildDuplicate("物理模板已经存在");
+        }
+        return Result.buildSucc();
+    }
+
+    private Set<String> getFinalIndexSet(IndexTemplatePhyWithLogic physicalWithLogic, int days, IndexTemplateLogic logicTemplate, List<String> indices) {
+        Set<String> finalIndexSet = Sets.newHashSet();
+        for (String indexName : indices) {
+            if (StringUtils.isBlank(indexName)) {
+                continue;
+            }
+
+            Date indexTime = IndexNameFactory.genIndexTimeByIndexName(
+                    genIndexNameClear(indexName, logicTemplate.getExpression()), logicTemplate.getExpression(),
+                    logicTemplate.getDateFormat());
+
+            if (indexTime == null) {
+                LOGGER.warn(
+                        "class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||indexName={}||msg=template parse index time fail",
+                        logicTemplate.getName(), indexName);
+                continue;
+            }
+
+            if (TemplateUtils.isSaveByMonth(logicTemplate.getDateFormat())) {
+                // 需要将索引时间定为当月的最后一天 确保最后一天的数据能被保留到保存时长
+                indexTime = AriusDateUtils.getLastDayOfTheMonth(indexTime);
+            }
+
+            if (needOperateAhead(physicalWithLogic)) {
+                int aheadSeconds = ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP,
+                        "operate.index.ahead.seconds", 2 * 60 * 60);
+                indexTime = AriusDateUtils.getBeforeSeconds(indexTime, aheadSeconds);
+            }
+
+            long timeIntervalDay = (System.currentTimeMillis() - indexTime.getTime()) / MILLIS_PER_DAY;
+            if (timeIntervalDay < days) {
+                LOGGER.info(
+                        "class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||indexName={}||timeIntervalDay={}||msg=index not match",
+                        logicTemplate.getName(), indexName, timeIntervalDay);
+                continue;
+            }
+
+            LOGGER.info("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||indexName={}||indexTime={}||timeIntervalDay={}", indexName,
+                    indexTime, timeIntervalDay);
+
+            finalIndexSet.add(indexName);
+        }
+        return finalIndexSet;
     }
 }
