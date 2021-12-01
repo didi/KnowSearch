@@ -1,4 +1,5 @@
-<img src="http://116.85.24.226/images/5002.jpg"/> 
+<img src="http://116.85.24.226/images/5002.jpg" height="100" width="200"/> 
+
 LogiEM：一站式 Elasticsearch 集群指标监控与运维管控平台。
 阅读本README文档，您可以了解到滴滴LogiEM的产品定位、体验地图、快速安装，并可以在线进行产品体验。
 
@@ -59,7 +60,7 @@ LogiEM 提供平台、运维、引擎等多维度的能力：
 
 - 开源特性：用户只用把自己运维的集群接入到 LogiEM，在开源 LogiEM 上就直接可以使用的能力，如：集群的指标采集和监控、集群索引的监控和管理等、接入 Gateway 后还可以获取到全量的查询写入指标。
 
-- 开源滴滴特性：用户把自己运维的集群接入到 LogiEM 后，按照 LogiEM 的规则创建好索引模板支护，就可以使用的能力，这一块主要和滴滴开发的索引模板服务相关，如：模板的升级、查询写入限流等。
+- 开源滴滴特性：用户把自己运维的集群接入到 LogiEM 后，按照 LogiEM 的规则创建好索引模板，就可以使用的其能力，这一块主要和滴滴开发的索引模板服务相关，如：模板的升级、查询写入限流等。
 
 - 商业特性：用户把自己运维的集群接入到 LogiEM 后，需要商业付费后才可以使用的能力，这一块主要包括集群管控和 didi-es 引擎开发的一些能力，如：ES 集群运维操作能力、滴滴 ES 引擎的性能优化等。
 
@@ -80,9 +81,9 @@ LogiEM自动化安装
 
 ## 5.2 脚本使用说明
 
-1. 需要服务器可以访问外网：将脚本下载到服务器后，执行方式：sh install_LogiEM.sh {ip} [下载地址](https://logi-em.s3.didiyunapi.com/install_LogiEM.sh]())
-，其中{ip}指安装服务器的IP地址。
-2. 如不能访问外网，可以将软件包从本地上传至服务器并注释脚本Down_Package函数中的wget命令[下载地址](https://logi-em.s3.didiyunapi.com/LogiEM_pack.tar.gz]())。
+1. 需要服务器可以访问外网：将脚本下载到服务器后，执行方式：sh install_LogiEM.sh ip [下载地址](https://logi-em.s3.didiyunapi.com/install_LogiEM.sh)
+   ，其中ip指安装服务器的IP地址。
+2. 如不能访问外网，可以将软件包从本地上传至服务器并注释脚本Down_Package函数中的wget命令[下载地址](https://logi-em.s3.didiyunapi.com/LogiEM_pack.tar.gz)。
 3. 如安装过程中断，请查看断点原因。
 
 ## 5.3 各个模块版本和使用的端口
@@ -93,8 +94,8 @@ LogiEM自动化安装
 | Kibana        | 7.6  | 8601 |
 | Mysql         | 5.7  | 3306 |
 | Nginx         | 1.8  | 80   |
-| EM_Admin      |      | 8015 |
-| EM_Gateway    |      | 8200 |
+| EM_Admin      | 0.1  | 8015 |
+| EM_Gateway    | 1.0  | 8200 |
 
 # 6.相关文档
 
