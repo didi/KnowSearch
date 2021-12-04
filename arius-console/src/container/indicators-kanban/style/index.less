@@ -1,0 +1,211 @@
+@import "../../../styles/base.less";
+.hash-menu-container {
+  position: relative;
+  .refresh-time {
+    position: absolute;
+    top: 27px;
+    right: 20px;
+  }
+}
+
+.rf-monitor-overview-search {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  &-reload {
+    .reload {
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      border: 1px solid #dbe0e4;
+      border-radius: 2px;
+      margin-right: 10px;
+    }
+    .reload:hover {
+      color: #2f81f9;
+    }
+  }
+  &-filter {
+    &-item {
+      padding-right: 8px;
+    }
+  }
+}
+
+.rf-monitor-overview-content {
+  // margin-bottom: 58px;
+  .ant-collapse-content > .ant-collapse-content-box {
+    padding: 0 20px!important;
+  }
+  &-config {
+    width: 100%;
+    overflow-x: scroll;
+    margin: 20px 0 20px 0;
+    &-box {
+      min-width: 1170px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      height: 437px;
+      &-view {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 67%;
+        min-width: 777px;
+        &-state-config {
+          border: 1px solid #dcdfe6;
+          margin-bottom: 20px;
+        }
+        &-memory-map {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          height: 268px;
+          border: 1px solid #dcdfe6;
+          .vertical-line {
+            width: 1px;
+            height: 228px;
+            background: #d8d8d8;
+          }
+          &-view {
+            flex: 1;
+          }
+        }
+      }
+      &-node-distribution {
+        display: flex;
+        flex-direction: column;
+        width: calc(33% - 20px);
+        min-width: 365px;
+        height: 437px;
+        border: 1px solid #dcdfe6;
+        .cross-line {
+          width: 100%;
+          height: 1px;
+          background: #dcdfe6;
+          align-self: center;
+          margin: 0 0 15px 0;
+        }
+      }
+    }
+  }
+  &-line {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    &-container {
+      width: calc(50% - 10px);
+      margin: 0 0 20px 0;
+      height: 305px;
+      border: 1px solid #dcdfe6;
+      border-radius: 2px;
+    }
+    &-item {
+      width: 100%;
+      height: 305px;
+      // 覆盖 echarts tooltip 的 z-index
+      div {
+        z-index: 100!important;
+      }
+      &-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        &-title {
+          .max-title();
+        }
+        &-time {
+          .min-title();
+        }
+      }
+    }
+    &-bigPicture {
+      width: 100%;
+      height: 50vh;
+    }
+    &-enlarge {
+      position: absolute;
+      cursor: pointer;
+      top: 20px;
+      right: 20px;
+      width: 15px;
+      height: 15px;
+      z-index: 100;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  &-shard {
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td,
+    .ant-table tfoot > tr > th,
+    .ant-table tfoot > tr > td {
+      padding: 0;
+    }
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 6px;
+    }
+  }
+}
+
+.index-view-line-container {
+  margin-top: 20px;
+}
+
+.content-margin-top-20 {
+  margin-top: 20px;
+}
+
+.indicators-kanban-loading-container {
+  border: 1px solid #dcdfe6;
+  border-radius: 2px;
+  margin: 0 0 20px 0;
+}
+
+.common-loading-container {
+  position: relative;
+  .center-center-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .center-center-empty-box-title {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-family: PingFangSC-Medium;
+    font-size: 16px;
+    color: #303a51;
+    line-height: 24px;
+  }
+  .center-center-empty-box-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .rf-monitor-overview-content-line-container {
+    width: 100%;
+  }
+}
+
+.shard-container {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  .rf-monitor-overview-content-shard {
+    min-width: 518px;
+    padding: 20px;
+  }
+}

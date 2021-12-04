@@ -1,0 +1,32 @@
+@import "../../../styles/base.less";
+.ant-spin-container {
+  .detail-header {
+    background-color: white;
+    margin-bottom: 20px;
+  }
+}
+.base-index-box {
+  &-title {
+    .middle-title();
+    padding-top: 20px;
+    border-bottom: 1px solid #dbe0e4;
+  }
+  &-tag {
+    padding-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    &-item {
+      display: flex;
+      padding-right: 30px;
+      align-items: center;
+      &-title {
+        .min-title();
+        padding-right: 4px;
+        cursor: pointer;
+      }
+      &-title:hover {
+        color: #2a8fff;
+      }
+    }
+  }
+}

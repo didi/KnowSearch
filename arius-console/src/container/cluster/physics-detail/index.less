@@ -1,0 +1,28 @@
+@import "../../../styles/base.less";
+
+.base-index-box {
+  padding-bottom: 20px;
+  &-tag {
+    padding-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    &-item {
+      display: flex;
+      padding-right: 30px;
+      align-items: center;
+      &-title {
+        .min-title();
+        padding-right: 4px;
+        cursor: pointer;
+      }
+      &-title:hover {
+        color: #2a8fff;
+      }
+    }
+  }
+}
+.base-info-title {
+  .middle-title();
+  border-bottom: 1px solid #dbe0e4;
+  padding-bottom: 8px;
+}

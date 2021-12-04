@@ -1,0 +1,100 @@
+{
+  "name": "logi-es-manager-fe",
+  "systemName": "es",
+  "version": "0.0.1",
+  "description": "es",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf ./pub & fetk run build",
+    "lint": "fetk run lint",
+    "start": "fetk run devServer"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "es"
+  ],
+  "author": {
+    "name": "eilenexu"
+  },
+  "license": "ISC",
+  "port": "8002",
+  "ident": "es",
+  "babel": {
+    "presets": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not ie < 11",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "@hot-loader/react-dom": "16.8.6",
+    "antd": "4.15.0",
+    "bowser": "^2.11.0",
+    "classnames": "^2.2.6",
+    "codemirror": "^5.62.0",
+    "echarts": "^5.1.2",
+    "jsencrypt": "^3.2.0",
+    "less": "4.1.1",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
+    "monaco-editor": "^0.20.0",
+    "monaco-editor-webpack-plugin": "^1.9.0",
+    "query-string": "^5.0.1",
+    "react": "16.12.0",
+    "react-copy-to-clipboard": "^5.0.1",
+    "react-dom": "16.12.0",
+    "react-intl": "^3.2.1",
+    "react-router-dom": "4.x",
+    "spark-md5": "^3.0.1"
+  },
+  "devDependencies": {
+    "@ant-design/compatible": "^1.0.8",
+    "@ant-design/icons": "^4.6.2",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
+    "@babel/plugin-transform-object-assign": "^7.12.1",
+    "@types/classnames": "^2.2.9",
+    "@types/lodash": "^4.14.138",
+    "@types/query-string": "^6.3.0",
+    "@types/react-dom": "^16.9.0",
+    "@types/react-router-dom": "^4.3.5",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "axios": "^0.19.2",
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-import": "^1.12.0",
+    "babel-preset-react-app": "^10.0.0",
+    "copy-webpack-plugin": "^6.2.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^5.3.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-testing-library": "^3.9.2",
+    "eslint-webpack-plugin": "^2.5.2",
+    "fetk": "~0.2.4",
+    "node-ssh": "^12.0.0",
+    "react-hot-loader": "^4.8.7",
+    "react-redux": "^7.2.2",
+    "redux": "^4.0.5",
+    "redux-thunk": "^2.3.0",
+    "stats-webpack-plugin": "^0.7.0",
+    "whatwg-fetch": "^3.6.2"
+  }
+}

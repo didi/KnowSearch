@@ -1,0 +1,85 @@
+.dsl-pb-20 {
+  padding-bottom: 20px;
+}
+
+.dsl-mr-20 {
+  margin-right: 20px;
+}
+
+.dsl-drawer {
+  margin-bottom: 20px;
+  &-title {
+    width: 100%;
+    height: 40px;
+    background: #F9F9FA;
+    font-family: PingFangSC-Medium;
+    font-size: 12px;
+    color: #1D2330;
+    text-align: left;
+    line-height: 40px;
+    margin-bottom: 24px;
+    padding-left: 24px;
+  }
+  &-box {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 90%;
+    position: relative;
+    padding-right: 20px;
+  }
+  &-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 0px;
+    top: 4px
+  }
+}
+
+.two-row-ellipsis {
+  text-overflow: -o-ellipsis-lastline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.dsl-overflow-auto {
+  overflow: auto;
+  max-height: 300px;
+}
+
+.dsl-vw-5 {
+  max-width: 6vw;
+}
+
+.dsl-float-right {
+  float: right;
+}
+
+.dsl-query-tpl {
+  &-search {
+    padding: 20px;
+    padding-bottom: 0px;
+    &-submit {
+      float: right;
+    }
+  }
+}
+.error-query-container {
+  .error-query-container-table {
+    .error-query-container-table-cell {
+      width: 12vw;
+    }
+  }
+}
+
+.slow-query-container {
+  .slow-query-container-table {
+    .slow-query-container-table-cell {
+      width: 10vw;
+    }
+  }
+}
