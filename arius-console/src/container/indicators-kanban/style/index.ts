@@ -1,8 +1,0 @@
-import './index.less'
-import './kanban-form.less'
-import './cluster-kanban.less'
-import './state-config.less'
-import './contrast-figure.less'
-import './gateway-kanban.less'
-import './node-view.less'
-import './select-time.less'
