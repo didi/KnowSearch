@@ -2,7 +2,7 @@ filebeat.inputs:
   - type: log
     enabled: true
     paths:
-      - /home/xiaoju/arius-gateway-rest/log/stats.log
+      -
     fields:
       flag: 'arius.gateway.join'
     fields_under_root: true
@@ -11,7 +11,7 @@ filebeat.inputs:
   - type: log
     enabled: true
     paths:
-      - /home/xiaoju/arius-gateway-rest/log/metrics.log
+      -
     fields:
       flag: 'cn_arius_gateway_metrics'
     fields_under_root: true
@@ -28,7 +28,7 @@ setup.ilm.enabled: false
 
 
 output.elasticsearch:
-  hosts: ["10.96.64.13:8060"]
+  hosts: [""]
   bulk_max_size: 1000
   indices:
     - index: "arius.gateway.join"

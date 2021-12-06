@@ -80,7 +80,7 @@ spring:
 
 admin:
   port:
-    web: 8010
+    web: 8015
   contextPath: /admin/api
 
 # 事务超时时间
