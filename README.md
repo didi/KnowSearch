@@ -102,6 +102,7 @@ LogiEM自动化安装
 - [LogiEM用户指南](./doc/LogiEM用户指南.md)
 - [LogiEM安装部署文档](./doc/LogiEM安装部署文档.md)
 - [LogiEM设计说明](./doc/LogiEM设计说明.md)
+- [LogiEM源码编译运行文档](doc/LogiEM源码编译运行文档.md)
 - [LogiEM最佳实践](./doc/LogiEM最佳实践.md)
 - [常见FAQ](./doc/常见FAQ.md)
 
