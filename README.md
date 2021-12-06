@@ -1,4 +1,4 @@
-<img src="http://116.85.24.226/images/5002.jpg" height="100" width="200"/> 
+<img src="http://116.85.24.226/images/5002.jpg" height="100"/> 
 
 LogiEM：一站式 Elasticsearch 集群指标监控与运维管控平台。
 阅读本README文档，您可以了解到滴滴LogiEM的产品定位、体验地图、快速安装，并可以在线进行产品体验。
