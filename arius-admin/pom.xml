@@ -9,12 +9,6 @@
     <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <parent>
-        <groupId>com.xiaoju</groupId>
-        <artifactId>base-pom</artifactId>
-        <version>0.0.1</version>
-    </parent>
-
     <modules>
         <module>arius-admin-client</module>
         <module>arius-admin-persistence</module>
