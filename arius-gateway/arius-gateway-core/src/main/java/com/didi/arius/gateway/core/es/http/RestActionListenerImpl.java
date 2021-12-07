@@ -9,7 +9,7 @@ import com.didi.arius.gateway.common.utils.CommonUtil;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.SpringTool;
 import com.didi.arius.gateway.elasticsearch.client.model.ESActionResponse;
-import com.didichuxing.tunnel.util.log.LogGather;
+import com.didiglobal.logi.log.LogGather;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;

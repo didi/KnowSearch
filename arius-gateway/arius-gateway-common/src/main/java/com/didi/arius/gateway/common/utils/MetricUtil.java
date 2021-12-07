@@ -1,8 +1,8 @@
 package com.didi.arius.gateway.common.utils;
 
-import com.didichuxing.datachannel.metrics.MetricsSource;
-import com.didichuxing.datachannel.metrics.MetricsSystem;
-import com.didichuxing.datachannel.metrics.lib.DefaultMetricsSystem;
+import com.didiglobal.logi.metrics.MetricsSource;
+import com.didiglobal.logi.metrics.MetricsSystem;
+import com.didiglobal.logi.metrics.lib.DefaultMetricsSystem;
 
 public class MetricUtil {
 
@@ -36,7 +36,7 @@ public class MetricUtil {
 	 *            指标数据源
 	 */
 	public static <T extends MetricsSource> T register(String metricSetName,
-			String desc, T metricSource) {
+													   String desc, T metricSource) {
 		return getMetricsSystem().register(metricSetName, desc, metricSource);
 	}
 }

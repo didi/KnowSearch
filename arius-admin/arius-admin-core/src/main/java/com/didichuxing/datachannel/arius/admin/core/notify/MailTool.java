@@ -7,11 +7,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,49 +77,7 @@ public class MailTool {
 
     private HtmlEmail constructEmail(String subject, String htmlMsg, List<String> toAddr,
                                      List<String> ccAddr) throws EmailException {
-        HtmlEmail email = new HtmlEmail();
-        // 设置发送主机的服务器地址
-        email.setTLS(true);
-        email.setHostName("mail.didichuxing.com");
-        //内网机器端口25
-        email.setSmtpPort(587);
-
-        // 发件人邮箱
-        email.setFrom(ARIUS, "Arius服务中心");
-        email.setAuthentication(ARIUS, "N0iMhUsJ");
-        email.setCharset("utf-8");
-        email.setSubject(subject);
-        email.setHtmlMsg(htmlMsg);
-
-        List<InternetAddress> toAddrList = Lists.newArrayList();
-        for (String emailAddress : toAddr) {
-            addInternetAddress(toAddrList, emailAddress);
-        }
-        email.setTo(toAddrList);
-
-        try {
-            List<InternetAddress> ccAddrList = Lists.newArrayList();
-            if (CollectionUtils.isNotEmpty(ccAddr)) {
-                for (String emailAddress : ccAddr) {
-                    addInternetAddress(ccAddrList, emailAddress);
-                }
-            }
-            ccAddrList.add(new InternetAddress(ARIUS));
-            email.setCc(ccAddrList);
-        } catch (AddressException e) {
-            LOGGER.warn("class=MailTool||method=constructEmail||msg=exception:{}", e.getMessage());
-        }
-
-        return email;
-    }
-
-    private void addInternetAddress(List<InternetAddress> ccAddrList, String emailAddress) {
-        try {
-            InternetAddress internetAddress = new InternetAddress(emailAddress.trim());
-            ccAddrList.add(internetAddress);
-        } catch (AddressException e) {
-            LOGGER.warn("class=MailTool||method=constructEmail||msg=illegal email address:" + emailAddress, e);
-        }
+        return null;
     }
 
     /**

@@ -89,6 +89,10 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
      */
     private Map<Long, Double> fetchAggSinglePercentilesMetrics(ESQueryResponse response, String clusterMetricsType, String aggType) {
         Map<Long, Double> timeSlip2ValueMap = Maps.newHashMap();
+        if (null == response || null == response.getAggs()) {
+            return timeSlip2ValueMap;
+        }
+
         String statsKey = aggType + "_" + clusterMetricsType;
 
         Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();

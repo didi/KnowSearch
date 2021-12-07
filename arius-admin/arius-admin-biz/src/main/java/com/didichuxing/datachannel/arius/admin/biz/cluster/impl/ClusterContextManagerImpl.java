@@ -185,25 +185,6 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
                 .collect(Collectors.toList());
     }
 
-    /***********************************************private*********************************************/
-
-    private void loadClusterLogicContexts() {
-        List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();
-        if (CollectionUtils.isEmpty(clusterLogicList)) {
-            LOGGER.warn("class=ClusterContextManagerImpl||method=loadId2ESClusterLogicContextMap||msg=平台无逻辑集群");
-        }
-
-        for (ClusterLogic clusterLogic : clusterLogicList) {
-            futureUtil.runnableTask(() -> {
-                ClusterLogicContext clusterLogicContext = getClusterLogicContext(clusterLogic.getId());
-                if (null != clusterLogicContext) {
-                    id2ClusterLogicContextMap.put(clusterLogicContext.getClusterLogicId(), clusterLogicContext);
-                }
-            });
-        }
-        futureUtil.waitExecute();
-    }
-
     @Override
     public ClusterLogicContext getClusterLogicContext(Long clusterLogicId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
@@ -213,7 +194,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
                     clusterLogicId);
             return null;
         }
-        
+
         ClusterLogicContext build = buildInitESClusterLogicContextByType(clusterLogic);
         setAssociatedClusterPhyInfo(build);
         setRegionAndAssociatedClusterPhyDataNodeInfo(build);
@@ -231,14 +212,33 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         }
 
         ClusterPhyContext build = ClusterPhyContext.builder()
-                                .clusterPhyId(clusterPhy.getId().longValue())
-                                .clusterName(clusterPhy.getCluster())
-                                .associatedLogicNumMax(PHY_ASSOCIATED_LOGIC_MAX_NUMBER)
-                                .build();
+                .clusterPhyId(clusterPhy.getId().longValue())
+                .clusterName(clusterPhy.getCluster())
+                .associatedLogicNumMax(PHY_ASSOCIATED_LOGIC_MAX_NUMBER)
+                .build();
 
         setClusterPhyNodeInfo(build);
         setRegionAndClusterLogicInfo(build);
         return build;
+    }
+
+    /***********************************************private*********************************************/
+
+    private void loadClusterLogicContexts() {
+        List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();
+        if (CollectionUtils.isEmpty(clusterLogicList)) {
+            LOGGER.warn("class=ClusterContextManagerImpl||method=loadId2ESClusterLogicContextMap||msg=平台无逻辑集群");
+        }
+
+        for (ClusterLogic clusterLogic : clusterLogicList) {
+            futureUtil.runnableTask(() -> {
+                ClusterLogicContext clusterLogicContext = getClusterLogicContext(clusterLogic.getId());
+                if (null != clusterLogicContext) {
+                    id2ClusterLogicContextMap.put(clusterLogicContext.getClusterLogicId(), clusterLogicContext);
+                }
+            });
+        }
+        futureUtil.waitExecute();
     }
 
     /**

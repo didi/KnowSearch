@@ -10,7 +10,7 @@ import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.metadata.TemplateClusterInfo;
 import com.didi.arius.gateway.common.utils.AppUtil;
 import com.didi.arius.gateway.core.es.http.HttpRestHandler;
-import com.didichuxing.tunnel.util.log.LogGather;
+import com.didiglobal.logi.log.LogGather;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

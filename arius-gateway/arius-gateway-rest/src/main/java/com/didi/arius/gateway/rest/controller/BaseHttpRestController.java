@@ -22,7 +22,7 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRespon
 import com.didi.arius.gateway.elasticsearch.client.model.ESActionRequest;
 import com.didi.arius.gateway.rest.http.IRestHandler;
 import com.didi.arius.gateway.rest.http.RestController;
-import com.didichuxing.tunnel.util.log.LogGather;
+import com.didiglobal.logi.log.LogGather;
 import org.elasticsearch.rest.*;
 import org.elasticsearch.rest.support.RestUtils;
 import org.slf4j.Logger;

@@ -37,7 +37,6 @@
         <dependency>
             <groupId>io.github.zqrferrari</groupId>
             <artifactId>logi-job-spring-boot-starter</artifactId>
-            <version>1.0.22</version>
         </dependency>
 
     </dependencies>

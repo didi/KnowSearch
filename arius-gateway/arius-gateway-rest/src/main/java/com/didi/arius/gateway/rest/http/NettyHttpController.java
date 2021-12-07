@@ -1,7 +1,7 @@
 package com.didi.arius.gateway.rest.http;
 
 import com.didi.arius.gateway.rest.controller.es.RestCommonController;
-import com.didichuxing.tunnel.util.log.LogFactory;
+import com.didiglobal.logi.log.LogFactory;
 import org.elasticsearch.http.HttpChannel;
 import org.elasticsearch.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;

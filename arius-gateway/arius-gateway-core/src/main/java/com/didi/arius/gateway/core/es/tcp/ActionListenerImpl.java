@@ -4,7 +4,8 @@ import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.event.ActionPostResponseEvent;
 import com.didi.arius.gateway.common.metadata.ActionContext;
 import com.didi.arius.gateway.core.component.SpringTool;
-import com.didichuxing.tunnel.util.log.LogGather;
+
+import com.didiglobal.logi.log.LogGather;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionResponse;
 import org.slf4j.Logger;

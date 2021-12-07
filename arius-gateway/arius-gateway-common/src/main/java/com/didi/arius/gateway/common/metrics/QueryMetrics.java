@@ -1,11 +1,11 @@
 package com.didi.arius.gateway.common.metrics;
 
 import com.didi.arius.gateway.common.utils.MetricUtil;
-import com.didichuxing.datachannel.metrics.MetricsBuilder;
-import com.didichuxing.datachannel.metrics.MetricsSource;
-import com.didichuxing.datachannel.metrics.lib.MetricMutablePeriodGaugeLong;
-import com.didichuxing.datachannel.metrics.lib.MetricMutableStat;
-import com.didichuxing.datachannel.metrics.lib.MetricsRegistry;
+import com.didiglobal.logi.metrics.MetricsBuilder;
+import com.didiglobal.logi.metrics.MetricsSource;
+import com.didiglobal.logi.metrics.lib.MetricMutablePeriodGaugeLong;
+import com.didiglobal.logi.metrics.lib.MetricMutableStat;
+import com.didiglobal.logi.metrics.lib.MetricsRegistry;
 
 public class QueryMetrics implements MetricsSource {
 	private MetricsRegistry metricsRegistry;

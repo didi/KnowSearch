@@ -8,7 +8,7 @@ import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESUpdateRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESUpdateResponse;
-import com.didichuxing.tunnel.util.log.LogGather;
+import com.didiglobal.logi.log.LogGather;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentHelper;

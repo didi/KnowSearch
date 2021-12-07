@@ -9,7 +9,7 @@ import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESDeleteRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESDeleteResponse;
-import com.didichuxing.tunnel.util.log.LogGather;
+import com.didiglobal.logi.log.LogGather;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.support.replication.ReplicationRequest;

@@ -2,9 +2,9 @@ package com.didi.arius.gateway.core.service.dsl.transform;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.aggr.*;
-import com.didichuxing.datachannel.arius.dsl.common.dsl.ast.query.Match;
-import com.didichuxing.datachannel.arius.dsl.common.dsl.visitor.basic.OutputVisitor;
+import com.didiglobal.logi.dsl.parse.dsl.ast.aggr.AggrTerms;
+import com.didiglobal.logi.dsl.parse.dsl.ast.query.Match;
+import com.didiglobal.logi.dsl.parse.dsl.visitor.basic.OutputVisitor;
 
 import java.util.Iterator;
 import java.util.Map;
