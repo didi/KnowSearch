@@ -8,7 +8,7 @@ import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.http.ESBase;
 import com.didi.arius.gateway.core.service.*;
-import com.didichuxing.tunnel.util.log.LogGather;
+import com.didiglobal.logi.log.LogGather;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.cluster.block.ClusterBlockException;

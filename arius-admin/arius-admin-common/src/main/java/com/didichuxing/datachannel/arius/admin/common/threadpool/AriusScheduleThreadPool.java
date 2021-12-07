@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
-import org.jboss.netty.util.ThreadRenamingRunnable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,11 +30,6 @@ public class AriusScheduleThreadPool {
         static final AtomicInteger poolNumber   = new AtomicInteger(1);
         final AtomicInteger        threadNumber = new AtomicInteger(1);
         final String               namePrefix;
-
-        static {
-            ThreadRenamingRunnable
-                .setThreadNameDeterminer((currentThreadName, proposedThreadName) -> currentThreadName);
-        }
 
         DesmondThreadFactory(String prefix) {
             namePrefix = prefix + "-pool-" + poolNumber.getAndIncrement() + "-";

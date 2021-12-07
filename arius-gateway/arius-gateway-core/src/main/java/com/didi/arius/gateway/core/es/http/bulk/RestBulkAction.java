@@ -10,7 +10,8 @@ import com.didi.arius.gateway.core.es.http.document.RestBaseWriteAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectResponse;
-import com.didichuxing.tunnel.util.log.LogGather;
+
+import com.didiglobal.logi.log.LogGather;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.rest.RestChannel;

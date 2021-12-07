@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.didi</groupId>
     <artifactId>arius-gateway-v2</artifactId>
-    <version>${version}</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>arius-gateway-v2</name>
 
@@ -27,7 +27,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <version>0.0.1-SNAPSHOT</version>
         <lucene.version>5.5.0.0.0.2-SNAPSHOT</lucene.version>
         <es.version>2.3.3-SNAPSHOT</es.version>
     </properties>
@@ -54,10 +53,6 @@
             </exclusions>
             <scope>test</scope>
         </dependency>
-        <dependency> <!-- 引入log4j2依赖 -->
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -71,6 +66,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
             <version>4.1.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -99,7 +100,7 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.6.2</version>
+                <version>2.8.9</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -130,6 +131,17 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5.13</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.13</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -143,9 +155,9 @@
                 <version>${es.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.nlpcn</groupId>
-                <artifactId>elasticsearch-sql-didi</artifactId>
-                <version>2.3.3.3-SNAPSHOT</version>
+                <groupId>io.github.zqrferrari</groupId>
+                <artifactId>logi-elasticsearch-sql</artifactId>
+                <version>1.0.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.elasticsearch</groupId>
@@ -165,12 +177,11 @@
                 </exclusions>
             </dependency>
 
-            <!-- 滴滴模块 -->
             <!-- 依赖DSL 解析模块 -->
             <dependency>
-                <groupId>com.didichuxing.datachannel</groupId>
-                <artifactId>dsl-parse</artifactId>
-                <version>1.0.1-SNAPSHOT</version>
+                <groupId>io.github.zqrferrari</groupId>
+                <artifactId>logi-dsl-prase</artifactId>
+                <version>1.0.5</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>elasticsearch-didi</artifactId>
@@ -193,9 +204,9 @@
             </dependency>
 
             <dependency>
-                <groupId>com.didichuxing.datachannel</groupId>
-                <artifactId>metrics</artifactId>
-                <version>1.0.1-SNAPSHOT</version>
+                <groupId>io.github.zqrferrari</groupId>
+                <artifactId>logi-metrices</artifactId>
+                <version>1.0.4</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>log4j</artifactId>

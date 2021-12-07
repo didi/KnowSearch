@@ -1,10 +1,11 @@
 package com.didi.arius.gateway.common.metrics;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.metrics.Metric;
-import com.didichuxing.datachannel.metrics.MetricsRecord;
-import com.didichuxing.datachannel.metrics.MetricsTag;
-import com.didichuxing.datachannel.metrics.sink.mq.AbstractMetricSink;
+
+import com.didiglobal.logi.metrics.Metric;
+import com.didiglobal.logi.metrics.MetricsRecord;
+import com.didiglobal.logi.metrics.MetricsTag;
+import com.didiglobal.logi.metrics.sink.mq.AbstractMetricSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
