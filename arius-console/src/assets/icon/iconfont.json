@@ -6,6 +6,111 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "27880045",
+      "name": "减少",
+      "font_class": "jianshao",
+      "unicode": "e710",
+      "unicode_decimal": 59152
+    },
+    {
+      "icon_id": "27880046",
+      "name": "增加",
+      "font_class": "zengjia",
+      "unicode": "e711",
+      "unicode_decimal": 59153
+    },
+    {
+      "icon_id": "27776836",
+      "name": "调度任务",
+      "font_class": "tiaodurenwu",
+      "unicode": "e708",
+      "unicode_decimal": 59144
+    },
+    {
+      "icon_id": "27776837",
+      "name": "检索查询",
+      "font_class": "jiansuochaxun",
+      "unicode": "e709",
+      "unicode_decimal": 59145
+    },
+    {
+      "icon_id": "27776838",
+      "name": "索引管理",
+      "font_class": "suoyinguanli",
+      "unicode": "e70a",
+      "unicode_decimal": 59146
+    },
+    {
+      "icon_id": "27776839",
+      "name": "模版管理",
+      "font_class": "mobanguanli",
+      "unicode": "e70b",
+      "unicode_decimal": 59147
+    },
+    {
+      "icon_id": "27776840",
+      "name": "系统管理",
+      "font_class": "xitongguanli",
+      "unicode": "e70c",
+      "unicode_decimal": 59148
+    },
+    {
+      "icon_id": "27776841",
+      "name": "工单任务",
+      "font_class": "gongdanrenwu",
+      "unicode": "e70d",
+      "unicode_decimal": 59149
+    },
+    {
+      "icon_id": "27776842",
+      "name": "集群管理",
+      "font_class": "jiqunguanli",
+      "unicode": "e70e",
+      "unicode_decimal": 59150
+    },
+    {
+      "icon_id": "27776843",
+      "name": "指标看板",
+      "font_class": "zhibiaokanban",
+      "unicode": "e70f",
+      "unicode_decimal": 59151
+    },
+    {
+      "icon_id": "27345833",
+      "name": "箭头_右上",
+      "font_class": "jiantou_youshang",
+      "unicode": "e6fe",
+      "unicode_decimal": 59134
+    },
+    {
+      "icon_id": "27202690",
+      "name": "筛选",
+      "font_class": "shaixuan",
+      "unicode": "e6f8",
+      "unicode_decimal": 59128
+    },
+    {
+      "icon_id": "25703269",
+      "name": "复制 - kafka",
+      "font_class": "fuzhi",
+      "unicode": "e6c8",
+      "unicode_decimal": 59080
+    },
+    {
+      "icon_id": "25703270",
+      "name": "更多 - kafka",
+      "font_class": "a-gengduo-kafka",
+      "unicode": "e6c9",
+      "unicode_decimal": 59081
+    },
+    {
+      "icon_id": "25703271",
+      "name": "info - kafka",
+      "font_class": "info",
+      "unicode": "e6ca",
+      "unicode_decimal": 59082
+    },
+    {
       "icon_id": "24326205",
       "name": "es-logo",
       "font_class": "es-logo",

@@ -60,11 +60,26 @@ public class ESClusterPhyBasicMetricsVO implements Serializable {
     @ApiModelProperty("总内存大小")
     private Long  memTotal;
 
+    @ApiModelProperty("已用堆内存大小")
+    private Long heapMemUsed;
+
+    @ApiModelProperty("剩余堆内存大小")
+    private Long heapMemFree;
+
+    @ApiModelProperty("总堆内存大小")
+    private Long heapMemTotal;
+
+    @ApiModelProperty("堆内存使用率")
+    private Double  heapUsage;
+
+    @ApiModelProperty("堆内存空闲率")
+    private Double  heapFreeUsage;
+
     @ApiModelProperty("已用内存百分比")
-    private Long    memUsedPercent;
+    private Double    memUsedPercent;
 
     @ApiModelProperty("剩余空闲内存百分比")
-    private Long    memFreePercent;
+    private Double    memFreePercent;
 
     @ApiModelProperty("集群已使用容量，bytes 单位")
     private Long  storeSize;

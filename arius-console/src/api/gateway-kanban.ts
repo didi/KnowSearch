@@ -2,7 +2,7 @@ import fetch from '../lib/fetch';
 const Prefix = "admin";
 const POST = "POST";
 
-type secondMetricsType = 'overview' | "node" | "index" | "app" | "dsl";
+type secondMetricsType = 'overview' | "node" | "index" | "app" | "dsl" | "clientNode";
 
 // 获取gateway各模块的指标
 export const getGatewayIndexList = (group: string) => {
@@ -66,8 +66,29 @@ export const getNodeViewData = (metricsTypes: string[], startTime: number, endTi
   });
 }
 
+// 获取clientNode节点视图
+export const getClientNodeViewData = (metricsTypes: string[], startTime: number, endTime: number, topNu: number, nodeIp: string, clientNodeIp: string) => {
+  return fetch("/v3/op/gateway/metrics/node/client", {
+    prefix: Prefix,
+    method: POST,
+    body: {
+      metricsTypes,
+      startTime,
+      endTime,
+      nodeIp,
+      topNu,
+      clientNodeIp,
+    }
+  });
+}
+
 export const getNodeIpList = () => {
   return fetch("/v2/thirdpart/gateway/aliveNodeName");
+}
+
+//获取取gatewayNode相关的clientNode ip列表
+export const getClientNodeList = (gatewayNode, startTime, endTime) => {
+  return fetch(`/v3/op/gateway/metrics/node/client/list?gatewayNode=${gatewayNode || ''}&startTime=${startTime}&endTime=${endTime}`);
 }
 
 // 获取索引视图数据

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.client.mapping;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import io.swagger.annotations.ApiModel;
@@ -72,11 +73,22 @@ public class AriusTypeProperty {
     @ApiModelProperty("属性（json格式）")
     private JSONObject         properties;
 
+    /**
+     * [{"key1":{}},{"key2":{}}]
+     */
+    @ApiModelProperty("dynamic_templates（jsonArray格式）")
+    private JSONArray dynamicTemplates;
+
     public static final String PROPERTIES_STR = "properties";
+    public static final String DYNAMIC_TEMPLATES_STR = "dynamic_templates";
 
     public JSONObject toMappingJSON() {
         JSONObject obj = new JSONObject();
         obj.put(PROPERTIES_STR, properties);
+
+        if (null != dynamicTemplates && !dynamicTemplates.isEmpty()) {
+            obj.put(DYNAMIC_TEMPLATES_STR, dynamicTemplates);
+        }
 
         JSONObject root = new JSONObject();
         root.put(typeName, obj);

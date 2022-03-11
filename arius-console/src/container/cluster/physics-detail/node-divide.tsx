@@ -2,13 +2,13 @@ import * as React from "react";
 import "styles/search-filter.less";
 import { getNodeDivideColumns } from "./config";
 import Url from "lib/url-parser";
-import { INodeDivide } from "@types/index-types";
+import { INodeDivide } from "typesPath/index-types";
 import { DTable, ITableBtn } from "component/dantd/dtable";
 import { getPhyNodeDivideList } from "api/op-cluster-index-api";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import * as actions from "actions";
-import { IOpPhysicsClusterDetail } from "@types/cluster/cluster-types";
+import { IOpPhysicsClusterDetail } from "typesPath/cluster/cluster-types";
 import _ from "lodash";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
@@ -95,7 +95,7 @@ export class NodeDivide extends React.Component<{
     res = _.cloneDeep(res);
     let regionIdArr = res
       ?.filter((item) => item.regionId)
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         if (sortOrder === "descend") {
           return b.regionId - a.regionId;
         } else {

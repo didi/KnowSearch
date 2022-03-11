@@ -1,10 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateLogicConfigRecord;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.MapUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
@@ -18,6 +23,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE_CONFIG;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
+
 /**
  * @author wangshu
  * @date 2020/08/24
@@ -29,6 +37,9 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
 
     @Autowired
     private ESTemplateService esTemplateService;
+
+    @Autowired
+    private OperateRecordService operateRecordService;
 
     @Override
     public boolean validTemplateSettings(String cluster, String template,
@@ -57,9 +68,10 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
     }
 
     @Override
-    public boolean mergeTemplateSettings(String cluster, String template,
+    public boolean mergeTemplateSettings(Integer logicId, String cluster, String template, String operator,
                                          Map<String, String> settings) throws AdminOperateException {
 
+        TemplateLogicConfigRecord templateLogicConfigRecord = new TemplateLogicConfigRecord();
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig == null) {
             sLogger.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
@@ -68,8 +80,13 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
             throw new AdminOperateException("模版不存在，template:" + template);
         }
 
-        IndexTemplatePhySettings templateSettings = new IndexTemplatePhySettings(templateConfig.getSetttings());
-        templateConfig.setSetttings(templateSettings.merge(settings));
+        IndexTemplatePhySettings oldTemplateSettings = new IndexTemplatePhySettings(templateConfig.getSetttings());
+        templateLogicConfigRecord.setOldConfig(oldTemplateSettings);
+
+        IndexTemplatePhySettings newTemplateSettings = new IndexTemplatePhySettings(templateConfig.getSetttings());
+        templateConfig.setSetttings(newTemplateSettings.merge(settings));
+        templateLogicConfigRecord.setNewConfig(newTemplateSettings);
+        templateLogicConfigRecord.setDiffContext(MapUtils.findChangedWithDestV(oldTemplateSettings.flatSettings(), settings));
 
         if (!esTemplateService.syncCheckTemplateConfig(cluster, fetchPreCreateTemplateName(template), templateConfig,
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT)) {
@@ -79,8 +96,13 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
             throw new AdminOperateException("非法模板settings: " + settings);
         }
 
-        return esTemplateService.syncUpsertSetting(cluster, template, settings,
+        boolean result = esTemplateService.syncUpsertSetting(cluster, template, settings,
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT);
+        if(result) {
+            // 记录setting 更新记录
+            operateRecordService.save(TEMPLATE_CONFIG, EDIT, logicId, JSON.toJSONString(templateLogicConfigRecord), operator);
+        }
+        return result;
     }
 
     /**************************************** private method ****************************************************/
@@ -90,10 +112,6 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
      * @return
      */
     private String fetchPreCreateTemplateName(String templateName) {
-        if (StringUtils.isBlank(templateName)) {
-            return AdminConstant.ES_CHECK_TEMPLATE_INDEX_PREFIX;
-        }
-
-        return templateName;
+        return AdminConstant.ES_CHECK_TEMPLATE_INDEX_PREFIX + System.currentTimeMillis() + templateName;
     }
 }

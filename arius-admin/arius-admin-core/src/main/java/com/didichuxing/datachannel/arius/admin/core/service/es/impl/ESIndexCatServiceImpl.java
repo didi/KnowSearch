@@ -70,6 +70,27 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
+    public int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus, int retryCount) {
+        if (CollectionUtils.isEmpty(indexNameList)) {
+            return 0;
+        }
+
+        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
+                .batchList(indexNameList)
+                .batchSize(10)
+                .processor(items -> indexCatESDAO.batchUpdateCatIndexStatus(cluster, items, indexNewStatus, retryCount))
+                .succChecker(succ -> succ)
+                .process();
+
+        if (!result.isSucc()) {
+            LOGGER.warn("class=ESIndexCatServiceImpl||method=syncUpdateCatIndexStatus||cluster={}||indexNameList={}||result={}", cluster, indexNameList,
+                    result);
+        }
+
+        return indexNameList.size() - result.getFailAndErrorCount();
+    }
+
+    @Override
     public List<IndexShardInfo> syncGetIndexShardInfo(String clusterPhyName, String indexName) {
         String shards2NodeInfoRequestContent = getShards2NodeInfoRequestContent(indexName, "20s");
         DirectResponse shardNodeResponse = indexCatESDAO.getDirectResponse(clusterPhyName, "Get",

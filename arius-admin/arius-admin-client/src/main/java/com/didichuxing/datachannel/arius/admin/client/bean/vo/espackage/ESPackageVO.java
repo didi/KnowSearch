@@ -46,4 +46,7 @@ public class ESPackageVO extends BaseVO {
 
     @ApiModelProperty("创建时间")
     private Date createTime;
+
+    @ApiModelProperty("类型(1 滴滴内部版本/2 开源版本)")
+    private Integer packageType;
 }

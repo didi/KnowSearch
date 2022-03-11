@@ -437,6 +437,12 @@ public abstract class ESBase {
 
     protected IndexTemplate getTemplateByIndexTire(List<String> indices, QueryContext queryContext) throws IndexNotFoundException, TooManyIndexException{
 		String index = indices.get(0);
+		if(index.startsWith(".")) {
+			// kibana 有一些请求，是把 .kibana_arius 索引放在请求体里面的，例如 /_mget
+			queryContext.setFromKibana(true);
+			queryContext.setSearchType(AppDetail.RequestType.Origin_Cluster.getType());
+			return null;
+		}
 
         IndexTemplate indexTemplate = indexTemplateService.getIndexTemplateByTire(index);
         if (indexTemplate == null) {

@@ -1,9 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -96,7 +93,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_USAGE_PERCENT.getType(), CPU_USAGE_PERCENT.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, this::getAvgAndPercentilesFromESQueryResponse, 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster,realIndex, TYPE, dsl,
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -110,7 +108,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_1M.getType(), CPU_LOAD_AVERAGE_1M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, this::getAvgAndPercentilesFromESQueryResponse, 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+            this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -124,7 +123,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_5M.getType(), CPU_LOAD_AVERAGE_5M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, this::getAvgAndPercentilesFromESQueryResponse, 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+            this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -138,7 +138,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_15M.getType(), CPU_LOAD_AVERAGE_15M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, this::getAvgAndPercentilesFromESQueryResponse, 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+            this::getAvgAndPercentilesFromESQueryResponse, 3);
 
     }
 
@@ -161,7 +162,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, INDICES_INDEXING_CONSUME.getType(), INDICES_INDEXING_CONSUME.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, this::getAvgAndPercentilesFromESQueryResponse, 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+            this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -183,18 +185,20 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, INDICES_QUERY_CONSUME.getType(), INDICES_QUERY_CONSUME.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, this::getAvgAndPercentilesFromESQueryResponse, 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+            this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
      * 获取集群磁盘空闲使用率分位值(统计节点维度)和平均使用率
      */
     public Map<String, Double> getClusterDiskFreeUsagePercentAvgAndPercentiles(String cluster) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT,
-                cluster, NOW_2M, NOW_1M);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+            DslsConstant.AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT, cluster, NOW_2M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, this::getAvgAndPercentilesFromESQueryResponse, 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+            this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -311,11 +315,11 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         List<String> metricsKeys = getAggMetricsStr(Lists.newArrayList(topMetrics.getType()), aggType);
 
         String dsl = dslLoaderUtil.getDslByTopNNameInfo(DslsConstant.GET_TOPN_NODE_AGG_METRICS_INFO, interval,
-            topNameStr, buildAggsDSL(metricsKeys, aggType), clusterPhyName, startTime, endTime, esNodesMaxNum);
+                topNameStr, buildAggsDSL(metricsKeys, aggType), clusterPhyName, startTime, endTime, esNodesMaxNum, startTime, endTime);
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
-        List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequest(metadataClusterName,
-            realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, metricsKeys, null, false), 3);
+        List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName,
+                null, realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, metricsKeys, null, false), 3);
         buildMetrics.addAll(variousLineChartMetrics);
     }
 
@@ -336,9 +340,15 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                                                     String aggType, int esNodesMaxNum, Long startTime, Long endTime) {
 
         int retryTime = 0;
-        List<VariousLineChartMetrics> variousLineChartMetrics;
+        List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
         do {
-            Tuple<Long, Long> firstInterval = MetricsUtils.getSortInterval(startTime, endTime,(retryTime + 3) * 60 * 1000L);
+            Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
+            //没有数据则提前终止
+            if (null == timePoint) {
+                break;
+            }
+
+            Tuple<Long, Long> firstInterval = MetricsUtils.getSortInterval(endTime - startTime, timePoint);
             long startTimeForOneInterval    = firstInterval.getV1();
             long endTimeForOneInterval      = firstInterval.getV2();
 
@@ -352,7 +362,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
             String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
                     endTimeForOneInterval);
 
-            variousLineChartMetrics = gatewayClient.performRequest(metadataClusterName,
+            variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
                     realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, metricsKeys, topNu, true), 3);
         }while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
 
@@ -384,7 +394,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
-        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+        return gatewayClient.performRequestWithRouting(metadataClusterName, nodeName, realIndexName, TYPE, dsl,
             s -> fetchSingleAggMetrics(s, metricsKeys, nodeName), 3);
     }
 

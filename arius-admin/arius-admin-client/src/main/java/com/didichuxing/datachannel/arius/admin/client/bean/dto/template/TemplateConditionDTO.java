@@ -27,6 +27,9 @@ public class TemplateConditionDTO extends IndexTemplateLogicDTO {
     @ApiModelProperty("所属集群")
     private List<String> clusterPhies;
 
-    @ApiModelProperty("是否具备DCDR")
-    private Boolean      hasDCDR;
+    @ApiModelProperty("是否开启 hasDCDR  位点差checkPointDiff")
+    private String       sortTerm;
+
+    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
+    private Boolean      orderByDesc = true;
 }

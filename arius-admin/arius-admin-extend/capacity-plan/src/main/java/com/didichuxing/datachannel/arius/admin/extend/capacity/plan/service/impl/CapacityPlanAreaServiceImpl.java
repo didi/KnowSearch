@@ -222,7 +222,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
         CapacityPlanAreaPO param = ConvertUtil.obj2Obj(areaDTO, CapacityPlanAreaPO.class);
         boolean succeed = (1 == capacityPlanAreaDAO.update(param));
         if (succeed) {
-            operateRecordService.save(CAPACITY_PLAN_AREA, EDIT, param.getId(), AriusObjUtils.findChanged(oldPO, param), operator);
+            operateRecordService.save(CAPACITY_PLAN_AREA, EDIT, param.getId(), AriusObjUtils.findChangedWithClear(oldPO, param), operator);
         }
 
         return Result.build(succeed);
@@ -393,7 +393,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
             return Sets.newHashSet();
         }
 
-        return esClusterPhyService.listHotRacks(capacityPlanAreaPO.getClusterName());
+        return clusterPhyService.listHotRacks(capacityPlanAreaPO.getClusterName());
     }
 
     /**

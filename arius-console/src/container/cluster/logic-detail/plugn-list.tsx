@@ -2,7 +2,7 @@ import * as React from "react";
 import "styles/search-filter.less";
 import { getPlugnListColumns } from "./config";
 import Url from "lib/url-parser";
-import { IIndex } from "@types/index-types";
+import { IIndex } from "typesPath/index-types";
 import { DTable, ITableBtn } from "component/dantd/dtable";
 import { getClusterPlugList } from "api/plug-api";
 import { connect } from "react-redux";
@@ -14,8 +14,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) =>
     dispatch(actions.setModalId(modalId, params, cb)),
 });
-
-@connect(null, mapDispatchToProps)
+const connects: Function = connect
+@connects(null, mapDispatchToProps)
 export class PlugnList extends React.Component<any> {
   public state = {
     searchKey: "",

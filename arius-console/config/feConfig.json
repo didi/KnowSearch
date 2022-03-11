@@ -1,9 +1,28 @@
 {
   "header": {
     "mode": "complicated",
-    "logo": "/src/assets/es-logo.png",
+    "logo": "../../assets/es-logo.png",
+    "userIconSrc": "../../assets/avatars.png",
     "subTitle": "LogiEM",
     "theme": "light",
-    "right_links": []
+    "rightEle": [
+      {
+        "type": "dropdown",
+        "scene": "doc",
+        "options": []
+      },
+      {
+        "type": "dropdown",
+        "scene": "project"
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "dropdown",
+        "scene": "user",
+        "showUserDrawer": true
+      }
+    ]
   }
 }

@@ -18,7 +18,7 @@ public class ClusterLogicRackInfo extends BaseEntity {
     /**
      * 逻辑集群ID
      */
-    private Long logicClusterId;
+    private String logicClusterIds;
 
     /**
      * Region Id

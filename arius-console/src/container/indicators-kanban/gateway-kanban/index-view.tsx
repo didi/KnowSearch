@@ -19,6 +19,9 @@ import {
   getIndexNameList,
 } from "../../../api/gateway-kanban";
 import { setIsUpdate } from "actions/gateway-kanban";
+import { arrayMoveImmutable } from 'array-move';
+import DragGroup from './../../../packages/drag-group/DragGroup';
+
 export const classPrefix = "rf-monitor";
 
 const INDEX = "index";
@@ -44,6 +47,14 @@ export const IndexView = memo(() => {
   const isFirst = useRef(true);
   const timeDiff = useRef(0);
   const prevTopNu = useRef(topNu);
+
+  const sortEnd = ({ oldIndex, newIndex }) => {
+    const listsNew = arrayMoveImmutable(checkedData['索引性能指标'], oldIndex, newIndex)
+    checkedData['索引性能指标'] = listsNew;
+    const checkedList = objFlat(checkedData);
+    setCheckedList(INDEX, checkedList);
+    setMetricsTypes([...listsNew]);
+  };
 
   const reloadPage = () => {
     dispatch(setIsUpdate(!isUpdate));
@@ -169,15 +180,27 @@ export const IndexView = memo(() => {
         </div>
       </div>
       <div className={`${classPrefix}-overview-content-line`}>
-        {metricsTypes.map((item, index) => (
-          <Line
-            key={`${item}_${index}`}
-            title={indexConfigData[item]?.title()}
-            index={`${item}_${index}`}
-            option={viewData[index] || {}}
-            isLoading={isLoading}
-          />
-        ))}
+        <DragGroup
+          dragContainerProps={{
+            onSortEnd: sortEnd,
+            axis: "xy",
+            distance: 100
+          }}
+          containerProps={{
+            grid: 12,
+            gutter: [10, 10],
+          }}
+        >
+          {metricsTypes.map((item, index) => (
+            <Line
+              key={`${item}`}
+              title={indexConfigData[item]?.title()}
+              index={`${item}_${index}`}
+              option={viewData[index] || {}}
+              isLoading={isLoading}
+            />
+          ))}
+        </DragGroup>
       </div>
     </>
   );

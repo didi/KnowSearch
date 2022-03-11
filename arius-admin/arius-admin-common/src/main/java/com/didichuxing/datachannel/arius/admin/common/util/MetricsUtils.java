@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
-
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
-import org.apache.commons.lang3.StringUtils;
-
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.google.common.collect.Lists;
 
 /**
  * Created by linyunan on 2021-08-05
@@ -32,6 +31,43 @@ public class MetricsUtils {
             return Interval.ONE_HOUR.getStr();
         } else {
             return Interval.ONE_HOUR.getStr();
+        }
+    }
+
+    /**
+     * 获取时间点对应聚合时间段
+     * @param intervalTime
+     * @param timePoint
+     * @return
+     */
+    public static Tuple<Long, Long> getSortInterval(Long intervalTime, long timePoint) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(timePoint);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        if (intervalTime > 0 && intervalTime <= ONE_HOUR) {
+            long tuple1 = cal.getTimeInMillis();
+            return new Tuple<>(tuple1 - 60 * 1000, tuple1);
+        } else if (intervalTime > ONE_HOUR && intervalTime <= ONE_DAY) {
+            int minute = cal.get(Calendar.MINUTE);
+            int start = 0;
+            int end = 20;
+            if (minute > 20 && minute <= 40) {
+                start = 20;
+                end = 40;
+            } else if (minute > 40 && minute <= 60){
+                start = 40;
+                end = 60;
+            }
+            cal.set(Calendar.MINUTE, start);
+            long tuple1 = cal.getTimeInMillis();
+            cal.set(Calendar.MINUTE, end);
+            long tuple2 = cal.getTimeInMillis();
+            return new Tuple<>(tuple1, tuple2);
+        } else  {
+            cal.set(Calendar.MINUTE, 0);
+            long tuple1 = cal.getTimeInMillis();
+            return new Tuple<>(tuple1, tuple1 + 60 * 60 * 1000);
         }
     }
 

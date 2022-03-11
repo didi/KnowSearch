@@ -6,7 +6,7 @@ import { FormItemType, IFormItem } from "component/x-form";
 import { AppState } from "store/type";
 import { updateCongig } from "api/op-cluster-config-api";
 import { notification } from "antd";
-import { IPhyConfig } from "@types/cluster/physics-type";
+import { IPhyConfig } from "typesPath/cluster/physics-type";
 
 const mapStateToProps = (state: any) => ({
   params: state.modal.params,
@@ -16,11 +16,11 @@ const mapStateToProps = (state: any) => ({
 });
 
 const EditConfigDesc = (props: {
-  dispatch: any;
-  cb: Function;
-  app: AppState;
-  user: any;
-  params: IPhyConfig;
+  dispatch?: any;
+  cb?: Function;
+  app?: AppState;
+  user?: any;
+  params?: IPhyConfig;
 }) => {
   const xFormModalConfig = {
     formMap: [
@@ -59,7 +59,7 @@ const EditConfigDesc = (props: {
         typeName: props.params?.typeName,
         id: props.params.id,
       };
-      updateCongig(req).then(() => {
+      return updateCongig(req).then(() => {
         notification.success({ message: "编辑配置信息成功！" });
         props.dispatch(actions.setModalId(""));
         props.cb();

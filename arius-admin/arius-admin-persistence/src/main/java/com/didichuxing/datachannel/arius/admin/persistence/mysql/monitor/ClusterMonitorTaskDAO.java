@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,6 +18,13 @@ public interface ClusterMonitorTaskDAO {
      * @return
      */
     List<ClusterMonitorTaskPO> getAllTaskByDataCentre(String dataCentre);
+
+    /**
+     *
+     * @param monitorHost
+     * @return
+     */
+    List<ClusterMonitorTaskPO> getTaskByHost(@Param("monitorHost") String monitorHost, @Param("size") int size);
 
     /**
      * 使用这个方法时要特别小心

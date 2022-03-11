@@ -3,7 +3,7 @@ import { XFormWrapper } from "component/x-form-wrapper";
 import { connect } from "react-redux";
 import * as actions from "actions";
 import { FormItemType } from "component/x-form";
-import { IWorkOrder } from "@types/params-types";
+import { IWorkOrder } from "typesPath/params-types";
 import { submitWorkOrder } from "api/common-api";
 import { appTemplateAuthEnum } from "constants/status-map";
 import { RenderText } from "container/custom-form";

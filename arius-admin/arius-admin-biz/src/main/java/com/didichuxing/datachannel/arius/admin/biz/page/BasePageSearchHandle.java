@@ -27,7 +27,7 @@ public abstract class BasePageSearchHandle<T> implements BaseHandle {
 
         Result<Boolean> validCheckForConditionResult = validCheckForCondition(pageDTO, appId);
         if (validCheckForConditionResult.failed()) {
-            return PaginationResult.buildParamIllegal(validCheckForAppIdResult.getMessage());
+            return PaginationResult.buildParamIllegal(validCheckForConditionResult.getMessage());
         }
 
         init(pageDTO);

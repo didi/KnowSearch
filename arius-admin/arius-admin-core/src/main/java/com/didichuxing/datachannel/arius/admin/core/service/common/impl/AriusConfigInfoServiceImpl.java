@@ -121,7 +121,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void>  editConfig(AriusConfigInfoDTO configInfoDTO, String operator) {
+    public Result<Void> editConfig(AriusConfigInfoDTO configInfoDTO, String operator) {
         if (AriusObjUtils.isNull(configInfoDTO.getId())) {
             return Result.buildParamIllegal("配置ID为空");
         }
@@ -131,18 +131,13 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             return Result.buildNotExist(NOT_EXIST);
         }
 
-        AriusConfigInfoPO param = new AriusConfigInfoPO();
-        param.setId(configInfoDTO.getId());
-        param.setValue(configInfoDTO.getValue());
-        param.setMemo(configInfoDTO.getMemo());
-
-        boolean succ = (1 == configInfoDAO.update(param));
+        boolean succ = (1 == configInfoDAO.update(ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class)));
 
         if (succ) {
-            operateRecordService.save(CONFIG, EDIT, param.getId(),
-                String.format("编辑平台配置, 配置组:%s, 配置名称%s, 配置值:", configInfoPO.getValueGroup(), configInfoPO.getValueName())
-                                                                   + AriusObjUtils.findChanged(configInfoPO, param),
-                operator);
+            operateRecordService.save(CONFIG, EDIT, configInfoDTO.getId(),
+                    String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：", configInfoPO.getValueGroup(), configInfoPO.getValueName())
+                            + AriusObjUtils.findChangedWithClear(configInfoPO, configInfoDTO),
+                    operator);
         }
 
         return Result.build(succ);

@@ -6,7 +6,7 @@ import { Select, Tooltip } from 'antd';
 
 
 interface IAttars {
-  mode?: 'multiple' | 'tags' ;
+  mode?: 'multiple' | 'tags';
   placeholder?: string;
 }
 
@@ -22,7 +22,7 @@ export class VirtualScrollSelect extends React.Component<ISelectProps> {
   public state = {
     optionsData: [] as ILabelValue[],
     scrollPage: 0,
-    keyword: '',
+    keyword: "",
     total: 0,
     refetchData: false,
   };
@@ -38,11 +38,10 @@ export class VirtualScrollSelect extends React.Component<ISelectProps> {
     let originData = await getData();
 
     if (originData) {
-      originData = this.state.keyword ?
-        originData.filter((item: any) => item.label.includes(this.state.keyword)) : originData;
+      originData = this.state.keyword ? originData.filter((item: any) => item.label.includes(this.state.keyword)) : originData;
       let data = [].concat(originData);
       // tslint:disable-next-line:no-bitwise
-      const total = data.length ? data.length / 30 | 1 : 0;
+      const total = data.length ? (data.length / 30) | 1 : 0;
       data = data.splice(pageSize * 30, 30); // 每页展示30条数据
 
       return this.setState({
@@ -51,18 +50,21 @@ export class VirtualScrollSelect extends React.Component<ISelectProps> {
         refetchData: false,
       });
     }
-  }
+  };
 
   public handleSearch = (e: string) => {
     debounce(() => {
-      this.setState({
-        keyword: e.trim(),
-        scrollPage: 0,
-      }, () => {
-        this.getData();
-      });
+      this.setState(
+        {
+          keyword: e.trim(),
+          scrollPage: 0,
+        },
+        () => {
+          this.getData();
+        }
+      );
     }, 300)();
-  }
+  };
 
   public handleSelectScroll = (e: any) => {
     e.persist();
@@ -71,30 +73,38 @@ export class VirtualScrollSelect extends React.Component<ISelectProps> {
     debounce(() => {
       if (target.scrollTop + target.offsetHeight === target.scrollHeight) {
         const nextScrollPage = scrollPage + 1;
-        if (this.state.total <= nextScrollPage) { // 已全部拉取
+        if (this.state.total <= nextScrollPage) {
+          // 已全部拉取
           return;
         }
-        this.setState({
-          scrollPage: nextScrollPage,
-        }, () => {
-          this.getData();
-        });
+        this.setState(
+          {
+            scrollPage: nextScrollPage,
+          },
+          () => {
+            this.getData();
+          }
+        );
       }
-      if (target.scrollTop === 0 && scrollPage !== 0) { // 往上滚且不是第一页
+      if (target.scrollTop === 0 && scrollPage !== 0) {
+        // 往上滚且不是第一页
         const nextScrollPage = scrollPage - 1;
-        this.setState({
-          scrollPage: nextScrollPage,
-        }, () => {
-          this.getData();
-        });
+        this.setState(
+          {
+            scrollPage: nextScrollPage,
+          },
+          () => {
+            this.getData();
+          }
+        );
       }
     }, 200)();
-  }
+  };
 
   public render() {
     // tslint:disable-next-line:prefer-const
     let { value, isDisabled, attrs } = this.props;
-    if (attrs && (attrs.mode === 'multiple' || attrs.mode === 'tags')) {
+    if (attrs && (attrs.mode === "multiple" || attrs.mode === "tags")) {
       value = value || [];
     }
     return (
@@ -109,12 +119,17 @@ export class VirtualScrollSelect extends React.Component<ISelectProps> {
           onPopupScroll={this.handleSelectScroll}
           {...searchProps}
         >
-          {this.state.optionsData.map((d: ILabelValue) =>
+          {this.state.optionsData.map((d: ILabelValue) => (
             <Select.Option value={d.value} key={d.value} disabled={d.disabled}>
-              {d.label.length > 25 ? <Tooltip placement="bottomLeft" title={d.label}>
-                {d.label.substring(0, 25) + '...'}
-              </Tooltip> : d.label}
-            </Select.Option>)}
+              {d.label.length > 25 ? (
+                <Tooltip placement="bottomLeft" title={d.label}>
+                  {d.label.substring(0, 25) + "..."}
+                </Tooltip>
+              ) : (
+                d.label
+              )}
+            </Select.Option>
+          ))}
         </Select>
       </>
     );

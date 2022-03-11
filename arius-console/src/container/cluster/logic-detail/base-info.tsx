@@ -1,9 +1,9 @@
 import React from 'react';
-import { Col, Row, Switch, Tooltip }  from 'antd';
-import { IBaseInfo } from '@types/base-types';
+import { Col, Empty, Switch, Tooltip }  from 'antd';
+import { IBaseInfo } from 'typesPath/base-types';
 import { baseInfo, indexExplain, onHandleServerTag } from './config';
 import Url from 'lib/url-parser';
-import { IClusterInfo, ITemplateSrvData } from '@types/cluster/cluster-types';
+import { IClusterInfo, ITemplateSrvData } from 'typesPath/cluster/cluster-types';
 import './index.less';
 import {  getLogicClusterAvalibleTemplateSrv, getLogicClusterTemplateSrv } from 'api/cluster-api';
 import { BaseDetail } from 'component/dantd/base-detail';
@@ -128,11 +128,12 @@ export class ClusterInfo extends React.Component<{logicBaseInfo: IClusterInfo}> 
                 {clusterTemplateSrvs.map((row: ITemplateSrvData, index: number) => (
                   <div className='base-index-box-tag-item' key={index}>
                     <Tooltip title={this.renderTip(row.item.serviceName)} className='base-index-box-tag-item-title'>
-                      {row.item.serviceName}
+                      <span style={{ color:  'rgb(0, 0, 0, 0.3)', cursor: 'not-allowed' }}>{row.item.serviceName}</span>
                     </Tooltip>
-                    <Switch disabled={row.disabled} size="small" checked={row.status ? true : false} onClick={() => onHandleServerTag(row, logicBaseInfo.id, this.reloadDataIndexServer.bind(this))} />
+                    <Switch disabled={true} size="small" checked={row.status ? true : false} onClick={() => onHandleServerTag(row, logicBaseInfo.id, this.reloadDataIndexServer.bind(this))} />
                   </div>
                 ))}
+                {clusterTemplateSrvs && clusterTemplateSrvs.length < 1 ? <Empty style={{ width: '100%', margin: '20px 0px' }} description="该集群版本不支持索引模板服务"/> : null}
             </div>
           </div>
         </>

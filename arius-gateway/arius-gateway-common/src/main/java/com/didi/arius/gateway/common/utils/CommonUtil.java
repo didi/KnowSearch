@@ -1,6 +1,5 @@
 package com.didi.arius.gateway.common.utils;
 
-import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import org.elasticsearch.rest.RestStatus;
 
@@ -12,7 +11,7 @@ public class CommonUtil {
 
     public static boolean isIndexType(QueryContext queryContext) {
         boolean res = false;
-        if (!isSearchKibana(queryContext.getUri(), queryContext.getIndices()) && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.INDEX) {
+        if (!queryContext.isFromKibana()) {
             res = true;
         }
         return res;
@@ -20,7 +19,7 @@ public class CommonUtil {
 
     public static boolean isIndexType(QueryContext queryContext, List<String> indices) {
         boolean res = false;
-        if (!isSearchKibana(queryContext.getUri(), indices) && queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.INDEX) {
+        if (!queryContext.isFromKibana()) {
             res = true;
         }
         return res;

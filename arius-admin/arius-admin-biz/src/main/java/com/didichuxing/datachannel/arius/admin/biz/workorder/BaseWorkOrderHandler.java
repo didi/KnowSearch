@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderProcessDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
@@ -17,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfo
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +61,13 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
                 workOrder.getType(), ConvertUtil.obj2Json(workOrder.getContentObj()));
 
             return Result.buildFrom(checkAuth);
+        }
+
+        Result<Void> checkDuplicateOrder = validDuplicateOrder(workOrder);
+        if(checkDuplicateOrder.failed()) {
+            LOGGER.warn("class=BaseWorkOrderHandler||method=submit||msg=checkDuplicateOrder fail||type={}||content={}",
+                    workOrder.getType(), ConvertUtil.obj2Json(workOrder.getContentObj()));
+            return Result.buildFrom(checkDuplicateOrder);
         }
 
         Result<Void> checkParam = validateConsoleParam(workOrder);
@@ -124,6 +134,35 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
             return Result.buildSucc();
         }
         return Result.buildFail("审批不通过");
+    }
+
+    /**
+     * 校验申请人是否重复提交了相同类型,相同内容的工单
+     * @param workOrder workorder工单
+     * @return 重复性校验的结果
+     */
+    protected Result<Void> validDuplicateOrder(WorkOrder workOrder) {
+        // 获取当前提交人已经提交待审批的工单列表
+        Result<List<WorkOrderVO>> orderToApproveResult = workOrderManager.getOrderApplyList(workOrder.getSubmitor(), OrderStatusEnum.WAIT_DEAL.getCode());
+        if (orderToApproveResult.failed()) {
+            return Result.buildFrom(orderToApproveResult);
+        }
+
+        List<WorkOrderVO> applyListResultData = orderToApproveResult.getData();
+        // 当前不存在待审批的工单时，无需做重复性校验
+        if (CollectionUtils.isEmpty(applyListResultData)) {
+            return Result.buildSucc();
+        }
+
+        // 遍历所有的工单，对于待审批的工单的内容和类型进行重复性的条件过滤
+        for (WorkOrderVO param : applyListResultData) {
+            if (workOrder.getType().equals(param.getType())
+                    && JSON.toJSONString(workOrder.getContentObj()).equals(param.getExtensions())) {
+                return Result.buildFail("重复性工单的提交");
+            }
+        }
+
+        return Result.buildSucc();
     }
 
     /**

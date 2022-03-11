@@ -10,7 +10,25 @@ export const indexConfigClassifyList: string[] = [
   "状态指标",
 ];
 
-const indexConfigData = {
+//黄金配置
+export const goldConfig = {
+  "系统指标": [
+    'cpuUsage',
+    'nodesForDiskUsageGte75Percent',
+  ],
+  "性能指标": [
+    'readTps',
+    'writeTps',
+    'searchLatency',
+    'indexingLatency',
+  ],
+  "状态指标": [
+    'shardNu',
+    'bigShards',
+  ],
+}
+
+export const indexConfigData = {
   cpuUsage: {
     name: "CPU使用率",
     classify: indexConfigClassifyList[0],
@@ -39,14 +57,20 @@ const indexConfigData = {
     name: "磁盘利用率大于75%节点列表",
     classify: indexConfigClassifyList[0],
   },
-  recvTransSize: {
-    name: "网络入口流量",
+  // 特殊的指标前端做合并
+  networkFlow: {
+    name: "网络流量",
+    types: ['recvTransSize', 'sendTransSize'],
     classify: indexConfigClassifyList[0],
   },
-  sendTransSize: {
-    name: "网络出口流量",
-    classify: indexConfigClassifyList[0],
-  },
+  // recvTransSize: {
+  //   name: "网络入口流量",
+  //   classify: indexConfigClassifyList[0],
+  // },
+  // sendTransSize: {
+  //   name: "网络出口流量",
+  //   classify: indexConfigClassifyList[0],
+  // },
   readTps: {
     name: "查询QPS",
     classify: indexConfigClassifyList[1],
@@ -61,6 +85,14 @@ const indexConfigData = {
   },
   indexingLatency: {
     name: "写入耗时",
+    classify: indexConfigClassifyList[1],
+  },
+  taskCost: {
+    name: "执行任务耗时",
+    classify: indexConfigClassifyList[1],
+  },
+  taskCount: {
+    name: "执行任务数量",
     classify: indexConfigClassifyList[1],
   },
   shardNu: {
@@ -84,7 +116,7 @@ const indexConfigData = {
     classify: indexConfigClassifyList[2],
   },
   pendingTasks: {
-    name: "Task列表",
+    name: "PendingTask列表",
     classify: indexConfigClassifyList[2],
   },
 };
@@ -149,7 +181,7 @@ export const getOverviewOption = (
     }
   });
 
-  const xAxisData = lineData.timeStamp.data;
+  const xAxisData = [...new Set(lineData.timeStamp.data)];
   
   const series = lineSeriesKeys.map((item) => lineData[item]);
 
@@ -317,7 +349,11 @@ export const writeTpsObj = {
 };
 
 // 网络出口流量
-export const sendTransSizeData = {
+export const networkFlowData = {
+  recvTransSize: {
+    name: "网络入口流量",
+    data: [],
+  },
   sendTransSize: {
     name: "网络出口流量",
     data: [],
@@ -328,34 +364,34 @@ export const sendTransSizeData = {
   },
 };
 
-export const sendTransSizeList = getObjKeys(sendTransSizeData);
+export const networkFlowList = getObjKeys(networkFlowData);
 
-export const sendTransSizeObj = {
-  title: "网络出口流量(MB/s)",
-  data: sendTransSizeData,
-  list: sendTransSizeList,
+export const networkFlowObj = {
+  title: "网络流量(MB/s)",
+  data: networkFlowData,
+  list: networkFlowList,
 };
 
 
-// 网络入口流量
-export const recvTransSizeData = {
-  recvTransSize: {
-    name: "网络入口流量",
-    data: [],
-  },
-  timeStamp: {
-    name: "时间戳",
-    data: [],
-  },
-};
+// // 网络入口流量
+// export const recvTransSizeData = {
+//   recvTransSize: {
+//     name: "网络入口流量",
+//     data: [],
+//   },
+//   timeStamp: {
+//     name: "时间戳",
+//     data: [],
+//   },
+// };
 
-export const recvTransSizeList = getObjKeys(recvTransSizeData);
+// export const recvTransSizeList = getObjKeys(recvTransSizeData);
 
-export const recvTransSizeObj = {
-  title: "网络入口流量(MB/s)",
-  data: recvTransSizeData,
-  list: recvTransSizeList,
-};
+// export const recvTransSizeObj = {
+//   title: "网络入口流量(MB/s)",
+//   data: recvTransSizeData,
+//   list: recvTransSizeList,
+// };
 
 // 查询耗时
 export const searchLatencyData = _.cloneDeep(legendInfo);
@@ -366,6 +402,17 @@ export const searchLatencyObj = {
   title: "查询耗时(ms)",
   data: searchLatencyData,
   list: searchLatencyList,
+};
+
+// task 耗时taskCost
+export const taskCostData = _.cloneDeep(legendInfo);
+
+export const taskCostList = getObjKeys(taskCostData);
+
+export const taskCostObj = {
+  title: "执行任务耗时(ms)",
+  data: taskCostData,
+  list: taskCostList,
 };
 
 // 查询QPS
@@ -386,6 +433,26 @@ export const readTpsObj = {
   title: "查询QPS(个/s)",
   data: readTpsData,
   list: readTpsList,
+};
+
+// taskCount task数量趋势
+export const taskCountData = {
+  taskCount: {
+    name: "执行任务数量",
+    data: [],
+  },
+  timeStamp: {
+    name: "时间戳",
+    data: [],
+  },
+};
+
+export const taskCountList = getObjKeys(taskCountData);
+
+export const taskCountObj = {
+  title: "执行任务数量(个/s)",
+  data: taskCountData,
+  list: taskCountList,
 };
 
 // 写入耗时
@@ -627,24 +694,39 @@ export const metricsDataType: metricsDataType = {
     info: writeTpsObj,
     unit: unitMap.countS,
   },
-  sendTransSize: {
-    type: LINE,
-    info: sendTransSizeObj,
-    unit: unitMap.mbS,
-  },
+  // sendTransSize: {
+  //   type: LINE,
+  //   info: sendTransSizeObj,
+  //   unit: unitMap.mbS,
+  // },
   searchLatency: {
     type: LINE,
     info: searchLatencyObj,
     unit: unitMap.ms,
   },
-  recvTransSize: {
+  taskCost: {
     type: LINE,
-    info: recvTransSizeObj,
+    info: taskCostObj,
+    unit: unitMap.ms,
+  },
+  networkFlow: {
+    type: LINE,
+    info: networkFlowObj,
     unit: unitMap.mbS,
   },
+  // recvTransSize: {
+  //   type: LINE,
+  //   info: recvTransSizeObj,
+  //   unit: unitMap.mbS,
+  // },
   readTps: {
     type: LINE,
     info: readTpsObj,
+    unit: unitMap.countS,
+  },
+  taskCount: {
+    type: LINE,
+    info: taskCountObj,
     unit: unitMap.countS,
   },
   indexingLatency: {
@@ -725,7 +807,7 @@ export const metricsDataType: metricsDataType = {
   },
   pendingTasks: {
     type: SHARD,
-    title: "Task 列表",
+    title: "PendingTask列表",
     shardColumn: pendingTasksColumns,
     mapFn: (item, index) =>
       shardColumnEllipsis(

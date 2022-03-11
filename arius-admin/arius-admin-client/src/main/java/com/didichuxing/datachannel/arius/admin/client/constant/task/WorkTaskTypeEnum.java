@@ -16,7 +16,7 @@ public enum WorkTaskTypeEnum {
 
                               CLUSTER_OFFLINE(7, "集群下线操作"),
 
-                              TEMPLATE_DCDR(10, "模版DCDR任务"),
+                              TEMPLATE_DCDR(10, "索引模板主从切换"),
 
                               CLUSTER_CONFIG_ADD(11, "集群配置新增"),
 

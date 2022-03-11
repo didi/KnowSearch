@@ -1,12 +1,18 @@
-import { IOpClusterRegion } from '@types/params-types';
+import { IOpClusterRegion } from 'typesPath/params-types';
 import fetch, { formFetch } from '../lib/fetch';
 
 export const getLogicClusterRegionList = (areaId: number) => {
   return fetch(`/v3/op/logic/cluster/region/list?logicClusterId=${areaId}`);
 };
 
-export const getPhyClusterRegionList = (clusterName: string) => {
-  return fetch(`/v3/op/phy/cluster/region?cluster=${clusterName}`);
+// GET /v3/op/phy/cluster/region 获取物理集群region列表接口
+export const getPhyClusterRegionList = (clusterName: string, clusterLogicType) => {
+  return fetch(`/v3/op/phy/cluster/region?cluster=${clusterName}&clusterLogicType=${clusterLogicType}`);
+};
+
+// /v3/op/phy/cluster/region/bind 获取物理集群region列表接口
+export const getPhyClusterRegionListBind = (clusterName: string, clusterLogicType, clusterLogicId) => {
+  return fetch(`/v3/op/phy/cluster/region/bind?cluster=${clusterName}&clusterLogicType=${clusterLogicType}&clusterLogicId=${clusterLogicId}`);
 };
 
 // 逻辑集群新建集群 获取想同版本物理集群列表
@@ -14,8 +20,8 @@ export const getPhyClusterList = (clusterLogicType, clusterName) => {
   return fetch(`/v3/op/phy/cluster/${clusterLogicType}/${clusterName}/version/list`);
 }
 
-export const delLogicCluterRegion = (id: number) => {
-  return fetch(`/v3/op/logic/cluster/region/delete?regionId=${id}`, {
+export const delLogicCluterRegion = (id: number, logicClusterId: number) => {
+  return fetch(`/v3/op/logic/cluster/region/delete?logicClusterId=${logicClusterId}&regionId=${id}`, {
     method: 'DELETE',
   });
 };
@@ -93,4 +99,9 @@ export const logicClusterBinRegion = (params: any) => {
 
 export const getPhyClusterRacks = (cluster: string) => {
   return fetch(`/v3/op/phy/cluster/region/phyClusterRacks?cluster=${cluster}`);
+};
+
+export const getBindRack = (clusterPhy: string, clusterLogic: string, templateSize: number) => {
+  // /v3/op/phy/cluster/{clusterPhy}/{clusterLogic}/{templateSize}/bindRack
+  return fetch(`/v3/op/phy/cluster/${clusterPhy}/${clusterLogic}/${templateSize}/bindRack`);
 };

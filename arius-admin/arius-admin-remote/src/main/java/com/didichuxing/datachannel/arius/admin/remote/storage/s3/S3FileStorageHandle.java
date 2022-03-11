@@ -59,7 +59,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
     }
 
     @Override
-    public Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile) {
+    public synchronized Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile) {
         InputStream inputStream = null;
         try {
             if (!createBucketIfNotExist()) {
@@ -92,7 +92,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
     }
 
     @Override
-    public Result<Void> remove(String fileName) {
+    public synchronized Result<Void> remove(String fileName) {
         try {
             minioClient.removeObject(RemoveObjectArgs.builder().bucket(this.bucket).object(fileName).build());
             return Result.buildSucc();

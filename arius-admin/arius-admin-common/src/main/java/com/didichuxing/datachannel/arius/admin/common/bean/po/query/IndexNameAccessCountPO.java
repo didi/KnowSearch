@@ -84,4 +84,9 @@ public class IndexNameAccessCountPO extends BaseESPO {
         return String.format("%d_%s_%s", templateId, indexName, date);
     }
 
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
+
 }

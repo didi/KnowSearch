@@ -1,10 +1,7 @@
 ## 1. 项目背景
     arius-admin-v2 致力于实现一套于对Elasticsearch元数据的管控平台，负责维护项目（APPID）、索引、Elasticsearch集群资源等信息的管理，并维护三者之前的关系；对外暴露restFul接口，以提供查询管控元数据的能力。
 ## 2. 工程模块组成和划分
-arius-admin-v2由如下10个主要的工程和扩展增值服务组成:
-
-![Logi-EM](http://116.85.24.226/images/5001.jpg)
-
+arius-admin-v2由10个主要的工程和扩展增值服务组成:
 
     arius-admin-rest            表现层1，可以直接封装Manager接口暴露成restful接口 
     arius-admin-task            表现层2，提供auv-job定时调度任务入口, 任务实现在arius-admin-biz/arius-admin-core中 

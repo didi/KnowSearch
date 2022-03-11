@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -184,11 +185,21 @@ public interface TemplatePhyManager {
                                           int retryCount) throws ESOperateException;
 
     /**
-     * @param physicalWithLogic
-     * @param days
-     * @return
+     * 根据逻辑模板和热数据保存天数或者过期天数来获取需要迁移到冷存的索引名称列表或者需要删除的索引名称列表
+     * @param physicalWithLogic 逻辑物理模板
+     * @param days 热数据保存天数
+     * @return 索引名称列表
+     */
+    Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days);
+
+    /**
+     * 获取指定天数外的索引列表
+     * @param physicalWithLogic 逻辑物理模板
+     * @param days  天数
+     * @return 索引名称列表
      */
     Set<String> getIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days);
+
 
     /**
      * 获取带有App权限信息的物理模板列表

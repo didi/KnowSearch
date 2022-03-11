@@ -4,10 +4,10 @@ import { connect } from "react-redux";
 import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { ExpectDataNodeNu, RenderText, ShowCost } from 'container/custom-form';
-import { IWorkOrder } from '@types/params-types';
+import { IWorkOrder } from 'typesPath/params-types';
 import { submitWorkOrder } from 'api/common-api';
 import { regNonnegativeInteger } from 'constants/reg';
-import { ICluster } from '@types/cluster/cluster-types';
+import { ICluster } from 'typesPath/cluster/cluster-types';
 import { AppState, UserState } from 'store/type';
 
 const mapStateToProps = (state: any) => ({

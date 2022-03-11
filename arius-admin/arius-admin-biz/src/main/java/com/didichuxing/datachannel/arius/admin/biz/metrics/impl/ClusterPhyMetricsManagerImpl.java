@@ -1,44 +1,32 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getDefaultClusterPhyMetricsCode;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getClusterPhyNodeMetricsType;
-
-import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.cluster.ESClusterOverviewMetricsVO;
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
-import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.ClusterOverviewMetricsHandle;
+import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyIndicesDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyNodeDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.*;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.MetricsVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.linechart.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.AggMetricsTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
+import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.MetricsConfigService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStaticsService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getClusterPhyNodeMetricsType;
 
 /**
  * Created by linyunan on 2021-07-30
@@ -52,9 +40,6 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     private AppService                   appService;
 
     @Autowired
-    private AriusUserInfoService         ariusUserInfoService;
-
-    @Autowired
     private MetricsConfigService         metricsConfigService;
 
     @Autowired
@@ -64,10 +49,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     private NodeStatisService            nodeStatisService;
 
     @Autowired
-    private ESIndicesStaticsService      esIndicesStaticsService;
-
-    @Autowired
-    private ClusterOverviewMetricsHandle clusterOverviewMetricsHandle;
+    private HandleFactory                handleFactory;
 
     @Override
     public List<String> getMetricsCode2TypeMap(String type) {
@@ -77,6 +59,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
             case NODE:
                 return getClusterPhyNodeMetricsType();
             case INDICES:
+            case TEMPLATES:
                 return getClusterPhyIndicesMetricsType();
             default:
                 return Lists.newArrayList();
@@ -84,61 +67,48 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     }
 
     @Override
-    public Result<ESClusterOverviewMetricsVO> getOverviewMetrics(MetricsClusterPhyDTO param, Integer appId,
-                                                                    String domainAccount) {
-        //1. verification
-        Result<Void> checkParamResult = checkParamForOverviewMetrics(param, appId, domainAccount);
-        if (checkParamResult.failed()) {
-            return Result.buildFrom(checkParamResult);
+    @SuppressWarnings("unchecked")
+    public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
+        try {
+            T result = null;
+            BaseClusterMetricsHandle metricsHandle = (BaseClusterMetricsHandle) handleFactory.getByHandlerNamePer(metricsTypeEnum.getType());
+            if (AriusObjUtils.isNull(metricsHandle)) {
+                LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getClusterMetricsFromEs||errMsg=cannot get metricsHandle");
+                return Result.buildFail();
+            }
+
+            if (metricsTypeEnum.isCollectCurveMetricsList()) {
+                Result<List<VariousLineChartMetricsVO>> clusterPhyMetricsResult = metricsHandle.getClusterPhyRelatedCurveMetrics(param, appId, domainAccount);
+                result = clusterPhyMetricsResult.success() ? (T) clusterPhyMetricsResult.getData() : null;
+            } else {
+                Result<MetricsVO> metricsVoResult = metricsHandle.getOtherClusterPhyRelatedMetricsVO(param, appId, domainAccount);
+                result = metricsVoResult.success() ? (T) metricsVoResult.getData() : null;
+            }
+
+            return Result.buildSucc(result);
+        } catch (Exception e) {
+            LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getClusterMetricsFromEs||errMsg={}", e);
+            return Result.buildFail();
         }
-
-        //2. initialization
-        initMetricsClusterPhy(param);
-
-        return Result.buildSucc(clusterOverviewMetricsHandle.buildClusterPhyOverviewMetrics(param));
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getClusterPhyNodesMetrics(MetricsClusterPhyNodeDTO param,
-                                                                             Integer appId, String domainAccount) {
-        //1. verification
-        Result<Void> checkParamResult = checkParamForClusterPhyNodesMetrics(param, appId, domainAccount);
-        if (checkParamResult.failed()) {
-            return Result.buildFrom(checkParamResult);
+    public Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
+        try {
+            List<VariousLineChartMetricsVO> result = new ArrayList<>();
+            MetricsClusterPhyNodeDTO phyNodeDTO =  ConvertUtil.obj2Obj(param, MetricsClusterPhyNodeDTO.class);
+            for (String nodeName : param.getNodeNames()) {
+                phyNodeDTO.setNodeName(nodeName);
+                Result<List<VariousLineChartMetricsVO>> nodeMetrics = getClusterMetricsByMetricsType(phyNodeDTO, appId, domainAccount, metricsTypeEnum);
+                if (nodeMetrics.success()) {
+                    result.addAll(nodeMetrics.getData());
+                }
+            }
+            return Result.buildSucc(result);
+        } catch (Exception e) {
+            LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getClusterMetricsFromEs||errMsg={}", e);
+            return Result.buildFail();
         }
-
-        //2. initialization
-        initMetricsClusterPhyNode(param);
-
-        //3. get metrics from es engine
-        List<VariousLineChartMetrics> variousLineChartMetrics = nodeStatisService.getAggClusterPhyNodeMetrics(param);
-
-        //4. uniform percentage unit
-        MetricsValueConvertUtils.convertClusterPhyNodeMetricsPercent(variousLineChartMetrics);
-
-        //5. optimize query burr
-        MetricsValueConvertUtils.doOptimizeQueryBurrForNodeOrIndicesMetrics(variousLineChartMetrics);
-        return Result.buildSucc(ConvertUtil.list2List(variousLineChartMetrics, VariousLineChartMetricsVO.class));
-    }
-
-    @Override
-    public Result<List<VariousLineChartMetricsVO>> getClusterPhyIndicesMetrics(MetricsClusterPhyIndicesDTO param,
-                                                                               Integer appId, String domainAccount) {
-        //1. verification
-        Result<Void> checkParamResult = checkParamForClusterPhyIndicesMetrics(param, appId, domainAccount);
-        if (checkParamResult.failed()) {
-            return Result.buildFrom(checkParamResult);
-        }
-
-        //2. initialization
-        initMetricsClusterPhyIndices(param);
-
-        //3. get metrics from es engine
-        List<VariousLineChartMetrics> aggClusterPhyIndicesMetrics = esIndicesStaticsService.getAggClusterPhyIndicesMetrics(param);
-
-        //4. optimize query burr
-        MetricsValueConvertUtils.doOptimizeQueryBurrForNodeOrIndicesMetrics(aggClusterPhyIndicesMetrics);
-        return Result.buildSucc(ConvertUtil.list2List(aggClusterPhyIndicesMetrics, VariousLineChartMetricsVO.class));
     }
 
     @Override
@@ -166,140 +136,12 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         return result;
     }
 
-    /***********************************************private***********************************************/
-
-    private Result<Void> checkCommonParam(MetricsClusterPhyDTO metricsClusterPhyDTO, Integer appId, String domainAccount) {
-
-        if (null == metricsClusterPhyDTO) {
-            return Result.buildParamIllegal("param is empty");
-        }
-
-        if (null == appId) {
-            return Result.buildParamIllegal("appId is empty");
-        }
-
-        if (null == ariusUserInfoService.getByName(domainAccount)) {
-            return Result.buildParamIllegal("user info is empty");
-        }
-
+    @Override
+    public Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer appId) {
         if (!appService.isAppExists(appId)) {
             return Result.buildParamIllegal(String.format("There is no appId:%s", appId));
         }
-
-        return Result.buildSucc();
+        return Result.buildSucc(ConvertUtil.list2List(nodeStatisService.getClusterTaskDetail(clusterPhyName, node, Long.parseLong(startTime), Long.parseLong(endTime)),
+                ESClusterTaskDetailVO.class));
     }
-
-    private Result<Void> checkParamForClusterPhyNodesMetrics(MetricsClusterPhyNodeDTO param, Integer appId,
-                                                       String domainAccount) {
-        Result<Void> checkCommonParam = checkCommonParam(param, appId, domainAccount);
-        if (checkCommonParam.failed()) {
-            return checkCommonParam;
-        }
-
-        for (String metricsType : param.getMetricsTypes()) {
-            if (!ClusterPhyNodeMetricsEnum.hasExist(metricsType)) {
-                return Result.buildParamIllegal(String.format("metricsType:%s is error", metricsType));
-            }
-        }
-
-        return Result.buildSucc();
-    }
-
-    private Result<Void> checkParamForOverviewMetrics(MetricsClusterPhyDTO param, Integer appId, String domainAccount) {
-        Result<Void> checkCommonParam = checkCommonParam(param, appId, domainAccount);
-        if (checkCommonParam.failed()) {
-            return checkCommonParam;
-        }
-
-        for (String metricsType : param.getMetricsTypes()) {
-            if (!ClusterPhyClusterMetricsEnum.hasExist(metricsType)) {
-                return Result.buildParamIllegal("metricsType is error");
-            }
-        }
-
-        return Result.buildSucc();
-    }
-
-    private Result<Void> checkParamForClusterPhyIndicesMetrics(MetricsClusterPhyIndicesDTO param, Integer appId,
-                                                               String domainAccount) {
-        Result<Void> checkCommonParam = checkCommonParam(param, appId, domainAccount);
-        if (checkCommonParam.failed()) {
-            return checkCommonParam;
-        }
-
-        for (String metricsType : param.getMetricsTypes()) {
-            if (!ClusterPhyIndicesMetricsEnum.hasExist(metricsType)) {
-                return Result.buildParamIllegal("metricsType is error");
-            }
-        }
-
-        return Result.buildSucc();
-    }
-
-    private void initMetricsClusterPhy(MetricsClusterPhyDTO metricsClusterPhyDTO) {
-        init(metricsClusterPhyDTO);
-
-        //指标类型为空, 获取默认指标
-        if (CollectionUtils.isEmpty(metricsClusterPhyDTO.getMetricsTypes())) {
-            metricsClusterPhyDTO.setMetricsTypes(getDefaultClusterPhyMetricsCode());
-        }
-    }
-
-    private void initMetricsClusterPhyNode(MetricsClusterPhyNodeDTO param) {
-        init(param);
-
-        //指标类型为空, 获取默认指标
-        if (CollectionUtils.isEmpty(param.getMetricsTypes())) {
-            param.setMetricsTypes(getClusterPhyNodeMetricsType());
-        }
-
-        if (!AriusObjUtils.isBlack(param.getNodeName())) {
-            param.setTopNu(null);
-        }
-    }
-
-    private void initMetricsClusterPhyIndices(MetricsClusterPhyIndicesDTO param) {
-        init(param);
-
-        //指标类型为空, 获取默认指标
-        if (CollectionUtils.isEmpty(param.getMetricsTypes())) {
-            param.setMetricsTypes(getClusterPhyIndicesMetricsType());
-        }
-
-        if (!AriusObjUtils.isBlack(param.getIndexName())) {
-            param.setTopNu(null);
-        }
-    }
-
-	private void init(MetricsClusterPhyDTO param) {
-		if (AriusObjUtils.isBlack(param.getClusterPhyName())) {
-			param.setClusterPhyName(ALL_CLUSTER);
-		}
-
-		if (0 == param.getEndTime() || null == param.getEndTime()) {
-			param.setEndTime(System.currentTimeMillis());
-		}
-
-		if (0 == param.getStartTime() || null == param.getStartTime()) {
-			param.setStartTime(param.getEndTime() - DEFAULT_TIME_INTERVAL);
-		}
-
-        //防止内存打爆, 触发熔断, 兜底方案, 结束时间近一周
-        long intervalTime = param.getEndTime() - param.getStartTime();
-        if (intervalTime > MAX_TIME_INTERVAL) {
-            param.setStartTime(param.getEndTime() - MAX_TIME_INTERVAL);
-        }
-
-        param.setAggType(AggMetricsTypeEnum.MAX.getType());
-
-		if (null != param.getTopNu()) {
-			if (param.getTopNu() <= 0) {
-				param.setTopNu(5);
-			}
-
-			if (param.getTopNu() > 20) {
-				param.setTopNu(20);
-			}
-		}
-	}
 }

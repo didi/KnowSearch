@@ -171,7 +171,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterOpRestartContent content = JSON.parseObject(extensions, ClusterOpRestartContent.class);
+        ClusterOpUpdateContent content = JSON.parseObject(extensions, ClusterOpUpdateContent.class);
 
         return ConvertUtil.obj2Obj(content, ClusterOpUpdateOrderDetail.class);
     }

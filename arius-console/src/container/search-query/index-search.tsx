@@ -1,89 +1,122 @@
-import React from 'react';
-import { Select } from 'antd';
-import { LeftMenuLayout } from 'component/left-menu-layout';
-import { leftMenuKeys, SEARCH_PROPERTY_MENU } from './../cluster/logic-detail/config';
-import { PageIFrameContainer } from 'container/iframe-page';
-import Url from 'lib/url-parser';
+import React from "react";
+import { Select, Menu } from "antd";
+import { LeftMenuLayout } from "component/left-menu-layout";
+import { leftMenuKeys, SEARCH_PROPERTY_MENU } from "./../cluster/logic-detail/config";
+import { PageIFrameContainer } from "container/iframe-page";
+import Url from "lib/url-parser";
 import { getClusterList } from "api/cluster-api";
-import { getCookie } from 'lib/utils';
+import { getCookie, setCookie } from 'lib/utils';
 import { SQLQuery } from './../cluster/logic-detail/sql-query';
+import './index.less';
 
-const Option = Select.Option
+const Option = Select.Option;
 
 export class IndexSearch extends React.Component {
-  public currLeftMenu = '';
-
+  public state;
   constructor(props: any) {
     super(props);
     const url = Url();
-    this.currLeftMenu = url.search.currLeftMenu || 'kibana' as leftMenuKeys;
-    window.addEventListener('hashchange', () => {
+    window.addEventListener("hashchange", () => {
       this.updateLogicMenu();
     });
-  }
-
-  public state = {
-    currentRegion: getCookie('idc') || 'cn',
-    id: null,
-    list: [],
+    this.state = {
+      currentRegion: getCookie("idc") || "cn",
+      id: null,
+      list: [],
+      phyClusterName: null,
+      currLeftMenu: url.hash.menu || ("kibana" as leftMenuKeys),
+      activeKey: url.hash.menu || ("kibana" as leftMenuKeys),
+    };
   }
 
   public renderContent = () => {
-    const { currentRegion } = this.state;
-    if (this.currLeftMenu === leftMenuKeys.kibana) return <PageIFrameContainer src={`/console/arius/kibana7${currentRegion === 'us01' ? '-us' : currentRegion === 'ru01' ? '-ru' : ''}/app/kibana#/discover?_g=()`} />;
-    if (this.currLeftMenu === leftMenuKeys.DSL) return <PageIFrameContainer src={`/console/arius/kibana7${currentRegion === 'us01' ? '-us' : currentRegion === 'ru01' ? '-ru' : ''}/app/kibana#/dev_tools/console`} />;
-    if (this.currLeftMenu === leftMenuKeys.SQL) return <SQLQuery />;
+    const { currentRegion, currLeftMenu } = this.state;
+    if (currLeftMenu === leftMenuKeys.kibana)
+      return (
+        <PageIFrameContainer
+          className="iframe-search"
+          src={`/console/arius/kibana7${
+            currentRegion === "us01" ? "-us" : currentRegion === "ru01" ? "-ru" : ""
+          }/app/kibana#/discover?_g=()`}
+        />
+      );
+    if (currLeftMenu === leftMenuKeys.DSL)
+      return (
+        <PageIFrameContainer
+          className="iframe-search"
+          src={`/console/arius/kibana7${
+            currentRegion === "us01" ? "-us" : currentRegion === "ru01" ? "-ru" : ""
+          }/app/kibana#/dev_tools/console?embed=true`}
+        />
+      );
+    if (currLeftMenu === leftMenuKeys.SQL) return <SQLQuery phyClusterName={this.state.phyClusterName} />;
     return null;
-  }
+  };
 
   public updateLogicMenu() {
     this.setState({
-      menu: window.location.hash.replace('#', '') || 'info'
-    })
+      menu: window.location.hash.replace("#", "") || "kibana",
+    });
   }
 
-  public changeMenu = e => {
-    this.currLeftMenu = e.key;
-    const href = window.location.href;
-    let search = window.location.search;
-    let url = href.split('?')?.[0];
-    const index = search.indexOf('currLeftMenu');
-    if (search.includes('currLeftMenu')) {
-      search = search.substring(0, index - 1);
-    }
+  public changeMenu = (e) => {
+    this.setState({
+      currLeftMenu: e.key,
+      activeKey: e.key
+    })
+    let href = window.location.pathname;
+    const search = window.location.search;
+    const url = href + search + `#menu=${e.key}`;
 
-    search = search + `?currLeftMenu=${e.key}`;
-    url = url + search + window.location.hash;
-
-    window.history.pushState({
-      url,
-    }, '', url);
+    window.history.pushState(
+      {
+        url,
+      },
+      "",
+      url
+    );
     this.updateLogicMenu();
+  };
+
+  public setCookiePhyClusterName(clusterInfo) {
+    const value = clusterInfo?.associatedPhyClusterName?.[0] || 'no bind phyCluster';
+    setCookie([{ key: "kibanaPhyClusterName", value }]);
   }
 
   // 注释调下拉请求
   public componentDidMount() {
     getClusterList().then((res) => {
-      this.setState({list: res });
+      this.setState({ list: res });
       if (res && res.length) {
-        this.setState({id: res[0].id });
+        this.setCookiePhyClusterName(res[0]);
+        this.setState({ id: res[0].id });
         this.changeUrl(res[0]);
       }
-    })
+    });
   }
 
   public changeUrl = (item) => {
+    this.setState({ phyClusterName: item.associatedPhyClusterName?.[0] || null });
     const href = window.location.href;
     let search = window.location.search;
-    let url = href.split('?')?.[0];
+    let url = href.split("?")?.[0];
+    if (href.split("?")?.[1]) {
+      return 
+    }
+    url = url.split('#')[0];
+    let hash = window.location.hash.split('#');
     const urlParams = Url();
-    search = `?clusterId=${item.id}&type=${item.type}&currLeftMenu=${urlParams.search.currLeftMenu || 'kibana'}`;
-    url = url + search + window.location.hash;
+    search = `?clusterId=${item.id}&type=${item.type}&currLeftMenu=${urlParams.search.currLeftMenu || "kibana"}`;
+    url = url + search + '#' + hash[hash.length - 1];
 
-    window.history.pushState({
-      url,
-    }, '', url);
-  }
+    window.history.pushState(
+      {
+        url,
+      },
+      "",
+      url
+    );
+  };
 
   public onChange = (e) => {
     const data = this.state.list.filter((item) => {
@@ -92,30 +125,45 @@ export class IndexSearch extends React.Component {
       }
       return false;
     })
+
     if (data && data.length) {
-      this.setState({id: e });
+      this.setCookiePhyClusterName(data[0]);
+      this.setState({ id: e });
       this.changeUrl(data[0]);
     }
-  }
+  };
 
   public render() {
-    const { id, list } = this.state;
+    const { id, list, currLeftMenu } = this.state;
     return (
-      <div style={{ background: '#fff' }}>
-        <div style={{ padding: 20, minWidth: 400 }}>
-          <span>逻辑集群：</span>
-          <Select value={id} onChange={this.onChange} style={{ minWidth: 200 }}>
-            {list?.map((item) => <Option value={item.id} key={item.id}>{item.name}</Option>)}
+      <div className="hiddenMenuHeader">
+        <div style={{ position: 'absolute', right: 24, top: 16 }}>
+          <span>逻辑集群 </span>
+          <Select value={id} onChange={this.onChange} style={{ width: 350, borderRadius: 4 }} showSearch optionFilterProp="children">
+            {list?.map((item) => (
+              <Option value={item.id} key={item.id}>
+                {item.name}
+              </Option>
+            ))}
           </Select>
         </div>
-        <LeftMenuLayout
-          menu={SEARCH_PROPERTY_MENU}
-          selectedKey={this.currLeftMenu}
-          onMenuClick={this.changeMenu}
-          menuWidth={96}
-        >
+        {/* <LeftMenuLayout menu={SEARCH_PROPERTY_MENU} selectedKey={this.currLeftMenu} onMenuClick={this.changeMenu} menuWidth={96}>
           {this.renderContent()}
-        </LeftMenuLayout>
+        </LeftMenuLayout> */}
+        <div className="detail-tabs">
+          {SEARCH_PROPERTY_MENU.map(m => <div onClick={() => this.changeMenu(m)} className={this.state.activeKey == m.key ? 'detail-tabs-item check' : 'detail-tabs-item'}>{m.label}</div>)}
+        </div>
+         <Menu
+          mode="horizontal"
+          // className="menu-wrapper"
+          selectedKeys={[currLeftMenu]}
+          onClick={this.changeMenu}
+        >
+          {SEARCH_PROPERTY_MENU.map(m => <Menu.Item key={m.key}>{m.label}</Menu.Item>)}
+        </Menu>
+        <div style={{ minHeight: 800,  overflow: 'scoll', position: 'relative' }}>
+          {this.renderContent()}
+        </div>
       </div>
     );
   }

@@ -24,6 +24,8 @@ public interface ESRoleClusterDAO {
 
     List<ESRoleClusterPO> listByClusterId(String clusterId);
 
+    List<ESRoleClusterPO> listByClusterIds(List<String> clusterIds);
+
     int update(ESRoleClusterPO param);
 
     int updateVersionByClusterIdAndRole(@Param("elasticClusterId") Long elasticClusterId,

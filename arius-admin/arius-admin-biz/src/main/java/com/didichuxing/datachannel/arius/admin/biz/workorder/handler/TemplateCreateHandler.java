@@ -1,7 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateCreateContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateCreateNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
@@ -12,6 +23,7 @@ import com.didichuxing.datachannel.arius.admin.client.constant.resource.Resource
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -25,29 +37,18 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateCreateContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateCreateNotify;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_TYPE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_CREATE;
@@ -68,9 +69,6 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private TemplatePhyMappingManager   templatePhyMappingManager;
-
-    @Autowired
-    private TemplateLogicMappingManager templateLogicMappingManager;
 
     @Autowired
     private TemplateAction              templateAction;
@@ -200,6 +198,8 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("集群数据中心不符");
         }
 
+        // 模板容量设置资源权限校验
+
         return Result.buildSucc();
     }
 
@@ -238,6 +238,16 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      */
     @Override
     protected Result<Void> validateParam(WorkOrder workOrder) {
+        TemplateCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+                TemplateCreateContent.class);
+
+        //校验模板参数类型
+        Result<Void> checkBaseInfoResult = templateLogicService
+                .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorAppid()), OperationEnum.ADD);
+        if (checkBaseInfoResult.failed()) {
+            return checkBaseInfoResult;
+        }
+
         return Result.buildSucc();
     }
 
@@ -261,10 +271,13 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
         if (result.success()) {
             // 模板创建成功，如果设置了mapping，更新mapping
-            if (StringUtils.isNoneBlank(content.getMapping()) && templateLogicMappingManager
+            /**
+             * 创建模板时同步设置mapping信息
+             */
+            /*if (StringUtils.isNoneBlank(content.getMapping()) && templateLogicMappingManager
                     .updateMappingForNew(result.getData(), genTypeProperty(content.getMapping())).failed()) {
                 throw new AdminOperateException("设置mapping失败");
-            }
+            }*/
 
             sendNotify(WORK_ORDER_TEMPLATE_CREATE,
                     new TemplateCreateNotify(workOrder.getSubmitorAppid(), content.getName()),
@@ -356,7 +369,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
     /**
      * 根据工单内容构建物理模板DTO
-     * 情融说：当前用户控制台不支持主从部署，所以这里每个逻辑模板知会对应一个物理模板角色是为master
+     * 当前用户控制台不支持主从部署，所以这里每个逻辑模板知会对应一个物理模板角色是为master
      * @param content 工单内容
      * @param logicDTO 逻辑模板DTO
      * @return dto
@@ -374,6 +387,26 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         physicalDTO.setCluster(content.getCluster());
         physicalDTO.setRack(content.getRack());
 
+        AriusIndexTemplateSetting settings = new AriusIndexTemplateSetting();
+        if (StringUtils.isNotBlank(content.getCustomerAnalysis())) {
+            settings.setAnalysis(JSON.parseObject(content.getCustomerAnalysis()));
+            physicalDTO.setSettings(settings);
+        }
+        if (content.isCancelCopy()) {
+            settings.setReplicasNum(0);
+            physicalDTO.setSettings(settings);
+        }
+        if (content.isAsyncTranslog()) {
+            settings.setTranslogDurability(AriusIndexTemplateSetting.ASYNC);
+            physicalDTO.setSettings(settings);
+        }
+        if (StringUtils.isNotBlank(content.getDynamicTemplates())
+                || StringUtils.isNotBlank(content.getMapping())) {
+            AriusTypeProperty ariusTypeProperty = genTypeProperty(content.getMapping(), content.getDynamicTemplates());
+            // 这里都是设置默认的type类型的类型名称
+            physicalDTO.setMappings(ariusTypeProperty.toMappingJSON().getJSONObject(DEFAULT_INDEX_MAPPING_TYPE).toJSONString());
+        }
+
         setTemplateShard(physicalDTO, content, logicDTO);
 
         return physicalDTO;
@@ -385,13 +418,23 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     }
 
     private AriusTypeProperty genTypeProperty(String mapping) {
+        return genTypeProperty(mapping, null);
+    }
+
+    private AriusTypeProperty genTypeProperty(String mapping, String dynamicTemplates) {
         AriusTypeProperty typeProperty = new AriusTypeProperty();
-        typeProperty.setTypeName(DEFAULT_TYPE);
+        typeProperty.setTypeName(DEFAULT_INDEX_MAPPING_TYPE);
         // 未指定mapping，设置为{}以符合json格式
         if (StringUtils.isBlank(mapping)) {
             mapping = "{}";
         }
         typeProperty.setProperties(JSON.parseObject(mapping));
+        if (StringUtils.isNotBlank(dynamicTemplates)) {
+            JSONArray dynamicTemplateArrays = JSONArray.parseArray(dynamicTemplates);
+            if (CollectionUtils.isNotEmpty(dynamicTemplateArrays)) {
+                typeProperty.setDynamicTemplates(dynamicTemplateArrays);
+            }
+        }
         return typeProperty;
     }
 

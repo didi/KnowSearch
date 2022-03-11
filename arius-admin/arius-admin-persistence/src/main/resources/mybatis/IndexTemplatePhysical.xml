@@ -147,6 +147,13 @@
         where status = #{status} and cluster = #{cluster}
     </select>
 
+    <select id="listByMatchClusterAndStatus" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_physical
+        where status = #{status} and cluster LIKE CONCAT(#{cluster},'%')
+    </select>
+
     <select id="getByClusterAndName" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

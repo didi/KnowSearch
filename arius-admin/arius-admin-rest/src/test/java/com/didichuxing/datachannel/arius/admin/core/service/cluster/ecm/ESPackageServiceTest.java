@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPackageDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileS
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPackageDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Rollback
-public class ESPackageServiceTest extends AriusAdminApplicationTests {
+public class ESPackageServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     ESPackageService esPackageService;
@@ -37,17 +38,15 @@ public class ESPackageServiceTest extends AriusAdminApplicationTests {
     @MockBean
     private FileStorageService fileStorageService;
 
-    private static final String OPERATOR = "wpk";
-
     /**
      * catch的异常分支无法进入,因此做了一些修改
      */
     @Test
     public void listESPackageTest() {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
-        Mockito.when(ariusUserInfoService.isOPByDomainAccount(OPERATOR)).thenReturn(true);
-        Long id = esPackageService.addESPackage(esPackageDTO, OPERATOR).getData();
-        Assert.assertTrue(esPackageService.listESPackage().stream().anyMatch(esPackage -> esPackage.getId().equals(id)));
+        Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
+        Long id = esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData();
+        Assertions.assertTrue(esPackageService.listESPackage().stream().anyMatch(esPackage -> esPackage.getId().equals(id)));
     }
 
     /**
@@ -55,83 +54,85 @@ public class ESPackageServiceTest extends AriusAdminApplicationTests {
      */
     @Test
     public void addESPackageTest() {
-        Assert.assertEquals(Result.buildParamIllegal("安装包为空").getMessage(),
-                esPackageService.addESPackage(null, OPERATOR).getMessage());
+        Assertions.assertEquals(Result.buildParamIllegal("安装包为空").getMessage(),
+                esPackageService.addESPackage(null, CustomDataSource.OPERATOR).getMessage());
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
-        Mockito.when(ariusUserInfoService.isOPByDomainAccount(OPERATOR)).thenReturn(false);
-        Assert.assertEquals(Result.buildFail("非运维人员不能更新ES安装包!").getMessage(),
-                esPackageService.addESPackage(esPackageDTO, OPERATOR).getMessage());
-        Mockito.when(ariusUserInfoService.isOPByDomainAccount(OPERATOR)).thenReturn(true);
-        Assert.assertEquals(ResultType.SUCCESS.getCode(),
-                esPackageService.addESPackage(esPackageDTO, OPERATOR).getCode().intValue());
+        Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(false);
+        Assertions.assertEquals(Result.buildFail("非运维人员不能更新ES安装包!").getMessage(),
+                esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
+        Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
+        Assertions.assertEquals(ResultType.SUCCESS.getCode(),
+                esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getCode().intValue());
         Integer manifest = ESClusterTypeEnum.ES_HOST.getCode();
         esPackageDTO.setManifest(manifest);
         Mockito.when(fileStorageService.upload(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any())).thenReturn(Result.buildFail());
-        Assert.assertEquals(Result.buildFail("上传文件失败").getMessage(),
-                esPackageService.addESPackage(esPackageDTO, OPERATOR).getMessage());
+        Assertions.assertEquals(Result.buildFail("上传文件失败").getMessage(),
+                esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
         Mockito.when(fileStorageService.upload(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any())).thenReturn(Result.buildSucc());
-        Assert.assertEquals(ResultType.SUCCESS.getCode(),
-                esPackageService.addESPackage(esPackageDTO, OPERATOR).getCode().intValue());
-        Assert.assertEquals(Result.buildParamIllegal("版本号重复").getMessage(),
-                esPackageService.addESPackage(esPackageDTO, OPERATOR).getMessage());
-        esPackageDTO.setEsVersion("1");
-        Assert.assertEquals(Result.buildParamIllegal("版本号格式不正确, 必须是'1.1.1.1000'类似的格式").getMessage(),
-                esPackageService.addESPackage(esPackageDTO, OPERATOR).getMessage());
+                Mockito.anyString(), Mockito.any())).thenReturn(Result.buildSucc("test", ""));
+        Assertions.assertTrue(esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).success());
+        Assertions.assertEquals(Result.buildParamIllegal("版本号重复").getMessage(),
+                esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
+        esPackageDTO.setEsVersion("1.w");
+        Assertions.assertEquals(Result.buildParamIllegal("版本号格式不正确, 必须是'1.1.1.1000'类似的格式").getMessage(),
+                esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
     }
 
     @Test
     public void updateESPackageTest() {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
-        Mockito.when(ariusUserInfoService.isOPByDomainAccount(OPERATOR)).thenReturn(true);
-        Long id = esPackageService.addESPackage(esPackageDTO, OPERATOR).getData();
+        Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
+        Long id = esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData();
         esPackageDTO.setId(id);
-        Assert.assertEquals(id,
-                esPackageService.updateESPackage(esPackageDTO, OPERATOR).getData().getId());
+        Assertions.assertEquals(id,
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData().getId());
         esPackageDTO.setId(id + 1);
-        Assert.assertEquals(Result.buildParamIllegal("版本号重复").getMessage(),
-                esPackageService.updateESPackage(esPackageDTO, OPERATOR).getMessage());
+        Assertions.assertEquals(Result.buildParamIllegal("版本号重复").getMessage(),
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
         esPackageDTO.setManifest(ESClusterTypeEnum.ES_HOST.getCode());
         Mockito.when(fileStorageService.upload(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any())).thenReturn(Result.buildSucc());
         esPackageDTO.setId(id);
-        Assert.assertEquals(ResultType.SUCCESS.getCode(),
-                esPackageService.updateESPackage(esPackageDTO, OPERATOR).getCode().intValue());
-        esPackageDTO.setEsVersion("1");
-        Assert.assertEquals(Result.buildParamIllegal("版本号格式不正确, 必须是'1.1.1.1000'类似的格式").getMessage(),
-                esPackageService.updateESPackage(esPackageDTO, OPERATOR).getMessage());
+        Assertions.assertEquals(ResultType.SUCCESS.getCode(),
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getCode().intValue());
+        esPackageDTO.setEsVersion("1.w");
+        Assertions.assertEquals(Result.buildParamIllegal("版本号格式不正确, 必须是'1.1.1.1000'类似的格式").getMessage(),
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
     }
 
     @Test
     public void getESPackagePOByIdTest() {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
-        Mockito.when(ariusUserInfoService.isOPByDomainAccount(OPERATOR)).thenReturn(true);
-        Long id = esPackageService.addESPackage(esPackageDTO, OPERATOR).getData();
-        Assert.assertNull(esPackageService.getESPackagePOById(id + 1));
-        Assert.assertNotNull(esPackageService.getESPackagePOById(id));
+        Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
+        Long id = esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData();
+        Assertions.assertNull(esPackageService.getESPackagePOById(id + 1));
+        Assertions.assertNotNull(esPackageService.getESPackagePOById(id));
 
     }
 
     @Test
     public void deleteESPackageTest() {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
-        Long id = 1234l;
-        Assert.assertEquals(Result.buildFail("非运维人员不能删除ES安装包!").getMessage(),
-                esPackageService.deleteESPackage(id, OPERATOR).getMessage());
-        Mockito.when(ariusUserInfoService.isOPByDomainAccount(OPERATOR)).thenReturn(true);
-        id = esPackageService.addESPackage(esPackageDTO, OPERATOR).getData();
-        Assert.assertTrue(esPackageService.deleteESPackage(id, OPERATOR).success());
-        Assert.assertNull(esPackageDAO.getById(id));
+        Long id = 1234L;
+        Assertions.assertEquals(Result.buildFail("非运维人员不能更新ES安装包!").getMessage(),
+                esPackageService.deleteESPackage(id, CustomDataSource.OPERATOR).getMessage());
+        Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
+        // mock一个文件系统
+        Mockito.when(fileStorageService.upload(Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(Result.buildSucc());
+        Mockito.when(fileStorageService.remove(Mockito.anyString())).thenReturn(Result.buildSucc());
+        id = esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData();
+        Assertions.assertTrue(esPackageService.deleteESPackage(id, CustomDataSource.OPERATOR).success());
+        Assertions.assertNull(esPackageDAO.getById(id));
     }
 
     @Test
     public void getByVersionAndTypeTest() {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
-        Long id = 1234l;
-        Assert.assertNull(esPackageService.getByVersionAndType(esPackageDTO.getEsVersion(), esPackageDTO.getManifest()));
-        Mockito.when(ariusUserInfoService.isOPByDomainAccount(OPERATOR)).thenReturn(true);
-        id = esPackageService.addESPackage(esPackageDTO, OPERATOR).getData();
-        Assert.assertEquals(id, esPackageService.getByVersionAndType(esPackageDTO.getEsVersion(), esPackageDTO.getManifest()).getId());
+        Long id = 1234L;
+        Assertions.assertNull(esPackageService.getByVersionAndType(esPackageDTO.getEsVersion(), esPackageDTO.getManifest()));
+        Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
+        id = esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData();
+        Assertions.assertEquals(id, esPackageService.getByVersionAndType(esPackageDTO.getEsVersion(), esPackageDTO.getManifest()).getId());
     }
 }

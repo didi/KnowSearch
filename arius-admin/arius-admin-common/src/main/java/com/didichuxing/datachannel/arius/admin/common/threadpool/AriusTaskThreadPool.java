@@ -36,8 +36,7 @@ public class AriusTaskThreadPool {
                 if (!pool.awaitTermination(20, TimeUnit.SECONDS)) {
                     LOGGER.warn("class=AriusTaskThreadPool||method=init||msg=still some task running, force to shutdown!");
                     List<Runnable> shutDownList = pool.shutdownNow();
-                    shutDownList
-                        .forEach(e -> LOGGER.info("class=AriusTaskThreadPool||method=init||msg=Runnable forced shutdown||class={}"));
+                    shutDownList.forEach(e -> LOGGER.info("class=AriusTaskThreadPool||method=init||msg=Runnable forced shutdown||class={}"));
                 }
             } catch (InterruptedException e) {
                 pool.shutdownNow();

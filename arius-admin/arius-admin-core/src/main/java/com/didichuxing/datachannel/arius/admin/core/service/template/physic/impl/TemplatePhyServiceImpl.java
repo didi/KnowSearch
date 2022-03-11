@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -40,13 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.DELETE;
@@ -267,6 +263,12 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
 
                 indexTemplatePhysicalConfig.setManualPipeLineRateLimit(param.getWriteRateLimit());
                 updateParam.setConfig(JSON.toJSONString(indexTemplatePhysicalConfig));
+                boolean succeed = (1 == indexTemplatePhysicalDAO.update(updateParam));
+                if (!succeed) {
+                    LOGGER.warn("class=TemplatePhyServiceImpl||method=editTemplateFromLogic||msg=editTemplateFromLogic fail||physicalId={}||expression={}||writeRateLimit={}", physicalPO.getId(),
+                            param.getExpression(), param.getWriteRateLimit());
+                    return Result.build(false);
+                }
             }
 
             Result<Void> buildExpression = updateExpressionTemplatePhysical(param, updateParam, physicalPO);
@@ -328,6 +330,13 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
         return ConvertUtil.list2List(
             indexTemplatePhysicalDAO.listByClusterAndStatus(cluster, TemplatePhysicalStatusEnum.NORMAL.getCode()),
             IndexTemplatePhy.class);
+    }
+
+    @Override
+    public Set<String> getMatchNormalLogicIdByCluster(String cluster) {
+        return ConvertUtil.list2Set(
+                indexTemplatePhysicalDAO.listByMatchClusterAndStatus(cluster, TemplatePhysicalStatusEnum.NORMAL.getCode()),
+                x -> x.getLogicId().toString());
     }
 
     /**
@@ -440,6 +449,15 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
         }
         List<TemplatePhysicalPO> templatePhysicalPOS = indexTemplatePhysicalDAO.listByIds(physicalIds);
         return batchBuildTemplatePhysicalWithLogic(templatePhysicalPOS);
+    }
+
+    @Override
+    public List<IndexTemplatePhyWithLogic> getTemplateByPhyCluster(String phyCluster) {
+        if (phyCluster == null) {
+            return new ArrayList<>();
+        }
+
+        return batchBuildTemplatePhysicalWithLogic(indexTemplatePhysicalDAO.listByClusterAndStatus(phyCluster, TemplatePhysicalStatusEnum.NORMAL.getCode()));
     }
 
     /**
@@ -602,6 +620,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
 
         return getNormalTemplateByClusterAndRack(region.getPhyClusterName(), RackUtils.racks2List(region.getRacks()));
     }
+
 
     /**************************************************** private method ****************************************************/
     private List<IndexTemplatePhyWithLogic> batchBuildTemplatePhysicalWithLogic(List<TemplatePhysicalPO> templatePhysicalPOS) {

@@ -5,7 +5,7 @@ import * as actions from "actions";
 import { FormItemType, IFormItem } from "component/x-form";
 import { notification } from "antd";
 import { StaffSelect } from "container/staff-select";
-import { RESOURCE_TYPE_LIST } from "constants/common";
+import { RESOURCE_TYPE_LIST, LEVEL_MAP } from "constants/common";
 import {
   getvailablePhysicsClusterListLogic,
 } from "api/cluster-api";
@@ -31,7 +31,6 @@ const NewClusterModal = (props: {
   params: any;
   app: AppState;
   user: any;
-  type: string | number,
 }) => {
   const $ref: any = React.createRef();
 
@@ -89,8 +88,9 @@ const NewClusterModal = (props: {
         },
       ],
       isCustomStyle: true,
+      CustomStyle: { marginBottom: 0 },
       type: FormItemType.custom,
-      isCustomStyle: true,
+      // isCustomStyle: true,
       customFormItem: (
         <StaffSelect placeholder="请选择责任人" style={{ width: "60%" }} />
       ),
@@ -119,6 +119,21 @@ const NewClusterModal = (props: {
       },
     },
     {
+      key: "level",
+      label: "业务等级",
+      type: FormItemType.select,
+      options: LEVEL_MAP,
+      rules: [
+        {
+          required: true,
+          message: "请选择",
+        },
+      ],
+      attrs: {
+        style: { width: "60%" },
+      },
+    },
+    {
       key: "regionObj",
       type: FormItemType.custom,
       label: (
@@ -138,16 +153,17 @@ const NewClusterModal = (props: {
             }
             if (!value) {
               return Promise.reject("请关联region，并点击添加完成操作！");
-            } else {
-              if (
-                type !== 1 &&
-                value.length > 1
-              ) {
-                return Promise.reject(
-                  "非共享集群只可选择一个物理集群，请删除。"
-                );
-              }
             }
+            //  else {
+            //   if (
+            //     type !== 1 &&
+            //     value.length > 1
+            //   ) {
+            //     return Promise.reject(
+            //       "非共享集群只可选择一个物理集群，请删除。"
+            //     );
+            //   }
+            // }
             return Promise.resolve();
           },
         },
@@ -200,7 +216,7 @@ const NewClusterModal = (props: {
   const xFormModalConfig = {
     formMap: formMap,
     visible: true,
-    title: "新建集群",
+    title: "分配集群",
     formData: props.params || {},
     isWaitting: true,
     width: 660,
@@ -227,7 +243,8 @@ const NewClusterModal = (props: {
           libraDepartmentId : "",
           quota : 0,
           name: result.name,
-          type: result.type
+          type: result.type,
+          level: result.level,
         },
         submitorAppid: props.app.appInfo()?.id,
         submitor: props.user.getName('domainAccount'),
@@ -235,7 +252,7 @@ const NewClusterModal = (props: {
         type: "logicClusterCreate",
       }
 
-      submitWorkOrder(params).then((res) => {
+      return submitWorkOrder(params).then((res) => {
         props.dispatch(actions.setModalId(""));
       })
       .finally(() => {

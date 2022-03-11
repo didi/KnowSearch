@@ -9,9 +9,9 @@ import * as actions from "actions";
 import { PHY_NODE_TYPE, VERSION_MAINFEST_TYPE } from "constants/status-map";
 import "./index.less";
 import { PageHeader, Button, Descriptions, Steps, Divider, Table, Tooltip, Spin, message}  from 'antd';
-import { IOrderInfo, ITypeEnums } from "@types/cluster/order-types";
-import { IUser } from "@types/user-types";
-import { IRoleIpList } from "@types/cluster/cluster-types";
+import { IOrderInfo, ITypeEnums } from "typesPath/cluster/order-types";
+import { IUser } from "typesPath/user-types";
+import { IRoleIpList } from "typesPath/cluster/cluster-types";
 import { cancelOrder, getOrderDetail, getTypeEnums } from "api/order-api";
 import { IStringMap } from "interface/common";
 const { Step } = Steps;
@@ -163,7 +163,13 @@ export class OrderDetail extends React.Component<{
   public getNodes = (role: string, data: IRoleIpList[]) => {
     const text = data
       ? data
-        ?.filter((ele: IRoleIpList) => ele.role === role)
+        ?.filter((ele: IRoleIpList) => {
+          let r = ele.role;
+          if (ele.beCold) {
+            r = 'coldnode'
+          }
+          return r === role
+        })
         ?.map((e: IRoleIpList) => e.hostname)
         ?.join("; ")
       : "";

@@ -23,6 +23,7 @@ public class TaskConcurrentConstants {
     public static final int SECURITY_META_CHECK_TASK_CONCURRENT = 20;
     public static final int SYNC_TEMPLATE_META_DATE_TASK_CONCURRENT = 20;
     public static final int TEMPLATE_QUOTA_CTL_TASK_CONCURRENT = 20;
+    public static final int INDEX_ROLLOVER_TASK_CONCURRENT = 10;
 
     public static final int SLEEP_SECONDS_PER_EXECUTE = 3;
     public static final int SLEEP_SECONDS_PER_BATCH = 2;

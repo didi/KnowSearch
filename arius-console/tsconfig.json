@@ -5,8 +5,17 @@
       "*": [
         "src/*"
       ],
-      "@pkgs/*": [
-        "src/packages/*"
+      "typesPath/*": [
+        "src/@types/*"
+      ],
+      "store": [
+        "src/store"
+      ],
+      "interface": [
+        "src/interface"
+      ],
+      "container": [
+        "src/container"
       ]
     },
     "outDir": "./dist/",

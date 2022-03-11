@@ -8,6 +8,9 @@ import { DTable, ITableBtn } from 'component/dantd/dtable';
 import { RenderTitle } from 'component/render-title';
 import QueryForm from 'component/dantd/query-form';
 import { queryFormText } from 'constants/status-map';
+import { Button } from 'antd';
+import { RiseOutlined } from '@ant-design/icons'
+
 
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
@@ -66,12 +69,20 @@ export const ClusterConfig = connect(null, mapDispatchToProps)((props: any) => {
   };
 
 
-  const getOpBtns = (): ITableBtn[] => {
-    return [{
-      label: '新增配置',
-      className: 'ant-btn-primary',
-      clickFunc: () => props.setModalId('clusterConfigModal', {}, reloadData)
-    }];
+  const getOpBtns = () => {
+    // return [{
+    //   label: '新增配置',
+    //   className: 'ant-btn-primary',
+    //   clickFunc: () => props.setModalId('clusterConfigModal', {}, reloadData)
+    // }];
+    return (
+      <>
+        <Button type="primary" className="ant-btn-primary" onClick={() => props.setModalId('clusterConfigModal', {}, reloadData)}>
+          新增配置
+        </Button>
+        <div style={{ display: 'inline-block', fontSize: 14, color: '#1473FF', letterSpacing: 0, textAlign: 'right', marginLeft: 4, cursor: "pointer" }} onClick={() => window.open('https://github.com/didi/LogiEM/blob/master/doc/LogiEM%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97.md#38-%E5%B9%B3%E5%8F%B0%E9%85%8D%E7%BD%AE')}>指导文档<RiseOutlined /></div>
+      </>
+    )
   }
 
 
@@ -91,7 +102,7 @@ export const ClusterConfig = connect(null, mapDispatchToProps)((props: any) => {
             dataSource={getData()}
             columns={getClusterCongigColumns(data, props.setModalId, reloadData)}
             reloadData={reloadData}
-            getOpBtns={getOpBtns}
+            renderInnerOperation={getOpBtns}
           />
         </div>
       </div>

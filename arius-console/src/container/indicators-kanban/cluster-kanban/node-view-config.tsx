@@ -8,6 +8,38 @@ export const indexConfigClassifyList: string[] = [
   "JVM指标",
 ];
 
+//黄金配置
+export const goldConfig = {
+  "系统指标": [
+    'os-cpu-percent',
+    'fs-total-disk_free_percent',
+  ],
+  "基本性能指标": [
+    'indices-indexing-index_total_rate',
+    'indices-indexing-index_time_in_millis',
+    'thread_pool-bulk-rejected',
+    'thread_pool-bulk-queue',
+    'indices-search-query_total_rate',
+    'indices-search-query_time_in_millis',
+    'thread_pool-search-queue',
+    'thread_pool-search-rejected',
+    'indices-merges-total_time_in_millis',
+    'indices-refresh-total_time_in_millis',
+    'indices-flush-total_time_in_millis',
+  ],
+  "高级性能指标": [
+    'http-current_open',
+    'indices-segments-count',
+    'indices-segments-memory_in_bytes',
+    'indices-docs-count',
+  ],
+  "JVM指标": [
+    'jvm-gc-young-collection_count_rate',
+    'jvm-gc-old-collection_count_rate',
+    'jvm-mem-heap_used_percent',
+  ],
+}
+
 // 所有指标项
 export const indexConfigData = {
   "os-cpu-percent": {
@@ -222,6 +254,18 @@ export const indexConfigData = {
     name: "RequestCache内存占用大小",
     unit: unitMap.MB,
     classify: indexConfigClassifyList[2],
+  },
+  "runningTime": {
+    name: "节点执行任务数耗时",
+    unit: unitMap.ms,
+    classify: indexConfigClassifyList[2],
+    newquota: 'avg',
+  },
+  "taskId": {
+    name: "节点执行任务数量",
+    unit: unitMap.count,
+    classify: indexConfigClassifyList[2],
+    newquota: 'cardinality',
   },
 
   "jvm-gc-young-collection_count_rate": {

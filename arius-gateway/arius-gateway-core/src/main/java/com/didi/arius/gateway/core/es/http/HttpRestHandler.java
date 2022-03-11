@@ -111,7 +111,7 @@ public abstract class HttpRestHandler extends ESBase {
     }
 
     protected boolean isOriginCluster(QueryContext queryContext){
-        return queryContext.getAppDetail().getSearchType() == AppDetail.RequestType.Origin_Cluster;
+        return queryContext.getSearchType() == AppDetail.RequestType.Origin_Cluster.getType();
     }
 
     protected void checkWriteIndicesAndTemplateBlockWrite(QueryContext queryContext) {
@@ -161,6 +161,7 @@ public abstract class HttpRestHandler extends ESBase {
             joinLogContext.setTotalCost(System.currentTimeMillis() - queryContext.getRequestTime());
             joinLogContext.setInternalCost( joinLogContext.getTotalCost() - joinLogContext.getEsCost());
             joinLogContext.setSinkTime(System.currentTimeMillis());
+            joinLogContext.setSearchCost(System.currentTimeMillis() - queryContext.getPreQueryEsTime());
             if (queryContext.getIndexTemplate() != null) {
                 joinLogContext.setDestTemplateName(queryContext.getIndexTemplate().getName());
             }
@@ -168,6 +169,7 @@ public abstract class HttpRestHandler extends ESBase {
     }
 
     protected RestActionListenerImpl<ESSearchResponse> newSearchListener(QueryContext queryContext) {
+        queryContext.setPreQueryEsTime(System.currentTimeMillis());
         return new RestActionListenerImpl<ESSearchResponse>(queryContext) {
             @Override
             public void onResponse(ESSearchResponse queryResponse) {

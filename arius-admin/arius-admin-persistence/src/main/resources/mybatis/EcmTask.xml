@@ -59,7 +59,7 @@
     </update>
 
     <!-- 根据物理集群ID 查询未执行的任务-->
-    <select id="listUndoWorkOrderTaskByClusterId" parameterType="long"  resultMap="BaseResultMap">
+    <select id="listUndoEcmTaskByClusterId" parameterType="long" resultMap="BaseResultMap">
         select  <include refid="Base_Column_List"/>
         from es_work_order_task
         where physic_cluster_id = #{physicClusterId} and status in ('waiting','pause','running','failed') and  delete_flag = '0'
@@ -73,7 +73,7 @@
     </select>
 
     <!-- 根据物理集群id，查询处于 waiting 或 running 状态的任务 -->
-    <select id="getUsefulWorkOrderTaskByClusterId" resultMap="BaseResultMap">
+    <select id="getUsefulEcmTaskByClusterId" resultMap="BaseResultMap">
         select  <include refid="Base_Column_List"/>
         from es_work_order_task
         where physic_cluster_id = #{physicClusterId} and status in ('waiting','pause','running') and  delete_flag = '0'

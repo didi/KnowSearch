@@ -6,7 +6,7 @@ import { getMyApplicationQueryXForm, getMyApplicationColumns } from './config';
 import moment from 'moment';
 import QueryForm from 'component/dantd/query-form';
 import { getApplyOrderList, getTypeEnums } from 'api/order-api';
-import { ITypeEnums } from '@types/cluster/order-types';
+import { ITypeEnums } from 'typesPath/cluster/order-types';
 import { IStringMap } from 'interface/common';
 import { queryFormText } from 'constants/status-map';
 import { DTable } from 'component/dantd/dtable';

@@ -22,9 +22,9 @@ public class ClusterRegion extends BaseEntity {
     private Long id;
 
     /**
-     * 绑定到的逻辑集群ID, 为0则没有被绑定
+     * 绑定到的逻辑集群ID列表, 为-1则没有被绑定
      */
-    private Long logicClusterId;
+    private String logicClusterIds;
 
     /**
      * 物理集群名称

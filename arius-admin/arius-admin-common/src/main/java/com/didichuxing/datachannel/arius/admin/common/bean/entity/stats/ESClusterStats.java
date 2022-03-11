@@ -1,12 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 
+import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.monitorTimestamp2min;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.monitorTimestamp2min;
 
 @Data
 @NoArgsConstructor
@@ -46,6 +47,11 @@ public class ESClusterStats extends BaseESPO {
     @Override
     public String getKey() {
         return String.format("%s@%s@%s@%d", dataCenter, cluster, percentilesType, monitorTimestamp2min(timestamp));
+    }
+
+    @Override
+    public String getRoutingValue() {
+        return cluster;
     }
 
 }

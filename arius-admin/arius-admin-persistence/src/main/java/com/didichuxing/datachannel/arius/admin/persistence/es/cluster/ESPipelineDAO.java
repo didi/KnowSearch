@@ -39,7 +39,7 @@ public class ESPipelineDAO extends BaseESDAO {
     public static final String MS_TIME_FIELD_ES_FORMAT           = "UNIX_MS";
     public static final String SECOND_TIME_FIELD_ES_FORMAT       = "UNIX";
     public static final String MS_TIME_FIELD_PLATFORM_FORMAT     = "epoch_millis";
-    public static final String SECOND_TIME_FIELD_PLATFORM_FORMAT = "epoch_seconds";
+    public static final String SECOND_TIME_FIELD_PLATFORM_FORMAT = "epoch_second";
     public static final int    FILE_BEATS_PROCESSOR_INDEX        = 0;
     public static final Set<String>        FILE_BEATS_PIPELINE_ID_SET        = new HashSet<>();
     public static final List<JSONObject>   FILE_BEATS_PROCESSOR              = new ArrayList<>();

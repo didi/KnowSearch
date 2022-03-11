@@ -1,4 +1,4 @@
-import zh from '@pkgs/locales/zh';
+import { zh } from '../d1-packages';
 import { systemKey } from '../constants/menu';
 
 export const permissions = {
@@ -11,6 +11,7 @@ export const permissions = {
   [`menu.${systemKey}.work-order.my-application.detail`]: '/work-order/my-application',
   [`menu.${systemKey}.work-order.my-approval.detail`]: '/work-order/my-approval',
   [`menu.${systemKey}.scheduling.log.detail`]: '/scheduling/log',
+  [`menu.${systemKey}.scheduling.task.dcdrdetail`]: '/work-order/task',
 }
 
 export default {
@@ -49,12 +50,13 @@ export default {
   [`menu.${systemKey}.work-order.my-approval.detail`]: '我的审批详情',
   [`menu.${systemKey}.work-order.task`]: '任务列表',
   [`menu.${systemKey}.work-order.task.detail`]: '我的任务列表详情',
+  [`menu.${systemKey}.work-order.task.dcdrdetail`]: '我的任务列表详情',
   [`menu.${systemKey}.scheduling`]: '调度任务',
   [`menu.${systemKey}.scheduling.task`]: '任务列表',
   [`menu.${systemKey}.scheduling.log`]: '调度日志',
   [`menu.${systemKey}.scheduling.log.detail`]: '调度日志详情',
   [`menu.${systemKey}.search-query`]: '检索查询',
-  [`menu.${systemKey}.search-query.dsl-tpl`]: 'DSL模板',
+  [`menu.${systemKey}.search-query.dsl-tpl`]: '查询诊断',
   [`menu.${systemKey}.search-query.index-search`]: '索引查询',
   [`menu.${systemKey}.index-admin`]: '索引管理',
   [`menu.${systemKey}.index-admin.detail`]: '索引管理详情',

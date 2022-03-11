@@ -1,0 +1,24 @@
+name: arius-admin-v2-zhaoqingrong-dev
+stages: 
+    - name: Compile-test
+      jobs: 
+        - name: compile-job-test
+          tasks: 
+            - name: compile-test
+              type: oe-compile
+              params: 
+                image: true
+                osType: centos7.2
+                env: test
+    - name: Deploy-test
+      jobs: 
+        - name: deploy-job-test
+          tasks: 
+            - name: deploy-test
+              type: oe-deploy:test
+              params: 
+                flavor: S2
+                port: 8080
+                replicas: 1
+                domain: http://api-kylin-xg02.intra.xiaojukeji.com/bigdata_databus_arius_admin_v2_zhaoqingrong_dev_test
+                region: hl

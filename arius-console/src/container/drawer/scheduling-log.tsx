@@ -13,7 +13,7 @@ interface IProps {
 const SchDulingLog: React.FC<IProps> = (props: IProps) => {
 
   const getWidth = () => {
-    return document.querySelector('.ecmc-layout-container')?.clientWidth || 600;
+    return document.querySelector('#d1-layout-main')?.clientWidth || 600;
   }
   return (
     <Drawer

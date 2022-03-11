@@ -1,5 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.client.constant.task;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public enum WorkTaskDCDRProgressEnum {
                                       /**创建DCDR链路*/
                                       STEP_0(0, "创建DCDR链路"),
@@ -41,4 +45,7 @@ public enum WorkTaskDCDRProgressEnum {
         return value;
     }
 
+    public static List<WorkTaskDCDRProgressEnum> listAll() {
+        return new ArrayList<>(Arrays.asList(WorkTaskDCDRProgressEnum.values()));
+    }
 }

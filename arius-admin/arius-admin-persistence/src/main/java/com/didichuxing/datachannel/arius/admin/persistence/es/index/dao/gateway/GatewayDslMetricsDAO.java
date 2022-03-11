@@ -13,14 +13,26 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -116,7 +128,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
                 }
             }
 
-            //根据第一个时间点的值进行倒排，取topNu
+            // 根据第一个时间点的值进行倒排，取topNu
             List<MetricsContent> sortedList = variousLineChartMetrics.getMetricsContents().stream()
                     .sorted(Comparator.comparing(x -> x.getMetricsContentCells().get(0).getValue(), Comparator.reverseOrder()))
                     .limit(topNu)

@@ -10,10 +10,14 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * ES集群对应角色集群 服务实现类
@@ -53,7 +57,7 @@ public class RoleClusterServiceImpl implements RoleClusterService {
             roleClusterPO.setRoleClusterName(clusterName + "-" + role);
             roleClusterPO.setRole(role);
             roleClusterPO.setPodNumber(0);
-            roleClusterPO.setPidCount(0);
+            roleClusterPO.setPidCount(1);
             roleClusterPO.setMachineSpec("");
             roleClusterPO.setEsVersion(clusterPhy.getEsVersion());
             roleClusterPO.setCfgId(ClusterConstant.INVALID_VALUE.intValue());
@@ -72,6 +76,21 @@ public class RoleClusterServiceImpl implements RoleClusterService {
     public List<RoleCluster> getAllRoleClusterByClusterId(Integer clusterId) {
         List<ESRoleClusterPO> roleClusterPos = roleClusterDAO.listByClusterId(clusterId.toString());
         return ConvertUtil.list2List(roleClusterPos, RoleCluster.class);
+    }
+
+    @Override
+    public Map<Long, List<RoleCluster>> getAllRoleClusterByClusterIds(List<Integer> clusterIds) {
+        List<String> clusterStrIds = clusterIds.stream().map(i -> String.valueOf(i)).collect( Collectors.toList());
+        List<ESRoleClusterPO> roleClusterPos = roleClusterDAO.listByClusterIds(clusterStrIds);
+
+        Map<Long, List<RoleCluster>> ret = new HashMap<>();
+
+        if (CollectionUtils.isNotEmpty(roleClusterPos)) {
+            List<RoleCluster> list = ConvertUtil.list2List(roleClusterPos, RoleCluster.class);
+            ret = list.stream().collect(Collectors.groupingBy(RoleCluster::getElasticClusterId));
+        }
+
+        return ret;
     }
 
     @Override

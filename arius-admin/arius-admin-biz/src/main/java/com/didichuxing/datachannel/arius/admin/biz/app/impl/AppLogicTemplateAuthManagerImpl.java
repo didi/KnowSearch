@@ -109,6 +109,7 @@ public class AppLogicTemplateAuthManagerImpl implements AppLogicTemplateAuthMana
         }
 
         appTemplateAuth.setType(authDTO.getType());
+        appTemplateAuth.setResponsible(authDTO.getResponsible());
         return appLogicTemplateAuthService
             .updateTemplateAuth(ConvertUtil.obj2Obj(appTemplateAuth, AppTemplateAuthDTO.class), operator);
     }

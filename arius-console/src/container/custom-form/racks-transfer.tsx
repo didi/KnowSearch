@@ -1,5 +1,5 @@
-import { INewRegionRacks, INewRegionRacksMap } from '@types/cluster/physics-type';
-import { INodeDivide } from '@types/index-types';
+import { INewRegionRacks, INewRegionRacksMap } from 'typesPath/cluster/physics-type';
+import { INodeDivide } from 'typesPath/index-types';
 import { getPhyClusterRacks } from 'api/op-cluster-region-api';
 import  { Transfer } from 'antd';
 import * as React from 'react';

@@ -1,5 +1,5 @@
 import React from "react";
-import { List, Switch, Tooltip } from "antd";
+import { Empty, Switch, Tooltip } from "antd";
 import {
   baseInfo,
   configInfo,
@@ -10,7 +10,7 @@ import Url from "lib/url-parser";
 import {
   IOpPhysicsClusterDetail,
   ITemplateSrvData,
-} from "@types/cluster/cluster-types";
+} from "typesPath/cluster/cluster-types";
 import "./index.less";
 import {
   getPhyClusterAvalibleTemplateSrv,
@@ -68,16 +68,23 @@ export class ClusterInfo extends React.Component<{
     const hasCapacityServer = !!currentSrvs.find((row) => row.serviceId === 11);
 
     for (const item of avalibleSrvs) {
+      let disabled = false;
       if(isOpenUp) {
+        // 开源环境部分功能禁用
+        if (showTag[item.serviceName] === 3) {
+          disabled = true
+        }
         // 在开源环境下，分类为 0 隐藏
         if(showTag[item.serviceName] !== 0) {
           phyClusterTemplateSrvs.push({
+            disabled,
             item,
             status: !!currentSrvs.find((row) => row.serviceId === item.serviceId) ? 1 : 0,
           });
         }
       } else {
         phyClusterTemplateSrvs.push({
+          disabled,
           item,
           status: !!currentSrvs.find((row) => row.serviceId === item.serviceId) ? 1 : 0,
         });
@@ -92,9 +99,6 @@ export class ClusterInfo extends React.Component<{
   public renderTip = (label: string) => {
     let tip = "暂无相关信息";
     if(isOpenUp) {
-      if (showTag[label] === 2) {
-        return '能力开发中，敬请期待';
-      }
       if (showTag[label] === 3) {
         return '该功能仅面向商业版客户开放';
       }
@@ -132,10 +136,10 @@ export class ClusterInfo extends React.Component<{
                   title={this.renderTip(row.item.serviceName)}
                   className="base-index-box-tag-item-title"
                 >
-                  {row.item.serviceName}
+                  <span style={{ color: row.disabled ? 'rgb(0, 0, 0, 0.3)' : '', cursor: row.disabled ? 'not-allowed' : '' }}>{row.item.serviceName}</span>
                 </Tooltip>
                 <Switch
-                  disabled={true}
+                  disabled={row.disabled}
                   size="small"
                   checked={row.status ? true : false}
                   onClick={() =>
@@ -148,6 +152,7 @@ export class ClusterInfo extends React.Component<{
                 />
               </div>
             ))}
+            {clusterTemplateSrvs && clusterTemplateSrvs.length < 1 ? <Empty style={{ width: '100%', margin: '20px 0px' }} description="该集群版本不支持索引模板服务"/> : null}
           </div>
         </div>
         {/* <EditList /> */}

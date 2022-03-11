@@ -44,13 +44,35 @@ public class GatewayMetricsController {
         return gatewayMetricsManager.getGatewayOverviewMetrics(dto);
     }
 
-
     @PostMapping("/node")
     @ApiOperation(value = "获取gateway节点指标信息")
     public Result<List<VariousLineChartMetricsVO>> getGatewayNodeMetrics(@RequestBody GatewayNodeDTO dto,
                                                                          HttpServletRequest request) {
         dto.validParam();
         return gatewayMetricsManager.getGatewayNodeMetrics(dto, HttpRequestUtils.getAppId(request));
+    }
+
+    @PostMapping("/nodes")
+    @ApiOperation(value = "获取多节点gateway节点指标信息")
+    public Result<List<VariousLineChartMetricsVO>> getMultiGatewayNodesMetrics(@RequestBody MultiGatewayNodesDTO dto,
+                                                                         HttpServletRequest request) {
+        dto.validParam();
+        return gatewayMetricsManager.getMultiGatewayNodesMetrics(dto, HttpRequestUtils.getAppId(request));
+    }
+
+    @PostMapping("/node/client")
+    @ApiOperation(value = "获取gatewayNode相关的clientNode指标信息")
+    public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(@RequestBody ClientNodeDTO dto,
+                                                                         HttpServletRequest request) {
+        dto.validParam();
+        return gatewayMetricsManager.getClientNodeMetrics(dto, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("/node/client/list")
+    @ApiOperation(value = "获取取gatewayNode相关的clientNode ip列表")
+    public Result<List<String>> getClientNodeIpList(String gatewayNode, Long startTime,
+                                                    Long endTime, HttpServletRequest request) {
+        return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime, HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/index")

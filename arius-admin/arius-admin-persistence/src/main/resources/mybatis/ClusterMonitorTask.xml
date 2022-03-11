@@ -29,6 +29,13 @@
         where dataCentre = #{dataCentre}
     </select>
 
+    <select id="getTaskByHost" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_monitor_task
+        where monitor_host = #{monitorHost} order by monitor_time desc limit #{size}
+    </select>
+
     <update id="updateMonitorHost" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
         update es_cluster_monitor_task
         set monitor_host = #{destMonitorHost}, monitor_time = #{monitorTime}

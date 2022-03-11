@@ -1,20 +1,8 @@
 import React from "react";
 import { renderOperationBtns, NavRouterLink } from "container/custom-component";
 import { InfoCircleOutlined } from "@ant-design/icons";
-import {
-  message,
-  Tag,
-  Modal,
-  Progress,
-  Tooltip,
-  notification,
-  DatePicker,
-} from "antd";
-import {
-  IClusterStatus,
-  IOpLogicCluster,
-  IOpPhysicsCluster,
-} from "@types/cluster/cluster-types";
+import { message, Tag, Modal, Progress, Tooltip, notification, DatePicker } from "antd";
+import { IClusterStatus, IOpLogicCluster, IOpPhysicsCluster } from "typesPath/cluster/cluster-types";
 import { nounClusterType, nounClusterStatus } from "container/tooltip";
 import {
   ClusterAuth,
@@ -30,17 +18,17 @@ import {
 import { cellStyle } from "constants/table";
 import { delPackage } from "api/cluster-api";
 import { ITableBtn } from "component/dantd/dtable";
-import { IVersions } from "@types/cluster/physics-type";
+import { IVersions } from "typesPath/cluster/physics-type";
 import moment from "moment";
 import { timeFormat } from "constants/time";
 import { submitWorkOrder } from "api/common-api";
-import { IWorkOrder } from "@types/params-types";
+import { IWorkOrder } from "typesPath/params-types";
 
 import store from "store";
 import { updateBinCluster } from "api/cluster-index-api";
 import { IColumnsType } from "component/dantd/query-form/QueryForm";
 import { bytesUnitFormatter } from "../../lib/utils";
-import { isOpenUp } from "constants/common";
+import { isOpenUp, LEVEL_MAP } from "constants/common";
 
 const loginInfo = {
   userName: store.getState().user?.getName,
@@ -109,6 +97,9 @@ export const getPhyClusterQueryXForm = (data: IOpPhysicsCluster[]) => {
       title: "集群名称",
       type: "input",
       placeholder: "请输入",
+      componentProps: {
+        autocomplete: "off",
+      },
     },
     {
       dataIndex: "esVersion",
@@ -168,13 +159,7 @@ export const getLogicClusterQueryXForm = (data: IOpLogicCluster[]) => {
   return formMap;
 };
 
-
-export const getPhysicsBtnList = (
-  record: IOpPhysicsCluster,
-  setModalId: any,
-  setDrawerId: any,
-  reloadDataFn
-): ITableBtn[] => {
+export const getPhysicsBtnList = (record: IOpPhysicsCluster, setModalId: any, setDrawerId: any, reloadDataFn): ITableBtn[] => {
   let btn = [
     {
       label: "升级",
@@ -235,11 +220,7 @@ export const getPhysicsBtnList = (
   return btn;
 };
 
-export const getPhysicsColumns = (
-  setModalId: any,
-  setDrawerId: any,
-  reloadDataFn: any
-) => {
+export const getPhysicsColumns = (setModalId: any, setDrawerId: any, reloadDataFn: any) => {
   const columns = [
     {
       title: "集群ID",
@@ -250,7 +231,6 @@ export const getPhysicsColumns = (
       title: "集群名称",
       dataIndex: "cluster",
       key: "cluster",
-      sorter: (a, b) => a.cluster.length - b.cluster.length,
       render: (text: string, record: IOpPhysicsCluster) => {
         return (
           <NavRouterLink
@@ -265,7 +245,6 @@ export const getPhysicsColumns = (
       title: "集群状态",
       dataIndex: "health",
       key: "health",
-      sorter: (a, b) => a.health - b.health,
       render: (health: string) => {
         return (
           <div>
@@ -286,15 +265,13 @@ export const getPhysicsColumns = (
       title: "集群版本",
       dataIndex: "esVersion",
       key: "esVersion",
-      sorter: (a, b) => a.esVersion.length - b.esVersion.length,
       render: (text: string) => text || "-",
     },
     {
       title: "磁盘使用率",
       dataIndex: "diskInfo",
       key: "diskInfo",
-      sorter: (a, b) =>
-        a.diskInfo.diskUsagePercent - b.diskInfo.diskUsagePercent,
+      sorter: true,
       render: (diskInfo) => {
         const num = Number((diskInfo.diskUsagePercent * 100).toFixed(2));
         let strokeColor;
@@ -308,26 +285,26 @@ export const getPhysicsColumns = (
 
         return (
           <div style={{ position: "relative" }} className="process-box">
-            <Progress
-              percent={num}
-              size="small"
-              strokeColor={strokeColor}
-              width={150}
-            />
+            <Progress percent={num} size="small" strokeColor={strokeColor} width={150} />
             <div style={{ position: "absolute", fontSize: "1em" }}>
-              {bytesUnitFormatter(diskInfo.diskUsage || 0)}/
-              {bytesUnitFormatter(diskInfo.diskTotal || 0)}
+              {bytesUnitFormatter(diskInfo.diskUsage || 0)}/{bytesUnitFormatter(diskInfo.diskTotal || 0)}
             </div>
           </div>
         );
       },
     },
     {
+      title: "活跃分片数",
+      dataIndex: "activeShardNum",
+      key: "activeShardNum",
+      sorter: true,
+    },
+    {
       title: "权限",
       dataIndex: "currentAppAuth",
       key: "currentAppAuth",
-      render: (currentAppAuth: number) => {
-        return <>{ClusterAuthMaps[currentAppAuth] || "无权限"}</>;
+      render: (text: string) => {
+        return ClusterAuthMaps[text];
       },
     },
     {
@@ -341,7 +318,7 @@ export const getPhysicsColumns = (
       render: (text: string) => {
         return (
           <Tooltip placement="bottomLeft" title={text}>
-            {text ? text : '-'}
+            {text ? text : "-"}
           </Tooltip>
         );
       },
@@ -351,12 +328,7 @@ export const getPhysicsColumns = (
       dataIndex: "operation",
       key: "operation",
       render: (id: number, record: IOpPhysicsCluster) => {
-        const btns = getPhysicsBtnList(
-          record,
-          setModalId,
-          setDrawerId,
-          reloadDataFn
-        );
+        const btns = getPhysicsBtnList(record, setModalId, setDrawerId, reloadDataFn);
         return renderOperationBtns(btns, record);
       },
     },
@@ -364,8 +336,8 @@ export const getPhysicsColumns = (
   return columns;
 };
 
-export const delLogicCluster = (data: IOpLogicCluster, reloadDataFn, setModalId?: Function, url?,) => {
-  setModalId("deleteLogicCluster", {...data, url: url}, reloadDataFn);
+export const delLogicCluster = (data: IOpLogicCluster, reloadDataFn, setModalId?: Function, url?) => {
+  setModalId("deleteLogicCluster", { ...data, url: url }, reloadDataFn);
   // confirm({
   //   title: `是否确定删除集群${data.name}`,
   //   icon: <InfoCircleOutlined />,
@@ -398,11 +370,7 @@ export const delLogicCluster = (data: IOpLogicCluster, reloadDataFn, setModalId?
   // });
 };
 
-const getLogicBtnList = (
-  record: IOpLogicCluster | any,
-  fn: any,
-  reloadDataFn: any
-): ITableBtn[] => {
+const getLogicBtnList = (record: IOpLogicCluster | any, fn: any, reloadDataFn: any): ITableBtn[] => {
   let btn = [
     {
       label: "编辑",
@@ -471,24 +439,15 @@ const getLogicBtnList = (
   return btn as ITableBtn[];
 };
 
-export const getLogicColumns = (
-  tableData: IOpLogicCluster[],
-  fn: any,
-  reloadDataFn: any
-) => {
+export const getLogicColumns = (tableData: IOpLogicCluster[], fn: any, reloadDataFn: any) => {
   const columns = [
     {
       title: "集群名称",
       dataIndex: "name",
       key: "name",
-      sorter: (a, b) => a.name.length - b.name.length,
       render: (text: string, record: IOpLogicCluster) => {
         return (
-          <NavRouterLink
-            needToolTip={true}
-            element={text}
-            href={`/cluster/logic/detail?clusterId=${record.id}&type=${record.type}#info`}
-          />
+          <NavRouterLink needToolTip={true} element={text} href={`/cluster/logic/detail?clusterId=${record.id}&type=${record.type}#info`} />
         );
       },
     },
@@ -504,7 +463,6 @@ export const getLogicColumns = (
       dataIndex: "health",
       key: "status",
       width: "12%",
-      sorter: (a, b) => a.health - b.health,
       render: (health) => {
         return (
           <div>
@@ -529,24 +487,15 @@ export const getLogicColumns = (
         return <>{clusterTypeMap[type] || "-"}</>;
       },
     },
-    // {
-    //   title: "集群版本",
-    //   dataIndex: "esClusterVersions",
-    //   key: "esClusterVersions",
-    //   width: "8%",
-    //   onCell: () => ({
-    //     style: { ...cellStyle, maxWidth: 100 },
-    //   }),
-    //   render: (t: string) => {
-    //     return (
-    //       <>
-    //         <Tooltip placement="bottomLeft" title={t}>
-    //           {t}
-    //         </Tooltip>
-    //       </>
-    //     );
-    //   },
-    // },
+    {
+      title: "业务等级",
+      dataIndex: "level",
+      key: "level",
+      sorter: true,
+      render: (text) => {
+        return LEVEL_MAP[Number(text) - 1]?.label || "-";
+      },
+    },
     {
       title: "是否关联物理集群",
       dataIndex: "phyClusterAssociated",
@@ -582,7 +531,7 @@ export const getLogicColumns = (
       render: (text: string) => {
         return (
           <Tooltip placement="bottomLeft" title={text}>
-            {text ? text : '-'}
+            {text ? text : "-"}
           </Tooltip>
         );
       },
@@ -656,6 +605,21 @@ export const getVersionsColumns = (fn, reloadDataFn) => {
       key: "esVersion",
     },
     {
+      title: "版本标识",
+      dataIndex: "packageType",
+      key: "packageType",
+      render: (text: number) => {
+        let str = "-";
+        if (text == 1) {
+          str = "滴滴内部版本";
+        }
+        if (text == 2) {
+          str = "开源版本";
+        }
+        return str;
+      },
+    },
+    {
       title: "url",
       dataIndex: "url",
       key: "url",
@@ -713,8 +677,7 @@ export const getVersionsColumns = (fn, reloadDataFn) => {
       dataIndex: "createTime",
       key: "createTime",
       width: "15%",
-      sorter: (a: IVersions, b: IVersions) =>
-        new Date(b.createTime).getTime() - new Date(a.createTime).getTime(),
+      sorter: (a: IVersions, b: IVersions) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime(),
       render: (t: number) => moment(t).format(timeFormat),
     },
     {
@@ -751,9 +714,7 @@ export const getEditionQueryXForm = (data) => {
       dataIndex: "createTime",
       title: "创建时间",
       type: "custom",
-      component: (
-        <RangePicker showTime={{ format: "HH:mm" }} format="YYYY-MM-DD HH:mm" />
-      ),
+      component: <RangePicker showTime={{ format: "HH:mm" }} format="YYYY-MM-DD HH:mm" />,
     },
   ] as IColumnsType[];
   return formMap;

@@ -1,30 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
-import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.MASTER;
-import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.SLAVE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cache.CacheGlobalNamesContent.CACHE_GLOBAL_NAME;
-import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDEX_SHARD_NUM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_INDEX_INCLUDE_RACK;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.shard.TemplateShardManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
@@ -38,11 +20,10 @@ import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplatePhysicalStatusEnum;
+import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
@@ -64,6 +45,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Templ
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -71,6 +53,20 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.MASTER;
+import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.SLAVE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 @Component
 public class TemplatePhyManagerImpl implements TemplatePhyManager {
@@ -105,7 +101,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private TemplatePreCreateManager    templatePreCreateManager;
 
     @Autowired
-    private TemplateShardManager        templateShardManager;
+    private IndexPlanManager indexPlanManager;
 
     @Autowired
     private RegionRackService           regionRackService;
@@ -306,7 +302,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         for (TemplatePhysicalUpgradeDTO param : params) {
             Result<Void> ret = upgradeTemplate(param, operator);
             if (ret.failed()) {
-                throw new ESOperateException("升级失败");
+                throw new ESOperateException(ret.getMessage());
             }
         }
         return Result.buildSucc(true);
@@ -336,7 +332,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
         // 记录操作记录
         operateRecordService.save(TEMPLATE, COPY, indexTemplatePhy.getLogicId(),
-                "复制" + indexTemplatePhy.getCluster() + "物理模板至" + param.getCluster(), operator);
+                String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()), operator);
 
         if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
                 tgtTemplateParam.getCluster(), tgtTemplateParam.getName(), 0)) {
@@ -451,16 +447,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         initParamWhenAdd(param);
 
         // 为了解决写入的长尾问题，引擎增加了逻辑shard的概念，这里需要计算逻辑shard的值，并调整源shard个数
-        templateShardManager.initShardRoutingAndAdjustShard(param);
+        indexPlanManager.initShardRoutingAndAdjustShard(param);
         Result<Long> result = templatePhyService.insert(param);
         Long physicalId = result.getData();
         if (result.success()) {
             //删除数据库中历史的脏数据
             templatePhyService.deleteDirtyByClusterAndName(param.getCluster(), param.getName());
-            IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(param.getLogicId());
 
-            esTemplateService.syncCreate(param.getCluster(), param.getName(), logic.getExpression(), param.getRack(),
-                    param.getShard(), param.getShardRouting(), 0);
+            //创建索引模板
+            syncCreateIndexTemplateWithEs(param);
 
             SpringTool.publish(new PhysicalTemplateAddEvent(this, templatePhyService.getTemplateById(physicalId),
                     buildIndexTemplateLogicWithPhysicalForNew(param)));
@@ -511,9 +506,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
             if (indexTemplatePhy.getRole().equals(MASTER.getCode())) {
                 if (oldMaster != null) {
-                    LOGGER.error(
-                            "class=TemplatePhyServiceImpl||method=switchMasterSlave||errMsg=no master||logicId={}",
-                            logicId);
+                    LOGGER.error("class=TemplatePhyServiceImpl||method=switchMasterSlave||errMsg=no master||logicId={}", logicId);
                 }
                 oldMaster = indexTemplatePhy;
             } else {
@@ -534,19 +527,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         boolean succ = true;
 
         if (oldMaster == null) {
-            LOGGER.error("class=TemplatePhyServiceImpl||method=switchMasterSlave||errMsg=no master||logicId={}",
-                    logicId);
+            LOGGER.error("class=TemplatePhyServiceImpl||method=switchMasterSlave||errMsg=no master||logicId={}", logicId);
         } else {
             succ = templatePhyService.updateTemplateRole(oldMaster,SLAVE,operator).success();
         }
 
         succ = succ && (templatePhyService.updateTemplateRole(newMaster,MASTER,operator).success());
 
-        if (succ) {
-            operateRecordService.save(TEMPLATE, SWITCH_MASTER_SLAVE, logicId,
-                    "src_master:" + (oldMaster != null ? oldMaster.getId() : "") + ", tgt_master:" + newMaster.getId(),
-                    operator);
-        }
 
         return Result.build(succ);
     }
@@ -584,7 +571,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getId());
 
         if (param.getShard() != null && !oldIndexTemplatePhy.getShard().equals(param.getShard())) {
-            templateShardManager.initShardRoutingAndAdjustShard(param);
+            indexPlanManager.initShardRoutingAndAdjustShard(param);
         }
 
         boolean succ = templatePhyService.update(param).success();
@@ -599,10 +586,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 }
             }
             // 记录操作记录
-            String editContent = AriusObjUtils.findChanged(oldIndexTemplatePhy, param);
+            String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
             if (StringUtils.isNotBlank(editContent)) {
                 operateRecordService.save(TEMPLATE, EDIT, oldIndexTemplatePhy.getLogicId(),
-                        "修改" + oldIndexTemplatePhy.getCluster() + "物理模板:" + editContent, operator);
+                        String.format("修改【%s】物理模板：%s", oldIndexTemplatePhy.getCluster(), editContent), operator);
             }
 
             SpringTool.publish(new PhysicalTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldIndexTemplatePhy, IndexTemplatePhy.class),
@@ -611,6 +598,35 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         return Result.buildWithTips(succ, tips);
+    }
+
+    @Override
+    public Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days) {
+        try {
+            IndexTemplateLogic logicTemplate = physicalWithLogic.getLogicTemplate();
+
+            if (!physicalWithLogic.getExpression().endsWith("*")) {
+                return new Tuple<>();
+            }
+
+            if (!TemplateUtils.isSaveByDay(logicTemplate.getDateFormat())
+                    && !TemplateUtils.isSaveByMonth(logicTemplate.getDateFormat())) {
+                return new Tuple<>();
+            }
+
+            List<String> indices = templatePhyService.getMatchIndexNames(physicalWithLogic.getId());
+            if (CollectionUtils.isEmpty(indices)) {
+                LOGGER.info("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||msg=no match indices", logicTemplate.getName());
+                return new Tuple<>();
+            }
+
+            return getHotAndColdIndexSet(physicalWithLogic, days, logicTemplate, indices);
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||templateName={}||errMsg={}", physicalWithLogic.getName(),
+                    e.getMessage(), e);
+        }
+
+        return new Tuple<>();
     }
 
     @Override
@@ -643,7 +659,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_GLOBAL_NAME, key = "#appId + '@' + #param.cluster + '@' + 'getConsoleTemplatePhyVOS'")
     public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhysicalDTO param, Integer appId) {
         List<ConsoleTemplatePhyVO> consoleTemplatePhyVOS = ConvertUtil.list2List(templatePhyService.getByCondt(param),
             ConsoleTemplatePhyVO.class);
@@ -1064,5 +1079,86 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             finalIndexSet.add(indexName);
         }
         return finalIndexSet;
+    }
+
+    private void syncCreateIndexTemplateWithEs(IndexTemplatePhysicalDTO param) throws ESOperateException {
+        IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(param.getLogicId());
+        MappingConfig mappings = null;
+        Result result = AriusIndexMappingConfigUtils.parseMappingConfig(param.getMappings());
+        if (result.success()) {
+            mappings = (MappingConfig) result.getData();
+        }
+        Map<String, String> settingsMap = getSettingsMap(param.getCluster(), param.getRack(), param.getShard(), param.getShardRouting(), param.getSettings());
+        boolean ret;
+        if (null != mappings || null != param.getSettings()) {
+            ret = esTemplateService.syncCreate(settingsMap, param.getCluster(), param.getName(), logic.getExpression(), mappings, 0);
+        } else {
+            ret = esTemplateService.syncCreate(param.getCluster(), param.getName(), logic.getExpression(), param.getRack(), param.getShard(), param.getShardRouting(), 0);
+        }
+        if (!ret) {
+            throw new ESOperateException("failed to create template!");
+        }
+    }
+
+    private Map<String, String> getSettingsMap(String cluster, String rack, Integer shard, Integer shardRouting, AriusIndexTemplateSetting settings) {
+        Map<String, String> settingsMap = new HashMap<>();
+        if (StringUtils.isNotBlank(rack)) {
+            settingsMap.put(TEMPLATE_INDEX_INCLUDE_RACK, rack);
+        }
+        if (shard != null && shard > 0) {
+            settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
+        }
+        /*if (shardRouting != null && shardRoutingEnableClusters.contains(cluster)) {
+            settingsMap.put(INDEX_SHARD_ROUTING_NUM, String.valueOf(shardRouting));
+        }*/
+        settingsMap.put(SINGLE_TYPE, "true");
+
+        //这里设置自定义分词器、副本数量、translog是否异步
+        if (null != settings) {
+            settingsMap.putAll(settings.toJSON());
+        }
+        return settingsMap;
+    }
+
+    private Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(IndexTemplatePhyWithLogic physicalWithLogic,
+                                                                                         int days, IndexTemplateLogic logicTemplate, List<String> indices) {
+        Set<String> finalColdIndexSet = Sets.newHashSet();
+        Set<String> finalHotIndexSet = Sets.newHashSet();
+        for (String indexName : indices) {
+            if (StringUtils.isBlank(indexName)) {
+                continue;
+            }
+
+            Date indexTime = IndexNameFactory.genIndexTimeByIndexName(
+                    genIndexNameClear(indexName, logicTemplate.getExpression()), logicTemplate.getExpression(),
+                    logicTemplate.getDateFormat());
+
+            if (indexTime == null) {
+                LOGGER.warn(
+                        "class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||indexName={}||msg=template parse index time fail",
+                        logicTemplate.getName(), indexName);
+                continue;
+            }
+
+            if (TemplateUtils.isSaveByMonth(logicTemplate.getDateFormat())) {
+                // 需要将索引时间定为当月的最后一天 确保最后一天的数据能被保留到保存时长
+                indexTime = AriusDateUtils.getLastDayOfTheMonth(indexTime);
+            }
+
+            long timeIntervalDay = (System.currentTimeMillis() - indexTime.getTime()) / MILLIS_PER_DAY;
+            if (timeIntervalDay < days) {
+                LOGGER.info(
+                        "class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||indexName={}||timeIntervalDay={}||msg=index not match",
+                        logicTemplate.getName(), indexName, timeIntervalDay);
+                finalHotIndexSet.add(indexName);
+                continue;
+            }
+
+            LOGGER.info("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||indexName={}||indexTime={}||timeIntervalDay={}", indexName,
+                    indexTime, timeIntervalDay);
+
+            finalColdIndexSet.add(indexName);
+        }
+        return new Tuple<>(finalColdIndexSet, finalHotIndexSet);
     }
 }

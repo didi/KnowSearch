@@ -1,17 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.client.mapping;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 @ApiModel(description = "索引模板分词器setting信息")
@@ -19,6 +20,25 @@ public class AriusIndexTemplateSetting implements Serializable {
 
     @ApiModelProperty("分词器")
     private JSONObject         analysis;
+    /**
+     * 副本数量
+     * index.number_of_replicas:0
+     * {"index": {"number_of_replicas": 0}
+     */
+    private Integer replicasNum;
+    /**
+     * 变更translog设置
+     * index.translog.durability:"request"
+     * "async"|"request"
+     */
+    private String translogDurability;
+
+    public static String NUMBER_OF_REPLICAS_KEY = "index.number_of_replicas";
+    public static String TRANSLOG_DURABILITY_KEY = "index.translog.durability";
+
+    public final static String REQUEST = "request";
+    public final static String ASYNC = "async";
+
 
     private static final String       ANALYSIS_KEY_PREFIX     = "index.analysis.";
 
@@ -35,20 +55,22 @@ public class AriusIndexTemplateSetting implements Serializable {
      * @return
      */
     public Map<String, String> toJSON() {
+        Map<String, String> ret = new HashMap<>();
         if (analysis != null) {
-            Map<String, String> reAnalysisDict = new HashMap<>();
-
             Map<String, String> analysisDict = flat(analysis);
 
-            for(Map.Entry<String, String> entry : analysisDict.entrySet()){
+            for (Map.Entry<String, String> entry : analysisDict.entrySet()) {
                 String analysisKey = entry.getKey();
-                reAnalysisDict.put(ANALYSIS_KEY_PREFIX + analysisKey, analysisDict.get(analysisKey));
+                ret.put(ANALYSIS_KEY_PREFIX + analysisKey, entry.getValue());
             }
-
-            return reAnalysisDict;
         }
-
-        return new HashMap<>();
+        if (replicasNum != null && replicasNum >= 0) {
+            ret.put(NUMBER_OF_REPLICAS_KEY, String.valueOf(replicasNum));
+        }
+        if (StringUtils.isNotBlank(translogDurability) && (REQUEST.equals(translogDurability) || ASYNC.equals(translogDurability))) {
+            ret.put(TRANSLOG_DURABILITY_KEY, translogDurability);
+        }
+        return ret;
     }
 
     public static Map<String, String> flat(JSONObject obj) {

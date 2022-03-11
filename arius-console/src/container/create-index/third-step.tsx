@@ -16,8 +16,9 @@ import store from 'store';
 const mapStateToProps = state => ({
   createIndex: state.createIndex
 });
+const connects: Function = connect
 
-@connect(mapStateToProps)
+@connects(mapStateToProps)
 export class ThirdStep extends React.Component<any> {
   public extraInfo = {};
   private clusterId: number = null;
@@ -52,7 +53,14 @@ export class ThirdStep extends React.Component<any> {
     const mappingData = this.props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.mappingValue) || '';
     const formData = this.props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.firstStepFormData);
     const type = 'templateCreate';
-    console.log(mappingData);
+    const {
+      cancelCopy,
+      asyncTranslog,
+      customerAnalysis,
+      // dynamicTemplates,
+      customerAnalysisValue,
+      // dynamicTemplatesValue,
+    } = this.props.createIndex;
     const postData = {
       name: `${formData.name}`, // 暂时cn TODO：
       dataCenter: 'cn',
@@ -71,6 +79,13 @@ export class ThirdStep extends React.Component<any> {
       dateField: formData.dateField,
       routingField: formData.routingField,
       dateFieldFormat: formData.dateFieldFormat,
+      disableIndexRollover: formData.disableIndexRollover,
+      hotTime: formData.hotTime,
+      level: formData.level,
+      cancelCopy,
+      asyncTranslog,
+      customerAnalysis: customerAnalysis ? customerAnalysisValue : '',
+      // dynamicTemplates: dynamicTemplates ? dynamicTemplatesValue : '',
     };
     const backUrl = '/index-tpl-management';
     // this.props.dispatch(actions.setLoadingMap('create-loading', true));

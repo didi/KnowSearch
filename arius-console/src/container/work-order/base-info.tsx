@@ -2,7 +2,7 @@ import * as React from 'react';
 import { BASE_INFO, ORDER_INFO } from './config';
 import Url from 'lib/url-parser';
 import { Descriptions, Spin, Divider }  from 'antd';
-import { IBaseInfo } from '@types/base-types';
+import { IBaseInfo } from 'typesPath/base-types';
 import { connect } from "react-redux";
 import { TaskState } from 'store/type';
 

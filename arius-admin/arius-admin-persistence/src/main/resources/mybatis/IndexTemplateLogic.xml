@@ -23,14 +23,20 @@
         <result column="write_rate_limit" jdbcType="INTEGER" property="writeRateLimit"/>
         <result column="app_id" jdbcType="INTEGER" property="appId"/>
         <result column="ingest_pipeline" jdbcType="VARCHAR" property="ingestPipeline"/>
+        <result column="block_read" jdbcType="BOOLEAN" property="blockRead"/>
+        <result column="block_write" jdbcType="BOOLEAN" property="blockWrite"/>
+        <result column="check_point_diff" jdbcType="BIGINT" property="checkPointDiff"/>
+        <result column="has_dcdr"    jdbcType="BOOLEAN" property="hasDCDR"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="resource_id" jdbcType="BIGINT" property="resourceId"/>
+        <result column="level" jdbcType="TINYINT" property="level"/>
     </resultMap>
 
     <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, app_id, ingest_pipeline, create_time, update_time
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`
     </sql>
 
     <select id="listByCondition"
@@ -66,7 +72,8 @@
         where is_active = 1
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
-        order by id desc
+        <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
+        order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
     </select>
 
@@ -78,6 +85,7 @@
         where is_active = 1
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
+        <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
         order by id desc
     </select>
 
@@ -98,11 +106,11 @@
         insert into index_template
         (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, app_id, ingest_pipeline)
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline, resource_id, `level`)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
          #{libraDepartmentId}, #{libraDepartment}, #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
-         #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{appId}, #{ingestPipeline})
+         #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{appId}, #{ingestPipeline}, #{resourceId}, #{level})
     </insert>
 
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
@@ -155,6 +163,12 @@
             <if test="writeRateLimit != null">,write_rate_limit = #{writeRateLimit}</if>
             <if test="quota != null">,quota = #{quota}</if>
             <if test="ingestPipeline != null">,ingest_pipeline = #{ingestPipeline}</if>
+            <if test="blockRead != null">,block_read = #{blockRead}</if>
+            <if test="blockWrite != null">,block_Write = #{blockWrite}</if>
+            <if test="resourceId != null">,resource_id = #{resourceId}</if>
+            <if test="level != null">,`level` = #{level}</if>
+            <if test="checkPointDiff != null">,check_point_diff = #{checkPointDiff}</if>
+            <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
         </trim>
         where id = #{id}
     </update>
@@ -189,5 +203,17 @@
         or responsible like CONCAT('%,', #{responsible})
         or responsible like CONCAT('%,', #{responsible},',%'))
     </select>
+
+    <update id="updateBlockReadState">
+        update index_template
+        set block_read = #{blockRead}
+        where id = #{logicId} and is_active = 1
+    </update>
+
+    <update id="updateBlockWriteState">
+        update index_template
+        set block_write = #{blockWrite}
+        where id = #{logicId} and is_active = 1
+    </update>
 
 </mapper>

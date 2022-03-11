@@ -4,9 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpNewHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.host.HostsParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderDTO;
@@ -16,12 +19,10 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderSub
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.user.AriusUserInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderDetail;
@@ -36,9 +37,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,6 +49,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.workorder.BpmAuditTypeEnum.AGREE;
@@ -77,12 +77,6 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
 
     @Autowired
     private AriusUserInfoService ariusUserInfoService;
-
-    @Autowired
-    private EcmTaskDAO           ecmTaskDao;
-
-    @Autowired
-    private ClusterPhyService    esClusterPhyService;
 
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
@@ -347,39 +341,6 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         }
 
         return Result.buildSucc(ConvertUtil.list2List(orderDOList, WorkOrderVO.class));
-    }
-
-    @Override
-    public Result<String> getClusterTaskInfo(String cluster) {
-        if (AriusObjUtils.isBlack(cluster)) {
-            return Result.buildFail("cluster name 为空");
-        }
-
-        ClusterPhy clusterPhy = esClusterPhyService.getClusterByName(cluster);
-        if (AriusObjUtils.isNull(clusterPhy)) {
-            return Result.buildFail("不存在cluster name=" + cluster + "的物理集群");
-        }
-
-        EcmTask task = ConvertUtil.obj2Obj(ecmTaskDao.getUsefulWorkOrderTaskByClusterId(clusterPhy.getId()),
-                EcmTask.class);
-        if (AriusObjUtils.isNull(task)) {
-            return Result.buildFail("当前集群没有待执行的工单任务");
-        }
-
-        List<EcmParamBase> ecmParamBases = WorkOrderTaskConverter.convert2EcmParamBaseList(task);
-        if(CollectionUtils.isEmpty(ecmParamBases)) {
-            return Result.buildFail("当前任务没有工单数据");
-        }
-        HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBases.get(0);
-        if(AriusObjUtils.isNull(hostsParamBase.getEsPluginAction())) {
-            return Result.buildFail("当前没有集群插件操作的工单任务");
-        }
-
-        OrderDetailBaseVO orderDetailBaseVO = getById(task.getWorkOrderId()).getData();
-        PhyClusterPluginOperationContent content = ConvertUtil.str2ObjByJson(orderDetailBaseVO.getDetail(),
-                PhyClusterPluginOperationContent.class);
-
-        return Result.build(Boolean.TRUE, JSON.toJSONString(content));
     }
 
     /*****************************************private*****************************************************/

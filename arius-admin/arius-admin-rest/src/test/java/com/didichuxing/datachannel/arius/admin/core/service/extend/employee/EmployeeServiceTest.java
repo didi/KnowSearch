@@ -1,11 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.employee;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.impl.DefaultEmployeeHandle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,30 +19,23 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Rollback
-public class EmployeeServiceTest extends AriusAdminApplicationTests {
+public class EmployeeServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private EmployeeService employeeService;
 
+    @MockBean
+    private AriusUserInfoService ariusUserInfoService;
+
     @Test
-    void getByDomainAccountTest() {
-        String account = "admin";
-        Result<BaseEmInfo> byDomainAccount = employeeService.getByDomainAccount(account);
-        Assertions.assertNotNull(byDomainAccount.getData());
-        // 不存在的account
-        account = "testest";
-        byDomainAccount = employeeService.getByDomainAccount(account);
-        Assertions.assertNull(byDomainAccount.getData());
+    public void getByDomainAccountTest() {
+        Mockito.when(ariusUserInfoService.getByDomainAccount("admin")).thenReturn(new AriusUserInfo());
+        Assertions.assertNotNull(employeeService.getByDomainAccount("admin"));
     }
 
     @Test
-    void checkUsersTest() {
-        String account = "admin";
-        Result<Void> result = employeeService.checkUsers(account);
-        Assertions.assertEquals(0, (int) result.getCode());
-        // 不存在的account
-        account = "testest";
-        result = employeeService.checkUsers(account);
-        Assertions.assertEquals(19999, (int) result.getCode());
+    public void checkUsersTest() {
+        Mockito.when(ariusUserInfoService.getByDomainAccount("admin")).thenReturn(new AriusUserInfo());
+        Assertions.assertTrue(employeeService.checkUsers("admin").success());
     }
 }

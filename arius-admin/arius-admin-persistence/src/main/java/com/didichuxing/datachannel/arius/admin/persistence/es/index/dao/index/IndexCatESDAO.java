@@ -108,6 +108,25 @@ public class IndexCatESDAO extends BaseESDAO {
         return false;
     }
 
+    /**
+     * 更新索引开启或关闭标识
+     * @param cluster           索引所在集群
+     * @param indexNameList     索引名称
+     * @param indexNewStatus    索引标识，true 开启，false 关闭
+     * @param retryCount        重试次数
+     * @return
+     */
+    public Boolean batchUpdateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus, int retryCount) {
+        try {
+            return ESOpTimeoutRetry.esRetryExecute("batchUpdateCatIndexStatus", retryCount,
+                    () -> updateCatIndexStatus(cluster, indexNameList, indexNewStatus));
+        } catch (ESOperateException e) {
+            LOGGER.warn("class=IndexCatESDAO||method=batchUpdateCatIndexStatus||errMsg={}", e.getMessage(), e);
+        }
+
+        return false;
+    }
+
     /**************************************************private******************************************************/
     /**
      * 构建模糊查询dsl语法, 如下
@@ -132,7 +151,7 @@ public class IndexCatESDAO extends BaseESDAO {
         termCellList.add(DSLSearchUtils.getTermCellsForExactSearch(clusters, "cluster"));
 
         //get index dsl term
-        termCellList.add(DSLSearchUtils.getTermCellForPrefixSearch(index, "index"));
+        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(index, "index"));
 
         //get index status term
         if (IndexStatusEnum.isStatusExit(health)) {
@@ -153,6 +172,21 @@ public class IndexCatESDAO extends BaseESDAO {
             indexCatCellPO.setCluster(cluster);
             indexCatCellPO.setIndex(index);
             indexCatCellPO.setDeleteFlag(true);
+            indexCatCellPO.setTimestamp(currentTimeMillis);
+            indexCatCellPOSList.add(indexCatCellPO);
+        }
+
+        return updateCatIndexInfo(indexCatCellPOSList);
+    }
+
+    private boolean updateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus) {
+        List<IndexCatCellPO> indexCatCellPOSList = Lists.newArrayList();
+        long currentTimeMillis = System.currentTimeMillis();
+        for (String index : indexNameList) {
+            IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
+            indexCatCellPO.setCluster(cluster);
+            indexCatCellPO.setIndex(index);
+            indexCatCellPO.setStatus(indexNewStatus ? "open" : "close");
             indexCatCellPO.setTimestamp(currentTimeMillis);
             indexCatCellPOSList.add(indexCatCellPO);
         }

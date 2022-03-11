@@ -89,3 +89,35 @@ export const MAPPING_TYPE = {
   table: 'table',
   json: 'json',
 };
+
+/*
+  cancelCopy：是否设置副本
+  asyncTranslog：是否开启translog异步
+  customerAnalysis：自定义分词器
+  dynamicTemplates：动态模板创建
+*/
+export const CHECK_GROUP = [
+  {
+    value: 'asyncTranslog',
+    text: '异步translog',
+  },
+  {
+    value: 'cancelCopy',
+    text: '取消副本',
+  },
+  {
+    value: 'customerAnalysis',
+    text: '自定义分词器',
+  },
+  // {
+  //   value: 'dynamicTemplates',
+  //   text: 'dynamic templates设置',
+  // },
+]
+
+export const MAPPING_CHECK_GROUP = [
+  {
+    value: 'dynamicTemplates',
+    text: 'dynamic templates设置',
+  },
+]

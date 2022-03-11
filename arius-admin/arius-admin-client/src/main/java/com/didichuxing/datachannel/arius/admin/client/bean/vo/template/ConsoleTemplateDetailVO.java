@@ -50,4 +50,9 @@ public class ConsoleTemplateDetailVO extends BaseTemplateVO {
     @ApiModelProperty("能够编辑")
     private Boolean      editable;
 
+    @ApiModelProperty("服务等级")
+    private Integer level;
+
+    @ApiModelProperty("是否开启indexRollover能力")
+    private Boolean disableIndexRollover;
 }
