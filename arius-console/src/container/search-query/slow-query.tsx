@@ -15,6 +15,7 @@ export const SlowQuery = () => {
     queryIndex: "",
     startTime: dates[0].valueOf(),
     endTime: dates[1].valueOf(),
+    totalCost: '',
   });
   const [dataSource, setDataSource] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +37,9 @@ export const SlowQuery = () => {
         setDataSource([]);
         return;
       }
+      dataSource.forEach((item, index) => {
+        item.key = index;
+      });
       setDataSource(dataSource);
     } catch (error) {
       setDataSource([]);
@@ -52,7 +56,7 @@ export const SlowQuery = () => {
   return (
     <div className={classPrefix}>
       <div>
-        <SearchQueryForm setSearchQuery={changeQueryParams} />
+        <SearchQueryForm setSearchQuery={changeQueryParams} isSlow value={'slow-query'}/>
       </div>
       <div className={`${classPrefix}-table`}>
         <DTable
@@ -60,7 +64,7 @@ export const SlowQuery = () => {
           rowKey="key"
           dataSource={dataSource}
           attrs={{
-            rowKey: 'esCost',
+            rowKey: 'key',
           }}
           paginationProps={{
             position: "bottomRight",

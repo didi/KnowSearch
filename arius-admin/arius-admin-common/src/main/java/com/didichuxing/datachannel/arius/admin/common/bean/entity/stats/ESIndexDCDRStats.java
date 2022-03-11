@@ -77,4 +77,9 @@ public class ESIndexDCDRStats extends BaseESPO {
     public String getKey() {
         return cluster + "@" + index + "@" + replicaCluster + "@" + monitorTimestamp2min(timestamp);
     }
+
+    @Override
+    public String getRoutingValue() {
+        return cluster;
+    }
 }

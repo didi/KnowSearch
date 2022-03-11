@@ -1,12 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum.OWN;
-import static com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum.isTemplateAuthExitByCode;
+import static com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum.*;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_LOGIC;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cache.CacheGlobalNamesContent.CACHE_GLOBAL_NAME;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl.NOT_CHECK;
 
@@ -18,14 +16,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,12 +52,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithLabels;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
@@ -68,13 +61,13 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplateLogicMetaErrorNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
@@ -125,9 +118,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ResponsibleConvertTool      responsibleConvertTool;
 
     @Autowired
-    private ClusterLogicService         clusterLogicService;
-
-    @Autowired
     private TemplatePhyManager          templatePhyManager;
 
     @Autowired
@@ -137,7 +127,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private HandleFactory               handleFactory;
 
     @Autowired
-    private ClusterContextManager clusterContextManager;
+    private TemplateDcdrManager         templateDcdrManager;
 
     /**
      * 校验所有逻辑模板元数据信息
@@ -267,6 +257,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             IndexTemplateConfig defaultTemplateConfig = getDefaultTemplateConfig(param.getId());
             if (param.getDisableSourceFlags() != null) {
                 defaultTemplateConfig.setDisableSourceFlags(param.getDisableSourceFlags());
+            }
+
+            if(param.getDisableIndexRollover() != null) {
+                defaultTemplateConfig.setDisableIndexRollover(param.getDisableIndexRollover());
             }
 
             if (param.getPreCreateFlags() != null) {
@@ -488,7 +482,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_GLOBAL_NAME, key = "#appId + '@' + #clusterLogicId +'@' + 'getConsoleTemplatesVOS'")
     public List<ConsoleTemplateVO> getConsoleTemplateVOSForClusterLogic(Long clusterLogicId, Integer appId) {
         if (AriusObjUtils.isNull(clusterLogicId)) {
             return Lists.newArrayList();
@@ -506,7 +499,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_GLOBAL_NAME, key = "#appId + '@' + 'getConsoleTemplatesVOS'")
     public List<ConsoleTemplateVO> getConsoleTemplatesVOS(Integer appId) {
         return fetchConsoleTemplates(getAllTemplatesAggregate(appId));
     }
@@ -609,7 +601,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         if (templateName.length() < TEMPLATE_NAME_SIZE_MIN || templateName.length() > TEMPLATE_NAME_SIZE_MAX) {
-            return Result.buildParamIllegal("名称长度非法, 1-128");
+            return Result.buildParamIllegal(String.format("名称长度非法, %s-%s",TEMPLATE_NAME_SIZE_MIN,TEMPLATE_NAME_SIZE_MAX));
         }
 
         for (Character c : templateName.toCharArray()) {
@@ -622,11 +614,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildDuplicate("模板名称已经存在");
         }
 
-        return Result.buildSucc();
-    }
-
-    @Override
-    public Result<Void> checkTemplateDataSizeValidForCreate(IndexTemplateLogicDTO param) {
+        // 前缀匹配校验
+        Result<Void> checkNamePrefixResult = checkTemplateNamePrefix(templateName);
+        if (checkNamePrefixResult.failed()) {
+            return Result.buildFrom(checkNamePrefixResult);
+        }
 
         return Result.buildSucc();
     }
@@ -662,6 +654,154 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc(true);
     }
 
+    @Override
+    public Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator) {
+        if(templateLogicId == null || status == null) {
+            return Result.buildSucc();
+        }
+        Boolean newDisable = status == 0;
+        IndexTemplateConfig templateConfig = templateLogicService.getTemplateConfig(templateLogicId);
+        if(templateConfig == null) {
+            return Result.buildFail("模版不存在");
+        }
+        Boolean oldDisable = templateConfig.getDisableIndexRollover();
+        if(!newDisable.equals(oldDisable)) {
+            // 如果状态不同则更新状态
+            IndexTemplateConfigDTO indexTemplateConfigDTO = ConvertUtil.obj2Obj(templateConfig, IndexTemplateConfigDTO.class);
+            indexTemplateConfigDTO.setDisableIndexRollover(newDisable);
+            return templateLogicService.updateTemplateConfig(indexTemplateConfigDTO, operator);
+        }
+        return Result.buildSucc();
+    }
+
+    @Override
+    public List<Integer> getHaveDCDRLogicIds() {
+        Result<List<TemplateLabel>> result = templateLabelService.listHaveDcdrTemplates();
+        if (result.failed() || CollectionUtils.isEmpty(result.getData())) {
+            return Lists.newArrayList();
+        }
+
+        return result.getData().stream().map(TemplateLabel::getIndexTemplateId).collect(Collectors.toList());
+    }
+
+    @Override
+    public Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId) {
+        // 根据逻辑模板id获取对应的逻辑物理模板信息
+        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+
+        if (AriusObjUtils.isNull(logicTemplateWithPhysicals)
+                || CollectionUtils.isEmpty(logicTemplateWithPhysicals.getPhysicals())) {
+            LOGGER.error(
+                    "class=TemplateLogicManagerImpl||method=checkTemplateEditService||templateId={}||msg=indexTemplateLogic is empty",
+                    templateId);
+            return Result.buildFail("逻辑模板信息为空");
+        }
+
+        // 获取逻辑集群对应的物理模板的物理集群名称列表
+        List<String> clusterPhyNameList = logicTemplateWithPhysicals.getPhysicals()
+                .stream()
+                .map(IndexTemplatePhy::getCluster)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 查看对应的物理集群是否开启了指定的索引模板服务
+        for (String clusterPhyName : clusterPhyNameList) {
+            Result<Boolean> checkResult = checkTemplateSrvByClusterName(clusterPhyName, templateSrvId);
+            if (checkResult.failed()) {
+                return Result.buildFrom(checkResult);
+            }
+        }
+
+        return Result.buildSucc(true);
+    }
+
+    @Override
+    public Result<Void> checkAppAuthOnLogicTemplate(Integer logicId, Integer appId) {
+        if (AriusObjUtils.isNull(logicId)) {
+            return Result.buildParamIllegal("索引id为空");
+        }
+
+        if (AriusObjUtils.isNull(appId)) {
+            return Result.buildParamIllegal("应用Id为空");
+        }
+
+        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
+        if (templateLogic == null) {
+            return Result.buildNotExist("索引不存在");
+        }
+
+        if (templateLabelService.isImportantIndex(logicId)) {
+            return Result.buildOpForBidden("禁止操作重要索引，请联系Arius服务号处理");
+        }
+
+        if (appService.isSuperApp(appId)) {
+            return Result.buildSucc();
+        }
+
+        if (!templateLogic.getAppId().equals(appId)) {
+            return Result.buildOpForBidden("您无权对该索引进行操作");
+        }
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    public boolean updateDCDRInfo(Integer logicId) {
+        if (!templateLogicService.exist(logicId)) { return true; }
+
+        // 1. 获取dcdr标识位
+        boolean dcdrFlag = false;
+        long totalIndexCheckPointDiff = 0;
+        try {
+            IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(logicId);
+            IndexTemplatePhy slavePhyTemplate  = logicTemplateWithPhysicals.getSlavePhyTemplate();
+            IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
+            if (null != masterPhyTemplate && null != slavePhyTemplate) {
+                dcdrFlag = templateDcdrManager.syncExistTemplateDCDR(masterPhyTemplate.getId(), slavePhyTemplate.getCluster());
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateName={}||errorMsg={}",
+                    logicId, e.getMessage(), e);
+        }
+
+        // 2. 获取位点差dcdr
+        if (dcdrFlag) {
+            try {
+                Tuple<Long, Long> masterAndSlaveTemplateCheckPointTuple = templateDcdrManager.getMasterAndSlaveTemplateCheckPoint(logicId);
+                totalIndexCheckPointDiff = Math.abs(masterAndSlaveTemplateCheckPointTuple.getV1() - masterAndSlaveTemplateCheckPointTuple.getV2());
+            } catch (Exception e) {
+                LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg={}",
+                        logicId, e.getMessage(), e);
+            }
+        }
+
+        try {
+            IndexTemplateLogicDTO indexTemplateLogicDTO = new IndexTemplateLogicDTO();
+            indexTemplateLogicDTO.setId(logicId);
+            indexTemplateLogicDTO.setHasDCDR(dcdrFlag);
+            indexTemplateLogicDTO.setCheckPointDiff(totalIndexCheckPointDiff);
+            templateLogicService.editTemplateInfoTODB(indexTemplateLogicDTO);
+        } catch (AdminOperateException e) {
+            LOGGER.error(
+                "class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg=failed to edit template",
+                logicId, e.getMessage(), e);
+        }
+
+        return true;
+    }
+
+    @Override
+    public Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId) {
+        // 根据物理集群名称获取全量逻辑模板列表
+        List<IndexTemplatePhyWithLogic> templateByPhyCluster = templatePhyService.getTemplateByPhyCluster(phyCluster);
+
+        // 转化为视图列表展示
+        List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
+        templateByPhyCluster.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic, appId)));
+
+        return Result.buildSucc(consoleTemplateVOLists);
+    }
+
     /**************************************** private method ***************************************************/
     /**
      * 校验逻辑模板Master ROLE物理模板是否存在
@@ -693,6 +833,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         return Result.build( ResultType.ADMIN_META_ERROR.getCode(), String.join(",", errMsg));
+    }
+
+    /**
+     * 构建逻辑模板视图
+     */
+    private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyWithLogic param, Integer appId) {
+        if (param == null) {
+            return null;
+        }
+
+        ConsoleTemplateVO consoleTemplateVO = ConvertUtil.obj2Obj(param.getLogicTemplate(), ConsoleTemplateVO.class);
+        consoleTemplateVO.setClusterPhies(Collections.singletonList(param.getCluster()));
+        return consoleTemplateVO;
     }
 
     /**
@@ -793,13 +946,30 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return indexTemplateLogicAggregates;
     }
 
-    private List<Integer> getHaveDCDRLogicIds() {
-        Result<List<TemplateLabel>> result = templateLabelService.listHaveDcdrTemplates();
-        if (result.failed() || CollectionUtils.isEmpty(result.getData())) {
-            return Lists.newArrayList();
+    /**
+     * 校验物理集群是否开启了指定的索引模板服务
+     * @param clusterPhyName 物理集群
+     * @param templateSrvId  索引服务id
+     * @return 校验结果
+     */
+    private Result<Boolean> checkTemplateSrvByClusterName(String clusterPhyName, Integer templateSrvId) {
+        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(templateSrvId);
+        if (AriusObjUtils.isNull(templateServiceEnum)) {
+            return Result.buildFail("指定校验的索引服务id不存在");
         }
 
-        return result.getData().stream().map(TemplateLabel::getIndexTemplateId).collect(Collectors.toList());
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
+        if (AriusObjUtils.isNull(clusterPhy)) {
+            return Result.buildFail(String.format("模板归属集群[%s]不存在", clusterPhyName));
+        }
+
+        // 校验物理集群是否已经开启了指定的索引模板服务
+        List<String> templateSrvList = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
+        if (!templateSrvList.contains(templateSrvId.toString())) {
+            return Result.buildFail(String.format("该模板归属集群未开启%s服务",templateServiceEnum.getServiceName()));
+        }
+
+        return Result.buildSucc();
     }
 
     private void initLogicParam(IndexTemplateLogicDTO param) {
@@ -865,6 +1035,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         indexTemplateConfig.setDisableSourceFlags(false);
         indexTemplateConfig.setPreCreateFlags(true);
         indexTemplateConfig.setShardNum(1);
+        indexTemplateConfig.setDisableIndexRollover(false);
         return indexTemplateConfig;
     }
 
@@ -875,5 +1046,33 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     private boolean insertTemplateConfig(IndexTemplateConfig indexTemplateConfig) {
         return templateLogicService.insertTemplateConfig(indexTemplateConfig).success();
+    }
+
+    /**
+     * 校验模板名称是否是其他逻辑模板名称的前缀
+     * @param templateName 逻辑模板名称
+     * @return 校验的结果
+     */
+    private Result<Void> checkTemplateNamePrefix(String templateName) {
+        if (StringUtils.isEmpty(templateName)) {
+            return Result.buildFail("模板名称为空");
+        }
+
+        // 获取全部的正在使用的逻辑模板
+        List<IndexTemplateLogic> allLogicTemplates = templateLogicService.getAllLogicTemplates();
+
+        if (!CollectionUtils.isEmpty(allLogicTemplates)) {
+            for (IndexTemplateLogic indexTemplateLogic : allLogicTemplates) {
+                String logicTemplateName = indexTemplateLogic.getName();
+
+                // 为了隔离索引创建匹配的模板，新建模板的名称和其他模板名称不能互相存在前缀匹配
+                if (logicTemplateName.startsWith(templateName)
+                        || templateName.startsWith(logicTemplateName)) {
+                    return Result.buildFail(String.format("目前和%s存在前缀匹配的情况", logicTemplateName));
+                }
+            }
+        }
+
+        return Result.buildSucc();
     }
 }

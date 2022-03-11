@@ -6,7 +6,7 @@ import { FormItemType, IFormItem } from 'component/x-form';
 import  { notification, Modal, Spin }  from 'antd';
 import { regNonnegativeInteger } from 'constants/reg';
 import { getPhysicalTemplateIndexDetail, updateTemplateIndex } from 'api/cluster-index-api';
-import { IOpTemplateIndexDetail } from '@types/index-types';
+import { IOpTemplateIndexDetail } from 'typesPath/index-types';
 
 const mapStateToProps = state => ({
   params: state.modal.params,

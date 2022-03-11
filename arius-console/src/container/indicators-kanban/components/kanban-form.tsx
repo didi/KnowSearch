@@ -55,6 +55,7 @@ export const KanbanForm: React.FC<propsType> = memo(
                 style={{ width: 200 }}
                 onChange={onClusterNameChange}
                 value={clusterNameList[0] && clusterNameList[0].value}
+                showSearch
               >
                 {clusterNameList.map((item, index) => (
                   <Option value={item.value} key={index + item.value}>

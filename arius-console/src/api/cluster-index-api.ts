@@ -1,5 +1,5 @@
-import { IUNSpecificInfo } from '@types/base-types';
-import { IClearIndexParams, IWorkOrder } from '@types/params-types';
+import { IUNSpecificInfo } from 'typesPath/base-types';
+import { IClearIndexParams, IWorkOrder } from 'typesPath/params-types';
 import fetch from '../lib/fetch';
 import store from 'store';
 
@@ -13,6 +13,15 @@ export interface IAllIndexList {
   dataType: number;
   // 索引名称
   name: number;
+  clusterPhies?: string[];
+  sortTerm?: string;
+  orderByDesc?: boolean;
+  hasDCDR?: boolean;
+}
+
+export interface ISwitchMasterSlave {
+  templateIds: number[],
+  type: number,
 }
 
 /**
@@ -135,8 +144,8 @@ export const toDsl = (sql: string) => {
   // });
 };
 
-export const explainSql = (sql: string) => {
-  return fetch(`/v3/op/gateway/sql`, {
+export const explainSql = (sql: string, phyClusterName?: string) => {
+  return fetch(`/v3/op/gateway/sql${phyClusterName ? '/' + phyClusterName : ''}`, {
     method: 'POST',
     prefix: 'sql',
     body: sql,
@@ -198,10 +207,49 @@ export const getNameCheck = (templateName: string) => {
   return fetch(`/v3/op/template/logic/${templateName}/nameCheck`);
 };
 
+export const getSizeCheck = (logicClusterId: number, diskSize: number) => {
+  // 校验模板大小资源是否充足
+  return fetch(`/v3/op/logic/cluster/${logicClusterId}/${diskSize}/sizeCheck`);
+};
+
 export const checkEditMapping = (templateId: number) => {
   // 检查mapping是否可编辑
   return fetch(`/v3/op/template/logic/${templateId}/checkEditMapping/`, {
     errorNoTips: true,
     returnRes: true
+  });
+};
+
+// /rollover/switch/{templateLogicId}/{disable} 
+// disable :是否禁用rollover能力（false 启用，true 禁用）
+export const rolloverSwitch = (templateLogicId: number, disable: string) => {
+  return fetch(`/v3/op/template/logic/rollover/switch/${templateLogicId}/${disable}`, {
+    method: 'PUT',
+  });
+};
+
+export const checkHotTimeState = (clusterLogicId: number) => {
+  return fetch(`/v3/op/logic/cluster/templateSrv/${clusterLogicId} `);
+};
+
+// /v3/op/template/logic/dcdr/switchMasterSlave DCDR主从切换接口
+export const switchMasterSlave = (params: ISwitchMasterSlave) => {
+  return fetch(`/v3/op/dcdr/work-order/task/switchMasterSlave`, {
+    method: 'POST',
+    body: params,
+  });
+};
+
+export const disableRead = (params: any) => {
+  return fetch(`/v2/op/template/logic/blockRead`, {
+    method: 'PUT',
+    body: JSON.stringify(params),
+  });
+};
+
+export const disableWrite = (params: any) => {
+  return fetch(`/v2/op/template/logic/blockWrite`, {
+    method: 'PUT',
+    body: JSON.stringify(params),
   });
 };

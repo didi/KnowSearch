@@ -21,8 +21,11 @@ public class LogicClusterRackVO extends BaseVO {
     @ApiModelProperty("映射ID")
     private Long   id;
 
-    @ApiModelProperty("逻辑集群ID")
-    private Long   resourceId;
+    @ApiModelProperty("逻辑集群ID,共享情况下rack可能会对应多个逻辑集群ID")
+    private String resourceIds;
+
+    @ApiModelProperty("逻辑集群ID,为兼容取rack对应的逻辑集群的首位")
+    private Long resourceId;
 
     @ApiModelProperty("物理集群名称")
     private String cluster;

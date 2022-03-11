@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -122,7 +123,7 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public Result<String> sqlOperate(String sql, Integer appId, String postFix) {
+    public Result<String> sqlOperate(String sql, String phyClusterName, Integer appId, String postFix) {
         Result<String> result = preSqlParamCheck(sql, appId, postFix);
         if (result.failed()) {
             return Result.buildFrom(result);
@@ -131,9 +132,9 @@ public class GatewayServiceImpl implements GatewayService {
         String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getGatewayAddress() + postFix;
         try {
             // gateway的sql语句操作接口直接以字符串的形式返还结果
-            String sqlResponse = BaseHttpUtil.postForString(url, sql, buildGatewayHeader(appId.toString()));
+            String sqlResponse = BaseHttpUtil.postForString(url, sql, buildGatewayHeader(phyClusterName, appId));
             return Result.buildSucc(sqlResponse, "");
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             LOGGER.error("class=GatewayManageServiceImpl||method=directSqlSearch||postFix={}||errMsg={}", postFix, e);
         }
         return Result.buildFail();
@@ -153,12 +154,15 @@ public class GatewayServiceImpl implements GatewayService {
         return Result.buildSucc();
     }
 
-    private Map<String, String> buildGatewayHeader(String appId) throws UnsupportedEncodingException {
+    private Map<String, String> buildGatewayHeader(String phyClusterName, Integer appId) {
         Map<String, String> headers = Maps.newHashMap();
-        BasicHeader basicHeader = (BasicHeader) esGatewayClient.getAppidHeaderMap().get(appId);
+        App app = appService.getAppById(appId);
+        Header header = BaseHttpUtil.buildHttpHeader(String.valueOf(appId), app.getVerifyCode());
         headers.put("Content-Type", "application/json;charset=utf-8");
-        headers.put(basicHeader.getName(), basicHeader.getValue());
-        headers.put("X-ARIUS-APP-ID", appId);
+        headers.put(header.getName(), header.getValue());
+        if(!AriusObjUtils.isBlack(phyClusterName)) {
+            headers.put("CLUSTER-ID", phyClusterName);
+        }
         return headers;
     }
 

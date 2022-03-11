@@ -174,6 +174,10 @@ public class RackUtils {
             return true;
         }
 
+        if(srcRack == null || tgtRack == null){
+            return false;
+        }
+
         Set<String> srcRackSet = RackUtils.racks2Set(srcRack);
         Set<String> tgtRackSet = RackUtils.racks2Set(tgtRack);
 

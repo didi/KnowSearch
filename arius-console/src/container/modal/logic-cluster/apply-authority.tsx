@@ -5,7 +5,7 @@ import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { StaffSelect } from 'container/staff-select';
 import { RenderText } from 'container/custom-form';
-import { IWorkOrder } from '@types/params-types';
+import { IWorkOrder } from 'typesPath/params-types';
 import { submitWorkOrder } from 'api/common-api';
 import { nounAuthority } from 'container/tooltip';
 import { AppState, UserState } from 'store/type';

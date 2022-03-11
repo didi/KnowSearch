@@ -3,7 +3,7 @@ import { EditorCom } from 'component/editor';
 import * as monaco from 'monaco-editor';
 import { getSqlSuggestionsList } from 'constants/sql-suggestions';
 import { editorShortCut } from 'lib/utils';
-import { btnFunc } from '@types/base-types';
+import { btnFunc } from 'typesPath/base-types';
 
 interface ISQLProps {
   className?: string;

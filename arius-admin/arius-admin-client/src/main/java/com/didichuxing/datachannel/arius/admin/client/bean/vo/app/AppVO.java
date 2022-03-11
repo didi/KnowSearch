@@ -50,7 +50,7 @@ public class AppVO extends BaseVO {
     @ApiModelProperty("查询集群")
     private String  cluster;
 
-    @ApiModelProperty("查询模式（0:集群模式；1:索引模式）")
+    @ApiModelProperty("查询模式（0:集群模式；1:索引模式, 3:原生模式）")
     private Integer searchType;
 
 }

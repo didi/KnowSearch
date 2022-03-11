@@ -127,7 +127,11 @@ public enum ClusterPhyNodeMetricsEnum {
 
                                        JVM_MEM_NON_HEAP_USED("jvm-mem-non_heap_used_in_bytes", "JVM堆外存使用量"),
 
-                                       JVM_MEM_HEAP_PERCENT("jvm-mem-heap_used_percent", "JVM堆使用率");
+                                       JVM_MEM_HEAP_PERCENT("jvm-mem-heap_used_percent", "JVM堆使用率"),
+
+                                       /*************************************5.TASK指标******************************************/
+                                       TASK_COUNT("taskId", "task id"),
+                                       TASK_COST("runningTime", "task耗时");
 
     ClusterPhyNodeMetricsEnum(String type, String desc) {
         this.type = type;

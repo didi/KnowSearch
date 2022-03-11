@@ -4,8 +4,8 @@ import { connect } from "react-redux";
 import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { AppState, UserState } from 'store/type';
-import { IPhyConfig } from '@types/cluster/physics-type';
-import { IWorkOrder } from '@types/params-types';
+import { IPhyConfig } from 'typesPath/cluster/physics-type';
+import { IWorkOrder } from 'typesPath/params-types';
 import Url from "lib/url-parser";
 import { submitWorkOrder } from 'api/common-api';
 import { getPhysicClusterRoles } from 'api/cluster-api';
@@ -102,7 +102,7 @@ const EditConfig = (props: { dispatch: any, cb: Function, app: AppState, user: U
         description: result.description || "",
         type: "clusterOpConfigRestart",
       };
-      submitWorkOrder(workOrderParams).finally(() => {
+      return submitWorkOrder(workOrderParams).finally(() => {
         props.dispatch(actions.setModalId(""));
       });
     },

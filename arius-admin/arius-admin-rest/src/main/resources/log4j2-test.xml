@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- status="OFF"，可以去掉，它的含义为是否记录log4j2本身的event信息，默认是OFF -->
+<configuration status="debug" monitorInterval="30">
+    <!-- 定义下面的引用名 -->
+    <Properties>
+
+        <Property name="PID">????</Property>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{${LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <Property name="log_pattern">%d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <!-- name的值是变量的名称，value的值时变量定义的值。通过定义的值会被插入到logger上下文中。定义后，可以使"${}"来使用变量。 -->
+        <property name="log.path">./logs/</property>
+    </Properties>
+    <!--先定义所有的appender -->
+    <appenders>
+
+        <RollingFile name="logiJobLogger"
+                     filename="${log.path}/logiJob.log" filePattern="${log.path}/logiJob.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="1">
+                <!-- 配置日志滚动删除策略 IfLastModified 的单位需要配合 filePattern中的规则使用 -->
+                <Delete basePath="${log.path}" maxDepth="1">
+                    <IfFileName glob="*.log.*"/>
+                    <IfLastModified age="3d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="accessLogger"
+                     filename="${log.path}/access.log" filePattern="${log.path}/access.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+
+        <RollingFile name="responseLogger"
+                     filename="${log.path}/response.log" filePattern="${log.path}/response.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <RollingFile name="thirdReqLogger"
+                     filename="${log.path}/thirdReq.log" filePattern="${log.path}/thirdReq.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+
+        <RollingFile name="thirdRespLogger"
+                     filename="${log.path}/thirdResp.log" filePattern="${log.path}/thirdResp.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <RollingFile name="systemLog"
+                     filename="${log.path}/system.log" filePattern="${log.path}/system.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Filters>
+                <!-- 只要level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+        <RollingFile name="errorLog"
+                     filename="${log.path}/error.log" filePattern="${log.path}/error.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Filters>
+                <!-- 只要level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+
+        <RollingFile name="threadLog"
+                     filename="${log.path}/thread.log" filePattern="${log.path}/thread.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+    </appenders>
+    <!-- 非开发环境只需要打印到文件就行 -->
+    <loggers>
+
+        <AsyncRoot level="INFO" includeLocation="true">
+            <AppenderRef ref="systemLog" />
+            <AppenderRef ref="errorLog" />
+        </AsyncRoot>
+
+        <!-- http请求请求日志记录  -->
+        <AsyncLogger name="accessLogger" level="INFO" additivity="false">
+            <appender-ref ref="accessLogger"/>
+        </AsyncLogger>
+
+        <!-- http请求响应日志记录  -->
+        <AsyncLogger name="responseLogger" level="INFO" additivity="false">
+            <appender-ref ref="responseLogger"/>
+        </AsyncLogger>
+
+        <!-- admin 与第三方服务交互请求日志记录 RestTool  -->
+        <AsyncLogger name="thirdRespLogger" level="INFO" additivity="false">
+            <appender-ref ref="thirdRespLogger"/>
+        </AsyncLogger>
+
+        <!-- admin 与第三方服务交互响应日志记录 RestTool  -->
+        <AsyncLogger name="thirdReqLogger" level="INFO" additivity="false">
+            <appender-ref ref="thirdReqLogger"/>
+        </AsyncLogger>
+
+        <!-- admin 线程池日志记录 -->
+        <AsyncLogger name="com.didichuxing.datachannel.arius.admin.common.threadpool" level="WARN" additivity="false">
+            <appender-ref ref="threadLog"/>
+        </AsyncLogger>
+
+        <!-- admin FutureUtil工具日志记录 -->
+        <AsyncLogger name="com.didichuxing.datachannel.arius.admin.common.util.FutureUtil" level="WARN" additivity="false">
+            <appender-ref ref="threadLog"/>
+        </AsyncLogger>
+
+        <!-- logi job 日子记录 -->
+        <AsyncLogger name="com.didiglobal.logi.job" level="INFO" additivity="false">
+            <appender-ref ref="logiJobLogger" />
+        </AsyncLogger>
+
+    </loggers>
+</configuration>

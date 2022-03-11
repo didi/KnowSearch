@@ -6,6 +6,23 @@ export const indexConfigClassifyList: string[] = [
   "索引内存指标",
 ];
 
+//黄金配置
+export const goldConfig = {
+  "索引基础指标": [
+    'shardNu',
+    'docs-count',
+  ],
+  "索引性能指标": [
+    'indexing-index_total_rate',
+    'indexing-index_time_in_millis',
+    'search-query_time_in_millis',
+  ],
+  "索引内存指标": [
+    'query_cache-memory_size_in_bytes',
+    'segments-memory_in_bytes',
+  ],
+}
+
 export const indexConfigData = {
   shardNu: {
     name: "Shard数",
@@ -22,31 +39,6 @@ export const indexConfigData = {
     unit: unitMap.count,
     classify: indexConfigClassifyList[0],
   },
-  "search-query_total_rate": {
-    name: "查询Query数",
-    unit: unitMap.ss,
-    classify: indexConfigClassifyList[0],
-  },
-  "search-fetch_total_rate": {
-    name: "查询Fetch数",
-    unit: unitMap.ss,
-    classify: indexConfigClassifyList[0],
-  },
-  "merges-total_rate": {
-    name: "Merge次数",
-    unit: unitMap.ss,
-    classify: indexConfigClassifyList[0],
-  },
-  "refresh-total_rate": {
-    name: "Refresh次数",
-    unit: unitMap.ss,
-    classify: indexConfigClassifyList[0],
-  },
-  "flush-total_rate": {
-    name: "Flush次数",
-    unit: unitMap.ss,
-    classify: indexConfigClassifyList[0],
-  },
   "indexing-index_total_rate": {
     name: "写入速率",
     unit: unitMap.ss,
@@ -57,9 +49,19 @@ export const indexConfigData = {
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
+  "search-query_total_rate": {
+    name: "查询Query速率",
+    unit: unitMap.ss,
+    classify: indexConfigClassifyList[1],
+  },
   "search-query_time_in_millis": {
     name: "查询Query耗时",
     unit: unitMap.ms,
+    classify: indexConfigClassifyList[1],
+  },
+  "search-fetch_total_rate": {
+    name: "查询Fetch速率",
+    unit: unitMap.ss,
     classify: indexConfigClassifyList[1],
   },
   "search-fetch_time_in_millis": {
@@ -68,7 +70,7 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[1],
   },
   "search-scroll_total_rate": {
-    name: "查询Scroll数",
+    name: "查询Scroll速率",
     unit: unitMap.ss,
     classify: indexConfigClassifyList[1],
   },
@@ -77,14 +79,29 @@ export const indexConfigData = {
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
+  "merges-total_rate": {
+    name: "Merge速率",
+    unit: unitMap.ss,
+    classify: indexConfigClassifyList[1],
+  },
   "merges-total_time_in_millis": {
     name: "Merge耗时",
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
+  "refresh-total_rate": {
+    name: "Refresh速率",
+    unit: unitMap.ss,
+    classify: indexConfigClassifyList[1],
+  },
   "refresh-total_time_in_millis": {
     name: "Refresh耗时",
     unit: unitMap.ms,
+    classify: indexConfigClassifyList[1],
+  },
+  "flush-total_rate": {
+    name: "Flush速率",
+    unit: unitMap.ss,
     classify: indexConfigClassifyList[1],
   },
   "flush-total_time_in_millis": {

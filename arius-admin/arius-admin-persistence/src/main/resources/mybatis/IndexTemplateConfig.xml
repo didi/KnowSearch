@@ -12,6 +12,7 @@
         <result column="mapping_improve_enable" jdbcType="TINYINT" property="mappingImproveEnable"/>
         <result column="pre_create_flags" jdbcType="TINYINT" property="preCreateFlags" />
         <result column="disable_source_flags" jdbcType="TINYINT" property="disableSourceFlags" />
+        <result column="disable_index_rollover" jdbcType="TINYINT" property="disableIndexRollover" />
         <result column="shard_num" jdbcType="INTEGER" property="shardNum" />
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -19,7 +20,7 @@
 
     <sql id="Base_Column_List">
         id, logic_id, is_source_separated, adjust_rack_tps_factor, adjust_rack_shard_factor, dynamic_limit_enable,
-    mapping_improve_enable, pre_create_flags, disable_source_flags, shard_num, create_time, update_time
+    mapping_improve_enable, pre_create_flags, disable_source_flags, disable_index_rollover, shard_num, create_time, update_time
     </sql>
 
     <select id="listByCondition"
@@ -36,6 +37,7 @@
             <if test="mappingImproveEnable != null">and mapping_improve_enable = #{mappingImproveEnable}</if>
             <if test="preCreateFlags != null">and pre_create_flags = #{preCreateFlags}</if>
             <if test="disableSourceFlags != null">and disable_source_flags = #{disableSourceFlags}</if>
+            <if test="disableIndexRollover != null">and disable_index_rollover = #{disableIndexRollover}</if>
             <if test="shardNum != null">and shard_num = #{shardNum}</if>
         </trim>
     </select>
@@ -53,11 +55,11 @@
         insert into index_template_config
         (logic_id, is_source_separated, adjust_rack_tps_factor, adjust_rack_shard_factor,
             dynamic_limit_enable, mapping_improve_enable,
-            pre_create_flags, disable_source_flags, shard_num)
+            pre_create_flags, disable_source_flags, disable_index_rollover, shard_num)
         values
         (#{logicId}, #{isSourceSeparated}, #{adjustRackTpsFactor}, #{adjustRackShardFactor},
             #{dynamicLimitEnable}, #{mappingImproveEnable},
-            #{preCreateFlags}, #{disableSourceFlags}, #{shardNum})
+            #{preCreateFlags}, #{disableSourceFlags}, #{disableIndexRollover}, #{shardNum})
     </insert>
 
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
@@ -85,6 +87,7 @@
             <if test="mappingImproveEnable != null">,mapping_improve_enable = #{mappingImproveEnable}</if>
             <if test="preCreateFlags != null">,pre_create_flags = #{preCreateFlags}</if>
             <if test="disableSourceFlags != null">,disable_source_flags = #{disableSourceFlags}</if>
+            <if test="disableIndexRollover != null">,disable_index_rollover = #{disableIndexRollover}</if>
             <if test="shardNum != null">,shard_num = #{shardNum}</if>
         </trim>
         where logic_id = #{logicId}

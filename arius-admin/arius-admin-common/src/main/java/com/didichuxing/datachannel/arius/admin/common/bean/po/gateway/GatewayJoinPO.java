@@ -224,4 +224,10 @@ public class GatewayJoinPO extends BaseESPO {
     public String getKey() {
         return null;
     }
+
+    @JSONField(serialize = false)
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

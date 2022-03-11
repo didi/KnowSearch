@@ -5,7 +5,7 @@ import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { RenderText } from 'container/custom-form';
 import { VERSION_MAINFEST_TYPE } from 'constants/status-map';
-import { IOpPhysicsClusterDetail } from '@types/cluster/cluster-types';
+import { IOpPhysicsClusterDetail } from 'typesPath/cluster/cluster-types';
 import { opEditCluster } from 'api/cluster-api';
 import { notification } from 'antd';
 
@@ -32,7 +32,7 @@ const EditPhyCluster = (props: { dispatch: any, cb: Function, params: IOpPhysics
         key: 'project',
         label: '所属项目',
         type: FormItemType.text,
-        customFormItem: <RenderText text={props.params.belongAppName} />,
+        customFormItem: <RenderText text={props.params?.belongAppNames?.join(',') || '-'} />,
       },
       {
         key: 'desc',
@@ -68,7 +68,7 @@ const EditPhyCluster = (props: { dispatch: any, cb: Function, params: IOpPhysics
       const { responsible,  desc} = result;
       req.responsible = Array.isArray(responsible) ? responsible.join(',') : responsible;
       req.desc = desc;
-      opEditCluster(req).then(() => {
+      return opEditCluster(req).then(() => {
         notification.success({ message: `编辑成功` });
       }).finally(() => {
         props.cb && props.cb();

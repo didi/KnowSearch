@@ -52,7 +52,7 @@ public class PaginationResult<T> extends BaseResult{
     public static <T> PaginationResult<T> buildParamIllegal(String msg) {
         PaginationResult<T> result = new PaginationResult<>();
         result.setCode(ResultType.ILLEGAL_PARAMS.getCode());
-        result.setMessage(ResultType.ILLEGAL_PARAMS.getMessage() + ":" + msg + "，请检查后再提交！");
+        result.setMessage(msg);
         return result;
     }
 }

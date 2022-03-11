@@ -1,0 +1,15 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": %s
+    }
+  },
+  "aggs": {
+    "group_by_field": {
+      "terms": {
+        "field": "clientNode"
+      }
+    }
+  }
+}

@@ -3,12 +3,12 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 import java.util.List;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPlugin;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
@@ -67,10 +67,9 @@ public interface ClusterLogicService {
     /**
      * 新建逻辑集群
      * @param param 参数
-     * @param operator 操作人
      * @return result
      */
-    Result<Long> createClusterLogic(ESLogicClusterDTO param, String operator);
+    Result<Long> createClusterLogic(ESLogicClusterDTO param);
 
     /**
      * 验证逻辑集群创建、更新参数是否合法
@@ -120,6 +119,8 @@ public interface ClusterLogicService {
      */
     List<ClusterLogic> getHasAuthClusterLogicsByAppId(Integer appId);
 
+    List<Long> getHasAuthClusterLogicIdsByAppId(Integer appId);
+
     /**
      * 判断逻辑集群是否存在
      * @param resourceId 逻辑集群id
@@ -168,16 +169,16 @@ public interface ClusterLogicService {
      * @param  logicClusterId 逻辑集群ID
      * @return config
      */
-    List<ESPlugin> getClusterLogicPlugins(Long logicClusterId);
+    List<Plugin> getClusterLogicPlugins(Long logicClusterId);
 
     /**
      * 根据逻辑集群Id添加插件信息
      * @param  logicClusterId        逻辑集群ID
-     * @param  esPluginDTO           插件信息
+     * @param  pluginDTO           插件信息
      * @param  operator              操作人
      * @return ESPlugin
      */
-    Result<Long> addPlugin(Long logicClusterId, ESPluginDTO esPluginDTO, String operator);
+    Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator);
 
     /**
      * 转移逻辑集群

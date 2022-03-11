@@ -40,6 +40,9 @@ export const EditListItem: React.FC<propsType> = memo(
     if (unit && unit == "%" && parseInt(value) != value) {
       value = Number(value).toFixed(2);
     }
+    if (String(value) == 'NaN') {
+      value = '';
+    }
     const [res, setRes] = useState(value);
     const [isEdit, setIsEdit] = useState(false);
     const [inpVal, setInpVal] = useState(value);
@@ -150,6 +153,9 @@ export const EditListItem: React.FC<propsType> = memo(
       if (Array.isArray(res)) {
         return res.join(", ");
       }
+      if (res == null || res == 'null') {
+        return '';
+      }
       return String(res);
     };
 
@@ -173,7 +179,7 @@ export const EditListItem: React.FC<propsType> = memo(
             ) : (
               <div className="edit-box">
                 {renderRes()}
-                {unit}
+                {renderRes() ? unit : null}
               </div>
             )}
           </div>

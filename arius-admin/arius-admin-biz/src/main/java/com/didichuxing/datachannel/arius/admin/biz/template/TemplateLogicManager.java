@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import java.util.List;
+import java.util.Set;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,16 +167,53 @@ public interface TemplateLogicManager {
     Result<Void> checkTemplateValidForCreate(String templateName);
 
     /**
-     * 校验模板大小资源是否充足
-     * @param param
-     * @return
-     */
-    Result<Void> checkTemplateDataSizeValidForCreate(IndexTemplateLogicDTO param);
-
-    /**
      * 校验模板mapping可否编辑
      * @param templateId
      * @return
      */
     Result<Boolean> checkTemplateEditMapping(Integer templateId);
+
+    /**
+     * 更改逻辑模版的rollover能力
+     * @param templateLogicId 逻辑模版id
+     * @param status 1 启用，0 禁用
+     * @param operator 操作者
+     * @return
+     */
+    Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator);
+    /**
+     * 获取创建dcdr链路模板
+     * @return
+     */
+    List<Integer> getHaveDCDRLogicIds();
+
+    /**
+     * 校验模板是否可以使用索引模板的相关服务，例如是否可以编辑mapping,setting
+     * @param templateId 逻辑模板id
+     * @param templateSrvId 索引模板服务id
+     * @return 校验的结果
+     */
+    Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId);
+
+    /**
+     * 校验指定appId能否对指定的逻辑模板进行操作
+     * @param logicId 逻辑模板id
+     * @param appId appId
+     * @return result
+     */
+    Result<Void> checkAppAuthOnLogicTemplate(Integer logicId, Integer appId);
+
+    /**
+     * 同步dcdr相关信息
+     * @param logicId
+     * @return
+     */
+    boolean updateDCDRInfo(Integer logicId);
+
+    /**
+     * 全量获取指定物理集群所关联的逻辑模板信息列表
+     * @param phyCluster 物理集群名称
+     * @return 物理集群下的全量模板信息列表视图
+     */
+    Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId);
 }

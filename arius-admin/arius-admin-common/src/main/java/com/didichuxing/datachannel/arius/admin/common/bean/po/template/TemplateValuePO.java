@@ -48,4 +48,9 @@ public class TemplateValuePO extends BaseESPO {
         return String.valueOf(logicTemplateId);
     }
 
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
+
 }

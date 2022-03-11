@@ -1,28 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.lucene.util.NamedThreadFactory;
+import java.util.Map;
+import java.util.concurrent.*;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
 import com.google.common.collect.Lists;
-
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.lucene.util.NamedThreadFactory;
 
 @NoArgsConstructor
 public class FutureUtil<T> {
     private static final ILog LOGGER = LogFactory.getLog(FutureUtil.class);
 
     private ThreadPoolExecutor  executor;
-    private List<Future<T>>     futures;
     private String              name;
+
+    private Map<Long/*currentThreadId*/, List<Future<T>>> futuresMap;
 
     public final static FutureUtil<Void> DEAULT_FUTURE = FutureUtil.init("default");
 
@@ -30,9 +26,7 @@ public class FutureUtil<T> {
 
     public ThreadPoolExecutor getExecutor() {return executor;}
 
-    public void setFutures(List<Future<T>> futures) {
-        this.futures = futures;
-    }
+    public void setFuturesMap(Map<Long, List<Future<T>>> futuresMap) {this.futuresMap = futuresMap;}
 
     public void setName(String name) {
         this.name = name;
@@ -48,7 +42,7 @@ public class FutureUtil<T> {
 
         futureUtil.setExecutor(exe);
         futureUtil.setName(name);
-        futureUtil.setFutures(Lists.newCopyOnWriteArrayList());
+        futureUtil.setFuturesMap(new ConcurrentHashMap<>());
         return futureUtil;
     }
 
@@ -81,7 +75,15 @@ public class FutureUtil<T> {
      * @return
      */
     public FutureUtil<T> callableTask(Callable<T> callable){
-        this.futures.add(executor.submit(callable));
+        Long currentThreadId = Thread.currentThread().getId();
+
+        List<Future<T>> futures = futuresMap.get(currentThreadId);
+        if(CollectionUtils.isEmpty(futures)){
+            futures = Lists.newCopyOnWriteArrayList();
+        }
+
+        futures.add(executor.submit(callable));
+        futuresMap.put(currentThreadId, futures);
         return this;
     }
 
@@ -91,27 +93,44 @@ public class FutureUtil<T> {
      * @return
      */
     public FutureUtil<T> runnableTask(Runnable runnable){
-        this.futures.add((Future<T>) executor.submit(runnable));
+        Long currentThreadId = Thread.currentThread().getId();
+
+        List<Future<T>> futures = futuresMap.get(currentThreadId);
+        if(CollectionUtils.isEmpty(futures)){
+            futures = Lists.newCopyOnWriteArrayList();
+        }
+
+        futures.add((Future<T>) executor.submit(runnable));
+        futuresMap.put(currentThreadId, futures);
         return this;
     }
 
     public void waitExecute(long timeOutSeconds) {
+        Long currentThreadId = Thread.currentThread().getId();
+
+        List<Future<T>> currentFutures = futuresMap.get(currentThreadId);
+
+        if(CollectionUtils.isEmpty(currentFutures)){return;}
+
         //CopyOnWriteArrayList 不支持迭代器进行remove 会抛出java.lang.UnsupportedOperationException
-        for (Future<T> f : futures) {
+        for (Future<T> f : currentFutures) {
             try {
                 f.get(timeOutSeconds, TimeUnit.SECONDS);
             } catch (Exception e) {
-                Thread.currentThread().interrupt();
                 f.cancel(true);
                 LOGGER.error("class=FutureUtil||method=waitExecute||msg=exception", e);
             }finally {
-                futures.remove(f);
+                currentFutures.remove(f);
             }
+        }
+
+        if(CollectionUtils.isEmpty(currentFutures)){
+            futuresMap.remove(currentThreadId);
         }
 
         if(!EnvUtil.isOnline()){
             LOGGER.info("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!",
-                    name, futures.size());
+                    name, currentFutures.size());
         }
     }
 
@@ -120,26 +139,35 @@ public class FutureUtil<T> {
     }
 
     public List<T> waitResult(long timeOutSeconds){
-        List<T> list = Lists.newArrayList();
-        for (Future<T> f : futures) {
+        Long currentThreadId = Thread.currentThread().getId();
+
+        List<Future<T>> currentFutures = futuresMap.get(currentThreadId);
+
+        List<T> list = Lists.newCopyOnWriteArrayList();
+
+        if(CollectionUtils.isEmpty(currentFutures)){return list;}
+
+        for (Future<T> f : currentFutures) {
             try {
                 T t = f.get(timeOutSeconds, TimeUnit.SECONDS);
                 if (t != null) {
                     list.add(t);
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
+            }catch (Exception e) {
                 f.cancel(true);
                 LOGGER.error("class=FutureUtil||method=waitResult||msg=exception", e);
             }finally {
-                futures.remove(f);
+                currentFutures.remove(f);
             }
+        }
+
+        if(CollectionUtils.isEmpty(currentFutures)){
+            futuresMap.remove(currentThreadId);
         }
 
         if(!EnvUtil.isOnline()){
             LOGGER.info("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!",
-                    name, futures.size());
+                    name, currentFutures.size());
         }
         return list;
     }

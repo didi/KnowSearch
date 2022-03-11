@@ -67,7 +67,6 @@ public class RestIndexAction extends RestBaseWriteAction {
         if (!indexTemplate.isInternal()) {
             source.put(WRITE_TIME_FIELD, System.currentTimeMillis());
         }
-
         ESIndexRequest indexRequest = new ESIndexRequest();
         indexRequest.index(index);
         indexRequest.type(request.param("type") == null ? "_doc" : request.param("type"));

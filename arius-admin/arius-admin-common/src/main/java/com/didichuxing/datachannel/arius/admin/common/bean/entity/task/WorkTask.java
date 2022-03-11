@@ -36,7 +36,7 @@ public class WorkTask extends BaseEntity {
     /**
      * 业务数据主键
      */
-    private Integer businessKey;
+    private String businessKey;
 
     /**
      * 任务状态

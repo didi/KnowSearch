@@ -8,11 +8,10 @@ import { renderFormItem, handleFormItem, IFormItem, FormItemType } from "compone
 import cloneDeep from "lodash/cloneDeep";
 import { TEMP_FORM_MAP_KEY, cascaderTypes } from "./constant";
 import Url from "lib/url-parser";
-import { LoadingBlock } from "container/custom-component";
 import { getIndexBaseInfo, getIndexMappingInfo } from "api/cluster-index-api";
 import { Form, Button, Row, Col, Tree, Popconfirm, Empty, Spin } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { IStringMap, IUNSpecificInfo } from "@types/base-types";
+import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { IStringMap, IUNSpecificInfo } from "typesPath/base-types";
 import * as actions from "actions";
 import { connect } from "react-redux";
 import "./index.less";
@@ -22,7 +21,7 @@ interface IFormProps {
   form?: any;
   wrappedComponentRef?: any;
   kIndex?: string;
-  addCustomForm?: (level: number) => void;
+  addCustomForm?: (level: number, l?: any) => void;
   formData?: any;
   createIndex?: any;
   dispatch?: any;
@@ -31,8 +30,9 @@ interface IFormProps {
 const mapStateToProps = (state) => ({
   createIndex: state.createIndex,
 });
+const connects: Function = connect
 
-@connect(mapStateToProps)
+@connects(mapStateToProps)
 export class TableMappingForm extends React.Component<IFormProps> {
   private id: number =
     this.props.createIndex.temporaryFormMap.get(
@@ -128,12 +128,11 @@ export class TableMappingForm extends React.Component<IFormProps> {
         )
       );
     }, 300);
-    
+
     if (tempKeys && values) {
       form.setFieldsValue({
         keys: tempKeys,
       });
-      console.log(tempKeys)
       Object.keys(values).map((key) => {
         if (key.includes("type")) {
           let fieldTypeMap = this.props.createIndex.fieldTypeMap;
@@ -325,27 +324,34 @@ export class TableMappingForm extends React.Component<IFormProps> {
   ) => {
     const type = currentObj.type;
 
+    const searchSortDefaultValue = (value) => {
+      return value === undefined || value === true ? '1' : '0';
+    }
+
     switch (type) {
       case "object":
-        formData[`search_${currentKey}`] = currentObj.enabled ? 1 : 0; // 检索
-        formData[`dynamic_${currentKey}`] = currentObj.dynamic ? 1 : 0;
-        formData[`sort_${currentKey}`] = currentObj.doc_values ? 1 : 0;
+        formData[`search_${currentKey}`] = searchSortDefaultValue(currentObj.enabled); // 检索
+        formData[`dynamic_${currentKey}`] = searchSortDefaultValue(currentObj.dynamic);
+        formData[`sort_${currentKey}`] = searchSortDefaultValue(currentObj.doc_values);
         break;
       case "nested":
-        formData[`search_${currentKey}`] = currentObj.index ? 1 : 0; // 检索
-        formData[`sort_${currentKey}`] = currentObj.doc_values ? 1 : 0;
+        formData[`search_${currentKey}`] = searchSortDefaultValue(currentObj.index); // 检索
+        formData[`sort_${currentKey}`] = searchSortDefaultValue(currentObj.doc_values);
         break;
       case "text":
+        // 无排序
         formData[`analyzer_${currentKey}`] = currentObj.analyzer || "none";
+        formData[`search_${currentKey}`] = searchSortDefaultValue(currentObj.index); // 检索
+        formData[`sort_${currentKey}`] = '-1'; // 检索
         break;
       case "date":
-        formData[`sort_${currentKey}`] = currentObj.doc_values ? 1 : 0;
-        formData[`search_${currentKey}`] = currentObj.index ? 1 : 0;
-        formData[`date_${currentKey}`] = []; // TODO:
+        formData[`sort_${currentKey}`] = searchSortDefaultValue(currentObj.doc_values);
+        formData[`search_${currentKey}`] = searchSortDefaultValue(currentObj.index);
+        formData[`type_${currentKey}`] = ['date', currentObj.format]; // 行内兼容
         break;
       default:
-        formData[`sort_${currentKey}`] = currentObj.doc_values ? 1 : 0;
-        formData[`search_${currentKey}`] = currentObj.index ? 1 : 0;
+        formData[`sort_${currentKey}`] = searchSortDefaultValue(currentObj.doc_values);
+        formData[`search_${currentKey}`] = searchSortDefaultValue(currentObj.index);
         break;
     }
   };
@@ -484,8 +490,10 @@ export class TableMappingForm extends React.Component<IFormProps> {
     const { getFieldValue } = this.props.wrappedComponentRef.current;
     const { wrappedComponentRef } = this.props;
     const keys = getFieldValue("keys");
-    const { children: secondChildren = [] } =
+    let { children: secondChildren = [] } =
       this.props.createIndex.secondChildMap.get(keys[start]);
+    secondChildren = [...new Set(secondChildren)];
+    console.log(secondChildren)
     const item = (
       <CustomMappingForm
         form={wrappedComponentRef.current}
@@ -514,7 +522,7 @@ export class TableMappingForm extends React.Component<IFormProps> {
 
     return (
       <div key={start} className="custom-tree-node">
-        <Tree defaultExpandAll={true} showLine={true}>
+        <Tree defaultExpandAll={true} showLine={true} motion={null}>
           <Tree.TreeNode className="first-level" title={item} key={keys[start]}>
             {secondChildren.map((row: string, index: number) => {
               const { children } =
@@ -589,56 +597,54 @@ export class TableMappingForm extends React.Component<IFormProps> {
     const { wrappedComponentRef } = this.props;
     return (
       <>
-      <Spin spinning={this.state.loading}>
-        <Form
-          ref={wrappedComponentRef}
-          onValuesChange={this.onHandleValuesChange}
-          name="control-hooks"
-          className={
-            this.isDetailPage
-              ? "table-mapping-form detail-page"
-              : "table-mapping-form"
-          }
-        >
-          <Row className="first-row">
-            {stepTowFormItems.map((formItem, index) => {
-              return (
-                <Col
-                  span={formItem.colSpan}
-                  key={index}
-                  className={`form-col ${formItem.customClassName || ""}`}
-                >
-                  <Form.Item key={`label-${formItem.key}_${index}`}>
-                    {formItem.label}
+        <Spin spinning={this.state.loading}>
+          <Form
+            ref={wrappedComponentRef}
+            onValuesChange={this.onHandleValuesChange}
+            name="control-hooks"
+            className={
+              this.isDetailPage
+                ? "table-mapping-form detail-page"
+                : "table-mapping-form"
+            }
+          >
+            <Row className="first-row">
+              {stepTowFormItems.map((formItem, index) => {
+                return (
+                  <Col
+                    span={formItem.colSpan}
+                    key={index}
+                    className={`form-col ${formItem.customClassName || ""}`}
+                  >
+                    <Form.Item key={`label-${formItem.key}_${index}`}>
+                      {formItem.label}
+                    </Form.Item>
+                  </Col>
+                );
+              })}
+              {!this.isDetailPage && (
+                <Col span={2}>
+                  <Form.Item>
+                    {''}
                   </Form.Item>
                 </Col>
-              );
-            })}
-            {!this.isDetailPage && (
-              <Col span={1}>
-                <Form.Item>
-                  <Button type="primary" onClick={() => this.add(-1, -1)}>
-                    <PlusOutlined />
-                  </Button>
-                </Form.Item>
-              </Col>
+              )}
+            </Row>
+            {formItems.length ? (
+              formItems
+            ) : (
+              <>
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              </>
             )}
-          </Row>
-          {formItems.length ? (
-            formItems
-          ) : (
-            <>
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            </>
-          )}
-        </Form>
-      </Spin>
+          </Form>
+        </Spin>
       </>
     );
   }
 }
 
-@connect(mapStateToProps)
+@connects(mapStateToProps)
 export class CustomMappingForm extends React.Component<IFormProps> {
   public remove = (k: string, form: any) => {
     let keys = form.getFieldValue("keys");
@@ -667,7 +673,7 @@ export class CustomMappingForm extends React.Component<IFormProps> {
       );
     } else if (secondLevel === 0) {
       const { children: thirdChildren = [] } =
-        this.props.createIndex.thirdChildMap.get(k);
+        this.props.createIndex.thirdChildMap.get(k) || {};
       const parentKey = `${id}_level-0-0`;
       const { children = [], index } =
         this.props.createIndex.secondChildMap.get(parentKey);
@@ -771,9 +777,14 @@ export class CustomMappingForm extends React.Component<IFormProps> {
     if (formItem.key === "dynamic" && type && type !== "object") {
       item = noItem;
     }
-    
     if (isDetailPage) {
-
+      // if ((formItem.key === "routing" || formItem.key === "primaryKey" || formItem.key === "partition")) {
+      //   item = !initialValue ? noItem : (
+      //     <>
+      //       <Form.Item key={`${formItem.key}_${kIndex}`}> ✔️ </Form.Item>
+      //     </>
+      //   );
+      // }
       if (!formItem?.type) {
         item = <Form.Item key={`${formItem.key}_${kIndex}`}>{initialValue ? initialValue : '-'}</Form.Item>
       } else {
@@ -853,7 +864,7 @@ export class CustomMappingForm extends React.Component<IFormProps> {
             );
           })}
           {!isDetailPage && (
-            <Col span={1} style={{ marginLeft: 10 }}>
+            <Col span={2}>
               <Form.Item>
                 {isShowLessBtn ? (
                   <Popconfirm
@@ -862,9 +873,10 @@ export class CustomMappingForm extends React.Component<IFormProps> {
                     okText="删除"
                     cancelText="取消"
                   >
-                    <MinusCircleOutlined />
+                    <Button style={{ width: 30, height: 30, marginRight: 8 }} icon={<MinusOutlined />} />
                   </Popconfirm>
                 ) : null}
+                <Button style={{ width: 30, height: 30 }} onClick={() => addCustomForm(-1, -1)} icon={<PlusOutlined />} />
               </Form.Item>
             </Col>
           )}

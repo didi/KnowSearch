@@ -1,9 +1,9 @@
 import fetch, { formFetch } from '../lib/fetch';
 import { IClusterInfo, IOpClusterCreate, IOpLogicClusterDetail, IOpPhysicsClusterDetail } from '../@types/cluster/cluster-types';
-import { IOperatRecord, IOpPackageParams } from '@types/params-types';
+import { IOperatRecord, IOpPackageParams } from 'typesPath/params-types';
 import store from 'store';
-import { IDeploy, IDeploySwitch } from '@types/cluster/physics-type';
-import { IDeteilId } from '@types/base-types';
+import { IDeploy, IDeploySwitch } from 'typesPath/cluster/physics-type';
+import { IDeteilId } from 'typesPath/base-types';
 
 const app = {
   currentAppInfo: {
@@ -19,6 +19,8 @@ export interface ILogicLike {
   health?: number;
   appId?: number;
   type?: number;
+  sortTerm?: string;
+  orderByDesc?: boolean;
   //todo：版本字段未给出
 }
 
@@ -29,6 +31,8 @@ export interface IClusterList {
   cluster?: string;
   health?: number;
   esVersion?: string;
+  sortTerm?: string;
+  orderByDesc?: boolean;
   //todo：版本字段未给出
 }
 /**
@@ -113,7 +117,7 @@ export const getOpPhysicsClusterList = (params: IClusterList) => {
   });
 };
 
-export const getCopyClusterPhyNames = (templatePhyId: string) => {
+export const getCopyClusterPhyNames = (templatePhyId: string | number) => {
   return fetch(`/v3/op/template/physical/${templatePhyId}/copyClusterPhyNames`);
 }
 
@@ -143,7 +147,7 @@ export const getOpLogicClusterList = (params: ILogicLike) => {
 };
 
 // 全量的逻辑集群
-export const getClusterList  = () => {
+export const getClusterList = () => {
   return fetch('/v3/op/logic/cluster/list');
 }
 
@@ -162,6 +166,13 @@ export const getPhyClusterAvalibleTemplateSrv = (clusterName: string) => {
 
 export const getPhyClusterTemplateSrv = (clusterName: string) => {
   return fetch(`/v3/op/phy/cluster/templateSrv/${clusterName}`);
+};
+
+export const checkEditTemplateSrv = (templateId: number, templateSrvId: number) => {
+  return fetch(`/v3/op/template/logic/${templateId}/${templateSrvId}/checkEditTemplateSrv/`, {
+    errorNoTips: true,
+    returnRes: true
+  });
 };
 
 export const setPhysicsClusterTemplateSrv = (clusterName: string, templateSrvId: number) => {
@@ -272,6 +283,13 @@ export const getUserRecordList = (params: IOperatRecord) => {
   });
 };
 
+export const getUserRecordMultiList = (params: any) => {
+  return fetch(`/v3/normal/record/${params.bizId}/${params.moduleId}/multiList`, {
+    method: 'POST',
+    body: {}
+  });
+};
+
 export const getlistModules = () => {
   return fetch(`/v2/op/record/listModules`);
 };
@@ -357,3 +375,25 @@ export const updateDynamicConfig = (clusterName: string, key: string, value: str
   })
 }
 
+// 接入集群时对于开启冷热分离的服务的校验
+// 接口：/v3/op/phy/cluster/templateSrv/{templateSrvId}/templateServiceWhenJoin
+export const templateServiceWhenJoin = (templateSrvId, params: IDeploy) => {
+  // /v3/op/phy/cluster/join/{templateSrvId}/checkTemplateService
+  return fetch(`/v3/op/phy/cluster/join/${templateSrvId}/checkTemplateService`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+
+// 获取索引模板setting 接口：/v2/console/template/setting 
+export const getSetting = (logicId: number) => {
+  return fetch(`/v3/op/template/logic/setting?logicId=${logicId}`);
+};
+
+// 获取索引模板setting 接口：/v2/console/template/setting 
+export const setSetting = (params: any) => {
+  return fetch(`/v3/op/template/logic/setting`, {
+    method: 'PUT',
+    body: JSON.stringify(params)
+  });
+};

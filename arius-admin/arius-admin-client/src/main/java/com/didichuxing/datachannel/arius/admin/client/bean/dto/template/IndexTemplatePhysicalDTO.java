@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.client.bean.dto.template;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
-
+import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -62,6 +62,43 @@ public class IndexTemplatePhysicalDTO extends BaseDTO {
     @ApiModelProperty("配置信息")
     private String                         config;
 
+    /**
+     * {
+     *     "type": {
+     *         "dynamic_templates": [
+     *             {
+     *                 "key1": {}
+     *             }
+     *         ],
+     *         "properties": {
+     *             "key3": {
+     *                 "type": "key4"
+     *             }
+     *         }
+     *     }
+     * }
+     */
+    @ApiModelProperty("mapping信息")
+    private String mappings;
+    /**
+     *
+     * {
+     *     "index.number_of_replicas": 0,
+     *     "index.translog.durability": "request",
+     *     "analysis": {
+     *         "analyzer": {
+     *             "my_custom_analyzer": {
+     *                  ...
+     *             }
+     *         },
+     *         "tokenizer": {
+     *         }...
+     *     }
+     * }
+     */
+    @ApiModelProperty("索引模板自定义settings")
+    private AriusIndexTemplateSetting settings;
+    
     @ApiModelProperty("逻辑集群ID")
     private Long                           resourceId;
 

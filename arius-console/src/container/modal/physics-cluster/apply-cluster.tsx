@@ -5,19 +5,16 @@ import * as actions from "actions";
 import { FormItemType, IFormItem } from "component/x-form";
 import { regClusterName } from "constants/reg";
 import { StaffSelect } from "container/staff-select";
-import { AddRole, Masternode, RenderText } from "container/custom-form";
-import {
-  ICreatePhyCluster,
-  INode,
-  IRoleCluster,
-  IRoleClusterHots,
-} from "@types/cluster/cluster-types";
+import { ICreatePhyCluster, INode, IRoleCluster, IRoleClusterHots } from "typesPath/cluster/cluster-types";
 import { PHY_CLUSTER_TYPE, PHY_NODE_TYPE } from "constants/status-map";
-import { IWorkOrder } from "@types/params-types";
+import { IWorkOrder } from "typesPath/params-types";
 import { AppState, UserState } from "store/type";
 import { submitWorkOrder } from "api/common-api";
 import { staffRuleProps } from "constants/table";
 import Item from "antd/lib/list/Item";
+import { AddRole, Masternode, RenderText } from "container/custom-form";
+import { AddRoleTable, nodeTypeList } from "container/custom-form/add-role-table";
+import { addRoleformMap } from "container/custom-form/tpl-table-add-row/editTable";
 
 export interface INodeListObjet {
   masternode: INode[];
@@ -33,91 +30,140 @@ const mapStateToProps = (state: any) => ({
   user: state.user,
 });
 
-const ApplyPhyClusterModal = (props: {
-  dispatch: any;
-  cb: Function;
-  app: AppState;
-  user: UserState;
-  params: any;
-}) => {
+const ApplyPhyClusterModal = (props: { dispatch: any; cb: Function; app: AppState; user: UserState; params: any }) => {
+  const getRoleClusterHosts = (result) => {
+    // 聚合成接口请求的格式
+    const masternodeRoleArr = [];
+    const masternodeRoleArrKey = [];
+    const clientnodeRoleArr = [];
+    const clientnodeRoleArrKey = [];
+    const datanodeRoleArr = [];
+    const datanodeRoleArrKey = [];
+    const coldRoleArr = [];
+    const coldRoleArrKey = [];
+
+    Object.keys(result).map((item) => {
+      if (item.indexOf(nodeTypeList[0]) > -1) {
+        const analysisKey = item.split("&");
+        if (analysisKey.length !== 3) return;
+        masternodeRoleArr.push({ role: analysisKey[0], [analysisKey[1]]: result[item], key: analysisKey[2], beCold: false });
+        masternodeRoleArrKey.push(analysisKey[2]);
+      }
+      if (item.indexOf(nodeTypeList[1]) > -1) {
+        const analysisKey = item.split("&");
+        if (analysisKey.length !== 3) return;
+        clientnodeRoleArr.push({ role: analysisKey[0], [analysisKey[1]]: result[item], key: analysisKey[2], beCold: false });
+        clientnodeRoleArrKey.push(analysisKey[2]);
+      }
+      if (item.indexOf(nodeTypeList[2]) > -1) {
+        const analysisKey = item.split("&");
+        if (analysisKey.length !== 3) return;
+        datanodeRoleArr.push({ role: analysisKey[0], [analysisKey[1]]: result[item], key: analysisKey[2], beCold: false });
+        datanodeRoleArrKey.push(analysisKey[2]);
+      }
+      if (item.indexOf(nodeTypeList[3]) > -1) {
+        const analysisKey = item.split("&");
+        if (analysisKey.length !== 3) return;
+        // 此处role使用datanode
+        coldRoleArr.push({ role: nodeTypeList[2], [analysisKey[1]]: result[item], key: analysisKey[2], beCold: true });
+        coldRoleArrKey.push(analysisKey[2]);
+      }
+    });
+    const masternodeHosts = getRole(masternodeRoleArrKey, masternodeRoleArr);
+    const clientnodeHosts = getRole(clientnodeRoleArrKey, clientnodeRoleArr);
+    const datanodeHosts = getRole(datanodeRoleArrKey, datanodeRoleArr);
+    const coldHosts = getRole(coldRoleArrKey, coldRoleArr);
+    const roleClusterHosts = [...masternodeHosts, ...clientnodeHosts, ...datanodeHosts, ...coldHosts];
+    return roleClusterHosts;
+  };
+
+  const getRole = (arrKey, RoleArr) => {
+    const arr = [];
+    new Set([...arrKey]).forEach((item) => {
+      let obj: { [key: string]: any } = {};
+      RoleArr.forEach((ele) => {
+        if (item === ele.key) {
+          obj = { ...obj, ...ele };
+        }
+      });
+      const realDataStructure = {
+        role: obj.role,
+        address: obj[addRoleformMap[0].key],
+        beCold: obj.beCold,
+        machineSpec: `${obj[addRoleformMap[1].key]}-${obj[addRoleformMap[2].key]}-${obj[addRoleformMap[3].key]}-${
+          obj[addRoleformMap[4].key]
+        }`,
+      };
+      arr.push(realDataStructure);
+    });
+    return arr;
+  };
+
   const xFormModalConfig = {
     formMap: [
-      {
-        key: "project",
-        label: "所属项目",
-        type: FormItemType.text,
-        customFormItem: <RenderText text={props.app.appInfo()?.name} />,
-      },
-      {
-        key: "type",
-        label: "集群类型",
-        type: FormItemType.select,
-        defaultValue: 4,
-        options: PHY_CLUSTER_TYPE,
-        attrs: {
-          style: { width: "60%" },
-          disabled: true,
-        },
-        rules: [
-          {
-            required: true,
-            message: "请选择",
-            validator: async (rule: any, value: string) => {
-              // updateFormModal(value);
-              return Promise.resolve();
+      [
+        {
+          key: "type",
+          label: "集群类型",
+          type: FormItemType.select,
+          defaultValue: 4,
+          options: PHY_CLUSTER_TYPE,
+          attrs: {
+            disabled: true,
+          },
+          rules: [
+            {
+              required: true,
+              message: "请选择",
+              validator: async (rule: any, value: string) => {
+                // updateFormModal(value);
+                return Promise.resolve();
+              },
             },
-          },
-        ],
-      },
-      {
-        key: "cluster",
-        label: "集群名称",
-        attrs: {
-          placeholder: "请填写集群名称",
-          style: { width: "60%" },
+          ],
         },
-        rules: [
-          {
-            required: true,
-            validator: async (rule: any, value: string) => {
-              if (!value || !new RegExp(regClusterName).test(value) || value?.trim().length > 128) {
-                return Promise.reject("请填写正确集群名称，支持大、小写字母、数字、-、_1-128位字符");
-              }
-              return Promise.resolve();
+        {
+          key: "cluster",
+          label: "集群名称",
+          attrs: {
+            placeholder: "请填写集群名称",
+          },
+          rules: [
+            {
+              required: true,
+              validator: async (rule: any, value: string) => {
+                if (!value || !new RegExp(regClusterName).test(value) || value?.trim().length > 128) {
+                  return Promise.reject("请填写正确集群名称，支持大、小写字母、数字、-、_1-128位字符");
+                }
+                return Promise.resolve();
+              },
             },
-          },
-        ],
-      },
-      // {
-      //   key: "creator",
-      //   label: "责任人",
-      //   colSpan: 10,
-      //   rules: [
-      //     {
-      //       required: true,
-      //       ...staffRuleProps,
-      //     },
-      //   ],
-      //   type: FormItemType.custom,
-      //   isCustomStyle: true,
-      //   customFormItem: <StaffSelect style={{ width: "60%" }} />,
-      // },
-      {
-        key: "esVersion",
-        label: "ES版本",
-        type: FormItemType.select,
-        options: props.params?.packageDockerList || [],
-        rules: [
-          {
-            required: true,
-            message: "请选择",
-          },
-        ],
-        attrs: {
-          placeholder: "请选择版本",
-          style: { width: "60%" },
+          ],
         },
-      },
+      ],
+      [
+        {
+          key: "project",
+          label: "所属项目",
+          type: FormItemType.text,
+          customFormItem: <RenderText text={props.app.appInfo()?.name} />,
+        },
+        {
+          key: "esVersion",
+          label: "集群版本",
+          type: FormItemType.select,
+          options: props.params?.packageDockerList || [],
+          rules: [
+            {
+              required: true,
+              message: "请选择",
+            },
+          ],
+          attrs: {
+            placeholder: "请选择版本",
+          },
+        },
+      ],
       {
         key: "nsTree",
         label: "机器节点",
@@ -167,8 +213,8 @@ const ApplyPhyClusterModal = (props: {
           },
         ],
         attrs: {
-          placeholder: '请输入集群描述'
-        }
+          placeholder: "请输入集群描述",
+        },
       },
       {
         key: "description",
@@ -195,14 +241,11 @@ const ApplyPhyClusterModal = (props: {
     visible: true,
     title: "新建集群",
     formData: {},
-    width: 660,
+    width: 850,
     onCancel: () => {
       props.dispatch(actions.setModalId(""));
     },
-    onSubmit: (result: any) => {
-      // result.creator = Array.isArray(result.creator)
-      //   ? result.creator.join(",")
-      //   : result.creator;
+    onSubmit: (result: { [key: string]: any }) => {
       let contentObj = {} as ICreatePhyCluster;
       if (result.type === 3) {
         let roleClusters = [
@@ -263,35 +306,19 @@ const ApplyPhyClusterModal = (props: {
           roleClusters,
         };
       } else {
-        const roleClusterHosts = [];
-        // if (result.masternode.length === 1) {
-        //   result.masternode?.forEach((element) => {
-        //     PHY_NODE_TYPE.forEach((item) => {
-        //       roleClusterHosts.push(...getPhyNodes(item, element.value));
-        //     });
-        //   });
-        // } else if (result.masternode.length > 1) {
-        //   result.masternode?.forEach((element) => {
-        //     roleClusterHosts.push(...getPhyNodes(element.type, element.value));
-        //   });
-        // }
-        if(result.masternode?.length) {
-          result.masternode?.forEach((element) => {
-            roleClusterHosts.push(...getPhyNodes(element.type, element.value));
-          });
-        }
-        // const roleClusterHosts = master?.concat(client).concat(data) as IRoleClusterHots[];
-        const spec = result.machineSpec;
+        const roleClusterHosts = getRoleClusterHosts(result);
         contentObj = {
           type: 4,
+          tags: JSON.stringify({
+            createSource: 1, // 0接入1新建
+          }),
           phyClusterName: result.cluster,
           dataCenter: result.dataCenter,
           nsTree: result.nsTree,
           esVersion: result.esVersion,
-          // creator: result.creator,
           desc: result.desc,
           pidCount: result.pidCount,
-          roleClusterHosts: roleClusterHosts
+          roleClusterHosts: roleClusterHosts,
         };
       }
 
@@ -308,59 +335,17 @@ const ApplyPhyClusterModal = (props: {
     },
   };
 
-  const getPhyNodes = (node: string, value: string) => {
-    const values = value?.split("\n").filter((ele: string) => ele !== "");
-    const data = values?.map((ele: string) => ({
-      role: node,
-      address: ele.trim(),
-    }));
-    return data?.length ? data : [{ role: node, hostname: "" }];
-  };
-
   const hostItem = [
-    // {
-    //   key: "pidCount",
-    //   label: "单节点实例数",
-    //   defaultValue: "1",
-    //   rules: [
-    //     {
-    //       message: "请输入",
-    //     },
-    //   ],
-    //   type: FormItemType.inputNumber,
-    //   attrs: {
-    //     placeholder: "请输入",
-    //     disabled: true,
-    //     style: { width: "60%" },
-    //   },
-    // },
     {
       key: "masternode",
       label: "Masternode",
       type: FormItemType.custom,
-      customFormItem: <AddRole isHost={false}/>,
+      customFormItem: <AddRoleTable />,
       rules: [
         {
           required: true,
-          message: "",
           validator: (rule: any, value: any) => {
-            if(!value?.length) {
-              (window as any).masternodeErr = true;
-              return Promise.reject("");;
-            }
-            (window as any).masternodeErr = false;
-            const check = value.filter((item) => item.check);
-            
-            if (check.length) {
-              return Promise.reject("");
-            }
-            
-            const flag = value.some(item => !item.value);
-
-            if(flag) {
-              return Promise.reject("");
-            }
-            
+            // console.log($ref.current, 888);
             return Promise.resolve();
           },
         },
@@ -404,7 +389,7 @@ const ApplyPhyClusterModal = (props: {
 
   const esVersionHost = {
     key: "esVersion",
-    label: "ES版本",
+    label: "集群版本",
     type: FormItemType.select,
     options: props.params?.packageHostList || [],
     rules: [
@@ -415,13 +400,12 @@ const ApplyPhyClusterModal = (props: {
     ],
     attrs: {
       placeholder: "请选择版本",
-      style: { width: "60%" },
     },
   } as IFormItem;
 
   const esVersionDocker = {
     key: "esVersion",
-    label: "ES版本",
+    label: "集群版本",
     type: FormItemType.select,
     options: props.params?.packageDockerList || [],
     rules: [
@@ -432,7 +416,6 @@ const ApplyPhyClusterModal = (props: {
     ],
     attrs: {
       placeholder: "请选择版本",
-      style: { width: "60%" },
     },
   } as IFormItem;
 
@@ -440,36 +423,31 @@ const ApplyPhyClusterModal = (props: {
   // xFormModalConfig.formMap.splice(5, 2, ...hostItem);
   // xFormModalConfig.formMap.splice(4, 1, esVersionHost);
   // 物理集群-新建集群，责任人暂时注释，剪切下标需要减一
-  xFormModalConfig.formMap.splice(4, 2, ...hostItem);
-  xFormModalConfig.formMap.splice(3, 1, esVersionHost);
+  xFormModalConfig.formMap.splice(2, 2, ...hostItem);
+  (xFormModalConfig.formMap[1] as any).splice(1, 1, esVersionHost);
 
   // 这是一段比较恶心的代码 xform的值无法传下去 但是内部需要接收到
   React.useEffect(() => {
     return () => {
       (window as any).masternodeErr = false;
       delete (window as any).masternodeErr;
-    }
-  },[])
-
-  const updateFormModal = (type) => {
-    if (type === 4) {
-      xFormModalConfig.formMap.splice(5, 2, ...hostItem);
-      xFormModalConfig.formMap.splice(4, 1, esVersionHost);
-    } else {
-      xFormModalConfig.formMap.splice(5, 2, ...dockerItem);
-      xFormModalConfig.formMap.splice(4, 1, esVersionDocker);
-    }
-    $ref.current?.updateFormMap$(xFormModalConfig.formMap, {});
-  };
-
-  const $ref: any = React.createRef();
+      delete (window as any).formData;
+    };
+  }, []);
 
   const { loading } = props.params;
+
+  const onHandleValuesChange = (value: any, allValues: object) => {
+    (window as any).formData = {
+      value,
+      allValues,
+    };
+  };
 
   return (
     <>
       {!loading ? (
-        <XFormWrapper ref={$ref} visible={true} {...xFormModalConfig} />
+        <XFormWrapper onHandleValuesChange={onHandleValuesChange} type={"drawer"} visible={true} {...xFormModalConfig} />
       ) : (
         <span>loading...</span>
       )}

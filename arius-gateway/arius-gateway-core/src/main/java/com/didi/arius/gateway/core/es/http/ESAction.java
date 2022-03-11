@@ -58,7 +58,7 @@ public abstract class ESAction extends HttpRestHandler {
 		checkIndices(queryContext);
 
 		IndexTemplate indexTemplate = null;
-		if(!CommonUtil.isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
+		if(!queryContext.isFromKibana()) {
 			// kibana的请求就不需要搜索模版了
 			indexTemplate = getTemplateByIndexTire(indices, queryContext);
 		}

@@ -5,7 +5,7 @@ import * as actions from 'actions';
 import { getTaskQueryXForm, getTaskColumns } from './config';
 import QueryForm from 'component/dantd/query-form';
 import { getTaskList } from 'api/task-api';
-import { ITask } from '@types/task-types';
+import { ITask } from 'typesPath/task-types';
 import { queryFormText } from 'constants/status-map';
 import { DTable } from 'component/dantd/dtable';
 import moment from 'moment';

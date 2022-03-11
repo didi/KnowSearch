@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
@@ -11,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateSchemaVO;
 import com.didichuxing.datachannel.arius.admin.client.mapping.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
@@ -34,6 +37,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,8 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT_TEMPLATE_MAPPING;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_TYPE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 
 /**
@@ -227,12 +232,12 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             fields = Lists.newArrayList();
         }
 
-        MappingConfig mappingConfig = convert2Mapping(AdminConstant.DEFAULT_TYPE, fields);
+        MappingConfig mappingConfig = convert2Mapping(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE, fields);
         AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
-        ariusTypeProperty.setTypeName(AdminConstant.DEFAULT_TYPE);
+        ariusTypeProperty.setTypeName(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE);
         if (CollectionUtils.isNotEmpty(fields)) {
             ariusTypeProperty
-                    .setProperties(mappingConfig.getMapping().get(AdminConstant.DEFAULT_TYPE).getProperties().toJson());
+                    .setProperties(mappingConfig.getMapping().get(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE).getProperties().toJson());
         } else {
             ariusTypeProperty.setProperties(new JSONObject());
         }
@@ -293,7 +298,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         List<AriusTypeProperty> typeProperties = buildAriusTypeProperty(optimizeDTO.getItems());
 
-        return updateProperties(optimizeDTO.getLogicId(), typeProperties);
+        return updateProperties(optimizeDTO.getLogicId(), typeProperties, operator);
     }
 
     @Override
@@ -341,7 +346,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     @Override
-    public Result<Void> updateProperties(Integer logicId, List<AriusTypeProperty> ariusTypePropertyList) {
+    public Result<Void> updateProperties(Integer logicId, List<AriusTypeProperty> ariusTypePropertyList, String operator) {
         IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
@@ -356,6 +361,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        Result<ConsoleTemplateSchemaVO> oldSchemaVO = getSchema(logicId);
+
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
                     templatePhysical.getName());
@@ -368,7 +375,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
             if (typeConfigMap.size() == 0) {
                 TypeConfig typeConfig = new TypeConfig();
-                typeConfigMap.put(AdminConstant.DEFAULT_TYPE, typeConfig);
+                typeConfigMap.put(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE, typeConfig);
             }
 
             // 将对应的type替换
@@ -394,6 +401,10 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                 return Result.buildFrom(updateMappingResult);
             }
         }
+
+        // 记录操作
+        Result<ConsoleTemplateSchemaVO> newSchemaVO = getSchema(logicId);
+        operateRecordService.save(TEMPLATE, EDIT, logicId, JSON.toJSONString(new TemplateMappingRecord(oldSchemaVO.getData(), newSchemaVO.getData())), operator);
 
         return Result.buildSucc();
     }
@@ -432,7 +443,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         // 修改mapping信息.
         if (schemaDTO.getTypeProperties() != null) {
-            Result<Void> result = updateProperties(schemaDTO.getLogicId(), schemaDTO.getTypeProperties());
+            Result<Void> result = updateProperties(schemaDTO.getLogicId(), schemaDTO.getTypeProperties(), operator);
             if (result.success()) {
                 templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
             }
@@ -449,6 +460,23 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         }
 
         return result;
+    }
+
+    public Result<ConsoleTemplateSchemaVO> getSchema(Integer logicId) {
+        Result<IndexTemplateLogicWithMapping> result = getTemplateWithMapping(logicId);
+        if (result.failed()) {
+            return Result.buildFrom(result);
+        }
+
+        IndexTemplateLogicWithMapping templateLogicWithMapping = result.getData();
+        if (templateLogicWithMapping == null) {
+            return Result.buildParamIllegal("索引不存在");
+        }
+
+        fillSpecialField(templateLogicWithMapping);
+
+        ConsoleTemplateSchemaVO schemaVO = ConvertUtil.obj2Obj(templateLogicWithMapping, ConsoleTemplateSchemaVO.class);
+        return Result.buildSucc(schemaVO);
     }
 
     /**************************************** private method ****************************************************/
@@ -878,7 +906,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         String routingField = templateLogic.getRoutingField();
 
         AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
-        ariusTypeProperty.setTypeName(AdminConstant.DEFAULT_TYPE);
+        ariusTypeProperty.setTypeName(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE);
 
         ariusTypeProperty.setProperties(new JSONObject());
 
@@ -925,6 +953,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         ariusTypeProperty.setRoutingField(routingField);
         ariusTypeProperty.setDateField(templateLogic.getDateField());
         ariusTypeProperty.setDateFieldFormat(templateLogic.getDateFieldFormat());
+
+        // 获取并且设置对应的dynamic_templates
+        Map<String, Object> notUsedMap = typeConfig.getNotUsedMap();
+        if(!MapUtils.isEmpty(notUsedMap) && notUsedMap.containsKey(AriusTypeProperty.DYNAMIC_TEMPLATES_STR)) {
+            JSONArray dynamicArrays = (JSONArray) notUsedMap.get(AriusTypeProperty.DYNAMIC_TEMPLATES_STR);
+            ariusTypeProperty.setDynamicTemplates(dynamicArrays);
+        }
 
         return ariusTypeProperty;
     }
@@ -998,7 +1033,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                                                 String operator) throws AdminOperateException {
         List<AriusTypeProperty> typeProperties = schemaDTO.getTypeProperties();
         if (typeProperties.size() == 1 && (StringUtils.isBlank(typeProperties.get(0).getTypeName())
-                || typeProperties.get(0).getTypeName().equals(DEFAULT_TYPE))) {
+                || typeProperties.get(0).getTypeName().equals(DEFAULT_INDEX_MAPPING_TYPE))) {
             // 就一个type，修改模板的id和routing字段
             IndexTemplateLogicDTO templateLogicDTO = new IndexTemplateLogicDTO();
             templateLogicDTO.setId(schemaDTO.getLogicId());
@@ -1069,7 +1104,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                     return Result
                             .buildFail(
                                     "平台升级es到高版本(7.6.1)，高版本es索引仅支持单type，不再支持多个type；平台弱化了用户侧索引type的概念，索引多type需求用户可以通过创建多个索引来实现；\n"
-                                            + "如需指定索引type的主键字段或者路由字段，请确认您的索引mapping中只有一个名为\"" + DEFAULT_TYPE + "\"的type；");
+                                            + "如需指定索引type的主键字段或者路由字段，请确认您的索引mapping中只有一个名为\"" + DEFAULT_INDEX_MAPPING_TYPE + "\"的type；");
                 }
             }
         }
@@ -1095,9 +1130,54 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         if(!logicWithPhysical.hasPhysicals()){return false;}
 
-        ClusterPhy clusterPhy = esClusterPhyService.getClusterByName(logicWithPhysical.getAnyOne().getCluster());
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(logicWithPhysical.getAnyOne().getCluster());
         if(null == clusterPhy){return false;}
 
         return ESVersionUtil.isHigher(clusterPhy.getEsVersion(), "6.5.1");
     }
+
+    protected void fillSpecialField(IndexTemplateLogicWithMapping templateLogicWithMapping) {
+        if (CollectionUtils.isEmpty(templateLogicWithMapping.getFields())) {
+            return;
+        }
+
+        Map<String, Field> name2FieldMap = ConvertUtil.list2Map(templateLogicWithMapping.getFields(), Field::getName);
+
+        if (StringUtils.isNotBlank(templateLogicWithMapping.getDateField())) {
+            handleDateField(templateLogicWithMapping, name2FieldMap);
+        }
+
+        if (StringUtils.isNotBlank(templateLogicWithMapping.getIdField())) {
+            handleIdField(templateLogicWithMapping, name2FieldMap);
+        }
+
+        if (StringUtils.isNotBlank(templateLogicWithMapping.getRoutingField())) {
+            handleRoutingField(templateLogicWithMapping, name2FieldMap);
+        }
+    }
+
+    private void handleRoutingField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        for (String routingField : templateLogicWithMapping.getRoutingField().split(",")) {
+            if (name2FieldMap.containsKey(routingField)) {
+                name2FieldMap.get(routingField).setRoutingField(true);
+            }
+        }
+    }
+
+    private void handleIdField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        for (String idField : templateLogicWithMapping.getIdField().split(",")) {
+            if (name2FieldMap.containsKey(idField)) {
+                name2FieldMap.get(idField).setIdField(true);
+            }
+        }
+    }
+
+    private void handleDateField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        if (name2FieldMap.containsKey(templateLogicWithMapping.getDateField())) {
+            name2FieldMap.get(templateLogicWithMapping.getDateField()).setDateField(true);
+            name2FieldMap.get(templateLogicWithMapping.getDateField())
+                    .setDateFieldFormat(templateLogicWithMapping.getDateFieldFormat());
+        }
+    }
+
 }

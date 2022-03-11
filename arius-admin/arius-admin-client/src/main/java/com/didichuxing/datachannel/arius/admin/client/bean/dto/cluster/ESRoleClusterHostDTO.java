@@ -34,6 +34,9 @@ public class ESRoleClusterHostDTO extends BaseDTO {
     @ApiModelProperty("端口")
     private String  port;
 
+    @ApiModelProperty("冷热节点标识,是热节点则设置为false")
+    private Boolean beCold;
+
     /**
      * @see ESClusterNodeRoleEnum
      */

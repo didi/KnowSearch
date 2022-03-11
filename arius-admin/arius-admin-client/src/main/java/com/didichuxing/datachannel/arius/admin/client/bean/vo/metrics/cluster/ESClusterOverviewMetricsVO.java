@@ -101,6 +101,12 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     @ApiModelProperty("写入延时")
     private List<IndexingLatencyMetricsVO>           indexingLatency;
 
+    @ApiModelProperty("当前执行的task耗时")
+    private List<TaskCostMetricVO>                   taskCost;
+
+    @ApiModelProperty("当前执行的task数量")
+    private List<TaskCountMetricVO>                   taskCount;
+
     /******************************************6.索引信息******************************************/
 
     @ApiModelProperty("大索引列表,大于10亿文档的索引列表")

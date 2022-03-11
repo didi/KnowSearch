@@ -35,6 +35,16 @@ public interface GatewayMetricsManager {
     Result<List<VariousLineChartMetricsVO>> getGatewayNodeMetrics(GatewayNodeDTO dto, Integer appId);
 
     /**
+     * 获取多节点gateway节点维度指标信息
+     */
+    Result<List<VariousLineChartMetricsVO>> getMultiGatewayNodesMetrics(MultiGatewayNodesDTO dto, Integer appId);
+
+    /**
+     * 获取client节点维度指标信息
+     */
+    Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(ClientNodeDTO dto, Integer appId);
+
+    /**
      * 获取gateway索引维度指标信息
      */
     Result<List<VariousLineChartMetricsVO>> getGatewayIndexMetrics(GatewayIndexDTO dto, Integer appId);
@@ -49,4 +59,8 @@ public interface GatewayMetricsManager {
      */
     Result<List<VariousLineChartMetricsVO>> getGatewayDslMetrics(GatewayDslDTO dto, Integer appId);
 
+    /**
+     * 获取clientNode ip信息
+     */
+    Result<List<String>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime, Integer appId);
 }

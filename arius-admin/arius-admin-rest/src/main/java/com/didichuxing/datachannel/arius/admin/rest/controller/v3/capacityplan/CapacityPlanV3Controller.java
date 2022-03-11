@@ -139,7 +139,7 @@ public class CapacityPlanV3Controller {
                                                   @RequestParam("phyClusterName") String phyClusterName) {
 
         // 容量规划开关统一到索引服务
-        return templateSrvManager.addTemplateSrv(phyClusterName,
+        return templateSrvManager.checkTemplateSrv(phyClusterName,
             TemplateServiceEnum.TEMPLATE_CAPA_PLAN.getCode().toString(), HttpRequestUtils.getOperator(request));
     }
 

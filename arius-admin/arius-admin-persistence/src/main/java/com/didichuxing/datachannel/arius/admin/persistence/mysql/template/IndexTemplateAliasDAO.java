@@ -24,4 +24,8 @@ public interface IndexTemplateAliasDAO {
 
     int delete(@Param("logicId") Integer logicId, @Param("name") String name);
 
+    int insertBatch(List<TemplateAliasPO> list);
+
+    int deleteBatch(@Param("logicIds") List<Integer> logicId, @Param("name") String name);
+
 }

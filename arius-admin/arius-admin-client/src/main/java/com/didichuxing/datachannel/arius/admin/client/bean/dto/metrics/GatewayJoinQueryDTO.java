@@ -19,4 +19,7 @@ public class GatewayJoinQueryDTO {
 
     @ApiModelProperty(value = "DSL模版最近使用时间end（时间戳ms）", dataType = "Long", required = true)
     private Long endTime;
+
+    @ApiModelProperty(value = "查询总耗时（时间戳ms）", dataType = "Long", required = true)
+    private Long totalCost;
 }

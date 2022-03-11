@@ -194,4 +194,12 @@ public interface ClusterLogicManager {
      * @return
      */
     boolean updateClusterLogicHealth(Long clusterLogicId);
+
+    /**
+     * 校验模板大小资源是否充足
+     * @param logicClusterId 逻辑集群id
+     * @param templateSize 模板新建的时候设置的数据大小
+     * @return
+     */
+    Result<Void> checkTemplateDataSizeValidForCreate(Long logicClusterId, String templateSize);
 }

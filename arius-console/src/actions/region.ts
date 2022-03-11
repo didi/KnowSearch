@@ -1,4 +1,4 @@
-import { ILabelValue } from '@types/base-types';
+import { ILabelValue } from 'typesPath/base-types';
 import actionTypes from './actionTypes';
 
 export const setPhyClusterList = (phyClusterList: ILabelValue[], type: string = "", tableData = []) => ({

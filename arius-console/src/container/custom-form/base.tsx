@@ -1,4 +1,4 @@
-import { INode, IOpClusterRoles } from "@types/cluster/cluster-types";
+import { INode, IOpClusterRoles } from "typesPath/cluster/cluster-types";
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,

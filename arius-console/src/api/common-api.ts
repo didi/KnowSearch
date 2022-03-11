@@ -2,7 +2,7 @@
 import fetch from '../lib/fetch';
 import { apiCache } from 'lib/api-cache';
 import { showSubmitOrderSuccessModal } from 'container/custom-component';
-import { IWorkOrder } from '@types/params-types';
+import { IWorkOrder } from 'typesPath/params-types';
 
 /*
  * 外部的接口

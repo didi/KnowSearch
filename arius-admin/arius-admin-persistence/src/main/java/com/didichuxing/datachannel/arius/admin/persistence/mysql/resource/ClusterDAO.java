@@ -15,7 +15,8 @@ public interface ClusterDAO {
 
     List<ClusterPO> pagingByCondition(@Param("cluster") String cluster,     @Param("health") Integer health,
                                       @Param("esVersion") String esVersion, @Param("from") Long from,
-                                      @Param("size") Long size);
+                                      @Param("size") Long size,
+                                      @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
 
     long getTotalHitByCondition(ClusterPO param);
 
@@ -30,6 +31,8 @@ public interface ClusterDAO {
     ClusterPO getById(Integer clusterId);
 
     ClusterPO getByName(String clusterName);
+
+    List<ClusterPO> listByNames(List<String> names);
 
     List<ClusterPO> listAll();
 

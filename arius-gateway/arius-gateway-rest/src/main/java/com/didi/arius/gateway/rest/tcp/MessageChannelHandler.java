@@ -197,6 +197,7 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
 			searchId = QueryConsts.TOTAL_SEARCH_ID;
 		}
 		
+		context.setTraceid(traceid);
 		context.setRequestId(UUID.randomUUID().toString());
 		context.setSearchId(searchId);
 		context.setClusterId(clusterId);

@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.DataType
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -101,6 +102,11 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private String  expression;
 
     /**
+     * 逻辑集群id
+     */
+    private Long resourceId;
+
+    /**
      * 备注
      */
     private String  desc;
@@ -122,6 +128,25 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
      * pipeline
      */
     private String  ingestPipeline;
+
+    /**
+     * 是否禁止读
+     */
+    private Boolean blockRead;
+
+    /**
+     * 是否禁止写
+     */
+    private Boolean blockWrite;
+
+    /**
+     * 服务等级
+     */
+    private Integer level;
+
+    private Boolean hasDCDR;
+
+    private Long    checkPointDiff;
 
     @Override
     public int compareTo(IndexTemplateLogic o) {

@@ -70,6 +70,10 @@ public class AppDetail {
 
         int type;
 
+        public int getType() {
+            return type;
+        }
+
         private RequestType(int type) {
             this.type = type;
         }

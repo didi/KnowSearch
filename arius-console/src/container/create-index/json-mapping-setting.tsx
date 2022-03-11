@@ -10,6 +10,10 @@ import { updateIndexMappingInfo, checkIndexMappingInfo, getIndexBaseInfo, getInd
 import { message, Spin, Tooltip } from 'antd';
 import * as actions from 'actions';
 import { connect } from "react-redux";
+// 引入codemirror
+import { UnControlled as CodeMirror } from 'react-codemirror2';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
 
 const placeholder = ` ES索引mapping样例如下：
  {
@@ -27,8 +31,8 @@ const placeholder = ` ES索引mapping样例如下：
 const mapStateToProps = state => ({
   createIndex: state.createIndex
 });
-
-@connect(mapStateToProps)
+const connects: Function = connect
+@connects(mapStateToProps)
 export class JSONMappingSetting extends React.Component<any> {
   private $formRef: any = null;
   private isCyclicalRoll: boolean = false;
@@ -120,7 +124,27 @@ export class JSONMappingSetting extends React.Component<any> {
     }, {
       key: 'partition',
       label: '分区字段',
-      rules: [{ required: !!this.isCyclicalRoll, message: '请输入分区字段' }],
+      rules: [{ 
+        required: !!this.isCyclicalRoll,
+        // message: '请输入分区字段', 
+        validator: (rule: any, value: string) => {
+          if (!this.isCyclicalRoll) {
+            return Promise.resolve();
+          }
+          if (!value) {
+            return Promise.reject('请输入分区字段');
+          }
+          try {
+            const jsonValue = this.props.createIndex.activeInstance.getValue() ? JSON.parse(this.props.createIndex.activeInstance.getValue()) : '';
+            if (typeof jsonValue == 'object' &&  !Object.keys(jsonValue).includes(value)) {
+              return Promise.reject('分区字段与mapping编辑器中不一致');
+            }
+          } catch (err) {
+            return Promise.reject('JSON解析失败，请检查JSON格式');
+          }
+          return Promise.resolve();
+        },
+      }],
       attrs: {
         disabled: !this.isCyclicalRoll,
         placeholder: "请输入分区字段",
@@ -138,7 +162,31 @@ export class JSONMappingSetting extends React.Component<any> {
         className: 'time-select',
         placeholder: "请选择时间格式",
       },
-      rules: [{ required: !!this.isCyclicalRoll, message: '请选择时间格式' }],
+      rules: [{ 
+        required: !!this.isCyclicalRoll,
+        // message: '请输入分区字段', 
+        validator: async (rule: any, value: string) => {
+          if (!this.isCyclicalRoll) {
+            return Promise.resolve();
+          }
+          if (!value) {
+            return Promise.reject('请选择时间格式');
+          }
+          try {
+            const partition = await this.$formRef.getFieldValue('partition');
+            const jsonValue = this.props.createIndex.activeInstance.getValue() ? JSON.parse(this.props.createIndex.activeInstance.getValue()) : '';
+            if (typeof jsonValue == 'object' && Object.keys(jsonValue).includes(String(partition))) {
+              if (jsonValue[partition]?.format != String(value)) {
+                return Promise.reject('时间格式与mapping编辑器中不一致');
+              }
+            }
+          } catch (err) {
+            return Promise.reject('JSON解析失败，请检查JSON格式');
+          }
+          return Promise.resolve();
+        },
+      }],
+      // rules: [{ required: !!this.isCyclicalRoll, message: '请选择时间格式' }],
     }] as unknown as IFormItem[];
   }
 
@@ -165,7 +213,13 @@ export class JSONMappingSetting extends React.Component<any> {
       this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.jsonMappingFormData, result));
       try {
         const editor = this.props.createIndex.activeInstance;
+        // 获取 customerAnalysisJson: null,  dynamicTemplatesJson: null 值
+        const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
+        // const dynamicTemplatesJsonEditor = this.props.createIndex.dynamicTemplatesJson;
         const value = editor ? editor.getValue() : '';
+        const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
+        // const dynamicTemplatesValue = dynamicTemplatesJsonEditor ? dynamicTemplatesJsonEditor.getValue() : '';
+        this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
         let jsonValue = {};
 
         if (value) {
@@ -188,7 +242,6 @@ export class JSONMappingSetting extends React.Component<any> {
   }
 
   public handleSave = async(history: string) => {
-    this.props.upLoading(true);
     let result = null;
     await this.$formRef.validateFields().then((values: any) => {
       result = values;
@@ -198,7 +251,13 @@ export class JSONMappingSetting extends React.Component<any> {
 
       try {
         const editor = this.props.createIndex.activeInstance;
+        // 获取 customerAnalysisJson: null,  dynamicTemplatesJson: null 值
+        const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
+        // const dynamicTemplatesJsonEditor = this.props.createIndex.dynamicTemplatesJson;
         const value = editor ? editor.getValue() : '';
+        const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
+        // const dynamicTemplatesValue = dynamicTemplatesJsonEditor ? dynamicTemplatesJsonEditor.getValue() : '';
+        this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
         let jsonValue = {};
 
         if (value) {
@@ -211,6 +270,7 @@ export class JSONMappingSetting extends React.Component<any> {
           }],
         };
         getJsonMappingData(params);
+        this.props.upLoading(true);
         this.props.dispatch(actions.setLoadingMap('update-schema', true));
         updateIndexMappingInfo(params).then(() => {
           message.success('编辑成功');
@@ -230,60 +290,145 @@ export class JSONMappingSetting extends React.Component<any> {
   public customMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
     const model = editor.getModel();
     const lineNumber = model.getLineCount();
-
+    
     editor.setPosition({
       lineNumber,
       column: model.getLineMaxColumn(lineNumber),
     });
-
+    
     editor.onDidChangeModelContent((e) => {
       //
     });
-
+    
     this.props.dispatch(actions.setEditorInstance(editor));
   }
+
+  // 获取customerAnalysisJson实例
+  public customerAnalysisJson = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
+    const model = editor.getModel();
+    const lineNumber = model.getLineCount();
+    
+    editor.setPosition({
+      lineNumber,
+      column: model.getLineMaxColumn(lineNumber),
+    });
+    
+    editor.onDidChangeModelContent((e) => {
+      //
+    });
+    
+    this.props.dispatch(actions.setCreateIndex({ customerAnalysisJson: editor }));
+  }
+
+  // // 获取customerAnalysisJson实例
+  // public dynamicTemplatesJson = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
+  //   const model = editor.getModel();
+  //   const lineNumber = model.getLineCount();
+    
+  //   editor.setPosition({
+  //     lineNumber,
+  //     column: model.getLineMaxColumn(lineNumber),
+  //   });
+    
+  //   editor.onDidChangeModelContent((e) => {
+  //     //
+  //   });
+    
+  //   this.props.dispatch(actions.setCreateIndex({ dynamicTemplatesJson: editor }));
+  // }
 
   public render() {
     const formData = this.props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.jsonMappingFormData) || {};
     const value = this.props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.jsonMappingValue) || '';
+    // const { customerAnalysis, dynamicTemplates, customerAnalysisValue, dynamicTemplatesValue } = this.props.createIndex
     // 索引管理页面也是只读属性
     const isDetailPage = window.location.pathname.includes('/detail');
     const loading = this.props.createIndex.loadingMap['mapping-loading'];
 
     return (
-      <Spin spinning={loading}>
-        { !isDetailPage && <XFormComponent
-          wrappedComponentRef={(formRef) => this.$formRef = formRef}
-          formData={formData}
-          formMap={this.getFormMap()}
-          formLayout={
-            {
-              labelCol: { span: 8 },
-              wrapperCol: { span: 14 },
+      <div style={{ paddingBottom: 55 }}>
+        <Spin spinning={loading}>
+          { !isDetailPage && <XFormComponent
+            wrappedComponentRef={(formRef) => this.$formRef = formRef}
+            formData={formData}
+            formMap={this.getFormMap()}
+            formLayout={
+              {
+                labelCol: { span: 8 },
+                wrapperCol: { span: 14 },
+              }
             }
-          }
-          layout="inline"
-        />}
-        <div style={{ height: this.selfAdaption + 'px' }} className={isDetailPage ? 'json-editor-wrapper detail' : 'json-editor-wrapper'}>
-          <div className="tip">
-            {
-              this.props.isShowPlaceholder ? 
-                <Tooltip title={<pre>{placeholder}</pre>}><a>查看填写示例</a></Tooltip>
-                : ""
-            }
-          </div>
-          {!loading && <EditorCom
-            options={{
-              language: 'json',
-              value,
-              theme: 'vs',
-              automaticLayout: true,
-              readOnly: isDetailPage,
-            }}
-            customMount={this.customMount}
+            layout="inline"
           />}
-        </div>
-      </Spin>
+          <div className={'json-editor-wrapper'}>
+            <div className="json-content-title" style={{ marginTop: 0 }}>
+              Mapping编辑器
+            </div>
+            <div className="tip">
+              {
+                this.props.isShowPlaceholder ? 
+                  <Tooltip title={<pre>{placeholder}</pre>}><a>查看填写示例</a></Tooltip>
+                  : ""
+              }
+            </div>
+            {/* {!loading && <EditorCom
+              options={{
+                language: 'json',
+                value,
+                theme: 'vs',
+                automaticLayout: true,
+                readOnly: isDetailPage,
+              }}
+              customMount={this.customMount}
+            />} */}
+            {!loading && <CodeMirror
+              options={{
+                mode: 'application/json',
+                lineNumbers: true,
+                // 自动缩进
+                smartIndent: true,
+                //start-设置支持代码折叠
+                lineWrapping: true,
+                foldGutter: true,
+                gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'], //end
+                indentUnit: 4, // 缩进配置（默认为2）
+                readOnly: isDetailPage,
+              }}
+              editorDidMount={(editor) => {
+                editor.setValue(value);
+                this.props.dispatch(actions.setEditorInstance(editor));
+              }}
+            />}
+          </div>
+          {/* {
+            dynamicTemplates && !this.isModifyPage ? 
+              <div className={isDetailPage ? 'json-editor-wrapper detail' : 'json-editor-wrapper'} style={isDetailPage ? { marginTop: 0 } : null}>
+                <div className="json-content-title">
+                  dynamic编辑器
+                </div>
+                <CodeMirror
+                  options={{
+                    mode: 'application/json',
+                    lineNumbers: true,
+                    // 自动缩进
+                    smartIndent: true,
+                    //start-设置支持代码折叠
+                    lineWrapping: true,
+                    foldGutter: true,
+                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'], //end
+                    indentUnit: 4, // 缩进配置（默认为2）
+                    readOnly: isDetailPage,
+                  }}
+                  editorDidMount={(editor) => {
+                    editor.setValue(dynamicTemplatesValue);
+                    this.props.dispatch(actions.setCreateIndex({ dynamicTemplatesJson: editor }));
+                  }}
+                />
+              </div>
+            :null
+          } */}
+        </Spin>
+      </div>
     );
   }
 }

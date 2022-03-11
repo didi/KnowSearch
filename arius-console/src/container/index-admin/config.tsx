@@ -1,12 +1,11 @@
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { message, Modal, Tag, Tooltip } from "antd";
-import { openOrCloseReadOrWrite } from "api/index-admin";
+import { openOrCloseReadOrWrite, indicesOpen, indicesClose } from "api/index-admin";
 import { BaseDetail } from "component/dantd/base-detail";
 import { IMenuItem } from "component/hash-menu";
-import { renderOperationBtns } from "container/custom-component";
+import { renderOperationBtns, NavRouterLink } from "container/custom-component";
 import React from "react";
 
-import { NavLink } from "react-router-dom";
 import { Mapping, Setting } from "./component";
 
 export const renderText = (text) => {
@@ -130,6 +129,35 @@ export const getBtnList = (
     });
   }
 
+  const clickOpenOrClose = (props: {
+    clusterName: string,
+    indexName: string,
+    type: 'open' | 'close' | any,
+  }) => {
+    const { clusterName, indexName, type } = props;
+
+    Modal.confirm({
+      icon: <QuestionCircleOutlined />,
+      content: `确定${type == 'open' ? "关闭" : "开启"}索引 ${indexName} 吗？`,
+      okText: '确认',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const params = [{
+            clusterPhyName: clusterName,
+            index: indexName,
+            // type: type,
+          }];
+          const res = type == 'open' ? await indicesClose(params) : await indicesOpen(params);
+          res ? message.success(`${type == 'open' ? "关闭" : "开启"}成功`) : message.error(`${type == 'open' ? "关闭" : "开启"}失败`);
+          reloadDataFn && reloadDataFn();
+        } catch (error) {
+          message.error(`${type == 'open' ? "关闭" : "开启"}失败`);
+        }
+      }
+    });
+  }
+
   let btn = [
     {
       label: isRead ? "禁用读" : "启用读",
@@ -154,6 +182,18 @@ export const getBtnList = (
           indexName: indexName,
           type: 'write',
           value: isWrite
+        })
+      },
+    },
+    {
+      label: record.status == 'open' ? "关闭索引" : "开启索引",
+      type: "primary",
+      isOpenUp: isOpenUp,
+      clickFunc: () => {
+        clickOpenOrClose({
+          clusterName: clusterName,
+          indexName: indexName,
+          type: record.status,
         })
       },
     },
@@ -214,20 +254,21 @@ export const getColumns = (
     {
       title: "索引名称",
       dataIndex: "index",
+      sorter: true,
+      fixed: "left",
+      width: 180,
       render: (item, record) => {
         return <div
           className="two-row-ellipsis pointer"
           style={{
             color: "#526ecc",
-            width: "8vw"
+            // width: "8vw"
           }}>
-          <Tooltip placement="right" title={renderText(item)}>
-            <NavLink to={{
-              pathname: "/index-admin/detail",
-              state: record,
-              search: `?index=${record.index}&cluster=${record.cluster}`
-            }}> {item} </NavLink>
-          </Tooltip>
+            <NavRouterLink 
+              needToolTip
+              element={item}
+              href={`/index-admin/detail?index=${record.index}&cluster=${record.cluster}`}
+            />
         </div>
       },
     },
@@ -240,6 +281,13 @@ export const getColumns = (
       title: "健康状态",
       dataIndex: "health",
       render: (item) => <div style={{ width: "2vw" }}>{statusTag(item)}</div>,
+    },
+    {
+      title: "索引状态",
+      dataIndex: "status",
+      render: (text) => {
+        return text == 'open' ? '开启' : '关闭'
+      },
     },
     {
       title: "Shard个数",

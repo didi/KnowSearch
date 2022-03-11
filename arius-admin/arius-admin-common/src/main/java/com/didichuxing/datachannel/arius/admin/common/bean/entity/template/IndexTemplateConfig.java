@@ -64,4 +64,9 @@ public class IndexTemplateConfig extends BaseEntity {
      */
     private Integer shardNum;
 
+    /**
+     * indexRollover功能，0：不禁用；1：禁用
+     */
+    private Boolean disableIndexRollover;
+
 }

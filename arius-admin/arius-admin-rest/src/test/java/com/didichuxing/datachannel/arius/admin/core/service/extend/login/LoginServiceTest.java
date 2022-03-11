@@ -1,61 +1,33 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.login;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * @author cjm
  */
 @Transactional
 @Rollback
-public class LoginServiceTest extends AriusAdminApplicationTests {
+public class LoginServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private LoginService loginService;
 
-    @Test
-    void loginAuthenticateTest() {
-        // 涉及 HttpServletRequest 的封装，通过集成测试
-    }
+    @MockBean
+    private AriusUserInfoService ariusUserInfoService;
 
-    @Test
-    void logoutTest() {
-        // 涉及 HttpServletRequest 的封装，通过集成测试
-    }
-
-    @Test
-    void interceptorCheckTest() {
-        // 涉及 HttpServletRequest 的封装，通过集成测试
-    }
-
-    /**
-     *         if (AriusObjUtils.isNull(userInfoDTO)) {
-     *             return Result.buildParamIllegal("用户信息为空");
-     *         }
-     *         if (AriusObjUtils.isNull(userInfoDTO.getName())) {
-     *             return Result.buildParamIllegal("名字为空");
-     *         }
-     *         if (AriusObjUtils.isNull(userInfoDTO.getPassword())) {
-     *             return Result.buildParamIllegal("密码为空");
-     *         }
-     *         if (AriusObjUtils.isNull(userInfoDTO.getDomainAccount())) {
-     *             return Result.buildParamIllegal("域账号为空");
-     *         }
-     *         if (AriusObjUtils.isNull(userInfoDTO.getStatus())) {
-     *             return Result.buildParamIllegal("状态为空");
-     *         }
-     */
+    @MockBean
+    private AppUserInfoService appUserInfoService;
 
     @Test
     void registerTest() {
@@ -88,7 +60,9 @@ public class LoginServiceTest extends AriusAdminApplicationTests {
         register = loginService.register(userInfoDTO, 1);
         Assertions.assertNotEquals(0, register.getCode());
         userInfoDTO.setRole(2);
-        register = loginService.register(userInfoDTO, 1);
-        Assertions.assertEquals(0, register.getCode());
+        Assertions.assertNotEquals(0, register.getCode());
+        Mockito.when(appUserInfoService.recordAppidAndUser(Mockito.anyInt(), Mockito.any())).thenReturn(true);
+        Mockito.when(ariusUserInfoService.save(Mockito.any())).thenReturn(Result.buildSucc(1L));
+        Assertions.assertTrue(loginService.register(userInfoDTO, 1).success());
     }
 }

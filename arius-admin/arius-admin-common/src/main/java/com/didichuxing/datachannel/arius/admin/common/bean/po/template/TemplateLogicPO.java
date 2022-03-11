@@ -114,7 +114,37 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
     private Integer writeRateLimit;
 
     /**
+     * 是否禁止读
+     */
+    private Boolean blockRead;
+
+    /**
+     * 是否禁止写
+     */
+    private Boolean blockWrite;
+
+    /**
      * pipeline
      */
     private String  ingestPipeline;
+
+    /**
+     * 逻辑集群id
+     */
+    private Long    resourceId;
+
+    /**
+     * 服务等级
+     */
+    private Integer level;
+
+    /*
+     * dcdr位点差
+     */
+    private Long    checkPointDiff;
+
+    /**
+     * 是否有创建dcdr链路
+     */
+    private Boolean hasDCDR;
 }

@@ -7,7 +7,7 @@ import { InfoItem } from "component/info-item";
 import { Dispatch } from "redux";
 import * as actions from "actions";
 import { getOpLogicClusterInfo } from "api/cluster-api";
-import { IClusterInfo } from "@types/cluster/cluster-types";
+import { IClusterInfo } from "typesPath/cluster/cluster-types";
 import { connect } from "react-redux";
 import { delLogicCluster } from "../config";
 import {
@@ -28,8 +28,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) =>
     dispatch(actions.setModalId(modalId, params, cb)),
 });
-
-@connect(null, mapDispatchToProps)
+const connects: Function = connect
+@connects(null, mapDispatchToProps)
 export class LogicClusterDetail extends React.Component<any> {
   public clusterId: number;
 
@@ -159,7 +159,7 @@ export class LogicClusterDetail extends React.Component<any> {
                 ? row.render(clusterInfo?.[row.key])
                 : `${clusterInfo?.[row.key] || ""}`
             }
-            width={250}
+            width={200}
           />
         ))}
       </PageHeader >

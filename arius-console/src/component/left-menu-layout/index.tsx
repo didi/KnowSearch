@@ -1,6 +1,6 @@
 import React from 'react';
 import { Menu } from 'antd';
-import { IMenuItem } from '@types/base-types';
+import { IMenuItem } from 'typesPath/base-types';
 import './index.less';
 
 

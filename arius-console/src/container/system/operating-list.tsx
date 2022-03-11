@@ -48,6 +48,7 @@ export const OperatingList = (() => {
   }
 
   const reloadData = () => {
+    setloading(true);
     getUserRecordList({}).then((res) => {
       if (res) {
         setData(res);

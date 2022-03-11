@@ -6,13 +6,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -34,6 +37,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfi
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * 索引冷存服务
@@ -55,6 +59,9 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     @Autowired
     private IndexTemplateLogicDAO  indexTemplateLogicDAO;
 
+    @Autowired
+    private ClusterPhyService      clusterPhyService;
+
     @Override
     public TemplateServiceEnum templateService() {
         return TEMPLATE_COLD;
@@ -64,21 +71,21 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      * 获取cold索引
      *
      * @param physicalId 物理模板ID
-     * @return set集合
+     * @return set集合 v1:冷节点索引列表 v2：热节点索引列表
      */
     @Override
-    public Set<String> getColdIndex(Long physicalId) {
+    public Tuple</*冷节点索引列表*/Set<String>, /*热节点索引列表*/Set<String>> getColdAndHotIndex(Long physicalId) {
         IndexTemplatePhyWithLogic templatePhysicalWithLogic = templatePhyService
             .getTemplateWithLogicById(physicalId);
         if (templatePhysicalWithLogic == null) {
-            return Sets.newHashSet();
+            return new Tuple<>();
         }
 
         int hotTime = templatePhysicalWithLogic.getLogicTemplate().getHotTime();
 
         if (hotTime <= 0) {
             LOGGER.info("class=TemplateColdManagerImpl||method=getColdIndex||template={}||msg=hotTime illegal", templatePhysicalWithLogic.getName());
-            return Sets.newHashSet();
+            return new Tuple<>();
         }
 
         // 供运维人员人工调整入冷存的天数
@@ -90,10 +97,54 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         if (hotTime >= templatePhysicalWithLogic.getLogicTemplate().getExpireTime()) {
             LOGGER.info("class=TemplateColdManagerImpl||method=getColdIndex||||template={}||msg=all index is hot",
                 templatePhysicalWithLogic.getName());
-            return Sets.newHashSet();
+            return new Tuple<>();
         }
 
-        return templatePhyManager.getIndexByBeforeDay(templatePhysicalWithLogic, hotTime);
+        return templatePhyManager.getHotAndColdIndexByBeforeDay(templatePhysicalWithLogic, hotTime);
+    }
+
+    /**
+     * 根据接入集群可以连接的地址校验是否可以开启冷热分离服务
+     * @param httpAddresses client地址
+     * @return 校验的结果，返回模板服务id
+     */
+    @Override
+    public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
+        //根据可连接的地址获取集群上的
+        Result<Set<String>> clusterRackByHttpAddress = clusterPhyService.getClusterRackByHttpAddress(httpAddresses, password);
+        if (clusterRackByHttpAddress.failed()) {
+            return Result.buildFrom(clusterRackByHttpAddress);
+        }
+
+        //如果含有冷节点则可以开启冷热分离的索引服务
+        for (String rack : clusterRackByHttpAddress.getData()) {
+            if (AdminConstant.DEFAULT_COLD_RACK.equals(rack)) {
+                return Result.buildSucc(Boolean.TRUE);
+            }
+        }
+
+        return Result.buildFail("接入集群不具备开启【冷热分离索引模板服务】条件，需要满足【集群版本6.6.1以上；具备cold属性节点】");
+    }
+
+    /**
+     * 校验指定的已经入库的物理集群是否可以开启冷热分离
+     * @param phyCluster 物理集群名称
+     * @return 校验结果
+     */
+    @Override
+    public Result<Boolean> checkOpenTemplateSrvByCluster(String phyCluster) {
+        if (StringUtils.isBlank(phyCluster)) {
+            return Result.buildFail("物理集群名称为空");
+        }
+
+        //指定物理集群未设置冷节点
+        List<String> coldRackList = Lists.newArrayList(clusterPhyService.listColdRacks(phyCluster));
+        if (CollectionUtils.isEmpty(coldRackList)) {
+            LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||cluster={}||no cold rack", phyCluster);
+            return Result.buildFail("接入集群不具备开启【冷热分离索引模板服务】条件，需要满足【集群版本6.6.1以上；具备cold属性节点】");
+        }
+
+        return Result.buildSucc();
     }
 
     /**
@@ -112,14 +163,8 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
 
         }
 
-        Set<String> enableClusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-            "platform.govern.cold.data.move2ColdNode.enable.clusters", "", ",");
+        List<String> coldRackList = Lists.newArrayList(clusterPhyService.listColdRacks(phyCluster));
 
-        if (!enableClusterSet.contains(phyCluster)) {
-            return Result.buildSucc();
-        }
-
-        List<String> coldRackList = Lists.newArrayList(esClusterPhyService.listColdRacks(phyCluster));
         if (CollectionUtils.isEmpty(coldRackList)) {
             LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||cluster={}||no cold rack", phyCluster);
             return Result.buildFail(phyCluster + "没有冷节点");
@@ -128,6 +173,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         coldRackList.sort(RackUtils::compareByName);
         String coldRack = String.join(",", coldRackList);
 
+        //配置分片级别重分配的参数（分片迁移并发度和单节点迁移速率最大值）
         tryConfigCluster(phyCluster);
 
         List<IndexTemplatePhy> templatePhysicals = templatePhyService.getNormalTemplateByCluster(phyCluster);
@@ -278,24 +324,34 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     }
 
     private Result<Boolean> movePerTemplate(IndexTemplatePhy templatePhysical, String coldRacks) throws ESOperateException {
-        Set<String> coldIndexNames = getColdIndex(templatePhysical.getId());
-        if (CollectionUtils.isEmpty(coldIndexNames)) {
-            LOGGER.info("class=TemplateColdManagerImpl||method=movePerTemplate||template={}||msg=no cold index", templatePhysical.getName());
-            return Result.buildSucc();
+        //获取冷存数据索引列表
+        Set<String> coldIndexNames = getColdAndHotIndex(templatePhysical.getId()).getV1();
+        //获取热存数据索引列表
+        Set<String> hotIndexNames = getColdAndHotIndex(templatePhysical.getId()).getV2();
+
+        //用户修改模板设置更大热数据保存天数，需要将原本迁移到冷存节点上的索引还原到热存节点上
+        return Result.buildBoolen(movePerIndexTemplate(templatePhysical, coldRacks, coldIndexNames)
+                && movePerIndexTemplate(templatePhysical, templatePhysical.getRack(), hotIndexNames));
+    }
+
+    private boolean movePerIndexTemplate(IndexTemplatePhy templatePhysical,
+                                         String racks, Set<String> indexNames) throws ESOperateException {
+        if (CollectionUtils.isEmpty(indexNames)) {
+            LOGGER.info("class=TemplateColdManagerImpl||method=movePerIndexTemplate||template={}||msg=no need index", templatePhysical.getName());
+            return false;
+        } else {
+            //冷热节点数据间的迁移
+            return esIndexService.syncBatchUpdateRack(templatePhysical.getCluster(), Lists.newArrayList(indexNames), racks, 3);
         }
-
-        boolean success = esIndexService.syncBatchUpdateRack(templatePhysical.getCluster(),
-            Lists.newArrayList(coldIndexNames), coldRacks, 3);
-
-        LOGGER.info("class=TemplateColdManagerImpl||method=movePerTemplate||template={}||coldRacks={}||coldIndexNames={}||success={}",
-            templatePhysical.getName(), coldRacks, coldIndexNames, success);
-
-        return Result.buildBoolen(success);
     }
 
     private void tryConfigCluster(String cluster) {
         try {
-            if (esClusterService.syncConfigColdDateMove(cluster, 2, 2, "10MB", 3)) {
+            if (esClusterService.syncConfigColdDateMove(cluster,
+                    ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP, CLUSTER_ROUTING_ALLOCATION_INGOING, 2),
+                    ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP, CLUSTER_ROUTING_ALLOCATION_OUTGOING, 2),
+                    ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP, COLD_MAX_BYTES_PER_SEC_KEY, "10MB"),
+                    3)) {
                 LOGGER.info("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||msg=config cluster succ", cluster);
             } else {
                 LOGGER.warn("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||msg=config cluster fail", cluster);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IDeploy, IOpRecord } from "@types/cluster/physics-type";
+import { IDeploy, IOpRecord } from "typesPath/cluster/physics-type";
 import { Tooltip, Modal, notification } from 'antd';
 import { cellStyle } from "constants/table";
 import { deployStatus } from 'constants/status-map';
@@ -187,7 +187,7 @@ export const getClusterCongigColumns = (data: IDeploy[], fn: any, reloadDataFn: 
         width: '15%',
         render: (id: number, record: IDeploy) => {
           const btns = getClusterCongigBtnList(record, fn, reloadDataFn);
-          return renderOperationBtns(btns, record);
+          return renderOperationBtns(btns as any, record);
         },
       },
   ]
@@ -196,13 +196,13 @@ export const getClusterCongigColumns = (data: IDeploy[], fn: any, reloadDataFn: 
 
 export const getOperationColumns = () => {
   let cols = [
-    {
-      title: '业务ID',
-      dataIndex: 'bizId',
-      key: 'bizId',
-      width: '10%',
-      sorter: (a: IOpRecord, b: IOpRecord) => b.id - a.id,
-    },
+    // {
+    //   title: '业务ID',
+    //   dataIndex: 'bizId',
+    //   key: 'bizId',
+    //   width: '10%',
+    //   sorter: (a: IOpRecord, b: IOpRecord) => b.id - a.id,
+    // },
     {
       title: '操作时间',
       dataIndex: 'operateTime',
@@ -214,6 +214,11 @@ export const getOperationColumns = () => {
       title: '模块',
       dataIndex: 'module',
       key: 'module',
+      width: '10%',
+    }, {
+      title: '操作类型',
+      dataIndex: 'operate',
+      key: 'operate',
       width: '10%',
     }, {
       title: '操作内容',
