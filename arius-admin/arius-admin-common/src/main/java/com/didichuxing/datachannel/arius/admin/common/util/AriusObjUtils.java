@@ -44,9 +44,6 @@ public class AriusObjUtils {
      * @return 不一样的字段
      */
     public static String findChanged(Object src, Object dest) {
-        if(src == null || dest == null) {
-            return "";
-        }
         StringBuilder content = new StringBuilder("");
         try {
             Map<String, Method> destMethodMap = Maps.newHashMap();
@@ -66,48 +63,6 @@ public class AriusObjUtils {
                         if (isChanged(destV, srcV)) {
                             content.append(getPropertyName(srcMethod.getName())).append(":").append(srcV).append("->")
                                 .append(destV).append("; ");
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("class=AriusObjUtils||method=findChanged||errMsg={}", e.getMessage(), e);
-        }
-
-        return content.toString();
-    }
-
-    /**
-     * 找到两个对象不一样的地方
-     * 这个方法要求参数bean中必须都是基本类型,且是封装类;如过不是封装类,例如boolean,getter方法不是get开头,而是is开头
-     * @param src 源
-     * @param dest 目标
-     * @return 不一样的字段，格式更加清晰
-     */
-    public static String findChangedWithClear(Object src, Object dest) {
-        if(src == null || dest == null) {
-            return "";
-        }
-        StringBuilder content = new StringBuilder("");
-        try {
-            Map<String, Method> destMethodMap = Maps.newHashMap();
-            for (Method destMethod : dest.getClass().getMethods()) {
-                if (isGetter(destMethod)) {
-                    destMethodMap.put(destMethod.getName(), destMethod);
-                }
-            }
-
-            for (Method srcMethod : src.getClass().getMethods()) {
-                if (isGetter(srcMethod)) {
-                    Method destMethod = destMethodMap.get(srcMethod.getName());
-                    if (destMethod != null) {
-                        Object srcV = srcMethod.invoke(src);
-                        Object destV = destMethod.invoke(dest);
-
-                        if (isChanged(destV, srcV)) {
-                            content.append("字段").append(getPropertyName(srcMethod.getName()))
-                                    .append("的原值").append("【").append(srcV).append("】").append("修改为")
-                                    .append("【").append(destV).append("】").append("\r\n");
                         }
                     }
                 }

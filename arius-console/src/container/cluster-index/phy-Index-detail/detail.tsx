@@ -10,16 +10,15 @@ import { connect } from "react-redux";
 import { getIndexBaseInfo } from "api/cluster-index-api";
 import { IBaseButton } from "container/cluster/logic-detail/detail";
 import { BaseInfo } from "./base-info";
-import { IIndex } from "typesPath/index-types";
+import { IIndex } from "@types/index-types";
 
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) =>
     dispatch(actions.setModalId(modalId, params, cb)),
 });
-const connects: Function = connect
 
-@connects(null, mapDispatchToProps)
+@connect(null, mapDispatchToProps)
 export class PhyIndexDetail extends React.Component<any> {
   public data: IIndex;
 

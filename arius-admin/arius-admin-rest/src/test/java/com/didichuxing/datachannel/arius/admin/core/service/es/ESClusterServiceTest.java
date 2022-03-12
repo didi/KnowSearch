@@ -1,174 +1,243 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.*;
-
-import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAttrInfo;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
-import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
-import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.google.common.collect.Maps;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+import java.util.Set;
+
 @Transactional
 @Rollback
-public class ESClusterServiceTest extends AriusAdminApplicationTest {
+public class ESClusterServiceTest extends AriusAdminApplicationTests {
 
-    @MockBean
+    @Autowired
     private ESClusterDAO esClusterDAO;
 
     @Autowired
     private ESClusterService esClusterService;
 
     @Test
-    public void syncCloseReBalanceTest() throws ESOperateException {
-        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertTrue(esClusterService.syncCloseReBalance(CustomDataSource.PHY_CLUSTER_NAME, 1));
+    void testSyncCloseReBalance() throws ESOperateException {
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Integer retryCount = 1;
+        Assertions.assertTrue(esClusterService.syncCloseReBalance(clusterName, retryCount));
+
     }
 
     @Test
-    public void syncOpenReBalanceTest() throws ESOperateException {
-        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertTrue(esClusterService.syncOpenReBalance(CustomDataSource.PHY_CLUSTER_NAME, "v"));
+    void testSyncOpenReBalance() throws ESOperateException {
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertTrue(esClusterService.syncOpenReBalance(clusterName, null));
     }
 
     @Test
-    public void syncPutRemoteClusterTest() throws ESOperateException {
-        Mockito.when(esClusterDAO.putPersistentRemoteClusters(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertTrue(esClusterService.syncPutRemoteCluster(CustomDataSource.PHY_CLUSTER_NAME, "test", new ArrayList<>(), 1));
+    void testSyncPutRemoteCluster() {
+
     }
 
     @Test
-    public void hasSettingExistTest() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("test", "test");
-        Mockito.when(esClusterDAO.getPersistentClusterSettings(Mockito.any())).thenReturn(map);
-        Assertions.assertTrue(esClusterService.hasSettingExist(CustomDataSource.PHY_CLUSTER_NAME, "test"));
+    void testHasSettingExist() {
+        // 存在的配置
+        String clusterName = "logi-elasticsearch-7.6.0";
+        String settingFlatName = "cluster.routing.rebalance.enable";
+        Assertions.assertTrue(esClusterService.hasSettingExist(clusterName, settingFlatName));
+        // 不存在的配置
+        settingFlatName = "xxxxx";
+        Assertions.assertFalse(esClusterService.hasSettingExist(clusterName, settingFlatName));
     }
 
     @Test
-    public void syncConfigColdDateMoveTest() throws ESOperateException {
-        Mockito.when(esClusterDAO.putPersistentConfig(Mockito.any(), Mockito.anyMap())).thenReturn(true);
-        Assertions.assertTrue(esClusterService.syncConfigColdDateMove(CustomDataSource.PHY_CLUSTER_NAME, 1, 1, "1", 1));
+    void testSyncConfigColdDateMove() {
+
     }
 
     @Test
-    public void syncGetClusterStatusTest() {
-        Mockito.when(esClusterDAO.getClusterStats(Mockito.any())).thenReturn(new ESClusterStatsResponse());
-        Assertions.assertNotNull(esClusterService.syncGetClusterStats(CustomDataSource.PHY_CLUSTER_NAME));
+    void testSyncGetClusterStatus() {
+        /*
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertNotEquals(esClusterService.syncGetClusterStatus(clusterName), ClusterHealthEnum.UNKNOWN);
+        // 不存在的集群
+        clusterName = "ggglogi-elasticsearch-7.6.0";
+        Assertions.assertEquals(esClusterService.syncGetClusterStatus(clusterName), ClusterHealthEnum.UNKNOWN);
+         */
     }
 
     @Test
-    public void syncGetNode2PluginsMapTest() {
-        Mockito.when(esClusterDAO.getNode2PluginsMap(Mockito.any())).thenReturn(new HashMap<>());
-        Assertions.assertNotNull(esClusterService.syncGetNode2PluginsMap(CustomDataSource.PHY_CLUSTER_NAME));
+    void testSyncGetNode2PluginsMap() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        esClusterService.syncGetNode2PluginsMap(clusterName);
     }
 
     @Test
-    public void syncGetAliasMapTest() {
-        Mockito.when(esClusterDAO.getClusterAlias(Mockito.any())).thenReturn(null);
-        Assertions.assertTrue(esClusterService.syncGetAliasMap(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
-        ESIndicesGetAliasResponse response = new ESIndicesGetAliasResponse();
-        Map<String, AliasIndexNode> m = new HashMap<>();
-        AliasIndexNode aliasIndexNode = new AliasIndexNode();
-        Map<String, JSONObject> aliases = new HashMap<>();
-        aliases.put("test1", new JSONObject());
-        aliasIndexNode.setAliases(aliases);
-        m.put("test1", aliasIndexNode);
-        response.setM(m);
-        Mockito.when(esClusterDAO.getClusterAlias(Mockito.any())).thenReturn(response);
-        Assertions.assertFalse(esClusterService.syncGetAliasMap(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
+    void testSyncGetAliasMap() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Map<String, Set<String>> stringSetMap = esClusterService.syncGetAliasMap(clusterName);
+        Assertions.assertFalse(stringSetMap.isEmpty());
+        // 不存在的集群
+        stringSetMap = esClusterService.syncGetAliasMap("testest");
+        Assertions.assertTrue(stringSetMap.isEmpty());
     }
 
     @Test
-    public void syncGetClusterHealthTest() {
-        Mockito.when(esClusterDAO.getClusterHealth(Mockito.any())).thenReturn(new ESClusterHealthResponse());
-        Assertions.assertNotNull(esClusterService.syncGetClusterHealth(CustomDataSource.PHY_CLUSTER_NAME));
+    void testSyncGetClientAlivePercent() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        // 都正常的client
+        String clientAddresses = "10.96.64.13:8061,10.96.64.15:8061,10.96.65.62:8061";
+        Assertions.assertEquals(esClusterService.syncGetClientAlivePercent(clusterName, clientAddresses), new Integer(100));
+
+        // 存在的集群
+        clusterName = "logi-elasticsearch-7.6.0";
+        // 带有1个不正常的client
+        clientAddresses = "10.96.64.13:8061,10.96.64.15:8061,10.96.65.69:8061";
+        Assertions.assertNotEquals(esClusterService.syncGetClientAlivePercent(clusterName, clientAddresses), new Integer(100));
+
     }
 
     @Test
-    public void syncGetClusterStatsTest() {
-        Mockito.when(esClusterDAO.getClusterStats(Mockito.any())).thenReturn(new ESClusterStatsResponse());
-        Assertions.assertNotNull(esClusterService.syncGetClusterStats(CustomDataSource.PHY_CLUSTER_NAME));
+    void testJudgeClientAlive() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        // 都正常的client
+        String clientAddresses = "10.96.64.13:8061";
+        Assertions.assertTrue(esClusterService.judgeClientAlive(clusterName, clientAddresses));
+
+        // 存在的集群
+        clusterName = "logi-elasticsearch-7.6.0";
+        // 不正常常的client
+        clientAddresses = "10.96.64.19:8061";
+        Assertions.assertFalse(esClusterService.judgeClientAlive(clusterName, clientAddresses));
     }
 
     @Test
-    public void syncGetClusterSettingTest() {
-        Mockito.when(esClusterDAO.getClusterStats(Mockito.any())).thenReturn(new ESClusterStatsResponse());
-        Assertions.assertNotNull(esClusterService.syncGetClusterStats(CustomDataSource.PHY_CLUSTER_NAME));
+    void testSyncGetClusterHealth() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertNotNull(esClusterService.syncGetClusterHealth(clusterName));
+        // 不存在的集群
+        clusterName = "test-logi-elasticsearch-7.6.0";
+        Assertions.assertNull(esClusterService.syncGetClusterHealth(clusterName));
     }
 
     @Test
-    public void synGetSegmentsOfIpByClusterTest() {
-        List<ECSegmentsOnIps> list = new ArrayList<>();
-        ECSegmentsOnIps ecSegmentsOnIps = new ECSegmentsOnIps();
-        ecSegmentsOnIps.setSegment("1");
-        ecSegmentsOnIps.setIp("127.0.0.1");
-        ECSegmentsOnIps ecSegmentsOnIps2 = new ECSegmentsOnIps();
-        ecSegmentsOnIps2.setSegment("2");
-        ecSegmentsOnIps2.setIp("127.0.0.1");
-        list.add(ecSegmentsOnIps);
-        list.add(ecSegmentsOnIps2);
-        Mockito.when(esClusterDAO.getSegmentsOfIpByCluster(Mockito.any())).thenReturn(list);
-        Assertions.assertEquals(1, esClusterService.synGetSegmentsOfIpByCluster(CustomDataSource.PHY_CLUSTER_NAME).size());
+    void testSyncGetClusterStats() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertNotNull(esClusterService.syncGetClusterStats(clusterName));
+        // 不存在的集群
+        clusterName = "ggg-test-logi-elasticsearch-7.6.0";
+        Assertions.assertNull(esClusterService.syncGetClusterStats(clusterName));
     }
 
     @Test
-    public void syncPutPersistentConfigTest() {
-        Mockito.when(esClusterDAO.putPersistentConfig(Mockito.any(), Mockito.anyMap())).thenReturn(true);
-        Assertions.assertTrue(esClusterService.syncPutPersistentConfig(CustomDataSource.PHY_CLUSTER_NAME, new HashMap<>()));
+    void testSyncGetClusterSetting() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertNotNull(esClusterService.syncGetClusterStats(clusterName));
+        // 不存在的集群
+        clusterName = "test-logi-elasticsearch-7.6.0";
+        Assertions.assertNull(esClusterService.syncGetClusterStats(clusterName));
     }
 
     @Test
-    public void syncGetAllNodesAttributesTest() {
-        Mockito.when(esClusterDAO.syncGetAllNodesAttributes("test")).thenReturn(new ArrayList<>());
-        Assertions.assertTrue(esClusterService.syncGetAllNodesAttributes(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
-        List<NodeAttrInfo> list = new ArrayList<>();
-        NodeAttrInfo nodeAttrInfo = new NodeAttrInfo();
-        nodeAttrInfo.setNode("test");
-        nodeAttrInfo.setValue("testValue");
-        nodeAttrInfo.setAttribute("testAttribute");
-        list.add(nodeAttrInfo);
-        Mockito.when(esClusterDAO.syncGetAllNodesAttributes(Mockito.any())).thenReturn(list);
-        Assertions.assertFalse(esClusterService.syncGetAllNodesAttributes(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
+    void testSynGetSegmentsOfIpByCluster() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.synGetSegmentsOfIpByCluster(clusterName).isEmpty());
+        // 不存在的集群
+        clusterName = "ggg-test-logi-elasticsearch-7.6.0";
+        Assertions.assertTrue(esClusterService.synGetSegmentsOfIpByCluster(clusterName).isEmpty());
     }
 
     @Test
-    public void syncGetAllSettingsByClusterTest() {
-        Map<String, ClusterNodeInfo> map = new HashMap<>();
-        map.put("test", new ClusterNodeInfo());
-        Mockito.when(esClusterDAO.getAllSettingsByCluster(Mockito.any())).thenReturn(map);
-        Assertions.assertFalse(esClusterService.syncGetAllSettingsByCluster(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
+    void testSyncPutPersistentConfig() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Map<String, Object> persistentConfig = Maps.newHashMap();
+        persistentConfig.put("cluster.routing.rebalance.enable", "all");
+        Assertions.assertTrue(esClusterService.syncPutPersistentConfig(clusterName, persistentConfig));
     }
 
     @Test
-    public void syncGetPartOfSettingsByClusterTest() {
-        Map<String, ClusterNodeSettings> map = new HashMap<>();
-        map.put("test", new ClusterNodeSettings());
-        Mockito.when(esClusterDAO.getPartOfSettingsByCluster(Mockito.any())).thenReturn(map);
-        Assertions.assertFalse(esClusterService.syncGetPartOfSettingsByCluster(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
+    void testSyncGetAllNodesAttributes() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.syncGetAllNodesAttributes(clusterName).isEmpty());
+        // 不存在的集群
+        clusterName = "ggg-test-logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.syncGetAllNodesAttributes(clusterName).isEmpty());
     }
 
     @Test
-    public void synGetESVersionByClusterTest() {
-        Mockito.when(esClusterDAO.getESVersionByCluster(Mockito.any())).thenReturn("v");
-        Assertions.assertNotNull(esClusterService.synGetESVersionByCluster(CustomDataSource.PHY_CLUSTER_NAME));
+    void testSyncGetAllSettingsByCluster() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.syncGetAllSettingsByCluster(clusterName).isEmpty());
+        // 不存在的集群
+        clusterName = "ggg-test-logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.syncGetAllSettingsByCluster(clusterName).isEmpty());
+    }
+
+    @Test
+    void testSyncGetPartOfSettingsByCluster() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.syncGetPartOfSettingsByCluster(clusterName).isEmpty());
+        // 不存在的集群
+        clusterName = "ggg-test-logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.syncGetPartOfSettingsByCluster(clusterName).isEmpty());
+    }
+
+    @Test
+    void testHasESClientHttpAddressActive() {
+
+        // 已经接入平台的地址
+        /*
+        String clientAddresses = "10.96.64.13:8061";
+        Result<Void> result = esClusterService.hasESClientHttpAddressActive(clientAddresses);
+        Assertions.assertEquals((int) result.getCode(), ResultType.ILLEGAL_PARAMS.getCode());
+
+        // 不存在的地址
+        clientAddresses = "10.96.64.43:8061";
+        result = esClusterService.hasESClientHttpAddressActive(clientAddresses);
+        Assertions.assertEquals((int) result.getCode(), ResultType.ILLEGAL_PARAMS.getCode());
+        */
+
+    }
+
+    @Test
+    void testSynGetESVersionByCluster() {
+        // 存在的集群
+        String clusterName = "logi-elasticsearch-7.6.0";
+        Assertions.assertFalse(esClusterService.synGetESVersionByCluster(clusterName).isEmpty());
+        // 不存在的集群
+        clusterName = "ggg-test-logi-elasticsearch-7.6.0";
+        Assertions.assertNull(esClusterService.synGetESVersionByCluster(clusterName));
+    }
+
+    @Test
+    void testGetClusterRackByHttpAddress() {
+        // 存在的地址
+        String clientAddresses = "10.96.64.13:8061";
+        Result<Set<String>> result = esClusterService.getClusterRackByHttpAddress(clientAddresses);
+        Assertions.assertFalse(result.getData().isEmpty());
+
+        // 不存在的地址
+        clientAddresses = "10.96.64.43:8061";
+        result = esClusterService.getClusterRackByHttpAddress(clientAddresses);
+        Assertions.assertEquals((int) result.getCode(), ResultType.ILLEGAL_PARAMS.getCode());
     }
 }
 

@@ -1,43 +1,41 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
+
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
+import javax.servlet.http.HttpServletRequest;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.limit.TemplateLimitManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.limit.TemplateLimitManager;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
+import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.AppTemplateAuthVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplateConfigVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplateLogicAllVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.OpLogicTemplateVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
 @RestController
 @RequestMapping(V2_OP + "/template/logic")
@@ -261,20 +259,6 @@ public class TemplateLogicOpController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true) })
     public Result<Void> adjustPipelineRateLimit(@RequestParam(value = "logicId") Integer logicId) {
         return Result.build(templateLimitManager.adjustPipelineRateLimit(logicId));
-    }
-
-    @RequestMapping(path = "/blockRead", method = RequestMethod.PUT)
-    @ResponseBody
-    @ApiOperation(value = "是否禁读", notes = "")
-    public Result updateBlockReadState(HttpServletRequest request, @RequestBody IndexTemplateLogicDTO param) {
-        return templateLogicService.updateBlockReadState(param.getId(), param.getBlockRead(), HttpRequestUtils.getOperator(request));
-    }
-
-    @RequestMapping(path = "/blockWrite", method = RequestMethod.PUT)
-    @ResponseBody
-    @ApiOperation(value = "是否禁写", notes = "")
-    public Result updateBlockWriteState(HttpServletRequest request, @RequestBody IndexTemplateLogicDTO param) {
-        return templateLogicService.updateBlockWriteState(param.getId(), param.getBlockWrite(), HttpRequestUtils.getOperator(request));
     }
 
     private Result<List<OpLogicTemplateVO>> getLogicTemplateList(IndexTemplateLogicDTO param){

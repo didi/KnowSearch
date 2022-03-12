@@ -1,12 +1,12 @@
 package com.didi.arius.gateway.elasticsearch.client.utils;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class JsonUtils {
 
@@ -59,14 +59,9 @@ public class JsonUtils {
 
             String value = m.get(key);
             if(value!=null && value.startsWith("[") && value.endsWith("]")) {
-                // 看是否可以转化成jsonArray
-                //这里应该进行try catch否则会导致解析json中的正则失败
-                JSONArray array = null;
-                try {
-                    array = JSONArray.parseArray(value);
-                } catch (JSONException e) {
-                    //pass
-                }
+                // 看是否可以转化成jsonarray
+
+                JSONArray array = JSON.parseArray(value);
                 obj.put(subKeys[i], array);
                 if(array==null) {
                     obj.put(subKeys[i], value);

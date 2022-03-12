@@ -21,7 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
@@ -41,7 +40,10 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.notify.mail.
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanAreaService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
-import com.google.common.collect.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -240,9 +242,15 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      */
     @Override
     public Result<Void> editRegion(CapacityPlanRegionDTO regionDTO, String operator) {
-        //编辑region进行参数校验
-        Result<Void> validResult = validRegionParamWhenEdit(regionDTO);
-        if (validResult.failed()) return Result.buildFrom(validResult);
+
+        // 检查更新参数
+        if (AriusObjUtils.isNull(regionDTO)) {
+            return Result.buildParamIllegal("参数为空");
+        }
+
+        if (AriusObjUtils.isNull(regionDTO.getRegionId())) {
+            return Result.buildParamIllegal("regionId为空");
+        }
 
         CapacityPlanRegion oldCapacityPlanRegion = getRegionById(regionDTO.getRegionId());
 
@@ -279,7 +287,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             boolean succeed = 1 == capacityPlanRegionInfoDAO.updateByRegionId(param);
 
             if (succeed) {
-                operateRecordService.save(CAPACITY_PLAN_REGION, EDIT, param.getId(), AriusObjUtils.findChangedWithClear(oldRegion, param), operator);
+                operateRecordService.save(CAPACITY_PLAN_REGION, EDIT, param.getId(), AriusObjUtils.findChanged(oldRegion, param), operator);
             } else {
                 return Result.buildFail();
             }
@@ -595,8 +603,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         }
 
         // 根据逻辑集群ID、物理集群名获取area
-        return capacityPlanAreaService.getAreaByResourceIdAndCluster(ListUtils.string2LongList(region.getLogicClusterIds()).get(0),
-                region.getPhyClusterName());
+        return capacityPlanAreaService.getAreaByResourceIdAndCluster(region.getLogicClusterId(), region.getPhyClusterName());
     }
 
     /**
@@ -794,11 +801,8 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         LOGGER.info("method=onApplicationEvent||meg=process cluster item miss");
 
         List<ClusterLogicRackInfo> items = event.getItems();
-        Multimap<Long, ClusterLogicRackInfo> resourceId2ResourceLogicItemMultiMap = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : items) {
-            List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
-            logicClusterIds.forEach(logicClusterId -> resourceId2ResourceLogicItemMultiMap.put(logicClusterId, param));
-        }
+        Multimap<Long, ClusterLogicRackInfo> resourceId2ResourceLogicItemMultiMap = ConvertUtil.list2MulMap(items,
+            ClusterLogicRackInfo::getLogicClusterId);
 
 
         for (Long resourceId : resourceId2ResourceLogicItemMultiMap.keySet()) {
@@ -1607,30 +1611,6 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
         if (!isTemplateSrvOpen(capacityPlanRegion.getClusterName())) {
             return Result.buildFail(String.format("%s 没有开启 %s", capacityPlanRegion.getClusterName(), templateServiceName()));
-        }
-
-        return Result.buildSucc();
-    }
-
-    /**
-     * 编辑region资源的时候会校验是否含有cold冷节点，冷节点是无法绑定region的
-     */
-    private Result<Void> validRegionParamWhenEdit(CapacityPlanRegionDTO regionDTO) {
-        if (AriusObjUtils.isNull(regionDTO)) {
-            return Result.buildParamIllegal("参数为空");
-        }
-
-        if (AriusObjUtils.isNull(regionDTO.getRegionId())) {
-            return Result.buildParamIllegal("regionId为空");
-        }
-
-        List<String> rackList = RackUtils.racks2List(regionDTO.getRacks());
-        if (CollectionUtils.isEmpty(rackList)) {
-            return Result.buildFail("修改的region没有含有rack信息");
-        }
-
-        if (rackList.contains(AdminConstant.DEFAULT_COLD_RACK)) {
-            return Result.buildFail("region绑定的rack中不能含有cold冷节点");
         }
 
         return Result.buildSucc();

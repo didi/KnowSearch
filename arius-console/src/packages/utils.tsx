@@ -1,4 +1,5 @@
-export const defaultPageSizeOptions = ['10', '30', '50', '100', '300', '500', '1000'];
+import { defaultPageSizeOptions } from './config';
+
 export const getPaginationOptions = (onShowSizeChange?: (size: number) => void) => {
   const _defaultPageSize = window.localStorage.getItem('ecmc-global-pagesize');
   const defaultPageSize = _defaultPageSize ? Number(_defaultPageSize) : undefined;

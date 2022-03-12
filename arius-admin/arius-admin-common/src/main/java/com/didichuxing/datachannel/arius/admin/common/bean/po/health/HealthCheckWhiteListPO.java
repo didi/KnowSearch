@@ -28,9 +28,4 @@ public class HealthCheckWhiteListPO extends BaseESPO {
     public String getKey() {
         return checkType + "_" + cluster + "_" + template;
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
 }

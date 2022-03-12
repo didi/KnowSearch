@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.ES_CLUSTER_PLUGINS;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
 
 /**

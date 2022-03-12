@@ -52,14 +52,4 @@ public class ESClusterStatsResponse {
      * 剩余磁盘大小
      */
     private ByteSizeValue freeFs;
-
-    /**
-     * 最大堆内存空间
-     */
-    private ByteSizeValue totalHeapMem;
-
-    /**
-     * 已使用的堆内存空间
-     */
-    private ByteSizeValue usedHeapMem;
 }

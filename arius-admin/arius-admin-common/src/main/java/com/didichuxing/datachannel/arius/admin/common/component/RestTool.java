@@ -275,17 +275,4 @@ public class RestTool {
         return AriusJSON.toObject(result.getBody(), responseType);
     }
 
-    /**
-     * GET请求
-     * @param url 请求地址
-     * @param headers 请求头
-     * @param resultType 返回类型
-     * @param <T> 泛型T
-     * @return T
-     * */
-    public <T> T deleteForObject(String url, Map<String, String> headers, Type resultType) {
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, getJsonContentHeaders(headers)),
-                String.class);    return AriusJSON.toObject(result.getBody(), resultType);
-    }
-
 }

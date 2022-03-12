@@ -40,8 +40,7 @@ public interface LogicClusterDAO {
 
     List<ClusterLogicPO> pagingByCondition(@Param("name") String name,  @Param("appId") Integer appId,
                                            @Param("type") Integer type, @Param("health") Integer health,
-                                           @Param("from") Long from,    @Param("size") Long size,
-                                           @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+                                           @Param("from") Long from,    @Param("size") Long size);
 
     Long getTotalHitByCondition(ClusterLogicPO param);
 }

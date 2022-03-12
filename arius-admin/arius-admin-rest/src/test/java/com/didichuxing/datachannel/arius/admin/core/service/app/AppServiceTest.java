@@ -1,19 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.app.impl.AppServiceImpl;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
 
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.junit.jupiter.api.Assertions;
@@ -22,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +29,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Transactional
 @Rollback
-public class AppServiceTest extends AriusAdminApplicationTest {
+public class AppServiceTest extends AriusAdminApplicationTests {
     private static final ILog LOGGER = LogFactory.getLog(AppServiceTest.class);
 
     @Autowired
-    private AppService service;
+    @InjectMocks
+    private AppServiceImpl service = new AppServiceImpl();
 
     @Autowired
     private AppDAO appDAO;
@@ -49,11 +48,8 @@ public class AppServiceTest extends AriusAdminApplicationTest {
     @MockBean
     private EmployeeService employeeService;
 
-    @MockBean
-    private AppUserInfoService userInfoService;
-
     private static final String operator = "System";
-    private static final AppConfig defaultConfig = new AppConfig();
+    private static AppConfig defaultConfig = new AppConfig();
 
     @BeforeAll
     public static void prepareData() {
@@ -65,7 +61,7 @@ public class AppServiceTest extends AriusAdminApplicationTest {
 
     @BeforeEach
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         Result result = Result.buildSucc();
         Mockito.when(employeeService.checkUsers(Mockito.any())).thenReturn(result);
     }
@@ -94,13 +90,24 @@ public class AppServiceTest extends AriusAdminApplicationTest {
     @Test
     public void validateAppAddTest() {
         AppDTO appDTO = new AppDTO();
+        service.validateApp(appDTO, OperationEnum.ADD);
         Assertions.assertFalse(service.validateApp(null, OperationEnum.ADD).success());
         Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
         appDTO.setName("1");
         Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
+        appDTO.setDepartment("1");
+        Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
+        appDTO.setDepartmentId("1");
+        Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
         appDTO.setResponsible("1");
         Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
         appDTO.setMemo("1");
+        Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
+        appDTO.setIsRoot(1);
+        Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
+        appDTO.setSearchType(0);
+        Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
+        appDTO.setVerifyCode("");
         Assertions.assertTrue(service.validateApp(appDTO, OperationEnum.ADD).success());
     }
 
@@ -109,7 +116,7 @@ public class AppServiceTest extends AriusAdminApplicationTest {
     public void appDuplicateTest(AppDTO appDTO) {
         AppPO appPO = getAppPO();
         appDAO.insert(appPO);
-        appDTO.setId(appPO.getId() + 1);
+        appDTO.setId(appPO.getId());
         Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.ADD).success());
     }
 
@@ -141,7 +148,7 @@ public class AppServiceTest extends AriusAdminApplicationTest {
         Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.EDIT).success());
         appDTO.setSearchType(0);
         Assertions.assertFalse(service.validateApp(appDTO, OperationEnum.EDIT).success());
-        appDTO.setVerifyCode("XXXX");
+        appDTO.setVerifyCode("");
         Assertions.assertTrue(service.validateApp(appDTO, OperationEnum.EDIT).success());
 
         // 修改时名称与其他app重复的情况
@@ -210,8 +217,9 @@ public class AppServiceTest extends AriusAdminApplicationTest {
     public void editAppDuplicateTest(AppDTO appDTO) {
         Result<Integer> result = service.registerApp(appDTO, operator);
         Integer id = result.getData();
-        appDTO.setId(id + 1);
-        Assertions.assertFalse(service.editApp(appDTO, operator).success());
+        appDTO.setId(id);
+        Result result1 = service.editApp(appDTO, operator);
+        Assertions.assertFalse(result1.success());
     }
 
     @ParameterizedTest
@@ -219,7 +227,7 @@ public class AppServiceTest extends AriusAdminApplicationTest {
     public void deleteAppTest(AppDTO appDTO) {
         Result<Integer> result = service.registerApp(appDTO, operator);
         Integer id = result.getData();
-        Result<Void> result1 = service.deleteAppById(id, operator);
+        Result result1 = service.deleteAppById(id, operator);
         Assertions.assertTrue(result1.success());
         AppPO app = appDAO.getById(id);
         Assertions.assertNull(app);
@@ -307,11 +315,11 @@ public class AppServiceTest extends AriusAdminApplicationTest {
         final String code = "123";
         appDTO.setVerifyCode(code);
         Integer id = service.registerApp(appDTO, operator).getData();
-        Result<Void> result = service.verifyAppCode(null, code);
+        Result result = service.verifyAppCode(null, code);
         Assertions.assertFalse(result.success());
-        Result<Void> result1 = service.verifyAppCode(id, "000");
+        Result result1 = service.verifyAppCode(id, "000");
         Assertions.assertFalse(result1.success());
-        Result<Void> result2 = service.verifyAppCode(id, code);
+        Result result2 = service.verifyAppCode(id, code);
         Assertions.assertTrue(result2.success());
     }
 
@@ -321,13 +329,13 @@ public class AppServiceTest extends AriusAdminApplicationTest {
         final String code = "123";
         appDTO.setVerifyCode(code);
         Integer id = service.registerApp(appDTO, operator).getData();
-        Result<Void> result = service.login(null, code, operator);
+        Result result = service.login(null, code, operator);
         Assertions.assertFalse(result.success());
-        Result<Void> result1 = service.login(id + 1, "000", operator);
+        Result result1 = service.login(id + 1, "000", operator);
         Assertions.assertFalse(result1.success());
-        Result<Void> result2 = service.login(id + 1, code, "");
+        Result result2 = service.login(id + 1, code, "");
         Assertions.assertFalse(result2.success());
-        Result<Void> result3 = service.login(id + 1, code, operator);
+        Result result3 = service.login(id + 1, code, operator);
         Assertions.assertFalse(result3.success());
     }
 
@@ -338,17 +346,7 @@ public class AppServiceTest extends AriusAdminApplicationTest {
         List<App> appList = service.getUserLoginWithoutCodeApps(user);
         Assertions.assertTrue(appList.isEmpty());
         Integer id1 = service.registerApp(appDTO, user).getData();
-        appDTO.setName("test_wpk");
         Integer id2 = service.registerApp(appDTO, user).getData();
-        AppUserInfo appUserInfo1 = new AppUserInfo();
-        appUserInfo1.setAppId(id1);
-        appUserInfo1.setUserName(user);
-        appUserInfo1.setLastLoginTime(new Date());
-        AppUserInfo appUserInfo2 = new AppUserInfo();
-        appUserInfo2.setAppId(id2);
-        appUserInfo2.setUserName(user);
-        appUserInfo2.setLastLoginTime(new Date());
-        Mockito.when(userInfoService.getByUser(Mockito.anyString())).thenReturn(Arrays.asList(appUserInfo1, appUserInfo2));
         List<App> appList1 = service.getUserLoginWithoutCodeApps(user);
         Assertions.assertEquals(appList1.get(0).getId(), id1);
         Assertions.assertEquals(appList1.get(1).getId(), id2);

@@ -2,6 +2,15 @@
   "size": 0,
   "query": {
     "bool": {
+      "must_not": [
+        {
+          "prefix": {
+            "index": {
+              "value": "."
+            }
+          }
+        }
+      ],
       "must": [
         {
           "term": {

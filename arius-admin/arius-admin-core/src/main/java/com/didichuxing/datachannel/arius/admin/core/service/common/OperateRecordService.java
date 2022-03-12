@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
@@ -17,7 +16,7 @@ public interface OperateRecordService {
      * @param condt 查询条件dto
      * @return 操作记录列表
      */
-    Result<List<OperateRecordVO>> list(OperateRecordDTO condt);
+    List<OperateRecord> list(OperateRecordDTO condt);
 
     /**
      * 插入一条操作记录
@@ -58,14 +57,5 @@ public interface OperateRecordService {
      * @return 如果没有一条 返回 null
      */
     OperateRecord getLastRecord(int moduleId, int operateId, String bizId, Date beginDate);
-
-    /**
-     * 根据指定的查询条件批量查询
-     *
-     * @param bizId
-     * @param moduleIds
-     * @return 操作记录列表
-     */
-    Result<List<OperateRecordVO>> multiList(String bizId, List<Integer> moduleIds);
 
 }

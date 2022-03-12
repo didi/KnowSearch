@@ -1,20 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.remote.monitor;
 
+import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Alert;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Metric;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.MetricSinkPoint;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.NotifyGroup;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Silence;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Strategy;
+import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinCluster;
+import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinTreeNode;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Alert;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Metric;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.MetricSinkPoint;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Silence;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Strategy;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinCluster;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinTreeNode;
 
 /**
  * @author zengqiao
@@ -23,17 +24,17 @@ import com.didichuxing.datachannel.arius.admin.remote.monitor.odin.bean.OdinTree
 public interface RemoteMonitorService {
     /**
      * 向Odin指定ns发送数据
-     * @param baseMonitorData 需要发送的数据
+     * @param n9eData 需要发送的数据
      * @return true/false
      */
-    boolean sendData(Collection<N9eData> baseMonitorData);
+    boolean sendData(Collection<N9eData> n9eData);
 
     /**
      *
      * @param odinService
      * @return
      */
-     List<OdinCluster> getOdinChildren(String odinService);
+    List<OdinCluster> getOdinChildren(String odinService);
 
     /**
      * 根据odin服务节点去获取对应的服务部署的机房信息

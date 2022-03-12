@@ -36,7 +36,7 @@ export const QueryTpl = () => {
   const [editVisible, setEditVisible] = useState(false);
   const [form] = Form.useForm();
   const [record, setRecord] = useState({});
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState([])
 
   const [pagination, setPagination] = useState({
     position: 'bottomRight',
@@ -54,57 +54,8 @@ export const QueryTpl = () => {
   })
 
   React.useEffect(() => {
-    let params: any = sessionStorage.getItem('query-tpl');
-    if (params) {
-      params = JSON.parse(params);
-      setDslTemplateMd5(params?.dslTemplateMd5);
-      setQueryIndex(params?.queryIndex);
-      setStartTime(moment(Number(params?.startTime)));
-      setEndTime(moment(Number(params?.endTime)));
-      form.setFieldsValue({MD5: params?.dslTemplateMd5, queryIndex: params?.queryIndex})
-      setloading(true);
-      const param = {
-        ...page,
-        ...params,
-      }
-      getDslList(param).then((res: any) => {
-        if (res) {
-          setData(res?.bizData);
-          sessionStorage.setItem('query-tpl', '')
-          setPagination({
-            position: 'bottomRight',
-            total: res?.pagination?.total,
-            showQuickJumper: true,
-            showSizeChanger: true,
-            pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
-            showTotal: (total) => `共 ${total} 条`,
-          });
-        }
-      }).finally(() => {
-        setloading(false)
-      })
-    }
-  }, []);
-
-  React.useEffect(() => {
-    // console.log(sessionStorage.getItem('query-tpl'), !!sessionStorage.getItem('query-tpl'))
-    if (sessionStorage.getItem('query-tpl')) {
-      sessionStorage.setItem('query-tpl', '')
-    } else {
-      reloadData();
-    }
+    reloadData();
   }, [department, page]);
-
-  React.useEffect(() => {
-    return () => {
-      sessionStorage.setItem('query-tpl', JSON.stringify({
-        dslTemplateMd5,
-        queryIndex,
-        startTime: startTime.valueOf(),
-        endTime: endTime.valueOf(),
-      }))
-    }
-  }, [dslTemplateMd5, queryIndex, startTime, endTime])
 
   const onSelectChange = (selectedRowKeys, records) => {
     setSelectItem(records);
@@ -185,7 +136,6 @@ export const QueryTpl = () => {
   }
 
   const onSearch = () => {
-    sessionStorage.setItem('query-tpl', '')
     setPage({
       from: 0,
       size: 10,
@@ -216,7 +166,8 @@ export const QueryTpl = () => {
             <Col span={14}>
               <Radio.Group
                 onChange={timeChange}
-                value={''}
+                defaultValue={1}
+                value={parseInt(`${(endTime.valueOf() - startTime.valueOf()) / (60 * 1000 * 60 * 24)}`)}
               >
                 {
                   tiemOptions.map(option => (
@@ -226,7 +177,7 @@ export const QueryTpl = () => {
               </Radio.Group>
               <RangePicker
                 className="dsl-ml-20"
-                style={{ minWidth: 310, marginLeft: 20 }}
+                style={{ minWidth: 310 }}
                 defaultValue={[startTime, endTime]}
                 showTime
                 value={[startTime, endTime]}
@@ -246,20 +197,12 @@ export const QueryTpl = () => {
   }
 
   const getCheckList = async () => {
-    const checkListStr: string = await window.localStorage.getItem('dslTemplate');
-    if (checkListStr) {
-      try {
-        return JSON.parse(checkListStr);
-      } catch(err) {
-        console.log(err);
-      }
-    } else {
-      return []
-    }
+    const checkList: string[] = await getCheckedList('dslTemplate');
+    return checkList;
   }
 
   const saveCheckFn = (list: string[]) => {
-    window.localStorage.setItem('dslTemplate', JSON.stringify(list))
+    setCheckedList('dslTemplate', list)
   }
   
   const getOpBtns = useCallback(() => {

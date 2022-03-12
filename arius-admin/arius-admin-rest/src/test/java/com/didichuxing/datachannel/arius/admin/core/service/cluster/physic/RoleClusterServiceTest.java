@@ -1,28 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Rollback
-public class RoleClusterServiceTest extends AriusAdminApplicationTest {
+public class RoleClusterServiceTest extends AriusAdminApplicationTests {
 
     @Autowired
     private ESRoleClusterDAO roleClusterDAO;
@@ -32,9 +30,6 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private RoleClusterService roleClusterService;
-
-    @MockBean
-    private ClusterPhyService clusterPhyService;
 
     /**
      * 不需要做其他字段的校验吗
@@ -54,12 +49,10 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
     @Test
     public void createRoleClusterIfNotExistTest() {
         ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
-        ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        esClusterDTO.setId(12344);
+        String clusterName = esRoleClusterDTO.getRoleClusterName();
         String role = esRoleClusterDTO.getRole();
-        Mockito.when(clusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(ConvertUtil.obj2Obj(esClusterDTO, ClusterPhy.class));
-        Assertions.assertEquals(esClusterDTO.getCluster() + "-" + esRoleClusterDTO.getRole(),
-                roleClusterService.createRoleClusterIfNotExist(esClusterDTO.getCluster(), role).getRoleClusterName());
+        Assertions.assertEquals(clusterName,
+                roleClusterService.createRoleClusterIfNotExist(clusterName, role).getRoleClusterName());
     }
 
     @Test
@@ -75,8 +68,8 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
         ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
         roleClusterService.save(esRoleClusterDTO).success();
         Assertions.assertTrue(roleClusterService.getAllRoleClusterByClusterId(esRoleClusterDTO
-                        .getElasticClusterId()
-                        .intValue()).stream()
+                .getElasticClusterId()
+                .intValue()).stream()
                 .anyMatch(esRoleCluster -> esRoleCluster.getId().equals(esRoleClusterDTO.getId())));
     }
 
@@ -104,15 +97,13 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
         ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
         Assertions.assertNull(roleClusterService
-                .getByClusterNameAndRole(esClusterDTO.getCluster(), esRoleClusterDTO.getRole()));
+				.getByClusterNameAndRole(esClusterDTO.getCluster(), esRoleClusterDTO.getRole()));
         ClusterPO clusterPO = ConvertUtil.obj2Obj(esClusterDTO, ClusterPO.class);
         clusterDAO.insert(clusterPO);
-        esRoleClusterDTO.setElasticClusterId(clusterPO.getId().longValue());
-        Assertions.assertTrue(roleClusterService.save(esRoleClusterDTO).success());
-        Mockito.when(clusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class));
+        esRoleClusterDTO.setId(clusterPO.getId().longValue());
         Assertions.assertEquals(clusterPO.getId().longValue(),
                 roleClusterService
-                        .getByClusterNameAndRole(esClusterDTO.getCluster(), esRoleClusterDTO.getRole()).getElasticClusterId().longValue());
+						.getByClusterNameAndRole(esClusterDTO.getCluster(), esRoleClusterDTO.getRole()).getElasticClusterId().longValue());
 
     }
 
@@ -123,10 +114,12 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
     @Test
     public void updatePodByClusterIdAndRoleTest() {
         ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
-        Assertions.assertTrue(roleClusterService.save(esRoleClusterDTO).success());
+        roleClusterService.save(esRoleClusterDTO).success();
         RoleCluster roleCluster = ConvertUtil.obj2Obj(esRoleClusterDTO, RoleCluster.class);
         esRoleClusterDTO.setRole(ESClusterNodeRoleEnum.DATA_NODE.getDesc());
         Result result = roleClusterService.updatePodByClusterIdAndRole(roleCluster);
+        ESRoleClusterPO data = (ESRoleClusterPO) result.getData();
+        Assertions.assertEquals(ESClusterNodeRoleEnum.DATA_NODE.getDesc(), data.getRole());
     }
 
     @Test
@@ -145,9 +138,9 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
         ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
         Long elasticClusterId = esRoleClusterDTO.getElasticClusterId();
         Assertions.assertTrue(
-                roleClusterService.deleteRoleClusterByClusterId(elasticClusterId.intValue()).failed());
+				roleClusterService.deleteRoleClusterByClusterId(elasticClusterId.intValue()).failed());
         roleClusterService.save(esRoleClusterDTO);
         Assertions.assertTrue(
-                roleClusterService.deleteRoleClusterByClusterId(elasticClusterId.intValue()).success());
+				roleClusterService.deleteRoleClusterByClusterId(elasticClusterId.intValue()).success());
     }
 }

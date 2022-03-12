@@ -25,7 +25,7 @@ public interface WorkTaskHandler extends BaseHandle {
      * 判断一个任务是否存在，参数待定
      * @return
      */
-    boolean existUnClosedTask(String key, Integer type);
+    boolean existUnClosedTask(Integer key, Integer type);
 
     /**
      * 处理任务

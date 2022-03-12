@@ -3,7 +3,6 @@ import { FirstStep } from './first-step';
 import { SecondStep } from './second-step';
 import './index.less';
 import { ThirdStep } from './third-step';
-import { Setting } from './setting';
 import Url from 'lib/url-parser';
 import { Steps }  from 'antd';
 import { connect } from "react-redux";
@@ -13,9 +12,8 @@ const { Step } = Steps;
 const mapStateToProps = state => ({
   createIndex: state.createIndex
 });
-const connects: Function = connect
 
-@connects(mapStateToProps)
+@connect(mapStateToProps)
 export class CreateIndex extends React.Component<any> {
   constructor(props: any) {
     super(props);
@@ -26,8 +24,7 @@ export class CreateIndex extends React.Component<any> {
     const componentMap = {
       0: <FirstStep {...this.props}/>,
       1: <SecondStep />,
-      2: <Setting />,
-      3: <ThirdStep {...this.props}/>,
+      2: <ThirdStep {...this.props}/>,
     } as {
       [key: number]: JSX.Element,
     };
@@ -40,9 +37,8 @@ export class CreateIndex extends React.Component<any> {
       <>
         <div className="content-wrapper">
           <Steps current={this.props.createIndex.currentStep}>
-            <Step title="基础信息" />
-            <Step title="Mapping设置" />
-            <Step title="Setting设置" />
+            <Step title="基本信息" />
+            <Step title="索引结构" />
             <Step title="设置完成" />
           </Steps>
           {this.renderContent()}

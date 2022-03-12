@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2457502 */
-  src: url('iconfont.woff2?t=1646015429663') format('woff2'),
-       url('iconfont.woff?t=1646015429663') format('woff'),
-       url('iconfont.ttf?t=1646015429663') format('truetype');
+  src: url('iconfont.woff2?t=1631620756083') format('woff2'),
+       url('iconfont.woff?t=1631620756083') format('woff'),
+       url('iconfont.ttf?t=1631620756083') format('truetype');
 }
 
 .iconfont {
@@ -11,66 +11,6 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.iconjianshao:before {
-  content: "\e710";
-}
-
-.iconzengjia:before {
-  content: "\e711";
-}
-
-.icontiaodurenwu:before {
-  content: "\e708";
-}
-
-.iconjiansuochaxun:before {
-  content: "\e709";
-}
-
-.iconsuoyinguanli:before {
-  content: "\e70a";
-}
-
-.iconmobanguanli:before {
-  content: "\e70b";
-}
-
-.iconxitongguanli:before {
-  content: "\e70c";
-}
-
-.icongongdanrenwu:before {
-  content: "\e70d";
-}
-
-.iconjiqunguanli:before {
-  content: "\e70e";
-}
-
-.iconzhibiaokanban:before {
-  content: "\e70f";
-}
-
-.iconjiantou_youshang:before {
-  content: "\e6fe";
-}
-
-.iconshaixuan:before {
-  content: "\e6f8";
-}
-
-.iconfuzhi:before {
-  content: "\e6c8";
-}
-
-.icona-gengduo-kafka:before {
-  content: "\e6c9";
-}
-
-.iconinfo:before {
-  content: "\e6ca";
 }
 
 .icones-logo:before {

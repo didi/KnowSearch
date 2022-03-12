@@ -7,7 +7,7 @@ import { notification } from 'antd';
 import { UploadFile } from "container/custom-form/upload-file";
 import { computeChecksumMd5 } from "lib/utils";
 import { PHY_CLUSTER_TYPE } from "constants/status-map";
-import { IOpPackageParams } from "typesPath/params-types";
+import { IOpPackageParams } from "@types/params-types";
 import { addPackage, updatePackage } from "api/cluster-api";
 import { UserState } from "store/type";
 

@@ -38,11 +38,7 @@
             "field": "timestamp",
             "fixed_interval": "{interval}",
             "time_zone": "Asia/Shanghai",
-            "min_doc_count": 0,
-            "extended_bounds" : {
-            "min" : %d,
-            "max" : %d
-            }
+            "min_doc_count": 0
           },
           "aggs": {
              "aggsDsl":1

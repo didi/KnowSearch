@@ -1,11 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
-import java.net.InetSocketAddress;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
@@ -13,8 +7,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.Cluste
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.document.ESIndexRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.document.ESIndexResponse;
-import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
-import com.didiglobal.logi.elasticsearch.client.request.batch.BatchNode;
 import com.didiglobal.logi.elasticsearch.client.request.batch.BatchType;
 import com.didiglobal.logi.elasticsearch.client.request.batch.ESBatchRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.refreshindex.ESIndicesRefreshIndexRequest;
@@ -35,6 +27,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: D10865
@@ -78,7 +75,6 @@ public class ESUpdateClient {
     public static final int               MAX_RETRY_CNT     = 5;
 
     private static final String           COMMA             = ",";
-    private static final String           ES_VERSION_PREFIX = "es-version";
 
     @PostConstruct
     public void init() {
@@ -178,16 +174,6 @@ public class ESUpdateClient {
 
             ESBatchRequest batchRequest = new ESBatchRequest();
             for (BaseESPO po : pos) {
-                //write with routing
-                if (null != po.getRoutingValue()) {
-                    BatchNode batchNode = new BatchNode(BatchType.INDEX, indexName, typeName, po.getKey(), JSON.toJSONString(po));
-                    batchNode.setRouting(po.getRoutingValue());
-                    batchNode.setEsVersion(getUpdateEsVersion(esClient));
-                    batchRequest.addNode(batchNode);
-                    continue;
-                }
-
-                //write without routing
                 batchRequest.addNode(BatchType.INDEX, indexName, typeName, po.getKey(), JSON.toJSONString(po));
             }
 
@@ -215,10 +201,6 @@ public class ESUpdateClient {
         }
 
         return false;
-    }
-
-    private ESVersion getUpdateEsVersion(ESClient esClient) {
-        return null != esClient ? ESVersion.valueBy(ES_VERSION_PREFIX + esClient.getEsVersion()) : null;
     }
 
     /**
@@ -402,7 +384,7 @@ public class ESUpdateClient {
         }
     }
 
-    private ESClient buildEsClient(String address,String password,String clusterName) {
+    private ESClient buildEsClient(String address, String clusterName) {
         if (StringUtils.isBlank(address)) {
             return null;
         }
@@ -427,9 +409,6 @@ public class ESUpdateClient {
 
             if (ioThreadCount > 0) {
                 esClient.setIoThreadCount(ioThreadCount);
-            }
-            if(StringUtils.isNotBlank(password)){
-                esClient.setPassword(password);
             }
 
             // 配置http超时
@@ -492,12 +471,11 @@ public class ESUpdateClient {
 
         this.updateClientPool.clear();
         beforeHttpAddress = updateClusterDataSource.getHttpAddress();
-        String pw = updateClusterDataSource.getPassword();
 
         // 添加新的客户端
         ESClient esClient = null;
         for (int i = 0; i < clientCount; ++i) {
-            esClient = buildEsClient(beforeHttpAddress, pw, metadataClusterName);
+            esClient = buildEsClient(beforeHttpAddress, metadataClusterName);
             if (esClient != null) {
                 this.updateClientPool.add(esClient);
                 LOGGER.info("class=UpdateClient||method=setDataSourceList||msg=add new es client {}, {}",

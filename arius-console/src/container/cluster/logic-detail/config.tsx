@@ -1,6 +1,6 @@
-import { IMenuItem, IBaseInfo } from "typesPath/base-types";
+import { IMenuItem, IBaseInfo } from "@types/base-types";
 import moment from "moment";
-import { IClusterInfo, ITemplateSrvData } from "typesPath/cluster/cluster-types";
+import { IClusterInfo, ITemplateSrvData } from "@types/cluster/cluster-types";
 import React from "react";
 import {
   ConsoleSqlOutlined,
@@ -9,15 +9,15 @@ import {
 } from "@ant-design/icons";
 import { Button, Modal, Tooltip, notification, message } from "antd";
 import { cellStyle } from "constants/table";
-import { ROLE_TYPE, colorTheme, DATA_TYPE_LIST, isOpenUp, LEVEL_MAP } from "constants/common";
+import { ROLE_TYPE, colorTheme, DATA_TYPE_LIST, isOpenUp } from "constants/common";
 import { ClusterInfo } from "./base-info";
 import { LogicNodeList } from "./logic-node-list";
 import { IndexList } from "./index-list";
 import { renderOperationBtns } from "container/custom-component";
 import { PlugnList } from "./plugn-list";
-import { IPlug } from "typesPath/plug-types";
+import { IPlug } from "@types/plug-types";
 import { submitWorkOrder } from "api/common-api";
-import { IWorkOrder } from "typesPath/params-types";
+import { IWorkOrder } from "@types/params-types";
 import store from "store";
 import { userDelPlug } from "api/plug-api";
 import { IndexSearch } from "./index-search";
@@ -29,7 +29,6 @@ import {
   setLogicClusterTemplateSrv
 } from "api/cluster-api";
 import { timeFormat } from "constants/time";
-import Url from "lib/url-parser";
 
 const appInfo = {
   app: store.getState().app.appInfo,
@@ -56,6 +55,21 @@ export const TAB_LIST = [
       <ClusterInfo logicBaseInfo={logicBaseInfo} />
     ),
   },
+  // {
+  //   name: "索引列表",
+  //   key: TAB_LIST_KEY.index,
+  //   content: (logicBaseInfo: IClusterInfo) => <IndexList />,
+  // },
+  // {
+  //   name: "索引查询",
+  //   key: TAB_LIST_KEY.indexTemplate,
+  //   content: (logicBaseInfo: IClusterInfo) => <IndexSearch />,
+  // },
+  // {
+  //   name: "插件列表",
+  //   key: TAB_LIST_KEY.pluggin,
+  //   content: (logicBaseInfo: IClusterInfo) => <PlugnList />,
+  // },
   {
     name: "节点映射",
     key: TAB_LIST_KEY.node,
@@ -174,16 +188,7 @@ export const DESC_LIST = [
     key: "type",
     render: (value: number) => (
       <>
-        <span>{clusterTypeMap[value] || "-"}</span>
-      </>
-    ),
-  },
-  {
-    label: "业务等级",
-    key: "level",
-    render: (value: number) => (
-      <>
-        <span>{LEVEL_MAP[value - 1]?.label || "-"}</span>
+        <span>{clusterTypeMap[value] || ""}</span>
       </>
     ),
   },
@@ -192,7 +197,7 @@ export const DESC_LIST = [
     key: "appName",
     render: (value) => (
       <>
-        <span>{value || "-"}</span>
+        <span>{value || ""}</span>
       </>
     ),
   },
@@ -201,7 +206,7 @@ export const DESC_LIST = [
     key: "appId",
     render: (value) => (
       <>
-        <span>{value || "-"}</span>
+        <span>{value || ""}</span>
       </>
     ),
   },
@@ -346,13 +351,12 @@ export const getLogicNodeColumns = (
             clickFunc: () => {
               Modal.confirm({
                 title: "提示",
-                content: "您确定要执行解绑操作吗？存储在该region上的模版或索引现有的数据不会进行迁移到该逻辑集群关联的其他region上",
+                content: "您确定要执行解绑操作吗？",
                 width: 500,
                 okText: "确认",
                 cancelText: "取消",
                 onOk() {
-                  const urlParams = Url().search;
-                  delLogicCluterRegion(record.regionId, Number(urlParams.clusterId)).then((res) => {
+                  delLogicCluterRegion(record.regionId).then((res) => {
                     notification.success({ message: "操作成功！" });
                     reloadData();
                   });
@@ -670,12 +674,6 @@ export const getPlugnBtnList = (record: IPlug, reloadDataFn: any) => {
   return btnList;
 };
 
-export const pDefaultMap = {
-  0: '系统默认',
-  1: 'ES能力',
-  2: '平台能力',
-}
-
 export const getPlugnListColumns = (fn: () => any) => {
   const columns = [
     {
@@ -687,9 +685,8 @@ export const getPlugnListColumns = (fn: () => any) => {
       title: "插件类型",
       dataIndex: "pdefault",
       key: "pdefault",
-      render: (value: number) => {
-        const text = pDefaultMap[value] || '未知类型';
-        return text;
+      render: (value: boolean) => {
+        return <>{value ? "系统默认插件" : "自定义插件"}</>;
       },
     },
     {

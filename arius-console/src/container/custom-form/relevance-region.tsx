@@ -12,9 +12,6 @@ const mapStateToProps = (state: any) => ({
   type: state.region.type,
 });
 
-// 永不重名的key
-let count = 0;
-
 export const RelevanceRegion: React.FC<any> = connect(mapStateToProps)((props: {onChange?: (result: any) => any, type: string, clusterList: {value: string, label: string}[]}) => {
   const [tableData, setTableData] = React.useState([]);
   const [regionList, setRegionList] = React.useState([]);
@@ -23,24 +20,21 @@ export const RelevanceRegion: React.FC<any> = connect(mapStateToProps)((props: {
 
   const onSubmit = (valus) => {
     valus.regionObject = valus.region?.map(item => JSON.parse(item));
-    // 原来是多选合并在一起的 现在改为分开 所以注释了之前的逻辑
-    // let racks = '';
-    // let regionId = '';
-    let dataSource = [...tableData];
+    let racks = '';
+    let regionId = '';
     valus.regionObject.forEach(element => {
-      // if (racks) {
-      //   racks = racks + ',' + element.racks;
-      //   regionId = regionId + ',' + element.regionId;
-      // } else {
-      //   racks = racks + element.racks;
-      //   regionId = regionId + element.regionId;
-      // }
-      valus.racks = element.racks;
-      valus.regionId = element.regionId;
-      dataSource.push({key: count++, ...{...valus, region: [JSON.stringify(element)]}});
+      if (racks) {
+        racks = racks + ',' + element.racks;
+        regionId = regionId + ',' + element.regionId;
+      } else {
+        racks = racks + element.racks;
+        regionId = regionId + element.regionId;
+      }
     });
-    // valus.racks = racks;
-    // valus.regionId = regionId;
+    valus.racks = racks;
+    valus.regionId = regionId;
+    let dataSource = [...tableData];
+    dataSource.push({key: dataSource.length, ...valus});
     setTableData(dataSource);
     setRegionList(regionList.map(item => {
       valus.region?.map(d => {
@@ -53,13 +47,11 @@ export const RelevanceRegion: React.FC<any> = connect(mapStateToProps)((props: {
     const { onChange } = props;
     onChange && onChange(dataSource);
     form.resetFields();
-    form.setFieldsValue({name: valus.name})
   }
 
   const handleDelete = (key) => {
     setRegionList(regionList.map(item => {
-      tableData[key]?.region?.map(d => {
-        console.log(item.value, d, item.value === d)
+      tableData[key].region?.map(d => {
         if (item.value === d) {
           item.disabled = false
         }
@@ -89,8 +81,8 @@ export const RelevanceRegion: React.FC<any> = connect(mapStateToProps)((props: {
     {
       title: '操作',
       dataIndex: 'operation',
-      render: (_, record: { key: React.Key }, index) => (
-        <Popconfirm title="确认删除？" onConfirm={() => handleDelete(index)}>
+      render: (_, record: { key: React.Key }) => (
+        <Popconfirm title="确认删除？" onConfirm={() => handleDelete(record.key)}>
           <a>删除</a>
         </Popconfirm>
       )
@@ -119,12 +111,12 @@ export const RelevanceRegion: React.FC<any> = connect(mapStateToProps)((props: {
 
   const getRegionList = async (e: string, type) => {
     const arr = tableData.filter(item => item.name === e);
-    getPhyClusterRegionList(e, props.type).then((res) => {
+    getPhyClusterRegionList(e).then((res) => {
       res = res.map(item => {
         return {
           label: `${item.id}(racks: ${item.racks})`,
           value: JSON.stringify({regionId: item.id, racks: item.racks}),
-          // disabled: (item.logicClusterId === -1) ? false : true,
+          disabled: (item.logicClusterId === -1) ? false : true,
         };
       });
       if(arr && arr.length > 0){ //重复选同个集群，禁用已选
@@ -153,7 +145,6 @@ export const RelevanceRegion: React.FC<any> = connect(mapStateToProps)((props: {
               placeholder="请选择物理集群" 
               style={{ width: 250}} 
               options={props.clusterList} 
-              disabled={tableData && tableData.length ? true : false}
               filterOption={(input, option) => JSON.stringify(option).toLowerCase().indexOf(input.toLowerCase()) >= 0}
               onChange={getRegionList}
             />

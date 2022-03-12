@@ -1,206 +1,222 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Transactional
 @Rollback
-public class ESIndexServiceTest extends AriusAdminApplicationTest {
+public class ESIndexServiceTest extends AriusAdminApplicationTests {
+
+    @Autowired
+    private ESIndexDAO esIndexDAO;
 
     @Autowired
     private ESIndexService esIndexService;
 
-    @MockBean
-    private ESIndexDAO esIndexDAO;
-
     @Test
     public void syncCreateIndexTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.createIndex(CustomDataSource.PHY_CLUSTER_NAME, "test")).thenReturn(true);
-        Assertions.assertTrue(esIndexService.syncCreateIndex(CustomDataSource.PHY_CLUSTER_NAME, "test", 1));
+        // 创建重复的
+        boolean keep_test = esIndexService.syncCreateIndex("test_es_version_7.6.2_2", "keep_test", 1);
+        boolean keep_test2 = esIndexService.syncCreateIndex("test_es_version_7.6.2_2", "keep_test_1", 1);
+        boolean keep_test3 = esIndexService.syncCreateIndex("test_es_version_7.6.2_2", "keep_test_2", 1);
+        Assertions.assertTrue(keep_test);
+        Assertions.assertTrue(keep_test2);
+        Assertions.assertTrue(keep_test3);
     }
 
     @Test
     public void syncDelIndexTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.deleteIndex(CustomDataSource.PHY_CLUSTER_NAME, "test")).thenReturn(true);
-        Assertions.assertTrue(esIndexService.syncDelIndex(CustomDataSource.PHY_CLUSTER_NAME, "test", 1));
+        boolean keep_test = esIndexService.syncDelIndex("test_es_version_6.6.2_2", "keep_test", 1);
+        Assertions.assertTrue(keep_test);
     }
 
     @Test
     public void syncDeleteIndexByExpressionTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.deleteIndex(CustomDataSource.PHY_CLUSTER_NAME, "test")).thenReturn(true);
-        Assertions.assertTrue(esIndexService.syncDeleteIndexByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test", 1));
+        boolean ret = esIndexService.syncDeleteIndexByExpression("test_es_version_6.6.2_2", "keep_test*", 1);
+        Assertions.assertTrue(ret);
     }
 
     @Test
     public void syncGetIndexMappingTest() {
-        Mockito.when(esIndexDAO.getIndexMapping(CustomDataSource.PHY_CLUSTER_NAME, "test1")).thenReturn(null);
-        Assertions.assertTrue(esIndexService.syncGetIndexMapping(CustomDataSource.PHY_CLUSTER_NAME, "test1").isEmpty());
-
-        MappingConfig mappingConfig = new MappingConfig();
-        mappingConfig.getMapping().put("test", new TypeConfig());
-        Mockito.when(esIndexDAO.getIndexMapping(CustomDataSource.PHY_CLUSTER_NAME, "test2")).thenReturn(mappingConfig);
-        Assertions.assertFalse(esIndexService.syncGetIndexMapping(CustomDataSource.PHY_CLUSTER_NAME, "test2").isEmpty());
+        // 获取存在的索引
+        String keep_test = esIndexService.syncGetIndexMapping("test_es_version_6.6.2_2", "keep_test");
+        Assertions.assertNotNull(keep_test);
+        // 获取不存在的索引
+        String keep_test2 = esIndexService.syncGetIndexMapping("test_es_version_6.6.2_2", "keep_test_99");
+        Assertions.assertEquals(keep_test2, "");
     }
 
     @Test
     public void syncGetIndexNameByExpressionTest() {
-        Mockito.when(esIndexDAO.getIndexByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test1")).thenReturn(null);
-        Assertions.assertTrue(esIndexService.syncGetIndexNameByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test1").isEmpty());
-        Map<String, IndexNodes> map = new HashMap<>();
-        map.put("node1", new IndexNodes());
-        map.put("node2", new IndexNodes());
-        Mockito.when(esIndexDAO.getIndexByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test2")).thenReturn(map);
-        Assertions.assertFalse(esIndexService.syncGetIndexNameByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test2").isEmpty());
+        // 存在的表达式
+        Set<String> strings = esIndexService.syncGetIndexNameByExpression("test_es_version_6.6.2_2", "keep_test*");
+        Assertions.assertTrue(!strings.isEmpty());
+        // 不存在的表达式
+        Set<String> strings2 = esIndexService.syncGetIndexNameByExpression("test_es_version_6.6.2_2", "keep_kkk_test*");
+        Assertions.assertTrue(strings2.isEmpty());
     }
 
     @Test
     public void syncPutIndexSettingTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.putIndexSetting(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
         List<String> indices = new ArrayList<>();
-        indices.add("test");
-        Assertions.assertTrue(esIndexService.syncPutIndexSetting(CustomDataSource.PHY_CLUSTER_NAME, indices, "", "1", "1", 1));
+        indices.add("keep_test");
+        // 存在的配置
+        boolean ret = esIndexService.syncPutIndexSetting("test_es_version_6.6.2_2", indices, "index.number_of_replicas", "2", "1", 1);
+        Assertions.assertTrue(ret);
+        // 不存在的配置，会抛出异常
+        try {
+            esIndexService.syncPutIndexSetting("test_es_version_6.6.2_2", indices, "index.ggg.number_of_replicas", "3", "4", 1);
+        } catch (ESOperateException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void syncGetIndexByExpressionTest() {
-        Map<String, IndexNodes> map = new HashMap<>();
-        map.put("node1", new IndexNodes());
-        map.put("node2", new IndexNodes());
-        Mockito.when(esIndexDAO.getIndexByExpression(Mockito.any(), Mockito.any())).thenReturn(map);
+        // 存在的expression
+        Map<String, IndexNodes> map = esIndexService.syncGetIndexByExpression("test_es_version_6.6.2_2", "keep_test*");
+        Assertions.assertTrue(!map.isEmpty());
         // 不存在的expression
-        Assertions.assertFalse(esIndexService.syncGetIndexByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test").isEmpty());
+        Map<String, IndexNodes> map2 = esIndexService.syncGetIndexByExpression("test_es_version_6.6.2_2", "keep_kkk_test*");
+        Assertions.assertTrue(map2.isEmpty());
     }
 
     @Test
     public void syncBatchGetIndicesTest() {
-        Map<String, IndexNodes> map = new HashMap<>();
-        map.put("node1", new IndexNodes());
-        map.put("node2", new IndexNodes());
+        // 存在的索引
         List<String> indices = new ArrayList<>();
-        indices.add("test1");
-        indices.add("test2");
-        Mockito.when(esIndexDAO.getIndexStatsWithShards(Mockito.any(), Mockito.any())).thenReturn(map);
-        Assertions.assertFalse(esIndexService.syncBatchGetIndices(CustomDataSource.PHY_CLUSTER_NAME, indices).isEmpty());
+        indices.add("keep_test");
+        indices.add("keep_test_2");
+        Map<String, IndexNodes> map = esIndexService.syncBatchGetIndices("test_es_version_6.6.2_2", indices);
+        Assertions.assertFalse(map.isEmpty());
+        // 不存在的索引
+        List<String> indices2 = new ArrayList<>();
+        indices2.add("keep_test_99");
+        Map<String, IndexNodes> map2 = esIndexService.syncBatchGetIndices("test_es_version_6.6.2_2", indices2);
+        Assertions.assertTrue(map2.isEmpty());
     }
 
     @Test
     public void syncGetIndexAliasesByExpressionTest() {
-        Map<String, JSONObject> aliases = new HashMap<>();
-        aliases.put("test1", new JSONObject());
-        aliases.put("test2", new JSONObject());
-        Map<String, AliasIndexNode> map = new HashMap<>();
-        AliasIndexNode aliasIndexNode1 = new AliasIndexNode();
-        aliasIndexNode1.setAliases(aliases);
-        AliasIndexNode aliasIndexNode2 = new AliasIndexNode();
-        aliasIndexNode2.setAliases(aliases);
-        map.put("node1", aliasIndexNode1);
-        map.put("node2", aliasIndexNode2);
-        Mockito.when(esIndexDAO.getAliasesByExpression(Mockito.any(), Mockito.eq("test"))).thenReturn(new HashMap<>());
-        Assertions.assertTrue(esIndexService.syncGetIndexAliasesByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test").isEmpty());
-        Mockito.when(esIndexDAO.getAliasesByExpression(Mockito.any(), Mockito.eq("test1"))).thenReturn(map);
-        Assertions.assertFalse(esIndexService.syncGetIndexAliasesByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test1").isEmpty());
+        List<Tuple<String, String>> tuples = esIndexService.syncGetIndexAliasesByExpression("test_es_version_6.6.2_2", "keep_test*");
+        Assertions.assertFalse(tuples.isEmpty());
     }
 
     @Test
     public void syncBatchDeleteIndicesTest() {
         List<String> indices = new ArrayList<>();
-        Assertions.assertEquals(0, esIndexService.syncBatchDeleteIndices(CustomDataSource.PHY_CLUSTER_NAME, indices, 1));
-        indices.add("test1");
-        indices.add("test2");
-        Mockito.when(esIndexDAO.deleteIndex(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertEquals(indices.size(), esIndexService.syncBatchDeleteIndices(CustomDataSource.PHY_CLUSTER_NAME, indices, 1));
+        // 存在的
+        indices.add("keep_test_1");
+        // 不存在的
+        indices.add("keep_test_9");
+        int ret = esIndexService.syncBatchDeleteIndices("test_es_version_6.6.2_2", indices, 1);
+        Assertions.assertTrue(ret > 0);
     }
 
     @Test
     public void syncDeleteByQueryTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.deleteByQuery(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
         List<String> indices = new ArrayList<>();
-        indices.add("test1");
-        indices.add("test2");
-        Assertions.assertTrue(esIndexService.syncDeleteByQuery(CustomDataSource.PHY_CLUSTER_NAME, indices, ""));
+        // 存在的
+        indices.add("keep_test_1");
+        // 不存在的
+        indices.add("keep_test_9");
+        boolean ret = esIndexService.syncDeleteByQuery("test_es_version_6.6.2_2", indices, "{}");
+        Assertions.assertTrue(ret);
     }
 
     @Test
     public void syncBatchUpdateRackTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.batchUpdateIndexRack(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
         List<String> indices = new ArrayList<>();
-        indices.add("test1");
-        indices.add("test2");
-        Assertions.assertTrue(esIndexService.syncBatchUpdateRack(CustomDataSource.PHY_CLUSTER_NAME, indices, "rack", 1));
+        indices.add("keep_test_1");
+        indices.add("keep_test_9");
+        try {
+            boolean ret = esIndexService.syncBatchUpdateRack("test_es_version_6.6.2_2", indices, "rack2", 1);
+            Assertions.assertTrue(ret);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Test
-    public void syncBatchBlockIndexWriteTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.blockIndexWrite(Mockito.any(), Mockito.any(), Mockito.eq(true))).thenReturn(true);
+    public void syncBatchBlockIndexWriteTest() {
         List<String> indices = new ArrayList<>();
-        indices.add("test1");
-        indices.add("test2");
-        Assertions.assertTrue(esIndexService.syncBatchBlockIndexWrite(CustomDataSource.PHY_CLUSTER_NAME, indices, true, 1));
+        indices.add("keep_test_1");
+        indices.add("keep_test_9");
+        try {
+            boolean ret = esIndexService.syncBatchBlockIndexWrite("test_es_version_6.6.2_2", indices, false, 1);
+            Assertions.assertTrue(ret);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
-    public void reOpenIndexTest() throws ESOperateException {
+    public void ensureDateSameTest() {
         List<String> indices = new ArrayList<>();
-        indices.add("test");
-        Mockito.when(esIndexDAO.closeIndex(Mockito.any(), Mockito.any())).thenReturn(true);
-        Mockito.when(esIndexDAO.openIndex(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertTrue(esIndexService.reOpenIndex(CustomDataSource.PHY_CLUSTER_NAME, indices, 1));
+        indices.add("keep_test_1");
+        // indices.add("keep_test_2");
+        boolean ret = esIndexService.ensureDateSame("test_es_version_7.6.2_2", "test_es_version_6.6.2_2", indices);
+        Assertions.assertTrue(ret);
+
+    }
+
+    @Test
+    public void reOpenIndexTest() {
+        List<String> indices = new ArrayList<>();
+        indices.add("keep_test_1");
+        try {
+            boolean ret = esIndexService.reOpenIndex("test_es_version_6.6.2_2", indices, 1);
+            Assertions.assertTrue(ret);
+        } catch (ESOperateException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void syncCatIndexByExpressionTest() {
-        // esIndexDAO.catIndexByExpression
-        List<CatIndexResult> list = new ArrayList<>();
-        list.add(new CatIndexResult());
-        Mockito.when(esIndexDAO.catIndexByExpression(Mockito.any(), Mockito.any())).thenReturn(list);
-        Assertions.assertFalse(esIndexService.syncCatIndexByExpression(CustomDataSource.PHY_CLUSTER_NAME, "test").isEmpty());
+        List<CatIndexResult> catIndexResults = esIndexService.syncCatIndexByExpression("test_es_version_6.6.2_2", "keep_test*");
+        Assertions.assertTrue(!catIndexResults.isEmpty());
+        List<CatIndexResult> catIndexResults2 = esIndexService.syncCatIndexByExpression("test_es_version_6.6.2_2", "keep_test_kkk*");
+        Assertions.assertTrue(catIndexResults2.isEmpty());
     }
 
     @Test
-    public void syncGetIndexConfigsTest() throws Exception {
-        Mockito.when(esIndexDAO.getIndexConfigs(Mockito.any(), Mockito.any())).thenReturn(new MultiIndexsConfig(new JSONObject()));
-        Assertions.assertNotNull(esIndexService.syncGetIndexConfigs(CustomDataSource.PHY_CLUSTER_NAME, "test"));
+    public void syncGetIndexConfigsTest() {
+        MultiIndexsConfig config = esIndexService.syncGetIndexConfigs("test_es_version_6.6.2_2", "keep_test_1");
+        Assertions.assertTrue(config != null);
+        MultiIndexsConfig config2 = esIndexService.syncGetIndexConfigs("test_es_version_6.6.2_2", "keep_test_99");
+        Assertions.assertTrue(config2 == null);
     }
 
     @Test
-    public void syncGetIndexPrimaryShardNumberTest() throws Exception {
-        Map<String, String> settings = new HashMap<>();
-        settings.put("index.number_of_shards", "2");
-        IndexConfig indexConfig = new IndexConfig();
-        indexConfig.setSettings(settings);
-        MultiIndexsConfig multiIndexsConfig = new MultiIndexsConfig(new JSONObject());
-        multiIndexsConfig.getIndexConfigMap().put("test1", indexConfig);
-        Mockito.when(esIndexDAO.getIndexConfigs(Mockito.any(), Mockito.any())).thenReturn(multiIndexsConfig);
-        Assertions.assertNotNull(esIndexService.syncGetIndexPrimaryShardNumber(CustomDataSource.PHY_CLUSTER_NAME, "test1"));
+    public void getIndexPrimaryShardNumberTest() {
+        Integer num = esIndexService.syncGetIndexPrimaryShardNumber("test_es_version_6.6.2_2", "keep_test_1");
+        Assertions.assertTrue(num != null);
+        Integer num2 = esIndexService.syncGetIndexPrimaryShardNumber("test_es_version_6.6.2_2", "keep_test_99");
+        Assertions.assertTrue(num2 == null);
     }
 
     @Test
-    public void  syncGetIndexNodesTest() {
-        Map<String, IndexNodes> map = new HashMap<>();
-        map.put("test1", new IndexNodes());
-        map.put("test2", new IndexNodes());
-        Mockito.when(esIndexDAO.getIndexNodes(Mockito.any(), Mockito.any())).thenReturn(map);
-        Assertions.assertFalse(esIndexService.syncGetIndexNodes(CustomDataSource.PHY_CLUSTER_NAME, "test").isEmpty());
+    public void  getIndexNodesTest() {
+        Map<String, IndexNodes> stringIndexNodesMap = esIndexService.syncGetIndexNodes("test_es_version_6.6.2_2", "keep_test*");
+        Assertions.assertTrue(!stringIndexNodesMap.isEmpty());
+        Map<String, IndexNodes> stringIndexNodesMap2 = esIndexService.syncGetIndexNodes("test_es_version_6.6.2_2", "keep_test99*");
+        Assertions.assertTrue(stringIndexNodesMap2.isEmpty());
     }
 }

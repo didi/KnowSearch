@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
@@ -87,23 +86,20 @@ public interface ESClusterService {
 
     /**
      * 获取 某个es 集群client存活率 0 ~ 100
-     *
      * @param cluster
-     * @param password
      * @param clientAddresses 地址用逗号分隔: ip:port,ip:port
      * @return
      */
-    int syncGetClientAlivePercent(String cluster, String password, String clientAddresses);
+    int syncGetClientAlivePercent(String cluster, String clientAddresses);
 
     /**
      * 判断es client是否存活
      *
      * @param cluster
-     * @param password 认证信息
      * @param clientAddress 单个地址
      * @return
      */
-    boolean judgeClientAlive(String cluster, String password, String clientAddress);
+    boolean judgeClientAlive(String cluster, String clientAddress);
 
     /**
      * 获取集群状态信息
@@ -112,14 +108,6 @@ public interface ESClusterService {
      * @return
      */
     ESClusterHealthResponse syncGetClusterHealth(String clusterName);
-
-    /**
-     * 获取集群task信息
-     *
-     * @param clusterName
-     * @return
-     */
-    List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName);
 
     /**
      * 获取集群健康度
@@ -164,14 +152,6 @@ public interface ESClusterService {
     Set<String> syncGetAllNodesAttributes(String cluster);
 
     /**
-     * 获取指定物理集群下的rack对应的剩余资源使用空间
-     *
-     * @param cluster 物理集群名称
-     * @return rack对应的可使用磁盘大小 key->rack value->diskSize
-     */
-    Map</*rack*/String, /*总磁盘使用信息,单位为字节数目*/Float> getAllocationInfoOfRack(String cluster);
-
-    /**
      * 获取全量集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeInfo
      */
     Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster);
@@ -189,18 +169,9 @@ public interface ESClusterService {
     String synGetESVersionByCluster(String cluster);
 
     /**
-     * 获取集群rack的信息
-     * @param addresses client地址
-     * @param password  集群认证信息：'user:password'
+     * 获取集群rack的信息,http es 地址
+     * @param addresses
      * @return
      */
-    Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password);
-
-    /**
-     * 获取运行的es版本号
-     * @param addresses 地址
-     * @param password 集群认证信息
-     * @return
-     */
-    String synGetESVersionByHttpAddress(String addresses, String password);
+    Result<Set<String>> getClusterRackByHttpAddress(String addresses);
 }

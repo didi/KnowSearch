@@ -13,16 +13,11 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ES
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigShardsRequestContent;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShardToNodeRequestContentByIndexName;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
-import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +26,12 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
@@ -234,47 +235,6 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     @Override
     public int syncGetIndicesCount(String cluster, String nodes) {
         return esClusterNodeDAO.getIndicesCount(cluster,nodes);
-    }
-
-    @Override
-    public ClusterMemInfo synGetClusterMem(String cluster) {
-        ESClient esClient = esOpClient.getESClient(cluster);
-        if (esClient == null) {
-            LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=synGetClusterMem||clusterName={}||errMsg=esClient is null",
-                    cluster);
-            return null;
-        }
-
-        // 获取nodes中的os信息
-        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setOs(true).execute()
-                .actionGet(30, TimeUnit.SECONDS);
-
-        // 构建集群的内存使用信息对象
-        ClusterMemInfo clusterMemInfo = ClusterMemInfo.builder().memFree(0L).memUsed(0L).memTotal(0L).build();
-        Map<String, ClusterNodeStats> clusterNodeStatsMap = response.getNodes();
-        if (MapUtils.isEmpty(clusterNodeStatsMap)) {
-            return clusterMemInfo;
-        }
-
-        // 统计所有的节点的内存信息合成为集群的内存使用信息
-        clusterNodeStatsMap.values()
-                .stream()
-                .map(ClusterNodeStats::getOs)
-                .map(OsNode::getMem)
-                .forEach(osMem -> {
-                    clusterMemInfo.setMemFree(clusterMemInfo.getMemFree() + osMem.getFreeInBytes());
-                    clusterMemInfo.setMemTotal(clusterMemInfo.getMemTotal() + osMem.getTotalInBytes());
-                    clusterMemInfo.setMemUsed(clusterMemInfo.getMemUsed() + osMem.getUsedInBytes());
-                });
-
-        // 计算集群总的内存使用和空闲的百分比信息，保留小数点后3位
-        BigDecimal memFreeDec = new BigDecimal(clusterMemInfo.getMemFree());
-        BigDecimal totalSizeDec = new BigDecimal(clusterMemInfo.getMemTotal());
-        clusterMemInfo.setMemFreePercent(memFreeDec.divide(totalSizeDec, 5, RoundingMode.HALF_UP).doubleValue() * 100);
-        clusterMemInfo.setMemUsedPercent(100 - clusterMemInfo.getMemFreePercent());
-
-        return clusterMemInfo;
     }
 
     /*********************************************private******************************************/

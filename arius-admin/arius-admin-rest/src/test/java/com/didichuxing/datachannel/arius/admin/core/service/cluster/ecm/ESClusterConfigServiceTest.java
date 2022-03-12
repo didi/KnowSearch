@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESZeusConfigDTO;
@@ -11,9 +11,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigP
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDcdrInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterConfigDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,7 +31,7 @@ import java.util.List;
  */
 @Transactional(timeout = 1000)
 @Rollback
-public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
+public class ESClusterConfigServiceTest extends AriusAdminApplicationTests {
 
     @Autowired
     private ESClusterConfigService esClusterConfigService;
@@ -44,6 +44,8 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private ESClusterConfigDAO esClusterConfigDAO;
+
+    private static final String OPERATOR = "wpk";
 
     /**
      * eSZeusConfigDTOFactory 生成ESZeusConfigDTO新的记录
@@ -72,6 +74,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals("old es config is empty", esClusterConfigService.getZeusConfigContent(esZeusConfigDTO, EsConfigActionEnum.EDIT.getCode()).getMessage());
         esClusterConfigDAO.insert(ConvertUtil.obj2Obj(esConfigDTO, ESConfigPO.class));
         Assertions.assertTrue(esClusterConfigService.getZeusConfigContent(esZeusConfigDTO, EsConfigActionEnum.DELETE.getCode()).success());
+        Assertions.assertEquals(esConfigDTO.getConfigData(), esClusterConfigService.getZeusConfigContent(esZeusConfigDTO, EsConfigActionEnum.EDIT.getCode()).getData());
     }
 
     /**
@@ -98,36 +101,36 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
         ESConfigDTO esConfigDTO = CustomDataSource.esConfigDTOFactory();
         EsConfigActionEnum actionEnum = EsConfigActionEnum.ADD;
         Assertions.assertEquals(Result.buildParamIllegal("esConfigDTO is empty").getMessage(),
-                esClusterConfigService.esClusterConfigAction(null, actionEnum, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.esClusterConfigAction(null, actionEnum, OPERATOR).getMessage());
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
-        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getData();
+        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getData();
         Assertions.assertEquals(clusterId, esClusterConfigDAO.getById(id).getClusterId());
         Assertions.assertEquals(Result.buildParamIllegal("operator is empty").getMessage(),
                 esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, "").getMessage());
         esConfigDTO.setClusterId(null);
         Assertions.assertEquals(Result.buildParamIllegal("clusterId name is empty").getMessage(),
-                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getMessage());
         esConfigDTO.setTypeName("");
         Assertions.assertEquals(Result.buildParamIllegal("type name is empty").getMessage(),
-                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getMessage());
         esConfigDTO.setEnginName("");
         Assertions.assertEquals(Result.buildParamIllegal("engin name is empty").getMessage(),
-                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getMessage());
         esConfigDTO.setConfigData("");
         Assertions.assertEquals(Result.buildParamIllegal("config data is empty").getMessage(),
-                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getMessage());
         esConfigDTO = CustomDataSource.esConfigDTOFactory();
         actionEnum = EsConfigActionEnum.EDIT;
         Assertions.assertEquals(Result.buildParamIllegal("id is empty").getMessage(),
-                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getMessage());
         esConfigDTO.setId(id + 1);
         Assertions.assertEquals(Result.buildParamIllegal("config is not exist, please create first").getMessage(),
-                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getMessage());
         esConfigDTO.setId(id);
         esConfigDTO.setDesc("just a test");
         esClusterConfigService.setConfigValid(id);
-        id = esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, CustomDataSource.OPERATOR).getData();
+        id = esClusterConfigService.esClusterConfigAction(esConfigDTO, actionEnum, OPERATOR).getData();
         Assertions.assertEquals(esConfigDTO.getDesc(), esClusterConfigDAO.getById(id).getDesc());
     }
 
@@ -135,7 +138,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
     public void batchCreateEsClusterConfigsTest() {
         ESConfigDTO esConfigDTO = CustomDataSource.esConfigDTOFactory();
         List<ESConfigDTO> esConfigDTOS = Arrays.asList(esConfigDTO);
-        List<Long> clusterConfig = esClusterConfigService.batchCreateEsClusterConfigs(esConfigDTOS, CustomDataSource.OPERATOR);
+        List<Long> clusterConfig = esClusterConfigService.batchCreateEsClusterConfigs(esConfigDTOS, OPERATOR);
         ESConfigPO esConfigPo = esClusterConfigDAO.getByClusterIdAndTypeAndEnginAndVersion(esConfigDTO.getClusterId(),
                 esConfigDTO.getTypeName(), esConfigDTO.getEnginName(), esConfigDTO.getVersionConfig());
         Assertions.assertTrue(clusterConfig.stream().anyMatch(l -> l.equals(esConfigPo.getId())));
@@ -146,9 +149,9 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
         ESConfigDTO esConfigDTO = CustomDataSource.esConfigDTOFactory();
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
-        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR).getData();
-        Assertions.assertTrue(esClusterConfigService.deleteEsClusterConfig(id + 1, CustomDataSource.OPERATOR).failed());
-        Assertions.assertTrue(esClusterConfigService.deleteEsClusterConfig(id, CustomDataSource.OPERATOR).success());
+        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, OPERATOR).getData();
+        Assertions.assertTrue(esClusterConfigService.deleteEsClusterConfig(id + 1, OPERATOR).failed());
+        Assertions.assertTrue(esClusterConfigService.deleteEsClusterConfig(id, OPERATOR).success());
     }
 
     @Test
@@ -156,8 +159,8 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
         ESConfigDTO esConfigDTO = CustomDataSource.esConfigDTOFactory();
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
-        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR).getData();
-        esClusterConfigService.deleteEsClusterConfig(id, CustomDataSource.OPERATOR);
+        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, OPERATOR).getData();
+        esClusterConfigService.deleteEsClusterConfig(id, OPERATOR);
         Assertions.assertTrue(esClusterConfigService.setConfigValid(id + 1).failed());
         Assertions.assertTrue(esClusterConfigService.setConfigValid(id).success());
     }
@@ -166,20 +169,24 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
     public void editConfigDescTest() {
         ESConfigDTO esConfigDTO = CustomDataSource.esConfigDTOFactory();
         Assertions.assertEquals(Result.buildParamIllegal("集群配置Id为空").getMessage(),
-                esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.editConfigDesc(esConfigDTO, OPERATOR).getMessage());
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
-        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR).getData();
+        Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, OPERATOR).getData();
         esConfigDTO.setId(id);
+        Assertions.assertEquals(Result.buildParamIllegal("集群配置详情为空").getMessage(),
+                esClusterConfigService.editConfigDesc(esConfigDTO, OPERATOR).getMessage());
         esConfigDTO.setDesc("new desc");
-        Assertions.assertTrue(esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR).success());
-        Assertions.assertEquals(esConfigDTO.getDesc(), esClusterConfigDAO.getById(id).getDesc());
-        esConfigDTO.setConfigData("");
         Assertions.assertEquals(Result.buildParamIllegal("不允许修改集群配置数据信息").getMessage(),
-                esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.editConfigDesc(esConfigDTO, OPERATOR).getMessage());
+        esConfigDTO.setConfigData("");
+        Assertions.assertEquals(ResultType.SUCCESS.getCode(),
+                esClusterConfigService.editConfigDesc(esConfigDTO, OPERATOR).getCode().intValue());
+        Assertions.assertEquals(Result.buildParamIllegal("集群配置内容为空").getMessage(),
+                esClusterConfigService.editConfigDesc(esConfigDTO, OPERATOR).getMessage());
         esConfigDTO.setId(id + 1);
         Assertions.assertEquals(Result.buildParamIllegal("集群配置不存在").getMessage(),
-                esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR).getMessage());
+                esClusterConfigService.editConfigDesc(esConfigDTO, OPERATOR).getMessage());
     }
 
     @Test
@@ -190,7 +197,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
                 esClusterConfigService.setOldConfigInvalid(esConfig).getMessage());
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
-        esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR).getData();
+        esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, OPERATOR).getData();
         Assertions.assertEquals(Result.buildFail("the old config is empty").getMessage(),
                 esClusterConfigService.setOldConfigInvalid(esConfig).getMessage());
     }

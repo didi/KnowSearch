@@ -19,8 +19,6 @@ import {
   getAppIdList,
 } from "../../../api/gateway-kanban";
 import { setIsUpdate } from "actions/gateway-kanban";
-import { arrayMoveImmutable } from 'array-move';
-import DragGroup from './../../../packages/drag-group/DragGroup';
 import * as actions from "../../../actions";
 
 export const classPrefix = "rf-monitor";
@@ -35,14 +33,6 @@ export const QueryTemplate = memo(() => {
   const [metricsTypes, setMetricsTypes] = useState([]);
   const [viewData, setViewData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const sortEnd = ({ oldIndex, newIndex }) => {
-    const listsNew = arrayMoveImmutable(checkedData['查询模板性能配置'], oldIndex, newIndex)
-    checkedData['查询模板性能配置'] = listsNew;
-    const checkedList = objFlat(checkedData);
-    setCheckedList(secondMetricsType, checkedList);
-    setMetricsTypes([...listsNew]);
-  };
 
   const { startTime, endTime, isMoreDay, isUpdate } = useSelector(
     (state) => ({
@@ -68,7 +58,7 @@ export const QueryTemplate = memo(() => {
 
   useEffect(() => {
     window['showTooltipModal'] = (md5, metricsType) => {
-      showTooltipModal(md5, metricsType);
+      showTooltipModal(md5, metricsType);     
     };
   }, []);
 
@@ -194,27 +184,15 @@ export const QueryTemplate = memo(() => {
         </div>
       </div>
       <div className={`${classPrefix}-overview-content-line`}>
-        <DragGroup
-          dragContainerProps={{
-            onSortEnd: sortEnd,
-            axis: "xy",
-            distance: 100
-          }}
-          containerProps={{
-            grid: 12,
-            gutter: [10, 10],
-          }}
-        >
-          {metricsTypes.map((item, index) => (
-            <Line
-              key={`${item}`}
-              title={indexConfigData[item]?.title()}
-              index={`${item}_${index}`}
-              option={viewData[index] || {}}
-              isLoading={isLoading}
-            />
-          ))}
-        </DragGroup>
+        {metricsTypes.map((item, index) => (
+          <Line
+            key={`${item}_${index}`}
+            title={indexConfigData[item]?.title()}
+            index={`${item}_${index}`}
+            option={viewData[index] || {}}
+            isLoading={isLoading}
+          />
+        ))}
       </div>
     </>
   );

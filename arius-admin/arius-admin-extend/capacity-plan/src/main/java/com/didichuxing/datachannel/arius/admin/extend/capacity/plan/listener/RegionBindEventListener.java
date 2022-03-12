@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.listener;
 
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -14,8 +12,6 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.Cap
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanAreaService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
-import java.util.List;
 
 /**
  * @Author: lanxinzheng
@@ -44,25 +40,18 @@ public class RegionBindEventListener implements ApplicationListener<RegionBindEv
         clusterContextManager.flushClusterContextByClusterRegion(region);
 
         // 构建area信息
-        List<Long> logicClusterIds = ListUtils.string2LongList(region.getLogicClusterIds());
-        if (CollectionUtils.isEmpty(logicClusterIds)) {
-            LOGGER.info("class=RegionBindEventListener||method=onApplicationEvent||msg=the logicClusterOf {} is empty", region.getId());
-            return;
-        }
+        CapacityPlanAreaDTO capacityPlanAreaDTO = new CapacityPlanAreaDTO();
+        capacityPlanAreaDTO.setResourceId(region.getLogicClusterId());
+        capacityPlanAreaDTO.setClusterName(region.getPhyClusterName());
+        capacityPlanAreaDTO.setConfigJson("");
 
-        for (Long logicClusterId : logicClusterIds) {
-            CapacityPlanAreaDTO capacityPlanAreaDTO = new CapacityPlanAreaDTO();
-            capacityPlanAreaDTO.setResourceId(logicClusterId);
-            capacityPlanAreaDTO.setClusterName(region.getPhyClusterName());
-            capacityPlanAreaDTO.setConfigJson("");
+        // 如果area不存在则创建
+        Result<Long> createResult = capacityPlanAreaService.createPlanAreaInNotExist(capacityPlanAreaDTO,
+            regionBindEvent.getOperator());
 
-            // 如果area不存在则创建
-            Result<Long> createResult = capacityPlanAreaService.createPlanAreaInNotExist(capacityPlanAreaDTO,
-                    regionBindEvent.getOperator());
+        LOGGER.info(
+            "class=RegionBindEventListener||method=onApplicationEvent||msg=create area for bound region||regionId={}||result={}",
+            region.getId(), createResult);
 
-            LOGGER.info(
-                    "class=RegionBindEventListener||method=onApplicationEvent||msg=create area for bound region||regionId={}||result={}",
-                    region.getId(), createResult);
-        }
     }
 }

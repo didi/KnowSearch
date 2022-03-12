@@ -3,14 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.DCDRMasterSlaveSwitchDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplatePhysicalDCDRDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.WorkTaskVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DCDRTasksDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateDCDRInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
@@ -26,20 +19,7 @@ public interface TemplateDcdrManager {
      * @return result
      * @throws ESOperateException
      */
-    @Deprecated
     Result<Void> createDcdr(Integer logicId, String operator) throws ESOperateException;
-
-    /**
-     * 复制并且创建dcdr链路
-     * @param templateId           模板ID
-     * @param targetCluster       物理集群名称
-     * @param rack                rack信息
-     * @param operator            操作人
-     * @return Result
-     * @throws ESOperateException
-     */
-    Result<Void> copyAndCreateDcdr(Integer templateId, String targetCluster, String rack,
-                                   String operator) throws AdminOperateException;
 
     /**
      * createPhyDcdr
@@ -76,73 +56,6 @@ public interface TemplateDcdrManager {
      * @return result
      */
     Result<Void> dcdrSwitchMasterSlave(Integer logicId, Long expectMasterPhysicalId, int step, String operator);
-
-    /**
-     * 批量dcdr主从切换
-     * @param dcdrMasterSlaveSwitchDTO
-     * @param operator
-     * @return
-     */
-    Result<WorkTaskVO> batchDcdrSwitchMaster2Slave(DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO, String operator);
-
-    /**
-     * 根据任务id和模板id取消DCDR主从切换
-     * @param taskId
-     * @param templateId
-     * @param fullDeleteFlag
-     * @param operator
-     * @return
-     * @throws ESOperateException
-     */
-    Result<Void> cancelDcdrSwitchMasterSlaveByTaskIdAndTemplateIds(Integer taskId, List<Long> templateId,
-                                                                   boolean fullDeleteFlag,
-                                                                   String operator) throws ESOperateException;
-
-    /**
-     * 根据任务id取消DCDR主从切换
-     * @param taskId
-     * @param operator
-     * @return
-     */
-    Result<Void> cancelDcdrSwitchMasterSlaveByTaskId(Integer taskId, String operator) throws ESOperateException;
-
-
-    Result<Void> refreshDcdrChannelState(Integer taskId, Integer templateId, String operator);
-
-    /**
-     * 异步刷新dcdr任务状态
-     *
-     * @param taskId     业务key
-     * @param templateId 模板id
-     * @return
-     */
-    Result<Void> asyncRefreshDcdrChannelState(Integer taskId, Integer templateId, String operator);
-
-    /**
-     * 主从强制切换接口
-     * @param taskId
-     * @param templateId
-     * @param operator
-     * @return
-     */
-    Result<Void> forceSwitchMasterSlave(Integer taskId, Integer templateId, String operator);
-
-    /**
-     * 获取dcdr主从切换任务详情
-     *
-     * @param taskId
-     * @return
-     */
-    Result<DCDRTasksDetailVO> getDCDRMasterSlaveSwitchDetailVO(Integer taskId);
-
-    /**
-     * 获取单个模板dcdr主从切换详情
-     * @param taskId         任务id
-     * @param templateId     模板id
-     * @return
-     */
-    Result<DCDRSingleTemplateMasterSlaveSwitchDetailVO> getDCDRSingleTemplateMasterSlaveSwitchDetailVO(Integer taskId,
-                                                                                                       Long templateId);
 
     /**
      * 创建dcdr模板
@@ -196,18 +109,4 @@ public interface TemplateDcdrManager {
      * @return
      */
     boolean clusterSupport(String cluster);
-
-    /**
-     * 根据模板Id获取主从dcdr位点
-     * @param templateId    模板id
-     * @return
-     */
-    Tuple<Long/*主模板位点*/, Long/*从模板位点*/> getMasterAndSlaveTemplateCheckPoint(Integer templateId);
-
-    /**
-     * 获取模板dcdr信息
-     * @param templateId
-     * @return
-     */
-    Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId);
 }

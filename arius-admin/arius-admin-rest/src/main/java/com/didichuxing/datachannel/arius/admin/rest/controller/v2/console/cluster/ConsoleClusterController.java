@@ -4,10 +4,10 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ConsoleLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESPluginVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
@@ -117,15 +117,15 @@ public class ConsoleClusterController {
     @GetMapping("/plugins")
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群插件列表(用户侧获取)", notes = "")
-    public Result<List<PluginVO>> pluginList(Long clusterId) {
+    public Result<List<ESPluginVO>> pluginList(Long clusterId) {
         return Result.buildSucc(
-            ConvertUtil.list2List(clusterLogicService.getClusterLogicPlugins(clusterId), PluginVO.class));
+            ConvertUtil.list2List(clusterLogicService.getClusterLogicPlugins(clusterId), ESPluginVO.class));
     }
 
     @PostMapping("/plugin")
     @ResponseBody
     @ApiOperation(value = "添加逻辑集群插件(用户侧添加)", notes = "")
-    public Result<Long> addPlugin(HttpServletRequest request, Long logicClusterId, PluginDTO pluginDTO) {
-        return clusterLogicService.addPlugin(logicClusterId, pluginDTO, HttpRequestUtils.getOperator(request));
+    public Result<Long> addPlugin(HttpServletRequest request, Long logicClusterId, ESPluginDTO esPluginDTO) {
+        return clusterLogicService.addPlugin(logicClusterId, esPluginDTO, HttpRequestUtils.getOperator(request));
     }
 }

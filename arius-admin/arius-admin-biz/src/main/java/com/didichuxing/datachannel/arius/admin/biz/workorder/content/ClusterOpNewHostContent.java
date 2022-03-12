@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class ClusterOpNewHostContent extends ClusterOpHostContent {
+public class ClusterOpNewHostContent extends ClusterOpBaseContent {
     /**
      * 数据中心
      */
@@ -59,4 +59,9 @@ public class ClusterOpNewHostContent extends ClusterOpHostContent {
      * @see ResourceLogicLevelEnum
      */
     private Integer                 level;
+
+    /**
+     * 集群角色 对应主机列表
+     */
+    private List<ESClusterRoleHost> roleClusterHosts;
 }

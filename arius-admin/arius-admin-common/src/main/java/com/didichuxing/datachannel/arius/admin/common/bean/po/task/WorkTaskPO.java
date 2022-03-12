@@ -40,7 +40,7 @@ public class WorkTaskPO extends BasePO {
     /**
      * 业务数据主键 
      */
-    private String businessKey;
+    private Integer businessKey;
 
     /**
      * 任务状态：

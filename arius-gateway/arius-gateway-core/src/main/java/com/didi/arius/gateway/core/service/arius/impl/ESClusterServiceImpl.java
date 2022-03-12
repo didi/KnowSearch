@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import static com.didi.arius.gateway.common.consts.RestConsts.DEFAULT_WRITE_ACTION;
+import static com.didi.arius.gateway.common.utils.CommonUtil.isSearchKibana;
 
 @Service
 @NoArgsConstructor
@@ -88,7 +89,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     public ESClient getClient(QueryContext queryContext, String actionName) {
         ESClient client = esRestClientService.getClient(queryContext.getCluster(), actionName);
 
-        if (queryContext.isFromKibana()) {
+        if (isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
             client = esRestClientService.getAdminClient(actionName);
         } else if (queryContext.getClusterId() != null){
             client = esRestClientService.getClientStrict(queryContext.getClusterId(), actionName);
@@ -108,7 +109,7 @@ public class ESClusterServiceImpl implements ESClusterService {
         ESClient client = esRestClientService.getClient(queryContext.getCluster(), actionName);
         String clusterName = queryContext.getCluster();
 
-        if (queryContext.isFromKibana()) {
+        if (isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
             client = esRestClientService.getAdminClient(actionName);
             clusterName = queryConfig.getAdminClusterName();
         } else if (queryContext.getClusterId() != null){

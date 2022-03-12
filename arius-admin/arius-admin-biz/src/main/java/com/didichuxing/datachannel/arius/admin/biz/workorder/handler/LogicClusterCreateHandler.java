@@ -3,14 +3,12 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_LOGIC_CLUSTER_CREATE;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterDeleteOrderDetail;
 import java.util.Arrays;
 import java.util.List;
 
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -120,7 +118,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
     }
 
     /**
-     * 处理工单 这里分为两种，一种是分配逻辑集群，一种是申请逻辑集群，其中申请逻辑集群不会绑定region，会联系同学在运维侧进行操作
+     * 处理工单 该工单需要运维人员在运维控制台处理好后;所以这里不用执行任何逻辑
      */
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
@@ -128,18 +126,15 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
             ESLogicClusterWithRegionDTO.class);
         esLogicClusterWithRegionDTO.setAppId(workOrder.getSubmitorAppid());
 
-        // 创建逻辑集群并且批量绑定指定的region,默认是能成功
-        Result<Void> result = Result.buildSucc();
-        if(!CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
-            result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO,approver);
-        }
+        Result<Long> result = clusterLogicManager.addLogicCluster(esLogicClusterWithRegionDTO,
+            workOrder.getSubmitor(), workOrder.getSubmitorAppid());
 
         if (result.success()) {
             sendNotify(WORK_ORDER_LOGIC_CLUSTER_CREATE, new LogicClusterCreateNotify(workOrder.getSubmitorAppid(),
                 esLogicClusterWithRegionDTO.getName(), approver), Arrays.asList(workOrder.getSubmitor()));
 
             List<String> administrators = getOPList().stream().map(AriusUserInfo::getName).collect(Collectors.toList());
-            return Result.buildSuccWithMsg(
+            return Result.buildSucc(
                 String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
         }
 

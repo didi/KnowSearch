@@ -3,8 +3,9 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.pl
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPluginsManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESPluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,15 +43,15 @@ public class PhyClusterPluginsController {
     @GetMapping("/{cluster}/get")
     @ResponseBody
     @ApiOperation(value = "获取ES集群插件列表")
-    public Result<List<PluginVO>> pluginList(@PathVariable(value = "cluster") String cluster) {
+    public Result<List<ESPluginVO>> pluginList(@PathVariable(value = "cluster") String cluster) {
         return clusterPhyManager.listPlugins(cluster);
     }
 
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "上传插件")
-    public Result<Long> add(PluginDTO param) {
-        return clusterPluginsManager.addPlugins(param);
+    public Result<Long> add(ESPluginDTO param) {
+        return clusterPluginsManager.batchAddPlugins(param);
     }
 
     @DeleteMapping("/{pluginId}")
@@ -63,7 +64,7 @@ public class PhyClusterPluginsController {
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "编辑本地插件描述")
-    public Result<Void> edit(HttpServletRequest request, @RequestBody PluginDTO pluginDTO) {
-        return clusterPluginsManager.editPluginDesc(pluginDTO, HttpRequestUtils.getOperator(request));
+    public Result<ESPluginPO> edit(HttpServletRequest request, @RequestBody ESPluginDTO esPluginDTO) {
+        return clusterPluginsManager.editPluginDesc(esPluginDTO, HttpRequestUtils.getOperator(request));
     }
 }

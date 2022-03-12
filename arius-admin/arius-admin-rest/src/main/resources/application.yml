@@ -78,48 +78,27 @@ spring:
   profiles:
     active: test
 
-# admin server http port
 admin:
   port:
-    web: 8010
+    web: 8015
   contextPath: /admin/api
 
 # 事务超时时间
 spring.transaction.default-timeout: 60
 
-server:
-  servlet:
-    session:
-      cookie:
-        path: /
+logging:
+  pattern:
+    file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
+  config: classpath:log4j2.xml
+  path: .
+  file:
+    max-history: 5
 
 # 扩展服务
 extend:
   service:
   fileStorage: s3
   department: defaultDep
-  employee: defaultEmployee
+  employee: didi
   loginProtocol: defaultLogin
 #extend.service: capacityPlan,dynamicLimit
-
-# dcdr相关
-# 并发执行数
-dcdr.concurrent: 2
-# 容错数
-dcdr.fault.tolerant: 5
-
-# 集成测试相关配置
-integrate:
-  test:
-    # admin服务，填写本地ip，则运行集成测试前，需启动admin服务
-    admin:
-      ip: 127.0.0.1
-      port: 8010
-    # es服务，作为基本的物理集群使用
-    es:
-      ip: 10.190.55.161
-      port: 8888
-    # appid信息
-    appid: 1
-    # 填写管理员name
-    operator: admin

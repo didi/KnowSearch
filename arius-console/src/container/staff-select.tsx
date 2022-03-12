@@ -1,7 +1,7 @@
 import { Select } from 'antd';
 import * as React from 'react';
 import { getAllUser } from 'api/common-api';
-import { IUser } from 'typesPath/user-types';
+import { IUser } from '@types/user-types';
 import { isArray } from 'lodash';
 
 const Option = Select.Option;

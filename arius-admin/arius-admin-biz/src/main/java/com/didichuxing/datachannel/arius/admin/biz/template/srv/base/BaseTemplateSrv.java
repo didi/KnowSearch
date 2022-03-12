@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -15,12 +13,14 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
+import java.util.List;
+
+public abstract class BaseTemplateSrv {
 
     protected static final ILog    LOGGER = LogFactory.getLog(BaseTemplateSrv.class);
 
     @Autowired
-    protected ClusterPhyService    clusterPhyService;
+    protected ClusterPhyService    esClusterPhyService;
 
     @Autowired
     protected ClusterLogicService  clusterLogicService;
@@ -40,8 +40,11 @@ public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
     @Autowired
     protected TemplatePhyManager   templatePhyManager;
 
-
-    @Override
+    /**
+     * 判断指定物理集群是否开启了当前索引服务
+     * @param phyClusterName 物理集群名字
+     * @return
+     */
     public boolean isTemplateSrvOpen(String phyClusterName) {
         boolean enable = templateSrvManager.isPhyClusterOpenTemplateSrv(phyClusterName, templateService().getCode());
 
@@ -51,7 +54,11 @@ public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
         return enable;
     }
 
-    @Override
+    /**
+     * 判断物理模板已经开启了当前索引服务（判断指定物理模板所在物理集群是否开启了当前索引服务）
+     * @param indexTemplatePhies 物理模板
+     * @return
+     */
     public boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies) {
         for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
             if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
@@ -62,18 +69,9 @@ public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
         return true;
     }
 
-    @Override
-    public Result<Boolean> checkOpenTemplateSrvByCluster(String phyCluster){
-        return Result.buildSucc(Boolean.TRUE);
-    }
-
-    @Override
-    public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
-        return Result.buildSucc(Boolean.TRUE);
-    }
-
-    @Override
     public String templateServiceName() {
         return templateService().getServiceName();
     }
+
+    public abstract TemplateServiceEnum templateService();
 }

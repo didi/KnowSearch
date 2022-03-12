@@ -37,18 +37,11 @@ public interface IndexTemplateLogicDAO {
     List<TemplateLogicPO> likeByCondition(TemplateLogicPO param);
 
     List<TemplateLogicPO> pagingByCondition(@Param("name") String name, @Param("dataType") Integer dataType,
-                                            @Param("hasDCDR") Boolean hasDCDR,
-                                            @Param("from") Long from,   @Param("size") Long size,
-                                            @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+                                            @Param("from") Long from,   @Param("size") Long size);
 
     long getTotalHitByCondition(TemplateLogicPO param);
 
     List<TemplateLogicPO> likeByResponsible(String responsible);
 
     int batchChangeHotDay(Integer days);
-
-    int updateBlockReadState(@Param("logicId") Integer logicId, @Param("blockRead") Boolean blockRead);
-
-    int updateBlockWriteState(@Param("logicId") Integer logicId, @Param("blockWrite") Boolean blockWrite);
-
 }

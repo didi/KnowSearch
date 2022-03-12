@@ -45,6 +45,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     @Autowired
     private TemplateLogicManager templateLogicManager;
 
+    @Autowired
+    private GatewayMetricsManager gatewayMetricsManager;
+
     @Override
     public Result<List<String>> getGatewayMetricsEnums(String group) {
         return Result.buildSucc(GatewayMetricsTypeEnum.getMetricsByGroup(group));
@@ -145,6 +148,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                 } else if (GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE.getType().equals(metricsType)) {
                     VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, appId, dto.getNodeIp());
                     result.add(gatewayMetricsVO);
+                } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getNodeIp());
+                    result.add(gatewayMetricsVO);
                 }
             });
             nameList.add(dto.getNodeIp());
@@ -156,61 +162,15 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                 } else if (GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE.getType().equals(metricsType)) {
                     VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, appId, dto.getTopNu());
                     result.add(gatewayMetricsVO);
+                } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getTopNu());
+                    result.add(gatewayMetricsVO);
                 }
             });
             // 获取nodeNameList
             nameList.addAll(gatewayManager.getGatewayAliveNodeNames("Normal").getData());
         }
         fillSortData(result, rawMetricsTypes, nameList, startTime, endTime, dto.getTopNu());
-        return Result.buildSucc(ConvertUtil.list2List(result, VariousLineChartMetricsVO.class));
-    }
-
-    @Override
-    public Result<List<VariousLineChartMetricsVO>> getMultiGatewayNodesMetrics(MultiGatewayNodesDTO dto, Integer appId) {
-        List<VariousLineChartMetricsVO> result = new ArrayList<>();
-        GatewayNodeDTO gatewayNodeDTO = ConvertUtil.obj2Obj(dto, GatewayNodeDTO.class);
-        for (String nodeIp : dto.getNodeIps()) {
-            gatewayNodeDTO.setNodeIp(nodeIp);
-            Result<List<VariousLineChartMetricsVO>> nodeMetrics = getGatewayNodeMetrics(gatewayNodeDTO, appId);
-            if (nodeMetrics.success()) {
-                result.addAll(nodeMetrics.getData());
-            }
-        }
-        return Result.buildSucc(result);
-    }
-
-    @Override
-    public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(ClientNodeDTO dto, Integer appId) {
-        List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
-        List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
-        Long startTime = dto.getStartTime();
-        Long endTime = dto.getEndTime();
-        // 补齐数据用的
-        List<String> clientNodeIpList = Lists.newArrayList();
-        if (StringUtils.isNotBlank(dto.getClientNodeIp())) {
-            dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
-                if (GatewayMetricsTypeEnum.WRITE_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeWriteMetrics(startTime, endTime, appId, dto.getNodeIp(), dto.getClientNodeIp());
-                    result.add(gatewayMetricsVO);
-                } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getNodeIp(), dto.getClientNodeIp());
-                    result.add(gatewayMetricsVO);
-                }
-            });
-            clientNodeIpList.add(dto.getClientNodeIp());
-        } else {
-            dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
-                if (GatewayMetricsTypeEnum.WRITE_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeWriteMetrics(startTime, endTime, appId, dto.getTopNu(), dto.getNodeIp());
-                    result.add(gatewayMetricsVO);
-                } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getTopNu(), dto.getNodeIp());
-                    result.add(gatewayMetricsVO);
-                }
-            });
-            clientNodeIpList.addAll(gatewayMetricsService.getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(), dto.getEndTime(), appId));
-        }
-        fillSortData(result, rawMetricsTypes, clientNodeIpList, startTime, endTime, dto.getTopNu());
         return Result.buildSucc(ConvertUtil.list2List(result, VariousLineChartMetricsVO.class));
     }
 
@@ -344,27 +304,11 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                 }
             });
             // 获取所有dslMD5
-            nameList.addAll(getDslMd5List(appId, null, null).getData());
+            nameList.addAll(gatewayMetricsManager.getDslMd5List(appId, null, null).getData());
         }
         // 获取
         fillSortData(result, rawMetricsTypes, nameList, startTime, endTime, dto.getTopNu() == 0 ? 1 : dto.getTopNu());
         return Result.buildSucc(ConvertUtil.list2List(result, VariousLineChartMetricsVO.class));
-    }
-
-    @Override
-    public Result<List<String>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime, Integer appId) {
-        long oneHour = 60 * 60 * 1000L;
-        if (endTime == null) {
-            endTime = System.currentTimeMillis();
-        }
-        if (startTime == null) {
-            startTime = endTime - oneHour;
-        }
-        // 超过一周时间容易引起熔断，不允许
-        if ((endTime - startTime) > oneHour * 24 * 7) {
-            return Result.buildFail("时间跨度不要超过一周");
-        }
-        return Result.buildSucc(gatewayMetricsService.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, appId));
     }
 
     /********************************************************** private methods **********************************************************/
@@ -378,8 +322,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
      * @param topN 获取线条个数
      */
     private void fillSortData(List<VariousLineChartMetrics> result, List<String> rawMetricsTypes, List<String> nameList, long startTime, long endTime, Integer topN) {
-        List<String> currentMetrics = result.stream()
-                .map(VariousLineChartMetrics::getType).collect(Collectors.toList());
+        List<String> currentMetrics = result.stream().map(VariousLineChartMetrics::getType).collect(Collectors.toList());
         // 获取指标展示时间分段信息
         List<Long> timeRange = getTimeRange(startTime, endTime);
         // 让时间节点由小到大 getTimeRange 获取默认是大到小
@@ -396,7 +339,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
 
         // 补充某个指标下，折线展示不全的问题（某个指标下，一共有5条折线数据可展示，用户想要展示top3，但是返回只有2个数据，所以要补齐另3个）
         for (VariousLineChartMetrics metrics : result) {
-            // 补齐当前指标类型下，某数据的时间段数据不齐全（时间段有k个，但是数据个数<k）
+            // 补齐当前指标类型下，某数据的时间段数据不齐全
             List<MetricsContent> metricsContentList = metrics.getMetricsContents();
             for(MetricsContent metricsContent : metricsContentList) {
                 // 补齐剩下的时间段数据
@@ -406,7 +349,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
             }
 
             if(metrics.getMetricsContents().size() >= topN) {
-                // 如果达到了用户所需展示的个数
+                // 如果达到了用户所需展示的个数，但是有些数据肯能并不齐全（时间段有k个，但是数据个数<k）
                 continue;
             }
 

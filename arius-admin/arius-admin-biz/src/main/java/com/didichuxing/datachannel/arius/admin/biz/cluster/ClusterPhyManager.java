@@ -11,12 +11,11 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESPluginVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 
 public interface ClusterPhyManager {
@@ -59,15 +58,6 @@ public interface ClusterPhyManager {
      * @param currentAppId 当前登录项目
      */
     List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param, Integer currentAppId);
-
-    /**
-     * 构建客户端需要的数据
-     *
-     * @param clusterPhyList  集群列表源数据
-     * @param appId           当前项目
-     * @return
-     */
-    List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId);
 
     /**
      * 获取单个控制台物理集群信息
@@ -114,7 +104,7 @@ public interface ClusterPhyManager {
      */
     Result<Void> deleteClusterJoin(Integer clusterId, String operator);
 
-    Result<List<PluginVO>> listPlugins(String cluster);
+    Result<List<ESPluginVO>> listPlugins(String cluster);
 
     /**
      * 获取集群下的动态配置信息
@@ -208,8 +198,6 @@ public interface ClusterPhyManager {
      */
     void buildClusterRole(ConsoleClusterPhyVO cluster);
 
-    void buildClusterRole(ConsoleClusterPhyVO cluster, List<RoleCluster> roleClusters);
-
     /**
      * 更新物理集群状态
      * @param clusterPhyName   物理集群名称
@@ -217,14 +205,6 @@ public interface ClusterPhyManager {
      * @return
      */
     boolean updateClusterHealth(String clusterPhyName, String operator);
-
-    /**
-     * 更新集群资源信息
-     * @param cluster
-     * @param operator
-     * @return
-     */
-    boolean updateClusterInfo(String cluster, String operator);
 
     /**
      * 校验集群状态是否有效
@@ -255,7 +235,7 @@ public interface ClusterPhyManager {
      * 构建物理集群所属项目和所属的appId的信息
      * @param consoleClusterPhyVO 物理集群看板视图
      */
-    void buildBelongAppIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO);
+    void buildBelongAppIdAndName(ConsoleClusterPhyVO consoleClusterPhyVO);
 
     /**
      *  根据逻辑集群类型和已选中的物理集群名称筛选出es版本一致的物理集群名称列表
@@ -271,22 +251,4 @@ public interface ClusterPhyManager {
      * @return 同版本的物理集群名称列表
      */
     Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId);
-
-    /**
-     * 为一个正在接入的物理集群校验是否可以添加索引服务
-     * @param clusterJoinDTO 物理集群接入DTO
-     * @param strId 索引服务id
-     * @param operator 操作人员
-     * @return 校验结果
-     */
-    Result<Boolean> checkTemplateServiceWhenJoin(ClusterJoinDTO clusterJoinDTO, String strId, String operator);
-
-    /**
-     * 根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表
-     * @param clusterPhy 物理集群名称
-     * @param clusterLogic 逻辑集群名称
-     * @param templateSize 模板设置的数据大小
-     * @return 可以绑定的rack列表
-     */
-    Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
 }

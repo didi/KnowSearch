@@ -1,16 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorCollectTimeEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorIndexEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorNodeEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESRunTimeException;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
@@ -118,6 +114,7 @@ public class MonitorClusterJob {
 
     private String                      clusterName;
 
+    private static final FutureUtil<Void>                   collectDataFuture = FutureUtil.initBySystemAvailableProcessors("MonitorClusterJob-collectData",  20);
     private static final FutureUtil<ESNodesStatsResponse>   nodeStatsFuture   = FutureUtil.initBySystemAvailableProcessors("MonitorClusterJob-nodeStats",  20);
     private static final FutureUtil<ESIndexStatsResponse>   indexStatsFuture  = FutureUtil.initBySystemAvailableProcessors("MonitorClusterJob-indexStats",  20);
 
@@ -136,7 +133,6 @@ public class MonitorClusterJob {
     private static final String CONFIG_NAME_INDEXSTAT_COLLECT_CONCURRENT = "indexstat.collect.concurrent";
 
     public MonitorClusterJob(ESClient esClient,
-                             String ariusClusterName,
                              ClusterPhy clusterPhy,
                              List<IndexTemplatePhyWithLogic> indexTemplates,
                              MetricsRegister metricsRegister,
@@ -148,7 +144,7 @@ public class MonitorClusterJob {
                              List<CollectMetrics> ingestWorkOrders,
                              List<CollectMetrics> dcdrWorkOrders,
                              MulityTypeTemplatesInfo mulityTypeTemplatesInfo,
-                             AriusConfigInfoService  ariusConfigInfoService
+                             AriusConfigInfoService ariusConfigInfoService
                              ) {
         this.esClient                 = esClient;
         this.clusterPhy               = clusterPhy;
@@ -161,18 +157,25 @@ public class MonitorClusterJob {
         this.ingestWorkOrders         = ingestWorkOrders;
         this.dcdrWorkOrders           = dcdrWorkOrders;
         this.mulityTypeTemplatesInfo  = mulityTypeTemplatesInfo;
-        this.clusterName              = ariusClusterName;
+        this.clusterName              = esClient.getClusterName();
         this.ariusConfigInfoService   = ariusConfigInfoService;
+
         this.indexTemplates.addAll(indexTemplates);
     }
 
     public void collectData(String ariusClusterName) {
-        collectNodeData(ariusClusterName, esClient, metricsRegister);
-        collectIndexData(ariusClusterName, esClient, metricsRegister);
-        //collectIndexToNodeData();
+        collectDataFuture.runnableTask(() -> collectNodeData(ariusClusterName, esClient, metricsRegister))
+                .runnableTask(() -> collectIndexData(ariusClusterName, esClient, metricsRegister))
+                .runnableTask(() -> collectDCDRData(esClient, metricsRegister))
+                .waitExecute(45);
+
+        // 索引的集群节点分布数据
+        // 注意：collectIndexToNodeData 依赖 collectNodeData、collectIndexData、collectDCDRData
+        // 因此不能一起并行计算
+        collectIndexToNodeData();
 
         LOGGER.info("class=MonitorClusterJob||method=collectData||clusterName={}||indexStopWatch={}||nodeStopWatch={}||dcdrStopWatch={}||index2NodeStopWatch={}",
-                ariusClusterName, indexStopWatch.toString(), nodeStopWatch.toString(), dcdrStopWatch.toString(), index2NodeStopWatch.toString());
+                clusterName, indexStopWatch.toString(), nodeStopWatch.toString(), dcdrStopWatch.toString(), index2NodeStopWatch.toString());
     }
 
     /**************************************** private methods ****************************************/
@@ -292,7 +295,7 @@ public class MonitorClusterJob {
      * @param ariusClusterName 平台设置的物理名称
      */
     private void collectNodeData(String ariusClusterName, ESClient esClient, MetricsRegister metricsRegister){
-        long timestamp = CommonUtils.monitorTimestamp2min(System.currentTimeMillis());
+        long timestamp = System.currentTimeMillis();
 
         try {
             nodeStopWatch.start("stats_node_begin");
@@ -328,9 +331,13 @@ public class MonitorClusterJob {
                     esNodeStatsList.add(esNodeStats);
                     // 节点id到节点数据的map
                     nodeIdEsNodeStatsMap.put(nodeId, esNodeStats);
+                    // 获取节点上的索引维度的数据
+                   // achieveAndSendNodeToIndexInfo(base, map, metricsRegister);
 
-                    //发送到指标到监控系统
-                    SpringTool.publish(new MetricsMonitorNodeEvent(this, esDataTempBeans, esNodeStatsList, clusterPhy.getLevel(), HOST_NAME));
+                    // 获取ingest指标
+                 // achieveAndSendIngestInfo(base, map, metricsRegister);
+
+                    sendN9e(esDataTempBeans);
                 } catch (Exception e) {
                     LOGGER.error("class=MonitorClusterJob||method=collectNodeData||nodeId={}||clusterName={}||msg=exception",
                             nodeId, clusterName, e);
@@ -343,8 +350,7 @@ public class MonitorClusterJob {
         }
 
         //必须要放到cache外层，在获取es数据超时时也要进行上报
-        SpringTool.publish(new MetricsMonitorCollectTimeEvent(this, "node",
-                (double) System.currentTimeMillis() - timestamp, clusterName, clusterPhy.getLevel(), HOST_NAME));
+        collectMonitorData2Odin("node", (double) System.currentTimeMillis() - timestamp, esClient.getClusterName());
 
         if (nodeStopWatch.isRunning()) {
             nodeStopWatch.stop();
@@ -459,7 +465,7 @@ public class MonitorClusterJob {
      * @param metricsRegister
      */
     private void collectIndexData(String ariusClusterName, ESClient esClient, MetricsRegister metricsRegister) {
-        long timestamp = CommonUtils.monitorTimestamp2min(System.currentTimeMillis());
+        long timestamp = System.currentTimeMillis();
 
         try {
             indexStopWatch.start("stats_index_begin");
@@ -530,10 +536,10 @@ public class MonitorClusterJob {
                     esIndexStatsList.add(esIndexStats);
 
                     // 索引的集群节点分布信息
-                    //achieveIndexToNodeInfo(base, indexStats);
+                    achieveIndexToNodeInfo(base, indexStats);
 
-                    // 指标发送给监控系统
-                    SpringTool.publish(new MetricsMonitorIndexEvent(this, esDataTempBeans, esIndexStatsList, clusterPhy.getLevel(), HOST_NAME));
+                    // 指标发送给odin
+                    sendN9e(esDataTempBeans);
                 } catch (Exception e) {
                     LOGGER.error("class=MonitorClusterJob||method=collectIndexData||index={}||clusterName={}||msg=exception",
                         index, clusterName, e);
@@ -549,8 +555,7 @@ public class MonitorClusterJob {
         }
 
         //必须要放到cache外层，在获取es数据超时时也要进行上报
-        SpringTool.publish(new MetricsMonitorCollectTimeEvent(this, "index",
-                (double) System.currentTimeMillis() - timestamp, clusterName, clusterPhy.getLevel(), HOST_NAME));
+        collectMonitorData2Odin("index", (double) System.currentTimeMillis() - timestamp, esClient.getClusterName());
 
         if (indexStopWatch.isRunning()) {
             indexStopWatch.stop();
@@ -637,8 +642,7 @@ public class MonitorClusterJob {
                         List<ESDataTempBean> esDataTempBeans = aggrAndComputeData(map, dcdrWorkOrders, base, metricsRegister);
                         ESIndexDCDRStats esIndexDCDRStats = buildESIndexDCDRStats(base, replicaCluster, esDataTempBeans);
                         esIndexDCDRStatsList.add(esIndexDCDRStats);
-
-                        //发送dcdr指标值监控系统
+                        sendN9e(esDataTempBeans);
                     });
                 } catch (Exception e) {
                     LOGGER.error("class=MonitorClusterJob||method=collectDcdrData||index={}||clusterName={}||msg=exception",
@@ -749,6 +753,36 @@ public class MonitorClusterJob {
         return esIndexDCDRStats;
     }
 
+    /**
+     * 向odin发送各个任务的执行时间
+     * @param type
+     * @param value
+     */
+    private void collectMonitorData2Odin(String type, Double value, String cluster) {
+        N9eData format = new N9eData();
+        format.setTime(System.currentTimeMillis() / 1000);
+        format.putTag("host",    HOST_NAME);
+        format.putTag("cluster", cluster);
+        format.putTag("type",    type);
+        format.putTag("level",   String.valueOf( clusterPhy.getLevel()));
+        format.setMetric("monitor.metadata.collect.time");
+        format.setValue(String.valueOf(value));
+
+        monitorMetricsSender.sendOdinData(Arrays.asList(format));
+    }
+
+    private void sendN9e(List<ESDataTempBean> esDataTempBeans){
+        List<N9eData> n9eDataFormats = new ArrayList<>();
+        for(ESDataTempBean esDataTempBean : esDataTempBeans){
+            if(esDataTempBean.isSendToN9e()){
+                N9eData n9eDataFormat = MonitorUtil.fillDataformat(esDataTempBean);
+                n9eDataFormat.putTag("level",   String.valueOf( clusterPhy.getLevel()));
+                n9eDataFormats.add(n9eDataFormat);
+            }
+        }
+
+        monitorMetricsSender.sendOdinData(n9eDataFormats);
+    }
 
     private void achieveIndexToNodeInfo(ESDataTempBean base, IndexNodes indexStats) {
         try {

@@ -9,8 +9,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
@@ -77,31 +75,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     /**
-     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤
-     * @param clusterLogicId 逻辑集群id
-     * @param phyCluster 物理集群名称
-     * @param clusterLogicType 逻辑集群类型
-     * @return
-     */
-    @Override
-    public List<ClusterRegion> filterClusterRegionByLogicClusterType(Long clusterLogicId, String phyCluster, Integer clusterLogicType) {
-        if (ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.UNKNOWN)) {
-            return new ArrayList<>();
-        }
-
-        //根据物理集群获取全量的region数据
-        List<ClusterRegion> clusterRegions = regionRackService.listPhyClusterRegions(phyCluster);
-        if (CollectionUtils.isEmpty(clusterRegions)) {
-            return clusterRegions;
-        }
-
-        //只有当物理集群上的region没有被绑定或者逻辑集群类型为public时region只被绑定到了共享类型的逻辑集群
-        return clusterRegions.stream()
-                .filter(clusterRegion -> canBindRegionToLogicCluster(clusterRegion, clusterLogicType, clusterLogicId))
-                .collect(Collectors.toList());
-    }
-
-    /**
      * 构建regionVO
      * @param region region
      * @return
@@ -114,7 +87,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         ClusterRegionVO logicClusterRegionVO = new ClusterRegionVO();
         logicClusterRegionVO.setId(region.getId());
-        logicClusterRegionVO.setLogicClusterIds(region.getLogicClusterIds());
+        logicClusterRegionVO.setLogicClusterId(region.getLogicClusterId());
         logicClusterRegionVO.setClusterName(region.getPhyClusterName());
         logicClusterRegionVO.setRacks(region.getRacks());
         return logicClusterRegionVO;
@@ -191,7 +164,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         //4. 是否要创建逻辑集群
         if (isAddClusterLogicFlag) {
             param.setDataCenter(EnvUtil.getDC().getCode());
-            Result<Long> createLogicClusterResult = clusterLogicService.createClusterLogic(param);
+            Result<Long> createLogicClusterResult = clusterLogicService.createClusterLogic(param, operator);
             if (createLogicClusterResult.failed()) {
                 return Result.buildFrom(createLogicClusterResult);
             }
@@ -206,8 +179,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator) {
-        return regionRackService.unbindRegion(regionId, logicClusterId, operator);
+    public Result<Void> unbindRegion(Long regionId, String operator) {
+        return regionRackService.unbindRegion(regionId, operator);
     }
 
     @Override
@@ -295,25 +268,10 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
         LogicClusterRackVO logicClusterRackVO = new LogicClusterRackVO();
-        logicClusterRackVO.setResourceIds(clusterLogicRackInfo.getLogicClusterIds());
-        logicClusterRackVO.setResourceId(genResourceIdFromLogicClusterIds(clusterLogicRackInfo.getLogicClusterIds()));
+        logicClusterRackVO.setResourceId(clusterLogicRackInfo.getLogicClusterId());
         logicClusterRackVO.setCluster(clusterLogicRackInfo.getPhyClusterName());
         logicClusterRackVO.setRack(clusterLogicRackInfo.getRack());
         return logicClusterRackVO;
-    }
-
-    /**
-     * 为了兼容调用该视图的应用，所以这里resourceId字段取rack关联的逻辑集群id列表的首位
-     * @param logicClusters 逻辑集群id列表
-     * @return 关联的首位逻辑集群id
-     */
-    private Long genResourceIdFromLogicClusterIds(String logicClusters) {
-        List<Long> logicClusterIds = ListUtils.string2LongList(logicClusters);
-        if (!CollectionUtils.isEmpty(logicClusterIds)) {
-            return logicClusterIds.get(0);
-        }
-
-        return null;
     }
 
     /**
@@ -424,29 +382,5 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                         clusterLogicId, e.getMessage());
             }
         }
-    }
-
-    /**
-     * 判断当前的region可否被指定类型的逻辑集群继续绑定
-     * @param clusterRegion 集群region
-     * @param clusterLogicType 逻辑集群类型
-     * @param clusterLogicId 逻辑集群id
-     * @return 校验结果
-     */
-    private boolean canBindRegionToLogicCluster(ClusterRegion clusterRegion, Integer clusterLogicType, Long clusterLogicId) {
-        List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
-        // 获取region绑定的逻辑集群类型
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterIds.get(0));
-
-        // region没有被任何的逻辑集群绑定，则该region可以被绑定
-        if (AriusObjUtils.isNull(clusterLogic)) {
-            return true;
-        }
-
-        // 当region有被逻辑集群绑定时，如需被指定逻辑集群绑定需要满足：region已绑定的逻辑集群类型为共享且指定的逻辑集群类型为共享
-        // 当满足上述条件之后，分为两种情况讨论：新建共享逻辑集群可以绑定该region;已建立逻辑集群需要过滤掉本来已经绑定了的region模块
-        return ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.PUBLIC)
-                && clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())
-                && (AriusObjUtils.isNull(clusterLogicId) || !logicClusterIds.contains(clusterLogicId));
     }
 }

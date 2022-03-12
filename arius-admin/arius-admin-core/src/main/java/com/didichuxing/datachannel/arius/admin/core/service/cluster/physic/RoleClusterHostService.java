@@ -1,11 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import java.util.List;
-import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
@@ -62,23 +59,6 @@ public interface RoleClusterHostService {
      */
     boolean collectClusterNodeSettings(String cluster) throws AdminTaskException;
 
-
-    /**
-     * 全量录入根据配置的节点信息持久化到MySQL, 包括节点状态
-     * @param param 参数
-     * @return true/false
-     */
-    boolean saveClusterNodeSettings(ClusterJoinDTO param) throws AdminTaskException;
-
-    /**
-     * 创建或扩容集群节点时录入节点数据到MySQL, 包括节点规格
-     * @param param               节点角色列表
-     * @param phyClusterName      物理集群名称
-     * @throws AdminTaskException 事务异常
-     * @return                    操作结果
-     */
-    boolean createClusterNodeSettings(List<ESClusterRoleHost> param, String phyClusterName) throws AdminTaskException;
-
     /**
      * 获取指定rack的索引个数
      * @param cluster 集群
@@ -114,12 +94,6 @@ public interface RoleClusterHostService {
      */
     List<RoleClusterHost> getByRoleClusterId(Long roleClusterId);
 
-    /**
-     * 获取节点信息
-     * @param roleClusterIds 多个角色集群id
-     * @return  Map<角色集群id,List<节点对象>>
-     */
-    Map<Long,List<RoleClusterHost>> getByRoleClusterIds(List<Long> roleClusterIds);
     /**
      * 获取节点名
      * @param clusterId 集群id

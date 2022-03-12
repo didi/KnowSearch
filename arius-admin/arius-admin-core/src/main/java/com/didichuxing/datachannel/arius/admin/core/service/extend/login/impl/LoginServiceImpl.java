@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
@@ -179,11 +178,6 @@ public class LoginServiceImpl implements LoginService {
 
     private boolean hasLoginValid(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        Object username = request.getSession().getAttribute(LoginConstant.SESSION_DOMAIN_ACCOUNT);
-
-        if(AriusObjUtils.isNull(username)) {
-            return false;
-        }
         if (AriusObjUtils.isNull(cookies)) {
             return false;
         }

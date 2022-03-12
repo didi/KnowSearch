@@ -250,12 +250,12 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<String> sqlExplain(String sql, Integer appId) {
-        return gatewayService.sqlOperate(sql, null, appId, GatewaySqlConstant.SQL_EXPLAIN);
+        return gatewayService.sqlOperate(sql, appId, GatewaySqlConstant.SQL_EXPLAIN);
     }
 
     @Override
-    public Result<String> directSqlSearch(String sql, String phyClusterName, Integer appId) {
-        return gatewayService.sqlOperate(sql, phyClusterName, appId, GatewaySqlConstant.SQL_SEARCH);
+    public Result<String> directSqlSearch(String sql, Integer appId) {
+        return gatewayService.sqlOperate(sql, appId, GatewaySqlConstant.SQL_SEARCH);
     }
 
     /**************************************** private method *************************************************/

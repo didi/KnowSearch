@@ -81,7 +81,6 @@ export interface ITaskNodeMap {
   clientnode: INodeTask[];
   datanode: INodeTask[];
   masternode: INodeTask[];
-  coldnode: INodeTask[];
 }
 
 export interface INodeTask {

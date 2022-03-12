@@ -101,6 +101,7 @@ public class RestMultiSearchAction extends ESAction {
         ActionListener<ESMultiSearchResponse> multiListener = new RestActionListenerImpl<ESMultiSearchResponse>(queryContext) {
             @Override
             public void onResponse(ESMultiSearchResponse esMultiSearchResponse) {
+                super.onResponse(esMultiSearchResponse);
 
                 JoinLogContext joinLogContext = queryContext.getJoinLogContext();
                 joinLogContext.setTotalCost(System.currentTimeMillis() - queryContext.getRequestTime());
@@ -109,6 +110,7 @@ public class RestMultiSearchAction extends ESAction {
                     if (esSearchResponse == null) {
                         continue;
                     }
+                    joinLogContext.setClientNode(esSearchResponse.getHost().getHostName() + ":" + esSearchResponse.getHost().getPort());
                     logSearchResponse(queryContext, esSearchResponse);
                 }
                 super.onResponse(esMultiSearchResponse);

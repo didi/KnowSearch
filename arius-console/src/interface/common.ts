@@ -101,10 +101,10 @@ export interface IXFormWrapper {
   noform?: boolean;
   nofooter?: boolean;
   isWaitting?: boolean;
+  funcType?: string;
   layout?: "inline" | "horizontal" | "vertical";
   actionAfterFailedSubmit?: () => any;
   actionAfterSubmit?: (res: any) => any;
-  onHandleValuesChange?: (value: any, allValues: object) => any;
 }
 
 export interface IAction {

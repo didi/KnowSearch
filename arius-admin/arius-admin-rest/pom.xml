@@ -151,7 +151,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -162,7 +161,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -179,12 +177,6 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>net.bytebuddy</groupId>
-                    <artifactId>byte-buddy</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -282,7 +274,7 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.glassfish.jersey.bundles.repackaged</groupId>
-                    <artifactId>jersey-guava</artifactId>
+                    <artifactId>jersey-guava </artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.glassfish.jersey.core</groupId>
@@ -334,10 +326,6 @@
                 <exclusion>
                     <groupId>org.glassfish.jaxb</groupId>
                     <artifactId>txw2</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.bytebuddy</groupId>
-                    <artifactId>byte-buddy</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -499,12 +487,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
             <exclusions>
@@ -526,29 +508,6 @@
         <finalName>arius-admin-rest</finalName>
 
         <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
-                <configuration>
-                    <!--表示执行任何子目录下所有命名以Test结尾的java类-->
-                    <includes>
-                        <include>**/*Test.java</include>
-                    </includes>
-                    <!--表示不执行任何子目录下所有命名以Test开头的java类-->
-                    <excludes>
-                        <exclude>**/Test*.java</exclude>
-                    </excludes>
-                    <reportsDirectory>${basedir}/test_output</reportsDirectory>
-                    <!-- 忽略测试套件执行过程中失败的测试方法，继续执行剩余的测试类和测试方法 -->
-                    <testFailureIgnore>true</testFailureIgnore>
-                    <!-- 并行执行最大线程数 -->
-                    <forkCount>2</forkCount>
-                    <!-- 是否可以重用 -->
-                    <reuseForks>true</reuseForks>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <groupId>org.springframework.boot</groupId>

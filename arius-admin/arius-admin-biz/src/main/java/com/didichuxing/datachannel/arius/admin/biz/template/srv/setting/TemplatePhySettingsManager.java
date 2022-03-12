@@ -32,6 +32,6 @@ public interface TemplatePhySettingsManager {
      * @param settings 增量配置
      * @return
      */
-    boolean mergeTemplateSettings(Integer logicId, String cluster, String template, String operator,
+    boolean mergeTemplateSettings(String cluster, String template,
                                   Map<String, String> settings) throws AdminOperateException;
 }

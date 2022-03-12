@@ -141,12 +141,6 @@ public class ESIndexServiceImpl implements ESIndexService {
             () -> esIndexDAO.putIndexSetting(cluster, indices, settingName, settingValue, defaultValue));
     }
 
-    @Override
-    public boolean syncPutIndexSettings(String cluster, List<String> indices, Map<String, String> settings, int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("putIndexSettings", retryCount,
-                () -> esIndexDAO.putIndexSettings(cluster, indices, settings));
-    }
-
     /**
      * 获取索引信息
      *
@@ -231,26 +225,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         return shouldDels.size() - result.getFailAndErrorCount();
     }
 
-    @Override
-    public boolean syncBatchCloseIndices(String cluster, List<String> shouldCloses, int retryCount) throws ESOperateException {
-        if (CollectionUtils.isEmpty(shouldCloses)) {
-            return true;
-        }
-
-        return ESOpTimeoutRetry.esRetryExecute("closeIndex", retryCount,
-                () -> esIndexDAO.closeIndex(cluster, shouldCloses));
-    }
-
-    @Override
-    public boolean syncBatchOpenIndices(String cluster, List<String> shouldOpens, int retryCount) throws ESOperateException {
-        if (CollectionUtils.isEmpty(shouldOpens)) {
-            return true;
-        }
-
-        return ESOpTimeoutRetry.esRetryExecute("openIndex", retryCount,
-                () -> esIndexDAO.openIndex(cluster, shouldOpens));
-    }
-
     /**
      * 删除文档
      *
@@ -333,10 +307,10 @@ public class ESIndexServiceImpl implements ESIndexService {
      */
     @Override
     public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) {
-        int retryCount = 1;
+        int retryCount = 20;
         while (retryCount-- > 0) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
@@ -483,38 +457,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.existByClusterAndIndexName(cluster, indexName);
     }
 
-    @Override
-    public AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo) {
-        AtomicLong totalCheckpoint = new AtomicLong(0);
-        if (stat == null) {
-            return totalCheckpoint;
-        }
-
-        stat.getShards().forEach((shard, v) -> v.forEach(commonStat -> {
-            if (!commonStat.getRouting().isPrimary()) {
-                return;
-            }
-
-            if (null == commonStat.getSeqNo()) {
-                LOGGER.warn(
-                    "class=ESIndexServiceImpl||method=syncGetTotalCheckpoint||indexName={}||shard={}||msg=commonStat seqNo is empty", index, shard);
-                return;
-            }
-
-            if (commonStat.getSeqNo().getMaxSeqNo() != commonStat.getSeqNo().getGlobalCheckpoint()) {
-                LOGGER.warn(
-                    "class=ESIndexServiceImpl||method=syncGetTotalCheckpoint||indexName={}||shard={}||msg=primary maxSeqNo({})!=globalCheckpoint({})",
-                    index, shard, commonStat.getSeqNo().getMaxSeqNo(), commonStat.getSeqNo().getGlobalCheckpoint());
-                if (null != checkpointEqualSeqNo) {
-                    checkpointEqualSeqNo.set(false);
-                }
-            }
-
-            totalCheckpoint.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
-        }));
-        return totalCheckpoint;
-    }
-
     /***************************************** private method ****************************************************/
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
@@ -556,8 +498,8 @@ public class ESIndexServiceImpl implements ESIndexService {
 
             // 校验checkpoint
             AtomicBoolean checkpointEqualSeqNo = new AtomicBoolean(true);
-            AtomicLong totalCheckpoint1 = syncGetTotalCheckpoint(index, stat1, checkpointEqualSeqNo);
-            AtomicLong totalCheckpoint2 = syncGetTotalCheckpoint(index, stat2, checkpointEqualSeqNo);
+            AtomicLong totalCheckpoint1 = getTotalCheckpoint1(index, stat1, checkpointEqualSeqNo);
+            AtomicLong totalCheckpoint2 = getTotalCheckpoint2(index, stat2, checkpointEqualSeqNo);
 
             if (!checkpointEqualSeqNo.get()) {
                 return false;
@@ -571,6 +513,44 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
 
         return true;
+    }
+
+    private AtomicLong getTotalCheckpoint2(String index, IndexNodes stat2, AtomicBoolean checkpointEqualSeqNo) {
+        AtomicLong totalCheckpoint2 = new AtomicLong(0);
+        stat2.getShards().forEach((shard, v) -> v.forEach(commonStat -> {
+            if (!commonStat.getRouting().isPrimary()) {
+                return;
+            }
+
+            if (commonStat.getSeqNo().getMaxSeqNo() != commonStat.getSeqNo().getGlobalCheckpoint()) {
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||shard={}||msg=replica maxSeqNo({})!=globalCheckpoint({})",
+                    index, shard, commonStat.getSeqNo().getMaxSeqNo(), commonStat.getSeqNo().getGlobalCheckpoint());
+                checkpointEqualSeqNo.set(false);
+            }
+
+            totalCheckpoint2.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
+        }));
+        return totalCheckpoint2;
+    }
+
+    private AtomicLong getTotalCheckpoint1(String index, IndexNodes stat1, AtomicBoolean checkpointEqualSeqNo) {
+        AtomicLong totalCheckpoint1 = new AtomicLong(0);
+        stat1.getShards().forEach((shard, v) -> v.forEach(commonStat -> {
+            if (!commonStat.getRouting().isPrimary()) {
+                return;
+            }
+
+            if (commonStat.getSeqNo().getMaxSeqNo() != commonStat.getSeqNo().getGlobalCheckpoint()) {
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||shard={}||msg=primary maxSeqNo({})!=globalCheckpoint({})",
+                    index, shard, commonStat.getSeqNo().getMaxSeqNo(), commonStat.getSeqNo().getGlobalCheckpoint());
+                checkpointEqualSeqNo.set(false);
+            }
+
+            totalCheckpoint1.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
+        }));
+        return totalCheckpoint1;
     }
 
     private boolean createIndexInner(String cluster, String indexName, int retryCount) throws ESOperateException {

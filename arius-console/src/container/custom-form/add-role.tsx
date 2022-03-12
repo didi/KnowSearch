@@ -1,5 +1,5 @@
-import { MinusOutlined, PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Select, Tooltip, Input, Checkbox, Form } from 'antd';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Select, Tooltip, Input, InputNumber, Form } from 'antd';
 import React from 'react';
 import './index.less'
 import { regIp } from 'constants/reg';
@@ -36,8 +36,6 @@ export class AddRole extends React.Component<any> {
       }
     ],
     isShow: false,
-    isFullType: this.props.isFullType || false,
-    isCold: false,
     check: {
       masternode: {
         tipText: '',
@@ -50,11 +48,7 @@ export class AddRole extends React.Component<any> {
       datanode: {
         tipText: '',
         isTip: false
-      },
-      'Cold属性节点': {
-        tipText: '',
-        isTip: false
-      },
+      }
     } as { [key: string]: { tipText: string, isTip: boolean } },
     addNodeTypeList: [
       {
@@ -68,33 +62,6 @@ export class AddRole extends React.Component<any> {
     ] as Item[]
   }
 
-  setFullType = (isFullType: boolean) => {
-    this.setState({
-      isFullType,
-    });
-
-    // 非全量类型，且未展示全部时
-    if (!isFullType && !this.state.isShow) {
-      this.setState({
-        itemArr: [
-          this.state.itemArr[0],
-          {
-            type: 'clientnode',
-            value: null,
-            port: "",
-          },
-          {
-            type: 'datanode',
-            value: null,
-            port: ""
-          }]
-      }, () => {
-        this.handleTextArea();
-      });
-    }
-  }
-
-
   addFrom = () => {
     this.setState({
       isShow: !this.state.isShow
@@ -107,7 +74,7 @@ export class AddRole extends React.Component<any> {
     this.setState({
       isShow: !this.state.isShow,
       itemArr: [
-        this.state.itemArr[0],
+        this.state.itemArr[0], 
         {
           type: 'clientnode',
           value: null,
@@ -134,9 +101,6 @@ export class AddRole extends React.Component<any> {
       }
       return item
     }));
-    if (this.state.isFullType) {
-      return this.handleChange(arr);
-    }
     if (!this.state.isShow) {
       this.handleChange(arr.splice(0, 1));
       return;
@@ -164,17 +128,11 @@ export class AddRole extends React.Component<any> {
 
   checkText(value, type) {
     const obj = this.state.check;
-    // 非master不做空判断
-    if (!value && type == 'masternode') {
+    console.log(1111, value, type);
+    if (!value) {
       obj[type] = {
-        tipText: this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888 ，不同IP用换行符分隔。',
+        tipText: this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888',
         isTip: true
-      };
-      return obj[type]?.isTip;
-    } else if (!value) {
-      obj[type] = {
-        tipText: '',
-        isTip: false
       };
       return obj[type]?.isTip;
     }
@@ -189,7 +147,7 @@ export class AddRole extends React.Component<any> {
       });
       if (flat_isHost) {
         obj[type] = {
-          tipText: this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888 ，不同IP用换行符分隔。',
+          tipText: this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888',
           isTip: true
         }
       } else if (((new Set(values)).size != values.length) && this.props.isHost) {
@@ -283,59 +241,16 @@ export class AddRole extends React.Component<any> {
   }
 
   renderItem = (item: Item, key: number) => {
-    const { check, itemArr, isCold } = this.state;
+    const { check, itemArr } = this.state;
     return (
       <div key={key}>
         <div className='add-role-header'>
-          <div>
-            <span>{item.value}</span>
-            {
-              this.props.cold && item.value === 'datanode' ?
-                <span style={{ marginLeft: 60, display: 'inline-block' }}>
-                  <Checkbox checked={isCold} onChange={(e) => {
-                    let addNodeTypeList = this.state.addNodeTypeList;
-                    let itemArr: any = this.state.itemArr;
-                    // cold开关
-                    if (e.target.checked) {
-                      if (addNodeTypeList && addNodeTypeList.length === 2) {
-                        addNodeTypeList.push({
-                          value: 'Cold属性节点',
-                          disabled: true
-                        });
-                      }
-                      if (itemArr && itemArr.length === 3) {
-                        itemArr.push({
-                          type: 'Cold属性节点',
-                          value: null,
-                          port: "",
-                          beCold: e.target.checked ? 'true' : 'false',
-                        })
-                      }
-                    } else {
-                      if (addNodeTypeList && addNodeTypeList.length === 3) {
-                        addNodeTypeList.pop();
-                      }
-                      if (itemArr && itemArr.length === 4) {
-                        itemArr.pop();
-                      }
-                    }
-                    this.setState({
-                      addNodeTypeList,
-                      isCold: e.target.checked,
-                      itemArr,
-                    }, () => {
-                      !e.target.checked ? this.handleTextArea() : this.handleTextArea('add');
-                    });
-                  }}>配置Cold节点</Checkbox>
-                  <Tooltip title={'如需开启冷热分离服务，需要将部分data节点的rack属性值设为Cold。注：cold节点不能划分region，请谨慎设置'}><QuestionCircleOutlined /></Tooltip>
-                </span> : null
-            }
-          </div>
+          <div>{item.value}</div>
           {/* {
             key === 0 ? <a href="#" onClick={() => this.del()} >删除</a> : null
           } */}
         </div>
-        <TextArea value={itemArr[key + 1].value} style={check[item.value]?.isTip ? null : {  borderColor: '#d9d9d9', boxShadow: 'none' }} onChange={(value) => this.handleTextArea(value, item.value)} rows={2} placeholder={this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888 ，不同IP用换行符分隔。'} />
+        <TextArea value={itemArr[key + 1].value} onChange={(value) => this.handleTextArea(value, item.value)} rows={2} placeholder={this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888'} />
         {
           check[item.value]?.isTip ?
             <p style={{ color: '#ff4d4f' }}>{check[item.value]?.tipText}</p>
@@ -363,52 +278,30 @@ export class AddRole extends React.Component<any> {
   componentDidMount() {
     const { value } = this.props;
     if (value) {
-      const arr: any = this.state.itemArr.map((item, index) => {
+      const arr = this.state.itemArr.map((item, index) => {
         if (item.type === value[index]?.type) {
           item.value = value[index]?.value
         }
         return item;
       });
-      const addNodeTypeList = this.state.addNodeTypeList;
-      let isCold = this.state.isCold
-      // 兼容cold情况
-      if (value && value.length === 4) {
-        arr.push({
-          type: 'Cold属性节点',
-          value: value[3]?.value,
-          port: "",
-          beCold: value[3]?.beCold,
-        })
-        addNodeTypeList.push({
-          value: 'Cold属性节点',
-          disabled: true
-        });
-        if (value[3]?.beCold) {
-          isCold = value[3]?.beCold === 'true';
-        }
-      }
       if (value.length > 1) {
         this.setState({
           itemArr: arr,
-          isShow: true,
-          addNodeTypeList,
-          isCold
+          isShow: true
         })
       } else {
         this.setState({
           itemArr: arr,
-          isShow: false,
-          addNodeTypeList,
-          isCold
+          isShow: false
         })
       }
     }
   }
 
   render() {
-    let { addNodeTypeList, isShow, check, itemArr, isFullType } = this.state;
+    let { addNodeTypeList, isShow, check, itemArr } = this.state;
     return <>
-      <TextArea value={itemArr[0].value} rows={2} onChange={(value) => this.handleTextArea(value, 'masternode')} placeholder={this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888 ，不同IP用换行符分隔。'} />
+      <TextArea value={itemArr[0].value} rows={2} onChange={(value) => this.handleTextArea(value, 'masternode')} placeholder={this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888'} />
       {
         check['masternode']?.isTip || (window as any)?.masternodeErr ?
           <p style={{ color: '#ff4d4f' }}>{check['masternode']?.tipText || '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割'}</p>
@@ -439,26 +332,23 @@ export class AddRole extends React.Component<any> {
         </Form.Item>
         : ""
       }
-      {!isFullType ? <div style={{ marginTop: 10 }}>
+      <div style={{marginTop: 10}}>
         {
           !isShow ?
             <Button type="primary" size='small' onClick={this.addFrom}>
               <PlusOutlined /> 添加节点类型
             </Button>
             :
-            <Button
-              type="primary"
-              size='small'
-              onClick={() => {
-                this.del()
-              }}
-              style={{ marginBottom: 10 }}>
+            <Button type="primary" size='small' onClick={() => {
+              this.del()
+            }}
+            style={{marginBottom: 10}}>
               <MinusOutlined /> 删除节点类型
             </Button>
         }
-      </div> : null}
+      </div>
       {
-        isShow || isFullType ?
+        isShow ?
           addNodeTypeList.map((item, index) => this.renderItem(item, index))
           :
           null

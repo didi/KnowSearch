@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.client.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cache.CacheGlobalNamesContent.CACHE_GLOBAL_NAME;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
 
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -59,7 +60,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
@@ -79,7 +79,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
@@ -332,13 +331,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer appId) {
-        List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), ConsoleClusterVO.class);
-        for(ConsoleClusterVO consoleClusterVO : list) {
-            List<String> clusterPhyNames = regionRackService.listPhysicClusterNames(consoleClusterVO.getId());
-            consoleClusterVO.setPhyClusterAssociated(!AriusObjUtils.isEmptyList(clusterPhyNames));
-            consoleClusterVO.setAssociatedPhyClusterName(clusterPhyNames);
-        }
-        return Result.buildSucc(list);
+        return Result.buildSucc(ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), ConsoleClusterVO.class));
     }
 
     /**
@@ -436,6 +429,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(ConvertUtil.list2List(esMachineNormsPOS, ESClusterNodeSepcVO.class));
     }
 
+    @Cacheable(cacheNames = CACHE_GLOBAL_NAME, key = "#appId + '@' + 'getConsoleClusterVOS'")
     @Override
     public List<ConsoleClusterVO> getConsoleClusterVOS(ESLogicClusterDTO param, Integer appId) {
         List<ClusterLogic> clusterLogics = clusterLogicService.listClusterLogics(param);
@@ -481,7 +475,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 	@Override
 	public Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator,
 			Integer appId) {
-		Result<Long> result = clusterLogicService.createClusterLogic(param);
+		Result<Long> result = clusterLogicService.createClusterLogic(param, operator);
 
 		if (result.success()) {
 			SpringTool.publish(new ClusterLogicEvent(result.getData(), appId));
@@ -606,49 +600,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         return true;
-    }
-
-    @Override
-    public Result<Void> checkTemplateDataSizeValidForCreate(Long logicClusterId, String templateSize) {
-        //所有的磁盘大小类型统一到字节数进行比较
-        float beSetDiskSizeOfTemplate = Float.valueOf(SizeUtil.getUnitSize(templateSize + "gb"));
-
-        //获取逻辑集群绑定的region
-        List<ClusterRegion> clusterRegions = regionRackService.listLogicClusterRegions(logicClusterId);
-        if (CollectionUtils.isEmpty(clusterRegions)) {
-            return Result.buildFail("指定的逻辑集群没有绑定任何物理集群的region");
-        }
-
-        //对于region按照物理集群名称进行分组
-        Map<String, List<ClusterRegion>> stringRegionListMap = ConvertUtil.list2MapOfList(clusterRegions,
-                ClusterRegion::getPhyClusterName, ClusterRegion -> ClusterRegion);
-
-        //这里设置用户侧在模板中可以设置的最大的数据大小
-        float canCreateTemplateDiskSize = 0F;
-
-        //对于不同分组下的region的可使用磁盘大小进行计算
-        for (Map.Entry</*物理集群名称*/String, /*逻辑绑定的物理集群下的region列表*/List<ClusterRegion>> entry : stringRegionListMap.entrySet()) {
-            //获取指定物理集群的r关于rack的磁盘总量分布情况
-            Map</*rack*/String, /*rack上的磁盘总量*/Float> allocationInfoOfRackMap = esClusterService.getAllocationInfoOfRack(entry.getKey());
-            List<ClusterRegion> logicBindRegions = entry.getValue();
-            if (CollectionUtils.isEmpty(logicBindRegions)) {
-                continue;
-            }
-
-            //统计region可以使用的最大磁盘容量
-            for (ClusterRegion clusterRegion : logicBindRegions) {
-                canCreateTemplateDiskSize = Float.max(canCreateTemplateDiskSize, esClusterPhyService.getSurplusDiskSizeOfRacks(clusterRegion.getPhyClusterName(),
-                        clusterRegion.getRacks(), allocationInfoOfRackMap));
-            }
-
-        }
-
-        if (canCreateTemplateDiskSize > beSetDiskSizeOfTemplate) {
-            return Result.buildSuccWithMsg("模板数据大小设置成功");
-        }
-
-        return Result.buildFail("当前数据大小超过最大可设置大小"
-                + SizeUtil.getUnitSizeAndFormat((long) canCreateTemplateDiskSize, 0).replace(".0", "").toUpperCase(Locale.ROOT) + ",请输入正确数值");
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.po;
 
 import java.util.Date;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 
@@ -118,11 +117,5 @@ public class CapacityPlanRegionStatisESPO extends BaseESPO {
     @Override
     public String getKey() {
         return regionId + "@" + AriusDateUtils.date2Str(timestamp, "yyyy-MM-dd HH:mm");
-    }
-
-    @Override
-    @JSONField(serialize = false)
-    public String getRoutingValue() {
-        return null;
     }
 }

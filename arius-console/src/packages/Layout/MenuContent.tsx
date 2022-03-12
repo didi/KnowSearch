@@ -17,7 +17,7 @@ interface Props {
   className?: string,
   menuMode?: 'vertical' | 'vertical-left' | 'vertical-right' | 'horizontal' | 'inline' | undefined,
   menuTheme?: 'dark' | 'light' | undefined,
-  menuStyle?: React.CSSProperties | any,
+  menuStyle?: React.CSSProperties,
   menuConf?: MenuConfItem[],
   collapsed: boolean,
   permissionPoints: any,

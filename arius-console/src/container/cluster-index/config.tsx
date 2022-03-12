@@ -1,9 +1,9 @@
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { IColumnsType } from "component/dantd/query-form/QueryForm";
-import { ITemplateLogic } from "typesPath/cluster/physics-type";
-import { IIndex, IOpTemplateIndex } from "typesPath/index-types";
+import { ITemplateLogic } from "@types/cluster/physics-type";
+import { IIndex, IOpTemplateIndex } from "@types/index-types";
 import { delTemplatePhysical, updateAppAuth, checkEditMapping } from "api/cluster-index-api";
-import { Modal, notification, Tooltip, message } from "antd";
+import { Modal, notification, Tooltip } from "antd";
 import { ITableBtn } from "component/dantd/dtable";
 import { FormItemType, IFormItem } from "component/x-form";
 import {
@@ -21,8 +21,6 @@ import moment from "moment";
 import React from "react";
 import { getOptions } from "container/cluster/config";
 import { isOpenUp } from "constants/common";
-import { rolloverSwitch } from "api/cluster-index-api";
-import { checkEditTemplateSrv } from "api/cluster-api";
 
 const { confirm } = Modal;
 
@@ -72,12 +70,13 @@ export const getBtnLogicIndexList = (
   // 是否为系统数据
   const isSystemData = record.dataType === 0;
   const currentIsOpenUp = isSystemData && isOpenUp;
+
   let authBtns = [
     {
       label: "申请权限",
       type: "primary",
       isOpenUp: currentIsOpenUp,
-      clickFunc: () => {
+      clickFunc: (record: ITemplateLogic) => {
         setModalId("logicApplyAuth", record, reloadData);
       },
     },
@@ -89,7 +88,7 @@ export const getBtnLogicIndexList = (
         label: "降级权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        clickFunc: () => {
+        clickFunc: (record: ITemplateLogic) => {
           confirm({
             title: "降级权限",
             icon: <QuestionCircleOutlined style={{ color: "red" }} />,
@@ -113,7 +112,7 @@ export const getBtnLogicIndexList = (
         label: "取消权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        clickFunc: () => {
+        clickFunc: (record: ITemplateLogic) => {
           confirm({
             title: "取消权限",
             icon: <QuestionCircleOutlined style={{ color: "red" }} />,
@@ -142,7 +141,7 @@ export const getBtnLogicIndexList = (
         label: "升级权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        clickFunc: () => {
+        clickFunc: (record: ITemplateLogic) => {
           setModalId("logicApplyAuth", record, reloadData);
           return;
         },
@@ -151,7 +150,7 @@ export const getBtnLogicIndexList = (
         label: "取消权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        clickFunc: () => {
+        clickFunc: (record: ITemplateLogic) => {
           confirm({
             title: "取消权限",
             icon: <QuestionCircleOutlined style={{ color: "red" }} />,
@@ -177,6 +176,17 @@ export const getBtnLogicIndexList = (
   const clearHref = `/index/clear?id=${record.id}`;
 
   const btns: any[] = [
+    {
+      label: currentIsOpenUp ? "编辑" : <NavRouterLink element={"编辑"} href={href} />,
+      isOpenUp: currentIsOpenUp,
+      isRouterNav: true,
+    },
+    // {
+    //   label: '扩缩容',
+    //   clickFunc: () => {
+    //     setModalId('expandShrinkIndex', record.id, reloadData);
+    //   },
+    // },
     {
       label: "编辑Mapping",
       isOpenUp: currentIsOpenUp,
@@ -211,52 +221,6 @@ export const getBtnLogicIndexList = (
       },
     },
     {
-      label: "编辑Setting",
-      isOpenUp: currentIsOpenUp,
-      tip: '',
-      clickFunc: () => {
-        checkEditTemplateSrv(record.id, 5)
-          .then((res) => {
-            if (res.code !== 0 && res.code !== 200) {
-              Modal.confirm({
-                title: "提示",
-                content: res.message || "",
-                okText: "确认",
-                cancelText: "取消",
-                onOk: () => {},
-              });
-            } else {
-              setModalId("editSetting", record.id, reloadData);
-            }
-          })
-      },
-    },
-    {
-      label: `${record.disableIndexRollover ? '开启' : '关闭'}Rollover`,
-      isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? '预置系统数据，不支持操作' : '',
-      clickFunc: () => {
-        Modal.confirm({
-          title: "提示",
-          width: 550,
-          content: (
-            <>
-              <div>确定{record.disableIndexRollover ? '开启' : '关闭'}索引RollOver能力?</div>
-              <div>{record.disableIndexRollover ? '开启后会影响索引Update和Delete能力以及指定id 写入，更新，删除' : null}</div>
-            </>
-          ),
-          okText: "确认",
-          cancelText: "取消",
-          onOk: () => {
-            rolloverSwitch(record.id, record.disableIndexRollover ? '1' : '0').then(() => {
-              message.success('操作成功');
-              reloadData();
-            })
-          },
-        });
-      },
-    },
-    {
       label: "升版本",
       isOpenUp: currentIsOpenUp,
       clickFunc: () => {
@@ -269,11 +233,6 @@ export const getBtnLogicIndexList = (
       clickFunc: () => {
         setModalId("phyModifyIndex", record.id, reloadData);
       },
-    },
-    {
-      label: currentIsOpenUp ? "编辑" : <NavRouterLink element={"编辑"} href={href} />,
-      isOpenUp: currentIsOpenUp,
-      isRouterNav: true,
     },
     {
       label: "转让",
@@ -300,7 +259,7 @@ export const getBtnLogicIndexList = (
     return btns;
   }
 
-  return authBtns as any;
+  return authBtns;
 };
 
 const authChange = (req, reloadData) => {
@@ -547,7 +506,7 @@ export const getPhysicsIndexColumns = (
       key: "operation",
       render: (text: number, record: ILogicIndex) => {
         const btns = getBtns(record);
-        return renderOperationBtns(btns as any, record);
+        return renderOperationBtns(btns, record);
       },
     },
   ];

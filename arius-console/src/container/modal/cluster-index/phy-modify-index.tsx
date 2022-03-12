@@ -5,7 +5,7 @@ import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { notification, Modal, Spin } from 'antd';
 import { getPhysicalTemplateIndexDetail, editTemplateIndex } from 'api/cluster-index-api';
-import { IOpTemplateIndexDetail } from 'typesPath/index-types';
+import { IOpTemplateIndexDetail } from '@types/index-types';
 
 const mapStateToProps = state => ({
   params: state.modal.params,

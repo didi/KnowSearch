@@ -1,4 +1,4 @@
-import { notification, message } from 'antd';
+import { notification } from 'antd';
 import { csrfTokenMethod } from '../constants/api';
 import { getCookie, getCurrentProject } from './utils';
 
@@ -7,7 +7,6 @@ export interface IRes {
   code: number;
   message: string;
   data: any;
-  tip: string;
 }
 
 const checkStatus = (res: Response) => {
@@ -37,9 +36,6 @@ const filter = (init: IInit) => (res: IRes) => {
       });
       throw res;
     }
-  }
-  if (res && res?.tip) {
-    message.info(res?.tip || '');
   }
   if (init.returnRes) {
     return res;
@@ -95,12 +91,6 @@ export default function fetch(url: string, init?: IInit) {
 
   init = addCustomHeader(init)
   const realUrl = `${prefix}${url}`;
-
-  // 自动取消配置， 延迟2秒自动取消
-  // let controller = new AbortController();
-  // setTimeout(() => controller.abort(), 2000);
-
-  // init = { ...init, signal: controller.signal }
   return window
     .fetch(realUrl, init)
     .then(res => checkStatus(res))

@@ -64,14 +64,6 @@ public class Result<T> extends BaseResult {
         return result;
     }
 
-    public static <T> Result<T> buildFail(T data) {
-        Result<T> result = new Result<>();
-        result.setCode(ResultType.FAIL.getCode());
-        result.setMessage(ResultType.FAIL.getMessage());
-        result.setData(data);
-        return result;
-    }
-
     public static <T> Result<T> buildFail() {
         Result<T> result = new Result<>();
         result.setCode(ResultType.FAIL.getCode());
@@ -149,7 +141,7 @@ public class Result<T> extends BaseResult {
         return result;
     }
 
-    public static <T> Result<T> buildSuccWithMsg(String msg) {
+    public static <T> Result<T> buildSucc(String msg) {
         Result<T> result = new Result<>();
         result.setCode(ResultType.SUCCESS.getCode());
         result.setMessage(msg);

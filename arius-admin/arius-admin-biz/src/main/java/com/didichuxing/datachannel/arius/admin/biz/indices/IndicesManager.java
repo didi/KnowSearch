@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesClearDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesOpenOrCloseDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexShardInfoVO;
@@ -34,16 +33,6 @@ public interface IndicesManager {
      * @return           Boolean
      */
     Result<Boolean> batchDeleteIndex(List<IndicesClearDTO> params, Integer appId, String operator);
-
-    /**
-     * 关闭索引
-     * @param params         关闭索引信息
-     * @param indexNewStatus true 开启索引标识，false 关闭索引标识
-     * @param appId          项目
-     * @param operator       操作人
-     * @return               Boolean
-     */
-    Result<Boolean> batchUpdateIndexStatus(List<IndicesOpenOrCloseDTO> params, boolean indexNewStatus, Integer appId, String operator);
 
     /**
      * 配合删除真实集群索引使用

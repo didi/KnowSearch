@@ -202,9 +202,4 @@ public class TemplateFieldPO extends BaseESPO {
     public String getKey() {
         return "" + id;
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
 }

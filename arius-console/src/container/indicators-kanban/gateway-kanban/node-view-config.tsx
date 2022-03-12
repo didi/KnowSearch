@@ -4,25 +4,20 @@ export const indexConfigClassifyList: string[] = ["节点性能指标"];
 
 export const indexConfigData = {
   writeGatewayNode: {
-    name: "gatewayNode写入",
+    name: "gateway对节点写入量",
     unit: unitMap.itemMin,
     classify: indexConfigClassifyList[0],
   },
   queryGatewayNode: {
-    name: "gatewayNode查询",
-    unit: unitMap.mins,
+    name: "各gateway节点查询分布",
+    unit: unitMap.numS,
     classify: indexConfigClassifyList[0],
   },
-  // queryClientNode: {
-  //   name: "gateway各clientnode查询分布",
-  //   unit: unitMap.numS,
-  //   classify: indexConfigClassifyList[0],
-  // },
-  // writeClientNode: {
-  //   name: "gateway各clientnode写入分布",
-  //   unit: unitMap.itemMin,
-  //   classify: indexConfigClassifyList[0],
-  // },
+  queryClientNode: {
+    name: "gateway各clientnode查询分布",
+    unit: unitMap.numS,
+    classify: indexConfigClassifyList[0],
+  },
 };
 
 // 给指标配置项添加标题

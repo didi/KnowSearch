@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesOpenOrCloseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,22 +52,6 @@ public class ESIndicesController {
     public Result<Boolean> delete(@RequestBody List<IndicesClearDTO> params, HttpServletRequest request) {
         return indicesManager.batchDeleteIndex(params, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
-    }
-
-    @PutMapping("/close")
-    @ResponseBody
-    @ApiOperation(value = "关闭索引")
-    public Result<Boolean> close(@RequestBody List<IndicesOpenOrCloseDTO> params, HttpServletRequest request) {
-        return indicesManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
-                HttpRequestUtils.getOperator(request));
-    }
-
-    @PutMapping("/open")
-    @ResponseBody
-    @ApiOperation(value = "开启索引")
-    public Result<Boolean> open(@RequestBody List<IndicesOpenOrCloseDTO> params, HttpServletRequest request) {
-        return indicesManager.batchUpdateIndexStatus(params, true, HttpRequestUtils.getAppId(request),
-                HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/block")

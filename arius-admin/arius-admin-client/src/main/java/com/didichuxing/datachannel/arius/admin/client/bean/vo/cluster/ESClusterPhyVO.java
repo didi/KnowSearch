@@ -61,9 +61,6 @@ public class ESClusterPhyVO extends BaseVO implements Comparable<ESClusterPhyVO>
     @ApiModelProperty("es版本")
     private String                       esVersion;
 
-    @ApiModelProperty("镜像地址")
-    private String                       imageName;
-
     @ApiModelProperty("集群所开放的索引服务")
     private List<ESClusterTemplateSrvVO> esClusterTemplateSrvVOS;
 
@@ -92,10 +89,7 @@ public class ESClusterPhyVO extends BaseVO implements Comparable<ESClusterPhyVO>
     private String                      writeAction;
 
     @ApiModelProperty("集群状态")
-    private Integer                     health;
-
-    @ApiModelProperty("活跃的分片数目")
-    private Long                        activeShardNum;
+    private Integer                      health;
 
     @Override
     public int compareTo(ESClusterPhyVO o) {

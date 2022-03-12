@@ -27,9 +27,4 @@ public class HealthCheckErrInfoPO extends BaseESPO {
     public String getKey() {
         return template;
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
 }

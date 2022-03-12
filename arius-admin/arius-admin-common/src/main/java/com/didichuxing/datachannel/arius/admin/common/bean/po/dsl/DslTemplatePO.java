@@ -164,9 +164,4 @@ public class DslTemplatePO extends BaseESPO {
     public String getKey() {
         return String.format("%d_%s", this.appid, this.dslTemplateMd5);
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
 }

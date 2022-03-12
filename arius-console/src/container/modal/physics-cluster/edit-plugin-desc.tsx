@@ -55,7 +55,7 @@ const EditPluginDesc = () => {
     },
     onSubmit: (result: any) => {
       const { desc } = result;
-      return editPlug(record.id, desc)
+      editPlug(record.id, desc)
         .then(() => {
           notification.success({ message: `编辑成功` });
         })

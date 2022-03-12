@@ -3,15 +3,15 @@ import { transTimeFormat, transTimeStamp } from "lib/utils";
 import { Link } from "react-router-dom";
 import { IColumnsType } from "component/dantd/query-form/QueryForm";
 import { Modal, DatePicker, message } from "antd";
-import { IStatusMap } from "typesPath/base-types";
+import { IStatusMap } from "types/base-types";
 import { renderOperationBtns } from "container/custom-component";
 import { taskStatus, taskDo, jobStop } from "api/Scheduling";
-import moment from "moment";
+import moment from 'moment';
 const { confirm } = Modal;
 
 export const StatusMap = {
-  0: "Paused",
-  1: "Normal",
+  0: 'Peused',
+  1: 'Normal',
 } as IStatusMap;
 
 export const logStatusMap = {
@@ -40,8 +40,17 @@ export const mockData = [
   },
 ];
 
-export const getSchedulingLogColumns = (reloadData: Function, showDetail: Function, showLog: Function) => {
-  const getCongigBtnList = (reloadData: any, showDetail: Function, showLog: Function, record) => {
+export const getSchedulingLogColumns = (
+  reloadData: Function,
+  showDetail: Function,
+  showLog: Function
+) => {
+  const getCongigBtnList = (
+    reloadData: any,
+    showDetail: Function,
+    showLog: Function,
+    record
+  ) => {
     return [
       {
         label: "调度详情",
@@ -56,7 +65,11 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
         },
       },
       {
-        label: `${record.status === 2 && record.result.indexOf("0") !== -1 ? "终止任务" : ""}`,
+        label: `${
+          record.status === 2 && record.result.indexOf("0") !== -1
+            ? "终止任务"
+            : ""
+        }`,
         clickFunc: () => {
           showStop(record, reloadData);
         },
@@ -80,12 +93,15 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
     {
       title: "调度时间",
       dataIndex: "createTime",
+      sorter: (a: any, b: any) =>
+        transTimeStamp(b.createTime) - transTimeStamp(a.createTime),
       render: (t: string) => transTimeFormat(t),
     },
     {
       title: "调度结果",
       dataIndex: "status",
       width: 100,
+      sorter: (a, b) => a.status - b.status,
       render: (text) => {
         return logStatusMap[text];
       },
@@ -93,17 +109,22 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
     {
       title: "执行开始时间",
       dataIndex: "startTime",
+      sorter: (a: any, b: any) =>
+        transTimeStamp(b.createTime) - transTimeStamp(a.createTime),
       render: (t: string) => (t ? transTimeFormat(t) : "-"),
     },
     {
       title: "执行结束时间",
       dataIndex: "endTime",
+      sorter: (a: any, b: any) =>
+        transTimeStamp(b.updateTime) - transTimeStamp(a.updateTime),
       render: (t: string) => (t ? transTimeFormat(t) : "-"),
     },
     {
       title: "执行结果",
       dataIndex: "result",
       width: 125,
+      sorter: (a, b) => a?.result - b?.result,
       render: (text) => {
         if (text) {
           const obj = JSON.parse(text);
@@ -117,7 +138,12 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
       dataIndex: "operation",
       width: 200,
       render: (text: any, record: any) => {
-        const btns: any = getCongigBtnList(reloadData, showDetail, showLog, record);
+        const btns: any = getCongigBtnList(
+          reloadData,
+          showDetail,
+          showLog,
+          record
+        );
         return renderOperationBtns(btns, record);
       },
     },
@@ -156,18 +182,16 @@ export const getSchedulingLogQueryXForm = (isDetail) => {
       dataIndex: "createTime",
       title: "调度时间",
       type: "custom",
-      component: (
-        <DatePicker.RangePicker
-          style={{ width: "100%" }}
-          ranges={{
-            近一天: [moment().subtract(1, "day"), moment()],
-            近一周: [moment().subtract(7, "day"), moment()],
-            近一月: [moment().subtract(1, "month"), moment()],
-          }}
-          showTime={{ format: "HH:mm" }}
-          format="YYYY-MM-DD"
-        />
-      ),
+      component: <DatePicker.RangePicker 
+        style={{ width: "100%" }} 
+        ranges={{
+          近一天: [moment().subtract(1, "day"), moment()],
+          近一周: [moment().subtract(7, "day"), moment()],
+          近一月: [moment().subtract(1, "month"), moment()],
+        }}
+        showTime={{ format: "HH:mm" }}
+        format="YYYY-MM-DD"
+      />,
     },
   ] as IColumnsType[];
   if (!isDetail) {
@@ -264,7 +288,10 @@ export const showStop = (record, reloadData: Function) => {
   });
 };
 
-export const getTaskListColumns = (reloadData: Function, showDetail: Function) => {
+export const getTaskListColumns = (
+  reloadData: Function,
+  showDetail: Function
+) => {
   const getCongigBtnList = (reloadData: Function, record: any) => {
     return [
       {
@@ -286,6 +313,7 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
       title: "任务ID",
       dataIndex: "id",
       width: 90,
+      sorter: (a, b) => a.id - b.id,
       render: (text: any, record: any) => {
         const btns: any = [
           {
@@ -302,13 +330,21 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
       title: "任务描述",
       dataIndex: "taskDesc",
       width: "20vw",
-      render: (text) => <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>{text}</div>,
+      render: (text) => (
+        <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>
+          {text}
+        </div>
+      ),
     },
     {
       title: "JobHandler",
       dataIndex: "className",
       width: "20vw",
-      render: (text) => <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>{text}</div>,
+      render: (text) => (
+        <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>
+          {text}
+        </div>
+      ),
     },
     {
       title: "Corn",
@@ -322,16 +358,15 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
       title: "状态",
       dataIndex: "status",
       width: 90,
+      sorter: (a, b) => a.status - b.status,
       render: (t: number) => {
-        if (StatusMap[t] === "Normal") {
-          return (
-            <div>
-              <svg className="icon" aria-hidden="true" style={{ marginRight: 5 }}>
-                <use xlinkHref="#iconwancheng"></use>
-              </svg>
-              {StatusMap[t]}
-            </div>
-          );
+        if (StatusMap[t] === 'Normal') {
+          return (<div>
+            <svg className="icon" aria-hidden="true" style={{ marginRight: 5 }}>
+              <use xlinkHref="#iconwancheng"></use>
+            </svg>
+            {StatusMap[t]}
+          </div>)
         }
         return (
           <div>
@@ -339,8 +374,8 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
               <use xlinkHref="#iconzanting"></use>
             </svg>
             {StatusMap[t]}
-          </div>
-        );
+          </div> 
+        )
       },
     },
     {
@@ -352,7 +387,10 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
         return (
           <div>
             {renderOperationBtns(btns, record)}
-            <Link to={`/scheduling/log/detail?taskId=${record.id}`} style={{ marginLeft: 10 }}>
+            <Link
+              to={`/scheduling/log/detail?taskId=${record.id}`}
+              style={{ marginLeft: 10 }}
+            >
               查看日志
             </Link>
           </div>

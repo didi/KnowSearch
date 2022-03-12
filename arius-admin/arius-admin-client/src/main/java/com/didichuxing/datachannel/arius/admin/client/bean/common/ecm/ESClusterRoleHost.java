@@ -21,28 +21,12 @@ public class ESClusterRoleHost {
     private String role;
 
     /**
-     * 主機名
+     * IP、主機名
      */
     private String hostname;
-
-    /**
-     * IP
-     */
-    private String ip;
 
     /**
      * 端口号
      */
     private String port;
-
-    /**
-     * 冷热节点标识
-     */
-    private Boolean beCold;
-
-    /**
-     * 机器规格 例如32C-64G-SSD-6T
-     */
-    private String machineSpec;
-
 }

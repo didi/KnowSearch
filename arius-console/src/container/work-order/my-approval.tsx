@@ -5,7 +5,7 @@ import * as actions from 'actions';
 import { getMyApplicationQueryXForm, getMyApplicationColumns } from './config';
 import QueryForm from 'component/dantd/query-form';
 import { getApprovalOrderList, getTypeEnums } from 'api/order-api';
-import { ITypeEnums } from 'typesPath/cluster/order-types';
+import { ITypeEnums } from '@types/cluster/order-types';
 import { IStringMap } from 'interface/common';
 import { queryFormText } from 'constants/status-map';
 import { DTable } from 'component/dantd/dtable';
@@ -98,8 +98,8 @@ export const MyApproval = connect(null, mapDispatchToProps)(() => {
   };
 
   const initialValues = {
-    status: ['0'], // 默认审批
-  };
+    status: '0', // 默认审批
+  }
 
   return (
     <>

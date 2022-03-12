@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 import * as actions from "actions";
 import { FormItemType, IFormItem } from "component/x-form";
 import { OrderNode, RenderText } from "container/custom-form";
-import { IOpPhysicsClusterDetail } from "typesPath/cluster/cluster-types";
+import { IOpPhysicsClusterDetail } from "@types/cluster/cluster-types";
 import { PHY_CLUSTER_TYPE } from "constants/status-map";
-import { IWorkOrder } from "typesPath/params-types";
+import { IWorkOrder } from "@types/params-types";
 import { submitWorkOrder } from "api/common-api";
 import { AppState, UserState } from "store/type";
 

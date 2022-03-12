@@ -7,7 +7,6 @@ import java.util.Set;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
@@ -40,7 +39,7 @@ public interface TemplateLogicService {
     /**
      * 模糊分页查询模板列表信息
      */
-    List<IndexTemplateLogic> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param);
+    List<IndexTemplateLogic> pagingGetLogicTemplatesByCondition(IndexTemplateLogicDTO param);
 
     /**
      * 模糊查询统计总命中数, 用于前端分页
@@ -229,14 +228,6 @@ public interface TemplateLogicService {
     Result<Void> editTemplateName(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
 
     /**
-     * 只更新本地db 不同步更新es
-     * @param param
-     * @return
-     * @throws AdminOperateException
-     */
-    Result<Void> editTemplateInfoTODB(IndexTemplateLogicDTO param) throws AdminOperateException;
-
-    /**
      * 获取APP有权限的集群下的所有逻辑模板.
      * @param appId APP的id
      * @return list
@@ -341,24 +332,4 @@ public interface TemplateLogicService {
      * @return list
      */
     List<IndexTemplateLogicWithPhyTemplates> getTemplateWithPhysicalByDataCenter(String dataCenter);
-
-
-    /**
-     * 修改禁读状态
-     * @param logicId 逻辑模板
-     * @param blockRead  是否禁读
-     * @param operator  操作人
-     * @return
-     */
-    Result updateBlockReadState(Integer logicId, Boolean blockRead, String operator);
-
-    /**
-     * 修改禁写状态
-     * @param logicId 逻辑模板
-     * @param blockWrite  是否禁读
-     * @param operator  操作人
-     * @return
-     */
-    Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
-
 }

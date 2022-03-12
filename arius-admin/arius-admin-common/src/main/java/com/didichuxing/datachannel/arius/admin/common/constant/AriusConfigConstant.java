@@ -28,4 +28,5 @@ public class AriusConfigConstant {
     public static final String ARIUS_QUOTA_CONFIG_TPS_PER_CPU_NO_REPLICA   = "arius.quota.config.tps.per.cpu.NO.replica";
 
     public static final String ARIUS_QUOTA_CONFIG_COST_PER_G_PER_MONTH     = "arius.quota.config.cost.per.g.per.month";
+
 }

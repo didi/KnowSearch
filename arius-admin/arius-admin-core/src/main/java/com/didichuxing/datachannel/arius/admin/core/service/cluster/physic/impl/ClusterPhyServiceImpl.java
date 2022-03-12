@@ -1,40 +1,50 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
-import java.util.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COLD_RACK_PREFER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Plugin;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPlugin;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
@@ -43,16 +53,8 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COLD_RACK_PREFER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
+import lombok.NoArgsConstructor;
 
 @Service
 @NoArgsConstructor
@@ -73,12 +75,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Autowired
     private ESPluginService          esPluginService;
-
-    @Autowired
-    private TemplatePhyService       templatePhyService;
-
-    @Autowired
-    private TemplateLogicService     templateLogicService;
 
     @Autowired
     private RoleClusterService       roleClusterService;
@@ -202,11 +198,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
             // 机器信息
             List<RoleClusterHost> roleClusterHosts = new ArrayList<>();
-            Map<Long, List<RoleClusterHost>> map = roleClusterHostService.getByRoleClusterIds(roleClusters.stream().map(RoleCluster::getId).collect(Collectors.toList()));
             for (RoleCluster roleCluster : roleClusters) {
-                List<RoleClusterHost> esRoleClusterHosts = map.getOrDefault(roleCluster.getId(), new ArrayList<>());
+                List<RoleClusterHost> esRoleClusterHosts = roleClusterHostService
+                    .getByRoleClusterId(roleCluster.getId());
                 roleClusterHosts.addAll(esRoleClusterHosts);
             }
+
             clusterPhy.setRoleClusterHosts(roleClusterHosts);
         }
 
@@ -224,14 +221,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return ConvertUtil.list2List(clusterDAO.listAll(), ClusterPhy.class);
     }
 
-    @Override
-    public List<ClusterPhy> listClustersByNames(List<String> names) {
-        if (CollectionUtils.isEmpty(names)) {
-            return new ArrayList<>();
-        }
-        return ConvertUtil.list2List(clusterDAO.listByNames(names), ClusterPhy.class);
-    }
-
     /**
      * 集群是否存在
      * @param clusterName 集群名字
@@ -242,15 +231,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return clusterDAO.getByName(clusterName) != null;
     }
 
-    /**
-     * 集群是否存在
-     * @param clusterName 集群名字
-     * @return true 存在
-     */
-    @Override
-    public boolean isClusterExistsByList(List<ClusterPhy> list,String clusterName) {
-        return list.stream().map(ClusterPhy::getCluster).anyMatch(cluster->cluster.equals(clusterName));
-    }
     /**
      * rack是否存在
      * @param cluster 集群名字
@@ -321,17 +301,17 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return
      */
     @Override
-    public List<Plugin> listClusterPlugins(String cluster) {
+    public List<ESPlugin> listClusterPlugins(String cluster) {
         ClusterPO clusterPhy = clusterDAO.getByName(cluster);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return new ArrayList<>();
         }
 
-        List<Plugin> pluginList = ConvertUtil.list2List(esPluginService.listClusterAndDefaultESPlugin(clusterPhy.getId().toString()), Plugin.class);
+        List<ESPlugin> pluginList = ConvertUtil.list2List(esPluginService.listClusterAndDefaultESPlugin(clusterPhy.getId().toString()), ESPlugin.class);
 
         // 将从插件列表获得的所有的插件(系统默认以及自定义)安装状态设置为FALSE
-        Map<Long, Plugin> pluginMap = new HashMap<>(0);
-        for (Plugin esPlugin : pluginList) {
+        Map<Long, ESPlugin> pluginMap = new HashMap<>(0);
+        for (ESPlugin esPlugin : pluginList) {
             esPlugin.setInstalled(Boolean.FALSE);
             pluginMap.put(esPlugin.getId(), esPlugin);
         }
@@ -339,7 +319,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         // 获取集群对应的已安装的插件列表，将对应的已安装的插件的安装状态设置为TRUE
         List<Long> pluginIds = parsePluginIds(clusterPhy.getPlugIds());
         for (Long pluginId : pluginIds) {
-            Plugin phyPlugin = pluginMap.get(pluginId);
+            ESPlugin phyPlugin = pluginMap.get(pluginId);
             if (AriusObjUtils.isNull(phyPlugin)) {
                 continue;
             }
@@ -431,69 +411,15 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Override
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO param) {
-        String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
-        String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-        List<ClusterPO> clusterPOS = Lists.newArrayList();
-        try {
-            clusterPOS = clusterDAO.pagingByCondition(param.getCluster(), param.getHealth(),
-                    param.getEsVersion(), param.getFrom(), param.getSize(), sortTerm, sortType);
-        } catch (Exception e) {
-            LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(), e);
-        }
-        return ConvertUtil.list2List(clusterPOS, ClusterPhy.class);
+        return ConvertUtil.list2List(
+                clusterDAO.pagingByCondition(param.getCluster(), param.getHealth(), param.getEsVersion(), param.getFrom(), param.getSize()),
+                ClusterPhy.class);
     }
 
     @Override
     public Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param) {
         return clusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterPO.class));
     }
-
-    @Override
-    public Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password) {
-        if (StringUtils.isBlank(addresses)) {
-            return Result.buildFail("连接到es集群的地址信息为空");
-        }
-
-        return esClusterService.getClusterRackByHttpAddress(addresses, password);
-    }
-
-    @Override
-    public Float getSurplusDiskSizeOfRacks(String clusterPhyName, String racks, Map<String, Float> allocationInfoOfRack) {
-        List<String> rackList = ListUtils.string2StrList(racks);
-
-        //获取region下的rack列表对应的总的磁盘空间
-        Float regionDiskSize = 0F;
-        for (String rack : rackList) {
-            if (allocationInfoOfRack.containsKey(rack)) regionDiskSize += allocationInfoOfRack.get(rack);
-        }
-
-        //获取存储在region上的物理模板列表
-        Float templateOnRegionDiskSize = 0F;
-        List<IndexTemplatePhy> normalTemplateOnPhyCluster = templatePhyService.getNormalTemplateByCluster(clusterPhyName);
-        if (CollectionUtils.isEmpty(normalTemplateOnPhyCluster)) {
-            return regionDiskSize;
-        }
-
-        //获取在region上创建的模板的总的设置空间
-        for (IndexTemplatePhy indexTemplatePhy : normalTemplateOnPhyCluster) {
-            if (!rackList.containsAll(ListUtils.string2StrList(indexTemplatePhy.getRack()))) {
-                continue;
-            }
-
-            //根据物理模板获取对应的逻辑模板中的quota参数
-            IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(indexTemplatePhy.getLogicId());
-            if (AriusObjUtils.isNull(logicTemplate)) {
-                continue;
-            }
-
-            //数据库中quota保存的单位是gb，这里需要统一转化为字节数目
-            templateOnRegionDiskSize += Float.valueOf(SizeUtil.getUnitSize(logicTemplate.getQuota() + "gb"));
-        }
-
-        //返回在指定region上可以利用的剩余磁盘大小
-        return regionDiskSize - templateOnRegionDiskSize;
-    }
-
     /**************************************** private method ***************************************************/
     private List<String> genTcpAddr(String httpAddress, int tcpPort) {
         try {
@@ -665,22 +591,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         if (null == param.getHealth()) {
             param.setHealth(DEFAULT_CLUSTER_HEALTH);
-        }
-
-        if(null == param.getActiveShardNum()) {
-            param.setActiveShardNum(0L);
-        }
-
-        if (null == param.getDiskTotal()) {
-            param.setDiskTotal(0L);
-        }
-
-        if (null == param.getDiskUsage()) {
-            param.setDiskUsage(0L);
-        }
-
-        if (null == param.getDiskUsagePercent()) {
-            param.setDiskUsagePercent(0D);
         }
     }
 

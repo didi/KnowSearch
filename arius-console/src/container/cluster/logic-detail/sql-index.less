@@ -26,8 +26,9 @@
 }
 
 .search-template-page {
-  .ant-descriptions-middle .ant-descriptions-row > th,
-  .ant-descriptions-middle .ant-descriptions-row > td {
+
+  .ant-descriptions-middle .ant-descriptions-row>th,
+  .ant-descriptions-middle .ant-descriptions-row>td {
     padding-bottom: 40px;
   }
 
@@ -47,23 +48,15 @@
   }
 }
 
-.text-oh {
-  white-space: nowrap;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .sql-page {
   position: absolute;
-  padding: 0 15px;
+  padding: 15px;
   top: 0px;
   right: 0px;
   left: 0px;
   height: auto;
   width: auto;
   bottom: 0px;
-  overflow: auto;
 
   .console-switch {
     position: absolute;
@@ -79,10 +72,11 @@
     color: #20a0ff;
     cursor: pointer;
     z-index: 12;
+
   }
 
   .console-switch-open {
-    transform: rotate(0deg);
+    transform: rotate(0deg)
   }
 
   .CodeMirror-line {
@@ -104,8 +98,6 @@
     .codemirror {
       flex: 1;
       border: 1px solid rgb(212, 212, 212);
-      max-width: 600px;
-      height: 360px;
     }
 
     .tip-content {
@@ -116,13 +108,14 @@
       }
 
       .index-ul {
-        height: 250px;
+        height: 120px;
         overflow: auto;
 
         li:hover {
           cursor: pointer;
           background-color: #d2d9e6;
         }
+
       }
     }
 
@@ -135,7 +128,7 @@
       margin-top: 20%;
       margin-left: 10px;
       margin-right: 10px;
-      border: 1px dashed #ccc;
+      border: 1px dashed #ccc
     }
 
     .expand-btn {
@@ -160,44 +153,17 @@
         width: 50%;
       }
     }
+
   }
 
   .bottom-console {
     position: relative;
 
     .checkbox-content {
-      border: 1px solid #EBEDEF;
-      margin-top: 12px;
-      height: 90px;
-      overflow: hidden;
-      border-radius: 4px;
-      position: relative;
-      .leftbox {
-        width: 180px;
-        height: 88px;
-        background: #F9F9FA;
-        display: inline-block;
-        position: relative;
-        .leftboxchildren {
-          position: absolute;
-          top: 36px;
-          left: 24px;
-        }
-      }
-      .rightbox {
-        position: absolute;
-        top: 0px;
-        left: 204px;
-        overflow: scroll;
-        height: 88px;
-        padding: 16px 0px;
-        .ant-checkbox-group-item {
-          white-space: nowrap;
-          width: 150px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      }
+      border: 1px solid #d4d4d4;
+      border-top: 0;
+      padding: 10px;
+      line-height: 40px;
     }
 
     .switch-btn {
@@ -209,6 +175,7 @@
 
     .data-table {
       overflow-x: scroll;
+      border: 1px solid #d4d4d4;
       border-top: 0;
       margin-top: 20px;
     }
@@ -223,7 +190,7 @@
       font-size: 13px;
       border-radius: 5px 5px 0px 0px;
 
-      & > span {
+      &>span {
         padding-right: 16px;
       }
     }
@@ -250,30 +217,18 @@
       left: 3px;
     }
 
-    .bcui-checkbox + .bcui-checkbox {
-      margin-left: 0;
-    }
-  }
-
-  .iam-head-tip {
-    height: 36px;
-    background: #F9F9FA;
-    border-bottom: 1px solid #EBEDEF;
-    padding: 7px 0px 6px 20px;
-    span {
-      font-family: PingFangSC-Regular;
-      font-size: 14px;
-      color: #303A51;
-      line-height: 22px;
+    .bcui-checkbox+.bcui-checkbox {
+      margin-left: 0
     }
   }
 
   .iam-box {
-    // border: 1px solid #d4d4d4;
-    // border-radius: 0px 0px 5px 5px;
-    width: 100%;
-    height: 324px;
+    border: 1px solid #d4d4d4;
+    border-radius: 0px 0px 5px 5px;
+    width: 98%;
+    min-height: 170px;
     margin-right: 16px;
+    max-height: 170px;
     overflow: hidden;
 
     li {
@@ -283,13 +238,7 @@
     ul {
       padding-left: 16px;
       margin-top: 5px;
-    }
 
-    &-icon {
-      width: 12px;
-      height: 12px;
-      opacity: 0.6;
-      color: #666666;
     }
 
     .bcui-input__inner {
@@ -346,39 +295,21 @@
       }
     }
 
-    .explain_icons {
-      // width: 0;
-      // height: 0;
-      // display: block;
-      // border-left: 6px solid #20a0ff;
-      // border-bottom: 6px solid transparent;
-      // border-top: 6px solid transparent;
-      // position: absolute;
-      // margin: 3px 0px 3px 70px;
-      border: 1px solid #20a0ff;
-      display: inline-block;
-      border-radius: 6px;
-      padding: 0px 6px;
-      height: 18px;
-      line-height: 16px;
-      margin-right: 5px;
-      font-style: italic;
-      color: #20a0ff;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #20a0ff;
-        color: #fff;
-
-        i {
-          color: #fff;
-        }
-      }
+    .explain_icon {
+      width: 0;
+      height: 0;
+      display: block;
+      border-left: 6px solid #20a0ff;
+      border-bottom: 6px solid transparent;
+      border-top: 6px solid transparent;
+      position: absolute;
+      margin: 3px 0px 3px 70px;
     }
+
   }
 
   .CodeMirror {
-    height: 358px;
+    height: 400px;
   }
 
   .box-left {
@@ -398,6 +329,7 @@
     padding-left: 0px;
 
     .querycallback {
+
       height: 100%;
       width: 100%;
       padding: 16px;
@@ -446,12 +378,12 @@
     width: 100%;
 
     .bcui-tab-pane {
-      height: 100%;
+      height: 100%
     }
   }
 
   .containr-title {
-    margin-bottom: 0px;
+    margin-bottom: 0px
   }
 
   .refresh-button {
@@ -460,83 +392,4 @@
     padding: 0px;
   }
 
-  .title-text {
-    font-family: PingFangSC-Regular;
-    font-size: 14px;
-    color: #303A51;
-    line-height: 22px;
-  }
-
-  .isempty{
-    height: 360px;
-    background: #FFFFFF;
-    border: 1px solid #EBEDEF;
-    border-radius: 4px;
-  }
-
-  .nulltitle-text {
-    height: 36px;
-    background: #F9F9FA;
-    border-bottom: 1px solid #EBEDEF;
-    border-radius: 4px 4px 0 0;
-    padding: 7px 0px 0px 20px;
-    font-family: PingFangSC-Regular;
-    font-size: 14px;
-    color: #303A51;
-  }
-
-  .json-button {
-    position: absolute;
-    right: 0px;
-    width: 80px;
-    height: 30px;
-  }
-
-  .filter-button {
-    position: absolute;
-    right: 88px;
-    width: 30px;
-    height: 30px;
-    &-before {
-      width: 6px;
-      height: 6px;
-      position: absolute;
-      bottom: -15px;
-      right: 100px;
-      background-color: #fff;
-      z-index: 10;
-      transform: rotate(45deg);
-      border-top: 1px solid #EBEDEF;
-      border-left: 1px solid #EBEDEF;
-    }
-  }
-  .jsontotable-button {
-    position: absolute;
-    right: 0px;
-    top: -2px;
-    width: 80px;
-    height: 30px;
-  }
-
-  .sql-title {
-    position: relative;
-    .title-text {
-      font-family: PingFangSC-Regular;
-      font-size: 14px;
-      color: #303A51;
-      line-height: 22px;
-    }
-    .line {
-      margin: 0 10px;
-      display: inline-block;
-    }
-    .text {
-      display: inline-block;
-      font-family: PingFangSC-Medium;
-      font-size: 12px;
-      color: #2E3A53;
-      line-height: 16px;
-      margin-right: 40px;
-    }
-  }
 }

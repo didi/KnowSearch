@@ -20,10 +20,4 @@ public class ClusterPhyConditionDTO extends ESClusterDTO {
      */
     @ApiModelProperty("权限类型 1:配置管理, 2:访问, -1:无权限")
     private Integer authType;
-
-    @ApiModelProperty("排序字段 diskUsagePercent")
-    private String  sortTerm;
-
-    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
-    private Boolean orderByDesc = true;
 }

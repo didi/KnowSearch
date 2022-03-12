@@ -6,8 +6,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
  */
 public class ClusterConstant {
 
-    private ClusterConstant() {
-    }
+    private ClusterConstant(){}
 
     /**
      * 初始化id
@@ -44,7 +43,7 @@ public class ClusterConstant {
      */
     public static final String  DEFAULT_CLUSTER_IDC             = "ys02";
 
-    public static final Integer DEFAULT_CLUSTER_HEALTH          = 3;
+    public static final Integer  DEFAULT_CLUSTER_HEALTH         = 3;
 
     /**
      * 集群默认实例数
@@ -59,12 +58,12 @@ public class ClusterConstant {
     /**
      * 接入集群master角色节点最小数量
      */
-    public static final Integer JOIN_MASTER_NODE_MIN_NUMBER     = 1;
+    public static final Integer JOIN_MASTER_NODE_MIN_NUMBER          = 1;
 
     /**
      * 创建集群master角色节点最小数量
      */
-    public static final Integer CREATE_MASTER_NODE_MIN_NUMBER   = 1;
+    public static final Integer CREATE_MASTER_NODE_MIN_NUMBER          = 1;
 
     /**
      * 物理集群标识
@@ -89,7 +88,7 @@ public class ClusterConstant {
     /**
      * 默认可用端口号
      */
-    public static final String  DEFAULT_PORT                    = "8060";
+    public static final String DEFAULT_PORT                             = "8060";
 
     /**
      * 间隔时间, 一小时内
@@ -101,7 +100,7 @@ public class ClusterConstant {
     /**
      * 集群读写地址连接重试次数和重试间隔睡眠时间
      */
-    public static final int     DEFAULT_RETRY_TIME_INTERVAL     = 5000;
+    public static final int DEFAULT_RETRY_TIME_INTERVAL = 5000;
 
     public static Integer defaultRetryTime(int retryTimes) {
         return DEFAULT_RETRY_TIME_INTERVAL;

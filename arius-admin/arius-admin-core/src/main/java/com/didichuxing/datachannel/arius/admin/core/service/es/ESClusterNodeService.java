@@ -3,7 +3,10 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 
@@ -59,11 +62,4 @@ public interface ESClusterNodeService {
      * @param nodes 主机名或IP集合字符串 , 用逗号分隔  
      */
     int syncGetIndicesCount(String cluster, String nodes);
-
-    /**
-     * 获取ES集群的内存使用统计信息
-     * @param cluster 物理集群名称
-     * @return 集群的内存使用信息统计
-     */
-     ClusterMemInfo synGetClusterMem(String cluster);
 }

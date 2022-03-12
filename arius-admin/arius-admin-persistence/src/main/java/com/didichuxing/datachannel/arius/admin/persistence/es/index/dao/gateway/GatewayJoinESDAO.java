@@ -1212,37 +1212,37 @@ public class GatewayJoinESDAO extends BaseESDAO {
         return indexName;
     }
 
-    private String buildGatewayJoinSlowQueryCriteriaDsl(Integer appId, GatewayJoinQueryDTO queryDTO) {
-        return "[" + buildGatewayJoinSlowQueryCriteriaCell(appId, queryDTO) +"]";
+    private String buildGatewayJoinSlowQueryCriteriaDsl(Integer appId, String queryIndex, Long startTime, Long endTime) {
+        return "[" + buildGatewayJoinSlowQueryCriteriaCell(appId, queryIndex, startTime, endTime) +"]";
     }
 
-    private String buildGatewayJoinSlowQueryCriteriaCell(Integer appId, GatewayJoinQueryDTO queryDTO) {
+    private String buildGatewayJoinSlowQueryCriteriaCell(Integer appId, String queryIndex, Long startTime, Long endTime) {
         List<String> cellList = Lists.newArrayList();
         // 最近时间范围条件
-        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
+        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
         // appId 条件
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appid"));
         // queryIndex 条件
-        cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
+        cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryIndex, "indices"));
         // totalCost>=1000即为慢查询
-        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getTotalCost(), null, "totalCost"));
+        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(1000, null, "totalCost"));
         // 只获取ariusType为type（正常的）的文档
         cellList.add(DSLSearchUtils.getTermCellForExactSearch("type", "ariusType"));
         return ListUtils.strList2String(cellList);
     }
 
-    private String buildGatewayJoinErrorQueryCriteriaDsl(Integer appId, GatewayJoinQueryDTO queryDTO) {
-        return "[" + buildGatewayJoinErrorQueryCriteriaCell(appId, queryDTO) +"]";
+    private String buildGatewayJoinErrorQueryCriteriaDsl(Integer appId, String queryIndex, Long startTime, Long endTime) {
+        return "[" + buildGatewayJoinErrorQueryCriteriaCell(appId, queryIndex, startTime, endTime) +"]";
     }
 
-    private String buildGatewayJoinErrorQueryCriteriaCell(Integer appId, GatewayJoinQueryDTO queryDTO) {
+    private String buildGatewayJoinErrorQueryCriteriaCell(Integer appId, String queryIndex, Long startTime, Long endTime) {
         List<String> cellList = Lists.newArrayList();
         // 最近时间范围条件
-        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
+        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
         // appId 条件
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appid"));
         // queryIndex 条件
-        cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
+        cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryIndex, "indices"));
         // 只获取 ariusType 为error 即为异常
         cellList.add(DSLSearchUtils.getTermCellForExactSearch("error", "ariusType"));
         return ListUtils.strList2String(cellList);
@@ -1255,7 +1255,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @return List<GatewayJoinPO>
      */
     public List<GatewayJoinPO> getGatewayJoinSlowList(Integer appId, GatewayJoinQueryDTO queryDTO) {
-        String queryCriteriaDsl = buildGatewayJoinSlowQueryCriteriaDsl(appId, queryDTO);
+        String queryCriteriaDsl = buildGatewayJoinSlowQueryCriteriaDsl(appId, queryDTO.getQueryIndex(), queryDTO.getStartTime(), queryDTO.getEndTime());
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         String dsl = dslLoaderUtil.getFormatDslForCatIndexByCondition(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_CONDITION,
                 queryCriteriaDsl);
@@ -1269,7 +1269,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @return List<GatewayJoinPO>
      */
     public List<GatewayJoinPO> getGatewayJoinErrorList(Integer appId, GatewayJoinQueryDTO queryDTO) {
-        String queryCriteriaDsl = buildGatewayJoinErrorQueryCriteriaDsl(appId, queryDTO);
+        String queryCriteriaDsl = buildGatewayJoinErrorQueryCriteriaDsl(appId, queryDTO.getQueryIndex(), queryDTO.getStartTime(), queryDTO.getEndTime());
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         String dsl = dslLoaderUtil.getFormatDslForCatIndexByCondition(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_CONDITION,
                 queryCriteriaDsl);

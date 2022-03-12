@@ -39,7 +39,4 @@ public class WorkOrderVO extends BaseVO {
     
     @ApiModelProperty(value = "审批人appId")
     private Integer approverAppId;
-
-    @ApiModelProperty(value = "扩展字段")
-    private String extensions;
 }

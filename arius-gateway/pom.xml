@@ -28,8 +28,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <lucene.version>5.5.0.0.0.2-SNAPSHOT</lucene.version>
-        <es.version>2.3.3</es.version>
-        <log4j2.version>2.17.1</log4j2.version>
+        <es.version>2.3.3-SNAPSHOT</es.version>
     </properties>
 
     <dependencies>
@@ -158,7 +157,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-elasticsearch-sql</artifactId>
-                <version>1.0.4</version>
+                <version>1.0.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.elasticsearch</groupId>
@@ -182,10 +181,10 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-dsl-prase</artifactId>
-                <version>1.0.8</version>
+                <version>1.0.5</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>elasticsearch</artifactId>
+                        <artifactId>elasticsearch-didi</artifactId>
                         <groupId>org.elasticsearch</groupId>
                     </exclusion>
                     <exclusion>
@@ -207,7 +206,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-metrices</artifactId>
-                <version>1.0.5</version>
+                <version>1.0.4</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>log4j</artifactId>
@@ -228,35 +227,6 @@
                 </exclusions>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-1.2-api</artifactId>
-                <version>${log4j2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>${log4j2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>${log4j2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
-                <version>${log4j2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-jcl</artifactId>
-                <version>${log4j2.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

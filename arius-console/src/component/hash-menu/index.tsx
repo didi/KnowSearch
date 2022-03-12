@@ -21,7 +21,6 @@ export const HashMenu: React.FC<propsType> = memo(
   ({ TAB_LIST, MENU_MAP, defaultHash, data }) => {
     const [menu, setMenu] = useState<string>("");
     const changeMenu = (e) => {
-      setMenu(e.key);
       window.location.hash = e.key;
     };
     const updateMenu = () => {
@@ -30,6 +29,10 @@ export const HashMenu: React.FC<propsType> = memo(
     };
     useEffect(() => {
       updateMenu();
+      window.addEventListener("hashchange", updateMenu);
+      return () => {
+        window.removeEventListener("hashchange", updateMenu);
+      };
     }, []);
 
     const renderContent = () => {

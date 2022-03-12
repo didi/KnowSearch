@@ -1,12 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.impl;
 
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskProcessDTO;
@@ -15,13 +14,12 @@ import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskHand
 import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.WorkTaskPO;
-import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.WorkTaskDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
@@ -30,19 +28,19 @@ import com.google.common.collect.Lists;
  */
 @Service
 public class WorkTaskManagerImpl implements WorkTaskManager {
-    private static final ILog LOGGER = LogFactory.getLog(WorkTaskManagerImpl.class);
 
     @Autowired
-    private WorkTaskDAO          workTaskDao;
+    private WorkTaskDAO workTaskDao;
 
     @Autowired
-    private HandleFactory        handleFactory;
+    private HandleFactory           handleFactory;
 
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private AriusUserInfoService    ariusUserInfoService;
 
     @Override
     public Result<WorkTask> addTask(WorkTaskDTO workTaskDTO) {
+
         if (AriusObjUtils.isNull(workTaskDTO.getCreator())) {
             return Result.buildParamIllegal("提交人为空");
         }
@@ -68,25 +66,16 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
         WorkTaskHandleEnum taskHandleEnum = WorkTaskHandleEnum.valueOfType(type);
 
         WorkTaskHandler handler = (WorkTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
-        return handler.existUnClosedTask(String.valueOf(key), type);
+        return handler.existUnClosedTask(key, type);
     }
 
     @Override
-    public void insert(WorkTask task) {
-        try {
-            WorkTaskPO workTaskPO = ConvertUtil.obj2Obj(task, WorkTaskPO.class);
-            boolean succ = workTaskDao.insert(workTaskPO) > 0;
-            if (succ) {
-                task.setId(workTaskPO.getId());
-            }
-        } catch (Exception e) {
-            LOGGER.error("class=DcdrWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg={}",
-                task.getTaskType(), task.getBusinessKey(), e.getStackTrace(), e);
-        }
+    public int insert(WorkTask task) {
+        return workTaskDao.insert(ConvertUtil.obj2Obj(task, WorkTaskPO.class));
     }
 
     @Override
-    public void updateTask(WorkTask task) {
+    public void updateTaskById(WorkTask task) {
         workTaskDao.update(ConvertUtil.obj2Obj(task, WorkTaskPO.class));
     }
 
@@ -129,7 +118,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
     }
 
     @Override
-    public Result<WorkTask> getLatestTask(String businessKey, Integer taskType) {
+    public Result<WorkTask> getLatestTask(Integer businessKey, Integer taskType) {
         WorkTaskPO workTaskPO = workTaskDao.getLatestTask(businessKey, taskType);
         if (workTaskPO == null) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
@@ -138,17 +127,11 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
     }
 
     @Override
-    public WorkTask getPengingTask(String businessKey, Integer taskType) {
-        return ConvertUtil.obj2Obj(workTaskDao.getPengingTask(businessKey, taskType), WorkTask.class);
-    }
-
-    @Override
-    public List<WorkTask> getPengingTaskByType(Integer taskType) {
-        return ConvertUtil.list2List(workTaskDao.getPengingTaskByType(taskType), WorkTask.class);
-    }
-
-    @Override
-    public List<WorkTask> getSuccessTaskByType(Integer taskType) {
-        return ConvertUtil.list2List(workTaskDao.getSuccessTaskByType(taskType), WorkTask.class);
+    public Result<WorkTask> getPengingTask(Integer businessKey, Integer taskType) {
+        WorkTaskPO workTaskPO = workTaskDao.getPengingTask(businessKey, taskType);
+        if (workTaskPO == null) {
+            return Result.buildFail(ResultType.NOT_EXIST.getMessage());
+        }
+        return Result.buildSucc(ConvertUtil.obj2Obj(workTaskPO, WorkTask.class));
     }
 }

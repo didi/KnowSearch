@@ -268,7 +268,7 @@ public class MonitorServiceImpl implements MonitorService {
         List<Alert> alertList = remoteMonitorService.getAlerts(monitorRuleDO.getAlertRuleId(), startTime / 1000,
             endTime / 1000);
         if (CollectionUtils.isEmpty(alertList)) {
-            return Result.buildSuccWithMsg("无历史告警!");
+            return Result.buildSucc("无历史告警!");
         }
         return Result.buildSucc(alertList);
     }

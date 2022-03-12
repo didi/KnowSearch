@@ -237,7 +237,7 @@ public class ElasticCloudRemoteServiceImpl implements ElasticCloudRemoteService 
         String postForString = BaseHttpUtil.get(url, null, getHttpHeader());
         ESDDCloudClusterInfo esddCloudClusterInfo = JSON.parseObject(postForString).toJavaObject(ESDDCloudClusterInfo.class);
         if (esddCloudClusterInfo != null){
-            return  Result.buildSuccWithMsg(JSON.toJSONString(esddCloudClusterInfo));
+            return  Result.buildSucc(JSON.toJSONString(esddCloudClusterInfo));
         }
         return Result.buildFail(postForString);
     }

@@ -25,14 +25,13 @@ public interface TemplateAction {
     /**
      * 扩缩容
      * @param logicId 逻辑id
-     * @param expectHotTime 期望热数据保存天数
      * @param expectExpireTime 期望保存周期
      * @param expectQuota 期望quota
      * @param submitor 操作人
      * @return result
      */
-    Result<Void> indecreaseWithAutoDistributeResource(Integer logicId, Integer expectHotTime, Integer expectExpireTime, Double expectQuota,
-                                                      String submitor) throws AdminOperateException;
+    Result<Void> indecreaseWithAutoDistributeResource(Integer logicId, Integer expectExpireTime, Double expectQuota,
+                                                String submitor) throws AdminOperateException;
 
     /**
      * 获取物理模板资源配置
@@ -40,4 +39,5 @@ public interface TemplateAction {
      * @return result
      */
     TemplateResourceConfig getPhysicalTemplateResourceConfig(Long physicalId);
+
 }

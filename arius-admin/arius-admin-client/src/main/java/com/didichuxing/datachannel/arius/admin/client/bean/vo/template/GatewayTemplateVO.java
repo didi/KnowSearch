@@ -106,15 +106,4 @@ public class GatewayTemplateVO extends BaseVO {
     @ApiModelProperty("别名列表")
     private List<String> aliases;
 
-    /**
-     * 是否禁止读
-     */
-    private Boolean blockRead;
-
-    /**
-     * 是否禁止写
-     */
-    private Boolean blockWrite;
-
-
 }

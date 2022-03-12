@@ -27,7 +27,6 @@ export const LogicCluserSelect: React.FC<any> = (props: {
               label: `${item.name}`,
               value: item.id,
               type: item.type,
-              level: item.level,
             };
           });
           setLogicClusterList(res);
@@ -50,7 +49,6 @@ export const LogicCluserSelect: React.FC<any> = (props: {
       cluster,
       clusterType,
       clusterName: '',
-      level: null,
     };
     if (type === "type") {
       obj.clusterType = valus;
@@ -63,7 +61,6 @@ export const LogicCluserSelect: React.FC<any> = (props: {
     if (type === "name") {
       obj.cluster = valus;
       obj.clusterName = logicClusterList.filter((item) => item.value === valus)[0]?.label;
-      obj.level = logicClusterList.filter((item) => item.value === valus)[0]?.level;
       setCluster(valus);
     }
     const { onChange } = props;
@@ -76,7 +73,7 @@ export const LogicCluserSelect: React.FC<any> = (props: {
         name="type"
         initialValue={clusterType}
         rules={[{ required: false }]}
-        style={{ paddingRight: 20, marginBottom: 0 }}
+        style={{ paddingRight: 20 }}
       >
         <Select
           style={{ width: 200 }}
@@ -90,7 +87,6 @@ export const LogicCluserSelect: React.FC<any> = (props: {
         name="clusterName"
         initialValue={cluster}
         rules={[{ required: false }]}
-        style={{ marginBottom: 0 }}
       >
         <Select
           showSearch

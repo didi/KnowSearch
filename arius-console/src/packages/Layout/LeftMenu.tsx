@@ -27,7 +27,7 @@ const { Content, Sider } = Layout;
 const MenuLayout = (props: Props & RouteComponentProps) => {
   const { sliderMenuCollapsed } = useSelector(
     (state) => ({
-      sliderMenuCollapsed: (state as any).sliderMenu.sliderMenuCollapsed,
+      sliderMenuCollapsed: state.sliderMenu.sliderMenuCollapsed,
     }),
     shallowEqual
   );
@@ -50,7 +50,10 @@ const MenuLayout = (props: Props & RouteComponentProps) => {
         })}
         style={{ height: "100%" }}
       >
-        <Content className={`${cPrefixCls}-content`} style={{ position: "relative" }}>
+        <Content
+          className={`${cPrefixCls}-content`}
+          style={{ position: "relative" }}
+        >
           <div
             className={classNames({
               [`${cPrefixCls}-main`]: true,
