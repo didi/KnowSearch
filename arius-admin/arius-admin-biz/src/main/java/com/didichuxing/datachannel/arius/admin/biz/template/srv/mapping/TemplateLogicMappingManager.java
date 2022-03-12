@@ -8,7 +8,6 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.MappingOptimiz
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateSchemaVO;
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.client.mapping.Field;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithMapping;
@@ -57,10 +56,9 @@ public interface TemplateLogicMappingManager {
      * updateProperties
      * @param logicId
      * @param properties
-     * @param operator
      * @return
      */
-    Result<Void> updateProperties(Integer logicId, List<AriusTypeProperty> properties, String operator);
+    Result<Void> updateProperties(Integer logicId, List<AriusTypeProperty> properties);
 
     /**
      * field装AriusTypeProperty
@@ -91,11 +89,4 @@ public interface TemplateLogicMappingManager {
      * @return result
      */
     Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException;
-
-    /**
-     * 获取模板schema
-     * @param logicId 模板id
-     * @return result
-     */
-    Result<ConsoleTemplateSchemaVO> getSchema(Integer logicId);
 }

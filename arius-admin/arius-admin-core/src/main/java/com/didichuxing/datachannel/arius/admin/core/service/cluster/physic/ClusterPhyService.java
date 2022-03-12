@@ -1,16 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Plugin;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPlugin;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 public interface ClusterPhyService {
@@ -69,12 +69,6 @@ public interface ClusterPhyService {
     List<ClusterPhy> listAllClusters();
 
     /**
-     * 根据names列出所有集群
-     * @param names
-     * @return 集群列表,如果没有返回空列表
-     */
-    List<ClusterPhy> listClustersByNames(List<String> names);
-    /**
      * 集群是否存在
      *
      * @param clusterName 集群名字
@@ -82,13 +76,6 @@ public interface ClusterPhyService {
      */
     boolean isClusterExists(String clusterName);
 
-    /**
-     * 集群是否存在于列表中
-     * @param list 集群列表
-     * @param clusterName 集群名字
-     * @return
-     */
-    boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName);
     /**
      * rack是否存在
      *
@@ -126,7 +113,7 @@ public interface ClusterPhyService {
      * @param cluster 集群名称
      * @return
      */
-    List<Plugin> listClusterPlugins(String cluster);
+    List<ESPlugin> listClusterPlugins(String cluster);
 
     /**
      * 查询指定集群
@@ -183,23 +170,4 @@ public interface ClusterPhyService {
      * @return
      */
     Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param);
-
-    /**
-     * 获取集群rack的信息,http es 地址
-     * @param addresses client地址
-     * @param password client连接需要的密码
-     * @return 需要添加的rack列表
-     */
-    Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password);
-
-    /**
-     * 获取指定rack的磁盘可使用的磁盘大小
-     * @param clusterPhyName 物理集群名称
-     * @param racks 指定的rack列表，用逗号隔开的字符串
-     * @param allocationInfoOfRack rack对应的磁盘使用总大小
-     * @return 指定rack的总的磁盘大小，单位是字节数目
-     */
-    Float getSurplusDiskSizeOfRacks(String clusterPhyName, String racks, Map</*rack信息*/String, /*rack对应的总磁盘大小*/Float> allocationInfoOfRack);
-
-
 }

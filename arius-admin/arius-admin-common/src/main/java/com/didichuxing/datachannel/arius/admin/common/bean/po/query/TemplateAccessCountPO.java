@@ -77,9 +77,4 @@ public class TemplateAccessCountPO extends BaseESPO {
         return String.format("%d_%s", templateId, date);
     }
 
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
-
 }

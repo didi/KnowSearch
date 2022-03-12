@@ -61,6 +61,6 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("配置")
     private String  configJson;
 
-    @ApiModelProperty("健康状态 0 green 1 yellow 2 red -1 未知")
+    @ApiModelProperty("健康状态 1 green 2 yellow 3 red -1 未知")
     private Integer health;
 }

@@ -40,13 +40,4 @@
         where index_template_id = #{logicId} and `name` = #{name}
     </delete>
 
-    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        insert into index_template_alias (index_template_id, `name`) values
-        <foreach collection="list" index="index" item="item" separator=",">(#{item.logicId}, #{item.name})</foreach>
-    </insert>
-
-    <delete id="deleteBatch" parameterType="java.util.List">delete from index_template_alias where `name` = #{name}
-        <foreach collection="logicIds" item="item" separator="," open="and index_template_id IN (" close=")">#{item}
-        </foreach>
-    </delete>
 </mapper>

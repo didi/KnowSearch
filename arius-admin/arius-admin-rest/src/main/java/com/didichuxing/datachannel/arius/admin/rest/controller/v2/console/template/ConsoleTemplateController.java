@@ -166,8 +166,6 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
         Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
         consoleTemplateDetail.setEditable(checkAuthResult.success());
-        // 获取indexRollover功能开启状态
-        consoleTemplateDetail.setDisableIndexRollover(templateLogicService.getTemplateConfig(logicId).getDisableIndexRollover());
 
         return Result.buildSucc(consoleTemplateDetail);
     }

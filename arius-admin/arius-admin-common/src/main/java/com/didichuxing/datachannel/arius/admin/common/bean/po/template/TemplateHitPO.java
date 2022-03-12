@@ -88,11 +88,6 @@ public class TemplateHitPO extends BaseESPO {
         return String.format("%s_%d_%s", EnvUtil.getStr(), id, date.replace(" ", "_"));
     }
 
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
-
     @JSONField(serialize = false)
     public void merge(TemplateHitPO templateHitPO) {
         if (templateHitPO == null) {

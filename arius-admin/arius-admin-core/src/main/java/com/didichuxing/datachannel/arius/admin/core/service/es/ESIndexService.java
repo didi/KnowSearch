@@ -11,8 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author d06679
@@ -79,16 +77,6 @@ public interface ESIndexService {
                                 String defaultValue, int retryCount) throws ESOperateException;
 
     /**
-     * 批量修改多个索引的相同的多个setting
-     * @param cluster 物理集群名称
-     * @param indices 索引列表
-     * @param settings key：setting名称 value：setting数值
-     * @param retryCount 重试次数
-     */
-    boolean syncPutIndexSettings(String cluster, List<String> indices, Map</*setting名称*/String, /*setting数值*/String> settings,
-                                 int retryCount) throws ESOperateException;
-
-    /**
      * 获取索引信息
      * @param cluster 集群
      * @param expression 表达式
@@ -122,29 +110,11 @@ public interface ESIndexService {
     int syncBatchDeleteIndices(String cluster, Collection<String> shouldDels, int retryCount);
 
     /**
-     * 批量关闭索引
-     * @param cluster 集群
-     * @param shouldCloses 索引集合
-     * @param retryCount 重试次数
-     * @return boolean
-     */
-    boolean syncBatchCloseIndices(String cluster, List<String> shouldCloses, int retryCount) throws ESOperateException;
-
-    /**
-     * 批量开启索引
-     * @param cluster 集群
-     * @param shouldOpens 索引集合
-     * @param retryCount 重试次数
-     * @return boolean
-     */
-    boolean syncBatchOpenIndices(String cluster, List<String> shouldOpens, int retryCount) throws ESOperateException;
-
-    /**
      * 删除文档
      * @param cluster 集群
      * @param delIndices 索引
      * @param delQueryDsl 删除语句
-     * @return boolean
+     * @return
      */
     boolean syncDeleteByQuery(String cluster, List<String> delIndices, String delQueryDsl) throws ESOperateException;
 
@@ -259,13 +229,4 @@ public interface ESIndexService {
      * @return
      */
     boolean syncIsIndexExist(String cluster, String indexName);
-
-    /**
-     * 获取索引checkpoint
-     * @param index                  索引名称
-     * @param stat                   索引节点信息
-     * @param checkpointEqualSeqNo   位点是否相同标识
-     * @return
-     */
-    AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo);
 }

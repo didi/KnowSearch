@@ -66,7 +66,7 @@ public class DslTemplateController {
             @ApiImplicitParam(name = "dslTemplateMd5List", value = "查询模板MD5List", required = true),
             @ApiImplicitParam(name = "queryLimit", value = "新的限流值", required = true)
     })
-    public Result<Boolean> updateQueryLimit(@RequestParam(value = "dslTemplateMd5List") List<String> dslTemplateMd5List,
+    public Result<Boolean> listByAppid(@RequestParam(value = "dslTemplateMd5List") List<String> dslTemplateMd5List,
                                        @RequestParam(value = "queryLimit") Double queryLimit,
                                        HttpServletRequest request) {
         return dslTemplateManager.updateDslTemplateQueryLimit(HttpRequestUtils.getAppId(request), dslTemplateMd5List, queryLimit);

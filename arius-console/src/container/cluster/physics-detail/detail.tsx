@@ -7,16 +7,20 @@ import { InfoItem } from "component/info-item";
 import { Dispatch } from "redux";
 import * as actions from "actions";
 import { getPhysicsClusterDetail } from "api/cluster-api";
-import { IOpPhysicsClusterDetail } from "typesPath/cluster/cluster-types";
+import { IOpPhysicsClusterDetail } from "@types/cluster/cluster-types";
 import { connect } from "react-redux";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { renderMoreBtns } from "container/custom-component";
 import { getPhysicsBtnList } from "../config";
-import { StatusMap } from "constants/status-map";
+import {
+  StatusMap,
+} from "constants/status-map";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
-  setDrawerId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setDrawerId(modalId, params)),
+  setModalId: (modalId: string, params?: any, cb?: Function) =>
+    dispatch(actions.setModalId(modalId, params, cb)),
+  setDrawerId: (modalId: string, params?: any, cb?: Function) =>
+    dispatch(actions.setDrawerId(modalId, params)),
 });
 
 const connects: Function = connect;
@@ -75,7 +79,12 @@ export class PhyClusterDetail extends React.Component<any> {
   };
 
   public getOpBtns = () => {
-    const arr = getPhysicsBtnList(this.state.clusterInfo as any, this.props.setModalId, this.props.setDrawerId, this.reloadData);
+    const arr = getPhysicsBtnList(
+      this.state.clusterInfo as any,
+      this.props.setModalId,
+      this.props.setDrawerId,
+      this.reloadData
+    );
     return renderMoreBtns(arr, this.state.clusterInfo);
   };
 
@@ -86,29 +95,35 @@ export class PhyClusterDetail extends React.Component<any> {
         className="detail-header"
         backIcon={false}
         title={clusterInfo?.cluster || ""}
-        tags={<Tag color={StatusMap[clusterInfo.health]}>{StatusMap[clusterInfo.health]}</Tag>}
-        extra={this.state.clusterInfo?.currentAppAuth === 1 || this.state.clusterInfo?.currentAppAuth === 0 ? this.getOpBtns() : null}
+        tags={
+          <Tag color={StatusMap[clusterInfo.health]}>
+            {StatusMap[clusterInfo.health]}
+          </Tag>
+        }
+        extra={
+          this.state.clusterInfo?.currentAppAuth === 1 || this.state.clusterInfo?.currentAppAuth === 0 ? this.getOpBtns() : null
+        }
       >
-        {DESC_LIST.map((row, index) => {
-          if (!clusterInfo) return null;
-          if (row.key === "tags" && Number(JSON.parse(clusterInfo[row.key] || "{}")?.createSource) !== 0) {
-            return null;
-          }
-          return (
-            <InfoItem
-              key={index}
-              label={row.label}
-              value={row.render ? row.render(clusterInfo?.[row.key]) : `${clusterInfo?.[row.key] || ""}`}
-              width={250}
-            />
-          );
-        })}
+        {DESC_LIST.map((row, index) => (
+          <InfoItem
+            key={index}
+            label={row.label}
+            value={
+              row.render
+                ? row.render(clusterInfo?.[row.key])
+                : `${clusterInfo?.[row.key] || ""}`
+            }
+            width={250}
+          />
+        ))}
       </PageHeader>
     );
   }
 
   public renderContent = () => {
-    return DETAIL_MENU_MAP.get(this.state.menu)?.content(this.state.clusterInfo);
+    return DETAIL_MENU_MAP.get(this.state.menu)?.content(
+      this.state.clusterInfo
+    );
   };
 
   public changeMenu = (e) => {
@@ -119,8 +134,13 @@ export class PhyClusterDetail extends React.Component<any> {
     return (
       <Spin spinning={this.state.loading}>
         {this.renderPageHeader()}
-        <Menu selectedKeys={[this.state.menu]} mode="horizontal" onClick={this.changeMenu}>
-          {this.state.clusterInfo?.currentAppAuth === 1 || this.state.clusterInfo?.currentAppAuth === 0
+        <Menu
+          selectedKeys={[this.state.menu]}
+          mode="horizontal"
+          onClick={this.changeMenu}
+        >
+          {this.state.clusterInfo?.currentAppAuth === 1 ||
+          this.state.clusterInfo?.currentAppAuth === 0
             ? TAB_LIST.map((d) => <Menu.Item key={d.key}>{d.name}</Menu.Item>)
             : null}
         </Menu>

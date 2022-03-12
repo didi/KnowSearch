@@ -5,12 +5,12 @@ import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { StaffSelect } from 'container/staff-select';
 import { RenderText } from 'container/custom-form';
-import { IWorkOrder } from 'typesPath/params-types';
+import { IWorkOrder } from '@types/params-types';
 import { submitWorkOrder } from 'api/common-api';
 import { AppState, UserState } from 'store/type';
 import { getAppList } from 'api/cluster-api';
-import { IAppDetail } from 'typesPath/user-types';
-import { IOpLogicCluster } from 'typesPath/cluster/cluster-types';
+import { IAppDetail } from '@types/user-types';
+import { IOpLogicCluster } from '@types/cluster/cluster-types';
 import { staffRuleProps } from 'constants/table';
 
 const mapStateToProps = (state: any) => ({
@@ -76,7 +76,7 @@ const TransferClusterModal = (props: { dispatch: any, cb: Function, app: AppStat
         ],
         isCustomStyle: true,
         type: FormItemType.custom,
-        // isCustomStyle: true,
+        isCustomStyle: true,
         customFormItem: <StaffSelect style={{width: '60%'}}/>,
       }, {
         key: 'description',

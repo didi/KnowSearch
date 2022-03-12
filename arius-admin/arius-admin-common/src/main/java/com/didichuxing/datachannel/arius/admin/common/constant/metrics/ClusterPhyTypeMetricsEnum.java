@@ -5,24 +5,19 @@ package com.didichuxing.datachannel.arius.admin.common.constant.metrics;
  */
 public enum ClusterPhyTypeMetricsEnum {
                                        /*** 未知*/
-                                       UNKNOWN(-1, "未知", false),
-									   CLUSTER(1, "clusterPhyOverviewMetrics", false),
-	                                   NODE(2, "clusterPhyNodeMetrics", true),
-	                                   INDICES(3, "clusterPhyIdicesMetrics", true),
-                                       TEMPLATES(4, "clusterPhyTemplateMetrics", true),
-                                       NODE_TASKS(5,"clusterPhyNodesTaskMetricsHandler", true);
+                                       UNKNOWN(-1, "未知"),
+									   CLUSTER(1, "clusterPhyOverviewMetrics"),
+	                                   NODE(2, "clusterPhyNodeMetrics"),
+	                                   INDICES(3, "clusterPhyNodeIndicesMetrics");
 
-    ClusterPhyTypeMetricsEnum(int code, String type, boolean collectCurveMetricsList) {
+    ClusterPhyTypeMetricsEnum(int code, String type) {
         this.code = code;
         this.type = type;
-        this.collectCurveMetricsList = collectCurveMetricsList;
     }
 
     private int    code;
 
     private String type;
-
-    private boolean collectCurveMetricsList;
 
     public int getCode() {
         return code;
@@ -31,8 +26,6 @@ public enum ClusterPhyTypeMetricsEnum {
     public String getType() {
         return type;
     }
-
-    public boolean isCollectCurveMetricsList() { return collectCurveMetricsList; }
 
     public static ClusterPhyTypeMetricsEnum valueOfCode(Integer code) {
         if (null == code) {

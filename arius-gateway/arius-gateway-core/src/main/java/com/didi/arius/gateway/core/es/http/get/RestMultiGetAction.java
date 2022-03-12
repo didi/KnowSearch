@@ -144,6 +144,14 @@ public class RestMultiGetAction extends ESAction {
 
 		ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
+        //for kibana
+        for (String index : indices) {
+        	if (index.startsWith(".kibana")) {
+        		readClient = esRestClientService.getAdminClient(actionName);
+        		break;
+        	}
+        }
+
 		final List<FetchFields> fetchFieldsList = new ArrayList<>(esMultiGetRequest.getItems().size());
         for (ESMultiGetRequest.Item item : esMultiGetRequest.getItems()) {
         	FetchFields fetchFields = new FetchFields();

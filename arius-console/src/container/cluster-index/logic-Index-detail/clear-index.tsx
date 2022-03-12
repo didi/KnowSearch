@@ -1,10 +1,10 @@
 import * as React from 'react';
 import './index.less';
 import Url from 'lib/url-parser';
-import { IUNSpecificInfo } from 'typesPath/base-types';
+import { IUNSpecificInfo } from '@types/base-types';
 import { SQLQuery1 } from './sql';
 import { getApplyOnlineColumns } from './config';
-import { IClearIndexParams } from 'typesPath/params-types';
+import { IClearIndexParams } from '@types/params-types';
 import { Table, Radio, Tooltip, Checkbox, Button, message } from 'antd';
 import { clearIndex, getClearInfo } from 'api/cluster-index-api';
 import { QuestionCircleTwoTone } from '@ant-design/icons';

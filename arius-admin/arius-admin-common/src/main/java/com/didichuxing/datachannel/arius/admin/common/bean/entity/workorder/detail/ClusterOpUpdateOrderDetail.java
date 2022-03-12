@@ -1,11 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author fengqiongfeng
@@ -27,12 +24,4 @@ public class ClusterOpUpdateOrderDetail extends AbstractOrderDetail {
      * 角色顺序，如：airepo-masternode,airepo-clientnode,airepo-datanode
      */
     private String roleOrder;
-    /**
-     * 集群角色 对应主机列表
-     */
-    private List<ESClusterRoleHost> roleClusterHosts;
-    /**
-     * 集群版本
-     */
-    private String esVersion;
 }

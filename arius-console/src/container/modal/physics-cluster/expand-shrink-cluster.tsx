@@ -8,13 +8,13 @@ import {
 } from "component/x-form";
 import { ExpandShrinkNodeList } from "container/custom-form";
 import "./index.less";
-import { IOpExpandValues, IRoleIpList } from "typesPath/cluster/cluster-types";
+import { IOpExpandValues, IRoleIpList } from "@types/cluster/cluster-types";
 import * as actions from "actions";
 import {
   CLUSTER_INDECREASE_TYPE,
   VERSION_MAINFEST_TYPE,
 } from "constants/status-map";
-import { IWorkOrder } from "typesPath/params-types";
+import { IWorkOrder } from "@types/params-types";
 import { submitWorkOrder } from "api/common-api";
 
 const labelList = [
@@ -39,15 +39,14 @@ const mapStateToProps = (state: any) => ({
   app: state.app,
   user: state.user,
 });
-const connects: Function = connect
-@connects(mapStateToProps, null)
+
+@connect(mapStateToProps, null)
 export class ExpandShrinkCluster extends React.Component<any> {
   public state = {
     opValues: {} as any,
     masterNodes: "",
     clientNodes: "",
     dataNodes: "",
-    coldNodes: "",
     formMap: [
       {
         key: "type",
@@ -103,8 +102,7 @@ export class ExpandShrinkCluster extends React.Component<any> {
         case "datanode":
           this.setState(
             {
-              dataNodes: item.esRoleClusterHostVO.filter((i) => i.rack !== 'cold').map((i) => i.ip).join("\n"),
-              coldNodes: item.esRoleClusterHostVO.filter((i) => i.rack === 'cold').map((i) => i.ip).join("\n"),
+              dataNodes: item.esRoleClusterHostVO.map((i) => i.ip).join("\n"),
             },
             () => {
               this.getFormMap(false);
@@ -158,10 +156,6 @@ export class ExpandShrinkCluster extends React.Component<any> {
       case "dataNode":
         otherValue = master.concat(client);
         originArr = this.state.dataNodes.split("\n") || [];
-        break;
-      case "coldNode":
-        otherValue = master.concat(client);
-        originArr = this.state.coldNodes.split("\n") || [];
         break;
     }
 
@@ -220,19 +214,20 @@ export class ExpandShrinkCluster extends React.Component<any> {
       // 扩容
       if (result.type === 2) {
         // 如果数据都为空判断没有进行扩容操作数据没有更改
-        if(!result.clientNodeExpand && !result.dataNodeExpand && !result.coldNodeExpand) {
+        if(!result.clientNodeExpand && !result.dataNodeExpand) {
           flag = true;
         }
       } else {
         // 如果 clientNodes 和 dataNodes 为空，则无法进行所容，不能点击确定按钮
-        if (!this.state.clientNodes && !this.state.dataNodes && !this.state.coldNodes) {
+        if (!this.state.clientNodes && !this.state.dataNodes) {
           flag = true;
         } else {
           // 将字符串 转成数组 再排序 最后转换成字符串 判断是否相同
           const oldClientNode = this.strSplitSortJoin(this.state.clientNodes)
-          const oldDataNode = this.strSplitSortJoin(this.state.dataNodes + `\n${this.state.coldNodes}`);
+          const oldDataNode = this.strSplitSortJoin(this.state.dataNodes);
           const clientNode = this.strSplitSortJoin(result.clientNode);
-          const dataNode = this.strSplitSortJoin(result.dataNode + `\n${result.coldNode}`);
+          const dataNode = this.strSplitSortJoin(result.dataNode);
+
           // 判断前后数据是否相同
           if(oldClientNode === clientNode && oldDataNode === dataNode) {
             flag = true;
@@ -249,11 +244,9 @@ export class ExpandShrinkCluster extends React.Component<any> {
       const masterArr = [] as IRoleIpList[];
       const clientArr = [] as IRoleIpList[];
       const dataArr = [] as IRoleIpList[];
-      const coldArr = [] as IRoleIpList[];
       const masterBaseArr = this.state.masterNodes.split("\n");
       const clientBaseArr = this.state.clientNodes.split("\n");
       const dataBaseArr = this.state.dataNodes.split("\n");
-      const coldBaseArr = this.state.coldNodes.split("\n");
       let masterExpandArr = result?.masterNode
         ?.split("\n")
         .filter((ele: string) => ele !== "")
@@ -263,10 +256,6 @@ export class ExpandShrinkCluster extends React.Component<any> {
         .filter((ele: string) => ele !== "")
         .map((ele: string) => ele.trim());
       let dataExpandArr = result?.dataNode
-        ?.split("\n")
-        .filter((ele: string) => ele !== "")
-        .map((ele: string) => ele.trim());
-      let coldExpandArr = result?.coldNode
         ?.split("\n")
         .filter((ele: string) => ele !== "")
         .map((ele: string) => ele.trim());
@@ -283,10 +272,6 @@ export class ExpandShrinkCluster extends React.Component<any> {
           ?.split("\n")
           .filter((ele: string) => ele !== "")
           .map((ele: string) => ele.trim());
-        coldExpandArr = result?.coldNodeExpand
-          ?.split("\n")
-          .filter((ele: string) => ele !== "")
-          .map((ele: string) => ele.trim());
       } else {
         masterExpandArr = result?.masterNode
           ?.split("\n")
@@ -300,73 +285,55 @@ export class ExpandShrinkCluster extends React.Component<any> {
           ?.split("\n")
           .filter((ele: string) => ele !== "")
           .map((ele: string) => ele.trim());
-          coldExpandArr = result?.coldNode
-          ?.split("\n")
-          .filter((ele: string) => ele !== "")
-          .map((ele: string) => ele.trim());
       }
       if (result?.type === 2) {
         masterExpandArr && masterExpandArr.forEach((ele: string) => {
           if (!masterBaseArr.includes(ele)) {
-            masterArr.push({ role: "masternode", hostname: ele, beCold: false });
+            masterArr.push({ role: "masternode", hostname: ele });
           }
         });
         clientExpandArr && clientExpandArr.forEach((ele: string) => {
           if (!clientBaseArr.includes(ele)) {
-            clientArr.push({ role: "clientnode", hostname: ele, beCold: false });
+            clientArr.push({ role: "clientnode", hostname: ele });
           }
         });
         dataExpandArr && dataExpandArr.forEach((ele: string) => {
           if (!dataBaseArr.includes(ele)) {
-            dataArr.push({ role: "datanode", hostname: ele, beCold: false });
-          }
-        });
-        coldExpandArr && coldExpandArr.forEach((ele: string) => {
-          if (!coldBaseArr.includes(ele)) {
-            coldArr.push({ role: "datanode", hostname: ele, beCold: true });
+            dataArr.push({ role: "datanode", hostname: ele });
           }
         });
       } else {
         masterExpandArr && masterBaseArr.forEach((ele: string) => {
           if (ele && !masterExpandArr.includes(ele)) {
-            masterArr.push({ role: "masternode", hostname: ele, beCold: false });
+            masterArr.push({ role: "masternode", hostname: ele });
           }
         });
         clientBaseArr && clientBaseArr.forEach((ele: string) => {
           if (ele && !clientExpandArr.includes(ele)) {
-            clientArr.push({ role: "clientnode", hostname: ele, beCold: false });
+            clientArr.push({ role: "clientnode", hostname: ele });
           }
         });
         dataBaseArr && dataBaseArr.forEach((ele: string) => {
           if (ele && !dataExpandArr.includes(ele)) {
-            dataArr.push({ role: "datanode", hostname: ele, beCold: false });
-          }
-        });
-        coldBaseArr && coldBaseArr.forEach((ele: string) => {
-          if (ele && !coldExpandArr.includes(ele)) {
-            coldArr.push({ role: "datanode", hostname: ele, beCold: true });
+            dataArr.push({ role: "datanode", hostname: ele });
           }
         });
       }
       const master = masterArr?.length
         ? masterArr
-        : [{ role: "masternode", hostname: "", beCold: false }];
+        : [{ role: "masternode", hostname: "" }];
       const client = clientArr?.length
         ? clientArr
-        : [{ role: "clientnode", hostname: "", beCold: false }];
+        : [{ role: "clientnode", hostname: "" }];
       const data = dataArr?.length
         ? dataArr
-        : [{ role: "datanode", hostname: "", beCold: false}];
-      const cold = coldArr?.length
-        ? coldArr
-        : [];
+        : [{ role: "datanode", hostname: "" }];
 
       // TODO: masterNode 暂不支持扩所容
       // roleClusterHosts = master.concat(client).concat(data);
       roleClusterHosts = client.concat(data);
-      roleClusterHosts = roleClusterHosts.concat(cold);
 
-      let originRoleClusterHosts = [] as any[];
+      let originRoleClusterHosts = [] as IRoleIpList[];
       const originMasterArr = masterBaseArr.map((ele) => ({
         role: "masternode",
         hostname: ele,
@@ -527,41 +494,6 @@ export class ExpandShrinkCluster extends React.Component<any> {
         },
       },
       {
-        key: "coldNode",
-        label: "cold列表",
-        type: FormItemType.textArea,
-        defaultValue: this.state.coldNodes,
-        rules: [
-          {
-            validator: (rule: any, value: any) => {
-              if(this.isNode()) {
-                return Promise.reject('至少保留一个节点');
-              }
-              if(!value) {
-                return Promise.resolve();
-              }
-              if(!this.state.coldNodes) {
-                return Promise.reject("cold列表主机不存在，无法进行缩容操作");
-              }
-              if (this.getPhyNodeRules("coldNode", value)) {
-                if (
-                  typeof this.getPhyNodeRules("coldNode", value, 3) === "string"
-                )
-                  return Promise.reject(
-                    this.getPhyNodeRules("coldNode", value, 3)
-                  );
-                return Promise.resolve();
-              }
-              return Promise.reject();
-            },
-          },
-        ],
-        attrs: {
-          placeholder: `请输入主机列表，多个主机换行`,
-          rows: 4,
-        },
-      },
-      {
         key: "description",
         type: FormItemType.textArea,
         label: "申请原因",
@@ -661,29 +593,6 @@ export class ExpandShrinkCluster extends React.Component<any> {
         customFormItem: <ExpandShrinkNodeList host={this.state.dataNodes} />,
       },
       {
-        key: "coldNodeExpand",
-        label: "cold属性节点列表",
-        type: FormItemType.custom,
-        rules: [
-          {
-            validator: (rule: any, value: any) => {
-              if(!value) {
-                return Promise.resolve();
-              }
-              if (this.getPhyNodeRules("coldNode", value)) {
-                if (typeof this.getPhyNodeRules("coldNode", value) === "string")
-                  return Promise.reject(
-                    this.getPhyNodeRules("coldNode", value)
-                  );
-                return Promise.resolve();
-              }
-              return Promise.reject();
-            },
-          },
-        ],
-        customFormItem: <ExpandShrinkNodeList host={this.state.coldNodes} />,
-      },
-      {
         key: "description",
         type: FormItemType.textArea,
         label: "申请原因",
@@ -708,12 +617,12 @@ export class ExpandShrinkCluster extends React.Component<any> {
 
     const arr = this.state.formMap;
     if (b) {
-      arr.splice(1, 5, ...expandArr);
+      arr.splice(1, 4, ...expandArr);
       this.setState({
         formMap: arr,
       });
     } else {
-      arr.splice(1, 5, ...shrinkArr);
+      arr.splice(1, 4, ...shrinkArr);
       this.setState({
         formMap: arr,
       });

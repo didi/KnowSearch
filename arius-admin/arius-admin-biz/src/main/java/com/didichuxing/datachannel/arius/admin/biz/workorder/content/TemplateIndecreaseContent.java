@@ -30,11 +30,6 @@ public class TemplateIndecreaseContent extends BaseContent {
     private Double  quota;
 
     /**
-     * 热数据保存天数 单位是天
-     */
-    private Integer hotTime;
-
-    /**
      * 实际的磁盘消耗
      */
     private Double  actualDiskG;
@@ -64,11 +59,6 @@ public class TemplateIndecreaseContent extends BaseContent {
      * 数据总量 单位台
      */
     private Double  expectQuota;
-
-    /**
-     * 期望热数据保存天数 单位天
-     */
-    private Integer expectHotTime;
 
     /**************************************** 管理员操作 ****************************************************/
     /**

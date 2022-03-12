@@ -4,11 +4,6 @@
     "bool": {
       "must": [
         {
-          "term": {
-            "queryRequest": true
-          }
-        },
-        {
           "range": {
             "timeStamp": {
               "gte": %d,
@@ -27,7 +22,7 @@
   "aggs": {
     "group_by_field": {
       "terms": {
-        "field": "gatewayNode"
+        "field": "%s"
       },
       "aggs": {
         "group_by_timeStamp": {

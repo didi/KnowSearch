@@ -3,17 +3,14 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAllocationInfo;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAttrInfo;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllAction;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.TimeValueUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -33,7 +30,7 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ES
 import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.ESClusterUpdateSettingsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;
@@ -159,33 +156,6 @@ public class ESClusterDAO extends BaseESDAO {
             ESResponsePluginInfo.class);
         return ConvertUtil.list2MapOfList(esResponsePluginInfos, ESResponsePluginInfo::getName,
             ESResponsePluginInfo::getComponent);
-    }
-
-    /**
-     * 获取物理集群下各个节点的资源设置信息
-     * @param cluster 物理集群名称
-     * @return 集群下的节点资源使用信息列表
-     */
-    public List<NodeAllocationInfo> getNodeAllocationInfoByCluster(String cluster) {
-        ESClient esClient = esOpClient.getESClient(cluster);
-        if (esClient == null) {
-            LOGGER.warn("class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}" +
-                    "||errMsg=client is null", cluster);
-            return null;
-        }
-
-        ESCatRequest esCatRequest = new ESCatRequest();
-        esCatRequest.setUri("allocation");
-
-        try {
-            ESCatResponse esCatResponse = esClient.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return JSON.parseArray(esCatResponse.getResponse().toString(), NodeAllocationInfo.class);
-        } catch (Exception e) {
-            LOGGER.warn("class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}" +
-                    "||errMsg=can't get allocation info", cluster);
-            return null;
-        }
     }
 
     /**
@@ -351,8 +321,17 @@ public class ESClusterDAO extends BaseESDAO {
                 JSONObject nodesObj = jsonObject.getJSONObject(NODES);
                 JSONObject nodesCountObj = nodesObj.getJSONObject(COUNT);
                 responses.setTotalNodes(nodesCountObj.getLongValue(TOTAL));
+                
+                responses.setNumberIngestNodes(nodesCountObj.getLongValue(ES_ROLE_INGEST));
+                responses.setNumberMasterNodes(nodesCountObj.getLongValue(ES_ROLE_MASTER));
+                responses.setNumberDataNodes(nodesCountObj.getLongValue(ES_ROLE_DATA));
+                responses.setNumberCoordinatingOnly(nodesCountObj.getLongValue(ES_ROLE_COORDINATING_ONLY));
 
-                setRoleNumberToResponses(responses, nodesCountObj);
+                long clientNum = nodesCountObj.getLongValue(TOTAL) - nodesCountObj.getLongValue(ES_ROLE_MASTER)
+                                 - nodesCountObj.getLongValue(ES_ROLE_DATA);
+                //处理特殊情况, 单实例全部角色
+                if (clientNum < 0) { clientNum = 0;}
+                responses.setNumberClientNodes(clientNum);
 
                 JSONObject osObj = nodesObj.getJSONObject(OS);
                 JSONObject memObj = osObj.getJSONObject(MEM);
@@ -365,12 +344,6 @@ public class ESClusterDAO extends BaseESDAO {
                 JSONObject fsObj = nodesObj.getJSONObject(FS);
                 responses.setTotalFs(new ByteSizeValue(fsObj.getLongValue(TOTAL_IN_BYTES)));
                 responses.setFreeFs(new ByteSizeValue(fsObj.getLongValue(FREE_IN_BYTES)));
-
-                JSONObject jvmObj = nodesObj.getJSONObject(JVM);
-                JSONObject jvmHeapObj = jvmObj.getJSONObject(MEM);
-                responses.setTotalHeapMem(new ByteSizeValue(jvmHeapObj.getLongValue(HEAP_MAX_IN_BYTES)));
-                responses.setUsedHeapMem(new ByteSizeValue(jvmHeapObj.getLongValue(HEAP_USED_IN_BYTES)));
-
             }
 
         } catch (Exception e) {
@@ -379,68 +352,6 @@ public class ESClusterDAO extends BaseESDAO {
         }
 
         return responses;
-    }
-
-    public List<ESClusterTaskStatsResponse> getClusterTaskStats(String clusterName) {
-        List<ESClusterTaskStatsResponse> responses = Lists.newArrayList();
-        ESClient esClient = esOpClient.getESClient(clusterName);
-        try {
-            DirectRequest taskStatsRequest = new DirectRequest("GET", "_cat/tasks?v&detailed&format=json");
-            DirectResponse directResponse = esClient.direct(taskStatsRequest).actionGet(30, TimeUnit.SECONDS);
-            if (directResponse.getRestStatus() == RestStatus.OK
-                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                JSONArray jsonArray = JSON.parseArray(directResponse.getResponseContent());
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    ESClusterTaskStatsResponse response = new ESClusterTaskStatsResponse();
-                    JSONObject js = jsonArray.getJSONObject(i);
-                    response.setAction(js.getString(ACTION));
-                    response.setDescription(js.getString(DESCRIPTION));
-                    response.setIp(js.getString(IP));
-                    response.setNode(js.getString(NODE));
-                    response.setTaskId(js.getString(TASK_ID));
-                    response.setStartTime(Long.parseLong(js.getString(START_TIME)));
-                    response.setType(js.getString(TYPE));
-                    response.setParentTaskId(js.getString(PARENT_TASK_ID));
-                    response.setRunningTime(TimeValueUtil.parseTimeValue(js.getString(RUNNING_TIME), "task").getMillis());
-                    response.setRunningTimeString(js.getString(RUNNING_TIME));
-                    responses.add(response);
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("class=ESClusterDAO||method=getClusterTaskStats||clusterName={}||errMsg=fail to get",
-                    clusterName, e);
-        }
-
-        return responses;
-    }
-
-    private void setRoleNumberToResponses(ESClusterStatsResponse responses, JSONObject nodesCountObj) {
-        // role--client/data/master的数目初始化
-        long clientNum, dataNum, masterNum;
-
-        // 设置dataNumber和masterNumber，兼容2.3.3低版本的es集群
-        if (nodesCountObj.get(ES_ROLE_MASTER_ONLY) != null) {
-            // 低版本中存在master_only的key
-            dataNum   = nodesCountObj.getLongValue(ES_ROLE_DATA_ONLY) + nodesCountObj.getLongValue(ES_ROLE_MASTER_DATA);
-            masterNum = nodesCountObj.getLongValue(ES_ROLE_MASTER_ONLY) + nodesCountObj.getLongValue(ES_ROLE_MASTER_DATA);
-            clientNum = nodesCountObj.getLongValue(ES_ROLE_CLIENT);
-        } else {
-            // 高版本的角色节点数目设置
-            dataNum   = nodesCountObj.getLongValue(ES_ROLE_DATA);
-            masterNum = nodesCountObj.getLongValue(ES_ROLE_MASTER);
-            clientNum = nodesCountObj.getLongValue(TOTAL) - dataNum - masterNum;
-        }
-
-        // 对于clientNumber的极端值处理，处理特殊情况, 单实例全部角色
-        if (clientNum < 0) {
-            clientNum = 0;
-        }
-
-        responses.setNumberClientNodes(clientNum);
-        responses.setNumberDataNodes(dataNum);
-        responses.setNumberMasterNodes(masterNum);
-        responses.setNumberIngestNodes(nodesCountObj.getLongValue(ES_ROLE_INGEST));
-        responses.setNumberCoordinatingOnly(nodesCountObj.getLongValue(ES_ROLE_COORDINATING_ONLY));
     }
 
     private ESClusterStatsResponse initESClusterStatsResponse() {
@@ -456,28 +367,35 @@ public class ESClusterDAO extends BaseESDAO {
     }
 
     /**
-     * 获取物理集群动态配置中的attr属性
+     * 获取物理集群动态配置中的attributes属性
      * @param clusterName 物理集群名称
-     * @return 集群配置下的attributesInfo属性集合
+     * @return 集群配置下的attributes属性集合
      */
-    public List<NodeAttrInfo> syncGetAllNodesAttributes(String clusterName) {
+
+    public Set<String> syncGetAllNodesAttributes(String clusterName) {
         ESClient client = esOpClient.getESClient(clusterName);
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=getClusterStats||clusterName={}||errMsg=esClient is null", clusterName);
-            return null;
+            return new HashSet<>();
         }
 
+        Set<String> allNodesAttributes = Sets.newHashSet();
         try {
-            ESCatRequest esCatRequest = new ESCatRequest();
-            esCatRequest.setUri("nodeattrs?h=node,attr,value&s=attr:desc");
-
-            ESCatResponse esCatResponse = client.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return JSON.parseArray(esCatResponse.getResponse().toString(), NodeAttrInfo.class);
+            DirectRequest directRequest = new DirectRequest("GET", "_cat/nodeattrs?v&h=attr&format=json");
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                List<JSONObject> attributeObjects = JSONArray.parseArray(directResponse.getResponseContent(), JSONObject.class);
+                if (!CollectionUtils.isEmpty(attributeObjects)) {
+                    // 对于attributes属性进行去重操作
+                    attributeObjects.forEach(attribute -> allNodesAttributes.add(attribute.get("attr").toString()));
+                }
+            }
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=syncGetAllNodesAttributes||cluster={}||errMsg=attributes is null", clusterName, e);
         }
 
-        return null;
+        return allNodesAttributes;
+
     }
 }

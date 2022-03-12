@@ -21,7 +21,6 @@
 				<TimeBasedTriggeringPolicy modulate="true"
 					interval="1" />
 			</Policies>
-			<DefaultRolloverStrategy max="7"/>
 		</RollingFile>
 		
 		<RollingFile name="bootLog" fileName="${gateway.queryConfig.logPath}/log/boot.log" filePattern="${gateway.queryConfig.logPath}/log/boot.log.%d{yyyy-MM-dd}"
@@ -31,7 +30,6 @@
 				<TimeBasedTriggeringPolicy modulate="true"
 					interval="1" />
 			</Policies>
-			<DefaultRolloverStrategy max="7"/>
 		</RollingFile>			
 		
 		<RollingFile name="queryStats" fileName="${gateway.queryConfig.logPath}/log/stats.log" filePattern="${gateway.queryConfig.logPath}/log/stats.log.%d{yyyy-MM-dd}"
@@ -41,7 +39,6 @@
 				<TimeBasedTriggeringPolicy modulate="true"
 					interval="1" />
 			</Policies>
-			<DefaultRolloverStrategy max="7"/>
 		</RollingFile>		
 
 		<RollingFile name="metrics" fileName="${gateway.queryConfig.logPath}/log/metrics.log" filePattern="${gateway.queryConfig.logPath}/log/metrics.log.%d{yyyy-MM-dd}"
@@ -51,7 +48,6 @@
 				<TimeBasedTriggeringPolicy modulate="true"
 					interval="1" />
 			</Policies>
-			<DefaultRolloverStrategy max="7"/>
 		</RollingFile>			
 
 
@@ -62,7 +58,6 @@
 				<TimeBasedTriggeringPolicy modulate="true"
 					interval="1" />
 			</Policies>
-			<DefaultRolloverStrategy max="7"/>
 		</RollingFile>	
 		
 		<RollingFile name="auditLog" fileName="${gateway.queryConfig.logPath}/log/audit.log" filePattern="${gateway.queryConfig.logPath}/log/audit.log.%d{yyyy-MM-dd}"
@@ -72,7 +67,6 @@
 				<TimeBasedTriggeringPolicy modulate="true"
 					interval="1" />
 			</Policies>
-			<DefaultRolloverStrategy max="7"/>
 		</RollingFile>
 		
 		<RollingFile name="thirdReq" fileName="${gateway.queryConfig.logPath}/log/thirdReq.log"

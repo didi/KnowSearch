@@ -80,9 +80,4 @@ public class ESTemplateQuotaUsagePO extends BaseESPO {
     public String getKey() {
         return String.valueOf(logicId);
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
 }

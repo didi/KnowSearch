@@ -202,7 +202,6 @@ export interface IEsRoleCluster {
 export interface IRoleIpList {
   hostname: string;
   role: string;
-  beCold: boolean;
 }
 
 export interface IEsRoleClusterHost {
@@ -260,7 +259,6 @@ export interface ICreatePhyCluster {
   machineSpec?: string;
   level?: string;
   roleClusterHosts?: IRoleClusterHots[];
-  tags?: string
 }
 
 export interface IRoleCluster {

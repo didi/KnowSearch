@@ -28,9 +28,9 @@ public class Getter {
 
     public static String strWithDefault(Object value, String defaultValue) {
         if (value != null) {
-            return String.valueOf(value);
+            return defaultValue;
         }
-        return defaultValue;
+        return String.valueOf(value);
     }
 
     /**

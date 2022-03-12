@@ -1,12 +1,13 @@
-import * as React from "react";
-import { Drawer, Modal, Button, message, Alert } from "antd";
-import { XForm as XFormComponent } from "component/x-form";
-import { IXFormWrapper } from "interface/common";
+import * as React from 'react';
+import { Drawer, Modal, Button, message, Alert } from 'antd';
+import { XForm as XFormComponent } from 'component/x-form';
+import { IXFormWrapper } from 'interface/common';
 
 export class XFormWrapper extends React.Component<IXFormWrapper> {
+
   public state = {
     confirmLoading: false,
-    formMap: this.props.formMap || ([] as any),
+    formMap: this.props.formMap || [] as any,
     formData: this.props.formData || {},
   };
 
@@ -31,60 +32,56 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
     if (this.$formRef) {
       return this.$formRef.current!.getFieldValue(key);
     }
-    return "";
-  };
+    return '';
+  }
 
   public setFieldValue = (ob: any) => {
     if (this.$formRef) {
       return this.$formRef.current!.setFieldsValue(ob);
     }
-    return "";
-  };
+    return '';
+  }
 
   public handleSubmit = () => {
-    this.$formRef
-      .current!.validateFields()
-      .then((result) => {
-        const { onSubmit, isWaitting, actionAfterFailedSubmit, actionAfterSubmit } = this.props;
+    this.$formRef.current!.validateFields().then(result => {
+      const { onSubmit, isWaitting, actionAfterFailedSubmit, actionAfterSubmit } = this.props;
 
-        if (typeof onSubmit === "function") {
-          if (isWaitting) {
+      if (typeof onSubmit === 'function') {
+        if (isWaitting) {
+          this.setState({
+            confirmLoading: true,
+          });
+          onSubmit(result).then((res: any) => {
             this.setState({
-              confirmLoading: true,
+              confirmLoading: false,
             });
-            onSubmit(result)
-              .then((res: any) => {
-                this.setState({
-                  confirmLoading: false,
-                });
-                if (typeof actionAfterSubmit === "function") {
-                  actionAfterSubmit(res);
-                }
-                message.success("操作成功");
-                this.resetForm();
-                this.closeModalWrapper();
-              })
-              .catch((err) => {
-                this.setState({
-                  confirmLoading: false,
-                  showErrorTip: true,
-                });
-                if (typeof actionAfterFailedSubmit === "function") {
-                  actionAfterFailedSubmit();
-                }
-              });
-            return;
-          }
-
-          // tslint:disable-next-line:no-unused-expression
-          onSubmit && onSubmit(result);
-
-          // this.resetForm(); //接口报错会情调表单数据
-          this.closeModalWrapper();
+            if (typeof actionAfterSubmit === 'function') {
+              actionAfterSubmit(res);
+            }
+            message.success('操作成功');
+            this.resetForm();
+            this.closeModalWrapper();
+          }).catch((err) => {
+            this.setState({
+              confirmLoading: false,
+              showErrorTip: true,
+            });
+            if (typeof actionAfterFailedSubmit === 'function') {
+              actionAfterFailedSubmit();
+            }
+          });
+          return;
         }
-      })
-      .catch((errs) => {});
-  };
+
+        // tslint:disable-next-line:no-unused-expression
+        onSubmit && onSubmit(result);
+
+        // this.resetForm(); //接口报错会情调表单数据
+        this.closeModalWrapper();
+      }
+    }).catch(errs => {
+    })
+  }
 
   public handleCancel = () => {
     const { onCancel } = this.props;
@@ -92,23 +89,23 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
     onCancel && onCancel();
     this.resetForm();
     this.closeModalWrapper();
-  };
+  }
 
   public resetForm = (resetFields?: string[]) => {
     // tslint:disable-next-line:no-unused-expression
-    this.$formRef && this.$formRef.current!.resetFields(resetFields || "");
-  };
+    this.$formRef && this.$formRef.current!.resetFields(resetFields || '');
+  }
 
   public closeModalWrapper = () => {
     const { onChangeVisible } = this.props;
     // tslint:disable-next-line:no-unused-expression
     onChangeVisible && onChangeVisible(false);
-  };
+  }
 
   public render() {
     const { type } = this.props;
     switch (type) {
-      case "drawer":
+      case 'drawer':
         return this.renderDrawer();
       default:
         return this.renderModal();
@@ -116,8 +113,11 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
   }
 
   public renderDrawer() {
-    const { visible, title, width, formLayout, cancelText, okText, customRenderElement, noform, nofooter, onHandleValuesChange } =
-      this.props;
+    const {
+      visible,
+      title,
+      width,
+      formLayout, cancelText, okText, customRenderElement, noform, nofooter, funcType } = this.props;
     const { formMap, formData } = this.state;
 
     return (
@@ -128,28 +128,28 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
         closable={true}
         onClose={this.handleCancel}
         destroyOnClose={true}
-        footer={
-          !nofooter && (
-            <div className="footer-btn">
-              <Button style={{ marginRight: 10 }} type="primary" onClick={this.handleSubmit}>
-                {okText || "确定"}
-              </Button>
-              <Button onClick={this.handleCancel}>{cancelText || "取消"}</Button>
-            </div>
-          )
-        }
       >
-        <>{customRenderElement}</>
+        <>
+          {customRenderElement}
+        </>
         {!noform && (
           <XFormComponent
-            layout="vertical"
             wrappedComponentRef={this.$formRef}
             formData={formData}
             formMap={formMap}
             formLayout={formLayout}
-            onHandleValuesChange={onHandleValuesChange}
-          />
-        )}
+          />)}
+        {
+          funcType && funcType === 'userFunc' && <div style={{ textAlign: 'center', padding: '20px 0', fontSize: '12px' }}>
+            <Alert style={{ width: '300px', display: 'inline-block', marginLeft: '45px' }} message="自定义函数可被共享使用，请将信息填写完整" type="info" showIcon />
+            {/* <span style={{ display: 'inline-block', padding: '0 15px' }}><Icon style={{ color: '#526ecc', fontSize: '13px', fontWeight: 'bolder' }} type="info-circle" />
+            </span><span>自定义函数可被共享使用，请将信息填写完整</span> */}
+          </div>
+        }
+        {!nofooter && (<div className="footer-btn">
+          <Button type="primary" onClick={this.handleSubmit}>{okText || '确定'}</Button>
+          <Button onClick={this.handleCancel}>{cancelText || '取消'}</Button>
+        </div>)}
       </Drawer>
     );
   }
@@ -167,15 +167,15 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
         maskClosable={false}
         onOk={this.handleSubmit}
         onCancel={this.handleCancel}
-        okText={okText || "确定"}
-        cancelText={cancelText || "取消"}
+        okText={okText || '确定'}
+        cancelText={cancelText || '取消'}
       >
         <XFormComponent
           wrappedComponentRef={this.$formRef}
           formData={formData}
           formMap={formMap}
           formLayout={formLayout}
-          layout={layout || "vertical"}
+          layout={layout || 'vertical'}
         />
       </Modal>
     );

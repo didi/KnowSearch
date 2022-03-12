@@ -17,9 +17,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setPhyClusterConfigList: (configList: any) =>
     dispatch(actions.setPhyClusterConfigList(configList)),
 });
-const connects: Function = connect
 
-@connects(null, mapDispatchToProps)
+@connect(null, mapDispatchToProps)
 export class PhysicsConfigInfo extends React.Component<any> {
   public state = {
     searchKey: "",

@@ -1,11 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.PageDTO;
@@ -19,6 +13,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author cjm
@@ -72,6 +71,11 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     @Override
     protected PaginationResult<DslTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
         DslTemplateConditionDTO condition = buildInitDslTemplateConditionDTO(pageDTO);
+        if (null == condition) {
+            LOGGER.error(
+                    "class=DslTemplatePageSearchHandle||method=buildWithoutAuthType||errMsg=failed to convert PageDTO to DslTemplateConditionDTO");
+            return PaginationResult.buildFail("获取DSL查询模板信息失败");
+        }
 
         Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(appId, condition);
         if (tuple == null) {

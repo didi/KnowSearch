@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.client.bean.dto.template;
 
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
 import io.swagger.annotations.ApiModel;

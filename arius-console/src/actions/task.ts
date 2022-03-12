@@ -1,4 +1,4 @@
-import { IDcdrStepDetailInfo } from 'typesPath/task-types';
+import { IDcdrStepDetailInfo } from '@types/task-types';
 import actionTypes from './actionTypes';
 
 export const setTaskBaseInfo = (taskBaseInfo: any) => {

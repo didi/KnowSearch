@@ -62,11 +62,6 @@ public class RoleClusterHost extends BaseEntity {
      */
     private String  nodeSet;
 
-    /**
-     * 机器规格 例如32C-64G-SSD-6T
-     */
-    private String machineSpec;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

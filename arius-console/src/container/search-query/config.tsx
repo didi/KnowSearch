@@ -1,6 +1,6 @@
 import React from "react";
 import { Tooltip, message, Modal } from 'antd';
-import { IMenuItem } from "typesPath/base-types";
+import { IMenuItem } from "@types/base-types";
 import { renderOperationBtns } from 'container/custom-component';
 import { QueryTpl } from './query-tpl';
 import moment from "moment";
@@ -91,7 +91,6 @@ export const getQueryTplColumns = (reloadData: Function, showDrawer: Function, s
     {
       title: '查询模板',
       dataIndex: 'dslTemplate',
-      fixed: "left",
       render: (text: any, record: any) => {
         const btns: any = [
           {
@@ -252,12 +251,12 @@ PERIOD_RADIO.forEach((p) => {
 export const PERIOD_RADIO_MAP = periodRadioMap;
 
 const errorQueryColumnsRender = (item) => {
-  return <Tooltip placement="right" title={renderText(item)}><div className="error-query-container-table-cell two-row-ellipsis"> {item || '-'}</div></Tooltip>;
+  return <Tooltip placement="right" title={renderText(item)}><div className="error-query-container-table-cell two-row-ellipsis"> {item}</div></Tooltip>;
 };
 
 export const errorQueryColumns = [
   {
-    title: "请求URL",
+    title: "查询uri",
     dataIndex: "uri",
     render: (item) => errorQueryColumnsRender(item),
   },

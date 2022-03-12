@@ -11,7 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author d06679
@@ -125,13 +124,6 @@ public interface TemplatePhyService {
     List<IndexTemplatePhy> getNormalTemplateByCluster(String cluster);
 
     /**
-     * 根据物理模板状态和模糊匹配获取模板列表
-     * @param cluster 集群
-     * @return set
-     */
-    Set<String> getMatchNormalLogicIdByCluster(String cluster);
-
-    /**
      * 根据物理模板状态获取模板列表
      * @param cluster 集群
      * @param racks racks
@@ -159,13 +151,6 @@ public interface TemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhyWithLogic> getTemplateWithLogicByIds(List<Long> physicalIds);
-
-    /**
-     * 全量获取指定物理集群所关联的逻辑模板信息列表
-     * @param phyCluster 物理集群名称
-     * @return 物理集群下的全量模板信息列表
-     */
-    List<IndexTemplatePhyWithLogic> getTemplateByPhyCluster(String phyCluster);
 
     /**
      * 根据名字查询
@@ -255,6 +240,4 @@ public interface TemplatePhyService {
      * 获取regionId下的物理模板
      */
     List<IndexTemplatePhy> getTemplateByRegionId(Long regionId);
-
-
 }

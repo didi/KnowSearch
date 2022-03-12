@@ -42,9 +42,4 @@ public class TemplateConfigPO extends BasePO {
      * 限定逻辑模板下所有物理模板shardNum
      */
     private Integer shardNum;
-
-    /**
-     * indexRollover功能，0：不禁用；1：禁用
-     */
-    private Boolean disableIndexRollover;
 }

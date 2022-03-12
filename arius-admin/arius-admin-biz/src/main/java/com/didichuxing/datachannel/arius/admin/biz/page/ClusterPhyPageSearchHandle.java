@@ -9,6 +9,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.didichuxing.datachannel.arius.admin.biz.app.AppClusterPhyAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -16,16 +17,14 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -48,9 +47,9 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     private ClusterPhyManager        clusterPhyManager;
 
     @Autowired
-    private RoleClusterService       roleClusterService;
+    private AppClusterPhyAuthManager appClusterPhyAuthManager;
 
-    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterPhyPageSearchHandle",20, 40, 100);
+    private static final FutureUtil<Void> futureUtil = FutureUtil.initBySystemAvailableProcessors("ClusterPhyPageSearchHandle",50);
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer appId) {
@@ -79,10 +78,6 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
                 return Result.buildParamIllegal("物理集群名称不允许带类似*, ?等通配符查询");
             }
 
-            if (null != clusterPhyConditionDTO.getSortTerm() && !SortEnum.isExit(clusterPhyConditionDTO.getSortTerm())) {
-                return Result.buildParamIllegal(String.format("暂且不支持排序字段[%s]", clusterPhyConditionDTO.getSortTerm()));
-            }
-
             return Result.buildSucc(true);
         }
 
@@ -99,61 +94,93 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     @Override
     protected PaginationResult<ConsoleClusterPhyVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
         ClusterPhyConditionDTO condition = buildClusterPhyConditionDTO(pageDTO);
+        if (null == condition) {
+            LOGGER.error(
+                    "class=TemplateLogicPageSearchHandle||method=buildWithAuthType||errMsg=failed to convert PageDTO to ClusterPhyConditionDTO");
+            return PaginationResult.buildFail("获取查询信息失败");
+        }
         
-        // 1. 获取管理/读写/读/无权限的物理集群信息
+        //1. 获取管理/读写/读/无权限的物理集群信息
         List<ClusterPhy> appAuthClusterPhyList = clusterPhyManager.getClusterPhyByAppIdAndAuthType(appId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthClusterPhyList)) {
             return PaginationResult.buildSucc();
         }
 
-        // 2. 过滤出符合条件的列表
+        //2. 过滤出符合条件的列表
         List<ClusterPhy> meetConditionClusterPhyList = getMeetConditionClusterPhyList(condition, appAuthClusterPhyList);
 
-        // 3. 设置命中数
+        //3. 设置命中数
         long hitTotal = meetConditionClusterPhyList.size();
 
-        List<ConsoleClusterPhyVO> meetConditionClusterPhyListVOList = ConvertUtil.list2List(meetConditionClusterPhyList, ConsoleClusterPhyVO.class);
-        
-        // 4. 根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
-        sort(meetConditionClusterPhyListVOList, condition.getSortTerm(), condition.getOrderByDesc());
+        //4. 根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
+        Collections.sort(meetConditionClusterPhyList);
 
-        // 5. 最后页临界点处理
+        //5. 最后页临界点处理
         long size = getLastPageSize(condition, meetConditionClusterPhyList.size());
 
-        List<ConsoleClusterPhyVO> fuzzyAndLimitConsoleClusterPhyVOList  = meetConditionClusterPhyListVOList.subList(condition.getFrom().intValue(), (int)size);
-        
-        // 6. 设置权限
-        fuzzyAndLimitConsoleClusterPhyVOList.forEach(consoleClusterPhyVO -> consoleClusterPhyVO.setCurrentAppAuth(condition.getAuthType()));
+        List<ClusterPhy> fuzzyAndLimitClusterPhyList      = meetConditionClusterPhyList.subList(condition.getFrom().intValue(), (int)size);
+        List<ConsoleClusterPhyVO> consoleClusterPhyVOList = ConvertUtil.list2List(fuzzyAndLimitClusterPhyList, ConsoleClusterPhyVO.class);
+        //6. 设置权限
+        consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> consoleClusterPhyVO.setCurrentAppAuth(condition.getAuthType()));
 
-        // 7.设置物理集群的所属项目和所属AppId
-        fuzzyAndLimitConsoleClusterPhyVOList.forEach(consoleClusterPhyVO -> clusterPhyManager.buildBelongAppIdsAndNames(consoleClusterPhyVO));
+        //2.设置物理集群的所属项目和所属AppId
+        consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> clusterPhyManager.buildBelongAppIdAndName(consoleClusterPhyVO));
 
-        // 8. 设置集群角色信息
-        List<Integer> clusterIds = fuzzyAndLimitConsoleClusterPhyVOList.stream().map(ConsoleClusterPhyVO::getId).collect(Collectors.toList());
-        Map<Long, List<RoleCluster>> roleListMap = roleClusterService.getAllRoleClusterByClusterIds(clusterIds);
-
-        for (ConsoleClusterPhyVO consoleClusterPhyVO : fuzzyAndLimitConsoleClusterPhyVOList) {
-            futureUtil.runnableTask(() -> clusterPhyManager.buildClusterRole(consoleClusterPhyVO,
-                    roleListMap.get(consoleClusterPhyVO.getId().longValue())));
+        //7. 设置集群基本统计信息：磁盘使用信息
+        for (ConsoleClusterPhyVO consoleClusterPhyVO : consoleClusterPhyVOList) {
+            futureUtil.runnableTask(() -> clusterPhyManager.buildPhyClusterStatics(consoleClusterPhyVO));
+            futureUtil.runnableTask(() -> clusterPhyManager.buildClusterRole(consoleClusterPhyVO));
         }
         futureUtil.waitExecute();
         
-        return PaginationResult.buildSucc(fuzzyAndLimitConsoleClusterPhyVOList, hitTotal, condition.getFrom(), condition.getSize());
+        return PaginationResult.buildSucc(consoleClusterPhyVOList, hitTotal, condition.getFrom(), condition.getSize());
     }
 
     @Override
     protected PaginationResult<ConsoleClusterPhyVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
         ClusterPhyConditionDTO condition = buildClusterPhyConditionDTO(pageDTO);
+        if (null == condition) {
+            LOGGER.error(
+                "class=ClusterPhyPageSearchHandle||method=buildWithoutAuthType||errMsg=failed to convert PageDTO to ClusterPhyConditionDTO");
+            return PaginationResult.buildFail("获取物理集群查询信息失败");
+        }
 
         List<ClusterPhy> pagingGetClusterPhyList      =  clusterPhyService.pagingGetClusterPhyByCondition(condition);
 
-        List<ConsoleClusterPhyVO> consoleClusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList, appId);
+        List<ConsoleClusterPhyVO> consoleClusterPhyVOList = doBuildWithoutAuthType(pagingGetClusterPhyList, appId);
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
         return PaginationResult.buildSucc(consoleClusterPhyVOList, totalHit, condition.getFrom(), condition.getSize());
     }
     
     /****************************************private***********************************************/
+    private List<ConsoleClusterPhyVO> doBuildWithoutAuthType(List<ClusterPhy> clusterPhyList, Integer appId) {
+        if (CollectionUtils.isEmpty(clusterPhyList)) {
+            return Lists.newArrayList();
+        }
+
+        //获取项目对集群列表的权限信息
+        List<AppClusterPhyAuth> appClusterPhyAuthList      = appClusterPhyAuthManager.getByClusterPhyListAndAppId(appId, clusterPhyList);
+        Map<String, Integer>    clusterPhyName2AuthTypeMap = ConvertUtil.list2Map(appClusterPhyAuthList, AppClusterPhyAuth::getClusterPhyName, AppClusterPhyAuth::getType);
+
+        List<ConsoleClusterPhyVO> consoleClusterPhyVOList = ConvertUtil.list2List(clusterPhyList, ConsoleClusterPhyVO.class);
+
+        //1. 设置单个集群权限
+        consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> consoleClusterPhyVO.setCurrentAppAuth(clusterPhyName2AuthTypeMap.get(consoleClusterPhyVO.getCluster())));
+
+        //2.设置物理集群的所属项目和所属AppId
+        consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> clusterPhyManager.buildBelongAppIdAndName(consoleClusterPhyVO));
+
+        //3. 设置集群基本统计信息：磁盘使用信息
+        for (ConsoleClusterPhyVO consoleClusterPhyVO : consoleClusterPhyVOList) {
+            futureUtil.runnableTask(() -> clusterPhyManager.buildClusterRole(consoleClusterPhyVO));
+            futureUtil.runnableTask(() -> clusterPhyManager.buildPhyClusterStatics(consoleClusterPhyVO));
+        }
+        futureUtil.waitExecute();
+
+        return consoleClusterPhyVOList;
+    }
+
     private ClusterPhyConditionDTO buildClusterPhyConditionDTO(PageDTO pageDTO) {
         if (pageDTO instanceof ClusterPhyConditionDTO) {
             return (ClusterPhyConditionDTO) pageDTO;
@@ -170,60 +197,85 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
      */
     private List<ClusterPhy> getMeetConditionClusterPhyList(ClusterPhyConditionDTO condition, List<ClusterPhy> appAuthClusterPhyList) {
         List<ClusterPhy> meetConditionClusterPhyList = Lists.newArrayList();
+        //分页查询参数为空
+        if (AriusObjUtils.isBlack(condition.getCluster()) && AriusObjUtils.isBlack(condition.getEsVersion())
+            && null == condition.getHealth()) {
+            meetConditionClusterPhyList.addAll(appAuthClusterPhyList);
+            return meetConditionClusterPhyList;
+        }
 
         //分页查询条件中只存在集群名称
-        if (!AriusObjUtils.isBlack(condition.getCluster())) {
-            appAuthClusterPhyList = appAuthClusterPhyList
+        if (!AriusObjUtils.isBlack(condition.getCluster()) && null == condition.getHealth()
+            && AriusObjUtils.isBlack(condition.getEsVersion())) {
+            meetConditionClusterPhyList = appAuthClusterPhyList
                                   .stream()
                                   .filter(r -> r.getCluster().contains(condition.getCluster()))
                                   .collect(Collectors.toList());
+            return meetConditionClusterPhyList;
         }
 
         //分页查询条件中只存在健康状态
-        if (null != condition.getHealth()) {
-            appAuthClusterPhyList = appAuthClusterPhyList
+        if (AriusObjUtils.isBlack(condition.getCluster())
+                && AriusObjUtils.isBlack(condition.getEsVersion()) && null != condition.getHealth()) {
+            meetConditionClusterPhyList = appAuthClusterPhyList
                                 .stream()
                                 .filter(r -> r.getHealth().equals(condition.getHealth()))
                                 .collect(Collectors.toList());
+            return meetConditionClusterPhyList;
         }
 
         //分页查询条件中只存在版本
-        if (!AriusObjUtils.isBlack(condition.getEsVersion())) {
-            appAuthClusterPhyList = appAuthClusterPhyList
+        if (AriusObjUtils.isBlack(condition.getCluster())
+                && !AriusObjUtils.isBlack(condition.getEsVersion()) && null == condition.getHealth()) {
+            meetConditionClusterPhyList = appAuthClusterPhyList
                                 .stream()
                                 .filter(r -> r.getEsVersion().equals(condition.getEsVersion()))
                                 .collect(Collectors.toList());
+            return meetConditionClusterPhyList;
         }
-        meetConditionClusterPhyList.addAll(appAuthClusterPhyList);
+
+        //分页查询条件中仅存在版本、健康状态
+        if (!AriusObjUtils.isBlack(condition.getEsVersion())
+                && null != condition.getHealth() && AriusObjUtils.isBlack(condition.getCluster())) {
+            meetConditionClusterPhyList = appAuthClusterPhyList
+                                .stream()
+                                .filter(r -> r.getEsVersion().equals(condition.getEsVersion()) && r.getHealth().equals(condition.getHealth()))
+                                .collect(Collectors.toList());
+            return meetConditionClusterPhyList;
+        }
+
+        //分页查询条件中仅存在版本、集群名称
+        if (!AriusObjUtils.isBlack(condition.getEsVersion())
+                && !AriusObjUtils.isBlack(condition.getCluster()) && null == condition.getHealth()) {
+            meetConditionClusterPhyList = appAuthClusterPhyList
+                                .stream()
+                                .filter(r -> r.getCluster().contains(condition.getCluster()) && r.getEsVersion().equals(condition.getEsVersion()))
+                                .collect(Collectors.toList());
+            return meetConditionClusterPhyList;
+        }
+
+        //分页查询条件中仅存在健康状态、集群名称
+        if (AriusObjUtils.isBlack(condition.getEsVersion())
+                && !AriusObjUtils.isBlack(condition.getCluster()) && null != condition.getHealth()) {
+            meetConditionClusterPhyList = appAuthClusterPhyList
+                                .stream()
+                                .filter(r -> r.getCluster().contains(condition.getCluster()) && r.getHealth().equals(condition.getHealth()))
+                                .collect(Collectors.toList());
+            return meetConditionClusterPhyList;
+        }
+
+        //分页查询条件中存在健康状态、集群名称、版本
+        if (!AriusObjUtils.isBlack(condition.getEsVersion())
+                && !AriusObjUtils.isBlack(condition.getCluster()) && null != condition.getHealth()) {
+            meetConditionClusterPhyList = appAuthClusterPhyList
+                                .stream()
+                                .filter(r -> r.getCluster().contains(condition.getCluster())
+                                        &&   r.getHealth().equals(condition.getHealth())
+                                        &&   r.getEsVersion().equals(condition.getEsVersion()))
+                                .collect(Collectors.toList());
+            return meetConditionClusterPhyList;
+        }
+
         return meetConditionClusterPhyList;
-    }
-
-    /**
-     * 根据条件排序
-     * @param meetConditionClusterPhyListVOList
-     * @param sortTerm
-     * @param orderByDesc
-     */
-    private void sort(List<ConsoleClusterPhyVO> meetConditionClusterPhyListVOList, String sortTerm, Boolean orderByDesc) {
-        if (null == sortTerm) {
-            Collections.sort(meetConditionClusterPhyListVOList);
-            return;
-        }
-
-        meetConditionClusterPhyListVOList.sort((o1, o2) -> {
-            if (SortEnum.DISK_FREE_PERCENT.getType().equals(sortTerm)) {
-                return orderByDesc ? o2.getDiskUsagePercent().compareTo(o1.getDiskUsagePercent()) :
-                        o1.getDiskUsagePercent().compareTo(o2.getDiskUsagePercent());
-            }
-
-            // 可在此添加需要排序的项
-            if (SortEnum.ACTIVE_SHARD_NUM.getType().equals(sortTerm)) {
-                return orderByDesc ? o2.getActiveShardNum().compareTo(o1.getActiveShardNum()) :
-                        o1.getActiveShardNum().compareTo(o2.getActiveShardNum());
-            }
-
-            // 0 为不排序 
-            return 0;
-        });
     }
 }

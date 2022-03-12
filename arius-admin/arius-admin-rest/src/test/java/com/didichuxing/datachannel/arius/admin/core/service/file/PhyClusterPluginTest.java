@@ -1,103 +1,72 @@
 package com.didichuxing.datachannel.arius.admin.core.service.file;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPluginDAO;
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockMultipartFile;
 
-public class PhyClusterPluginTest extends AriusAdminApplicationTest {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
 
+public class PhyClusterPluginTest extends AriusAdminApplicationTests {
     @Autowired
     private ESPluginService esPluginService;
 
-    @MockBean
+    @Autowired
     private ClusterPhyService clusterPhyService;
 
-    @MockBean
+    @Autowired
     private ESPluginDAO esPluginDAO;
 
-    @MockBean
-    private FileStorageService fileStorageService;
-
     @Test
-    public void updateESPluginDescTest() {
-        // 不存在插件
-        Mockito.when(esPluginDAO.getById(-1L)).thenReturn(CustomDataSource.getESPluginPO());
-        Assertions.assertTrue(esPluginService.updateESPluginDesc(CustomDataSource.getESPluginDTO(), "admin").failed());
-        // 存在的插件
-        Mockito.when(esPluginDAO.updateDesc(Mockito.any(), Mockito.any())).thenReturn(1);
-        Mockito.when(esPluginDAO.updateDesc(Mockito.any(), Mockito.any())).thenReturn(1);
-        Mockito.when(esPluginDAO.getById(Mockito.anyLong())).thenReturn(CustomDataSource.getESPluginPO());
-        Assertions.assertTrue(esPluginService.updateESPluginDesc(CustomDataSource.getESPluginDTO(), "admin").success());
+    public void uploadPluginTest() throws IOException {
+        Result<Long> updateResult = esPluginService.addESPlugin(getESPluginDTO());
+        Long id = updateResult.getData();
+        Assertions.assertTrue(updateResult.success());
+        Result deleteResult = esPluginService.deletePluginById(id,"admin");
+        Assertions.assertTrue(deleteResult.success());
     }
 
     @Test
-    public void addESPluginTest() {
-        Mockito.when(clusterPhyService.getClusterById(-1)).thenReturn(null);
-        Mockito.when(clusterPhyService.getClusterById(1)).thenReturn(CustomDataSource.esClusterPhyFactory());
-        PluginDTO pluginDTO = CustomDataSource.getESPluginDTO();
-
-        Assertions.assertTrue(esPluginService.addESPlugin(null).failed());
-        pluginDTO.setUploadFile(null);
-        Assertions.assertTrue(esPluginService.addESPlugin(pluginDTO).failed());
-        pluginDTO.setPhysicClusterId("-1");
-        Assertions.assertTrue(esPluginService.addESPlugin(pluginDTO).failed());
-        pluginDTO.setPhysicClusterId(null);
-        Assertions.assertTrue(esPluginService.addESPlugin(pluginDTO).failed());
-
-        Mockito.when(fileStorageService.upload(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Result.buildSucc());
-        Mockito.when(esPluginDAO.insert(Mockito.any())).thenReturn(1);
-        pluginDTO = CustomDataSource.getESPluginDTO();
-        Assertions.assertTrue(esPluginService.addESPlugin(pluginDTO).failed());
+    public void pluginAddOrderTest() {
+        // 获取插件的信息列表
+        List<ESPluginPO> byNameAndVersionAndPhysicClusterId = esPluginDAO.getByNameAndVersionAndPhysicClusterId("analysis-ik", "6.6.1", "303");
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(byNameAndVersionAndPhysicClusterId));
+        // 插件的安装
+        ESPluginPO esPluginPO = byNameAndVersionAndPhysicClusterId.get(0);
+        Assertions.assertNotNull(esPluginPO);
     }
 
     @Test
-    public void deletePluginByIdTest() {
-        Mockito.when(esPluginDAO.delete(Mockito.anyLong())).thenReturn(1);
-        Mockito.when(esPluginDAO.getById(-1L)).thenReturn(null);
-        Mockito.when(esPluginDAO.getById(1L)).thenReturn(CustomDataSource.getESPluginPO());
-        Mockito.when(clusterPhyService.getClusterById(1)).thenReturn(CustomDataSource.esClusterPhyFactory());
-        Assertions.assertTrue(esPluginService.deletePluginById(-1L, "admin").failed());
-        Mockito.when(fileStorageService.remove(Mockito.anyString())).thenReturn(Result.buildFail());
-        Assertions.assertTrue(esPluginService.deletePluginById(1L, "admin").failed());
-        Mockito.when(fileStorageService.remove(Mockito.anyString())).thenReturn(Result.buildSucc());
-        Mockito.when(esPluginDAO.delete(1L)).thenReturn(1);
-        ClusterPhy clusterPhy = CustomDataSource.esClusterPhyFactory();
-        clusterPhy.setPlugIds("");
-        Mockito.when(clusterPhyService.getClusterById(1)).thenReturn(clusterPhy);
-        Assertions.assertTrue(esPluginService.deletePluginById(1L, "admin").success());
+    public void pluginTaskTest() {
+        Assertions.assertNotNull(esPluginService);
     }
 
-    @Test
-    public void getPluginsByClusterNameTest() {
-        // 不存在的物理集群名
-        Mockito.when(clusterPhyService.getClusterByName("test")).thenReturn(null);
-        Assertions.assertTrue(esPluginService.getPluginsByClusterName("test").isEmpty());
-        // 存在的
-        Mockito.when(clusterPhyService.getClusterByName(CustomDataSource.PHY_CLUSTER_NAME)).thenReturn(CustomDataSource.esClusterPhyFactory());
-        Mockito.when(esPluginDAO.listByPlugIds(Mockito.anyList())).thenReturn(CustomDataSource.getESPluginPOList());
-        Assertions.assertFalse(esPluginService.getPluginsByClusterName(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
-    }
-
-    @Test
-    public void getESPluginByIdTest() {
-        Mockito.when(esPluginDAO.getById(1L)).thenReturn(CustomDataSource.getESPluginPO());
-        Assertions.assertNotNull(esPluginService.getESPluginById(1L));
-    }
-
-    @Test
-    public void getAllSysDefaultPluginIdsTest() {
-        Mockito.when(esPluginDAO.getAllSysDefaultPlugins()).thenReturn(CustomDataSource.getESPluginPOList());
-        Assertions.assertFalse(esPluginService.getAllSysDefaultPluginIds().isEmpty());
+    private ESPluginDTO getESPluginDTO() throws IOException {
+        ESPluginDTO esPluginDTO = new ESPluginDTO();
+        String clusterName = "dc-cluster";
+        esPluginDTO.setPhysicClusterId(clusterPhyService.getClusterByName(clusterName).getId().toString());
+        String filePath = "/Users/didi/wpkShell/analysis-ik.tar.gz";
+        String fileName = "analysis-ik.tar.gz";
+        File file = new File(filePath);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(fileName, fileInputStream);
+        esPluginDTO.setUploadFile(mockMultipartFile);
+        esPluginDTO.setFileName(fileName);
+        esPluginDTO.setCreator("wpk");
+        esPluginDTO.setDesc("插件安装测试");
+        esPluginDTO.setMd5("test-test-test");
+        esPluginDTO.setPDefault(true);
+        return esPluginDTO;
     }
 }

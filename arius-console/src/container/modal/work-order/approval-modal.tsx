@@ -5,7 +5,7 @@ import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { FORCED_EXPANSION_MAP } from 'constants/status-map';
 import { approvalOrder } from 'api/order-api';
-import { IApprovalOrder, IOrderInfo } from 'typesPath/cluster/order-types';
+import { IApprovalOrder, IOrderInfo } from '@types/cluster/order-types';
 import { AppState, UserState } from 'store/type';
 import { notification } from 'antd';
 import { PhyClusterRacks, AllPhyCluster } from 'container/custom-form/region';
@@ -18,13 +18,13 @@ const mapStateToProps = state => ({
 });
 
 export const ShowApprovalModal = connect(mapStateToProps)((props: {params: IOrderInfo, dispatch: Function, app: AppState, cb: Function, user: UserState}) => {
-  const { id, type, detailInfo: { clusterPhyNameList = [], clusterLogicName, diskQuota }} = props.params;
+  const { id, type, detailInfo: { clusterPhyNameList = [] }} = props.params;
 
   const formtTemplateCreateMap = [{
     key: 'cluster',
     label: '物理集群名称',
     type: FormItemType.custom,
-    customFormItem: <AllPhyCluster clusterPhyNameList={clusterPhyNameList} clusterLogicName={clusterLogicName}  diskQuota={diskQuota} workid={id}/>,
+    customFormItem: <AllPhyCluster clusterPhyNameList={clusterPhyNameList} />,
     rules: [{
       required: true,
       message: '请输入物理集群名称',
@@ -107,7 +107,7 @@ export const ShowApprovalModal = connect(mapStateToProps)((props: {params: IOrde
         assigneeAppid: props.app.appInfo()?.id,
         contentObj,
       } as unknown as IApprovalOrder;
-      return approvalOrder(orderParams).then((res) => {
+      approvalOrder(orderParams).then((res) => {
         let msg = props.params.outcome === 'agree' ? '通过成功' : '驳回成功';
         if (res?.message) {
           msg = res?.description;

@@ -45,12 +45,6 @@ public class TemplateLabelPO extends BaseESPO {
     public String getKey() {
         return String.format("%d_%s", indexTemplateId, labelId);
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
-
     /**
      * 获取主键key
      *

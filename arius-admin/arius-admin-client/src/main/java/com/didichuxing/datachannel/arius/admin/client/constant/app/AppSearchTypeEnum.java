@@ -13,8 +13,6 @@ public enum AppSearchTypeEnum {
 
                                TEMPLATE(1, "索引模式"),
 
-                               PRIMITIVE(2, "原生模式"),
-
                                UNKNOWN(-1, "未知");
 
     AppSearchTypeEnum(int code, String desc) {

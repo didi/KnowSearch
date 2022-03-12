@@ -1,4 +1,4 @@
-import { IStatusMap, IStringMap, ILabelValue, IStringArray } from 'typesPath/base-types';
+import { IStatusMap, IStringMap, ILabelValue, IStringArray } from 'types/base-types';
 
 export const selectAppAuth = [
   // {
@@ -34,22 +34,22 @@ export const ClusterAuthMaps = {
 } as IStatusMap;
 
 export const StatusMap = {
-  0: 'green',
-  1: 'yellow',
-  2: 'red',
+  1: 'green',
+  2: 'yellow',
+  3: 'red',
 }
 
 export const ClusterStatus = [
   {
     title: 'green',
-    value: '0',
+    value: '1',
   },
   {
     title: 'yellow',
-    value: '1',
+    value: '2',
   }, {
     title: 'red',
-    value: '2',
+    value: '3',
   }] as ILabelValue[];
 
 export const brokerMetrics = {
@@ -161,7 +161,6 @@ export const INDEX_AUTH_TYPE_ARR = [-1, 1, 2, 3];
 export const VERSION_MAINFEST_TYPE = {
   3: 'docker',
   4: 'host',
-  5: 'vm',
 } as IStatusMap;
 
 export const TASK_STATUS_TYPE_MAP = {
@@ -252,7 +251,7 @@ export const NODE_TYPE_MAP = [
   // { value: 'datanode-ceph', text: 'datanode-ceph' },
 ] as ILabelValue[];
 
-export const PHY_NODE_TYPE = ['masternode', 'clientnode', 'datanode', 'coldnode'];
+export const PHY_NODE_TYPE = ['masternode', 'clientnode', 'datanode'];
 
 export const STAUS_TYPE_MAP = [
   { value: 'waiting', text: '待执行' },
@@ -348,27 +347,3 @@ export const TOP_MAP = [
   { value: 15, label: 'Top15' },
   { value: 20, label: 'Top20' },
 ];
-
-export const DCDR_STATE_MAP = {
-  0: 'cancel',
-  1: 'success',
-  2: 'running',
-  3: 'failed',
-  4: 'waiting',
-}
-
-export const filtersHasDCDR = [
-  { text: "是", value: true },
-  { text: "否", value: false },
-];
-
-export const RESOURCE_TYPE_MAP = {
-  5: '信创(tce)',
-  4: 'vmware',
-  3: 'acs',
-} as IStatusMap;
-
-export const INPUT_RULE_MAP = {
-  '0': '自动获取',
-  '1': '全量录入',
-} as IStatusMap;

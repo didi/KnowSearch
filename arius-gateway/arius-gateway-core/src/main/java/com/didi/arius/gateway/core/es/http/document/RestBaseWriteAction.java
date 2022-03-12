@@ -1,15 +1,5 @@
 package com.didi.arius.gateway.core.es.http.document;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.exception.IndexDateFieldException;
 import com.didi.arius.gateway.common.exception.IndexNotPermittedException;
@@ -34,6 +24,16 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
 public abstract class RestBaseWriteAction extends HttpRestHandler {
     protected static final Logger logger = LoggerFactory.getLogger(RestBaseWriteAction.class);
 
@@ -46,7 +46,7 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
     protected static final String WRITE_TIME_FIELD          = "es_index_time";
     protected static final List<String> timePatterns = Arrays.asList("yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss.SSS",
             "yyyy-MM-dd HH:mm:ss.SSS Z", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ssZ",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy/MM/dd HH:mm:ss", "epoch_second", "epoch_millis", "yyyy-MM-dd");
+            "yyyy/MM/dd HH:mm:ss", "epoch_second", "epoch_millis", "yyyy-MM-dd");
 
     protected static final long MILLIS_ZONE_OFFSET = LocalDateTime.of(1970, 1, 1, 0, 0, 0,
             0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -210,7 +210,7 @@ public abstract class RestBaseWriteAction extends HttpRestHandler {
     protected IndexTemplate getAndCheckIndexTemplate(String index, QueryContext queryContext) {
         IndexTemplate indexTemplate = getTemplateByIndex(Arrays.asList(index), queryContext);
         if (indexTemplate == null) {
-            if (queryContext.isFromKibana())  {
+            if (index.startsWith(".kibana"))  {
                 // kibana索引写入admin集群
                 indexTemplate = new IndexTemplate();
                 indexTemplate.setExpression(index);

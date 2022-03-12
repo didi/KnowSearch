@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class ClusterOpIndecreaseHostContent extends ClusterOpHostContent {
+public class ClusterOpIndecreaseHostContent extends ClusterOpBaseContent {
     /**
      * 物理集群id
      */
@@ -26,6 +26,11 @@ public class ClusterOpIndecreaseHostContent extends ClusterOpHostContent {
      * 单机实例数
      */
     private Integer                 pidCount;
+
+    /**
+     * 集群角色 对应的变动的主机列表
+     */
+    private List<ESClusterRoleHost> roleClusterHosts;
 
     /**
      * 集群角色 对应的原始的主机列表

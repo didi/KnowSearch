@@ -66,18 +66,6 @@
         where elastic_cluster_id = #{clusterId}  and  delete_flag = 0 order by id
     </select>
 
-    <!-- 根据clusterId 和 role  查询详情 -->
-    <select id="listByClusterIds" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from es_role_cluster
-        where elastic_cluster_id in
-        <foreach collection="list" separator="," item="item" close=")" open="(">
-            #{item}
-        </foreach>
-        and  delete_flag = 0 order by id;
-    </select>
-
     <!-- 根据clusterId 和 role  修改podCount -->
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO" >
         update es_role_cluster

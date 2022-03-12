@@ -114,11 +114,6 @@ public class IndexSizePO extends BaseESPO {
     }
 
     @Override
-    public String getRoutingValue() {
-        return null;
-    }
-
-    @Override
     public String toString() {
         return JSON.toJSONString(this);
     }

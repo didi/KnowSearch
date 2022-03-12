@@ -356,22 +356,6 @@ public class ESGatewayClient {
         return func.apply(esQueryResponse);
     }
 
-    public <R> R performRequestWithRouting(String clusterName, String routingValue, String indexName, String typeName,
-                                String queryDsl, Function<ESQueryResponse, R> func, int tryTimes) {
-        ESQueryResponse esQueryResponse;
-        do {
-            esQueryResponse = doQuery(clusterName, indexName,
-                    new ESQueryRequest().routing(routingValue).indices(indexName).types(typeName).source(queryDsl));
-        } while (tryTimes-- > 0 && null == esQueryResponse);
-
-        if(!EnvUtil.isOnline()){
-            LOGGER.warn("class=GatewayClient||method=performRequestWithRouting||dataCenter={}||indexName={}||queryDsl={}||ret={}",
-                    EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
-        }
-
-        return func.apply(esQueryResponse);
-    }
-
     /**
      * 查询并获取第一个元素
      *

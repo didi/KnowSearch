@@ -57,9 +57,6 @@ public class RestActionListenerImpl<T extends ESActionResponse> implements Actio
 	public void onResponse(T response) {
 
 		RestResponse restResponse;
-		if(response.getHost() != null) {
-			queryContext.getJoinLogContext().setClientNode(response.getHost().getHostName() + ":" + response.getHost().getPort());
-		}
 		if (queryContext.getRequest().method() == RestRequest.Method.HEAD) {
 			restResponse = new BytesRestResponse(response.getRestStatus());
 		} else {

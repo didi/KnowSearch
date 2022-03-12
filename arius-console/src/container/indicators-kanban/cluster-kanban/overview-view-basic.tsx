@@ -296,7 +296,6 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
               id="node-view"
               legendVal={nodeLegendVal}
               unit="个"
-              tooltipDirection="left"
               {...getContrastChartProps(
                 "节点",
                 nodeContrastEChartsData,

@@ -41,8 +41,8 @@
         from es_cluster_region_capacity_info
         where delete_flag = 0 and
         <choose>
-            <when test="list != null and list.size > 0">
-                region_id in <foreach collection="list" item="regionId" open="(" separator="," close=")">#{regionId} </foreach>
+            <when test="regionIds != null and regionIds.size > 0">
+                region_id in <foreach collection="regionIds" item="regionId" open="(" separator="," close=")">#{regionId} </foreach>
             </when>
             <otherwise>
                 1=0

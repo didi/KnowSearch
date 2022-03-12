@@ -11,9 +11,9 @@ import {
 import { OrderNode } from "container/custom-form";
 import "./index.less";
 import { VERSION_MAINFEST_TYPE } from "constants/status-map";
-import { IVersions } from "typesPath/cluster/physics-type";
+import { IVersions } from "@types/cluster/physics-type";
 import { getPackageList } from "api/cluster-api";
-import { IWorkOrder } from "typesPath/params-types";
+import { IWorkOrder } from "@types/params-types";
 import { submitWorkOrder } from "api/common-api";
 
 const labelList = [
@@ -138,27 +138,12 @@ export class UpgradeCluster extends React.Component<any> {
   public handleOk = () => {
     this.formRef.current!.validateFields().then((result) => {
       result.roleOrder = result.roleOrder.map((item) => item.roleClusterName);
-      let roleClusterHosts = [];
-      if (this.props.params && this.props.params.esRoleClusterVOS) {
-        this.props.params.esRoleClusterVOS?.forEach(item => {
-          item?.esRoleClusterHostVO?.forEach((obj) => {
-            const param: any = { role: item.role, hostname: obj.hostname};
-            if (obj.rack == 'cold') {
-              param.beCold = true;
-            } else {
-              param.beCold = false;
-            }
-            roleClusterHosts.push(param)
-          })
-        });
-      }
       const params: IWorkOrder = {
         contentObj: {
           phyClusterId: this.props.params.id,
           phyClusterName: this.props.params.cluster,
           esVersion: result.esVersion,
           roleOrder: result.roleOrder,
-          roleClusterHosts,
         },
         submitorAppid: this.props.app.appInfo()?.id,
         submitor: this.props.user.getName('domainAccount'),

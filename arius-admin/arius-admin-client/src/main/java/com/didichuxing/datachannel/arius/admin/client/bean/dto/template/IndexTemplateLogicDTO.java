@@ -86,9 +86,6 @@ public class IndexTemplateLogicDTO extends PageDTO {
     @ApiModelProperty("disableSourceFlags，禁用索引_source标识")
     private Boolean                        disableSourceFlags;
 
-    @ApiModelProperty("disableIndexRollover，禁用indexRollover")
-    private Boolean                        disableIndexRollover;
-
     /**
      * 写入限流值，
      * writeRateLimit = 0 禁止写入，
@@ -96,31 +93,7 @@ public class IndexTemplateLogicDTO extends PageDTO {
      * writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档
      */
     @ApiModelProperty("writeRateLimit")
-    private Integer                        writeRateLimit;
-
-    /**
-     * 是否禁读
-     */
-    @ApiModelProperty("是否禁读")
-    private Boolean                        blockRead;
-
-    /**
-     * 是否禁写
-     */
-    @ApiModelProperty("是否禁写")
-    private Boolean                        blockWrite;
-
-    @ApiModelProperty("逻辑集群id")
-    private Long                           resourceId;
-
-    @ApiModelProperty("是否禁写")
-    private Long                           checkPointDiff;
-
-    @ApiModelProperty("是否已创建dcdr")
-    private Boolean                        hasDCDR;
-
-    @ApiModelProperty("服务等级")
-    private Integer                         level;
+    private Integer                         writeRateLimit;
 
     @ApiModelProperty("物理模板信息")
     private List<IndexTemplatePhysicalDTO> physicalInfos;

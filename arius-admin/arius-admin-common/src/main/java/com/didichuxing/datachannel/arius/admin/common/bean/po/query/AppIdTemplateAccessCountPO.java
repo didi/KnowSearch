@@ -29,35 +29,42 @@ public class AppIdTemplateAccessCountPO extends BaseESPO {
     /**
      * 索引模板主键
      */
+    @ApiModelProperty("索引模板主键")
     private Integer templateId;
     /**
      * 索引逻辑id
      */
+    @ApiModelProperty("索引逻辑id")
     private Integer logicTemplateId;
     /**
      * 索引模板名称
      */
+    @ApiModelProperty("索引模板名称")
     private String templateName;
     /**
      * 集群名称
      */
+    @ApiModelProperty("集群名称")
     private String clusterName;
     /**
      * 应用账号
      */
-
+    @ApiModelProperty("应用账号")
     private Integer appId;
     /**
      * 访问索引模板次数，为@accessDetailInfo 访问索引明细的总次数
      */
+    @ApiModelProperty("访问索引模板次数")
     private Long count;
     /**
      *访问索引名称明细数据,key不能是.开头，否则写入es失败
      */
+    @ApiModelProperty("访问索引名称明细数据")
     private Map<String/*indexName*/, Long/*access indexName count*/> accessDetailInfo;
     /**
      * 统计日期
      */
+    @ApiModelProperty("统计日期")
     private String date;
 
     /**
@@ -81,12 +88,6 @@ public class AppIdTemplateAccessCountPO extends BaseESPO {
     public String getKey() {
         // 由于存在索引双写的情况，需要加上索引模板主键作为联合id
         return String.format("%d_%d_%s", templateId, appId, date);
-    }
-
-    @JSONField(serialize = false)
-    @Override
-    public String getRoutingValue() {
-        return null;
     }
 
 }

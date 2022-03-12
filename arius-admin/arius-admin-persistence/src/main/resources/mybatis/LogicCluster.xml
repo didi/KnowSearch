@@ -145,7 +145,7 @@
         <if test="appId != null"> and  app_id = #{appId}</if>
         <if test="health != null">and  health = #{health}</if>
         <if test="type != null">  and  type = #{type}</if>
-        order by  ${sortTerm}  ${sortType}
+        order by id desc
         limit #{from}, #{size}
     </select>
 

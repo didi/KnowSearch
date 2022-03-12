@@ -34,26 +34,12 @@ export const delIndexAdminData = (delList: delListType[]) => {
 interface configType {
   "clusterPhyName": string,
   "index": string,
-  "type"?: string,
-  "value"?: boolean
+  "type": string,
+  "value": boolean
 }
 
 export const openOrCloseReadOrWrite = (configList: configType[]) => {
   return fetch(`/v3/indices/block`, {
-    method: "PUT",
-    body: configList
-  })
-}
-
-export const indicesClose = (configList: configType[]) => {
-  return fetch(`/v3/indices/close`, {
-    method: "PUT",
-    body: configList
-  })
-}
-
-export const indicesOpen = (configList: configType[]) => {
-  return fetch(`/v3/indices/open`, {
     method: "PUT",
     body: configList
   })

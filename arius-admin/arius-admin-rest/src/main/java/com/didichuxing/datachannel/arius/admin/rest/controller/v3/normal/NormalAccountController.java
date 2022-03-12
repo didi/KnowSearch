@@ -32,7 +32,7 @@ public class NormalAccountController {
     public Result<List<AriusUserInfoVO>> searchOnJobStaffByKeyWord(@RequestParam("keyWord") String keyWord) {
         List<AriusUserInfo> ariusUserInfos = ariusUserInfoService.searchOnJobStaffByKeyWord(keyWord);
         if(CollectionUtils.isEmpty(ariusUserInfos)){
-            return Result.buildSuccWithMsg("查询为空");
+            return Result.buildSucc("查询为空");
         }
 
         return Result.buildSucc(ConvertUtil.list2List(ariusUserInfos, AriusUserInfoVO.class));

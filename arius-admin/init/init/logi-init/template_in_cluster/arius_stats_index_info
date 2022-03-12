@@ -1,0 +1,208 @@
+{
+    "order" : 10,
+    "index_patterns" : [
+      "arius_stats_index_info*"
+    ],
+    "settings" : {
+      "index" : {
+        "routing" : {
+          "allocation" : {
+            "include" : {
+              "rack" : ""
+            }
+          }
+        },
+        "mapping" : {
+          "single_type" : "true"
+        },
+        "number_of_shards" : "4",
+        "number_of_replicas" : "1"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "template" : {
+          "type" : "keyword"
+        },
+        "cluster" : {
+          "type" : "keyword"
+        },
+        "collectTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "index" : {
+          "type" : "keyword"
+        },
+        "templateId" : {
+          "type" : "long"
+        },
+        "logTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "cleanTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "shardNu" : {
+          "type" : "double"
+        },
+        "sinkTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "metrics" : {
+          "properties" : {
+            "refresh-total" : {
+              "type" : "double"
+            },
+            "indexing-index_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "store-size_in_bytes" : {
+              "type" : "double"
+            },
+            "docs-count-total" : {
+              "type" : "float"
+            },
+            "flush-total" : {
+              "type" : "double"
+            },
+            "search-fetch_time_in_millis" : {
+              "type" : "double"
+            },
+            "search-query_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "merges-total" : {
+              "type" : "double"
+            },
+            "segments-doc_values_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "search-fetch_total_rate" : {
+              "type" : "double"
+            },
+            "search-query_time_in_millis" : {
+              "type" : "double"
+            },
+            "refresh-total_rate" : {
+              "type" : "double"
+            },
+            "translog-size_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-index_writer_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-count" : {
+              "type" : "double"
+            },
+            "indexing-index_total_rate" : {
+              "type" : "double"
+            },
+            "indices-search-query_avg_time" : {
+              "type" : "double"
+            },
+            "flush-total_time_in_millis" : {
+              "type" : "double"
+            },
+            "indexing-index_total" : {
+              "type" : "double"
+            },
+            "indexing-index_time_in_millis" : {
+              "type" : "double"
+            },
+            "search-fetch_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "flush-total_rate" : {
+              "type" : "double"
+            },
+            "search-scroll_time_in_millis" : {
+              "type" : "double"
+            },
+            "indices-merge_avg_time" : {
+              "type" : "double"
+            },
+            "merges-current" : {
+              "type" : "double"
+            },
+            "segments-memory_in_bytes" : {
+              "type" : "double"
+            },
+            "store-size_in_bytes_rate" : {
+              "type" : "double"
+            },
+            "search-scroll_total_rate" : {
+              "type" : "double"
+            },
+            "query_cache-memory_size_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-points_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "indices-search-fetch_avg_time" : {
+              "type" : "double"
+            },
+            "indices-indexing-index_latency" : {
+              "type" : "float"
+            },
+            "segments-term_vectors_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "store-size_in_bytes-total" : {
+              "type" : "float"
+            },
+            "docs-count" : {
+              "type" : "double"
+            },
+            "merges-total_time_in_millis" : {
+              "type" : "double"
+            },
+            "indices-refresh_avg_time" : {
+              "type" : "double"
+            },
+            "shardNu" : {
+              "type" : "double"
+            },
+            "indexing-index_failed_rate" : {
+              "type" : "double"
+            },
+            "search-query_total_rate" : {
+              "type" : "double"
+            },
+            "refresh-total_time_in_millis" : {
+              "type" : "double"
+            },
+            "search-scroll_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "merges-total_rate" : {
+              "type" : "double"
+            },
+            "indices-search-scroll_avg_time" : {
+              "type" : "double"
+            },
+            "indices-flush_avg_time" : {
+              "type" : "double"
+            }
+          }
+        },
+        "key" : {
+          "ignore_above" : 512,
+          "type" : "keyword"
+        },
+        "logicTemplateId" : {
+          "type" : "long"
+        },
+        "timestamp" : {
+          "format" : "epoch_millis",
+          "type" : "date"
+        }
+      }
+    },
+    "aliases" : { }
+  }

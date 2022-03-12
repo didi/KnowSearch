@@ -67,4 +67,47 @@ public class BaseConsoleTemplateController {
         return Result.buildSucc();
     }
 
+    protected void fillSpecialField(IndexTemplateLogicWithMapping templateLogicWithMapping) {
+        if (CollectionUtils.isEmpty(templateLogicWithMapping.getFields())) {
+            return;
+        }
+
+        Map<String, Field> name2FieldMap = ConvertUtil.list2Map(templateLogicWithMapping.getFields(), Field::getName);
+
+        if (StringUtils.isNotBlank(templateLogicWithMapping.getDateField())) {
+            handleDateField(templateLogicWithMapping, name2FieldMap);
+        }
+
+        if (StringUtils.isNotBlank(templateLogicWithMapping.getIdField())) {
+            handleIdField(templateLogicWithMapping, name2FieldMap);
+        }
+
+        if (StringUtils.isNotBlank(templateLogicWithMapping.getRoutingField())) {
+            handleRoutingField(templateLogicWithMapping, name2FieldMap);
+        }
+    }
+
+    private void handleRoutingField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        for (String routingField : templateLogicWithMapping.getRoutingField().split(",")) {
+            if (name2FieldMap.containsKey(routingField)) {
+                name2FieldMap.get(routingField).setRoutingField(true);
+            }
+        }
+    }
+
+    private void handleIdField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        for (String idField : templateLogicWithMapping.getIdField().split(",")) {
+            if (name2FieldMap.containsKey(idField)) {
+                name2FieldMap.get(idField).setIdField(true);
+            }
+        }
+    }
+
+    private void handleDateField(IndexTemplateLogicWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+        if (name2FieldMap.containsKey(templateLogicWithMapping.getDateField())) {
+            name2FieldMap.get(templateLogicWithMapping.getDateField()).setDateField(true);
+            name2FieldMap.get(templateLogicWithMapping.getDateField())
+                .setDateFieldFormat(templateLogicWithMapping.getDateFieldFormat());
+        }
+    }
 }

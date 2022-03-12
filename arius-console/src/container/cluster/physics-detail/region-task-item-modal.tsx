@@ -1,7 +1,7 @@
 import * as React from 'react';
 import moment from 'moment';
 import { Row, Col } from 'antd';
-import { IRegionTaskItem } from 'typesPath/cluster/physics-type';
+import { IRegionTaskItem } from '@types/cluster/physics-type';
 
 export const TaskItemModal = (props: IRegionTaskItem) => {
     return (

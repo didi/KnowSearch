@@ -25,7 +25,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.QueryContext;
-import com.didi.arius.gateway.common.utils.CommonUtil;
 import com.didi.arius.gateway.core.es.http.StatAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.google.common.collect.Lists;
@@ -38,6 +37,9 @@ import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
+import static com.didi.arius.gateway.common.utils.CommonUtil.isSearchKibana;
 
 /**
  */
@@ -55,7 +57,7 @@ public class RestFieldStatsAction extends StatAction {
     @Override
     protected void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel, ESClient client)
             throws Exception {
-        if (CommonUtil.isIndexType(queryContext)) {
+        if (isIndexType(queryContext)) {
             String[]  indicesArr = Strings.splitStringByCommaToArray(request.param(INDEX));
             List<String> indices = Lists.newArrayList(indicesArr);
             IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
@@ -63,7 +65,7 @@ public class RestFieldStatsAction extends StatAction {
             client = esClusterService.getClient(queryContext, indexTemplate, actionName);
         }
 
-        if (CommonUtil.isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
+        if (isSearchKibana(queryContext.getUri(), queryContext.getIndices())) {
             sendDirectResponse(queryContext, new BytesRestResponse(RestStatus.OK, XContentType.JSON.restContentType(), "{\"_shards\":{\"total\":0,\"successful\":0,\"failed\":0},\"indices\":{}}"));
         } else if ( queryContext.isFromKibana()
                 && !queryContext.isNewKibana()

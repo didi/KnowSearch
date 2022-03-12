@@ -33,7 +33,7 @@ public class WorkTaskDTO extends BaseDTO {
     private Integer taskType;
 
     @ApiModelProperty("业务数据主键")
-    private String businessKey;
+    private Integer businessKey;
 
     /**
      * 任务状态

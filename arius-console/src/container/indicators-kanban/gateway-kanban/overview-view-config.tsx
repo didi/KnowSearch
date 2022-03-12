@@ -16,23 +16,23 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[0],
   },
   writeResponseLen: {
-    name: "写入响应长度平均值",
+    name: "写入总请求响应长度",
     unit: unitMap.byte,
     classify: indexConfigClassifyList[0],
   },
   queryTotalHitsAvgCount: {
     name: "查询平均命中量",
-    unit: unitMap.mins,
+    unit: unitMap.item,
     classify: indexConfigClassifyList[0],
   },
   readDocCount: {
     name: "查询量",
-    unit: unitMap.mins,
+    unit: unitMap.ss,
     classify: indexConfigClassifyList[0],
   },
   querySearchType: {
     name: "dsl/sql分布",
-    unit: unitMap.mins,
+    unit: unitMap.count,
     classify: indexConfigClassifyList[0],
   },
   queryCostAvg: {
@@ -41,13 +41,13 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[0],
   },
   queryTotalShardsAvg: {
-    name: "查询shard平均数",
-    unit: unitMap.countM,
+    name: "查询平均shard数量",
+    unit: unitMap.count,
     classify: indexConfigClassifyList[0],
   },
   queryFailedShardsAvg: {
-    name: "查询失败shard平均数",
-    unit: unitMap.countM,
+    name: "查询失败shard数量",
+    unit: unitMap.count,
     classify: indexConfigClassifyList[0],
   },
 };

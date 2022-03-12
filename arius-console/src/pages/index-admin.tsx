@@ -3,7 +3,9 @@ import CommonRoutePage from './common';
 import { IndexAdmin } from '../container/index-admin';
 import { IndexAdminDetail } from '../container/index-admin/detail';
 
-export const IndexAdminPagePageRoutes = [
+
+export const IndexAdminPage = () => {
+  const pageRoutes = [
     {
       path: '/index-admin',
       exact: true,
@@ -14,4 +16,9 @@ export const IndexAdminPagePageRoutes = [
       exact: true,
       component: IndexAdminDetail,
     }
-];
+  ];
+
+  return (
+    <CommonRoutePage pageRoute={pageRoutes} active="cluster" />
+  );
+};

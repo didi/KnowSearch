@@ -171,6 +171,6 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
         List<String> administrators = getOPList().stream().map(AriusUserInfo::getName).collect(
                 Collectors.toList());
-        return Result.buildSuccWithMsg(String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+        return Result.buildSucc(String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
     }
 }

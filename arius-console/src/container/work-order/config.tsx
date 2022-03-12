@@ -3,9 +3,9 @@ import { renderOperationBtns, NavRouterLink } from "container/custom-component";
 import { transTimeFormat, transTimeStamp } from "lib/utils";
 import moment from "moment";
 import { cellStyle } from "constants/table";
-import { Tooltip, DatePicker, Popconfirm, Modal, message } from "antd";
+import { Tooltip, DatePicker, Popconfirm, Modal } from "antd";
 import { IColumnsType } from "component/dantd/query-form/QueryForm";
-import { IBaseOrder, IOrderInfo, ITypeEnums } from "typesPath/cluster/order-types";
+import { IBaseOrder, IOrderInfo, ITypeEnums } from "@types/cluster/order-types";
 import {
   appTemplateAuthEnum,
   ClusterAuth,
@@ -17,10 +17,10 @@ import {
   VERSION_MAINFEST_TYPE,
 } from "constants/status-map";
 import { ILabelValue, IMenuItem, IStringMap } from "interface/common";
-import { DATA_TYPE_LIST, LEVEL_MAP } from "constants/common";
-import { IRoleIpList } from "typesPath/cluster/cluster-types";
-import { INodeTask, ITask } from "typesPath/task-types";
-import { IBaseInfo } from "typesPath/base-types";
+import { DATA_TYPE_LIST } from "constants/common";
+import { IRoleIpList } from "@types/cluster/cluster-types";
+import { INodeTask, ITask } from "@types/task-types";
+import { IBaseInfo } from "@types/base-types";
 import { BaseInfo } from "./base-info";
 import { PlanSpeed } from "./plan-speed";
 import { timeFormat } from "constants/time";
@@ -33,7 +33,6 @@ import {
   scaleTask,
   upgradeTask,
 } from "api/task-api";
-import { cancelDcdr } from 'api/dcdr-api';
 
 const { RangePicker } = DatePicker;
 export const authCodeMap = {
@@ -141,7 +140,7 @@ export const getMyApplicationQueryXForm = (typeList: ITypeEnums[]) => {
     },
     {
       dataIndex: "createTime",
-      title: "申请时间",
+      title: "创建时间",
       type: "custom",
       component: (
         <RangePicker
@@ -201,9 +200,6 @@ export const getTaskColumns = (reloadData: Function) => {
       render: (text: string, record: ITask) => {
         const str = encodeURI(record.expandData);
         let href = `/work-order/task/detail?id=${record.businessKey}&taskid=${record.id}&type=${record?.taskType}&status=${record?.status}&dcdr_info=${str}`;
-        if (record.taskType === 10) {
-          href = `/work-order/task/dcdrdetail?taskid=${record.id}&title=${record.title}`;
-        }
         return <NavRouterLink needToolTip={true} element={text} href={href} />;
       },
     },
@@ -280,7 +276,9 @@ const confirmFn = (text: string, taskId: number, id: number, fn: Function, reloa
 const getTaskBtns = (record: ITask, reloadData: Function) => {
   let href = `/work-order/task/detail?id=${record.businessKey}&taskid=${record.id}#plan`;
   if (record.taskType === 10) {
-    href = `/work-order/task/dcdrdetail?taskid=${record.id}&title=${record.title}`;
+    // encodeURI(JSON.stringify(record.expandData));
+    const str = encodeURI(record.expandData);
+    href = `/work-order/task/detail?id=${record.businessKey}&type=${record?.taskType}&status=${record?.status}&dcdr_info=${str}&taskid=${record.id}`;
   }
   let taskBtns = [
     {
@@ -328,33 +326,6 @@ const getTaskBtns = (record: ITask, reloadData: Function) => {
     ),
   } as any;
   if (record.taskType === 10) {
-    if (record.status == 'running') {
-      taskBtns.push({
-        isRouterNav: false,
-        label: (
-          <span
-            onClick={() => {
-              Modal.confirm({
-                title: `提示`,
-                content: `确定取消任务${record.title}?`,
-                // icon: <DeleteOutlined style={{ color: "red" }} />,
-                // width: 500,
-                okText: "确定",
-                cancelText: "取消",
-                onOk() {
-                  cancelDcdr(record.id).then(() => {
-                    reloadData();
-                    message.success('操作成功')
-                  });
-                },
-              });
-            }}
-          >
-            取消
-          </span>
-        ),
-      })
-    }
     return taskBtns;
   }
   switch (record.status) {
@@ -419,6 +390,7 @@ const TaskApi = {
     return confirmFn('执行', taskId, id, upgradeTask, reloadData);
   },
   pauseTask: (id: number, reloadData: Function, taskId: number) => {
+    console.log(id)
     return confirmFn('暂停', taskId, id, pauseTask, reloadData);
   },
   cancalTask: (id: number, reloadData: Function, taskId: number) => {
@@ -618,7 +590,11 @@ export const ORDER_INFO = (task) => {
             </span>
           </div>
           <div style={{ float: 'left' }}>
-            <NavRouterLink element="查看" href={`/work-order/my-approval/detail?orderId=${task.taskBaseInfo?.workOrderId}`} />
+            <a
+              href={`/work-order/my-approval/detail?orderId=${task.taskBaseInfo?.workOrderId}`}
+            >
+              查看
+            </a>
           </div>
           
         </>
@@ -663,7 +639,7 @@ export const getPlanSpeedColumns = (setModalId: Function) => {
       width: "15%",
       render: (text: number, record: INodeTask) => {
         const btns = getPlanBtns(record, setModalId);
-        return renderOperationBtns(btns as any, record);
+        return renderOperationBtns(btns, record);
       },
     },
   ];
@@ -850,10 +826,6 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
       value: workType || '-',
     },
     {
-      label: "业务等级",
-      value: LEVEL_MAP[Number(detail.level) - 1]?.label || '-',
-    },
-    {
       label: "分区字段",
       value: detail.dateField || '-',
     },
@@ -868,14 +840,6 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
     {
       label: "保存周期",
       value: detail.expireTime === -1 ? "永不过期" : detail.expireTime,
-    },
-    {
-      label: "索引模板是否开启RollOver",
-      value: !detail.disableIndexRollover ? '是' : '否',
-    },
-    {
-      label: "热节点保存周期",
-      value: detail.hotTime || '-',
     },
     {
       label: "主键字段",
@@ -1170,10 +1134,6 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
     {
       label: "集群名称",
       value: detail.name || '-',
-    },
-    {
-      label: "业务等级",
-      value: LEVEL_MAP[Number(detail.level) - 1]?.label || '-',
     },
     // {
     //   label: "插件ID列表",

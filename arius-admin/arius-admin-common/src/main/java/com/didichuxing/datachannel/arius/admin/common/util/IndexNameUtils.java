@@ -50,21 +50,6 @@ public class IndexNameUtils {
         return templateName + "_" + DateTimeUtil.getFormatMonthByOffset(0);
     }
 
-    public static String genIndexNameWithVersion(String indexName, Integer version) {
-        if(version == null || version <= 0) {
-            return indexName;
-        }
-        return indexName + "_v" + version;
-    }
-
-    public static String genDailyIndexNameWithVersion(String templateName, int offsetDay, Integer version){
-        return genIndexNameWithVersion(genDailyIndexName(templateName, offsetDay), version);
-    }
-
-    public static String genCurrentMonthlyIndexNameWithVersion(String templateName, Integer version){
-        return genIndexNameWithVersion(genCurrentMonthlyIndexName(templateName), version);
-    }
-
     public static String genDailyIndexName(String templateName, int offsetDay){
         return templateName + "_" + DateTimeUtil.getFormatDayByOffset(offsetDay);
     }

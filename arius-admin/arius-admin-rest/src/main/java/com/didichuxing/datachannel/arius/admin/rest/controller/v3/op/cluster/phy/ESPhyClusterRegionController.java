@@ -8,7 +8,6 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PhyCluster
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -22,7 +21,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,19 +64,14 @@ public class ESPhyClusterRegionController {
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
-    public Result<List<ClusterRegionVO>> listPhyClusterRegions(@RequestParam("cluster") String cluster,
-                                                               @RequestParam("clusterLogicType") Integer clusterLogicType) {
-        return listPhyClusterRegionsAfterFilter(cluster, clusterLogicType, null);
-    }
+    public Result<List<ClusterRegionVO>> listPhyClusterRegions(@RequestParam("cluster") String cluster) {
 
-    @GetMapping("/bind")
-    @ResponseBody
-    @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
-    public Result<List<ClusterRegionVO>> listPhyClusterRegions(@RequestParam("cluster") String cluster,
-                                                               @RequestParam("clusterLogicType") Integer clusterLogicType,
-                                                               @RequestParam("clusterLogicId") Long clusterLogicId) {
+        if (StringUtils.isBlank(cluster)) {
+            return Result.buildSucc(new ArrayList<>());
+        }
 
-        return listPhyClusterRegionsAfterFilter(cluster, clusterLogicType, clusterLogicId);
+        List<ClusterRegion> regions = regionRackService.listPhyClusterRegions(cluster);
+        return Result.buildSucc(clusterRegionManager.buildLogicClusterRegionVO(regions));
     }
 
     @PostMapping("/add")
@@ -147,22 +140,5 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "获取物理集群下的rack列表")
     public Result<Set<String>> getClusterPhyRacks(@PathVariable String clusterPhyName) {
         return Result.buildSucc(clusterPhyService.getClusterRacks(clusterPhyName));
-    }
-
-    /**
-     * 根据逻辑集群的类型进行过滤
-     * @param phyCluster          物理集群名称
-     * @param clusterLogicType 逻辑集群类型
-     * @param clusterLogicId   逻辑集群id，没有指定的时候为null
-     * @return 过滤后形成的region视图列表
-     */
-    private Result<List<ClusterRegionVO>> listPhyClusterRegionsAfterFilter(String phyCluster, Integer clusterLogicType, Long clusterLogicId) {
-        if (StringUtils.isBlank(phyCluster) || AriusObjUtils.isNull(clusterLogicType)) {
-            return Result.buildSucc(new ArrayList<>());
-        }
-
-        //根据逻辑集群类型筛选物理集群下可以使用的region
-        List<ClusterRegion> regions = clusterRegionManager.filterClusterRegionByLogicClusterType(clusterLogicId, phyCluster, clusterLogicType);
-        return Result.buildSucc(clusterRegionManager.buildLogicClusterRegionVO(regions));
     }
 }

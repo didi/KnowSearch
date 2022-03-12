@@ -43,9 +43,4 @@ public class IndexCatCellPO extends BaseESPO {
     public String getKey() {
         return cluster + "@" + index;
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
 }

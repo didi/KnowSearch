@@ -4,15 +4,15 @@ const indexConfigClassifyList: string[] = ["查询模板性能配置"];
 
 export const indexConfigData = {
   queryDslCount: {
-    name: "查询模版访问量",
-    unit: unitMap.countM,
+    name: "gateway 各查询模板访问量",
+    unit: unitMap.count,
     title: function () {
-      return this.name + "(个/min)";
+      return this.name + "(个)";
     },
     classify: indexConfigClassifyList[0],
   },
   queryDslTotalCost: {
-    name: " 查询模版访问耗时",
+    name: "gateway 各查询模板访问耗时",
     unit: unitMap.ms,
     title: function () {
       return this.name + "(ms)";

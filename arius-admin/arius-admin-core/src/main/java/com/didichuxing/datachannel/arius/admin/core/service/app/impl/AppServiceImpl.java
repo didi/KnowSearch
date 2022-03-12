@@ -1,12 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
@@ -51,6 +44,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP_CONFIG;
@@ -161,23 +161,21 @@ public class AppServiceImpl implements AppService {
             return Result.buildParamIllegal("责任人非法");
         }
 
+        if (appDTO.getIsRoot() == null || !AdminConstant.yesOrNo(appDTO.getIsRoot())) {
+            return Result.buildParamIllegal("超管标记非法");
+        }
+        AppSearchTypeEnum searchTypeEnum = AppSearchTypeEnum.valueOf(appDTO.getSearchType());
+        if (searchTypeEnum.equals(AppSearchTypeEnum.UNKNOWN)) {
+            return Result.buildParamIllegal("查询模式非法");
+        }
+        if (StringUtils.isBlank(appDTO.getVerifyCode())) {
+            return Result.buildParamIllegal("校验码不能为空");
+        }
+
         if (EDIT.equals(operation)) {
             if (AriusObjUtils.isNull(appDTO.getId())) {
                 return Result.buildParamIllegal("应用ID为空");
             }
-
-            if (appDTO.getIsRoot() == null || !AdminConstant.yesOrNo(appDTO.getIsRoot())) {
-                return Result.buildParamIllegal("超管标记非法");
-            }
-
-            AppSearchTypeEnum searchTypeEnum = AppSearchTypeEnum.valueOf(appDTO.getSearchType());
-            if (searchTypeEnum.equals(AppSearchTypeEnum.UNKNOWN)) {
-                return Result.buildParamIllegal("查询模式非法");
-            }
-            if (StringUtils.isBlank(appDTO.getVerifyCode())) {
-                return Result.buildParamIllegal("校验码不能为空");
-            }
-
             AppPO oldApp = appDAO.getById(appDTO.getId());
             if (AriusObjUtils.isNull(oldApp)) {
                 return Result.buildNotExist(APP_NOT_EXIST);
@@ -328,7 +326,7 @@ public class AppServiceImpl implements AppService {
         boolean succ = (1 == appConfigDAO.update(ConvertUtil.obj2Obj(configDTO, AppConfigPO.class)));
         if (succ) {
             operateRecordService.save(APP_CONFIG, EDIT, configDTO.getAppId(),
-                AriusObjUtils.findChangedWithClear(oldConfigPO, configDTO), operator);
+                AriusObjUtils.findChanged(oldConfigPO, configDTO), operator);
         }
 
         return Result.build(succ);
@@ -345,11 +343,6 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public boolean isAppExists(App app) {
-        return app != null;
-    }
-
-    @Override
     public boolean isSuperApp(Integer appId) {
         App appById = getAppById(appId);
         if (AriusObjUtils.isNull(appById)) {
@@ -357,15 +350,6 @@ public class AppServiceImpl implements AppService {
         }
 
         return appById.getIsRoot() == 1;
-    }
-
-    @Override
-    public boolean isSuperApp(App app) {
-        if (AriusObjUtils.isNull(app)) {
-            return false;
-        }
-
-        return app.getIsRoot() == 1;
     }
 
     /**
@@ -380,7 +364,6 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public String getAppName(Integer appId) {
-        if (null == appId) { return null;}
         App app = getAppById(appId);
         return app == null ? null : app.getName();
     }
@@ -539,15 +522,7 @@ public class AppServiceImpl implements AppService {
             appDTO.setCluster("");
         }
 
-        if (appDTO.getDepartmentId() == null) {
-            appDTO.setDepartmentId("");
-        }
-
-        if (appDTO.getDepartment() == null) {
-            appDTO.setDepartment("");
-        }
-
-        // 默认索引模式
+        // 默认集群模式
         if (appDTO.getSearchType() == null) {
             appDTO.setSearchType(AppSearchTypeEnum.TEMPLATE.getCode());
         }
@@ -602,7 +577,7 @@ public class AppServiceImpl implements AppService {
 
         boolean succeed = (appDAO.update(param) == 1);
         if (succeed) {
-            operateRecordService.save(APP, EDIT, appDTO.getId(), AriusObjUtils.findChangedWithClear(oldPO, param), operator);
+            operateRecordService.save(APP, EDIT, appDTO.getId(), AriusObjUtils.findChanged(oldPO, param), operator);
             appUserInfoService.recordAppidAndUser(appDTO.getId(), appDTO.getResponsible());
             SpringTool.publish(new AppEditEvent(this, responsibleConvertTool.obj2Obj(oldPO, App.class),
                     responsibleConvertTool.obj2Obj(appDAO.getById(param.getId()), App.class)));
@@ -647,6 +622,12 @@ public class AppServiceImpl implements AppService {
     private Result<Void> validateAppFieldIsNull(AppDTO appDTO) {
         if (AriusObjUtils.isNull(appDTO.getName())) {
             return Result.buildParamIllegal("应用名称为空");
+        }
+        if (AriusObjUtils.isNull(appDTO.getDepartmentId())) {
+            return Result.buildParamIllegal("部门ID为空");
+        }
+        if (AriusObjUtils.isNull(appDTO.getDepartment())) {
+            return Result.buildParamIllegal("部门名字为空");
         }
         if (appDTO.getMemo() == null) {
             return Result.buildParamIllegal("备注为空");

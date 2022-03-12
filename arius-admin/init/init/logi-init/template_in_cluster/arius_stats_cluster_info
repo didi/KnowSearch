@@ -1,0 +1,235 @@
+{
+    "order" : 10,
+    "index_patterns" : [
+      "arius_stats_cluster_info*"
+    ],
+    "settings" : {
+      "index" : {
+        "routing" : {
+          "allocation" : {
+            "include" : {
+              "rack" : ""
+            }
+          }
+        },
+        "mapping" : {
+          "single_type" : "true"
+        },
+        "number_of_shards" : "4",
+        "number_of_replicas" : "0",
+        "number_of_routing_size" : "4"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "cleanTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "cluster" : {
+          "ignore_above" : 512,
+          "type" : "keyword"
+        },
+        "collectTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "physicCluster" : {
+          "type" : "long"
+        },
+        "statis" : {
+          "properties" : {
+            "unAssignedShards" : {
+              "type" : "long"
+            },
+            "cpuUsage" : {
+              "type" : "double"
+            },
+            "cpuLoad1M" : {
+              "type" : "double"
+            },
+            "cpuLoad5M" : {
+              "type" : "double"
+            },
+            "cpuLoad15M" : {
+              "type" : "double"
+            },
+            "appNu" : {
+              "type" : "double"
+            },
+            "statusType" : {
+              "type" : "long"
+            },
+            "numberPendingTasks" : {
+              "type" : "long"
+            },
+            "searchLatency" : {
+              "type" : "double"
+            },
+            "totalTemplateNu" : {
+              "type" : "double"
+            },
+            "indexStoreSize" : {
+              "type" : "double"
+            },
+            "nodeNamesForDiskUsageGte75Percent" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "ignore_above" : 256,
+                  "type" : "keyword"
+                }
+              }
+            },
+            "totalDocNu" : {
+              "type" : "double"
+            },
+            "extendInfoMap" : {
+              "type" : "object"
+            },
+            "activeNodeNu" : {
+              "type" : "long"
+            },
+            "memUsedPercent" : {
+              "type" : "float"
+            },
+            "clusterName" : {
+              "ignore_above" : 512,
+              "type" : "keyword"
+            },
+            "storeSize" : {
+              "type" : "double"
+            },
+            "indexingLatency" : {
+              "type" : "double"
+            },
+            "nodeIpsForDiskUsageGte75Percent" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "ignore_above" : 256,
+                  "type" : "keyword"
+                }
+              }
+            },
+            "key" : {
+              "ignore_above" : 512,
+              "type" : "keyword"
+            },
+            "invalidNodeNu" : {
+              "type" : "long"
+            },
+            "clusterNu" : {
+              "type" : "double"
+            },
+            "esNodeNu" : {
+              "type" : "double"
+            },
+            "totalIndicesNu" : {
+              "type" : "double"
+            },
+            "numberNodes" : {
+              "type" : "long"
+            },
+            "recvTransSize" : {
+              "type" : "double"
+            },
+            "totalStoreSize" : {
+              "type" : "double"
+            },
+            "memFree" : {
+              "type" : "long"
+            },
+            "readTps" : {
+              "type" : "double"
+            },
+            "level" : {
+              "type" : "long"
+            },
+            "memTotal" : {
+              "type" : "long"
+            },
+            "numberDataNodes" : {
+              "type" : "long"
+            },
+            "writeTps" : {
+              "type" : "double"
+            },
+            "sla" : {
+              "type" : "double"
+            },
+            "numberIngestNodes" : {
+              "type" : "long"
+            },
+            "numberMasterNodes" : {
+              "type" : "long"
+            },
+            "sendTransSize" : {
+              "type" : "double"
+            },
+            "queryTimesPreDay" : {
+              "type" : "double"
+            },
+            "alivePercent" : {
+              "type" : "long"
+            },
+            "shardNu" : {
+              "type" : "double"
+            },
+            "numberClientNodes" : {
+              "type" : "long"
+            },
+            "diskUsage" : {
+              "type" : "double"
+            },
+            "freeStoreSize" : {
+              "type" : "double"
+            },
+            "memUsed" : {
+              "type" : "long"
+            },
+            "memFreePercent" : {
+              "type" : "float"
+            },
+            "status" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "ignore_above" : 256,
+                  "type" : "keyword"
+                }
+              }
+            }
+          }
+        },
+        "dataCenter" : {
+          "ignore_above" : 512,
+          "type" : "keyword"
+        },
+        "sinkTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "percentilesType" : {
+          "ignore_above" : 512,
+          "type" : "keyword"
+        },
+        "es_index_time" : {
+          "type" : "long"
+        },
+        "key" : {
+          "ignore_above" : 512,
+          "type" : "keyword"
+        },
+        "logTime" : {
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+          "type" : "date"
+        },
+        "timestamp" : {
+          "format" : "epoch_millis",
+          "type" : "date"
+        }
+      }
+    },
+    "aliases" : { }
+  }

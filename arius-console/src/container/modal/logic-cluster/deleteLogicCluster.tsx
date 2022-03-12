@@ -47,7 +47,6 @@ export const DeleteLogicCluster = connect(mapStateToProps)((props: { dispatch: a
             return submitWorkOrder(param, () => {
               message.success("提交工单成功");
               if (params.url) {
-                dispatch(actions.setModalId(''))
                 params.url();
               } else {
                 cb();

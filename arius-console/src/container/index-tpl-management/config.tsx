@@ -1,24 +1,30 @@
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { IColumnsType } from "component/dantd/query-form/QueryForm";
-import { ITemplateLogic } from "typesPath/cluster/physics-type";
-import { IIndex } from "typesPath/index-types";
-import { rolloverSwitch, updateAppAuth, checkEditMapping, disableRead, disableWrite } from "api/cluster-index-api";
-import { message, Modal, notification, Tooltip } from "antd";
+import { ITemplateLogic } from "@types/cluster/physics-type";
+import { IIndex, IOpTemplateIndex } from "@types/index-types";
+import { delTemplatePhysical, updateAppAuth, checkEditMapping } from "api/cluster-index-api";
+import { Modal, notification, Tooltip } from "antd";
 import { ITableBtn } from "component/dantd/dtable";
 import { FormItemType, IFormItem } from "component/x-form";
-import { filtersHasDCDR, INDEX_AUTH_TYPE_ARR, INDEX_AUTH_TYPE_MAP, INDEX_DATA_TYPE_MAP } from "constants/status-map";
+import {
+  authStatusMap,
+  INDEX_AUTH_TYPE_ARR,
+  INDEX_AUTH_TYPE_MAP,
+  INDEX_DATA_TYPE_MAP,
+  opTemplateIndexRoleMap,
+} from "constants/status-map";
 import { cellStyle } from "constants/table";
 import { timeFormat } from "constants/time";
 import { NavRouterLink, renderOperationBtns } from "container/custom-component";
+import { ILogicIndex } from "interface/cluster-index";
 import moment from "moment";
 import React from "react";
-import { isOpenUp, LEVEL_MAP } from "constants/common";
-import { checkEditTemplateSrv } from "api/cluster-api";
+import { getOptions } from "container/cluster/config";
+import { isOpenUp } from "constants/common";
 
 const { confirm } = Modal;
-export const cherryList = ["authType", "clusterPhies", "hasDCDR", "checkPointDiff", "desc", "createTime"];
 
-export const getQueryFormConfig = (cluster: any) => {
+export const getQueryFormConfig = () => {
   return [
     {
       dataIndex: "authType",
@@ -54,24 +60,12 @@ export const getQueryFormConfig = (cluster: any) => {
           required: false,
           validator: async (rule: any, value: string) => {
             if (value && value.length > 128) {
-              return Promise.reject("最大限制128字符");
+              return Promise.reject('最大限制128字符');
             }
             return Promise.resolve();
           },
         },
       ],
-    },
-    {
-      dataIndex: "clusterPhies",
-      title: "集群名称",
-      type: FormItemType.select,
-      options: cluster.map((item) => {
-        return {
-          title: item,
-          value: item,
-        };
-      }),
-      placeholder: "请选择",
     },
   ] as IColumnsType[];
 };
@@ -82,39 +76,29 @@ export const getLogicIndexColumns = (
   reloadData: any,
   clusterId?: number,
   appId?: number,
-  pushHistory?: (url: string) => void
+  pushHistory?: (url: string) => void,
 ) => {
   return [
     {
       title: "模板ID",
       dataIndex: "id",
       key: "id",
-      fixed: "left",
     },
     {
       title: "模板名称",
       dataIndex: "name",
       key: "name",
-      width: 150,
-      // onCell: () => ({
-      //   style: cellStyle,
-      // }),
+      onCell: () => ({
+        style: cellStyle,
+        width: 100,
+      }),
       render: (text: string, record: IIndex) => {
         const href = `/index/logic/detail?id=${record.id}&authType=${record.authType}`;
         return (
-          <div className="intro-step-8 two-row-ellipsis pointer">
+          <div className="intro-step-8">
             <NavRouterLink needToolTip={true} element={text} href={href} />
           </div>
         );
-      },
-    },
-    {
-      title: "业务等级",
-      dataIndex: "level",
-      key: "level",
-      sorter: true,
-      render: (text) => {
-        return LEVEL_MAP[Number(text) - 1]?.label || "-";
       },
     },
     {
@@ -136,50 +120,7 @@ export const getLogicIndexColumns = (
       dataIndex: "clusterPhies",
       key: "clusterPhies",
       render: (text) => {
-        return <>{text?.join(",")}</>;
-      },
-    },
-    {
-      title: "是否建立DCDR链路",
-      dataIndex: "hasDCDR",
-      key: "hasDCDR",
-      width: 150,
-      render: (text) => {
-        return <>{text ? "是" : "否"}</>;
-      },
-      filters: filtersHasDCDR,
-    },
-    {
-      title: "主从位点差",
-      dataIndex: "checkPointDiff",
-      key: "checkPointDiff",
-      render: (text) => {
-        return <>{text || typeof text == "number" ? text : "-"}</>;
-      },
-      sorter: true,
-    },
-    {
-      title: "Rollover",
-      dataIndex: "disableIndexRollover",
-      key: "disableIndexRollover",
-      render: (text) => {
-        return <>{text ? "否" : "是"}</>;
-      },
-    },
-    {
-      title: "读",
-      dataIndex: "blockRead",
-      key: "blockRead",
-      render: (text) => {
-        return <>{!text ? "启用" : "禁用"}</>;
-      },
-    },
-    {
-      title: "写",
-      dataIndex: "blockWrite",
-      key: "blockWrite",
-      render: (text) => {
-        return <>{!text ? "启用" : "禁用"}</>;
+        return <>{text?.join(',')}</>;
       },
     },
     {
@@ -192,7 +133,7 @@ export const getLogicIndexColumns = (
       render: (text: string) => {
         return (
           <Tooltip placement="bottomLeft" title={text}>
-            {text || "-"}
+            {text || '-'}
           </Tooltip>
         );
       },
@@ -207,10 +148,15 @@ export const getLogicIndexColumns = (
       title: "操作",
       dataIndex: "operation",
       key: "operation",
-      width: 215,
-      fixed: "right",
       render: (text: number, record: ITemplateLogic) => {
-        const btns = getBtnLogicIndexList(record, clusterId, setModalId, reloadData, appId, pushHistory);
+        const btns = getBtnLogicIndexList(
+          record,
+          clusterId,
+          setModalId,
+          reloadData,
+          appId,
+          pushHistory,
+        );
         return renderOperationBtns(btns, record);
       },
     },
@@ -225,6 +171,7 @@ export const getBtnLogicIndexList = (
   appId: number,
   pushHistory: (url: string) => void
 ): ITableBtn[] => {
+
   // 是否为系统数据
   const isSystemData = record.dataType === 0;
   const currentIsOpenUp = isSystemData && isOpenUp;
@@ -234,7 +181,6 @@ export const getBtnLogicIndexList = (
       label: "申请权限",
       type: "primary",
       isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
       clickFunc: (record: ITemplateLogic) => {
         setModalId("logicApplyAuth", record, reloadData);
       },
@@ -247,7 +193,6 @@ export const getBtnLogicIndexList = (
         label: "降级权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        tip: isSystemData ? "预置系统数据，不支持操作" : "",
         clickFunc: (record: ITemplateLogic) => {
           confirm({
             title: "降级权限",
@@ -272,7 +217,6 @@ export const getBtnLogicIndexList = (
         label: "取消权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        tip: isSystemData ? "预置系统数据，不支持操作" : "",
         clickFunc: (record: ITemplateLogic) => {
           confirm({
             title: "取消权限",
@@ -302,7 +246,6 @@ export const getBtnLogicIndexList = (
         label: "升级权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        tip: isSystemData ? "预置系统数据，不支持操作" : "",
         clickFunc: (record: ITemplateLogic) => {
           setModalId("logicApplyAuth", record, reloadData);
           return;
@@ -312,7 +255,6 @@ export const getBtnLogicIndexList = (
         label: "取消权限",
         type: "primary",
         isOpenUp: currentIsOpenUp,
-        tip: isSystemData ? "预置系统数据，不支持操作" : "",
         clickFunc: (record: ITemplateLogic) => {
           confirm({
             title: "取消权限",
@@ -340,84 +282,52 @@ export const getBtnLogicIndexList = (
 
   const btns: any[] = [
     {
+      label: currentIsOpenUp ? "编辑" : <NavRouterLink element={"编辑"} href={href} />,
+      isOpenUp: currentIsOpenUp,
+      isRouterNav: true,
+    },
+    // {
+    //   label: '扩缩容',
+    //   clickFunc: () => {
+    //     setModalId('expandShrinkIndex', record.id, reloadData);
+    //   },
+    // },
+    {
       label: "编辑Mapping",
       isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
       clickFunc: () => {
-        checkEditMapping(record.id).then((res) => {
-          if (res.code !== 0 && res.code !== 200) {
-            Modal.confirm({
-              title: "提示",
-              content: res.message || "",
-              okText: "确认",
-              cancelText: "取消",
-              onOk: () => {},
-            });
-          } else {
-            Modal.confirm({
-              title: "提示",
-              content: "Mapping修改，仅对修改后写入的数据生效，修改前写入的历史数据不会生效。是否确认修改？",
-              okText: "确认",
-              cancelText: "取消",
-              onOk: () => {
-                const href = `/index/modify/mapping?id=${record.id}&history=${"/index-tpl-management"}`;
-                pushHistory(href);
-                // window.location.href = href;
-              },
-            });
-          }
-        });
-      },
-    },
-    {
-      label: "编辑Setting",
-      isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
-      clickFunc: () => {
-        checkEditTemplateSrv((record as any)?.id, 5).then((res) => {
-          if (res.code !== 0 && res.code !== 200) {
-            Modal.confirm({
-              title: "提示",
-              content: res.message || "",
-              okText: "确认",
-              cancelText: "取消",
-              onOk: () => {},
-            });
-          } else {
-            setModalId("editSetting", record.id, reloadData);
-          }
-        });
-      },
-    },
-    {
-      label: `${record.disableIndexRollover ? "开启" : "关闭"}Rollover`,
-      isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
-      clickFunc: () => {
-        Modal.confirm({
-          title: "提示",
-          width: 550,
-          content: (
-            <>
-              <div>确定{record.disableIndexRollover ? "开启" : "关闭"}索引RollOver能力?</div>
-              <div>{record.disableIndexRollover ? "开启后会影响索引Update和Delete能力以及指定id 写入，更新，删除" : null}</div>
-            </>
-          ),
-          okText: "确认",
-          cancelText: "取消",
-          onOk: () => {
-            rolloverSwitch(record.id, record.disableIndexRollover ? "1" : "0").then(() => {
-              message.success("操作成功");
-              reloadData();
-            });
-          },
-        });
+        checkEditMapping(record.id)
+          .then((res) => {
+            if (res.code !== 0 && res.code !== 200) {
+              Modal.confirm({
+                title: "提示",
+                content: res.message || '',
+                okText: "确认",
+                cancelText: "取消",
+                onOk: () => {},
+              });
+            } else {
+              Modal.confirm({
+                title: "提示",
+                content:
+                  "Mapping修改，仅对修改后写入的数据生效，修改前写入的历史数据不会生效。是否确认修改？",
+                okText: "确认",
+                cancelText: "取消",
+                onOk: () => {
+                  const href = `/index/modify/mapping?id=${
+                    record.id
+                  }&history=${'/index-tpl-management'}`;
+                  pushHistory(href);
+                  // window.location.href = href;
+                },
+              });
+            }
+          })
       },
     },
     {
       label: "升版本",
       isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
       clickFunc: () => {
         setModalId("phyUpgradeIndex", record.id, reloadData);
       },
@@ -425,63 +335,25 @@ export const getBtnLogicIndexList = (
     {
       label: "配置",
       isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
       clickFunc: () => {
         setModalId("phyModifyIndex", record.id, reloadData);
       },
     },
     {
-      label: !record.blockRead ? "禁用读" : "启用读",
-      isOpenUp: currentIsOpenUp,
-      clickFunc: () => {
-        disableRead({ blockRead: !record.blockRead, id: record.id }).then(() => {
-          message.success("操作成功");
-          reloadData();
-        });
-      },
-    },
-    {
-      label: !record.blockWrite ? "禁用写" : "启用写",
-      isOpenUp: currentIsOpenUp,
-      clickFunc: () => {
-        disableWrite({ blockWrite: !record.blockWrite, id: record.id }).then(() => {
-          message.success("操作成功");
-          reloadData();
-        });
-      },
-    },
-    {
-      label: "编辑",
-      isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
-      clickFunc: () => {
-        setTimeout(() => {
-          pushHistory(href);
-        }, 500);
-      },
-    },
-    {
       label: "转让",
       isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
       clickFunc: () => {
         setModalId("transClusterIndex", record, reloadData);
       },
     },
     {
+      isRouterNav: true,
       isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
-      label: "清理",
-      clickFunc: () => {
-        setTimeout(() => {
-          pushHistory(clearHref);
-        }, 500);
-      },
+      label: currentIsOpenUp ? "清理" : <NavRouterLink element={"清理"} href={clearHref} />,
     },
     {
       label: "下线",
       isOpenUp: currentIsOpenUp,
-      tip: isSystemData ? "预置系统数据，不支持操作" : "",
       clickFunc: () => {
         setModalId("clearClusterIndex", record.id, reloadData);
       },

@@ -4,14 +4,12 @@ import static com.didichuxing.datachannel.arius.admin.client.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_HOST;
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_OP_NEW;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,9 +68,6 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private EcmHandleService ecmHandleService;
-
-    @Autowired
-    private RoleClusterHostService roleClusterHostService;
 
     @Autowired
     private WorkTaskManager workTaskManager;
@@ -278,14 +273,6 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             if (null == clusterOpIndecreaseHostContent.getPidCount()) {
                 clusterOpIndecreaseHostContent.setPidCount(ClusterConstant.DEFAULT_CLUSTER_PAID_COUNT);
             }
-
-            // 填充工单中的ip字段,port端口号填充
-            Map<String, String> portOfRoleMapFromHost = getPortOfRoleMapFromHost(clusterOpIndecreaseHostContent.getPhyClusterId());
-            for (ESClusterRoleHost esClusterRoleHost : clusterOpIndecreaseHostContent.getRoleClusterHosts()) {
-                esClusterRoleHost.setIp(Getter.strWithDefault(esClusterRoleHost.getIp(), esClusterRoleHost.getHostname()));
-                esClusterRoleHost.setPort(portOfRoleMapFromHost.get(esClusterRoleHost.getRole()));
-            }
-
             workOrder.setContentObj(JSON.toJSON(clusterOpIndecreaseHostContent));
         }
     }
@@ -317,23 +304,5 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             }
         }
         return hostScaleParamBaseList;
-    }
-
-    /**
-     * 从db中获取物理集群角色下的端口号信息
-     * @return 物理集群下的角色端口map
-     */
-    private Map<String/*角色名称*/, String/*端口号*/> getPortOfRoleMapFromHost(Long phyClusterId) {
-        Map<String, String> rolePortMap = new HashMap<>();
-        for (ESClusterNodeRoleEnum param : ESClusterNodeRoleEnum.values()) {
-            if (param != ESClusterNodeRoleEnum.UNKNOWN) {
-                List<RoleClusterHost> roleClusterHosts = roleClusterHostService.getByRoleAndClusterId(phyClusterId, param.getDesc());
-                // 默认采用8060端口进行es集群的搭建
-                rolePortMap.put(param.getDesc(),
-                        CollectionUtils.isEmpty(roleClusterHosts) ? ClusterConstant.DEFAULT_PORT : roleClusterHosts.get(0).getPort());
-            }
-        }
-
-        return rolePortMap;
     }
 }

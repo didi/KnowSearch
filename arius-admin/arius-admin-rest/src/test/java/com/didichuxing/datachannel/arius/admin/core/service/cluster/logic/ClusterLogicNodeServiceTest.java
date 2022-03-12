@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 @Transactional
 @Rollback
-public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
+public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTests {
 
     @MockBean
     private RegionRackService regionRackService;

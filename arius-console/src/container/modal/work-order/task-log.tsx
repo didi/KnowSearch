@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import * as actions from "actions";
 import { Modal, Spin, Tabs } from "antd";
 import { getTaskLog } from "api/task-api";
-import { ITaskLog } from "typesPath/task-types";
+import { ITaskLog } from "@types/task-types";
 
 const { TabPane } = Tabs;
 

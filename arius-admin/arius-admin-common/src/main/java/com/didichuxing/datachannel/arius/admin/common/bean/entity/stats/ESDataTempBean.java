@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didiglobal.logi.log.util.HostUtil;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
@@ -13,7 +12,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESDataTempBean extends BaseESPO implements CollectBean  {
+public class ESDataTempBean implements CollectBean {
     public static final Integer INDEX_TYPE = 1;
     public static final Integer NODE_TYPE  = 2;
 
@@ -101,11 +100,6 @@ public class ESDataTempBean extends BaseESPO implements CollectBean  {
 
     public String getKey() {
         return getKeyPre() + valueName;
-    }
-
-    @Override
-    public String getRoutingValue() {
-        return cluster;
     }
 
     /**

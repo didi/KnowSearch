@@ -1,6 +1,6 @@
 import React from 'react';
 import { Col, Row, } from 'antd';
-import { IBaseInfo } from 'typesPath/base-types';
+import { IBaseInfo } from '@types/base-types';
 import { baseInfo } from './config';
 import './index.less';
 import { BaseDetail } from 'component/dantd/base-detail';

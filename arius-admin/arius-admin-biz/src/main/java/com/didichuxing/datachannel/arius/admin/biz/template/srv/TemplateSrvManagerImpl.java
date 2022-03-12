@@ -1,10 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrvInterface;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterTemplateSrvVO;
@@ -14,7 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -34,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.CLUSTER;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.DELETE;
@@ -70,54 +68,24 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     private static final String   CLUSTER_LOGIC_NOT_EXISTS    = "逻辑集群不存在";
 
-    Map<Integer, BaseTemplateSrvInterface> templateHandlerMap = new HashMap<>();
-
-    @PostConstruct
-    public void init() {
-        LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init start.");
-        Map<String, BaseTemplateSrvInterface> strTemplateHandlerMap = SpringTool.getBeansOfType(BaseTemplateSrvInterface.class);
-
-        for (String str : strTemplateHandlerMap.keySet()) {
-            try {
-                BaseTemplateSrvInterface baseTemplateHandler = strTemplateHandlerMap.get(str);
-                TemplateServiceEnum templateServiceEnum = baseTemplateHandler.templateService();
-
-                if (null != templateServiceEnum) {
-                    templateHandlerMap.put(templateServiceEnum.getCode(), baseTemplateHandler);
-
-                    LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-                            templateServiceEnum.getServiceName(), templateServiceEnum.getEsClusterVersion());
-                }
-            } catch (Exception e) {
-                LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-                        str);
-            }
-        }
-        LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init finished.");
-    }
-
     @Override
     public ClusterTemplateSrv getTemplateServiceBySrvId(int srvId) {
         return convertFromEnum(TemplateServiceEnum.getById(srvId));
     }
 
     @Override
-    public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
+    public List<String> getPhyClusterByOpenTemplateSrv(int srvId){
+        List<String>     clusterPhyNames = new ArrayList<>();
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
-        return getPhyClusterByOpenTemplateSrv(clusterPhies, srvId);
-    }
 
-    @Override
-    public List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId) {
-        List<String> clusterPhyNames = new ArrayList<>();
-        if (CollectionUtils.isEmpty(clusterPhies)) {
-            return clusterPhyNames;
-        }
-        clusterPhies.forEach(clusterPhy -> {
-            if (isPhyClusterOpenTemplateSrv(clusterPhy, srvId)) {
+        if(CollectionUtils.isEmpty(clusterPhies)){return clusterPhyNames;}
+
+        clusterPhies.stream().forEach( clusterPhy -> {
+            if(isPhyClusterOpenTemplateSrv(clusterPhy.getCluster(), srvId)){
                 clusterPhyNames.add(clusterPhy.getCluster());
             }
-        });
+        } );
+
         return clusterPhyNames;
     }
 
@@ -140,30 +108,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         } catch (Exception e) {
             LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
                 phyCluster, srvId, e);
-
-            return true;
-        }
-    }
-
-    @Override
-    public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
-        try {
-            Result<List<ClusterTemplateSrv>> result = getPhyClusterTemplateSrv(phyCluster);
-            if (null == result || result.failed()) {
-                return false;
-            }
-
-            List<ClusterTemplateSrv> clusterTemplateSrvs = result.getData();
-            for (ClusterTemplateSrv templateSrv : clusterTemplateSrvs) {
-                if (srvId == templateSrv.getServiceId()) {
-                    return true;
-                }
-            }
-
-            return false;
-        } catch (Exception e) {
-            LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
-                    phyCluster, srvId, e);
 
             return true;
         }
@@ -225,11 +169,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     @Override
     public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
-        return getPhyClusterTemplateSrv(clusterPhy);
-    }
-
-    @Override
-    public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy clusterPhy) {
         if (null == clusterPhy) {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
         }
@@ -241,7 +180,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         List<ClusterTemplateSrv> templateServices = new ArrayList<>();
         for (String strId : StringUtils.split(templateSrvs, COMMA)) {
-            ClusterTemplateSrv templateSrv = getTemplateServiceBySrvId(Integer.parseInt(strId));
+            ClusterTemplateSrv templateSrv = getTemplateServiceBySrvId(Integer.valueOf(strId));
             if (null != templateSrv) {
                 templateServices.add(templateSrv);
             }
@@ -306,8 +245,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public Result<Boolean> checkTemplateSrv(String phyCluster, String templateSrvId, String operator) {
-        ClusterTemplateSrv clusterTemplateSrv = getTemplateServiceBySrvId(Integer.parseInt(templateSrvId));
+    public Result<Boolean> addTemplateSrv(String phyCluster, String templateSrvId, String operator) {
+        ClusterTemplateSrv clusterTemplateSrv = getTemplateServiceBySrvId(Integer.valueOf(templateSrvId));
         if (null == clusterTemplateSrv) {
             return Result.buildNotExist("对应的索引服务不存在");
         }
@@ -317,18 +256,11 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
         }
 
-        //对模板服务的开启做校验
-        Result<Boolean> validResult = validCanOpenTemplateSrvId(phyCluster, templateSrvId);
-        if (validResult.failed()) {
-            return Result.buildFrom(validResult);
-        }
-
         if (StringUtils.isBlank(clusterPhy.getTemplateSrvs())) {
             clusterPhy.setTemplateSrvs(templateSrvId);
         } else {
             List<String> templateSrvs = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
             if (!templateSrvs.contains(templateSrvId)) {
-                //增加模板服务的开启校验，具体的逻辑映射到具体的模板服务当中
                 clusterPhy.setTemplateSrvs(clusterPhy.getTemplateSrvs() + "," + templateSrvId);
             }else {
                 return Result.buildSucc();
@@ -342,21 +274,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 phyCluster + "集群，增加一个索引服务：" + clusterTemplateSrv.getServiceName(), operator);
         }
         return result;
-    }
-
-    @Override
-    public Result<Boolean> checkTemplateSrvWhenJoin(String httpAddresses, String password, String strId) {
-        if (StringUtils.isBlank(httpAddresses) || StringUtils.isBlank(strId)) {
-            return Result.buildFail("校验信息有误");
-        }
-
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(strId));
-        if (AriusObjUtils.isNull(templateServiceEnum) ||
-                AriusObjUtils.isNull(templateHandlerMap.get(Integer.parseInt(strId)))) {
-            return Result.buildFail("未找到指定的模板服务");
-        }
-
-        return templateHandlerMap.get(Integer.parseInt(strId)).checkOpenTemplateSrvWhenClusterJoin(httpAddresses, password);
     }
 
     @Override
@@ -385,7 +302,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         for (String associatedClusterPhyName : associatedClusterPhyNames) {
             try {
-                Result<Boolean> ret = checkTemplateSrv(associatedClusterPhyName, templateSrvId, operator);
+                Result<Boolean> ret = addTemplateSrv(associatedClusterPhyName, templateSrvId, operator);
                 if (ret.failed()) {
                     throw new ESOperateException("逻辑集群添加索引服务失败");
                 }
@@ -515,21 +432,5 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     private boolean isRDOrOP(String operator) {
         return ariusUserInfoService.isRDByDomainAccount(operator) || ariusUserInfoService.isOPByDomainAccount(operator);
-    }
-
-    /**
-     * 根据物理集群名称和模板服务的映射id校验是否能够开启指定的模板服务
-     * @param phyCluster 物理集群名称
-     * @param templateSrvId 模板服务id
-     * @return 校验结果
-     */
-    private Result<Boolean> validCanOpenTemplateSrvId(String phyCluster, String templateSrvId) {
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(templateSrvId));
-        if (templateServiceEnum == null ||
-                AriusObjUtils.isNull(templateHandlerMap.get(Integer.parseInt(templateSrvId)))) {
-            return Result.buildFail("指定模板服务id有误");
-        }
-
-        return templateHandlerMap.get(Integer.parseInt(templateSrvId)).checkOpenTemplateSrvByCluster(phyCluster);
     }
 }

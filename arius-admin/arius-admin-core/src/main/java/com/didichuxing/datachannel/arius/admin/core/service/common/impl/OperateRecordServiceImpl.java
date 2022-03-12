@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.operaterecord.OperateRecordVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -35,7 +34,6 @@ import com.google.common.collect.Lists;
 public class OperateRecordServiceImpl implements OperateRecordService {
 
     private static final ILog LOGGER = LogFactory.getLog(OperateRecordServiceImpl.class);
-    private static final int     MAX_RECORD_COUNT = 200;
 
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
@@ -78,16 +76,12 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      * @return 操作记录列表
      */
     @Override
-    public Result<List<OperateRecordVO>> list(OperateRecordDTO condt) {
+    public List<OperateRecord> list(OperateRecordDTO condt) {
         if (condt == null) {
-            return Result.buildSucc(Lists.newArrayList());
+            return Lists.newArrayList();
         }
-        List<OperateRecordVO> records = ConvertUtil.list2List(operateRecordDAO.listByCondition(ConvertUtil.obj2Obj(condt, OperateRecordPO.class)), OperateRecordVO.class);
-        if (records.size() > MAX_RECORD_COUNT) {
-            records = records.subList(0, MAX_RECORD_COUNT);
-        }
-        fillVOField(records);
-        return Result.buildSucc(records);
+        List<OperateRecordPO> pos = operateRecordDAO.listByCondition(ConvertUtil.obj2Obj(condt, OperateRecordPO.class));
+        return ConvertUtil.list2List(pos, OperateRecord.class);
     }
 
     /**
@@ -174,29 +168,6 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         return ConvertUtil.obj2Obj(pos.get(0), OperateRecord.class);
     }
 
-    /**
-     * 根据指定的查询条件批量查询
-     *
-     * @param bizId
-     * @param moduleIds
-     * @return 操作记录列表
-     */
-    @Override
-    public Result<List<OperateRecordVO>> multiList(String bizId, List<Integer> moduleIds) {
-        if (bizId == null) {
-            return Result.buildSucc(Lists.newArrayList());
-        }
-        List<OperateRecordVO> operateRecordVOS= new ArrayList<>();
-        for (Integer moduleId : moduleIds) {
-            OperateRecordDTO operateRecordDTO = new OperateRecordDTO();
-            operateRecordDTO.setBizId(bizId);
-            operateRecordDTO.setModuleId(moduleId);
-            Result<List<OperateRecordVO>> result = list(operateRecordDTO);
-            operateRecordVOS.addAll(result.getData());
-        }
-        return Result.buildSucc(operateRecordVOS);
-    }
-
     /******************************************* private method **************************************************/
     private Result<Void> checkParam(OperateRecordDTO param) {
         if (AriusObjUtils.isNull(param)) {
@@ -225,14 +196,5 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         }
 
         return Result.buildSucc();
-    }
-
-    private void fillVOField(List<OperateRecordVO> records) {
-        if(CollectionUtils.isEmpty(records)){return;}
-
-        for(OperateRecordVO vo : records){
-            vo.setModule(ModuleEnum.valueOf(vo.getModuleId()).getDesc());
-            vo.setOperate( OperationEnum.valueOf(vo.getOperateId()).getDesc());
-        }
     }
 }

@@ -8,8 +8,6 @@ import { addPlug } from "api/plug-api";
 import { computeChecksumMd5 } from "lib/utils";
 import { UserState } from "store/type";
 import urlParser from "lib/url-parser";
-import { pDefaultMap } from "container/cluster/logic-detail/config";
-
 
 const mapStateToProps = (state: any) => ({
   params: state.modal.params,
@@ -46,29 +44,6 @@ const CustomPlugnModal = (props: {
         ],
         attrs: {
           accept: ".gz",
-        },
-      },
-      {
-        key: "pDefault",
-        label: "插件类型",
-        type: FormItemType.select,
-        options: Object.keys({
-          1: 'ES能力',
-          2: '平台能力',
-        }).map((item) => {
-          return {
-            label: pDefaultMap[Number(item)],
-            value: item,
-          };
-        }),
-        rules: [
-          {
-            required: true,
-            message: '请选择插件类型'
-          },
-        ],
-        attrs: {
-          placeholder: "请选择插件类型",
         },
       },
       {
@@ -117,7 +92,7 @@ const CustomPlugnModal = (props: {
         desc: result.desc,
         name: result.name,
         version: result.version,
-        pDefault: result.pDefault,
+        pDefault: props.params?.pDefault ? true : false,
         logicClusterId: props.params?.id || 0,
         physicsClusterId: physicsClusterId,
       };

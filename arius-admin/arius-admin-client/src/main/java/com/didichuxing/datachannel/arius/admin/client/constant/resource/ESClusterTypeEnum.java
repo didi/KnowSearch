@@ -16,11 +16,6 @@ public enum ESClusterTypeEnum {
                                 */
                                ES_HOST(4, "host集群"),
 
-                                /**
-                                * 虚拟机集群
-                                */
-                                ES_VM(5, "virtual machine集群"),
-
                                /**
                                 * 未知
                                 */
@@ -54,17 +49,5 @@ public enum ESClusterTypeEnum {
             }
         }
         return ESClusterTypeEnum.UNKNOWN;
-    }
-
-    public static boolean validCode(Integer code) {
-        if (code == null) {
-            return false;
-        }
-        for (ESClusterTypeEnum typeEnum : ESClusterTypeEnum.values()) {
-            if (typeEnum.getCode() == code) {
-                return true;
-            }
-        }
-        return false;
     }
 }

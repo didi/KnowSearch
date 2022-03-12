@@ -1,39 +1,33 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.AppClusterPhyAuthManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
-import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterPhyAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import com.didichuxing.datachannel.arius.admin.biz.app.AppClusterPhyAuthManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
+import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterPhyAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.google.common.collect.Lists;
 
 /**
  * Created by linyunan on 2021-10-15
  */
 @Component
 public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
+
     @Autowired
     private AppService                 appService;
 
@@ -46,20 +40,7 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
     @Autowired
     private ClusterContextManager      clusterContextManager;
 
-    @Autowired
-    private ClusterPhyService          clusterPhyService;
-
-    @Autowired
-    private AriusScheduleThreadPool    ariusScheduleThreadPool;
-
     private static final FutureUtil futureUtil = FutureUtil.initBySystemAvailableProcessors("AppClusterPhyAuthManagerImpl",100);
-
-    private static final Map<Integer/*appId*/, List<AppClusterPhyAuth> /*AppClusterPhyAuthList*/> appId2AppClusterPhyAuthListMap = Maps.newConcurrentMap();
-
-    @PostConstruct
-    private void init(){
-        ariusScheduleThreadPool.submitScheduleAtFixTask(this::refreshAppClusterPhyAuth,60,120);
-    }
 
     @Override
     public List<AppClusterPhyAuth> getByClusterPhyListAndAppId(Integer appId, List<ClusterPhy> clusterPhyList) {
@@ -67,17 +48,15 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             return appClusterPhyAuthList;
         }
-        App app = appService.getAppById(appId);
-        boolean isSuperApp = appService.isSuperApp(app);
 
-        if (!appService.isAppExists(app)) {
+        if (!appService.isAppExists(appId)) {
             appClusterPhyAuthList = clusterPhyList.stream()
                     .map(r -> appClusterPhyAuthService.buildClusterPhyAuth(appId, r.getCluster(), AppClusterPhyAuthEnum.NO_PERMISSIONS))
                     .collect(Collectors.toList());
             return appClusterPhyAuthList;
         }
 
-        if (isSuperApp) {
+        if (appService.isSuperApp(appId)) {
             appClusterPhyAuthList = clusterPhyList.stream()
                     .map(r -> appClusterPhyAuthService.buildClusterPhyAuth(appId, r.getCluster(), AppClusterPhyAuthEnum.OWN))
                     .collect(Collectors.toList());
@@ -91,31 +70,6 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
         futureUtil.waitExecute();
 
         return appClusterPhyAuthList;
-    }
-
-    @Override
-    public List<AppClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId,
-                                                                        List<ClusterPhy> clusterPhyList) {
-        if (null == appId || CollectionUtils.isEmpty(clusterPhyList)) { return Lists.newArrayList();}
-        
-        List<AppClusterPhyAuth> appClusterPhyAuthList = appId2AppClusterPhyAuthListMap.get(appId);
-        if (CollectionUtils.isEmpty(appClusterPhyAuthList)) {
-            return buildInitAppClusterPhyAuth(clusterPhyList);
-        }
-
-        return appClusterPhyAuthList;
-    }
-
-    private List<AppClusterPhyAuth> buildInitAppClusterPhyAuth(List<ClusterPhy> clusterPhyList) {
-        List<AppClusterPhyAuth>  initAppClusterPhyAuthList = Lists.newArrayList();
-        for (ClusterPhy clusterPhy : clusterPhyList) {
-            AppClusterPhyAuth appClusterPhyAuth = new AppClusterPhyAuth();
-            appClusterPhyAuth.setClusterPhyName(clusterPhy.getCluster());
-            appClusterPhyAuth.setType(AppClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
-            initAppClusterPhyAuthList.add(appClusterPhyAuth);
-        }
-
-        return initAppClusterPhyAuthList;
     }
 
     @Override
@@ -195,18 +149,5 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
         AppClusterPhyAuth appClusterPhyAuth = appClusterPhyAuthService.buildClusterPhyAuth(appId, clusterPhy.getCluster(), appClusterPhyAuthEnum);
 
         return appClusterPhyAuth;
-    }
-
-    /**
-     * 定时刷新权限信息
-     */
-    private void refreshAppClusterPhyAuth() {
-        Set<Integer> appIdSet = appService.listApps().stream().map(App::getId).collect(Collectors.toSet());
-        if (CollectionUtils.isEmpty(appIdSet)) { return;}
-
-        List<ClusterPhy> esClusterPhyList = clusterPhyService.listClustersByCondt(null);
-        for (int appId : appIdSet) {
-            appId2AppClusterPhyAuthListMap.put(appId, getByClusterPhyListAndAppId(appId, esClusterPhyList));
-        }
     }
 }

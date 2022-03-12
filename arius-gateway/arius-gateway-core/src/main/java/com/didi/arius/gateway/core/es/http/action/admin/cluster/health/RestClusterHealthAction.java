@@ -53,22 +53,14 @@ public class RestClusterHealthAction extends StatAction {
             throws Exception {
         String index = request.param("index");
         if (index != null && isIndexType(queryContext)) {
-            // 如果查询指定索引的健康状态
             String[] indicesArr = Strings.splitStringByCommaToArray(request.param("index"));
             List<String> indices = Lists.newArrayList(indicesArr);
             IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
-            // 根据索引模版找到对应的集群client
+
             client = esClusterService.getClient(queryContext, indexTemplate, actionName);
         }
 
-
         if (client == null) {
-            // 找到根据appid关联的集群的client
-            client = esClusterService.getClient(queryContext, actionName);
-        }
-
-        if(client == null) {
-            // 使用默认的集群的client
             client = esRestClientService.getAdminClient(actionName);
         }
 

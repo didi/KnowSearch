@@ -1,25 +1,21 @@
 import * as React from 'react';
 import { TableMappingForm } from './table-mapping-setting';
 import { JSONMappingSetting } from './json-mapping-setting';
-import { DATE_FORMAT_BY_ES, TEMP_FORM_MAP_KEY, MAPPING_TYPE, MAPPING_CHECK_GROUP } from './constant';
+import { DATE_FORMAT_BY_ES, TEMP_FORM_MAP_KEY, MAPPING_TYPE } from './constant';
 import { getFormatJsonStr } from 'lib/utils';
 import Url from 'lib/url-parser';
-import { getTableMappingData, strNumberToBoolean } from './config';
+import { getTableMappingData } from './config';
 import { updateIndexMappingInfo, checkIndexMappingInfo, getIndexBaseInfo, getIndexMappingInfo } from 'api/cluster-index-api';
-import { Tabs, Button, Modal, message, Checkbox, Tooltip, PageHeader } from 'antd';
+import { Tabs, Button, Modal, message } from 'antd';
 import * as actions from 'actions';
 import { connect } from "react-redux";
 import { tuple } from 'antd/lib/_util/type';
 import { CancelActionModal } from 'container/custom-component';
-import { getSetting } from 'api/cluster-api';
-import './index.less';
-import { InfoCircleFilled } from '@ant-design/icons';
-import { InfoItem } from 'component/info-item';
 
 interface IMappingItem {
   type: string;
   enabled?: boolean;
-  // dynamic?: boolean;
+  dynamic?: boolean;
   doc_values?: boolean;
   store?: boolean;
   properties?: IMappingItem;
@@ -33,13 +29,12 @@ const mapStateToProps = state => ({
 const connects: any = connect
 @connects(mapStateToProps)
 export class SecondStep extends React.Component<any> {
-  // private activeKey: string = this.props.createIndex.temporaryFormMap?.get(TEMP_FORM_MAP_KEY.mappingType) || MAPPING_TYPE.table;
+  private activeKey: string = this.props.createIndex.temporaryFormMap?.get(TEMP_FORM_MAP_KEY.mappingType) || MAPPING_TYPE.table;
   private $tableFormRef: any = React.createRef();
-  private $jsonFormRef: any = React.createRef();
+  private $jsonFormRef: any =  React.createRef();
   private isCyclicalRoll: boolean = false;
   private isCreatePage: boolean = true;
   private isModifyPage: boolean = true;
-  private isDetailPage: boolean = true;
   private indexId: number = null;
   private history: string = null;
 
@@ -51,120 +46,69 @@ export class SecondStep extends React.Component<any> {
     this.isCyclicalRoll = !!(props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.isCyclicalRoll));
     this.isCreatePage = window.location.pathname.includes('create');
     this.isModifyPage = window.location.pathname.includes('mapping');
-    this.isDetailPage = window.location.pathname.includes('/detail');
   }
 
   public state = {
-    btnLoading: false,
-    activeKey: this.props.createIndex.temporaryFormMap?.get(TEMP_FORM_MAP_KEY.mappingType) || MAPPING_TYPE.table,
-    indexBaseInfo: {} as any,
+    btnLoading: false
   }
 
   public componentDidMount() {
     if (this.isModifyPage) {
       getIndexBaseInfo(this.indexId).then(info => {
         this.isCyclicalRoll = !!info?.cyclicalRoll;
-        this.setState({
-          indexBaseInfo: info,
-        })
         this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.isCyclicalRoll, !!info?.cyclicalRoll));
       });
     }
-    if (this.isDetailPage) {
-      getSetting(this.indexId).then(res => {
-        if (res) {
-          this.props.dispatch(actions.setCreateIndex({
-            asyncTranslog: res.asyncTranslog,
-            cancelCopy: res.cancelCopy,
-            customerAnalysisValue: res.analysis ? JSON.stringify(res.analysis, null, 4) : '',
-            // dynamicTemplatesValue: res.dynamicTemplates ? JSON.stringify(res.dynamicTemplates, null, 4) : '',
-            customerAnalysis: res.analysis ? true : false,
-            // dynamicTemplates: res.dynamicTemplates ? true : false,
-          }))
-        }
-      })
-    }
-    const mainbox = document.querySelector('#d1-layout-main');
-    const cbox = document.querySelector('.content-wrapper');
-    mainbox?.setAttribute('style', `padding-bottom: ${0 + 'px'}`)
-    cbox?.setAttribute('style', `padding-bottom: ${55 + 'px'}`)
-    const div = document.querySelector('#mappingName');
-    const btn = document.querySelector('.op-btns-group');
-    const sider = document.querySelector('.d1-layout-sider-nav');
-    div?.setAttribute('style', `min-height: ${mainbox.clientHeight + 20 + 'px;'}position: relative;`)
-    btn?.setAttribute('style', `width: ${mainbox.clientWidth + 'px;'}`)
-    setTimeout(() => {
-      // 通过获取侧边栏增加resiz适配e
-      btn?.setAttribute('style', `width: calc(100% - ${sider.clientWidth + 'px);'}`)
-    }, 300);
   }
 
-  public componentDidUpdate(preProps) {
-    if (preProps?.createIndex?.settingCount !== this.props?.createIndex?.settingCount) {
-      getSetting(this.indexId).then(res => {
-        if (res) {
-          this.props.dispatch(actions.setCreateIndex({
-            asyncTranslog: res.asyncTranslog,
-            cancelCopy: res.cancelCopy,
-            customerAnalysisValue: res.analysis ? JSON.stringify(res.analysis, null, 4) : '',
-            // dynamicTemplatesValue: res.dynamicTemplates ? JSON.stringify(res.dynamicTemplates, null, 4) : '',
-            customerAnalysis: res.analysis ? true : false,
-            // dynamicTemplates: res.dynamicTemplates ? true : false,
-          }))
-        }
-      })
-    }
-  }
 
   public onChangeTab = (key: string) => {
-    // this.activeKey = key;
-    this.setState({
-      activeKey: key
-    })
+    this.activeKey = key;
   }
 
   public skip = () => {
-    if (this.state.activeKey === MAPPING_TYPE.table && this.$tableFormRef) {
+    if (this.activeKey === MAPPING_TYPE.table && this.$tableFormRef) {
       const { getFieldValue } = this.$tableFormRef.current;
       const keys = getFieldValue('keys');
 
       this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingKeys, keys));
     }
-    if (this.state.activeKey === MAPPING_TYPE.json) {
+    if (this.activeKey === MAPPING_TYPE.json) {
       const editor = this.props.createIndex.activeInstance;
       const value = editor ? editor.getValue() : '';
       this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.jsonMappingValue, value));
     }
+  
     this.props.dispatch(actions.setCurrentStep(2));
   }
 
   public handleTableMappingSubmit = () => {
     this.$tableFormRef.current.validateFields().then((values: any) => {
-      const keys = Object.keys(values);
-      const { getFieldsValue, getFieldValue } = this.$tableFormRef.current;
-      if (this.isCyclicalRoll && this.judgeIsNeedWarning(keys, values)) {
-        return Modal.warning({
-          title: '提示',
-          content: '请添加分区字段，分区字段类型必须是date类型, 分区字段为true',
-          okText: '确定',
+        const keys = Object.keys(values);
+        const { getFieldsValue, getFieldValue } = this.$tableFormRef.current;
+        if (this.isCyclicalRoll && this.judgeIsNeedWarning(keys, values)) {
+          return Modal.warning({
+            title: '提示',
+            content: '请添加分区字段，分区字段类型必须是date类型, 分区字段为true',
+            okText: '确定',
+          });
+        }
+        const previewJson = this.transTableFormDataToJson(values);
+        const params = {
+          logicTemplateId: this.indexId,
+          mapping: previewJson,
+        };
+        checkIndexMappingInfo(params).then(() => {
+          const renderKeys = getFieldValue('keys');
+          const allValues = getFieldsValue();
+
+          this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingKeys, renderKeys));
+          this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingValues, allValues));
+          this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.thirdStepPreviewJson, getFormatJsonStr(previewJson)));
+          this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingValue, JSON.stringify(previewJson)));
+
+          this.props.dispatch(actions.setCurrentStep(2));
         });
-      }
-      const previewJson = this.transTableFormDataToJson(values);
-      const params = {
-        logicTemplateId: this.indexId,
-        mapping: previewJson,
-      };
-      checkIndexMappingInfo(params).then(() => {
-        const renderKeys = getFieldValue('keys');
-        const allValues = getFieldsValue();
-
-        this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingKeys, renderKeys));
-        this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingValues, allValues));
-        this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.thirdStepPreviewJson, getFormatJsonStr(previewJson)));
-        this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingValue, JSON.stringify(previewJson)));
-
-        this.props.dispatch(actions.setCurrentStep(2));
-      });
     });
   }
 
@@ -235,51 +179,50 @@ export class SecondStep extends React.Component<any> {
 
     switch (type) {
       case 'object':
-        result.enabled = strNumberToBoolean(values[`search_${key}`]); // 检索
-        // result.dynamic = strNumberToBoolean(values[`dynamic_${key}`]);
-        result.doc_values = strNumberToBoolean(values[`sort_${key}`]);
+        result.enabled = !!values[`search_${key}`]; // 检索
+        result.dynamic = !!values[`dynamic_${key}`];
+        result.doc_values = !!values[`sort_${key}`];
         break;
       case 'nested':
-        result.index = strNumberToBoolean(values[`search_${key}`]);
-        result.doc_values = strNumberToBoolean(values[`sort_${key}`]);
+        result.index = !!values[`search_${key}`];
+        result.doc_values = !!values[`sort_${key}`];
         break;
       case 'text':
         if (values[`analyzer_${key}`] && values[`analyzer_${key}`] !== 'none') {
           result.analyzer = values[`analyzer_${key}`];
         }
-        result.index = strNumberToBoolean(values[`search_${key}`]);
         break;
       case 'date':
       case 'date_range':
-        result.doc_values = strNumberToBoolean(values[`sort_${key}`]);
-        result.index = strNumberToBoolean(values[`search_${key}`]);
-        result.format = values[`type_${key}`]?.[1] || DATE_FORMAT_BY_ES;
+        result.doc_values = !!values[`sort_${key}`];
+        result.index = !!values[`search_${key}`];
+        result.format = DATE_FORMAT_BY_ES;
         break;
       default:
-        result.index = strNumberToBoolean(values[`search_${key}`]);
-        result.doc_values = strNumberToBoolean(values[`sort_${key}`]);
+        result.index = !!values[`search_${key}`];
+        result.doc_values = !!values[`sort_${key}`];
         break;
     }
     return result;
   }
 
   public onHandleNextStep = () => {
-    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingType, this.state.activeKey));
-    if (this.state.activeKey === MAPPING_TYPE.table && this.$tableFormRef.current) {
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingType, this.activeKey));
+    if (this.activeKey === MAPPING_TYPE.table && this.$tableFormRef.current) {
       this.handleTableMappingSubmit();
     }
-    if (this.state.activeKey === MAPPING_TYPE.json) {
+    if (this.activeKey === MAPPING_TYPE.json) {
       this.$jsonFormRef.handleSubmit();
     }
   }
 
   public onHandlePrevStep = () => {
-    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingType, this.state.activeKey));
-    if (this.state.activeKey === MAPPING_TYPE.json) {
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingType, this.activeKey));
+    if (this.activeKey === MAPPING_TYPE.json) {
       this.$jsonFormRef.setFilledFormInfo();
       this.props.dispatch(actions.setCurrentStep(0));
     }
-    if (this.state.activeKey === MAPPING_TYPE.table && this.$tableFormRef) {
+    if (this.activeKey === MAPPING_TYPE.table && this.$tableFormRef) {
       const { getFieldValue, getFieldsValue } = this.$tableFormRef.current;
       const keys = getFieldValue('keys');
       const allValues = getFieldsValue();
@@ -292,51 +235,51 @@ export class SecondStep extends React.Component<any> {
   }
 
   public onSave = () => {
-    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingType, this.state.activeKey));
-    if (this.state.activeKey === MAPPING_TYPE.table && this.$tableFormRef) {
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingType, this.activeKey));
+    if (this.activeKey === MAPPING_TYPE.table && this.$tableFormRef) {
       this.$tableFormRef.current.validateFields().then((values: any) => {
         const { getFieldsValue, getFieldValue } = this.$tableFormRef.current;
 
         const keys = Object.keys(values);
-        if (this.isCyclicalRoll && this.judgeIsNeedWarning(keys, values)) {
-          return Modal.warning({
-            title: '提示',
-            content: '请添加分区字段，分区字段类型必须是date类型',
-            okText: '确定',
-          });
-        }
-        const previewJson = this.transTableFormDataToJson(values);
-        const params = {
-          logicId: this.indexId,
-          typeProperties: [{
-            properties: previewJson,
-          }],
-        };
-        const allValues = getFieldsValue();
-        this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingValues, allValues));
+          if (this.isCyclicalRoll && this.judgeIsNeedWarning(keys, values)) {
+            return Modal.warning({
+              title: '提示',
+              content: '请添加分区字段，分区字段类型必须是date类型',
+              okText: '确定',
+            });
+          }
+          const previewJson = this.transTableFormDataToJson(values);
+          const params = {
+            logicId: this.indexId,
+            typeProperties: [{
+              properties: previewJson,
+            }],
+          };
+          const allValues = getFieldsValue();
+          this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingValues, allValues));
 
-        getTableMappingData(params);
-        this.setState({
-          btnLoading: true
-        });
-        updateIndexMappingInfo(params).then(() => {
-          message.success('编辑成功');
-          window.setTimeout(() => {
-            //因不确定改动范围 加判断
-            if (this.history.indexOf('index-tpl-management') !== -1) {
-              this.props.history.push('/index-tpl-management')
-            } else {
-              window.location.href = this.history;
-            }
-          }, 1000);
-        }).finally(() => {
+          getTableMappingData(params);
           this.setState({
-            btnLoading: false
-          })
-        });
+            btnLoading: true
+          });
+          updateIndexMappingInfo(params).then(() => {
+            message.success('编辑成功');
+            window.setTimeout(() => {
+              //因不确定改动范围 加判断
+              if (this.history.indexOf('index-tpl-management') !== -1 ) {
+                this.props.history.push('/index-tpl-management')
+              } else {
+                window.location.href = this.history;
+              }
+            }, 1000);
+          }).finally(() => {
+            this.setState({
+              btnLoading: false
+            })
+          });
       });
     }
-    if (this.state.activeKey === MAPPING_TYPE.json) {
+    if (this.activeKey === MAPPING_TYPE.json) {
       this.$jsonFormRef.handleSave(this.history);
     }
   }
@@ -347,72 +290,16 @@ export class SecondStep extends React.Component<any> {
     })
   }
 
-  // 关闭页面跳转
-  public clearStore = (str) => {
-    this.props?.setRemovePaths([str]);
-  }
-
-  public handleCheckGroup = (key, check) => {
-    if ((key == 'customerAnalysis') && check) {
-      this.setState({
-        activeKey: MAPPING_TYPE.json
-      });
-    }
-    this.props.dispatch(actions.setCreateIndex({ [key]: check }))
-  }
-
   public render() {
-    const isDetailPage = window.location.pathname.includes('/index/logic/detail');
+    const isDetailPage = window.location.pathname.includes('/index/detail');
+
     return (
-      <div id="mappingName">
-        {this.isModifyPage ? <PageHeader
-          className="detail-header"
-          backIcon={false}
-        > {[{
-          label: "模版名称",
-          key: "name",
-        }, {
-          label: "所属集群",
-          key: "cluster",
-        }].map((row, index) => (
-          <InfoItem
-            key={index}
-            label={row.label}
-            value={
-              `${this.state.indexBaseInfo?.[row.key] || "-"}`
-            }
-            width={250}
-          />
-        ))}</PageHeader> : null}
+      <>
         <div className={this.isModifyPage ? 'content-wrapper' : ''}>
-          {/* {
-            !this.isModifyPage ?
-              <div style={{ marginTop: 10, position: 'absolute', right: 0, zIndex: 10 }}>
-                {MAPPING_CHECK_GROUP.map(item => {
-                  return (
-                    <Checkbox disabled={this.isDetailPage} checked={this.props.createIndex[item.value]} key={item.value} onChange={(e) => {
-                        this.handleCheckGroup(item.value, e.target.checked);
-                      }}>
-                      {item.text}
-                    </Checkbox>
-                  )
-                })}
-                <Tooltip title="打开dynamic templates设置显示相应编辑器"><span><InfoCircleFilled style={{ width: 14, height: 14, color: '#495057' }} /></span></Tooltip>
-              </div>
-              : null
-          } */}
-          {
-            isDetailPage ?
-              <div className="detail-tabs">
-                <div onClick={() => this.onChangeTab(MAPPING_TYPE.table)} className={this.state.activeKey == MAPPING_TYPE.table ? 'detail-tabs-item check' : 'detail-tabs-item'}>表格格式</div>
-                <div onClick={() => this.onChangeTab(MAPPING_TYPE.json)} className={this.state.activeKey == MAPPING_TYPE.json ? 'detail-tabs-item-json check' : 'detail-tabs-item-json'}>JSON格式</div>
-              </div>
-              : null
-          }
           <Tabs
-            // type="card"
-            className={isDetailPage || this.isModifyPage ? `tab-content no-margin ${isDetailPage ? 'no-nav' : ''}` : 'tab-content'}
-            activeKey={this.state.activeKey}
+            type="card"
+            className={isDetailPage || this.isModifyPage ? 'tab-content no-margin' : 'tab-content'}
+            defaultActiveKey={this.activeKey}
             onChange={this.onChangeTab}
           >
             <Tabs.TabPane tab="表格格式" key={MAPPING_TYPE.table}>
@@ -422,16 +309,16 @@ export class SecondStep extends React.Component<any> {
               <JSONMappingSetting childEvevnt={child => this.$jsonFormRef = child} upLoading={this.updataBtnLoading} isShowPlaceholder={this.props.isShowPlaceholder} />
             </Tabs.TabPane>
           </Tabs>
-          {!isDetailPage && <div className="op-btns-group">
+          {!isDetailPage && <div className="op-btn-group">
             {this.isCreatePage && <Button onClick={this.onHandlePrevStep}>上一步</Button>}
             {this.isCreatePage && <Button type="primary" onClick={this.onHandleNextStep}>下一步</Button>}
             {this.isModifyPage &&
-              <Button loading={this.state.btnLoading} type="primary" onClick={this.onSave}>保存</Button>}
-            {this.isModifyPage && <CancelActionModal routeHref={this.history} history={this.props.history} cb={this.clearStore} />}
+              <Button loading={this.state.btnLoading}  type="primary" onClick={this.onSave}>保存</Button>}
+            {this.isModifyPage && <CancelActionModal routeHref={this.history} history={this.props.history} />}
             {!this.isCyclicalRoll && this.isCreatePage && <Button onClick={() => this.skip()}>跳过</Button>}
           </div>}
         </div>
-      </div >
+      </>
 
     );
   }

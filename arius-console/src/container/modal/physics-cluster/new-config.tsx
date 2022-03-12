@@ -19,7 +19,7 @@ import { StepSelect } from "container/custom-form/step-select";
 import { PlusOutlined } from "@ant-design/icons";
 import { getPhysicClusterRoles } from "api/cluster-api";
 import { submitWorkOrder } from "api/common-api";
-import { IWorkOrder } from "typesPath/params-types";
+import { IWorkOrder } from "@types/params-types";
 
 const mapStateToProps = (state) => ({
   phyClusterConfig: state.configInfo,
@@ -28,8 +28,8 @@ const mapStateToProps = (state) => ({
   params: state.modal.params,
   cb: state.modal.cb,
 });
-const connects: Function = connect
-@connects(mapStateToProps)
+
+@connect(mapStateToProps)
 export class NewConfigModal extends React.Component<any> {
   public state = {
     addFormArr: [0],

@@ -1,35 +1,29 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-
-import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.PHY_CLUSTER_NAME;
-import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.gatewayHeartbeatFactory;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayNodeDAO;
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.gatewayHeartbeatFactory;
+
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Transactional
 @Rollback
-public class GatewayServiceTest extends AriusAdminApplicationTest {
+public class GatewayServiceTest extends AriusAdminApplicationTests {
 
     @Autowired
     private GatewayService gatewayService;
-
-    @MockBean
-    private GatewayClusterDAO gatewayClusterDAO;
-
-    @MockBean
-    private GatewayNodeDAO gatewayNodeDAO;
 
     @Test
     void heartbeatTest() {
@@ -45,9 +39,8 @@ public class GatewayServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(ResultType.ILLEGAL_PARAMS.getCode(), gatewayService.heartbeat(gatewayHeartbeat).getCode().intValue());
         gatewayHeartbeat.setPort(-1);
         Assertions.assertEquals(ResultType.ILLEGAL_PARAMS.getCode(), gatewayService.heartbeat(gatewayHeartbeat).getCode().intValue());
+
         // 记录的正确执行操作
-        Mockito.when(gatewayClusterDAO.insert(Mockito.any())).thenReturn(1);
-        Mockito.when(gatewayNodeDAO.recordGatewayNode(Mockito.any())).thenReturn(1);
         gatewayHeartbeat = gatewayHeartbeatFactory();
         Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).success());
 
@@ -71,19 +64,8 @@ public class GatewayServiceTest extends AriusAdminApplicationTest {
 
     @Test
     void getAliveNodeTest() {
-        GatewayHeartbeat gatewayHeartbeat = new GatewayHeartbeat();
-        Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).failed());
-        gatewayHeartbeat.setClusterName(CustomDataSource.PHY_CLUSTER_NAME);
-        Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).failed());
-        gatewayHeartbeat.setHostName("localhost");
-        Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).failed());
-        gatewayHeartbeat.setPort(8080);
-        Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).failed());
-        gatewayHeartbeat = gatewayHeartbeatFactory();
-        Mockito.when(gatewayClusterDAO.insert(Mockito.any())).thenReturn(1);
-        Mockito.when(gatewayNodeDAO.recordGatewayNode(Mockito.any())).thenReturn(1);
-        Mockito.when(gatewayNodeDAO.listAliveNodeByClusterNameAndTime(Mockito.any(), Mockito.any()))
-                .thenReturn(CustomDataSource.getGatewayNodePOList());
-        Assertions.assertFalse(gatewayService.getAliveNode(CustomDataSource.PHY_CLUSTER_NAME, 1000).isEmpty());
+        // 生成新的记录
+        GatewayHeartbeat gatewayHeartbeat = gatewayHeartbeatFactory();
+        Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).success());
     }
 }

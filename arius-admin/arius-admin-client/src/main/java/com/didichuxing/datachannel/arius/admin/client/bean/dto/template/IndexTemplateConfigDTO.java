@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class IndexTemplateConfigDTO extends BaseDTO {
 
     @ApiModelProperty("模板ID")
-    private Long id;
+    private Long    id;
 
     @ApiModelProperty("模板ID")
     private Integer logicId;
@@ -28,17 +28,14 @@ public class IndexTemplateConfigDTO extends BaseDTO {
     private Integer isSourceSeparated;
 
     @ApiModelProperty("tps因子")
-    private Double adjustRackTpsFactor;
+    private Double  adjustRackTpsFactor;
 
     @ApiModelProperty("shard资源因子")
-    private Double adjustRackShardFactor;
+    private Double  adjustRackShardFactor;
 
     @ApiModelProperty("动态限流开关")
     private Integer dynamicLimitEnable;
 
     @ApiModelProperty("mapping优化开关")
     private Integer mappingImproveEnable;
-
-    @ApiModelProperty("indexRollover功能")
-    private Boolean disableIndexRollover;
 }

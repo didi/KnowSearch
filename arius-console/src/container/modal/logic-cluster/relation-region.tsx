@@ -42,13 +42,14 @@ const RelationRegionModal = (props: {
       }
     });
   }, []);
+
   const xFormModalConfig = {
     formMap: [
       {
         key: "clusterName",
         label: "物理集群",
         type: FormItemType.custom,
-        customFormItem: <PhyCluster disabled={props.params.data &&  props.params.data.length ? true : false} initValue={props.params.data &&  props.params.data.length ? props.params.data[0]?.cluster : ''} />,
+        customFormItem: <PhyCluster />,
         rules: [
           {
             required: true,
@@ -77,7 +78,7 @@ const RelationRegionModal = (props: {
     ],
     visible: true,
     title: "关联region",
-    formData: { clusterName: props.params.data &&  props.params.data.length ? props.params.data[0]?.cluster : ''},
+    formData: {},
     isWaitting: true,
     width: 660,
     onCancel: () => {
@@ -104,7 +105,7 @@ const RelationRegionModal = (props: {
         phyClusterName: result.clusterName,
       }));
       result.clusterRegionDTOS = clusterRegionDTOS;
-      return logicClusterBinRegion(result)
+      logicClusterBinRegion(result)
         .then((res) => {
           notification.success({ message: `关联成功` });
           props.dispatch(actions.setModalId(""));

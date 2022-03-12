@@ -23,9 +23,9 @@ public class ClusterRegionPO extends BasePO {
     private Long id;
 
     /**
-     * 绑定到的逻辑集群ID列表，用逗号隔开, 为空则没有被绑定
+     * 绑定到的逻辑集群ID, 为0则没有被绑定
      */
-    private String logicClusterIds;
+    private Long logicClusterId;
 
     /**
      * 物理集群名称

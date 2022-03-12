@@ -17,7 +17,7 @@
     
     <sql id="columns">
         <![CDATA[
-        id, title, task_type, business_key, `status`, creator, create_time, update_time, delete_flag, expand_data
+        id, title, task_type, business_key, status, creator, create_time, update_time, delete_flag, expand_data
         ]]>
     </sql>
     
@@ -66,7 +66,7 @@
             FROM
                 arius_work_task
             WHERE
-                 business_key LIKE CONCAT(#{businessKey},'%')
+                business_key = #{businessKey}
                  AND task_type = #{taskType}
                 order by id desc limit 1
         ]]>
@@ -78,29 +78,13 @@
             FROM
                 arius_work_task
             WHERE
-                business_key LIKE CONCAT(#{businessKey},'%')
+                business_key = #{businessKey}
                 AND task_type = #{taskType}
                 and status in ('waiting','pause','running')
                 limit 1
         ]]>
     </select>
-
-    <select id="getPengingTaskByType" resultMap="WorkTaskMap">
-        SELECT <include refid="columns" />
-        FROM
-            arius_work_task
-        WHERE task_type = #{taskType}
-        AND status in ('waiting','pause','running','failed')
-    </select>
-
-    <select id="getSuccessTaskByType" resultMap="WorkTaskMap">
-        SELECT <include refid="columns" />
-        FROM
-        arius_work_task
-        WHERE task_type = #{taskType}
-        AND status in ('success')
-    </select>
-
+    
     <select id="listAll" resultMap="WorkTaskMap">
         SELECT
         <include refid="columns" />
@@ -114,6 +98,16 @@
             <include refid="columns" />
         FROM
             arius_work_task 
+        <include refid="where"/>
+    </select>
+        
+    <select id="getCount" resultType="long">
+        <![CDATA[
+            SELECT
+                count(1)
+            FROM
+                arius_work_task
+        ]]>
         <include refid="where"/>
     </select>
 

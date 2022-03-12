@@ -18,7 +18,6 @@ public class JoinLogContext {
     private String stack;
     private int appid;
     private String ariusType;
-    private String traceid;
     private String requestId;
     private AppDetail.RequestType requestType;
     private RestRequest.Method method;

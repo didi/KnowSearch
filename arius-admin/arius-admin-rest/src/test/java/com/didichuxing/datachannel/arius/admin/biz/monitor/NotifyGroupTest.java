@@ -2,12 +2,13 @@ package com.didichuxing.datachannel.arius.admin.biz.monitor;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor.NotifyGroupDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor.QueryNotifyGroupDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.monitor.NotifyGroupVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.NotifyGroupPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotExistException;
 import com.didichuxing.datachannel.arius.admin.core.service.monitor.MonitorService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.NotifyGroupDAO;
 import org.apache.commons.collections4.CollectionUtils;
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class NotifyGroupTest extends AriusAdminApplicationTest {
+public class NotifyGroupTest extends AriusAdminApplicationTests {
 
 
     @Autowired
@@ -27,7 +28,7 @@ public class NotifyGroupTest extends AriusAdminApplicationTest {
     private MonitorService monitorService;
 
 
-    // @Test
+    @Test
     public void testDAOInsert() {
         NotifyGroupPO po = new NotifyGroupPO();
         po.setAppId(99L);
@@ -45,7 +46,7 @@ public class NotifyGroupTest extends AriusAdminApplicationTest {
 
     }
 
-    // @Test
+    @Test
     public void testDAOFindNotifyGroup() {
         NotifyGroupPO po = new NotifyGroupPO();
         po.setAppId(99L);
@@ -57,14 +58,14 @@ public class NotifyGroupTest extends AriusAdminApplicationTest {
         System.out.println(notifyGroupPOS);
     }
 
-    // @Test
+    @Test
     public void testDAOGetNotifyGroup() {
         NotifyGroupPO notifyGroupPO = notifyGroupDAO.selectById(1L);
         Assertions.assertNotNull(notifyGroupPO);
         System.out.println(notifyGroupPO);
     }
 
-    // @Test
+    @Test
     public void testDAOUpdateNotifyGroup() {
         NotifyGroupPO po = new NotifyGroupPO();
         po.setId(1L);
@@ -77,7 +78,7 @@ public class NotifyGroupTest extends AriusAdminApplicationTest {
 
     //test service
 
-    // @Test
+    @Test
     public void testFindNotifyGroups() {
         QueryNotifyGroupDTO dto = new QueryNotifyGroupDTO();
 //        dto.setAppId(77L);
@@ -92,14 +93,14 @@ public class NotifyGroupTest extends AriusAdminApplicationTest {
         System.out.println(JSON.toJSONString(notifyGroupPage));
     }
 
-    // @Test
+    @Test
     public void testGetNotifyGroup() {
         final NotifyGroupPO notifyGroup = monitorService.getNotifyGroup(3L);
         Assertions.assertNotNull(notifyGroup);
         System.out.println(JSON.toJSONString(notifyGroup));
     }
 
-    // @Test
+    @Test
     public void testSaveNotifyGroup() {
         NotifyGroupDTO notifyGroupDTO = new NotifyGroupDTO();
         notifyGroupDTO.setName("es_0728");
@@ -112,7 +113,7 @@ public class NotifyGroupTest extends AriusAdminApplicationTest {
         System.out.println(i);
     }
 
-    // @Test
+    @Test
     public void testUpdateNotifyGroup() throws Exception {
         NotifyGroupDTO dto = new NotifyGroupDTO();
         dto.setId(13L);

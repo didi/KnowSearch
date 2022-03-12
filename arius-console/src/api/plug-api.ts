@@ -8,7 +8,7 @@ export const getPlugList = () => {
   return fetch(`/v3/normal/ecm/plugin`);
 };
 
-export const getClusterPlugList = (id: number | string) => {
+export const getClusterPlugList = (id: number) => {
   return fetch(`/v2/console/cluster/plugins?clusterId=${id}`);
 };
 
@@ -24,10 +24,10 @@ export const addPlug = (params: any) => {
   formData.append('uploadFile', uploadFile);
   formData.append('desc', desc || '');
   formData.append('md5', md5);
-  formData.append('name', fileName);
+  formData.append('name', name);
   formData.append('creator', creator);
   formData.append('fileName', fileName);
-  formData.append('pDefault', pDefault);
+  formData.append('pDefault', pDefault ? 'true' : 'false');
   // 后端需要返回值 physicClusterId， 没有 s
   formData.append('physicClusterId', physicsClusterId);
   if (logicClusterId) {

@@ -1,18 +1,16 @@
 export * from "../config";
 
 import React from "react";
-import { IMenuItem } from "typesPath/base-types";
+import { IMenuItem } from "@types/base-types";
 import { OverviewView } from "./overview-view";
 import { IndexView } from "./index-view";
 import { NodeView } from "./node-view";
-import { IndexTemplateView } from "./index-template-view";
 import moment from "moment";
 
 export enum TAB_LIST_KEY {
   overview = "overview",
   node = "node",
   index = "index",
-  template = "template",
 }
 
 export const TAB_LIST = [
@@ -30,11 +28,6 @@ export const TAB_LIST = [
     name: "索引视图",
     key: TAB_LIST_KEY.index,
     content: () => <IndexView />,
-  },
-  {
-    name: "索引模板视图",
-    key: TAB_LIST_KEY.template,
-    content: () => <IndexTemplateView />,
   },
 ];
 const menuMap = new Map<string, IMenuItem>();

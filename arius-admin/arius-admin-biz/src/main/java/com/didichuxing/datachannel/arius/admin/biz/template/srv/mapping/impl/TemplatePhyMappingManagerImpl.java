@@ -312,14 +312,14 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
                 if (typeConfigs.size() == 1) {
                     LOGGER.info("class=TemplatePhysicalMappingServiceImpl||method=mergeMultiTypePropertiesToDefaultType||msg=singleType" +
                             "||typeName={}||indexTemplate={}", typeConfigs.keySet(), indexTemplate);
-                } else if (typeConfigs.size() == 2 && typeConfigs.containsKey(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE)) {
-                    String userDefinedTypeName = fetchNonDefaultKey(typeConfigs, AdminConstant.DEFAULT_INDEX_MAPPING_TYPE);
+                } else if (typeConfigs.size() == 2 && typeConfigs.containsKey(AdminConstant.DEFAULT_TYPE)) {
+                    String userDefinedTypeName = fetchNonDefaultKey(typeConfigs, AdminConstant.DEFAULT_TYPE);
                     LOGGER.info("class=TemplatePhysicalMappingServiceImpl||method=mergeMultiTypePropertiesToDefaultType||" +
                                     "msg=multi type||userDefinedType={}||indexTemplate={}",
                             userDefinedTypeName, indexTemplate);
                     if (StringUtils.isNotBlank(userDefinedTypeName)) {
-                        typeConfigs.get(userDefinedTypeName).merge(typeConfigs.get(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE));
-                        typeConfigs.remove(AdminConstant.DEFAULT_INDEX_MAPPING_TYPE);
+                        typeConfigs.get(userDefinedTypeName).merge(typeConfigs.get(AdminConstant.DEFAULT_TYPE));
+                        typeConfigs.remove(AdminConstant.DEFAULT_TYPE);
                     }
                 } else {
                     LOGGER.warn("class=TemplatePhysicalMappingServiceImpl||method=mergeMultiTypePropertiesToDefaultTypee||" +

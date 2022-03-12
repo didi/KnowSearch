@@ -22,7 +22,7 @@ public class ClusterJoinDTO extends BaseDTO {
     /**
      * @see ESClusterTypeEnum
      */
-    @ApiModelProperty("集群类型(-1 未知 3 docker集群 4 host集群 5 VM集群)")
+    @ApiModelProperty("集群类型(-1 未知 3 docker集群 4 host集群)")
     private Integer                    type;
 
     @ApiModelProperty("所属项目id")
@@ -51,13 +51,4 @@ public class ClusterJoinDTO extends BaseDTO {
 
     @ApiModelProperty("逻辑集群名称")
     private String                     logicCluster;
-
-    @ApiModelProperty("集群接入开启的索引服务")
-    private String                     templateSrvs;
-
-    @ApiModelProperty("集群认证信息：'user:password'")
-    private String                     password;
-
-    @ApiModelProperty("录入规则 0 自动获取 1 全量录入")
-    private Integer importRule;
 }

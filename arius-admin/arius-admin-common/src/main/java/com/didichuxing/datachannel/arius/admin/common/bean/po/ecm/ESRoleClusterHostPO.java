@@ -67,11 +67,6 @@ public class ESRoleClusterHostPO extends BasePO {
      */
     private String  nodeSet;
 
-    /**
-     * 机器规格 例如32C-64G-SSD-6T
-     */
-    private String machineSpec;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -97,7 +92,7 @@ public class ESRoleClusterHostPO extends BasePO {
         return result;
     }
 
-    public String getKey() {
-        return roleClusterId + "@" + ip + "@" + port;
+    public String getKey(){
+        return roleClusterId + "@" + nodeSet;
     }
 }

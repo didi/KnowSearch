@@ -4,7 +4,7 @@ const indexConfigClassifyList: string[] = ["项目性能指标"];
 
 export const indexConfigData = {
   queryAppTotalCost: {
-    name: "appid查询耗时平均值",
+    name: "gateway各appid平均查询时间分布",
     unit: unitMap.ms,
     title: function () {
       return this.name + "(ms)";
@@ -20,7 +20,7 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[0],
   },
   queryAppSearchCost: {
-    name: "appid查询总耗时平均值",
+    name: "gateway各appid查询平均响应时间",
     unit: unitMap.ms,
     title: function () {
       return this.name + "(ms)";

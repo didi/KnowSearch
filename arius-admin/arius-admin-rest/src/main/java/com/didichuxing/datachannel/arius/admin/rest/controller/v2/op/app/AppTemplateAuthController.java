@@ -57,7 +57,7 @@ public class AppTemplateAuthController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
     public Result<List<AppTemplateAuthVO>> getAppTemplateAuths(@RequestParam("appId") Integer appId) {
         List<AppTemplateAuthVO> templateAuths = ConvertUtil
-            .list2List(appLogicTemplateAuthService.getAppActiveTemplateRWAndRAuths(appId), AppTemplateAuthVO.class);
+            .list2List(appLogicTemplateAuthService.getTemplateAuthsByAppId(appId), AppTemplateAuthVO.class);
 
         fillTemplateAuthVO(templateAuths);
 

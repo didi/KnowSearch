@@ -7,10 +7,4 @@ public abstract class BaseESPO {
      * @return
      */
     public abstract String getKey();
-
-    /**
-     * 获取routing值
-     * @return
-     */
-    public abstract String getRoutingValue();
 }

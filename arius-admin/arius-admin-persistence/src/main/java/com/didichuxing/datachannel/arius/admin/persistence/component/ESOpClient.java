@@ -4,16 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -22,7 +19,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Sets;
 
 /**
  * es的操作需要通过ESOpClient，维护admin与各个集群的链接
@@ -57,14 +58,14 @@ public class ESOpClient {
         LOGGER.info("class=ESOpClient||method=init||ESOpClient refreshConnect start.");
         List<ClusterPO> dataCluster = clusterDAO.listAll();
         Set<String> currentESClientClusters = Sets.newHashSet(esClientMap.keySet());
-        dataCluster.parallelStream().forEach(clusterPO -> {
 
+        for (ClusterPO clusterPO : dataCluster) {
             if (!esClientMap.containsKey(clusterPO.getCluster())) {
                 try {
                     connect(clusterPO);
                 } catch (Exception e) {
                     LOGGER.error("class=ESOpClient||method=refreshConnect||errMsg={}||cluster={}", e.getMessage(),
-                            clusterPO.getCluster(), e);
+                        clusterPO.getCluster(), e);
                 }
             } else {
                 ClusterPO cachedCluster = esClusterMap.get(clusterPO.getCluster());
@@ -80,7 +81,7 @@ public class ESOpClient {
                 }
             }
             currentESClientClusters.remove(clusterPO.getCluster());
-        });
+        }
 
         if (CollectionUtils.isNotEmpty(currentESClientClusters)) {
             for (String cluster : currentESClientClusters) {

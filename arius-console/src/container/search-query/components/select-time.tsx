@@ -9,7 +9,6 @@ interface SelectTimePropsType {
   periodRadio: IPeriod[];
   periodRadioMap: Map<string, IPeriod>;
   reload?: boolean;
-  value?: any
 }
 
 export const SelectTime: React.FC<SelectTimePropsType> = ({
@@ -17,7 +16,6 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
   periodRadio,
   periodRadioMap,
   reload,
-  value
 }) => {
   const [time, setTime] = useState("oneDay");
   const [dates, setDates] = useState([undefined, undefined]);
@@ -43,13 +41,6 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
     onTimeStampChange &&
       onTimeStampChange(dates[0].valueOf(), dates[1].valueOf());
   };
-
-  useEffect(() => {
-    if (value) {
-      setTime && setTime("");
-      setDates([moment(value[0]), moment(value[1])])
-    }
-  }, [value])
 
   useEffect(() => {
     if (typeof reload !== "boolean" || !time) {

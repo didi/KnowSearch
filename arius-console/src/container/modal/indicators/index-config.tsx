@@ -67,7 +67,7 @@ const SelectCheckBox: React.FC<selectPropsType> = memo(
 
 export const IndexConfig = memo(() => {
   const {
-    params: { title, optionList, defaultCheckedData, goldConfig = null },
+    params: { title, optionList, defaultCheckedData },
     cb: callback,
   } = useSelector(
     (state: any) => ({
@@ -78,45 +78,7 @@ export const IndexConfig = memo(() => {
   );
   const dispatch = useDispatch();
   const [isDisabled, setIsDisabled] = useState(true);
-  const [check, setCheck] = useState(false);
-  const [count, setCount] = useState(0);
-  const [selectedData, setSelectedData] = useState(defaultCheckedData || goldConfig || {});
-
-  const renderFooter = () => {
-    return (
-      <div style={{ overflow: 'hidden' }}>
-        {
-          goldConfig !== null ? <Button key="primary" onClick={() => {
-            setCheck(true);
-            setCount((state) => state + 1)
-          }} style={{ float: 'left' }}>
-            黄金指标
-          </Button> : null
-        }
-        <Button
-          type="primary"
-          key="ok"
-          disabled={isDisabled}
-          onClick={() => {
-            dispatch(actions.setModalId(""));
-            callback(selectedData);
-          }}
-          style={{ float: 'right', marginLeft: 8 }}
-        >
-          确认
-        </Button>
-        <Button key="cancel" onClick={() => dispatch(actions.setModalId(""))} style={{ float: 'right' }}>
-          取消
-        </Button>
-      </div>
-    )
-  }
-
-  useEffect(() => {
-    if (JSON.stringify(selectedData) !== JSON.stringify(goldConfig)) {
-      setCheck(false)
-    }
-  }, [selectedData])
+  const [selectedData, setSelectedData] = useState(defaultCheckedData || {});
 
   return (
     <>
@@ -126,7 +88,22 @@ export const IndexConfig = memo(() => {
         visible={true}
         onCancel={() => dispatch(actions.setModalId(""))}
         width={660}
-        footer={renderFooter()}
+        footer={[
+          <Button key="cancel" onClick={() => dispatch(actions.setModalId(""))}>
+            取消
+          </Button>,
+          <Button
+            type="primary"
+            key="ok"
+            disabled={isDisabled}
+            onClick={() => {
+              dispatch(actions.setModalId(""));
+              callback(selectedData);
+            }}
+          >
+            确认
+          </Button>,
+        ]}
       >
         <Form
           onValuesChange={(changedValues, allValues) => {
@@ -150,8 +127,7 @@ export const IndexConfig = memo(() => {
               <Form.Item name={item.title}>
                 <SelectCheckBox
                   title={item.title}
-                  key={count}
-                  defaultCheckedList={check ? goldConfig[item.title] : selectedData[item.title]}
+                  defaultCheckedList={selectedData[item.title]}
                   plainOptions={item.plainOptions}
                 />
               </Form.Item>

@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.order.OperationTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -34,9 +34,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_PHY_CLUSTER_PLUGIN;
 
@@ -67,7 +69,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         if (AriusObjUtils.isNull(content.getPluginId())) {
             return Result.buildParamIllegal("插件id为空！");
         }
-        PluginPO plugin = esPluginService.getESPluginById(content.getPluginId());
+        ESPluginPO plugin = esPluginService.getESPluginById(content.getPluginId());
         if (AriusObjUtils.isNull(plugin)) {
             return Result.buildParamIllegal("插件不存在！");
         }
@@ -87,7 +89,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         }
 
         // 集群存在等待执行或正在执行的插件操作任务
-        if (null != ecmTaskManager.getRunningEcmTaskByClusterId(Integer.parseInt(plugin.getPhysicClusterId()))) {
+        if (null != ecmTaskManager.getRunningWorkOrderTaskByClusterId(Integer.parseInt(plugin.getPhysicClusterId()))) {
             return Result.buildFail("该集群上仍存在待执行或者正在执行的插件操作任务，请完成该任务后再提交");
         }
 
@@ -104,9 +106,9 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
             return "";
         }
         OperationTypeEnum operationType = OperationTypeEnum.valueOfCode(content.getOperationType());
-        PluginPO pluginPO = esPluginService.getESPluginById(content.getPluginId());
-        ClusterPhy cluster = esClusterPhyService.getClusterById(Integer.parseInt(pluginPO.getPhysicClusterId()));
-        return cluster.getCluster() + " " + pluginPO.getName() + pluginPO.getVersion() + " "
+        ESPluginPO esPluginPO = esPluginService.getESPluginById(content.getPluginId());
+        ClusterPhy cluster = esClusterPhyService.getClusterById(Integer.parseInt(esPluginPO.getPhysicClusterId()));
+        return cluster.getCluster() + " " + esPluginPO.getName() + esPluginPO.getVersion() + " "
                 + workOrderTypeEnum.getMessage() + "-" + operationType.getMessage();
     }
 
@@ -130,9 +132,9 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
                 PhyClusterPluginOperationContent.class);
 
         // 当该物理集群对应的逻辑集群对应多个物理集群时，提示用户应该在逻辑侧进行操作
-        PluginPO pluginPO = esPluginService.getESPluginById(content.getPluginId());
+        ESPluginPO esPluginPO = esPluginService.getESPluginById(content.getPluginId());
 
-        ClusterPhy clusterPhy = esClusterPhyService.getClusterById(Integer.parseInt(pluginPO.getPhysicClusterId()));
+        ClusterPhy clusterPhy = esClusterPhyService.getClusterById(Integer.parseInt(esPluginPO.getPhysicClusterId()));
         List<RoleCluster> roleClusterList = roleClusterService.getAllRoleClusterByClusterId(
 				clusterPhy.getId());
         if (CollectionUtils.isEmpty(roleClusterList)) {
@@ -148,7 +150,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
 
         // 生成工单任务
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
-        ecmTaskDTO.setPhysicClusterId(Long.parseLong(pluginPO.getPhysicClusterId()));
+        ecmTaskDTO.setPhysicClusterId(Long.parseLong(esPluginPO.getPhysicClusterId()));
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
         ecmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());

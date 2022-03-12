@@ -47,9 +47,9 @@ public enum TemplateServiceEnum {
     TEMPLATE_QUOTA(6, "资源管控", ES_6_6_1_700, 1),
 
     /**
-     * 容量规划
+     * 容量规划：保障集群节点的容量均衡，避免索引在节点上的分布不合理问题.
      */
-    TEMPLATE_CAPA_PLAN(7, "容量规划", ES_6_6_1_700, 0),
+    TEMPLATE_CAPA_PLAN(7, "容量规划", ES_6_6_1_700, 1),
 
     /**
      * 冷热分离：提供SSD和HDD两种类型的磁盘来保存索引，从而降低成本.
@@ -57,14 +57,14 @@ public enum TemplateServiceEnum {
     TEMPLATE_COLD(8, "冷热分离", ES_6_6_1_700, 1),
 
     /**
-     * 跨集群同步（DCDR）：跨集群数据复制功能，用于集群间的数据复制，类似ES官方的CCR能力.
-     */
-    TEMPLATE_DCDR(10, "跨集群同步(DCDR)", ES_6_6_1_902, 1),
-
-    /**
      * 写入限流：对索引写入量进行限制，避免过大影响集群稳定性.
      */
     TEMPLATE_LIMIT_W(9, "写入限流", ES_6_6_6_800, 1),
+
+    /**
+     * 跨集群同步（DCDR）：跨集群数据复制功能，用于集群间的数据复制，类似ES官方的CCR能力.
+     */
+    TEMPLATE_DCDR(10, "跨集群同步(DCDR)", ES_6_6_6_900, 1),
 
     /**
      * 索引别名：支持通过接口来设置和修改索引别名.
@@ -72,9 +72,9 @@ public enum TemplateServiceEnum {
     TEMPLATE_ALIASES(11, "索引别名", ES_6_6_1_700, 1),
 
     /**
-     * 索引规划：索引shard动态调整+indexRollover能力
+     * Shard调整：依据索引写入的历史数据来每天定时计算未来一天索引的 shard 个数，保障索引 shard 个数的合理性.
      */
-    INDEX_PLAN(12, "索引规划", ES_6_6_1_700, 1),
+    TEMPLATE_SHARD(12, "Shard调整", ES_6_6_1_700, 1),
 
     /**
      * 安全管控:对于索引的安全服务进行权限控制.

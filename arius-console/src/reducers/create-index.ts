@@ -1,4 +1,4 @@
-import { IUNSpecificInfo } from "typesPath/base-types";
+import { IUNSpecificInfo } from "@types/base-types";
 import { TEMP_FORM_MAP_KEY } from "container/create-index/constant";
 import { IAction, IStringMap } from "interface/common";
 import _ from "lodash";
@@ -20,15 +20,6 @@ export const initialState: any = {
   } as {
     [key: string]: boolean,
   },
-  cancelCopy: false,
-  asyncTranslog: false,
-  customerAnalysis: false,
-  // dynamicTemplates: false,
-  customerAnalysisJson: null,
-  // dynamicTemplatesJson: null,
-  customerAnalysisValue: '',
-  // dynamicTemplatesValue: '',
-  settingCount: 0,
 };
 
 // const cloneInitState = _.cloneDeep(initialState);
@@ -86,19 +77,8 @@ export default (state = initialState, action: IAction) => {
           zoomInfo: false,
         } as {
           [key: string]: boolean,
-        },
-        cancelCopy: false,
-        asyncTranslog: false,
-        customerAnalysis: false,
-        // dynamicTemplates: false,
-        customerAnalysisJson: null,
-        // dynamicTemplatesJson: null,
-        customerAnalysisValue: '',
-        // dynamicTemplatesValue: '',
+        }
       }
-    }
-    case actionTypes.SET_CREATE_INDEX: {
-      return {...state, ...action.payload }
     }
   }
 

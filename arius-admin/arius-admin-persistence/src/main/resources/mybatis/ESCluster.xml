@@ -26,15 +26,11 @@
         <result column="run_mode"                   jdbcType="TINYINT" property="runMode"/>
         <result column="write_action"               jdbcType="VARCHAR" property="writeAction"/>
         <result column="health"                     jdbcType="TINYINT" property="health"/>
-        <result column="active_shard_num"           jdbcType="BIGINT"  property="activeShardNum"/>
-        <result column="disk_total"                 jdbcType="BIGINT" property="diskTotal"/>
-        <result column="disk_usage"                 jdbcType="BIGINT" property="diskUsage"/>
-        <result column="disk_usage_percent"         jdbcType="DECIMAL" property="diskUsagePercent"/>
     </resultMap>
 
     <sql id="Base_Column_List">
        id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`, password, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time, run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent
+        es_version, `level`, password, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time, run_mode, write_action, health
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO"
@@ -42,10 +38,10 @@
             keyColumn="id" keyProperty="id">
         insert into es_data_source
         ( cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent)
+        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health)
         values
         (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type}, #{dataCenter},#{imageName},#{idc},
-        #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health}, #{password}, #{activeShardNum}, #{diskTotal}, #{diskUsage}, #{diskUsagePercent})
+        #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health})
     </insert>
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO">
         update es_data_source
@@ -71,11 +67,6 @@
             <if test="runMode != null">,run_mode = #{runMode}</if>
             <if test="writeAction != null">,write_action = #{writeAction}</if>
             <if test="health != null">,health = #{health}</if>
-            <if test="activeShardNum != null">,active_shard_num = #{activeShardNum}</if>
-            <if test="health != null">, health = #{health}</if>
-            <if test="diskTotal != null">, disk_total = #{diskTotal}</if>
-            <if test="diskUsage != null">, disk_usage = #{diskUsage}</if>
-            <if test="diskUsagePercent != null">, disk_usage_percent = #{diskUsagePercent}</if>
         </trim>
         where id = #{id} and is_active = 1;
     </update>
@@ -106,7 +97,6 @@
             <if test="level != null">and `level` = #{level}</if>
             <if test="esVersion != null">and es_version = #{esVersion}</if>
             <if test="health != null">and health = #{health}</if>
-            <if test="activeShardNum != null">and active_shard_num = #{activeShardNum}</if>
             and is_active = 1;
         </trim>
     </select>
@@ -119,7 +109,7 @@
         <if test="cluster != null">  and  cluster LIKE CONCAT(#{cluster},'%')</if>
         <if test="esVersion != null">and  es_version = #{esVersion}</if>
         <if test="health != null">   and  health = #{health}</if>
-        order by ${sortTerm} ${sortType}
+        order by id desc
         limit #{from}, #{size}
     </select>
 
@@ -133,7 +123,6 @@
         <if test="cluster != null">  and  cluster LIKE CONCAT(#{cluster}, '%')</if>
         <if test="esVersion != null">and  es_version = #{esVersion}</if>
         <if test="health != null">   and  health = #{health}</if>
-        <if test="activeShardNum != null">and active_shard_num = #{activeShardNum}</if>
     </select>
 
     <select id="getById" parameterType="integer" resultMap="BaseResultMap">
@@ -149,17 +138,6 @@
         from es_data_source
         where cluster = #{clusterName} and is_active = 1;
     </select>
-
-    <select id="listByNames" parameterType="list" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from es_data_source
-        where is_active = 1 and cluster in
-        <foreach collection="list" separator="," item="item" close=");" open="(">
-            #{item}
-        </foreach>
-    </select>
-
 
     <select id="listAll" resultMap="BaseResultMap">
         select

@@ -169,14 +169,4 @@ public class ESClusterStatsCells {
      * 写入耗时
      */
     private double indexingLatency;
-
-    /**
-     * 任务耗时
-     */
-    private double taskCost;
-
-    /**
-     * 任务数量
-     */
-    private long taskCount;
 }

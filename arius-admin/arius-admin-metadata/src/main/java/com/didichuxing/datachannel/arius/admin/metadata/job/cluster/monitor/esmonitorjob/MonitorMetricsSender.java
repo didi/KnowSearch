@@ -1,29 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
+import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.MonitorDataSender;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.BaseAriusStatsESDAO;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.lucene.util.NamedThreadFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.lucene.util.NamedThreadFactory;
-import org.springframework.stereotype.Component;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexDCDRStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIngestStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.BaseAriusStatsESDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 
 /**
  * 发送monitor指标数据
@@ -33,12 +28,20 @@ public class MonitorMetricsSender {
 
     protected static final ILog LOGGER = LogFactory.getLog(MonitorMetricsSender.class);
 
+    @Autowired
+    private MonitorDataSender monitorDataSender;
+
     private static final int    THRESHOLD = 100;
 
     private ThreadPoolExecutor esExecutor = new ThreadPoolExecutor(30, 60, 6000, TimeUnit.MILLISECONDS,
             new LinkedBlockingDeque<>(4000),
             new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ES"),
             (r, e) -> LOGGER.warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-ES Deque is blocked, taskCount:{}" + e.getTaskCount()));
+
+    private ThreadPoolExecutor odinExecutor = new ThreadPoolExecutor(10, 20, 6000, TimeUnit.MILLISECONDS,
+            new LinkedBlockingDeque<>(500),
+            new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-Odin"),
+            (r, e) -> LOGGER.warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-Odin Deque is blocked, taskCount:{}" + e.getTaskCount()));
 
     public void sendNodeInfo(List<ESNodeStats> esNodeStatsList) {
         send2es( AriusStatsEnum.NODE_INFO, esNodeStatsList);
@@ -68,8 +71,9 @@ public class MonitorMetricsSender {
         send2es(AriusStatsEnum.CLUSTER_INFO, esClusterStats);
     }
 
-    public void sendClusterTaskStats(List<ESClusterTaskStats> esClusterTaskStats) {
-        send2es(AriusStatsEnum.TASK_INFO, esClusterTaskStats);
+    public void sendOdinData(List<N9eData> list){
+        odinExecutor.execute(() ->
+                monitorDataSender.batchSend(list));
     }
 
     /**

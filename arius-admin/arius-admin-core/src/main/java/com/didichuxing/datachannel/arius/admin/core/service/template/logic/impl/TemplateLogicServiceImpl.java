@@ -1,31 +1,54 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl;
 
-import java.util.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE_CONFIG;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -33,7 +56,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -48,21 +70,9 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
 
 @Service
 public class TemplateLogicServiceImpl implements TemplateLogicService {
@@ -135,19 +145,10 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
     }
 
     @Override
-    public List<IndexTemplateLogic> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param) {
-        String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
-        String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-        List<TemplateLogicPO> templateLogicPOS = Lists.newArrayList();
-        try {
-            templateLogicPOS = indexTemplateLogicDAO.pagingByCondition(param.getName(), 
-                    param.getDataType(), param.getHasDCDR(), param.getFrom(), param.getSize(), sortTerm, sortType);
-        } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicServiceImpl||method=pagingGetLogicTemplatesByCondition||err={}",
-                e.getMessage(), e);
-        }
-
-        return responsibleConvertTool.list2List(templateLogicPOS, IndexTemplateLogic.class);
+    public List<IndexTemplateLogic> pagingGetLogicTemplatesByCondition(IndexTemplateLogicDTO param) {
+        return responsibleConvertTool.list2List(
+                indexTemplateLogicDAO.pagingByCondition(param.getName(), param.getDataType(), param.getFrom(), param.getSize()),
+                IndexTemplateLogic.class);
     }
 
     @Override
@@ -335,7 +336,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
             .update(responsibleConvertTool.obj2Obj(configDTO, TemplateConfigPO.class));
         if (succ) {
             operateRecordService.save(TEMPLATE_CONFIG, EDIT, configDTO.getLogicId(),
-                AriusObjUtils.findChangedWithClear(oldConfigPO, configDTO), operator);
+                AriusObjUtils.findChanged(oldConfigPO, configDTO), operator);
         }
 
         return Result.build(succ);
@@ -619,17 +620,6 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
     }
 
     @Override
-    public Result<Void> editTemplateInfoTODB(IndexTemplateLogicDTO param) {
-        boolean succ = false;
-        try {
-            succ = 1 == indexTemplateLogicDAO.update(ConvertUtil.obj2Obj(param, TemplateLogicPO.class));
-        } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicServiceImpl||method=editTemplateInfoTODB||||msg={}", e.getMessage(), e);
-        }
-        return succ ? Result.buildSucc() : Result.buildFail();
-    }
-
-    @Override
     public List<IndexTemplateLogic> getTemplatesByHasAuthCluster(Integer appId) {
         if (appId == null) {
             return new ArrayList<>();
@@ -834,50 +824,6 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         return batchConvertLogicTemplateCombinePhysical(indexTemplateLogicDAO.listByDataCenter(dataCenter));
     }
 
-
-    /**
-     * 更新读状态
-     * @param logicId 逻辑模板
-     * @param blockRead  是否禁读
-     * @param operator  操作人
-     * @return
-     * @throws AdminOperateException
-     */
-    @Override
-    public Result updateBlockReadState(Integer logicId, Boolean blockRead, String operator) {
-        if (null == logicId || null == blockRead) {
-            return Result.buildFail("logicId or blockRead is null");
-        }
-        int row = indexTemplateLogicDAO.updateBlockReadState(logicId, blockRead);
-        if (1 != row) {
-            return Result.buildFail("修改禁读状态失败");
-        }
-        operateRecordService.save(TEMPLATE, BLOCK_READ, -1, blockRead.toString(), operator);
-        return Result.buildSucc(row);
-    }
-
-    /**
-     * 更新写状态
-     * @param logicId 逻辑模板
-     * @param blockWrite 是否禁写
-     * @param operator 操作热人
-     * @return
-     */
-    @Override
-    public Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator) {
-        if (null == logicId || null == blockWrite) {
-            return Result.buildFail("logicId or blockWrite is null");
-        }
-        int row = indexTemplateLogicDAO.updateBlockWriteState(logicId, blockWrite);
-        if (1 != row) {
-            return Result.buildFail("修改禁写状态失败");
-        }
-        operateRecordService.save(TEMPLATE, BLOCK_WRITE, -1, blockWrite.toString(), operator);
-        return Result.buildSucc(row);
-    }
-
-
-
     /**************************************** private method ****************************************************/
     /**
      * 转换逻辑模板，获取并组合对应的物理模板信息
@@ -938,7 +884,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
      * @return
      */
     private IndexTemplateLogicWithCluster buildLogicTemplateWithLogicClusterMeta(Map<Long, ClusterLogic> logicClusterId2ClusterMeta,
-                                                                                 Multimap<String, Long> clusterRackMeta2LogicClusterId,
+                                                                                 Map<String, Long> clusterRackMeta2LogicClusterId,
                                                                                  IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical) {
         List<IndexTemplatePhy> physicals = templateLogicWithPhysical.getPhysicals();
 
@@ -946,11 +892,11 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         if (CollectionUtils.isNotEmpty(physicals)) {
             for (IndexTemplatePhy physical : physicals) {
 
-                List<ClusterLogic> logicClusters = getPhysicalTemplateLogicCluster(physical, clusterRackMeta2LogicClusterId,
-                        logicClusterId2ClusterMeta);
+                ClusterLogic logicCluster = getPhysicalTemplateLogicCluster(physical, clusterRackMeta2LogicClusterId,
+                    logicClusterId2ClusterMeta);
 
-                if (!CollectionUtils.isEmpty(logicClusters)) {
-                    logicClusters.forEach(logicCluster -> relatedLogicClusters.put(logicCluster.getId(), logicCluster));
+                if (logicCluster != null) {
+                    relatedLogicClusters.put(logicCluster.getId(), logicCluster);
                 }
             }
         }
@@ -971,23 +917,20 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
      * @param logicClusterId2LogicClusterMeta 逻辑集群ID与逻辑集群的映射关系
      * @return
      */
-    private List<ClusterLogic> getPhysicalTemplateLogicCluster(IndexTemplatePhy physicalTemplate,
-                                                               Multimap<String, Long> clusterRack2LogicClusterId,
-                                                               Map<Long, ClusterLogic> logicClusterId2LogicClusterMeta) {
+    private ClusterLogic getPhysicalTemplateLogicCluster(IndexTemplatePhy physicalTemplate,
+                                                           Map<String, Long> clusterRack2LogicClusterId,
+                                                           Map<Long, ClusterLogic> logicClusterId2LogicClusterMeta) {
 
         if (physicalTemplate != null) {
-            Collection<Long> logicClusterIds = clusterRack2LogicClusterId
-                    .get(fetchRackKey(physicalTemplate.getCluster(), fetchFirstRack(physicalTemplate.getRack())));
+            Long logicClusterId = clusterRack2LogicClusterId
+                .get(fetchRackKey(physicalTemplate.getCluster(), fetchFirstRack(physicalTemplate.getRack())));
 
-            if (CollectionUtils.isEmpty(logicClusterIds)) {
-                logicClusterIds = clusterRack2LogicClusterId
-                        .get(fetchRackKey(physicalTemplate.getCluster(), AdminConstant.RACK_COMMA));
+            if (logicClusterId == null) {
+                logicClusterId = clusterRack2LogicClusterId
+                    .get(fetchRackKey(physicalTemplate.getCluster(), AdminConstant.RACK_COMMA));
             }
 
-            List<ClusterLogic> clusterLogics = Lists.newArrayList();
-            logicClusterIds.forEach(logicClusterId -> clusterLogics.add(logicClusterId2LogicClusterMeta.get(logicClusterId)));
-
-            return clusterLogics;
+            return logicClusterId2LogicClusterMeta.get(logicClusterId);
         }
 
         return null;
@@ -1011,13 +954,10 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
      *
      * @return
      */
-    private Multimap<String, Long> fetchClusterRacks2LogicClusterIdMappings() {
-        Multimap<String, Long> logicClusterIdMappings = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : regionRackService.listAllLogicClusterRacks()) {
-            List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
-            logicClusterIds.forEach(logicClusterId -> logicClusterIdMappings.put(fetchRackKey(param.getPhyClusterName(), param.getRack()), logicClusterId));
-        }
-        return logicClusterIdMappings;
+    private Map<String, Long> fetchClusterRacks2LogicClusterIdMappings() {
+        return ConvertUtil.list2Map(regionRackService.listAllLogicClusterRacks(),
+            clusterRackMeta -> fetchRackKey(clusterRackMeta.getPhyClusterName(), clusterRackMeta.getRack()),
+            ClusterLogicRackInfo::getLogicClusterId);
     }
 
     /**
@@ -1054,7 +994,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         // 所有逻辑集群，key-逻辑集群id，value-逻辑集群
         final Map<Long, ClusterLogic> logicClusterMap = getLogicClusters();
         // 集群rack到逻辑集群id的映射
-        final Multimap<String, Long> clusterIdMappingsMap = fetchClusterRacks2LogicClusterIdMappings();
+        final Map<String, Long> clusterIdMappingsMap = fetchClusterRacks2LogicClusterIdMappings();
 
         logicTemplatesCombinePhysicals.forEach(templateLogicWithPhysical -> {
             try {
@@ -1131,12 +1071,12 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
             if (editPhyResult.failed()) {
                 throw new AdminOperateException("修改物理模板失败");
             }
-
             // 记录操作记录
-            operateRecordService.save(TEMPLATE, EDIT, oldPO.getId(), AriusObjUtils.findChangedWithClear(oldPO, editTemplate),
-                    operator);
-            SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplateLogic.class)
-                    , getLogicTemplateById(oldPO.getId())));
+            operateRecordService.save(TEMPLATE, EDIT, oldPO.getId(), AriusObjUtils.findChanged(oldPO, editTemplate),
+                operator);
+
+            SpringTool.publish(new LogicTemplateModifyEvent(this,
+                responsibleConvertTool.obj2Obj(oldPO, IndexTemplateLogic.class), getLogicTemplateById(oldPO.getId())));
         }
 
         return Result.build(succeed);
@@ -1315,19 +1255,8 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         if (AriusObjUtils.isNull(param.getWriteRateLimit())) {
             param.setWriteRateLimit(-1);
         }
-        if(LevelEnum.valueOfCode(param.getLevel()).equals(LevelEnum.UNKNOWN)) {
-            return Result.buildParamIllegal("模板设置的服务等级为未知类型");
-        }
-        if(levelOfTemplateLower(param)) {
-            return Result.buildParamIllegal("模板设置的服务等级低于所属逻辑集群的服务等级");
-        }
 
         return Result.buildSucc();
-    }
-
-    private boolean levelOfTemplateLower(IndexTemplateLogicDTO param) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(param.getResourceId());
-        return !AriusObjUtils.isNull(clusterLogic) && clusterLogic.getLevel() < param.getLevel();
     }
 
     private Result<Void> validateExpression(IndexTemplateLogicDTO param, List<IndexTemplateLogic> indexTemplateLogicList) {
@@ -1365,7 +1294,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
     private Result<Void> validateIndexName(IndexTemplateLogicDTO param, List<IndexTemplateLogic> indexTemplateLogicList) {
         String name = param.getName();
         if (name.length() < TEMPLATE_NAME_SIZE_MIN || name.length() > TEMPLATE_NAME_SIZE_MAX) {
-            return Result.buildParamIllegal(String.format("名称长度非法, %s-%s",TEMPLATE_NAME_SIZE_MIN,TEMPLATE_NAME_SIZE_MAX));
+            return Result.buildParamIllegal("名称长度非法, 1-128");
         }
 
         for (Character c : name.toCharArray()) {

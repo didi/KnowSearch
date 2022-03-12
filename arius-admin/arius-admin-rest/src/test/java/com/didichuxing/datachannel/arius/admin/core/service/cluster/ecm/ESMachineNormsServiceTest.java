@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESMachineNormsDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Transactional
 @Rollback
-public class ESMachineNormsServiceTest extends AriusAdminApplicationTest {
+public class ESMachineNormsServiceTest extends AriusAdminApplicationTests {
 
     @Autowired
     private ESMachineNormsService esMachineNormsService;

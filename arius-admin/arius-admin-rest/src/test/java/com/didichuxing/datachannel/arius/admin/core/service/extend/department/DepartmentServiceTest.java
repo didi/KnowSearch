@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.department;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Rollback
-public class DepartmentServiceTest extends AriusAdminApplicationTest {
+public class DepartmentServiceTest extends AriusAdminApplicationTests {
 
     @Autowired
     private DepartmentService departmentService;

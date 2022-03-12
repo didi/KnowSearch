@@ -4,7 +4,7 @@ import { QuestionCircleTwoTone } from '@ant-design/icons';
 import { deleteIndexInfo, getIndexDeleteInfo } from 'api/cluster-index-api';
 import { connect } from "react-redux";
 import * as actions from 'actions';
-import { IUNSpecificInfo } from 'typesPath/base-types';
+import { IUNSpecificInfo } from '@types/base-types';
 
 const mapStateToProps = state => ({
   params: state.modal.params,

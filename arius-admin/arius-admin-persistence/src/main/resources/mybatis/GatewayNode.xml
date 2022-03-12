@@ -15,13 +15,14 @@
         id, cluster_name, host_name, port, heartbeat_time, create_time, update_time
     </sql>
 
-    <insert id="recordGatewayNode"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO"
-            keyColumn="id">
+    <insert id="recordGatewayNode" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
         insert into gateway_node
-            (cluster_name, host_name, port, heartbeat_time)
-        values (#{clusterName}, #{hostName}, #{port}, #{heartbeatTime}) ON DUPLICATE KEY
-        UPDATE cluster_name= #{clusterName}, heartbeat_time= #{heartbeatTime}
+        (cluster_name, host_name, port, heartbeat_time)
+        values
+        (#{clusterName} , #{hostName}, #{port}, #{heartbeatTime})
+        ON DUPLICATE KEY UPDATE cluster_name= #{clusterName}, heartbeat_time= #{heartbeatTime}
     </insert>
 
     <select id="aliveCountByClusterNameAndTime" parameterType="map" resultType="integer">

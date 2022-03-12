@@ -3,19 +3,16 @@ import { useSelector, shallowEqual } from "react-redux";
 import { Spin } from "antd";
 import { Line, Shard } from "../components";
 import { getOverviewOption } from "./overview-view-config";
-import { LINE, SHARD, metricsDataType, indexConfigData } from "./overview-view-config";
+import { LINE, SHARD, metricsDataType } from "./overview-view-config";
 import { getOverviewData } from "../../../api/cluster-kanban";
-import _, { forEach } from "lodash";
-import DragGroup from './../../../packages/drag-group/DragGroup';
+import _ from "lodash";
 
 interface propsType {
   metricsTypes: string[];
-  sortEnd?: any;
-  item?: string;
 }
 
 export const LineShard: React.FC<propsType> = memo(
-  ({ metricsTypes, sortEnd, item }) => {
+  ({ metricsTypes }) => {
     const { clusterName, startTime, endTime, isMoreDay } = useSelector(
       (state) => ({
         clusterName: (state as any).clusterKanban.clusterName,
@@ -57,18 +54,11 @@ export const LineShard: React.FC<propsType> = memo(
 
     const getOption = (LineShardData, metricsType) => {
       const metricsConfig = _.cloneDeep(metricsDataType[metricsType]);
-      // 针对合并数据做特殊处理
-      let data = []
-      if (indexConfigData[metricsType] && indexConfigData[metricsType].types) {
-        indexConfigData[metricsType].types.forEach(type => {
-          data.push(...LineShardData[type])
-        })
-      } else {
-        data = LineShardData[metricsType];
-      }
+
+      const data = LineShardData[metricsType];
       // 判断是折线图还是表格
       if (metricsConfig.type === LINE) {
-        return data && data.length ? getLineOption(metricsConfig, data) : {};
+        return data && data.length ? getLineOption(metricsConfig, LineShardData[metricsType]) : {};
       } else {
         return data && data.length ? getShardOption(metricsConfig, LineShardData[metricsType]) : [];
       }
@@ -76,17 +66,8 @@ export const LineShard: React.FC<propsType> = memo(
 
     const getOverviewLineShardData = async () => {
       try {
-        // 针对合并数据做特殊处理
-        let newMetricsTypes = [];
-        metricsTypes.forEach(item => {
-          if (indexConfigData[item] && indexConfigData[item].types) {
-            newMetricsTypes.push(...indexConfigData[item].types)
-          } else {
-            newMetricsTypes.push(item)
-          }
-        })
         const LineShardData = await getOverviewData(
-          newMetricsTypes,
+          metricsTypes,
           clusterName,
           startTime,
           endTime
@@ -147,21 +128,9 @@ export const LineShard: React.FC<propsType> = memo(
 
     return (
       <>
-        <DragGroup
-          dragContainerProps={{
-            onSortEnd: (args) => sortEnd(item, { ...args }),
-            axis: "xy",
-            distance: 100
-          }}
-          containerProps={{
-            grid: 12,
-            gutter: [10, 10],
-          }}
-        >
-          {
-            metricsTypes.map(item => renderLineShard(item))
-          }
-        </DragGroup>
+        {
+          metricsTypes.map(item => renderLineShard(item))
+        }
       </>
     );
   }

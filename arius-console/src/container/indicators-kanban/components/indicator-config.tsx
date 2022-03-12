@@ -13,49 +13,27 @@ interface propsType {
   optionList: optionListType[];
   checkedData?: object;
   setCheckedData: (defaultCheckedList) => void;
-  goldConfig?: any;
 }
 
 export const IndexConfig: React.FC<propsType> = memo(
-  ({ title, optionList, checkedData, setCheckedData, goldConfig }) => {
+  ({ title, optionList, checkedData, setCheckedData }) => {
     const { btnTitle } = {
       btnTitle: "指标配置",
     };
     const dispatch = useDispatch();
     const modalId = "IndexConfig";
 
-    const openWindow = () => {
-      for (const key in checkedData) {
-        optionList.forEach(item => {
-          if (item.title === key) {
-            const before = [];
-            const after = [];
-            item.plainOptions.forEach(option => {
-              const index = checkedData[key].indexOf(option.value);
-              if (index !== -1) {
-                before[index] = option;
-              } else {
-                after.push(option);
-              }
-            })
-            item.plainOptions = [...before, ...after];
-          }
-        })
-      }
-      const params = {
-        title: title,
-        optionList: optionList,
-        defaultCheckedData: checkedData || {},
-        goldConfig,
-      };
-      dispatch(actions.setModalId(modalId, params, setCheckedData));
-    }
+    const params = {
+      title: title,
+      optionList: optionList,
+      defaultCheckedData: checkedData || {},
+    };
 
     return (
       <Button
         icon={<SettingOutlined />}
         onClick={() => {
-          openWindow()
+          dispatch(actions.setModalId(modalId, params, setCheckedData));
         }}
       >
         {btnTitle}

@@ -31,7 +31,6 @@ import java.util.List;
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_INDECREASE;
 
 /**
- * 逻辑集群的编辑
  * @author d06679
  * @date 2019/4/29
  */
@@ -108,10 +107,6 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("索引Quota为空");
         }
 
-        if(AriusObjUtils.isNull(content.getExpectHotTime())) {
-            return Result.buildParamIllegal("索引HotDay设置为空");
-        }
-
         return Result.buildSucc();
     }
 
@@ -172,9 +167,9 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
         TemplateIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateIndecreaseContent.class);
 
-        // 修改模板quota及保存时长信息以及热数据保存天数
-        Result<Void> result = templateAction.indecreaseWithAutoDistributeResource(content.getId(), content.getExpectHotTime(),
-                content.getExpectExpireTime(), content.getExpectQuota(), workOrder.getSubmitor());
+        // 修改模板quota及保存时长信息
+        Result<Void> result = templateAction.indecreaseWithAutoDistributeResource(content.getId(),
+            content.getExpectExpireTime(), content.getExpectQuota(), workOrder.getSubmitor());
 
         //Quota更新
         if (!templateQuotaManager.controlAndPublish(content.getId())) {

@@ -1,4 +1,4 @@
-import { IPhysicalTemplateParams } from 'typesPath/params-types';
+import { IPhysicalTemplateParams } from '@types/params-types';
 import fetch, { formFetch } from '../lib/fetch';
 
 export const getPhysicalTemplateList = (params: IPhysicalTemplateParams) => {

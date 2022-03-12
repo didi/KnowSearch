@@ -33,9 +33,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) =>
     dispatch(actions.setModalId(modalId, params, cb)),
 });
-const connects: Function = connect
 
-@connects(null, mapDispatchToProps)
+@connect(null, mapDispatchToProps)
 export class LogicNodeList extends React.Component<any> {
   constructor(props: any) {
     super(props);
@@ -211,7 +210,7 @@ export class LogicNodeList extends React.Component<any> {
         clickFunc: () => {
           this.props.setModalId(
             "relationRegion",
-            { id: this.clusterId, type: this.type, data: this.getData(this.state.nodeList) },
+            { id: this.clusterId, type: this.type },
             this.reloadData
           );
         },

@@ -24,7 +24,7 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
   const [editVisible, setEditVisible] = useState(false);
 
   const getWidth = () => {
-    return document.querySelector('#d1-layout-main')?.clientWidth || 600;
+    return document.querySelector('.ecmc-layout-container')?.clientWidth || 600;
   }
 
   const getDetail = () => {

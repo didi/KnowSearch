@@ -62,11 +62,6 @@ public class QueryContext extends BaseContext {
      */
     private boolean isNewKibana;
 
-    /**
-     * 请求ES前的时间点
-     */
-    private long preQueryEsTime;
-
     public String getUri() {
         return request.rawPath();
     }

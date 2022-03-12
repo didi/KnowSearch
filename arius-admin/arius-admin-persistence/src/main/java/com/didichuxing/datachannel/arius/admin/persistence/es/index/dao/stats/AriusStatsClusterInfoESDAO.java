@@ -46,9 +46,8 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
             String dsl = dslLoaderUtil.getFormatDslByFileNameByAggParam(DslsConstant.GET_CLUSTER_PHY_AGG_PERCENTILES_METRICS_BY_AGG_PARAM,
                     clusterMetricsType, interval, aggType, clusterName, percentilesType, startTime, endTime);
 
-            resultMap = gatewayClient.performRequestWithRouting(metadataClusterName, clusterName, realIndexName, TYPE, dsl,
-                (ESQueryResponse response) -> fetchAggSinglePercentilesMetrics(response, clusterMetricsType, aggType),
-                3);
+            resultMap = gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                    (ESQueryResponse response) -> fetchAggSinglePercentilesMetrics(response, clusterMetricsType, aggType), 3);
         } catch (Exception e) {
             LOGGER.error("class=AriusStatsClusterInfoESDAO||method=getAggSinglePercentilesMetrics||clusterName={}||clusterMetricsType={}" +
                     "percentilesType={}||startTime={}||endTime={}", clusterName, clusterMetricsType, percentilesType, startTime, endTime, e);

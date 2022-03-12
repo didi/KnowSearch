@@ -18,9 +18,9 @@ public interface EcmTaskDAO {
 
     int updateStatusById(@Param("id") Long  id, @Param("status") String status);
 
-    List<EcmTaskPO> listUndoEcmTaskByClusterId(Long physicClusterId);
+    List<EcmTaskPO> listUndoWorkOrderTaskByClusterId(Long physicClusterId);
 
-    EcmTaskPO getUsefulEcmTaskByClusterId(Integer physicClusterId);
+    EcmTaskPO getUsefulWorkOrderTaskByClusterId(Integer physicClusterId);
 
     List<EcmTaskPO> listRunningTasks();
 }

@@ -69,7 +69,20 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     @ApiOperation(value = "获取索引Schema信息接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateSchemaVO> getSchema(@RequestParam("logicId") Integer logicId) {
-        return templateLogicMappingManager.getSchema(logicId);
+        Result<IndexTemplateLogicWithMapping> result = templateLogicMappingManager.getTemplateWithMapping(logicId);
+        if (result.failed()) {
+            return Result.buildFrom(result);
+        }
+
+        IndexTemplateLogicWithMapping templateLogicWithMapping = result.getData();
+        if (templateLogicWithMapping == null) {
+            return Result.buildParamIllegal("索引不存在");
+        }
+
+        fillSpecialField(templateLogicWithMapping);
+
+        ConsoleTemplateSchemaVO schemaVO = ConvertUtil.obj2Obj(templateLogicWithMapping, ConsoleTemplateSchemaVO.class);
+        return Result.buildSucc(schemaVO);
     }
 
     @PutMapping("/schema")

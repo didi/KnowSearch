@@ -132,7 +132,6 @@ public class DslLoaderUtil {
                 .replace("\"aggsDsl\":1", aggsDsl);
     }
 
-
     public String getDslByTopNNameInfo(String fileName, String interval, String topNameStr, String aggsDsl,
                                        Object... args) {
         String formatDslByFileName = getFormatDslByFileName(fileName, args);

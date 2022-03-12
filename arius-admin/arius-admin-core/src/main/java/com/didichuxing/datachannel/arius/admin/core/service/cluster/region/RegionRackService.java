@@ -1,8 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterRackInfoDTO;
@@ -173,10 +171,9 @@ public interface RegionRackService {
      * 解绑region
      * @param regionId regionId
      * @param operator operator
-     * @param logicClusterId 逻辑集群id
      * @return
      */
-    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator);
+    Result<Void> unbindRegion(Long regionId, String operator);
 
     /**
      * 绑定region到逻辑集群
@@ -205,9 +202,9 @@ public interface RegionRackService {
     boolean isRegionBound(ClusterRegion region);
 
     /**
-     * 根据物理集群id，获取该物理集群对应的逻辑集群的id列表
+     * 根据物理集群id，获取该物理集群对应的逻辑集群的id
      * @param phyClusterId 物理集群id
-     * @return 逻辑集群id列表
+     * @return 逻辑集群id
      */
-    Set<Long> getLogicClusterIdByPhyClusterId(Integer phyClusterId);
+    Long getLogicClusterIdByPhyClusterId(Integer phyClusterId);
 }

@@ -7,7 +7,7 @@ import { systemKey, urlPrefix } from 'constants/menu';
 import * as monaco from 'monaco-editor';
 import moment, { Moment } from 'moment';
 import { timeFormat } from 'constants/time';
-import { IAppDetail } from 'typesPath/user-types';
+import { IAppDetail } from '@types/user-types';
 import { CodeSandboxCircleFilled } from '@ant-design/icons';
 
 export interface IStatusMap {
@@ -266,12 +266,11 @@ export const bytesUnitFormatter = (bytes: number, type?: string) => {
 }
 
 export const resize = () => {
-  if (!document.createEvent) {
-    return;
+  if (document.createEvent) {
+    var event = document.createEvent("HTMLEvents");
+    event.initEvent("resize", true, true);
+    window.dispatchEvent(event);
   }
-  let event = document.createEvent("HTMLEvents");
-  event.initEvent("resize", true, true);
-  window.dispatchEvent(event);
 }
 
 export const asyncMicroTasks = (callback: () => void) => {

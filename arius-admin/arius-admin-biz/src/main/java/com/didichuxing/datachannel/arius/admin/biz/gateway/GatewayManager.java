@@ -97,10 +97,9 @@ public interface GatewayManager {
     /**
      * sql语句直接查询
      * @param sql sql查询语句
-     * @param phyClusterName 指定查询物理集群名
      * @param appId 项目id
      * @return 数据查询结果
      */
-    Result<String> directSqlSearch(String sql, String phyClusterName, Integer appId);
+    Result<String> directSqlSearch(String sql, Integer appId);
 
 }

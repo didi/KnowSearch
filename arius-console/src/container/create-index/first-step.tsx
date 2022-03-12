@@ -6,11 +6,10 @@ import { TEMP_FORM_MAP_KEY } from './constant';
 import Url from 'lib/url-parser';
 import { CancelActionModal } from 'container/custom-component';
 import { Button, notification, Spin, Modal } from 'antd';
-import { getIndexBaseInfo, queryQuotaCost, updateIndexInfo, checkHotTimeState } from 'api/cluster-index-api';
+import { getIndexBaseInfo, queryQuotaCost, updateIndexInfo } from 'api/cluster-index-api';
 import { connect } from "react-redux";
 import * as actions from 'actions';
 import { urlPrefix } from 'constants/menu';
-import { dropByCacheKey } from 'react-router-cache-route';
 
 const mapStateToProps = state => ({
   createIndex: state.createIndex
@@ -26,7 +25,6 @@ export class FirstStep extends React.Component<any> {
     currentRegion: REGION_LIST[0].value,
     formData: null as any,
     loading: false,
-    hotTimeState: true,
   };
   private $formRef: any = null;
   private isModifyPage: boolean = false;
@@ -65,24 +63,6 @@ export class FirstStep extends React.Component<any> {
   }
 
   public onHandleValuesChange = (value: any, allValues: object) => {
-    const checkHotTime = () => {
-      if (value?.clusterInfo && value?.clusterInfo?.cluster) {
-        checkHotTimeState(value?.clusterInfo?.cluster).then((res) => {
-          let flag = true;
-          if (res && res.length) {
-            res.forEach((item) => {
-              if (item.serviceId === 8) {
-                flag = false;
-              }
-            })
-          }
-          this.setState({
-            hotTimeState: flag,
-          });
-        })
-      }
-      
-    }
     Object.keys(value).forEach(key => {
       switch (key) {
         case 'region':
@@ -96,22 +76,14 @@ export class FirstStep extends React.Component<any> {
           }, () => {
             this.getCostData(allValues);
           });
-          if (value[key] === 'more') {
-            this.$formRef.setFieldsValue({ disableIndexRollover: 'false' });
-          }
           break;
         case 'type':
-          this.$formRef.setFieldsValue({ clusterName: null }); 
+          this.$formRef.setFieldsValue({ clusterName: null }); // 选择集群类型后重置逻辑集群
           break;
         case 'expireTime':
         case 'cluster':
         case 'quota':
           this.getCostData(allValues);
-          break;
-        case 'clusterInfo': 
-          this.$formRef.setFieldsValue({ level: value?.clusterInfo?.level }); // 选择集群后给level初始值
-          checkHotTime();
-          this.setState({...this.state});
           break;
       }
     });
@@ -147,7 +119,6 @@ export class FirstStep extends React.Component<any> {
         notification.success({ message: '更新成功' });
         window.setTimeout(() => {
           if(this.props?.history) {
-            dropByCacheKey('index-tpl-management')
             this.props.history.push('/index-tpl-management');
           } else {
             window.location.href = `${urlPrefix}${'/index-tpl-management'}`;
@@ -190,18 +161,16 @@ export class FirstStep extends React.Component<any> {
     if (this.isModifyPage && !formData.name) {
       return [];
     }
+
     return getStepOneFormMap(
       finClusterType,
       cyclicalRoll,
       this.isModifyPage,
       this.$formRef,
-      this.state.hotTimeState
     );
   }
 
-  public clearStore = (str) => {
-    this.props?.setRemovePaths([str]);
-    dropByCacheKey('index/create');
+  public clearStore = () => {
     this.props.dispatch(actions.setClearCreateIndex());
   }
 

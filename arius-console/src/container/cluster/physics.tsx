@@ -3,11 +3,16 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import * as actions from "actions";
 import { getPhysicsColumns, getPhyClusterQueryXForm } from "./config";
-import { getNodeList, getOpPhysicsClusterList, IClusterList, getPackageList } from "api/cluster-api";
+import {
+  getNodeList,
+  getOpPhysicsClusterList,
+  IClusterList,
+  getPackageList,
+} from "api/cluster-api";
 import { DTable, ITableBtn } from "component/dantd/dtable";
 import { INodeListObjet } from "container/modal/physics-cluster/apply-cluster";
-import { IVersions } from "typesPath/cluster/physics-type";
-import { INode } from "typesPath/cluster/cluster-types";
+import { IVersions } from "@types/cluster/physics-type";
+import { INode } from "@types/cluster/cluster-types";
 import { notification } from "antd";
 import { RenderTitle } from "component/render-title";
 import { queryFormText } from "constants/status-map";
@@ -15,14 +20,16 @@ import QueryForm from "component/dantd/query-form";
 import { isOpenUp } from "constants/common";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
-  setDrawerId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setDrawerId(modalId, params)),
+  setModalId: (modalId: string, params?: any, cb?: Function) =>
+    dispatch(actions.setModalId(modalId, params, cb)),
+  setDrawerId: (modalId: string, params?: any, cb?: Function) =>
+    dispatch(actions.setDrawerId(modalId, params)),
 });
 
 const PhysicsClusterBox = (props) => {
   const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject]: any = useState({
+  const [queryFromObject, setqueryFromObject]:any = useState({
     from: 0,
     size: 10,
   });
@@ -32,6 +39,33 @@ const PhysicsClusterBox = (props) => {
   React.useEffect(() => {
     reloadData();
   }, [department, queryFromObject]);
+
+  // const getData = () => {
+  //   // 查询项的key 要与 数据源的key  对应
+  //   if (!queryFromObject) return data;
+  //   const keys = Object.keys(queryFromObject);
+  //   const filterData = data.filter((d) => {
+  //     let b = true;
+  //     keys.forEach((k: string) => {
+  //       if (k === "currentAppAuth") {
+  //         d[k] === queryFromObject[k] ? "" : (b = false);
+  //       } else {
+  //         (d[k] + "")?.toLowerCase().includes(queryFromObject[k])
+  //           ? ""
+  //           : (b = false);
+  //       }
+  //     });
+  //     return b;
+  //   });
+    // return filterData.map((item) => ({
+    //   ...item,
+    //   diskInfo: {
+    //     diskTotal: item.diskTotal,
+    //     diskUsage: item.diskUsage,
+    //     diskUsagePercent: item.diskUsagePercent,
+    //   },
+    // }));
+  // };
 
   const reloadData = () => {
     const app = JSON.parse(localStorage.getItem("current-project"));
@@ -46,23 +80,19 @@ const PhysicsClusterBox = (props) => {
       health: queryFromObject.health,
       cluster: queryFromObject.cluster,
       esVersion: queryFromObject.esVersion,
-      sortTerm: queryFromObject.sortTerm,
-      orderByDesc: queryFromObject.orderByDesc,
-    };
+    }
     getOpPhysicsClusterList(Params)
       .then((res) => {
         if (res) {
-          setData(
-            res?.bizData?.map((item) => ({
-              ...item,
-              diskInfo: {
-                diskTotal: item.diskTotal,
-                diskUsage: item.diskUsage,
-                diskUsagePercent: item.diskUsagePercent,
-              },
-            }))
-          );
-          setTotal(res?.pagination?.total);
+          setData(res?.bizData?.map((item) => ({
+            ...item,
+            diskInfo: {
+              diskTotal: item.diskTotal,
+              diskUsage: item.diskUsage,
+              diskUsagePercent: item.diskUsagePercent,
+            },
+          })));
+          setTotal(res?.pagination?.total)
         }
       })
       .finally(() => {
@@ -83,10 +113,11 @@ const PhysicsClusterBox = (props) => {
         delete result[key];
       }
     }
-    setqueryFromObject({ ...result, from: 0, size: 10 });
+    setqueryFromObject({...result, from: 0, size: 10});
   };
 
   const getModalData = () => {
+    props.setModalId("applyPhyCluster", { loading: true }, reloadData);
     const nodeList = {} as INodeListObjet;
     let packageDockerList = [] as IVersions[];
     let packageHostList = [] as IVersions[];
@@ -101,12 +132,16 @@ const PhysicsClusterBox = (props) => {
       nodeList.masternode = list.filter((ele) => ele.role === "masternode");
       nodeList.clientnode = list.filter((ele) => ele.role === "clientnode");
       nodeList.datanode = list.filter((ele) => ele.role === "datanode");
-      nodeList.datanodeceph = list.filter((ele) => ele.role === "datanode-ceph");
+      nodeList.datanodeceph = list.filter(
+        (ele) => ele.role === "datanode-ceph"
+      );
     };
 
     const setPackageList = (data: IVersions[]) => {
       const list = data.filter((data, indx, self) => {
-        return self.findIndex((ele) => ele.esVersion === data.esVersion) === indx;
+        return (
+          self.findIndex((ele) => ele.esVersion === data.esVersion) === indx
+        );
       });
       const packageList = list.map((ele, index) => {
         return {
@@ -119,9 +154,16 @@ const PhysicsClusterBox = (props) => {
       packageHostList = packageList.filter((ele) => ele.manifest === 4);
     };
 
-    Promise.all([getNodeList().then(setNodeList), getPackageList().then(setPackageList)])
+    Promise.all([
+      getNodeList().then(setNodeList),
+      getPackageList().then(setPackageList),
+    ])
       .then((values) => {
-        props.setModalId("applyPhyCluster", { loading: false, nodeList, packageDockerList, packageHostList }, reloadData);
+        props.setModalId(
+          "applyPhyCluster",
+          { loading: false, nodeList, packageDockerList, packageHostList },
+          reloadData
+        );
       })
       .catch((err) => {
         notification.error({ message: `网络错误！` });
@@ -142,44 +184,15 @@ const PhysicsClusterBox = (props) => {
         isOpenUp: isOpenUp,
         clickFunc: () => getModalData(),
       },
-      {
-        label: "分配集群",
-        className: "ant-btn-primary",
-        clickFunc: () => props.setModalId("newCluster", {}, reloadData),
-      },
     ];
   };
-  const handleChange = (pagination, filters, sorter) => {
-    // 条件过滤请求在这里处理
-    const sorterObject: { [key: string]: any } = {};
-    if (sorter.columnKey && sorter.order) {
-      switch (sorter.columnKey) {
-        case "diskInfo":
-          sorterObject.sortTerm = "disk_usage_percent";
-          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
-          break;
-        case "activeShardNum":
-          sorterObject.sortTerm = "active_shard_num";
-          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
-          break;
-        default:
-          break;
-      }
-    }
-    setqueryFromObject((state) => {
-      if (!sorter.order) {
-        delete state.sortTerm;
-        delete state.orderByDesc;
-      }
-
-      return {
-        ...state,
-        ...sorterObject,
-        from: (pagination.current - 1) * pagination.pageSize,
-        size: pagination.pageSize,
-      };
-    });
-  };
+  const handleChange = (pagination) => {
+    setqueryFromObject((state) => ({
+      ...state,
+      from: (pagination.current - 1) * pagination.pageSize,
+      size: pagination.pageSize,
+    }));
+  }
 
   return (
     <>
@@ -204,7 +217,7 @@ const PhysicsClusterBox = (props) => {
             rowKey="id"
             dataSource={data}
             attrs={{
-              onChange: handleChange,
+              onChange: handleChange
             }}
             key={JSON.stringify({
               authType: queryFromObject.authType,
@@ -212,15 +225,19 @@ const PhysicsClusterBox = (props) => {
               cluster: queryFromObject.cluster,
               esVersion: queryFromObject.esVersion,
             })}
-            columns={getPhysicsColumns(props.setModalId, props.setDrawerId, reloadData)}
+            columns={getPhysicsColumns(
+              props.setModalId,
+              props.setDrawerId,
+              reloadData
+            )}
             reloadData={reloadData}
             getOpBtns={getOpBtns}
             paginationProps={{
-              position: "bottomRight",
+              position: 'bottomRight',
               showQuickJumper: true,
               total: total,
               showSizeChanger: true,
-              pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
+              pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
               showTotal: (total) => `共 ${total} 条`,
             }}
           />
@@ -229,4 +246,7 @@ const PhysicsClusterBox = (props) => {
     </>
   );
 };
-export const PhysicsCluster = connect(null, mapDispatchToProps)(PhysicsClusterBox);
+export const PhysicsCluster = connect(
+  null,
+  mapDispatchToProps
+)(PhysicsClusterBox);

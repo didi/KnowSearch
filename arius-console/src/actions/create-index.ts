@@ -57,10 +57,3 @@ export const setClearCreateIndex = () => ({
   type: actionTypes.SET_CLEAR_CREATE_INDEX,
   payload: {}
 });
-
-export const setCreateIndex = (payload: any) => {
-  return {
-    type: actionTypes.SET_CREATE_INDEX,
-    payload,
-  }
-};

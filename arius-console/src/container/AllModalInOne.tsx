@@ -6,7 +6,7 @@ import EditClusterModal from "./modal/logic-cluster/edit-cluster";
 import ExpandShrinkModal from "./modal/logic-cluster/expand-shrink-cluster";
 import TransferClusterModal from "./modal/logic-cluster/transfer-cluster";
 import ApplyAauthorityModal from "./modal/logic-cluster/apply-authority";
-import AccessCluster from "./modal/physics-cluster/access-authority";
+import { AccessCluster } from "./modal/physics-cluster/access-authority";
 import ApplyPhyClusterModal from "./modal/physics-cluster/apply-cluster";
 import { UpgradeCluster } from "./modal/physics-cluster/upgrade-cluster";
 import RestartClusterModal from "./modal/physics-cluster/restart-cluster";
@@ -39,7 +39,6 @@ import { IndexConfig } from "./modal/indicators/index-config";
 import EditPluginDesc from "./modal/physics-cluster/edit-plugin-desc";
 import { DeleteIndex } from './modal/index-admin/delete-index';
 import { ChartModal } from './modal/indicators/chart-modal';
-import { ChartTableModal } from './modal/indicators/chart-tablemodal';
 import { DeleteCluster } from './modal/physics-cluster/deleteCluster';
 import { InstallPlugin } from './modal/physics-cluster/install';
 import { UninstallPlugin } from './modal/physics-cluster/unintallPlugn';
@@ -52,8 +51,6 @@ import NodeMonitorDrawer from "./drawer/node-monitor";
 import PhysicsClusterTaskDrawer from "./drawer/physics-cluster-task";
 import { TaskLogModal } from "./modal/work-order/task-log";
 import { ShardList } from "./drawer/shard-list/index";
-import EditSetting from "./drawer/setting";
-import MappingDiff from "./drawer/mapping-diff";
 const mapStateToProps = (state: any) => ({
   isLoading: state.modal.loading,
   modalId: state.modal.modalId,
@@ -113,12 +110,10 @@ const modalMap = {
   EditPluginDesc: <EditPluginDesc />,
   deleteIndex: <DeleteIndex />,
   chartModal: <ChartModal />,
-  chartTableModal: <ChartTableModal />,
   deleteCluster: <DeleteCluster />,
   installplugin: <InstallPlugin />,
   uninstallPlugin: <UninstallPlugin />,
   deleteLogicCluster: <DeleteLogicCluster />,
-  editSetting: <EditSetting />,
 } as {
   [key: string]: JSX.Element;
 };
@@ -128,8 +123,7 @@ const drawerMap = {
   regionTaskList: <RegionTaskList />,
   nodeMonitorDrawer: <NodeMonitorDrawer />,
   physicsClusterTaskDrawer: <PhysicsClusterTaskDrawer />,
-  shardList: <ShardList />,
-  mappingDiff: <MappingDiff />,
+  shardList: <ShardList />
 } as {
   [key: string]: JSX.Element;
 };

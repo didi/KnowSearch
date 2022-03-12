@@ -226,7 +226,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     public Result<Void> deleteByClusterIdAndTypeAndEngin(Long clusterId, String typeName, String enginName) {
         try {
             esClusterConfigDAO.deleteByClusterIdAndTypeAndEngin(clusterId, typeName, enginName);
-            return Result.buildSuccWithMsg("集群角色下对应类型的配置已删除");
+            return Result.buildSucc("集群角色下对应类型的配置已删除");
         } catch (Exception e) {
             LOGGER.error("class=ESClusterConfigServiceImpl||method=deleteByClusterIdAndTypeAndEngin||msg={}", e.getStackTrace());
         }

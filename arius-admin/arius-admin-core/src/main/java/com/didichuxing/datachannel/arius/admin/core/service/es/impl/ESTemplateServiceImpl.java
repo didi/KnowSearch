@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -16,14 +12,15 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiT
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -83,29 +80,6 @@ public class ESTemplateServiceImpl implements ESTemplateService {
             expression, rack, shard, shardRouting));
     }
 
-    @Override
-    public boolean syncCreate(Map<String, String> settings, String cluster, String name, String expression, MappingConfig mappings, int retryCount) throws ESOperateException {
-        // 获取es中原来index template的配置
-        TemplateConfig templateConfig = esTemplateDAO.getTemplate(cluster, name);
-        if (templateConfig == null) {
-            templateConfig = new TemplateConfig();
-        }
-        if (StringUtils.isNotBlank(expression)) {
-            templateConfig.setTemplate(expression);
-        }
-        if (templateConfig.getOrder() == null) {
-            templateConfig.setOrder(TEMPLATE_DEFAULT_ORDER);
-        }
-        if (MapUtils.isNotEmpty(settings)) {
-            templateConfig.setSetttings(settings);
-        }
-        if (null != mappings) {
-            templateConfig.setMappings(mappings);
-        }
-        templateConfig.setSettings(SINGLE_TYPE, "true");
-        TemplateConfig finalTemplateConfig = templateConfig;
-        return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount, () -> esTemplateDAO.create(cluster, name, finalTemplateConfig));
-    }
     /**
      * 修改模板
      * @param cluster    集群
@@ -251,14 +225,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         }
 
         if (syncDelete(cluster, srcName, retryCount)) {
-            try {
-                return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount,
-                        () -> esTemplateDAO.create(cluster, tgtName, templateConfig));
-            } catch (Exception e) {
-                LOGGER.error(
-                        "class=ESTemplateServiceImpl||method=syncUpdateName||clusterName={}||srcName={}||tgtName={}||errMsg=exception",
-                        cluster, srcName, tgtName);
-            }
+            return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount,
+                () -> esTemplateDAO.create(cluster, tgtName, templateConfig));
         }
 
         return false;
@@ -292,7 +260,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
                 List<TemplatePhysicalPO> indexBelongNodes = ConvertUtil
                     .str2ObjArrayByJson(directResponse.getResponseContent(), TemplatePhysicalPO.class);
 
-                return indexBelongNodes.stream().map(TemplatePhysicalPO::getName).filter(r -> !r.startsWith(".")).count();
+                return indexBelongNodes.stream().map(TemplatePhysicalPO::getName).filter(r -> !r.startsWith("."))
+                    .count();
             }
         } catch (Exception e) {
             LOGGER.error("class=ESTemplateServiceImpl||method=syncGetTemplateNum||clusterName={}||errMsg=exception",
@@ -301,12 +270,6 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         }
 
         return 0;
-    }
-
-    @Override
-    public long synGetTemplateNumForAllVersion(String cluster) {
-        Map<String, TemplateConfig> allTemplate = esTemplateDAO.getAllTemplate(Collections.singletonList(cluster));
-        return MapUtils.isEmpty(allTemplate) ? 0 : allTemplate.size();
     }
 
 }

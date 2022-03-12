@@ -78,10 +78,6 @@ export const unitMap = {
     name: "Bytes",
     formatter: toFixedNum,
   },
-  countM: {
-    name: "个/min",
-    formatter: toFixedNum,
-  },
 };
 
 // 图表标题
@@ -171,15 +167,14 @@ const markLine = (val1 = 50000, val2 = 100000) => ({
 });
 
 // 图表 tooltip 展示的样式
-const tooltipFormatter = (date, arr, unit, isShowTooltipModal, metricsType, isShowTaskTooltipModal, clusterPhyName) => {
+const tooltipFormatter = (date, arr, unit, isShowTooltipModal, metricsType) => {
   const str = arr
     .map(
       (item) => `<div style="margin: 3px 0;line-height:1;">
           <div style="margin: 0px 0 0;line-height:1;">
           ${item.marker}
-          <span style="font-size:14px;color:#666;pointer-events: auto;font-weight:400;margin-left:2px;${isShowTooltipModal ? 'cursor: pointer' : ''}" 
-            ${isShowTooltipModal ? `onclick="window.showTooltipModal('${item.seriesName}', '${metricsType}')"}` : ""}
-            ${isShowTaskTooltipModal ? `onclick="window.showTaskTooltipModal('${clusterPhyName}', '${item.seriesName}', '${item.name}')"}` : ""}>
+          <span style="font-size:14px;color:#666;font-weight:400;margin-left:2px;${isShowTooltipModal ? 'cursor: pointer' : ''}" 
+            ${isShowTooltipModal ? `onclick="window.showTooltipModal('${item.seriesName}', '${metricsType}')"}` : ""}>
               ${item.seriesName}
             </span>
             <span style="float:right;margin-left:20px;font-size:14px;color:#666;font-weight:900">
@@ -260,10 +255,8 @@ interface lineOptionType {
   isMarkLine?: boolean,
   color?: string[],
   isShowTooltipModal?: boolean,
-  isShowTaskTooltipModal?: boolean,
-  metricsType?: string,
-  showLegend?: boolean,
-  clusterPhyName?: string,
+  metricsType?: string
+  showLegend?: boolean
 }
 
 export const getLineOption = ({
@@ -279,13 +272,10 @@ export const getLineOption = ({
   color = colorList,
   // 是否展示可以点击 Tooltip 并展示弹窗 
   isShowTooltipModal = false,
-  // 是否展示可以点击 Tooltip 并展示task弹窗
-  isShowTaskTooltipModal = false,
   // 后端图表指标名称，帮助弹窗获取数据
   metricsType,
   // 是否显示左侧 legend
   showLegend = true,
-  clusterPhyName = ''
 }: lineOptionType) => {
   let seriesData;
   let unitFormatter = unitMap.formatter;
@@ -300,17 +290,18 @@ export const getLineOption = ({
       }
       unitName = 's';
       title = title.replace('ms', 's');
-    } 
-    seriesData = series.map((item: any) => ({
+    }
+
+    seriesData = series.map((item) => ({
       name: item?.name || "",
-      data: item?.data.map((el) => {
-        if (typeof el == "object") {
+      data: item.data.map((item) => {
+        if (typeof item == "object") {
           return {
-            timestamp: el.timestamp,
-            value: unitFormatter(el.value),
+            timestamp: item.timestamp,
+            value: unitFormatter(item.value),
           };
         }
-        return unitFormatter(el);
+        return unitFormatter(item);
       }),
       type: "line",
       markLine: isMarkLine ? markLine() : {},
@@ -345,9 +336,7 @@ export const getLineOption = ({
             params,
             unitName,
             isShowTooltipModal,
-            metricsType,
-            isShowTaskTooltipModal,
-            clusterPhyName,
+            metricsType
           );
         }
         return res;
@@ -356,7 +345,7 @@ export const getLineOption = ({
     legend: showLegend ? {
       type: "scroll",
       orient: "vertical",
-      right: "10",
+      right: "5%",
       top: "20%",
       bottom: "20%",
       icon: "rect",
@@ -373,7 +362,7 @@ export const getLineOption = ({
     } : null,
     grid: {
       left: showLegend ? "20" : 0,
-      right: showLegend ? "120" : 20,
+      right: showLegend ? "25%" : 20,
       bottom: showLegend ? "3%" : 0,
       containLabel: true,
     },
@@ -418,9 +407,7 @@ export const getOption = (
   isMoreDay: boolean = false,
   isMarkLine: boolean = false,
   isShowTooltipModal: boolean = false,
-  showLegend: boolean = true,
-  isShowTaskTooltipModal: boolean = false,
-  clusterPhyName: string = '',
+  showLegend: boolean = true
 ) => {
   if (!metrics || !metrics.type) {
     return {};
@@ -454,9 +441,7 @@ export const getOption = (
     isMarkLine,
     isShowTooltipModal,
     metricsType: metrics.type,
-    showLegend,
-    clusterPhyName,
-    isShowTaskTooltipModal,
+    showLegend
   });
 };
 

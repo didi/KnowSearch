@@ -25,9 +25,4 @@ public class TemplateNotifyESPO extends BaseESPO {
     public String getKey() {
         return logicTemplateId + "#" + zeroDate + "#" + rate;
     }
-
-    @Override
-    public String getRoutingValue() {
-        return null;
-    }
 }

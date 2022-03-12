@@ -39,20 +39,8 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
     @ApiModelProperty("是否具备DCDR")
     private Boolean      hasDCDR;
 
-    @ApiModelProperty("DCDR主从位点差")
-    private Long         checkPointDiff;
-
     @ApiModelProperty("项目名称")
     private String       appName;
-
-    @ApiModelProperty("是否开启indexRollover能力")
-    private Boolean      disableIndexRollover;
-
-    @ApiModelProperty("逻辑集群id")
-    private Long         resourceId;
-
-    @ApiModelProperty("服务等级,为1，2，3")
-    private Integer      level;
 
     @Override
     public int compareTo(ConsoleTemplateVO o) {

@@ -1,19 +1,42 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.impl;
 
+import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum.CANCEL;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_DOCKER;
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_HOST;
+import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.EXPAND;
+import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.SHRINK;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyHealthEvent;
+import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmTaskBasic;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmTaskDetail;
@@ -25,7 +48,6 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
@@ -34,54 +56,24 @@ import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.BaseClusterHostOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpNewHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.event.ecm.EcmTaskEditEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyHealthEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.EcmRemoteException;
-import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum.*;
-import static com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum.CANCEL;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_DOCKER;
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_HOST;
-import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.EXPAND;
-import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.SHRINK;
+import lombok.NoArgsConstructor;
 
 /**
  * ES工单任务管理
@@ -93,6 +85,10 @@ import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.
 public class EcmTaskManagerImpl implements EcmTaskManager {
     private static final Logger    LOGGER                                = LoggerFactory
         .getLogger(EcmTaskManagerImpl.class);
+
+    private static final String    CHECK_CLUSTER_FINAL_STATUS_ERROR_TIPS = "class=EcmTaskManagerImpl||method=checkClusterFinalStatus||clusterId={}||";
+
+    private static final String    UPDATE_CLUSTER_RW_ADDRESS_ERROR_TIPS  = "class=EcmTaskManagerImpl||method=updateClusterRWAddress||clusterId={}";
 
     @Value("${es.client.cluster.port}")
     private String                 esClusterClientPort;
@@ -125,11 +121,11 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     private AriusScheduleThreadPool ariusScheduleThreadPool;
 
     @Autowired
-    private WorkOrderManager       workOrderManager;
+    private OperateRecordService operateRecordService;
 
     @Override
     public boolean existUnClosedEcmTask(Long phyClusterId) {
-        List<EcmTaskPO> notFinishedTasks = ecmTaskDao.listUndoEcmTaskByClusterId(phyClusterId);
+        List<EcmTaskPO> notFinishedTasks = ecmTaskDao.listUndoWorkOrderTaskByClusterId(phyClusterId);
         return !AriusObjUtils.isEmptyList(notFinishedTasks);
     }
 
@@ -361,37 +357,6 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         return Result.buildSucc();
     }
 
-    /**
-     * 根据集群名称，ip和port获取对应的rack信息的设置
-     *
-     * @param clusterName 物理集群名称
-     * @param ip          ip地址
-     * @return 判断指定data节点的rack类型，如果是冷节点则返回cold，否则返回*
-     */
-    @Override
-    public String judgeColdRackFromEcmTaskOfClusterNewOrder(String clusterName, String ip) {
-        Result<String> ecmTaskOrderDetailInfo = getEcmTaskOrderDetailInfo(clusterName);
-        if (ecmTaskOrderDetailInfo.failed()) {
-            return AdminConstant.DEFAULT_HOT_RACK;
-        }
-        ClusterOpHostContent clusterOpHostContent = ConvertUtil.str2ObjByJson(ecmTaskOrderDetailInfo.getData(),
-                ClusterOpHostContent.class);
-
-        //获取用户配置的冷节点的http地址信息
-        Set<String> coldHttpAddress = clusterOpHostContent.getRoleClusterHosts()
-                .stream()
-                .filter(ESClusterRoleHost::getBeCold)
-                .map(ESClusterRoleHost::getHostname)
-                .collect(Collectors.toSet());
-
-        //冷节点默认设置rack值为cold
-        if (coldHttpAddress.contains(ip)) {
-            return AdminConstant.DEFAULT_COLD_RACK;
-        }
-
-        return AdminConstant.DEFAULT_HOT_RACK;
-    }
-
     @Override
     public Result<Void> cancelClusterEcmTask(Long taskId, String operator) {
         EcmTask ecmTask = getEcmTask(taskId);
@@ -458,8 +423,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     @Override
-    public EcmTaskPO getRunningEcmTaskByClusterId(Integer physicClusterId) {
-        return ecmTaskDao.getUsefulEcmTaskByClusterId(physicClusterId);
+    public EcmTaskPO getRunningWorkOrderTaskByClusterId(Integer physicClusterId) {
+        return ecmTaskDao.getUsefulWorkOrderTaskByClusterId(physicClusterId);
     }
 
     @Override
@@ -481,39 +446,6 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         ecmTask.setStatus(EcmTaskStatusEnum.RUNNING.getValue());
         updateEcmTask(ConvertUtil.obj2Obj(ecmTask, EcmTask.class));
         return Result.buildSucc();
-    }
-
-    @Override
-    public Result<EcmTask> getUsefulEcmTaskByClusterName(String clusterName) {
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterName);
-        if (AriusObjUtils.isNull(clusterPhy)) {
-            return Result.buildFail("物理名称对应的物理信息不存在");
-        }
-        return Result.buildSucc(ConvertUtil.obj2Obj(ecmTaskDao.getUsefulEcmTaskByClusterId(clusterPhy.getId()), EcmTask.class));
-    }
-
-    @Override
-    public Result<String> getEcmTaskOrderDetailInfo(String cluster) {
-        if (AriusObjUtils.isBlack(cluster)) {
-            return Result.buildFail("cluster name 为空");
-        }
-
-        Result<EcmTask> usefulWorkOrderTaskByClusterName = getUsefulEcmTaskByClusterName(cluster);
-        if (usefulWorkOrderTaskByClusterName.failed()) {
-            return Result.buildFail("无法获取物理集群信息");
-        }
-        EcmTask task = usefulWorkOrderTaskByClusterName.getData();
-        if (AriusObjUtils.isNull(task)) {
-            return Result.buildFail("当前集群没有待执行的工单任务");
-        }
-
-        List<EcmParamBase> ecmParamBases = WorkOrderTaskConverter.convert2EcmParamBaseList(task);
-        if (CollectionUtils.isEmpty(ecmParamBases)) {
-            return Result.buildFail("当前任务没有工单数据");
-        }
-        OrderDetailBaseVO orderDetailBaseVO = workOrderManager.getById(task.getWorkOrderId()).getData();
-
-        return Result.buildSucc(orderDetailBaseVO.getDetail(), "ecm任务对应的工单任务详细信息");
     }
 
     @Override
@@ -687,7 +619,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param mergedStatusEnum    任务状态
      * @return
      */
-    private Result<Void> postProcess(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) {
+    private Result<Void> postProcess(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum){
         if (!SUCCESS.getValue().equals(mergedStatusEnum.getValue()) && !hasRemoteTaskFailed(mergedStatusEnum)) {
             return Result.buildSucc();
         }
@@ -696,71 +628,25 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
         //1. 任务失败, 清理集群role表数据、data_source表数据
         //cleanUpUselessClusterInfoFromDB(mergedStatusEnum, ecmParamBases);
-        if (hasRemoteTaskFailed(mergedStatusEnum)) {
-            return Result.buildSucc();
-        }
+        if (hasRemoteTaskFailed(mergedStatusEnum)) {return Result.buildSucc();}
 
         //2. 更新集群读写地址, 其中重启，升级 不需要更新读写地址
         if (updateClusterAddressWhenIsValid(ecmTask, mergedStatusEnum, ecmParamBases).failed()) {
             return Result.buildFail();
         }
 
-        //3.根据ecm任务中内容插入es_role_cluster_host表中
-        saveOrEditHostInfoFromEcmTask(ecmTask, mergedStatusEnum);
-
-        //4. 设置30s的延迟时间，采集节点数据入集群host表中
+        //3. 设置30s的延迟时间，采集节点数据入集群host表中
         delayCollectNodeSettingsTask(ecmParamBases);
 
-        //5. 升级, 更新集群版本
+        //4. 升级, 更新集群版本
         updateEsClusterVersion(mergedStatusEnum, ecmTask);
 
+        //5、缩容进行数据库表数据硬删除
+        deleteRoleClusterAndHost(mergedStatusEnum, ecmTask);
+
+        //6、缩容的时候对于被逻辑集群关联到的datanode节点进行缩容操作
+
         return Result.buildSucc();
-    }
-
-    /**
-     * 集群的新建，扩容，缩容任务需要修改es_role_host表信息
-     * @param ecmTask ecm任务
-     * @param mergedStatusEnum 总的任务执行情况
-     */
-    private void saveOrEditHostInfoFromEcmTask(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) {
-        if (!EcmTaskStatusEnum.SUCCESS.equals(mergedStatusEnum)) {
-            return;
-        }
-
-        switch (EcmTaskTypeEnum.valueOf(ecmTask.getOrderType())) {
-            case EXPAND:
-            case NEW: addHostInfoFromTaskOrder(ecmTask); break;
-            case SHRINK: deleteRoleClusterAndHost(mergedStatusEnum,ecmTask); break;
-            default: break;
-        }
-    }
-
-    private void addHostInfoFromTaskOrder(EcmTask ecmTask) {
-        // 从ecm任务的工单中获取节点全量的信息
-        Result<OrderDetailBaseVO> getOrderDetailResult = workOrderManager.getById(ecmTask.getWorkOrderId());
-        if (getOrderDetailResult.failed()) {
-            return;
-        }
-        BaseClusterHostOrderDetail baseClusterHostOrderDetail = (JSONObject.parseObject(getOrderDetailResult.getData().getDetail(),
-                BaseClusterHostOrderDetail.class));
-
-        // 保存全量节点信息到DB
-        roleClusterHostService.createClusterNodeSettings(baseClusterHostOrderDetail.getRoleClusterHosts(), baseClusterHostOrderDetail.getPhyClusterName());
-
-        // 更新es_role_cluster中的podNumber
-        for (EcmParamBase ecmParamBase : WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask)) {
-            HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
-            if (CollectionUtils.isEmpty(hostsParamBase.getHostList())) {
-                continue;
-            }
-
-            RoleCluster roleCluster = roleClusterService.getByClusterNameAndRole(baseClusterHostOrderDetail.getPhyClusterName(), hostsParamBase.getRoleName());
-            if (roleCluster == null) {
-                continue;
-            }
-
-            updatePodNumbers(ecmTask, roleCluster);
-        }
     }
 
     private Result<Void> updateClusterAddressWhenIsValid(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum, List<EcmParamBase> ecmParamBases) {
@@ -798,7 +684,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
 
         return esClusterService.syncGetClientAlivePercent(getClusterPhyNameFromEcmParamBases(ecmParamBases),
-            null,ListUtils.strList2String(clusterPhyRWAddress)) > 0;
+            ListUtils.strList2String(clusterPhyRWAddress)) > 0;
     }
 
     private String getClusterPhyNameFromEcmParamBases(List<EcmParamBase> ecmParamBases) {
@@ -839,21 +725,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
                     ecmParamBases);
         }
 
-        if(ecmTask.getOrderType().equals(EcmTaskTypeEnum.RESTART.getCode())) {
-            return buildClusterReadAndWriteAddressForHostWhenRestart(ecmTask.getPhysicClusterId());
-        }
-
         return new ArrayList<>();
-    }
-
-    private List<String> buildClusterReadAndWriteAddressForHostWhenRestart(Long physicClusterId) {
-        ClusterPhy clusterPhy = clusterPhyService.getClusterById(Math.toIntExact(physicClusterId));
-        if(AriusObjUtils.isNull(clusterPhy) || AriusObjUtils.isNull(clusterPhy.getHttpAddress())) {
-            return Lists.newArrayList();
-        }
-
-        // 获取的当前集群可以使用的http地址，作为es服务有效性检测的地址池子
-        return ListUtils.string2StrList(clusterPhy.getHttpAddress());
     }
 
     private List<String> buildClusterReadAndWriteAddressForHostWhenCreate(List<EcmParamBase> ecmParamBases) {
@@ -964,7 +836,16 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param ecmTask
      */
     private void deleteRoleClusterAndHost(EcmTaskStatusEnum mergedStatusEnum, EcmTask ecmTask) {
-        for (EcmParamBase ecmParamBase : WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask)) {
+        if (!SUCCESS.getValue().equals(mergedStatusEnum.getValue())) {
+            return;
+        }
+
+        if (EcmTaskTypeEnum.SHRINK.getCode() != ecmTask.getOrderType()) {
+            return;
+        }
+
+        List<EcmParamBase> ecmParamBases = WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
+        for (EcmParamBase ecmParamBase : ecmParamBases) {
             HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
             if (CollectionUtils.isEmpty(hostsParamBase.getHostList())) {
                 continue;
@@ -1100,8 +981,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         return SUCCESS.getValue().equals(mergedStatusEnum.getValue())
                && (EcmTaskTypeEnum.NEW.getCode() == ecmTask.getOrderType()
                    || EcmTaskTypeEnum.EXPAND.getCode() == ecmTask.getOrderType()
-                   || EcmTaskTypeEnum.SHRINK.getCode() == ecmTask.getOrderType()
-                   || EcmTaskTypeEnum.RESTART.getCode() == ecmTask.getOrderType());
+                   || EcmTaskTypeEnum.SHRINK.getCode() == ecmTask.getOrderType());
     }
 
     private void updateRoleClusterNumber(EcmTask ecmTask, EcmParamBase ecmParamBase) {

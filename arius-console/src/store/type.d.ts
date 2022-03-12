@@ -1,8 +1,8 @@
-import { ILabelValue } from "typesPath/base-types"
-import { IVersions } from "typesPath/cluster/physics-type"
-import { INode } from "typesPath/index-types"
-import { IDcdrStepDetailInfo, ITaskBaseInfo } from "typesPath/task-types"
-import { IAppDetail } from "typesPath/user-types"
+import { ILabelValue } from "@types/base-types"
+import { IVersions } from "@types/cluster/physics-type"
+import { INode } from "@types/index-types"
+import { IDcdrStepDetailInfo, ITaskBaseInfo } from "@types/task-types"
+import { IAppDetail } from "@types/user-types"
 
 type UserState = {
   getName: Function;

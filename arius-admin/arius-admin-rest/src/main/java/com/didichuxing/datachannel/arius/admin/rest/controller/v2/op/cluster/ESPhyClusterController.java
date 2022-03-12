@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.cluster;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.TemplateExpireManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.shard.TemplateShardManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterHostDTO;
@@ -42,7 +42,7 @@ public class ESPhyClusterController {
     private TemplateExpireManager    templateExpireManager;
 
     @Autowired
-    private IndexPlanManager indexPlanManager;
+    private TemplateShardManager     templateShardManager;
 
     @Autowired
     private RoleClusterHostService roleClusterHostService;
@@ -114,7 +114,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "调整shard个数", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<Void> adjustShardCount(@RequestParam(value = "cluster") String cluster) {
-        return indexPlanManager.adjustShardCountByPhyClusterName(cluster);
+        return Result.build(templateShardManager.adjustShardCount(cluster, 0));
     }
 
     @PostMapping("/node/list")
