@@ -141,5 +141,4 @@ public class SizeUtil {
 
         return String.format("%f%s", value, suffix);
     }
-
 }

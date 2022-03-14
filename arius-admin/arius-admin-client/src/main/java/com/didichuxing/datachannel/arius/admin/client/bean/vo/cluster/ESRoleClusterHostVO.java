@@ -54,7 +54,7 @@ public class ESRoleClusterHostVO extends BaseVO {
     private String  rack;
 
     @ApiModelProperty("节点规格")
-    private String  nodeSpec;
+    private String  machineSpec;
 
     @ApiModelProperty("set")
     private String  nodeSet;

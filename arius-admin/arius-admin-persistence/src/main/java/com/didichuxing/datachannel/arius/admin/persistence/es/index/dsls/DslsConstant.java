@@ -139,9 +139,29 @@ public class DslsConstant {
     public static final String GET_TOPN_INDEX_AGG_METRICS                                    = "AriusStatsIndexInfoEsDao/getTopNIndicesAggMetrics";
 
     /**
+     * 获取指定集群有索引信息的时间戳
+     */
+    public static final String GET_HAS_INDEX_METRICS_DATA_TIME                               = "AriusStatsIndexInfoEsDao/getHasIndexMetricsDataTime";
+
+    /**
      * 查询第一个时间分片中指标数值的索引指标信息
      */
     public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS                 = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetrics";
+
+    /**
+     * 查询第一个时间分片中指标数值的逻辑模板指标信息
+     */
+    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS                 = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetrics";
+
+    /**
+     * 查询topN索引聚合信息
+     */
+    public static final String GET_TOPN_TEMPLATE_AGG_METRICS                                    = "AriusStatsIndexInfoEsDao/getTopNTemplateAggMetrics";
+
+    /**
+     * 查询单个模板聚合信息
+     */
+    public static final String GET_AGG_SINGLE_TEMPLATE_METRICS                                  = "AriusStatsIndexInfoEsDao/getAggSingleTemplateMetrics";
 
     /************************************************************** AriusStatsIndexNodeInfoEsDao **************************************************************/
     /**
@@ -211,6 +231,11 @@ public class DslsConstant {
      * 获取集群单个节点维度统计信息
      */
     public static final String GET_AGG_CLUSTER_PHY_SINGLE_NODE_NODE                          = "AriusStatsNodeInfoEsDao/getAggClusterPhySingleNodeInfo";
+
+    /**
+     * 获取指定集群节点有节点信息的时间戳
+     */
+    public static final String GET_HAS_NODE_METRICS_DATA_TIME                                = "AriusStatsNodeInfoEsDao/getHasNodeMetricInfoTime";
 
     /************************************************************** TemplateAccessCountEsDao **************************************************************/
     /**
@@ -452,24 +477,51 @@ public class DslsConstant {
     public static final String GET_GATEWAY_INDEX_SEARCH_BY_TEMPLATE_NAME                     = "GatewayIndexMetricsDao/getAggSearchByTemplateName";
 
     /************************************************************** GatewayNodeMetricsDao **************************************************************/
+
     /**
-     * 获取某个字段分布.(gatewayNode，clientNode)
+     * 获取某 gatewayNode 读分布
+     */
+    public static final String GET_GATEWAY_NODE_FIELD_BY_IP                                  = "GatewayNodeMetricsDao/getAggFieldByIp";
+
+    /**
+     * 获取 topN gatewayNode 读分布
      */
     public static final String GET_GATEWAY_NODE_FIELD                                        = "GatewayNodeMetricsDao/getAggField";
 
     /**
-     * 获取某个字段分布.(gatewayNode，clientNode) by nodeIp
-     */
-    public static final String GET_GATEWAY_NODE_FIELD_BY_IP                                  = "GatewayNodeMetricsDao/getAggFieldByIp";
-    /**
-     * 获取各gatewayNode写入
+     * 获取 topN gatewayNode 写分布
      */
     public static final String GET_GATEWAY_NODE_WRITE                                        = "GatewayNodeMetricsDao/getAggWriteAndGatewayNode";
 
     /**
-     * 获取某个gatewayNode写入 by nodeIp
+     * 获取某 gatewayNode 写分布
      */
     public static final String GET_GATEWAY_NODE_WRITE_BY_IP                                  = "GatewayNodeMetricsDao/getAggWriteAndGatewayNodeByIp";
+
+    /**
+     * 获取某 clientNode 读分布
+     */
+    public static final String GET_CLIENT_NODE_FIELD_BY_IP                                   = "GatewayNodeMetricsDao/getClientNodeAggFieldByIp";
+
+    /**
+     * 获取 topN clientNode 读分布
+     */
+    public static final String GET_CLIENT_NODE_FIELD                                         = "GatewayNodeMetricsDao/getClientNodeAggField";
+
+    /**
+     * 获取 topN clientNode 写分布
+     */
+    public static final String GET_CLIENT_NODE_WRITE                                        = "GatewayNodeMetricsDao/getClientNodeAggWrite";
+
+    /**
+     * 获取某 clientNode 写分布
+     */
+    public static final String GET_CLIENT_NODE_WRITE_BY_IP                                  = "GatewayNodeMetricsDao/getClientNodeAggWriteByIp";
+
+    /**
+     * 获取 gatewayNode 相关的 clientNode ip 信息
+     */
+    public static final String GET_CLIENT_NODE_BY_GATEWAY_NODE                              = "GatewayNodeMetricsDao/getClientNodeByGatewayNode";
 
     /************************************************************** GatewayAppMetricsDao **************************************************************/
     /**
@@ -756,4 +808,39 @@ public class DslsConstant {
      * 获取字段基数大于100w的字段
      */
     public static final String GET_LARGE_FIELDS                                              = "DslFieldUseEsDao/getAllLargeFieldCardinalNumbers";
+
+    /**
+     * 获取集群task耗时分位图
+     */
+    public static final String AGG_CLUSTER_TASK_REAL_TIME_AVG_AND_PERCENT                    = "AriusStatsClusterTaskInfoEsDao/aggClusterTaskCostAvgAndPercentiles";
+
+    /**
+     * 获取集群task数量
+     */
+    public static final String AGG_CLUSTER_TASK_COUNT                                        = "AriusStatsClusterTaskInfoEsDao/aggClusterTaskCount";
+
+    /**
+     * 获取集群节点task统计信息
+     */
+    public static final String GET_AGG_CLUSTER_NODE_TASK_INFO                                = "AriusStatsClusterTaskInfoEsDao/getAggClusterPhyNodesTaskInfo";
+
+    /**
+     * 获取集群节点top的task统计信息
+     */
+    public static final String GET_AGG_CLUSTER_TOP_NODE_TASK_INFO                            = "AriusStatsClusterTaskInfoEsDao/getTopNNodeTaskAggMetricsInfo";
+
+    /**
+     * 获取指定集群节点的task统计信息
+     */
+    public static final String GET_AGG_CLUSTER_SINGLE_NODE_TASK_INFO                         = "AriusStatsClusterTaskInfoEsDao/getAggClusterPhySingleNodeTaskInfo";
+
+    /**
+     * 获取指定集群节点的task详细信息
+     */
+    public static final String GET_CLUSTER_SINGLE_NODE_TASK_DETAIL_INFO                      = "AriusStatsClusterTaskInfoEsDao/getClusterPhySingleNodeTaskDetailInfo";
+
+    /**
+     * 获取指定集群节点有task信息的时间戳
+     */
+    public static final String GET_HAS_CLUSTER_NODE_TASK_DATA_TIME                           = "AriusStatsClusterTaskInfoEsDao/getHasNodeTaskInfoTime";
 }

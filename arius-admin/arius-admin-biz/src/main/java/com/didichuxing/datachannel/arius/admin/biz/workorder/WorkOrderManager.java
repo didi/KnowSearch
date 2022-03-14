@@ -91,11 +91,6 @@ public interface WorkOrderManager {
     OrderDetail getBaseDetail(WorkOrderPO orderPO);
 
     /**
-     * 根据集群名称，获取插件工单任务信息
-     */
-    Result<String> getClusterTaskInfo(String cluster);
-
-    /**
      * 根据状态获取工单列表
      */
     Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status);

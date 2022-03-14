@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 
 public interface TemplateSrvManager {
@@ -23,13 +24,28 @@ public interface TemplateSrvManager {
     List<String> getPhyClusterByOpenTemplateSrv(int srvId);
 
     /**
+     * 查询开启了某个索引服务的物理集群列表
+     * @param clusterPhies
+     * @param srvId
+     * @return
+     */
+    List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId);
+
+    /**
      * 判断物理集群是否打开了某个索引服务
-     * @param phyCluster        物理模板名称
+     * @param phyCluster        物理集群名称
      * @param srvId
      * @return
      */
     boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId);
 
+    /**
+     * 判断物理集群是否打开了某个索引服务
+     * @param phyCluster    ClusterPhy 物理集群对象
+     * @param srvId
+     * @return
+     */
+    boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId);
     /**
      * 获取物理集群可选择的索引服务
      * @param phyCluster
@@ -51,6 +67,12 @@ public interface TemplateSrvManager {
      */
     Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster);
 
+    /**
+     * 获取phyCluster已经开启的索引服务
+     * @param clusterPhy
+     * @return
+     */
+    Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy clusterPhy);
     /**
      * 获取逻辑集群索引服务
      * @param clusterLogicId
@@ -74,11 +96,22 @@ public interface TemplateSrvManager {
 
     /**
      * 为一个物理集群增加一个索引服务
-     * @param phyCluster
-     * @param strId
-     * @return
+     * @param phyCluster 物理集群名称
+     * @param strId 模板服务id
+     * @param operator 操作人员
+     * @return 校验结果
      */
-    Result<Boolean> addTemplateSrv(String phyCluster, String strId, String operator);
+    Result<Boolean> checkTemplateSrv(String phyCluster, String strId, String operator);
+
+    /**
+     * 校验一个接入的集群是否可以开启指定的索引服务
+     * @param httpAddresses client的地址
+     * @param password 集群认证信息
+     * @param strId 模板服务id
+     * @param password 密码
+     * @return 校验结果 返回确认可开启的索引服务id
+     */
+    Result<Boolean> checkTemplateSrvWhenJoin(String httpAddresses, String password, String strId);
 
     /**
      * 为逻辑集群增加一个索引服务

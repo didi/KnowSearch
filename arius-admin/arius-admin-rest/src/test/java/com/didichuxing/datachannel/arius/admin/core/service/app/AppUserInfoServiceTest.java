@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.core.service.app.impl.AppUserInfoServiceImpl;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Transactional
 @Rollback
-public class AppUserInfoServiceTest extends AriusAdminApplicationTests {
+public class AppUserInfoServiceTest extends AriusAdminApplicationTest {
 
     private static final ILog LOGGER = LogFactory.getLog(AppUserInfoServiceTest.class);
 

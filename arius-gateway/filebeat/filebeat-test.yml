@@ -1,0 +1,46 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /home/xiaoju/arius-gateway-rest/log/stats.log
+    fields:
+      flag: 'arius.gateway.join'
+    fields_under_root: true
+    exclude_lines: ['_arius_query']
+
+  - type: log
+    enabled: true
+    paths:
+      - /home/xiaoju/arius-gateway-rest/log/metrics.log
+    fields:
+      flag: 'cn_arius_gateway_metrics'
+    fields_under_root: true
+
+
+processors:
+  - drop_fields:
+      fields: ["host", "ecs","agent","log", "input"]
+      ignore_missing: true
+
+
+setup.template.enabled: false
+setup.ilm.enabled: false
+
+
+output.elasticsearch:
+  hosts: ["10.96.64.13:8060"]
+  bulk_max_size: 1000
+  indices:
+    - index: "arius.gateway.join"
+      when.contains:
+        flag: "arius.gateway.join"
+    - index: "cn_arius_gateway_metrics"
+      when.contains:
+        flag: "cn_arius_gateway_metrics"
+  pipelines:
+    - pipeline: "arius.gateway.join"
+      when.contains:
+        flag: "arius.gateway.join"
+    - pipeline: "cn_arius_gateway_metrics"
+      when.contains:
+        flag: "cn_arius_gateway_metrics"

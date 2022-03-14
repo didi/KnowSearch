@@ -10,6 +10,7 @@ import {
   allCheckedData,
   getCheckedData,
   indexConfigClassifyList,
+  goldConfig,
 } from "./overview-view-config";
 import { LineShard } from "./overview-line-shard";
 import { asyncMicroTasks, resize } from "../../../lib/utils";
@@ -18,6 +19,7 @@ const { Panel } = Collapse;
 import "../style/index";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { setIsUpdate } from "actions/cluster-kanban";
+import { arrayMoveImmutable } from 'array-move';
 
 const OVERVIEW = "overview";
 
@@ -37,6 +39,14 @@ export const OverviewView = memo(() => {
   const reloadPage = () => {
     dispatch(setIsUpdate(!isUpdate));
   };
+
+  const sortEnd = (item, { oldIndex, newIndex }) => {
+    const listsNew = arrayMoveImmutable(checkedData[item], oldIndex, newIndex)
+    checkedData[item] = listsNew;
+    const checkedList = objFlat(checkedData);
+    setCheckedList(OVERVIEW, checkedList);
+    setCheckedData({...checkedData});
+  };  
 
   const getAsyncCheckedList = async () => {
     try {
@@ -58,7 +68,6 @@ export const OverviewView = memo(() => {
     setCheckedData(changeCheckedData);
     reloadPage();
   };
-
   useEffect(() => {
     getAsyncCheckedList();
   }, []);
@@ -70,6 +79,7 @@ export const OverviewView = memo(() => {
         optionList={defaultIndexConfigList}
         checkedData={checkedData}
         setCheckedData={setIndexConfigCheckedData}
+        goldConfig={goldConfig}
       />
     );
   };
@@ -109,7 +119,7 @@ export const OverviewView = memo(() => {
                     className={`${classPrefix}-overview-content-line content-margin-top-20`}
                   >
                     {
-                      checkedData[item] && checkedData[item].length ? <LineShard metricsTypes={checkedData[item]} key={`${item}_${index}`} /> : ""
+                      checkedData[item] && checkedData[item].length ? <LineShard sortEnd={sortEnd} item={item} metricsTypes={checkedData[item]} key={`${item}_${index}`} /> : ""
                     }
                   </div>
                 </Panel>

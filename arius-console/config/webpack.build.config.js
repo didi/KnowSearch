@@ -11,6 +11,10 @@ module.exports = function getwebpackConfig(webpackConfig) {
 
   webpackConfig.output.filename = '[name]-[chunkhash].js';
   webpackConfig.output.publicPath =  `/${pkgJson.systemName}/`;
+  webpackConfig.output.publicPath = pre_build ? publicPath : `/${pkgJson.systemName}/`;
+  if (webpackConfig?.module?.rules[2]?.loader == 'url-loader' && webpackConfig?.module?.rules[2]?.options)  {
+    webpackConfig.module.rules[2].options = {...webpackConfig.module.rules[2].options, 'esModule': false}
+  }
   webpackConfig.plugins = webpackConfig.plugins.filter((plugin) => {
     if (plugin instanceof MiniCssExtractPlugin) {
       return false;

@@ -28,4 +28,9 @@ public class HealthCheckRecordPO extends BaseESPO {
     public String getKey() {
         return cluster + "_" + typeName;
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

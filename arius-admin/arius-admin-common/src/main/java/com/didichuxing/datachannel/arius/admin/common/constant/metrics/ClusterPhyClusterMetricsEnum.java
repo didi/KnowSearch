@@ -64,7 +64,11 @@ public enum ClusterPhyClusterMetricsEnum {
 
                                           SEARCH_LATENCY("searchLatency", "查询耗时"),
 
-                                          INDEXING_LATENCY("indexingLatency", "写入耗时");
+                                          INDEXING_LATENCY("indexingLatency", "写入耗时"),
+
+                                          TASK_COST("taskCost", "任务耗时"),
+
+                                          TASK_COUNT("taskCount", "任务数量");
 
     ClusterPhyClusterMetricsEnum(String type, String desc) {
         this.type = type;

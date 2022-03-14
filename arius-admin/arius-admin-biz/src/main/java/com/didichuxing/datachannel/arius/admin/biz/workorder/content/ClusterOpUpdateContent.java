@@ -1,11 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
-public class ClusterOpUpdateContent extends BaseContent {
+public class ClusterOpUpdateContent extends ClusterOpHostContent {
     /**
      * 物理集群id
      */

@@ -15,22 +15,12 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterOpNewHostOrderDetail extends AbstractOrderDetail {
-
-    /**
-     * type 3:docker 4:host
-     */
-    private int type;
+public class ClusterOpNewHostOrderDetail extends BaseClusterHostOrderDetail {
 
     /**
      * 数据中心
      */
     private String  dataCenter;
-
-    /**
-     * 物理集群名称
-     */
-    private String  phyClusterName;
 
     /**
      * 机器节点
@@ -63,17 +53,8 @@ public class ClusterOpNewHostOrderDetail extends AbstractOrderDetail {
     private String  desc;
 
     /**
-     * 单节点实例数
-     */
-    private Integer  pidCount;
-
-    /**
      * 机器规格
      */
     private String  machineSpec;
 
-    /**
-     * 集群角色 对应主机列表
-     */
-    private List<ESClusterRoleHost> roleClusterHosts;
 }

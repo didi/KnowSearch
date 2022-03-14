@@ -39,7 +39,7 @@
   }
   &-config {
     width: 100%;
-    overflow-x: scroll;
+    overflow-x: auto;
     margin: 20px 0 20px 0;
     &-box {
       min-width: 1170px;
@@ -97,7 +97,7 @@
     flex-wrap: wrap;
     margin-top: 20px;
     &-container {
-      width: calc(50% - 10px);
+      // width: calc(50% - 10px);
       margin: 0 0 20px 0;
       height: 305px;
       border: 1px solid #dcdfe6;
@@ -108,7 +108,7 @@
       height: 305px;
       // 覆盖 echarts tooltip 的 z-index
       div {
-        z-index: 100!important;
+        // z-index: 100!important;
       }
       &-header {
         display: flex;
@@ -202,7 +202,7 @@
 }
 
 .shard-container {
-  overflow-x: scroll;
+  overflow-x: auto;
   overflow-y: hidden;
   .rf-monitor-overview-content-shard {
     min-width: 518px;

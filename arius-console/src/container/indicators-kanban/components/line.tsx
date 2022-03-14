@@ -135,9 +135,14 @@ export const DrawLine = connect(
       // 监听鼠标移动显示 toolTip
       chartMousemove();
 
-      const resize = () => {
-        myChart.current.resize();
-      };
+      const resize = _.throttle(() => {
+        const el: HTMLElement = document.getElementById(index);
+        // 表示该dom未进入可视区
+        if (!el.getBoundingClientRect().width) {
+          return;
+        }
+        myChart.current?.resize();
+      }, 300);
 
       window.addEventListener("resize", resize);
 
@@ -147,7 +152,8 @@ export const DrawLine = connect(
     }, []);
 
     useEffect(() => {
-      option && myChart.current?.setOption(option);
+      // 增加true不合并数据
+      option && myChart.current?.setOption(option, true);
     }, [option]);
 
     const getBigPictureOption = (option: ECOption): ECOption => {

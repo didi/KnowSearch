@@ -15,11 +15,12 @@
         <result column="node_set"        jdbcType="VARCHAR"   property="nodeSet"/>
         <result column="create_time"     jdbcType="TIMESTAMP" property="createTime" />
         <result column="update_time"     jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="machine_spec"    jdbcType="VARCHAR"   property="machineSpec"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, role_cluster_id, hostname,ip, cluster,`port`,`status`,`role`,rack,node_set,create_time, update_time, delete_flag
+        id, role_cluster_id, hostname,ip, cluster,`port`,`status`,`role`,rack,node_set,create_time, update_time, delete_flag, machine_spec
     </sql>
 
     <!-- 保存 角色对应主机 -->
@@ -27,9 +28,9 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_role_cluster_host
-        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, rack, node_set)
+        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, rack, node_set, machine_spec)
         values
-        (#{roleClusterId}, #{hostname}, #{ip}, #{cluster},#{role},#{port},#{status},#{rack}, #{nodeSet})
+        (#{roleClusterId}, #{hostname}, #{ip}, #{cluster},#{role},#{port},#{status},#{rack}, #{nodeSet}, #{machineSpec})
     </insert>
 
     <!-- 根据ID  查询详情 -->
@@ -61,6 +62,18 @@
         where role_cluster_id = #{roleClusterId} and delete_flag = '0'
     </select>
 
+    <!-- 根据多个 role_cluster_id  查询 -->
+    <select id="listByRoleClusterIds" parameterType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_role_cluster_host
+        where delete_flag = '0'
+        and role_cluster_id in
+        <foreach collection="list" separator="," item="item" close=");" open="(">
+            #{item}
+        </foreach>
+    </select>
+
     <select id="listByCondition"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostPO"
             resultMap="BaseResultMap">
@@ -78,6 +91,7 @@
             <if test="role != null">and `role` = #{role}</if>
             <if test="rack != null">and rack = #{rack}</if>
             <if test="nodeSet != null">and node_set = #{nodeSet}</if>
+            <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
             and delete_flag = 0
         </trim>
     </select>
@@ -108,17 +122,18 @@
             <if test="status != null">, `status` = #{status}</if>
             <if test="rack != null">, rack = #{rack}</if>
             <if test="nodeSet != null">, node_set = #{nodeSet}</if>
+            <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
         </trim>
         where id = #{id} and delete_flag = 0;
     </update>
 
     <insert id="insertBatch" parameterType="java.util.List">
         insert into es_role_cluster_host
-        (role_cluster_id, hostname, ip, cluster, `port`, `role`, `status`, rack, node_set)
+        (role_cluster_id, hostname, ip, cluster, `port`, `role`, `status`, rack, node_set, machine_spec)
         values
         <foreach collection="list" index="index" item="item" separator=",">
             (#{item.roleClusterId}, #{item.hostname}, #{item.ip},#{item.cluster}, #{item.port},
-            #{item.role}, #{item.status}, #{item.rack}, #{item.nodeSet})
+            #{item.role}, #{item.status}, #{item.rack}, #{item.nodeSet}, #{item.machineSpec})
         </foreach>
     </insert>
 
@@ -197,6 +212,7 @@
             <if test="status != null">, `status` = #{status}</if>
             <if test="rack != null">, rack = #{rack}</if>
             <if test="nodeSet != null">, node_set = #{nodeSet}</if>
+            <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
              ,delete_flag = 0
         </trim>
         where id = #{id}

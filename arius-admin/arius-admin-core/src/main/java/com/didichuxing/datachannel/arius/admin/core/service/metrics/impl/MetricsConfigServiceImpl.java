@@ -5,9 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.core.service.gateway.impl.GatewayServiceImpl;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +19,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsTy
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.MetricsConfigService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.MetricsConfigDAO;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author wangpengkai
@@ -51,8 +50,7 @@ public class MetricsConfigServiceImpl implements MetricsConfigService {
             return new ArrayList<>();
         }
 
-        List<MetricsConfigInfo> metricsConfigInfos = JSON
-                .parseArray(metricsConfigPO.getMetricInfo(), MetricsConfigInfo.class);
+        List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(metricsConfigPO.getMetricInfo(), MetricsConfigInfo.class);
 
         // 获取对应属性下的配置列表
         List<List<String>> metricsList = metricsConfigInfos

@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.AmsTemplatePhysicalConfVO;
@@ -8,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemp
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.MonitorTaskInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -32,14 +40,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
@@ -55,25 +59,25 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 public class MonitorJobHandler extends AbstractMetaDataJob {
 
     @Autowired
-    private ClusterMonitorTaskDAO clusterMonitorTaskDAO;
+    private ClusterMonitorTaskDAO       clusterMonitorTaskDAO;
 
     @Autowired
-    private ClusterPhyService phyClusterService;
+    private ClusterPhyService           phyClusterService;
 
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private TemplatePhyService          templatePhyService;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private TemplateLogicService        templateLogicService;
 
     @Autowired
-    private ESOpClient               esOpClient;
+    private ESOpClient                  esOpClient;
 
     @Autowired
-    private MonitorMetricsSender     monitorMetricsSender;
+    private MonitorMetricsSender        monitorMetricsSender;
 
     @Autowired
-    private AriusConfigInfoService ariusConfigInfoService;
+    private AriusConfigInfoService      ariusConfigInfoService;
 
     private MetricsRegister             metricsRegister = new MetricsRegister();
 
@@ -97,6 +101,16 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     private Map<String/*clusterName*/, Triple<ESClient, ClusterMonitorTaskPO, ClusterPhy>> localTask = new HashMap<>();
 
     private Set<String> notMonitorCluster = Sets.newHashSet();
+
+    @Value("${monitorJob.thread.initsize:20}")
+    private int  poolSize;
+
+    /**
+     * maxPoolSize，当前monitorjob能支持的最大集群采集个数，
+     * 超过maxPoolSize的集群不会被采集，保证maxPoolSize个集群采集的稳定性
+     */
+    @Value("${monitorJob.thread.maxsize:30}")
+    private int  maxPoolSize;
 
     private ThreadPoolExecutor threadPool;
 
@@ -284,7 +298,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     }
 
     /**
-     * 开始计算AMS节点具体负责的ClusterMonitorTaskEntity任务
+     * 开始计算AMS节点具体负责的ClusterMonitorTaskEntity任务，每个节点最多负责maxPoolSize个采集任务
      * @param jobTotalNu
      * @param taskPOs
      * @return
@@ -302,8 +316,8 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
             //都被monitor
             if(!StringUtils.isEmpty(o1.getMonitorHost()) && !StringUtils.isEmpty(o2.getMonitorHost())){
                 if(o1.getMonitorHost().equals(o2.getMonitorHost())){
-                    //优先获取长时间没有被monitor的
-                    return o1Time.compareTo(o2Time);
+                    //优先获取持续被monitor的，保证monitor的稳定性和持续性
+                    return o2Time.compareTo(o1Time);
                 }else{
                     //都不是本机,不优先
                     if(!o1.getMonitorHost().equals(hostName)
@@ -336,7 +350,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
         });
 
         Double taskCountCeil = Math.ceil(taskPOs.size() * 1.0 / jobTotalNu);
-        int taskCount = taskCountCeil.intValue();
+        int taskCount = taskCountCeil.intValue() > maxPoolSize ? maxPoolSize : taskCountCeil.intValue();
 
         LOGGER.info("class=MonitorJobHandler||method=acquireOwnCluster||hostName={}||count={}||taskPOs={}||env={}",
                 hostName, taskCount, JSON.toJSON(taskPOs), EnvUtil.getStr());
@@ -496,7 +510,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
      */
     private boolean checkThreadPool() {
         if (threadPool == null || threadPool.isShutdown()) {
-            threadPool = new ThreadPoolExecutor(20, 30,
+            threadPool = new ThreadPoolExecutor(poolSize, maxPoolSize + 10,
                     0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<>( 100 ),
                     new BasicThreadFactory.Builder().namingPattern("monitor-cluster-data-collect-%d").build());
@@ -527,6 +541,11 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
 
         // 从admin获取所有模板信息
         List<IndexTemplatePhyWithLogic> indexTemplates = templatePhyService.listTemplateWithLogic();
+
+        Map<String,List<IndexTemplatePhyWithLogic>> indexTemplatesMap = new ConcurrentHashMap<>();
+        if(CollectionUtils.isNotEmpty(indexTemplates)){
+            indexTemplatesMap.putAll(indexTemplates.stream().collect(Collectors.groupingBy(IndexTemplatePhy::getCluster)));
+        }
 
         // 从admin获取所多type的模板信息，包括源模板名和映射到的模板名之间的map
         MulityTypeTemplatesInfo mulityTypeTemplatesInfo = getAllEnabledMulityTypeTemplates("");
@@ -565,8 +584,9 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                                 stopWatch.stop().start("collect");
                                 MonitorClusterJob monitorClusterJob = new MonitorClusterJob(
                                         esClient,
+                                        clusterName,
                                         taskEntityTuple.v3(),
-                                        indexTemplates,
+                                        indexTemplatesMap.getOrDefault(clusterName,Lists.newCopyOnWriteArrayList()),
                                         metricsRegister,
                                         monitorMetricsSender,
                                         indexWorkOrders,

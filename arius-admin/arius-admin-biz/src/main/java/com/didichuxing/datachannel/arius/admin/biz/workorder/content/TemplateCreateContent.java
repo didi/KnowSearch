@@ -62,6 +62,11 @@ public class TemplateCreateContent extends BaseContent {
     private Integer expireTime;
 
     /**
+     * 热数据保存天数, 单位天
+     */
+    private Integer hotTime;
+
+    /**
      * 数据总量 单位G
      */
     private Double  diskQuota;
@@ -107,6 +112,34 @@ public class TemplateCreateContent extends BaseContent {
      */
     private String  routingField;
 
+    /**
+     * dynamic_templates设置
+     * {"dynamic_templates":[{"key":{}}]}
+     */
+    private String dynamicTemplates;
+
+    /**
+     * 是否取消副本
+     */
+    private boolean cancelCopy = false;
+
+    /**
+     * 是否开启异步translog
+     */
+    private boolean asyncTranslog = false;
+
+    /**
+     * 索引模板自定义分词器
+     * {"analyzer":{"key":{}},"tokenizer":{}...}
+     * 支持 analyzer同级的可选项 analyzer、tokenizer、char_filter、filter
+     */
+    private String customerAnalysis;
+
+    /**
+     * 模板服务等级
+     */
+    private Integer level;
+
     /**************************************** 部署信息 ****************************************************/
     /**
      * 物理集群信息
@@ -132,4 +165,9 @@ public class TemplateCreateContent extends BaseContent {
      * 禁用索引_source标识
      */
     private Boolean disableSourceFlags;
+
+    /**
+     * 禁用rollover标识
+     */
+    private Boolean disableIndexRollover;
 }

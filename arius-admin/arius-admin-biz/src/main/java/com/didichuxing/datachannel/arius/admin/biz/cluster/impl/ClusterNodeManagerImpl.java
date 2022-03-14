@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -22,16 +21,14 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Regio
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ClusterNodeManagerImpl implements ClusterNodeManager {
@@ -62,8 +59,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
         List<ClusterLogicRackInfo> clusterRacks = regionRackService.listAllLogicClusterRacks();
 
-        Map<String, ClusterLogic> rack2LogicClusters = getRack2LogicClusterMappings(clusterRacks,
-            clusterLogicService.listAllClusterLogics());
+        Multimap<String, ClusterLogic> rack2LogicClusters = getRack2LogicClusterMappings(clusterRacks,
+                clusterLogicService.listAllClusterLogics());
         Map<String, ClusterLogicRackInfo> rack2ClusterRacks = getRack2ClusterRacks(clusterRacks);
 
         for (RoleClusterHost node : clusterNodes) {
@@ -75,9 +72,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 nodeVO.setRegionId(rackInfo.getRegionId());
             }
 
-            ClusterLogic clusterLogic = rack2LogicClusters.get(clusterRack);
-            if (clusterLogic != null) {
-                nodeVO.setLogicDepart(clusterLogic.getName());
+            Collection<ClusterLogic> clusterLogics = rack2LogicClusters.get(clusterRack);
+            if (!CollectionUtils.isEmpty(clusterLogics)) {
+                nodeVO.setLogicDepart(ListUtils.strList2String(clusterLogics.stream().map(ClusterLogic::getName).collect(Collectors.toList())));
             }
 
             result.add(nodeVO);
@@ -267,25 +264,29 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     /**
-     * 获取所有集群Rack与逻辑集群映射信息
+     * 获取所有集群Rack与逻辑集群映射信息，同样的Rack可以对应多个逻辑集群
      *
      * @param logicClusterRacks 所有集群Racks
-     * @param logicClusters             逻辑集群列表
+     * @param logicClusters     逻辑集群列表
      * @return
      */
-    private Map<String, ClusterLogic> getRack2LogicClusterMappings(List<ClusterLogicRackInfo> logicClusterRacks,
-                                                                     List<ClusterLogic> logicClusters) {
-        Map<String, ClusterLogic> rack2LogicClusterMappings = Maps.newHashMap();
+    private Multimap<String, ClusterLogic> getRack2LogicClusterMappings(List<ClusterLogicRackInfo> logicClusterRacks,
+                                                                        List<ClusterLogic> logicClusters) {
 
         Map<Long, ClusterLogic> logicClusterMappings = ConvertUtil.list2Map(logicClusters, ClusterLogic::getId);
+
+        // 一个rack被多个逻辑集群集群所关联
+        Multimap<String, ClusterLogic> logicClusterId2RackInfoMap = ArrayListMultimap.create();
         for (ClusterLogicRackInfo rackInfo : logicClusterRacks) {
-            if (logicClusterMappings.containsKey(rackInfo.getLogicClusterId())) {
-                rack2LogicClusterMappings.put(createClusterRackKey(rackInfo.getPhyClusterName(), rackInfo.getRack()),
-                    logicClusterMappings.get(rackInfo.getLogicClusterId()));
+            List<Long> logicClusterIds = ListUtils.string2LongList(rackInfo.getLogicClusterIds());
+            if (CollectionUtils.isEmpty(logicClusterIds)) {
+                continue;
             }
+            logicClusterIds.forEach(logicClusterId -> logicClusterId2RackInfoMap.put(createClusterRackKey(rackInfo.getPhyClusterName(),
+                    rackInfo.getRack()), logicClusterMappings.get(logicClusterId)));
         }
 
-        return rack2LogicClusterMappings;
+        return logicClusterId2RackInfoMap;
     }
 
     /**
@@ -328,13 +329,20 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             LOGGER.error("class=ClusterNodeManagerImpl||method=buildHostRegionIdAndLogicName||errMsg=clusterRegion doesn't exit!");
             return;
         }
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterRegion.getLogicClusterId());
 
+        List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
         // region没有绑定到逻辑集群，则不设置关联的逻辑集群
-        if (clusterLogic == null) {
+        if (CollectionUtils.isEmpty(logicClusterIds) ||
+                logicClusterIds.get(0).equals(Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))) {
             return;
         }
 
-        esRoleClusterHostVO.setClusterLogicNames(clusterLogic.getName());
+        //获取逻辑集群对应的名称列表
+        List<String> clusterLogicNames = logicClusterIds.stream()
+                .map(logicClusterId -> clusterLogicService.getClusterLogicById(logicClusterId))
+                .map(ClusterLogic::getName)
+                .collect(Collectors.toList());
+
+        esRoleClusterHostVO.setClusterLogicNames(ListUtils.strList2String(clusterLogicNames));
     }
 }

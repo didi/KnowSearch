@@ -1,17 +1,5 @@
 import * as React from "react";
-import {
-  Button,
-  Checkbox,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Radio,
-  Select,
-  Switch,
-  Upload,
-  Cascader,
-} from 'antd';
+import { Button, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch, Upload, Cascader, Col, Row } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
 const TextArea = Input.TextArea;
@@ -38,7 +26,7 @@ export interface IFormItem {
   label: string;
   type: FormItemType;
   value?: string;
-  options: any[];
+  options?: any[];
   // 内部组件属性注入
   attrs?: any;
   // form属性注入
@@ -51,7 +39,8 @@ export interface IFormItem {
   customClassName?: any;
   radioType?: boolean;
   isCustomStyle?: boolean;
-  customFormItem: any;
+  CustomStyle?: any;
+  customFormItem?: any;
 }
 
 export interface IFormSelect extends IFormItem {
@@ -89,14 +78,10 @@ export const renderFormItem = (item: IFormItem) => {
       return <TextArea rows={2} {...item.attrs} />;
     case FormItemType.select:
       return (
-        <Select
-          key={item.key}
-          placeholder={item.attrs?.placeholder || "请选择"}
-          {...item.attrs}
-        >
+        <Select key={item.key} placeholder={item.attrs?.placeholder || "请选择"} {...item.attrs}>
           {(item as IFormSelect).options &&
             (item as IFormSelect).options.map((v, index) => (
-              <Select.Option key={v.value || v.key || index} value={v.value} disabled={v.disabled} >
+              <Select.Option key={v.value || v.key || index} value={v.value} disabled={v.disabled}>
                 {v.label || v.value}
               </Select.Option>
             ))}
@@ -141,19 +126,12 @@ export const renderFormItem = (item: IFormItem) => {
         </Upload>
       );
     case FormItemType.cascader:
-      return (
-        <Cascader
-          key={item.key}
-          options={(item as IFormSelect).options}
-          {...item.attrs}
-        />
-      );
+      return <Cascader key={item.key} options={(item as IFormSelect).options} {...item.attrs} />;
   }
 };
 
 export const handleFormItem = (formItem: any, formData: any) => {
-  let initialValue =
-    formData[formItem.key] || formItem.defaultValue || undefined;
+  let initialValue = formData[formItem.key] || formItem.defaultValue || undefined;
   let valuePropName = "value";
 
   if (formItem.type === FormItemType.datePicker) {
@@ -175,15 +153,7 @@ export const handleFormItem = (formItem: any, formData: any) => {
 };
 
 export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
-  const {
-    layout,
-    formLayout,
-    formData,
-    formMap,
-    form,
-    wrappedComponentRef,
-    onHandleValuesChange,
-  } = props;
+  const { layout, formLayout, formData, formMap, form, wrappedComponentRef, onHandleValuesChange } = props;
   const onUploadFileChange = (e: any) => {
     if (Array.isArray(e)) {
       return e;
@@ -195,64 +165,62 @@ export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
     layout === "vertical"
       ? null
       : formLayout
-        ? formLayout
-        : {
+      ? formLayout
+      : {
           labelCol: { span: 4 },
           wrapperCol: { span: 16 },
         };
 
+  const renderTwoArray = (formMap) => {
+    return (
+      <Row gutter={[24, 16]}>
+        <Col span={12}>{renderFormItemBox(formMap)[0]}</Col>
+        <Col span={12}>{renderFormItemBox(formMap)[1]}</Col>
+      </Row>
+    );
+  };
+
+  const renderFormItemBox = (formMap) => {
+    return formMap.map((formItem) => {
+      const { initialValue = undefined, valuePropName } = handleFormItem(formItem, formData);
+      if (Array.isArray(formItem)) {
+        return renderTwoArray(formItem);
+      }
+
+      if (formItem.type === FormItemType.text)
+        return (
+          <div key={formItem.key} style={{ display: "flex" }}>
+            <div className="ant-form-item-label">
+              <label>{typeof formItem.label === "string" ? formItem.label + ":" : formItem.label}</label>
+            </div>
+            <div style={{ paddingLeft: 10 }}>{(formItem as IFormCustom).customFormItem}</div>
+          </div>
+        );
+      return (
+        !formItem.invisible && (
+          <Form.Item
+            name={formItem.key}
+            key={formItem.key}
+            label={formItem.label}
+            rules={formItem.rules || [{ required: false, message: "" }]}
+            initialValue={initialValue}
+            valuePropName={valuePropName}
+            className={formItem.isCustomStyle ? "ant-form-item-custom" : null} // 兼容负责人选择后表单样式变大
+            style={formItem.isCustomStyle ? { marginBottom: 24, ...formItem.CustomStyle } : null}
+            getValueFromEvent={formItem.type === FormItemType.upload ? onUploadFileChange : null}
+            {...formItem.formAttrs}
+          >
+            {renderFormItem(formItem)}
+          </Form.Item>
+        )
+      );
+    });
+  };
+
   return (
     <>
-      <Form
-        ref={wrappedComponentRef}
-        form={form}
-        {...defaultLayout}
-        layout={layout || "horizontal"}
-        onValuesChange={onHandleValuesChange}
-      >
-        {formMap.map((formItem) => {
-          const { initialValue = undefined, valuePropName } = handleFormItem(
-            formItem,
-            formData
-          );
-          if (formItem.type === FormItemType.text)
-            return (
-              <div key={formItem.key} style={{ display: "flex" }}>
-                <div className="ant-form-item-label">
-                  <label>
-                    {typeof formItem.label === "string"
-                      ? formItem.label + ":"
-                      : formItem.label}
-                  </label>
-                </div>
-                <div style={{ paddingLeft: 10 }}>
-                  {(formItem as IFormCustom).customFormItem}
-                </div>
-              </div>
-            );
-          return (
-            !formItem.invisible && (
-              <Form.Item
-                name={formItem.key}
-                key={formItem.key}
-                label={formItem.label}
-                rules={formItem.rules || [{ required: false, message: "" }]}
-                initialValue={initialValue}
-                valuePropName={valuePropName}
-                className={formItem.isCustomStyle ? 'ant-form-item-custom' : null} // 兼容负责人选择后表单样式变大
-                style={formItem.isCustomStyle ? {marginBottom: 24} : null}
-                getValueFromEvent={
-                  formItem.type === FormItemType.upload
-                    ? onUploadFileChange
-                    : null
-                }
-                {...formItem.formAttrs}
-              >
-                {renderFormItem(formItem)}
-              </Form.Item>
-            )
-          );
-        })}
+      <Form ref={wrappedComponentRef} form={form} {...defaultLayout} layout={layout || "horizontal"} onValuesChange={onHandleValuesChange}>
+        {renderFormItemBox(formMap)}
       </Form>
     </>
   );

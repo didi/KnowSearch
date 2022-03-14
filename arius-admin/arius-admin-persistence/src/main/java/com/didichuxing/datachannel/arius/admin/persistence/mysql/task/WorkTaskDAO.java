@@ -28,10 +28,13 @@ public interface WorkTaskDAO {
 
     int update(WorkTaskPO param);
 
-    WorkTaskPO getLatestTask(@Param("businessKey") Integer businessKey,
+    WorkTaskPO getLatestTask(@Param("businessKey") String businessKey,
                              @Param("taskType") Integer taskType);
 
-    WorkTaskPO getPengingTask(@Param("businessKey") Integer businessKey,
+    WorkTaskPO getPengingTask(@Param("businessKey") String businessKey,
                               @Param("taskType") Integer taskType);
 
+    List<WorkTaskPO> getPengingTaskByType(@Param("taskType") Integer taskType);
+
+    List<WorkTaskPO> getSuccessTaskByType(@Param("taskType") Integer taskType);
 }

@@ -5,7 +5,12 @@
       "must": [
         {
           "term": {
-            "%s": "%s"
+            "queryRequest": true
+          }
+        },
+        {
+          "term": {
+            "gatewayNode": "%s"
           }
         },
         {

@@ -7,7 +7,7 @@ import { RenderText } from "container/custom-form";
 import { RacksTransfer } from "container/custom-form/racks-transfer";
 import { clusterRegionEdit, clusterRegionNew } from "api/op-cluster-region-api";
 import { notification } from "antd";
-import { INodeDivide } from "@types/index-types";
+import { INodeDivide } from "typesPath/index-types";
 
 const mapStateToProps = (state: any) => ({
   params: state.modal.params,
@@ -85,7 +85,7 @@ const NewRegionModal = (props: {
         : value.racks;
       if (props.params.record?.regionId) {
         value.regionId = props.params.record.regionId;
-        clusterRegionEdit(value)
+        return clusterRegionEdit(value)
           .then(() => {
             notification.success({ message: "编辑成功" });
             props.cb();
@@ -94,7 +94,7 @@ const NewRegionModal = (props: {
             props.dispatch(actions.setModalId(""));
           });
       } else {
-        clusterRegionNew(value)
+        return clusterRegionNew(value)
           .then(() => {
             notification.success({ message: "新建成功" });
             props.cb();

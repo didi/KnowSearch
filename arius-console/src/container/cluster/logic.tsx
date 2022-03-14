@@ -11,8 +11,7 @@ import { queryFormText } from "constants/status-map";
 import { isOpenUp } from "constants/common";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setModalId(modalId, params, cb)),
+  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
 });
 
 const LogicClusterBox = (props) => {
@@ -63,7 +62,9 @@ const LogicClusterBox = (props) => {
       health: queryFromObject.health,
       appId: queryFromObject.appId,
       type: queryFromObject.type,
-    }
+      sortTerm: queryFromObject.sortTerm,
+      orderByDesc: queryFromObject.orderByDesc,
+    };
     getOpLogicClusterList(Params)
       .then((res) => {
         if (res) {
@@ -72,7 +73,7 @@ const LogicClusterBox = (props) => {
             return item;
           });
           setData(res?.bizData);
-          setTotal(res?.pagination?.total)
+          setTotal(res?.pagination?.total);
         }
       })
       .finally(() => {
@@ -93,16 +94,11 @@ const LogicClusterBox = (props) => {
         delete result[key];
       }
     }
-    setqueryFromObject({...result, from: 0, size: 10});
+    setqueryFromObject({ ...result, from: 0, size: 10 });
   };
 
   const getOpBtns = (): ITableBtn[] => {
     return [
-      {
-        label: "新建集群",
-        className: "ant-btn-primary",
-        clickFunc: () => props.setModalId("newCluster", {}, reloadData),
-      },
       {
         className: "ant-btn-primary",
         label: "申请集群",
@@ -112,13 +108,33 @@ const LogicClusterBox = (props) => {
     ];
   };
 
-  const handleChange = (pagination) => {
-    setqueryFromObject((state) => ({
-      ...state,
-      from: (pagination.current - 1) * pagination.pageSize,
-      size: pagination.pageSize,
-    }));
-  }
+  const handleChange = (pagination, filters, sorter) => {
+    const sorterObject: { [key: string]: any } = {};
+    // 排序
+    if (sorter.columnKey && sorter.order) {
+      switch (sorter.columnKey) {
+        case "level":
+          sorterObject.sortTerm = "level";
+          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
+          break;
+        default:
+          break;
+      }
+    }
+    setqueryFromObject((state) => {
+      if (!sorter.order) {
+        delete state.sortTerm;
+        delete state.orderByDesc;
+      }
+
+      return {
+        ...state,
+        ...sorterObject,
+        from: (pagination.current - 1) * pagination.pageSize,
+        size: pagination.pageSize,
+      };
+    });
+  };
 
   return (
     <>
@@ -143,7 +159,7 @@ const LogicClusterBox = (props) => {
             rowKey="id"
             dataSource={data}
             attrs={{
-              onChange: handleChange
+              onChange: handleChange,
             }}
             key={JSON.stringify({
               authType: queryFromObject.authType,
@@ -156,11 +172,11 @@ const LogicClusterBox = (props) => {
             reloadData={reloadData}
             getOpBtns={getOpBtns}
             paginationProps={{
-              position: 'bottomRight',
+              position: "bottomRight",
               showQuickJumper: true,
               total: total,
               showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
+              pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
               showTotal: (total) => `共 ${total} 条`,
             }}
           />

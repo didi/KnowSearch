@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -63,6 +64,11 @@ public class DslAnalyzeResultQpsPO extends BaseESPO {
     @Override
     public String getKey() {
         return String.format("%d_%s_%s", this.appid, this.dslTemplateMd5, date);
+    }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
     }
 
     /**

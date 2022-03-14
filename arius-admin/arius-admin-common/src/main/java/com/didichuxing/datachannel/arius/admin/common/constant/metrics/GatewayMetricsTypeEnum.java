@@ -33,13 +33,16 @@ public enum GatewayMetricsTypeEnum {
 
 
 	/**
-	 * 节点 metrics
+	 * gateway node metrics
 	 */
-
 	WRITE_GATEWAY_NODE("node", "writeGatewayNode", MetricsConstant.DOC_COUNT, "gateway节点写入量分布"),
 	QUERY_GATEWAY_NODE("node", "queryGatewayNode", MetricsConstant.DOC_COUNT, "gateway节点查询分布"),
-	QUERY_CLIENT_NODE("node", "queryClientNode", MetricsConstant.DOC_COUNT, "clientNode查询分布"),
 
+	/**
+	 * es client node metrics
+	 */
+	WRITE_CLIENT_NODE("clientNode", "writeClientNode", MetricsConstant.DOC_COUNT, "clientNode节点写入量分布"),
+	QUERY_CLIENT_NODE("clientNode", "queryClientNode", MetricsConstant.DOC_COUNT, "clientNode节点查询分布"),
 
 	/**
 	 * 项目 metrics

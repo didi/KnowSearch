@@ -42,7 +42,7 @@ public class MetricsValueConvertUtils {
 	 * uniform clusterPhy node percentage unit
 	 * @param variousLineChartMetrics
 	 */
-	public static void convertClusterPhyNodeMetricsPercent(List<VariousLineChartMetrics> variousLineChartMetrics) {
+	public static void convertClusterPhyMetricsPercent(List<VariousLineChartMetrics> variousLineChartMetrics) {
 		variousLineChartMetrics.parallelStream()
 				.filter(element -> getPercentMetricsType().contains(element.getType()))
 				.forEach(MetricsValueConvertUtils::convertCell);

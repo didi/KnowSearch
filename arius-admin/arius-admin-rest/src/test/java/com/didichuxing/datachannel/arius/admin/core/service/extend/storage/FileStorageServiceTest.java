@@ -1,10 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.storage;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.remote.storage.s3.S3FileStorageHandle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,39 +22,38 @@ import java.io.IOException;
  */
 @Transactional
 @Rollback
-public class FileStorageServiceTest extends AriusAdminApplicationTests {
+public class FileStorageServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private FileStorageService fileStorageService;
 
+    @MockBean
+    private S3FileStorageHandle s3FileStorageHandle;
+
     @Test
     void getDownloadBaseUrl() {
-        Result<String> result = fileStorageService.getDownloadBaseUrl();
-        Assertions.assertEquals(0, result.getCode());
+        Mockito.when(s3FileStorageHandle.getDownloadBaseUrl()).thenReturn("");
+        Assertions.assertTrue(fileStorageService.getDownloadBaseUrl().success());
     }
 
     @Test
     void upLoadTest() throws IOException {
-        String filePath = "/Users/didi/wpkShell/test.sh";
-        String fileName = "test.sh";
-        File file = new File(filePath);
-        FileInputStream fileInputStream = new FileInputStream(file);
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(fileName, fileInputStream);
-        Result<String> upload = fileStorageService.upload(fileName, null, mockMultipartFile);
-        Assertions.assertEquals("",upload.getData());
+        Mockito.when(s3FileStorageHandle.upload(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+                .thenReturn(Result.buildSucc());
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("test", new byte[10]);
+        Assertions.assertTrue(fileStorageService.upload("test", "test", mockMultipartFile).success());
     }
 
     @Test
     void downLoadTest() {
-        String fileName = "test.sh";
-        Result<MultipartFile> download = fileStorageService.download(fileName);
-        Assertions.assertEquals(0, download.getCode());
+        Mockito.when(s3FileStorageHandle.download(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Result<MultipartFile> download = fileStorageService.download("test");
+        Assertions.assertTrue(download.success());
     }
 
     @Test
     void removeTest(){
-        String fileName = "test.sh";
-        Result<Void> remove = fileStorageService.remove(fileName);
-        Assertions.assertTrue(remove.success());
+        Mockito.when(s3FileStorageHandle.remove(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Assertions.assertTrue(fileStorageService.remove(Mockito.anyString()).success());
     }
 }

@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,20 +64,16 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
         if (pageDTO instanceof IndicesConditionDTO) {
             IndicesConditionDTO indicesConditionDTO = (IndicesConditionDTO) pageDTO;
 
-            if (StringUtils.isNotBlank(indicesConditionDTO.getClusterPhyName())
-                && !clusterPhyManager.isClusterExists(indicesConditionDTO.getClusterPhyName())) {
+            if(StringUtils.isBlank(indicesConditionDTO.getClusterPhyName())) {
+                return Result.buildParamIllegal("物理集群查询条件不可为空");
+            }
+
+            if (!clusterPhyManager.isClusterExists(indicesConditionDTO.getClusterPhyName())) {
                 return Result.buildParamIllegal("物理集群不存在");
             }
 
             if (StringUtils.isNotBlank(indicesConditionDTO.getHealth()) && !IndexStatusEnum.isStatusExit(indicesConditionDTO.getHealth())) {
                 return Result.buildParamIllegal(String.format("健康状态%s非法", indicesConditionDTO.getHealth()));
-            }
-
-            List<String> appAuthClusterPhyNameList = clusterPhyManager.getAppClusterPhyNames(appId);
-            if (!AriusObjUtils.isBlack(indicesConditionDTO.getClusterPhyName())
-                && (CollectionUtils.isEmpty(appAuthClusterPhyNameList)
-                    || !appAuthClusterPhyNameList.contains(indicesConditionDTO.getClusterPhyName()))) {
-                return Result.buildFail(String.format("项目[%s]无查询集群[%s]权限", appId, indicesConditionDTO.getClusterPhyName()));
             }
             
             String indexName = indicesConditionDTO.getIndex();
@@ -133,12 +130,13 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
             return PaginationResult.buildFail("获取索引查询信息失败");
         }
 
-        List<String> finallyClusterPhyNameList = getFinallyCluster(condition.getClusterPhyName(), appId);
-        if (CollectionUtils.isEmpty(finallyClusterPhyNameList)) {
-            return PaginationResult.buildSucc();
+        if(StringUtils.isBlank(condition.getClusterPhyName())){
+            return PaginationResult.buildFail("集群信息为空，必须选择一个集群");
         }
 
-        return getIndexCatCellsFromES(finallyClusterPhyNameList, condition);
+        List<String> clusterPhyNameList = new ArrayList<>();
+        clusterPhyNameList.add(condition.getClusterPhyName());
+        return getIndexCatCellsFromES(clusterPhyNameList, condition);
     }
 
     /**
@@ -177,25 +175,6 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
             return (IndicesConditionDTO) pageDTO;
         }
         return null;
-    }
-
-    /**
-     * 获取项目下有权限的集群列表
-     * @param cluster
-     * @param appId
-     * @return
-     */
-    private List<String> getFinallyCluster(String cluster, Integer appId) {
-        List<String> appAuthClusterPhyNameList = clusterPhyManager.getAppClusterPhyNames(appId);
-        if (CollectionUtils.isEmpty(appAuthClusterPhyNameList)) {
-            return Lists.newArrayList();
-        }
-
-        if (!AriusObjUtils.isBlack(cluster) && appAuthClusterPhyNameList.contains(cluster)) {
-            return Lists.newArrayList(cluster);
-        } else {
-            return appAuthClusterPhyNameList;
-        }
     }
 
     /**
@@ -277,8 +256,8 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
                     indexCatCell.getCluster(), indexCatCell.getIndex(), e.getMessage(), e);
             }
 
-            indexCatCell.setReadFlag(writeAndReadBlockFromMerge.getV1());
-            indexCatCell.setWriteFlag(writeAndReadBlockFromMerge.getV2());
+            indexCatCell.setReadFlag(writeAndReadBlockFromMerge.getV1() != null && writeAndReadBlockFromMerge.getV1());
+            indexCatCell.setWriteFlag(writeAndReadBlockFromMerge.getV2() != null && writeAndReadBlockFromMerge.getV2());
         }
 
         indexCatCellWithBlockInfo.addAll(indexCatCellList);
@@ -295,10 +274,10 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
         writeAndReadBlockFromDefaultSettingTuple.setV1(null);
         writeAndReadBlockFromDefaultSettingTuple.setV2(null);
 
-        JSONObject defaultsSettingsObj = JSON.parseObject(indexConfig.getOther(DEFAULTS).toString());
-        if (null == defaultsSettingsObj) {
+        if (AriusObjUtils.isNull(indexConfig.getOther(DEFAULTS))) {
             return writeAndReadBlockFromDefaultSettingTuple;
         }
+        JSONObject defaultsSettingsObj = JSON.parseObject(indexConfig.getOther(DEFAULTS).toString());
 
         JSONObject indexSettingsObj = JSON.parseObject(defaultsSettingsObj.get(INDEX).toString());
         if (null == indexSettingsObj) {
@@ -360,14 +339,14 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
         //set read block info
         if (null != tupleFromSetUp.getV1()) {
             mergeBlockTuple.setV1(tupleFromSetUp.getV1());
-        } else {
+        } else if (null != tupleFromDefault.getV1()) {
             mergeBlockTuple.setV1(tupleFromDefault.getV1());
         }
 
-        //set read block info
+        //set write block info
         if (null != tupleFromSetUp.getV2()) {
             mergeBlockTuple.setV2(tupleFromSetUp.getV2());
-        } else {
+        } else if (null != tupleFromDefault.getV2()) {
             mergeBlockTuple.setV2(tupleFromDefault.getV2());
         }
 

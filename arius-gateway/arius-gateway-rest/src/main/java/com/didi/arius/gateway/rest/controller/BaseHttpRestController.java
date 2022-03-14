@@ -3,6 +3,7 @@ package com.didi.arius.gateway.rest.controller;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.exception.QueryDslLengthException;
+import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.utils.Convert;
@@ -36,7 +37,7 @@ import java.util.*;
 
 public abstract class BaseHttpRestController implements IRestHandler {
 
-    protected static final Logger logger = LoggerFactory.getLogger( BaseHttpRestController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(BaseHttpRestController.class);
     protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
     protected static final Logger traceLogger = LoggerFactory.getLogger(QueryConsts.TRACE_LOGGER);
     protected static final Logger auditLogger = LoggerFactory.getLogger(QueryConsts.AUDIT_LOGGER);
@@ -72,7 +73,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
     protected String actionName = this.getClass().getSimpleName();
 
     @PostConstruct
-    public void init(){
+    public void init() {
         register();
     }
 
@@ -96,7 +97,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
             try {
                 channel.sendResponse(new BytesRestResponse(channel, ex));
             } catch (IOException ioe) {
-                BytesRestResponse response = new BytesRestResponse( RestStatus.INTERNAL_SERVER_ERROR);
+                BytesRestResponse response = new BytesRestResponse(RestStatus.INTERNAL_SERVER_ERROR);
                 channel.sendResponse(response);
             }
         }
@@ -109,13 +110,11 @@ public abstract class BaseHttpRestController implements IRestHandler {
     protected abstract void register();
 
     /**
-     *
      * @return
      */
     protected abstract String name();
 
     /**
-     *
      * @param queryContext
      * @throws Exception
      */
@@ -123,7 +122,6 @@ public abstract class BaseHttpRestController implements IRestHandler {
 
     /************************************************************** protected method **************************************************************/
     /**
-     *
      * @param queryContext
      * @param restResponse
      */
@@ -139,11 +137,15 @@ public abstract class BaseHttpRestController implements IRestHandler {
 
     protected void checkToken(QueryContext queryContext) {
         appService.checkToken(queryContext);
-        String encode = Base64.getEncoder().encodeToString(String.format("%s", "user_" + queryContext.getAppid() + ":" + queryContext.getAppDetail().getVerifyCode()).getBytes( StandardCharsets.UTF_8));
+        String encode = Base64.getEncoder().encodeToString(String.format("%s", "user_" + queryContext.getAppid() + ":" + queryContext.getAppDetail().getVerifyCode()).getBytes(StandardCharsets.UTF_8));
         queryContext.getRequest().putHeader(AUTHORIZATION, "Basic " + encode);
     }
 
     protected void preRequest(QueryContext queryContext) {
+        if (queryContext.isFromKibana()) {
+            // 如果是来自 kibana 的请求，则设置为原生查询
+            queryContext.setSearchType(AppDetail.RequestType.Origin_Cluster.getType());
+        }
         if (queryContext.getPostBody() != null && queryContext.getPostBody().length() > queryConfig.getDslMaxLength()) {
             throw new QueryDslLengthException(String.format("query length(%d) > %d exception", queryContext.getPostBody().length(), queryConfig.getDslMaxLength()));
         }
@@ -153,6 +155,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
         if (queryContext.isDetailLog()) {
             JoinLogContext joinLogContext = queryContext.getJoinLogContext();
             joinLogContext.setAppid(queryContext.getAppid());
+            joinLogContext.setTraceid(queryContext.getTraceid());
             joinLogContext.setRequestId(queryContext.getRequestId());
             joinLogContext.setRequestType(queryContext.getAppDetail().getSearchType());
             joinLogContext.setMethod(queryContext.getMethod());
@@ -186,7 +189,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
             joinLogContext.setExceptionName(e.getClass().getName());
             joinLogContext.setStack(Convert.logExceptionStack(e));
             joinLogContext.setTotalCost(System.currentTimeMillis() - queryContext.getRequestTime());
-            joinLogContext.setInternalCost( joinLogContext.getTotalCost() - joinLogContext.getEsCost());
+            joinLogContext.setInternalCost(joinLogContext.getTotalCost() - joinLogContext.getEsCost());
             joinLogContext.setSinkTime(System.currentTimeMillis());
 
             String log = joinLogContext.toString();
@@ -247,7 +250,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
         context.setRestName(name());
         context.setJoinLogContext(new JoinLogContext());
 
-        String searchId = request.header( QueryConsts.HEAD_SEARCH_ID);
+        String searchId = request.header(QueryConsts.HEAD_SEARCH_ID);
         String clusterId = request.header(QueryConsts.HEAD_CLUSTER_ID);
         String user = request.header(QueryConsts.HEAD_USER);
         String authentication = request.header(QueryConsts.HEAD_AUTHORIZATION);
@@ -283,7 +286,8 @@ public abstract class BaseHttpRestController implements IRestHandler {
             request.params().remove(QueryConsts.GET_CLUSTER_ID);
         }
 
-        context.setRequestId( UUID.randomUUID().toString());
+        context.setTraceid(traceid);
+        context.setRequestId(UUID.randomUUID().toString());
         context.setMethod(request.method());
         context.setSearchId(searchId);
         context.setClusterId(clusterId);
@@ -291,13 +295,15 @@ public abstract class BaseHttpRestController implements IRestHandler {
         context.setClientVersion(clientVersion);
 
         String kibanaVersion = request.header(QueryConsts.HEAD_KIBANA_VERSION);
-        context.setFromKibana(kibanaVersion != null);
+
+        // 保存 kibana 数据的索引一般是：.kibana_task_manager、.reporting、.kibana_arius 等
+        context.setFromKibana(request.rawPath().startsWith("/.") || request.rawPath().startsWith("."));
         context.setNewKibana(kibanaVersion != null && kibanaVersion.startsWith(QueryConsts.NEW_KIBANA_VERSION_START));
 
         String uri = request.uri();
         int pathEndPos = uri.indexOf('?');
-        if (pathEndPos > 0 && pathEndPos < uri.length())  {
-            context.setQueryString(uri.substring(pathEndPos+1));
+        if (pathEndPos > 0 && pathEndPos < uri.length()) {
+            context.setQueryString(uri.substring(pathEndPos + 1));
         } else {
             context.setQueryString("");
         }

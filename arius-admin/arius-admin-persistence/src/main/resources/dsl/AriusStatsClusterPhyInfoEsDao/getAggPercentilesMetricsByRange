@@ -12,6 +12,13 @@
         },
         {
           "term": {
+        	 "physicCluster": {
+        	   "value": "1"
+        	  }
+           }
+        },
+        {
+          "term": {
             "percentilesType": {
               "value": "%s"
             }

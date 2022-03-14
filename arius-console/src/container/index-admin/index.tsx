@@ -35,7 +35,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   const [queryFromColumn, setQueryFormColumns] = useState(formColumns);
   const [current, setCurrent] = useState(1);
   const [queryData, setQueryData] = useState({
-    clusterPhyName: "",
+    clusterPhyName: null,
     index: "",
     health: "",
     from: 0,
@@ -44,6 +44,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
     sortTerm: "",
   });
   const [columns, setColumns] = useState([])
+  const [initValue, setInitValue] = useState({})
 
   const getAsyncData = async (num = 1) => {
     if(num >= 3) {
@@ -52,8 +53,11 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
       setIsLoading(false);
       return;
     }
-    setIsLoading(true);
     try {
+      if (queryData.clusterPhyName === null) {
+        return;
+      }
+      setIsLoading(true);
       const res = await getIndexAdminData(queryData);
       const { bizData, pagination: { total } } = res;
       if(!bizData) {
@@ -79,6 +83,16 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   const getAsyncClusterName = async () => {
     const clusterNameList = await getClusterNameList();
     if (clusterNameList && clusterNameList.length > 0) {
+      setInitValue({clusterPhyName: clusterNameList[0]})
+      setQueryData({
+        clusterPhyName: clusterNameList[0],
+        index: "",
+        health: "",
+        from: 0,
+        size: 10,
+        orderByDesc: false,
+        sortTerm: "",
+      })
       formColumns[1].options = clusterNameList.map(item => ({
         title: item,
         value: item,
@@ -117,7 +131,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
     })
   };
 
-  const modalReloadData = (del?: boolean) => {
+  const modalReloadData = function (del?: boolean) {
     // 删除操作，
     if(del) {
       setQueryData({
@@ -130,7 +144,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
       setCurrent(1)
       return;
     }
-    getAsyncData();
+    setQueryData((state) => ({...state}));
   }
 
   const onSelectChange = (selectedRowKeys, records) => {
@@ -181,12 +195,20 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   }, [selectedRowKeys]);
 
   const getCheckList = async () => {
-    const checkList: string[] = await getCheckedList('indexSearch');
-    return checkList;
+    const checkListStr: string = await window.localStorage.getItem('indexSearch');
+    if (checkListStr) {
+      try {
+        return JSON.parse(checkListStr);
+      } catch(err) {
+        console.log(err);
+      }
+    } else {
+      return []
+    }
   }
 
   const saveCheckFn = (list: string[]) => {
-    setCheckedList('indexSearch', list)
+    window.localStorage.setItem('indexSearch', JSON.stringify(list));
   }
 
   return (
@@ -198,7 +220,8 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
           onSearch={handleSubmit}
           onChange={() => { }}
           columns={queryFromColumn}
-          initialValues={{}}
+          initialValues={initValue}
+          key={JSON.stringify(initValue)}
           isResetClearAll
           {...queryFormText}
           defaultCollapse

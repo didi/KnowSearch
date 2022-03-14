@@ -37,14 +37,14 @@ public interface WorkTaskManager {
      * @param task task
      * @return int
      */
-    int insert(WorkTask task);
+    void insert(WorkTask task);
 
     /**
      * 通过id更新任务
      * @param task task
      * @return int
      */
-    void updateTaskById(WorkTask task);
+    void updateTask(WorkTask task);
 
     /**
      * 通过id获取任务
@@ -75,7 +75,7 @@ public interface WorkTaskManager {
      * @param businessKey 业务id
      * @param taskType 任务类型
      */
-    Result<WorkTask> getLatestTask(Integer businessKey, Integer taskType);
+    Result<WorkTask> getLatestTask(String businessKey, Integer taskType);
 
     /**
      * 通过businessKey获取待处理任务
@@ -83,6 +83,19 @@ public interface WorkTaskManager {
      * @param businessKey 业务id
      * @param taskType 任务类型
      */
-    Result<WorkTask> getPengingTask(Integer businessKey, Integer taskType);
+    WorkTask getPengingTask(String businessKey, Integer taskType);
 
+    /**
+     * 通过taskType获取待处理任务
+     *
+     * @param taskType 任务类型
+     */
+    List<WorkTask> getPengingTaskByType(Integer taskType);
+
+    /**
+     * 根据类型获取失败任务
+     * @param taskType
+     * @return
+     */
+    List<WorkTask> getSuccessTaskByType(Integer taskType);
 }

@@ -59,4 +59,9 @@ public class DslAnalyzeResultTypePO extends BaseESPO {
     public String getKey() {
         return String.format("%d_%s", appid, date);
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import  { Modal } from 'antd';
-import { IRegionTaskItem } from '@types/cluster/physics-type';
+import { IRegionTaskItem } from 'typesPath/cluster/physics-type';
 import { renderOperationBtns } from 'container/custom-component';
 import { TaskItemModal } from 'container/cluster/physics-detail/region-task-item-modal';
 
@@ -60,7 +60,7 @@ export const getPhysicsRegionTaskItemColumns = () => {
       width: '15%',
       render: (text: number, record: IRegionTaskItem) => {
         const btns = operationList;
-        return renderOperationBtns(btns, record);
+        return renderOperationBtns(btns as any, record);
       },
     },
   ];

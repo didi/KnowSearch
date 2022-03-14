@@ -53,8 +53,10 @@ public class ESPhyClusterTemplateSrvController {
     @PutMapping("/{clusterName}/{templateSrvId}")
     @ResponseBody
     @ApiOperation(value = "打开指定集群的指定索引服务", notes = "")
-    public Result<Boolean> addTemplateSrvId(HttpServletRequest request, @PathVariable String clusterName, @PathVariable String templateSrvId) {
-        return templateSrvManager.addTemplateSrv(clusterName, templateSrvId, HttpRequestUtils.getOperator(request));
+    public Result<Boolean> addTemplateSrvId(HttpServletRequest request,
+                                            @PathVariable("clusterName") String clusterName,
+                                            @PathVariable("templateSrvId") String templateSrvId) {
+        return templateSrvManager.checkTemplateSrv(clusterName, templateSrvId, HttpRequestUtils.getOperator(request));
     }
 
     @DeleteMapping("/{clusterName}/{templateSrvId}")

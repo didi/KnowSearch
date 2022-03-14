@@ -1,6 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import com.alibaba.fastjson.JSON;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
@@ -15,11 +19,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiT
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
@@ -188,10 +187,8 @@ public class ESTemplateDAO extends BaseESDAO {
             templateConfig.setOrder(TEMPLATE_DEFAULT_ORDER);
         }
 
-        // 新建索引模板时配置索引为单type索引
-        if (EnvUtil.isOnline() || EnvUtil.isPre()) {
-            templateConfig.setSettings(SINGLE_TYPE, "true");
-        }
+
+        templateConfig.setSettings(SINGLE_TYPE, "true");
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
@@ -208,8 +205,9 @@ public class ESTemplateDAO extends BaseESDAO {
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
 
+        // 向ES中创建模板流程
         ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
         return response.getAcknowledged();
     }
@@ -371,27 +369,35 @@ public class ESTemplateDAO extends BaseESDAO {
 
         ESClient srcClient = esOpClient.getESClient(srcCluster);
         ESClient tgtClient = esOpClient.getESClient(tgtCluster);
+        ESIndicesPutTemplateResponse response = new ESIndicesPutTemplateResponse();
+        response.setAcknowledged(false);
 
-        // 获取es中原来index template的配置
-        ESIndicesGetTemplateResponse getSrcTemplateResponse = srcClient.admin().indices()
-            .prepareGetTemplate(srcTemplateName).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        TemplateConfig srcTemplateConfig = getSrcTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+        try {
+            // 获取es中原来index template的配置
+            ESIndicesGetTemplateResponse getSrcTemplateResponse = srcClient.admin().indices()
+                .prepareGetTemplate(srcTemplateName).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            TemplateConfig srcTemplateConfig = getSrcTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
-        // 获取es中原来index template的配置
-        ESIndicesGetTemplateResponse getTgtTemplateResponse = tgtClient.admin().indices()
-            .prepareGetTemplate(tgtTemplateName).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        TemplateConfig tgtTemplateConfig = getTgtTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+            // 获取es中目标index template的配置
+            ESIndicesGetTemplateResponse getTgtTemplateResponse = tgtClient.admin().indices()
+                .prepareGetTemplate(tgtTemplateName).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            TemplateConfig tgtTemplateConfig = getTgtTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
-        if (srcTemplateConfig == null || tgtTemplateConfig == null) {
-            return false;
+            if (srcTemplateConfig == null || tgtTemplateConfig == null) {
+                return false;
+            }
+
+            tgtTemplateConfig.setMappings(srcTemplateConfig.getMappings());
+            tgtTemplateConfig.setAliases(srcTemplateConfig.getAliases());
+            tgtTemplateConfig.setVersion(tgtClient.getEsVersion());
+
+            response = tgtClient.admin().indices().preparePutTemplate(tgtTemplateName)
+                .setTemplateConfig(tgtTemplateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOGGER.error(
+                "class=ESTemplateDAO||method=copyMappingAndAlias||srcCluster={}||srcTemplateName={}||tgtCluster={}||tgtTemplateName={}",
+                srcCluster, srcTemplateName, tgtCluster, tgtTemplateName, e);
         }
-
-        tgtTemplateConfig.setMappings(srcTemplateConfig.getMappings());
-        tgtTemplateConfig.setAliases(srcTemplateConfig.getAliases());
-        tgtTemplateConfig.setVersion(tgtClient.getEsVersion());
-
-        ESIndicesPutTemplateResponse response = tgtClient.admin().indices().preparePutTemplate(tgtTemplateName)
-            .setTemplateConfig(tgtTemplateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
         return response.getAcknowledged();
     }

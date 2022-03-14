@@ -233,6 +233,7 @@ public class RestCommonController extends ESBaseController {
         controller.registerHandler(GET, "/_xpack/watcher/stats", this);
         controller.registerHandler(GET, "/_xpack/watcher/stats/{metric}", this);
         controller.registerHandler(GET, "/_xpack/watcher/watch/{id}", this);
+        controller.registerHandler(GET, "/_all/_rollup/data", this);
         controller.registerHandler(GET, "/{index}", this);
         controller.registerHandler(GET, "/{index}/{type}", this);
         controller.registerHandler(GET, "/{index}/_cache/clear", this);
@@ -548,6 +549,8 @@ public class RestCommonController extends ESBaseController {
 
         controller.registerHandler(GET, "/_refresh", this);
         controller.registerHandler(POST, "/_refresh", this);
+        
+        controller.registerHandler(GET, "/_resolve/index/{name}", this);
 
 //        controller.registerHandler(POST, "/{index}/_analyze", this);
 //        controller.registerHandler(GET, "/{index}/_analyze", this);

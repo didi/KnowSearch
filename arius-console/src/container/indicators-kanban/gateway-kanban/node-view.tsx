@@ -21,6 +21,9 @@ import {
 } from "../../../api/gateway-kanban";
 import "../style/index";
 import { setIsUpdate } from "actions/gateway-kanban";
+import { arrayMoveImmutable } from 'array-move';
+import DragGroup from './../../../packages/drag-group/DragGroup';
+
 const { Panel } = Collapse;
 
 export const classPrefix = "rf-monitor";
@@ -53,6 +56,14 @@ export const NodeView = memo(() => {
   const isFirst = useRef(true);
   const timeDiff = useRef(0);
   const prevTopNu = useRef(topNu);
+
+  const sortEnd = ({ oldIndex, newIndex }) => {
+    const listsNew = arrayMoveImmutable(checkedData['节点性能指标'], oldIndex, newIndex)
+    checkedData['节点性能指标'] = listsNew;
+    const checkedList = objFlat(checkedData);
+    setCheckedList(NODE, checkedList);
+    setMetricsTypes([...listsNew]);
+  };
 
   const getAsyncCheckedList = async () => {
     try {
@@ -176,15 +187,27 @@ export const NodeView = memo(() => {
         </div>
       </div>
       <div className={`${classPrefix}-overview-content-line`}>
-        {metricsTypes.map((item, index) => (
-          <Line
-            key={`${item}_${index}`}
-            title={indexConfigData[item]?.title()}
-            index={`${item}_${index}`}
-            option={viewData[index] || {}}
-            isLoading={isLoading}
-          />
-        ))}
+        <DragGroup
+          dragContainerProps={{
+            onSortEnd: sortEnd,
+            axis: "xy",
+            distance: 100
+          }}
+          containerProps={{
+            grid: 12,
+            gutter: [10, 10],
+          }}
+        >
+          {metricsTypes.map((item, index) => (
+            <Line
+              key={`${item}`}
+              title={indexConfigData[item]?.title()}
+              index={`${item}_${index}`}
+              option={viewData[index] || {}}
+              isLoading={isLoading}
+            />
+          ))}
+        </DragGroup>
       </div>
     </>
   );

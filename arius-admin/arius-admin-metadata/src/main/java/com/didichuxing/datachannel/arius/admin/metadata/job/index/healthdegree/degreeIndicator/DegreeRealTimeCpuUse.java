@@ -13,8 +13,8 @@ public class DegreeRealTimeCpuUse extends AbstractDegreeIndicator {
         double avgCpuUse;
         double totalCpuUse = 0.0;
         for (ESIndexToNodeStats esESIndexToNodeStats : degreeParam.getEsIndexToNodeStats()) {
-            if(StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("os-cpu_percent"))){
-                totalCpuUse += Double.parseDouble(esESIndexToNodeStats.getMetrics().get("os-cpu_percent"));
+            if(StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("os-cpu-percent"))){
+                totalCpuUse += Double.parseDouble(esESIndexToNodeStats.getMetrics().get("os-cpu-percent"));
             }
         }
 

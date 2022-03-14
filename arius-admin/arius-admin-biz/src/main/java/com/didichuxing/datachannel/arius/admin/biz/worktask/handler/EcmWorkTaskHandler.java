@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EsConfigAction;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.detail.OrderDetailBaseVO;
@@ -55,25 +54,25 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     private static final ILog      LOGGER = LogFactory.getLog(EcmWorkTaskHandler.class);
 
     @Autowired
-    private EcmTaskManager ecmTaskManager;
+    private EcmTaskManager         ecmTaskManager;
 
     @Autowired
-    private WorkTaskManager workTaskManager;
+    private WorkTaskManager        workTaskManager;
 
     @Autowired
-    private ESClusterService esClusterService;
+    private ESClusterService       esClusterService;
 
     @Autowired
     private ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private WorkOrderManager workOrderManager;
+    private WorkOrderManager       workOrderManager;
 
     @Autowired
     private ESPluginService        esPluginService;
 
     @Autowired
-    private ClusterPhyService esClusterPhyService;
+    private ClusterPhyService      esClusterPhyService;
 
     @Override
     public Result<WorkTask> addTask(WorkTask workTask) {
@@ -87,7 +86,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             return Result.buildFail("生成集群新建操作任务失败!");
         }
 
-        workTask.setBusinessKey(ret.getData().intValue());
+        workTask.setBusinessKey(String.valueOf(ret.getData()));
         workTask.setTitle(ecmTaskDTO.getTitle());
         workTask.setCreateTime(new Date());
         workTask.setUpdateTime(new Date());
@@ -99,8 +98,8 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     }
 
     @Override
-    public boolean existUnClosedTask(Integer key, Integer type) {
-        return ecmTaskManager.existUnClosedEcmTask(key.longValue());
+    public boolean existUnClosedTask(String key, Integer type) {
+        return ecmTaskManager.existUnClosedEcmTask(Long.valueOf(key));
     }
 
     @Override
@@ -114,7 +113,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         workTask.setStatus(status);
         workTask.setUpdateTime(new Date());
         workTask.setExpandData(JSON.toJSONString(ecmTaskPO));
-        workTaskManager.updateTaskById(workTask);
+        workTaskManager.updateTask(workTask);
 
         return Result.buildSucc();
     }
@@ -135,7 +134,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         handlerRestartPostConfig(ecmTask);
         handlerRestartPostPlugin(ecmTask);
 
-        Result<WorkTask> result = workTaskManager.getLatestTask(ecmTask.getId().intValue(), ecmTask.getOrderType());
+        Result<WorkTask> result = workTaskManager.getLatestTask(String.valueOf(ecmTask.getId()), ecmTask.getOrderType());
         if (result.failed()) {
             return;
         }

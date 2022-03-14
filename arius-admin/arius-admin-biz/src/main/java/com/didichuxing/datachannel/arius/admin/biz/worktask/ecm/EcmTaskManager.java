@@ -127,7 +127,7 @@ public interface EcmTaskManager {
      * @param physicClusterId 物理集群id
      * @return EcmTaskPO
      */
-    EcmTaskPO getRunningWorkOrderTaskByClusterId(Integer physicClusterId);
+    EcmTaskPO getRunningEcmTaskByClusterId(Integer physicClusterId);
 
     /**
      * 对于单个集群任务节点进行操作
@@ -138,4 +138,26 @@ public interface EcmTaskManager {
      * @return
      */
     Result<Void> actionClusterHostEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname, String operator);
+
+    /**
+     * 根据物理集群名称获取到正在执行或者等待执行的ecm任务
+     * @param clusterName 物理集群名称
+     * @return ecm任务
+     */
+    Result<EcmTask> getUsefulEcmTaskByClusterName(String clusterName);
+
+    /**
+     * 根据集群名称，获取当前正在运行的ecm任务的工单id(一个集群只能存在一个可执行或者待执行的ecm任务)
+     * @param cluster 物理集群名称
+     * @return ecm任务工单的contentObj内容
+     */
+    Result<String> getEcmTaskOrderDetailInfo(String cluster);
+
+    /**
+     * 根据集群名称，ip和port获取对应的rack信息的设置
+     * @param clusterName 物理集群名称
+     * @param ip ip地址
+     * @return 判断指定data节点的rack类型，如果是冷节点则返回cold，否则返回*
+     */
+    String judgeColdRackFromEcmTaskOfClusterNewOrder(String clusterName, String ip);
 }

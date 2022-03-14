@@ -1,20 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeStatusEnum.OFFLINE;
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeStatusEnum.ONLINE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,11 +36,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostPO;
 
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
@@ -162,27 +162,49 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
             }
         }
 
-        roleClusterHostDAO.offlineByCluster(cluster);
+        return addAndEditNodes(cluster, shouldAdd, shouldEdit);
+    }
 
-        boolean flag = addNodeBatch(shouldAdd);
-        if (flag) {
-            if (!updateRolePod(shouldAdd, cluster)) {
-                throw new AdminTaskException("更新新增节点数量失败");
-            }
-        }else {
-            LOGGER.error(
-                    "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||addNode={}"
-                            + "||errMag=fail to add cluster node to arius",
-                    cluster, shouldAdd);
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean saveClusterNodeSettings(ClusterJoinDTO param) throws AdminTaskException {
+        if (null == param.getRoleClusterHosts()) {
+            return false;
         }
-        if (!editNodeBatch(shouldEdit)) {
-            LOGGER.error(
-                "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||addNode={}"
-                         + "||errMag=fail to edit cluster node to arius",
-                cluster, shouldEdit);
+        List<ESRoleClusterHostPO> nodePOList = new ArrayList<>();
+        for (ESRoleClusterHostDTO node: param.getRoleClusterHosts()) {
+            ESRoleClusterHostPO roleClusterHostPO = buildEsClusterHostPO(node);
+            setRoleClusterId(roleClusterHostPO, param.getCluster());
+            roleClusterHostPO.setStatus(OFFLINE.getCode());
+            nodePOList.add(roleClusterHostPO);
+        }
+        return addAndEditNodes(param.getCluster(), nodePOList, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean createClusterNodeSettings(List<ESClusterRoleHost> param, String phyClusterName) throws AdminTaskException {
+        if (CollectionUtils.isEmpty(param) || StringUtils.isBlank(phyClusterName)) {
+            return false;
         }
 
-        return true;
+        List<ESRoleClusterHostPO> nodePOList = new ArrayList<>();
+        param.stream().filter(esClusterRoleHost -> !AriusObjUtils.isNull(esClusterRoleHost.getHostname()))
+                .forEach(esClusterRoleHost -> nodePOList.add(buildEsClusterHostPOFromEcmTaskOrder(esClusterRoleHost, phyClusterName)));
+
+        return addAndEditNodes(phyClusterName, nodePOList, null);
+    }
+
+    private ESRoleClusterHostPO buildEsClusterHostPOFromEcmTaskOrder(ESClusterRoleHost esClusterRoleHost, String phyClusterName) {
+        ESRoleClusterHostPO roleClusterHostPO = ConvertUtil.obj2Obj(esClusterRoleHost, ESRoleClusterHostPO.class);
+        roleClusterHostPO.setHostname(roleClusterHostPO.getIp());
+        roleClusterHostPO.setCluster(phyClusterName);
+        roleClusterHostPO.setRole(ESClusterNodeRoleEnum.getByDesc(esClusterRoleHost.getRole()).getCode());
+        roleClusterHostPO.setStatus(2);
+        roleClusterHostPO.setRack("");
+        roleClusterHostPO.setNodeSet("");
+        setRoleClusterId(roleClusterHostPO, phyClusterName);
+        return roleClusterHostPO;
     }
 
     @Override
@@ -220,6 +242,21 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
     }
 
     @Override
+    public Map<Long,List<RoleClusterHost>> getByRoleClusterIds(List<Long> roleClusterIds) {
+        if(CollectionUtils.isEmpty(roleClusterIds)){
+            return new HashMap<>();
+        }
+        List<ESRoleClusterHostPO> roleClusterPOS = roleClusterHostDAO.listByRoleClusterIds(roleClusterIds);
+        Map<Long, List<RoleClusterHost>> ret = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(roleClusterPOS)) {
+            List<RoleClusterHost> list = ConvertUtil.list2List(roleClusterPOS, RoleClusterHost.class);
+            ret = list.stream().collect(Collectors.groupingBy(RoleClusterHost::getRoleClusterId));
+        }
+        return ret;
+    }
+
+
+    @Override
     public List<String> getHostNamesByRoleAndClusterId(Long clusterId, String role) {
         List<RoleClusterHost> roleClusterHosts = getByRoleAndClusterId(clusterId, role);
         return roleClusterHosts.stream().map(RoleClusterHost::getHostname).collect(Collectors.toList());
@@ -241,7 +278,7 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
         if (!success) {
             return Result.buildFail("failed to delete the clusterHost");
         }
-        return Result.buildSucc("success to delete the clusterHost");
+        return Result.buildSuccWithMsg("success to delete the clusterHost");
     }
 
     @Override
@@ -293,7 +330,7 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
         if (!success) {
             return Result.buildFail("failed to delete the clusterHost");
         }
-        return Result.buildSucc("success to delete the clusterHost");
+        return Result.buildSuccWithMsg("success to delete the clusterHost");
     }
 
     @Override
@@ -306,7 +343,7 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
                     hostnames, roleId);
             return Result.buildFail("failed to delete the clusterHost");
         }
-        return Result.buildSucc("success to delete the clusterHost");
+        return Result.buildSuccWithMsg("success to delete the clusterHost");
     }
 
     @Override
@@ -316,10 +353,11 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
 
         List<String> httpAddressesList = Lists.newArrayList();
         List<ESRoleClusterHostDTO> esRoleClusterHostDTOSForClient = role2ESRoleClusterHostDTOMap.get(CLIENT_NODE.getCode());
-        if (CollectionUtils.isNotEmpty(esRoleClusterHostDTOSForClient)) {
+        if (null != esRoleClusterHostDTOSForClient) {
             esRoleClusterHostDTOSForClient.forEach(host -> httpAddressesList.add(host.getIp() + ":" + host.getPort()));
-        }else {
-            List<ESRoleClusterHostDTO> esRoleClusterHostDTOSForMaster = role2ESRoleClusterHostDTOMap.get(MASTER_NODE.getCode());
+        }
+        List<ESRoleClusterHostDTO> esRoleClusterHostDTOSForMaster = role2ESRoleClusterHostDTOMap.get(MASTER_NODE.getCode());
+        if (null != esRoleClusterHostDTOSForMaster) {
             esRoleClusterHostDTOSForMaster.forEach(host -> httpAddressesList.add(host.getIp() + ":" + host.getPort()));
         }
 
@@ -437,17 +475,13 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
      */
     private List<ESRoleClusterHostPO> getClusterHostFromEsAndCreateRoleClusterIfNotExist(String cluster) {
         List<ESRoleClusterHostPO> nodePOList = Lists.newArrayList();
-        // 从ES集群获取节点配置信息
-        Map<String/*uuid*/, ClusterNodeInfo> nodeSettingsMap = esClusterService.syncGetAllSettingsByCluster(cluster);
-        if (nodeSettingsMap == null || nodeSettingsMap.isEmpty()) {
-            return nodePOList;
-        }
 
-        //原生集群节点信息
-        List<ClusterNodeInfo> clusterNodeInfoListFromES = Lists.newArrayList(nodeSettingsMap.values());
-        //兼容单个ES节点拥有多个角色场景
-        List<ClusterNodeInfo> clusterNodeInfoListFromArius = buildWithMultipleRole(clusterNodeInfoListFromES);
-        for (ClusterNodeInfo nodeInfoListFromArius : clusterNodeInfoListFromArius) {
+        // 从ES集群中获取初始的节点信息列表
+        List<ClusterNodeInfo> clusterNodeInfos = buildAllClusterNodeInfoFromES(cluster);
+
+
+        // 根据集群节点角色信息构建入DB的host列表信息
+        for (ClusterNodeInfo nodeInfoListFromArius : clusterNodeInfos) {
             // 构造节点记录数据
             ESRoleClusterHostPO roleClusterHostPO = buildEsClusterHostPO(nodeInfoListFromArius, cluster);
             // 节点所属的角色记录如果不存在，则去设置
@@ -460,36 +494,98 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
     }
 
     /**
-     * 兼容单个ES节点拥有多个角色场景
-     * @param clusterNodeInfoListFromES
+     * 从es中获取全部的集群节点信息，尤其包括节点角色的初始化操作
+     * @param cluster 集群名称
      * @return
      */
-    private List<ClusterNodeInfo> buildWithMultipleRole(List<ClusterNodeInfo> clusterNodeInfoListFromES) {
-        List<ClusterNodeInfo> clusterNodeInfoListFromArius = Lists.newArrayList();
-        for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfoListFromES) {
-            List<String> roles = clusterNodeInfo.getRoles();
-            if (hasRoleOfMasterAndData(roles)) {
-                //添加client角色
-                roles.add(ES_ROLE_CLIENT);
-                for (String role : roles) {
-                    if (!ESClusterNodeRoleEnum.getByDesc(role + "node").equals(UNKNOWN)) {
-                        ClusterNodeInfo nodeInfo = ConvertUtil.obj2Obj(clusterNodeInfo, ClusterNodeInfo.class);
-                        nodeInfo.setRoles(Lists.newArrayList(role));
-                        clusterNodeInfoListFromArius.add(nodeInfo);
-                    }
-                }
-            }
-        }
-        
-        if (CollectionUtils.isEmpty(clusterNodeInfoListFromArius)) {
+    private List<ClusterNodeInfo> buildAllClusterNodeInfoFromES(String cluster) {
+        List<ClusterNodeInfo> clusterNodeInfoListFromES = Lists.newArrayList();
+
+        // 从ES集群获取节点全量的信息
+        Map<String, ClusterNodeInfo> clusterNodeInfoMap = esClusterService.syncGetAllSettingsByCluster(cluster);
+        // 获取高低版本通用的节点角色信息
+        Map<String, ClusterNodeSettings> clusterNodeSettingsMap = esClusterService.syncGetPartOfSettingsByCluster(cluster);
+
+        if (MapUtils.isEmpty(clusterNodeSettingsMap) || MapUtils.isEmpty(clusterNodeInfoMap)) {
             return clusterNodeInfoListFromES;
         }
 
-        return  clusterNodeInfoListFromArius;
+        // 构建原生集群节点信息列表
+        for (Map.Entry</*UUID*/String, ClusterNodeInfo> entry : clusterNodeInfoMap.entrySet()) {
+            // 为纳管2.3.3版本的角色信息，需要从_nodes/settings中获取
+            ClusterNodeInfo clusterNodeInfo = entry.getValue();
+            // 根据节点的UUID获取对应的全量的角色信息
+            ClusterNodeSettings clusterNodeSettings = clusterNodeSettingsMap.get(entry.getKey());
+            // 重新设置clusterNodeInfo的roles列表
+            clusterNodeInfo.setRoles(buildRolesInfoFromSettings(clusterNodeSettings));
+            // 构建节点角色的多角色信息
+            buildMultiRoleListForESNode(clusterNodeInfoListFromES, clusterNodeInfo);
+        }
+
+        return CollectionUtils.isEmpty(clusterNodeInfoListFromES) ? (List<ClusterNodeInfo>) clusterNodeInfoMap.values() : clusterNodeInfoListFromES;
+    }
+
+    /**
+     * 构建节点的多角色信息列表
+     * @param clusterNodeInfoListFromES 节点信息列表
+     * @param clusterNodeInfo 节点信息对象
+     */
+    private void buildMultiRoleListForESNode(List<ClusterNodeInfo> clusterNodeInfoListFromES, ClusterNodeInfo clusterNodeInfo) {
+        // 根据当前角色列表添加节点角色信息
+        List<String> roles = clusterNodeInfo.getRoles();
+        if (notHasRoleOfMasterAndData(roles)) {
+            //该节点既不含有data角色也不含有master角色，则添加client角色
+            roles.add(ES_ROLE_CLIENT);
+        }
+
+        //根据es获取的节点信息构建节点角色信息
+        addNodeRoleInfoFromES(clusterNodeInfoListFromES, clusterNodeInfo, roles);
+    }
+
+    private List<String> buildRolesInfoFromSettings(ClusterNodeSettings clusterNodeSetting) {
+        List<String> roles = JSONArray.parseArray(JSON.toJSONString(clusterNodeSetting.getRoles()), String.class);
+        if (CollectionUtils.isEmpty(roles)) {
+            JSONObject roleNode = clusterNodeSetting.getSettings().getJSONObject("node");
+            List<String> roleInfo = Lists.newArrayList();
+            if (AriusObjUtils.isNull(roleNode)) {
+                roleInfo.add(ES_ROLE_DATA);
+                roleInfo.add(ES_ROLE_MASTER);
+            } else {
+                for (String role : ESClusterNodeRoleEnum.nodeRoleList()) {
+                    if (role.equalsIgnoreCase(ES_ROLE_CLIENT)) {
+                        continue;
+                    }
+                    if (!roleNode.containsKey(role) || roleNode.getBoolean(role)) {
+                        roleInfo.add(role);
+                    }
+                }
+            }
+
+
+            return roleInfo;
+        }
+
+        return roles;
+    }
+
+    private void addNodeRoleInfoFromES(List<ClusterNodeInfo> clusterNodeInfoListFromArius,
+                                       ClusterNodeInfo clusterNodeInfo, List<String> roles) {
+        for (String role : roles) {
+            //对于节点的角色进行过滤，平台只兼容data,master和client三种角色类型
+            if (!ESClusterNodeRoleEnum.getByDesc(role + "node").equals(UNKNOWN)) {
+                ClusterNodeInfo nodeInfo = ConvertUtil.obj2Obj(clusterNodeInfo, ClusterNodeInfo.class);
+                nodeInfo.setRoles(Lists.newArrayList(role));
+                clusterNodeInfoListFromArius.add(nodeInfo);
+            }
+        }
     }
 
     private boolean hasRoleOfMasterAndData(List<String> roles) {
-        return roles.contains(ES_ROLE_DATA) && roles.contains(ES_ROLE_MASTER); 
+        return roles.contains(ES_ROLE_DATA) && roles.contains(ES_ROLE_MASTER);
+    }
+
+    private boolean notHasRoleOfMasterAndData(List<String> roles) {
+        return !roles.contains(ES_ROLE_DATA) && !roles.contains(ES_ROLE_MASTER);
     }
 
     private ESRoleClusterHostPO buildEsClusterHostPO(ClusterNodeInfo clusterNodeInfo, String cluster) {
@@ -512,6 +608,12 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
         nodePO.setRack(getRackFromNodeSettings(clusterNodeInfo));
         nodePO.setRole(getRoleFromNodeSettings(clusterNodeInfo));
 
+        return nodePO;
+    }
+
+    private ESRoleClusterHostPO buildEsClusterHostPO(ESRoleClusterHostDTO nodeDTO) {
+        ESRoleClusterHostPO nodePO = ConvertUtil.obj2Obj(nodeDTO, ESRoleClusterHostPO.class);
+        nodePO.setHostname(Getter.withDefault(nodeDTO.getIp(), ""));
         return nodePO;
     }
 
@@ -572,9 +674,6 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
             if (roles.contains(ES_ROLE_MASTER)) {
                 return MASTER_NODE.getCode();
             }
-            if (roles.contains(ES_ROLE_ML)) {
-                return ML_NODE.getCode();
-            }
         }
 
         return CLIENT_NODE.getCode();
@@ -599,5 +698,27 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
         });
 
         return flag.get();
+    }
+
+    private boolean addAndEditNodes(String cluster, List<ESRoleClusterHostPO> shouldAdd, List<ESRoleClusterHostPO> shouldEdit) {
+        roleClusterHostDAO.offlineByCluster(cluster);
+        boolean flag = addNodeBatch(shouldAdd);
+        if (flag) {
+            if (!updateRolePod(shouldAdd, cluster)) {
+                throw new AdminTaskException("更新新增节点数量失败");
+            }
+        }else {
+            LOGGER.error(
+                    "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||addNode={}"
+                            + "||errMag=fail to add cluster node to arius",
+                    cluster, shouldAdd);
+        }
+        if (!editNodeBatch(shouldEdit)) {
+            LOGGER.error(
+                    "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||addNode={}"
+                            + "||errMag=fail to edit cluster node to arius",
+                    cluster, shouldEdit);
+        }
+        return true;
     }
 }

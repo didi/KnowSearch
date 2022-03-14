@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import * as actions from "actions";
 import { FormItemType, IFormItem } from "component/x-form";
 import { StaffSelect } from "container/staff-select";
-import { IWorkOrder } from "@types/params-types";
+import { IWorkOrder } from "typesPath/params-types";
 import { submitWorkOrder } from "api/common-api";
 import { VirtualScrollSelect } from "container/custom-form/virtual-scroll-select";
 import { getConsoleAppList } from "api/app-api";
@@ -73,7 +73,7 @@ const TransClusterIndex = (props: {
         rules: [
           {
             required: true,
-            message: "请选择负责人",
+            message: "请选择目标项目",
           },
         ],
         

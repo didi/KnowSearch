@@ -40,4 +40,9 @@ public class TemplateHealthDegreePO extends BaseESPO {
     public String getKey() {
         return String.valueOf(logicTemplateId);
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

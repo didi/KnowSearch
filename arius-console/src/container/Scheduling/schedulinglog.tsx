@@ -18,7 +18,7 @@ export const Schedulinglog = () => {
   const [data, setData] = useState([] as any[]);
   // 控制调度日志的状态
   const [visible, setVisible] = useState(false);
-  const [record, setRecord] = useState({});
+  const [record, setRecord]: any = useState({});
   // 控制执行日志的状态
   const [logVisible, setLogVisible] = useState(false);
   const [urlParams, setUrlParams]: any = useState(getUrlParams().search);

@@ -19,6 +19,6 @@ public class HealthController {
     @ResponseBody
     @ApiOperation(value = "探活接口", notes = "")
     public Result<String> demo() {
-        return Result.buildSucc("let's go");
+        return Result.buildSuccWithMsg("let's go");
     }
 }

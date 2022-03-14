@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_APP_ID;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 @NoArgsConstructor
@@ -21,17 +22,19 @@ public class GatewaySqlController {
     @Autowired
     private GatewayManager gatewayManager;
 
-    @PostMapping("")
+    @PostMapping(value = {"/{phyClusterName}", ""})
     @ResponseBody
     @ApiOperation(value = "根据sql语句查询gateway集群")
-    public Result<String> directSqlSearch(@RequestBody String sql, HttpServletRequest request) {
-        return gatewayManager.directSqlSearch(sql, HttpRequestUtils.getAppId(request));
+    public Result<String> directSqlSearch(@RequestBody String sql,
+                                          @PathVariable(required = false) String phyClusterName,
+                                          HttpServletRequest request) {
+        return gatewayManager.directSqlSearch(sql, phyClusterName, HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/explain")
     @ResponseBody
     @ApiOperation(value = "根据sql语句解释")
-    public Result<String> sqlExplain(@RequestBody String sql, HttpServletRequest request) {
-        return gatewayManager.sqlExplain(sql,HttpRequestUtils.getAppId(request));
+    public Result<String> sqlExplain(@RequestBody String sql) {
+        return gatewayManager.sqlExplain(sql, DEFAULT_APP_ID);
     }
 }

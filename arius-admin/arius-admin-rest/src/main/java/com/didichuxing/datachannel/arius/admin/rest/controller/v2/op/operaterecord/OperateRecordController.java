@@ -71,7 +71,7 @@ public class OperateRecordController {
     }
 
     public Result<List<OperateRecordVO>> listInner(@RequestParam OperateRecordDTO query) {
-        List<OperateRecordVO> records = ConvertUtil.list2List(operateRecordService.list(query), OperateRecordVO.class);
+        List<OperateRecordVO> records = ConvertUtil.list2List(operateRecordService.list(query).getData(), OperateRecordVO.class);
 
         if (records.size() > MAX_RECORD_COUNT) {
             records = records.subList(0, MAX_RECORD_COUNT);

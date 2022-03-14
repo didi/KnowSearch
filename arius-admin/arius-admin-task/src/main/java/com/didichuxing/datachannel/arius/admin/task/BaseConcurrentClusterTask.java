@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.task;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -9,12 +15,6 @@ import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * base任务 集群级别并发处理 记录任务完成时间  检查任务前置依赖
@@ -28,10 +28,10 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask<Clust
     protected static final String TASK_RETRY_URL = "";
 
     @Autowired
-    protected ClusterPhyService clusterPhyService;
+    protected ClusterPhyService   clusterPhyService;
 
     @Autowired
-    protected ClusterPhyManager clusterPhyManager;
+    protected ClusterPhyManager   clusterPhyManager;
 
     @Autowired
     protected NotifyService       notifyService;
@@ -70,22 +70,17 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask<Clust
                 } else {
                     succ = false;
                     LOGGER.warn("executeByCluster fail||cluster={}||task={}", cluster.getCluster(), getTaskName());
-                    notifyService.send(
-                            NotifyTaskTypeEnum.SCHEDULE_TASK_FAILED,
-                            new ScheduleTaskFailNotifyInfo(getTaskName(), "集群_" + cluster.getCluster(), TASK_RETRY_URL),
-                            Arrays.asList()
-                    );
+                    notifyService.send(NotifyTaskTypeEnum.SCHEDULE_TASK_FAILED,
+                        new ScheduleTaskFailNotifyInfo(getTaskName(), "集群_" + cluster.getCluster(), TASK_RETRY_URL),
+                        Arrays.asList());
                 }
             } catch (Exception e) {
                 succ = false;
                 LOGGER.warn("executeByCluster error||cluster={}||task={}||errMsg={}", cluster.getCluster(),
                     getTaskName(), e.getMessage(), e);
 
-                notifyService.send(
-                        NotifyTaskTypeEnum.SCHEDULE_TASK_FAILED,
-                        new ScheduleTaskFailNotifyInfo(getTaskName(), "集群_" + cluster.getCluster(), TASK_RETRY_URL, e.getMessage()),
-                        Arrays.asList()
-                );
+                notifyService.send(NotifyTaskTypeEnum.SCHEDULE_TASK_FAILED, new ScheduleTaskFailNotifyInfo(
+                    getTaskName(), "集群_" + cluster.getCluster(), TASK_RETRY_URL, e.getMessage()), Arrays.asList());
             }
         }
 

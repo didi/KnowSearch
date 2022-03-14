@@ -15,6 +15,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -110,11 +112,6 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     @Override
     protected PaginationResult<ConsoleClusterVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
         ClusterLogicConditionDTO condition = buildClusterLogicConditionDTO(pageDTO);
-        if (null == condition) {
-            LOGGER.error(
-                "class=ClusterLogicPageSearchHandle||method=buildWithAuthType||errMsg=failed to convert PageDTO to ClusterLogicConditionDTO");
-            return PaginationResult.buildFail("获取逻辑集群查询信息失败");
-        }
 
         //1. 获取管理/访问/无权限的逻辑集群信息
         List<ClusterLogic> appAuthClusterLogicList = clusterLogicManager.getClusterLogicByAppIdAndAuthType(appId, condition.getAuthType());
@@ -129,7 +126,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         long hitTotal = meetConditionClusterLogicList.size();
 
         //4. 根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
-        Collections.sort(meetConditionClusterLogicList);
+        sort(meetConditionClusterLogicList, condition.getSortTerm(), condition.getOrderByDesc());
 
         //5. 最后页临界点处理
         long size = getLastPageSize(condition, meetConditionClusterLogicList.size());
@@ -152,11 +149,6 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     @Override
     protected PaginationResult<ConsoleClusterVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
         ClusterLogicConditionDTO condition = buildClusterLogicConditionDTO(pageDTO);
-        if (null == condition) {
-            LOGGER.error(
-                    "class=ClusterLogicPageSearchHandle||method=buildWithoutAuthType||errMsg=failed to convert PageDTO to ClusterLogicConditionDTO");
-            return PaginationResult.buildFail("获取逻辑集群查询信息失败");
-        }
         
         List<ClusterLogic> pagingGetClusterLogicList   =  clusterLogicService.pagingGetClusterLogicByCondition(condition);
         List<ConsoleClusterVO> consoleClusterPhyVOList =  doBuildWithoutAuthType(pagingGetClusterLogicList, appId);
@@ -207,183 +199,38 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
                                                               List<ClusterLogic> appAuthClusterLogicList) {
         List<ClusterLogic> meetConditionClusterLogicList = Lists.newArrayList();
 
-        //分页查询参数为空
-        if (AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null == condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList.addAll(appAuthClusterLogicList);
-            return meetConditionClusterLogicList;
-        }
-
-        /********************************************1条件组合*************************************************/
         //分页查询条件中只存在集群名称
-        if (!AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null == condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
+        if (!AriusObjUtils.isBlack(condition.getName())) {
+            appAuthClusterLogicList = appAuthClusterLogicList
                     .stream()
                     .filter(r -> r.getName().contains(condition.getName()))
                     .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
         }
 
         //分页查询条件中仅存在集群类型
-        if (AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null == condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
+        if (null != condition.getType()) {
+            appAuthClusterLogicList = appAuthClusterLogicList
                     .stream()
                     .filter(r -> r.getType().equals(condition.getType()))
                     .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
         }
 
         //分页查询条件中仅存在状态名称
-        if (AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null != condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
+        if (null != condition.getHealth()) {
+            appAuthClusterLogicList = appAuthClusterLogicList
                     .stream()
                     .filter(r -> r.getHealth().equals(condition.getHealth()))
                     .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
         }
 
         //分页查询条件中仅存在项目Id
-        if (AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null == condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
+        if (null != condition.getAppId()) {
+            appAuthClusterLogicList = appAuthClusterLogicList
                     .stream()
                     .filter(r -> r.getAppId().equals(condition.getAppId()))
                     .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
         }
-
-        /********************************************2条件组合*************************************************/
-        //分页查询条件中仅存在集群名称、类型
-        if (!AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null == condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getName().contains(condition.getName())
-                              && r.getType().equals(condition.getType()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在集群名称、状态
-        if (!AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null != condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getName().contains(condition.getName())
-                              && r.getHealth().equals(condition.getHealth()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在集群名称、项目
-        if (!AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null == condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getName().contains(condition.getName())
-                              && r.getAppId().equals(condition.getAppId()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在集群类型、状态
-        if (AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null != condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getType().equals(condition.getType())
-                              && r.getHealth().equals(condition.getHealth()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在集群类型、项目
-        if (AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null == condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getType().equals(condition.getType())
-                              && r.getAppId().equals(condition.getAppId()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在状态、项目
-        if (AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null != condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getHealth().equals(condition.getHealth())
-                              && r.getAppId().equals(condition.getAppId()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        /********************************************3条件组合*************************************************/
-        //分页查询条件中仅存在名称、类型、健康度
-        if (!AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null != condition.getHealth() && null == condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getName().contains(condition.getName())
-                              && r.getType().equals(condition.getType())
-                              && r.getHealth().equals(condition.getHealth()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在名称、类型、项目
-        if (!AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null == condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getName().contains(condition.getName())
-                              && r.getType().equals(condition.getType())
-                              && r.getAppId().equals(condition.getAppId()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在名称、状态、项目
-        if (!AriusObjUtils.isBlack(condition.getName()) && null == condition.getType()
-                && null != condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getName().contains(condition.getName())
-                              && r.getHealth().equals(condition.getHealth())
-                              && r.getAppId().equals(condition.getAppId()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        //分页查询条件中仅存在类型、状态、项目
-        if (AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null != condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getType().equals(condition.getType())
-                              && r.getHealth().equals(condition.getHealth())
-                              && r.getAppId().equals(condition.getAppId()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
-        /********************************************4条件组合*************************************************/
-        if (!AriusObjUtils.isBlack(condition.getName()) && null != condition.getType()
-                && null != condition.getHealth() && null != condition.getAppId()) {
-            meetConditionClusterLogicList = appAuthClusterLogicList
-                    .stream()
-                    .filter(r -> r.getName().contains(condition.getName())
-                              && r.getType().equals(condition.getType())
-                              && r.getHealth().equals(condition.getHealth())
-                              && r.getAppId().equals(condition.getAppId()))
-                    .collect(Collectors.toList());
-            return meetConditionClusterLogicList;
-        }
-
+        meetConditionClusterLogicList.addAll(appAuthClusterLogicList);
         return meetConditionClusterLogicList;
     }
 
@@ -426,5 +273,24 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         if (null != app && !AriusObjUtils.isBlack(app.getName())) {
             consoleClusterVO.setAppName(app.getName());
         }
+    }
+
+
+    private void sort(List<ClusterLogic> meetConditionClusterLogicList, String sortTerm, Boolean orderByDesc) {
+        if (null == sortTerm) {
+            Collections.sort(meetConditionClusterLogicList);
+            return;
+        }
+
+        meetConditionClusterLogicList.sort((o1, o2) -> {
+            // 可在此添加需要排序的项
+            if (SortEnum.LEVEL.getType().equals(sortTerm)) {
+                return orderByDesc ? o2.getLevel().compareTo(o1.getLevel()) :
+                        o1.getLevel().compareTo(o2.getLevel());
+            }
+
+            // 返回0 不排序
+            return 0;
+        });
     }
 }

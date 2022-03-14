@@ -1,14 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.monitor;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor.AppMonitorRuleDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.MonitorRulePO;
-import com.didichuxing.datachannel.arius.admin.common.converter.CommonConverter;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.MonitorRuleDAO;
 import com.didichuxing.datachannel.arius.admin.remote.monitor.RemoteMonitorService;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +22,14 @@ import static org.mockito.Mockito.when;
  */
 @Transactional
 @Rollback
-public class MonitorServiceTest extends AriusAdminApplicationTests {
+@Deprecated
+public class MonitorServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private MonitorService monitorService;
 
     @Autowired
     private MonitorRuleDAO monitorRuleDAO;
-
-    @Autowired
-    private AppService appService;
 
     @MockBean
     private RemoteMonitorService remoteMonitorService;

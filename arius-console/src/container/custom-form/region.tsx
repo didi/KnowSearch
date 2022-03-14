@@ -2,15 +2,16 @@ import React from 'react';
 import  { Select, Spin } from 'antd';
 import { connect } from "react-redux";
 import * as actions from 'actions';
-import { getPhyClusterRegionList } from 'api/op-cluster-region-api';
+import { getPhyClusterRegionListBind, getBindRack } from 'api/op-cluster-region-api';
 import { getOpPhysicsClusterList } from 'api/cluster-api';
 
 const mapStateToProps = (state) => ({
   region: state.region,
+  params: state.modal.params,
 });
 
 export const AllPhyCluster = connect(mapStateToProps)((props: any) => {
-  const { onChange, clusterPhyNameList } = props;
+  const { onChange, clusterPhyNameList, workid, clusterLogicName, diskQuota } = props;
 
   const [val, setVal] = React.useState(clusterPhyNameList[0] || "");
 
@@ -31,22 +32,17 @@ export const AllPhyCluster = connect(mapStateToProps)((props: any) => {
   }
 
   const getRegionList = (e: string) => {
-    getPhyClusterRegionList(e).then((res) => {
-      res = res.map(item => {
-        if (item.racks.split(',').length > 1) {
-          return item.racks.split(',')
-        }
-        return item.racks
-      });
+    getBindRack(e, clusterLogicName, diskQuota).then((res) => {
       const arr = [];
       res.forEach(element => {
-        if (element instanceof Array) {
-          element.forEach(item => {
+        if (element.indexOf(',') != -1) {
+          const strArr = element.split(',')
+          strArr.forEach(item => {
             arr.push({value: item, label: item});
           })
-          return;
+        } else {
+          arr.push({value: element, label: element});
         }
-        arr.push({value: element, label: element});
       });
       props.dispatch(actions.setRacksArr(arr));
     });
@@ -93,18 +89,24 @@ const PhyClusterSelect = (props) => {
   }
 
   const getRegionList = (e: string) => {
-    getPhyClusterRegionList(e).then((res) => {
+    getPhyClusterRegionListBind(e, props.params?.type, props.params?.id).then((res) => {
       res = res.map(item => {
         return {
           label: `${item.id}(racks: ${item.racks})`,
           value: JSON.stringify({id: item.id, racks: item.racks}),
           racks: item.racks,
-          disabled: (item.logicClusterId === -1) ? false : true,
+          // disabled: (item.logicClusterId === -1) ? false : true,
         };
       });
       props.dispatch(actions.setRegionList(res));
     });
   }
+
+  React.useEffect(() =>  {
+    if (props.value) {
+      getRegionList(props.value);
+    }
+  }, [])
 
   return (
     <>
@@ -112,7 +114,9 @@ const PhyClusterSelect = (props) => {
           placeholder="请选择物理集群"
           onChange={(value) => handleSelect(value)}
           options={props.region?.phyClusterList} 
-          style={{width: '50%'}}>
+          style={{width: '50%'}}
+          disabled={props.disabled || false}
+          value={props.value}>
       </Select>
     </>
   );

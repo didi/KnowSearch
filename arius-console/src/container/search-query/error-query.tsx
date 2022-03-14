@@ -25,7 +25,6 @@ export const ErrorQuery = () => {
   }, 300);
 
   const changeQueryParams = (params) => {
-    console.log(params)
     setQueryParams({ ...queryParams, ...params });
   };
 
@@ -60,7 +59,7 @@ export const ErrorQuery = () => {
   return (
     <div className={classPrefix}>
       <div>
-        <SearchQueryForm setSearchQuery={changeQueryParams} />
+        <SearchQueryForm setSearchQuery={changeQueryParams} value={'error-query'} />
       </div>
       <div className={`${classPrefix}-table`}>
         <DTable

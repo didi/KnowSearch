@@ -7,7 +7,7 @@ export interface IPlug {
   updateTime?: string;
   md5: string;
   name: string;
-  pdefault: string;
+  pdefault: number;
   s3url: string;
   url: string;
   version?: string;

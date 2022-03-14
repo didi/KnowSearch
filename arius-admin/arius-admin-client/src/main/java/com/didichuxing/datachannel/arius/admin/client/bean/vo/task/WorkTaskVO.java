@@ -27,22 +27,22 @@ public class WorkTaskVO extends BaseVO {
     /**
      * id
      */
-    private Integer id;
+    private Integer           id;
 
     /**
      * 标题 
      */
-    private String title;
+    private String            title;
 
     /**
      * 任务类型
      */
-    private Integer taskType;
+    private Integer           taskType;
 
     /**
      * 业务数据主键 
      */
-    private Integer businessKey;
+    private String            businessKey;
 
     /**
      * 任务状态
@@ -50,32 +50,31 @@ public class WorkTaskVO extends BaseVO {
      * running:执行中 waiting:等待
      * cancel:取消 pause:暂停
      */
-    private String status;
+    private String            status;
 
     /**
      * 创建人 
      */
-    private String creator;
+    private String            creator;
 
     /**
      * 创建时间 
      */
-    private Date createTime;
+    private Date              createTime;
 
     /**
      * 更新时间 
      */
-    private Date updateTime;
+    private Date              updateTime;
 
     /**
      * 标记删除 
      */
-    private Boolean deleteFlag;
+    private Boolean           deleteFlag;
 
     /**
      * expandData 
      */
-    private String expandData;
+    private String            expandData;
 
 }
-

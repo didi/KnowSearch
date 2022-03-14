@@ -159,9 +159,14 @@ public abstract class BaseContext implements Serializable {
      */
     private JoinLogContext joinLogContext;
 
+    /**
+     * 查询模式
+     */
+    private Integer searchType;
 
     public void setAppDetail(AppDetail appDetail) {
         this.appDetail = appDetail;
+        this.searchType = appDetail.getSearchType().type;
         this.appid = appDetail.getId();
     }
 

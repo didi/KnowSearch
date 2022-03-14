@@ -1,12 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPlugin;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
+import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -68,29 +70,30 @@ public class ESPluginServiceImpl implements ESPluginService {
 
     /**
      * 相同名字的ES插件会有不同的版本，始终是显示最新的版本
-     *
-     * @return
+     * @return 插件类型列表
      */
     @Override
-    public List<ESPluginPO> listESPlugin() {
-        List<ESPluginPO> allESPlugins = esPluginDAO.listAll();
+    public List<PluginPO> listESPlugin() {
+        // 获取全部的插件列表
+        List<PluginPO> allESPlugins = esPluginDAO.listAll();
 
         if (CollectionUtils.isEmpty(allESPlugins)) {
             return Collections.emptyList();
         }
 
-        Map<String, ESPluginPO> esPluginPOMap = new HashMap<>();
-        for (ESPluginPO esPluginPO : allESPlugins) {
-            String pluginName = esPluginPO.getName();
-            String pluginVersion = esPluginPO.getVersion();
+        // 展示更高版本的插件列表
+        Map<String, PluginPO> esPluginPOMap = new HashMap<>();
+        for (PluginPO pluginPO : allESPlugins) {
+            String pluginName = pluginPO.getName();
+            String pluginVersion = pluginPO.getVersion();
 
-            ESPluginPO esPluginTemp = esPluginPOMap.get(pluginName);
+            PluginPO esPluginTemp = esPluginPOMap.get(pluginName);
             if (null == esPluginTemp) {
-                esPluginPOMap.put(pluginName, esPluginPO);
+                esPluginPOMap.put(pluginName, pluginPO);
             } else {
                 String versionTemp = esPluginTemp.getVersion();
                 if (ESVersionUtil.isHigher(pluginVersion, versionTemp)) {
-                    esPluginPOMap.put(pluginName, esPluginPO);
+                    esPluginPOMap.put(pluginName, pluginPO);
                 }
             }
         }
@@ -99,119 +102,122 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     @Override
-    public List<ESPluginPO> listClusterAndDefaultESPlugin(String phyClusterId) {
-        List<ESPluginPO> esPluginPOS = esPluginDAO.listByPhyClusterId(phyClusterId);
-        if (CollectionUtils.isEmpty(esPluginPOS)) {
+    public List<PluginPO> listClusterAndDefaultESPlugin(String phyClusterId) {
+        List<PluginPO> pluginPOS = esPluginDAO.listByPhyClusterId(phyClusterId);
+        if (CollectionUtils.isEmpty(pluginPOS)) {
             return new ArrayList<>();
         }
-        return esPluginPOS;
+        return pluginPOS;
     }
 
     @Override
-    public Result<Long> addESPlugin(ESPluginDTO esPluginDTO) {
-        Result<Void> resultCheck = paramCheck(esPluginDTO,ADD,null);
+    public Result<Long> addESPlugin(PluginDTO pluginDTO) {
+        // 1.对插件信息的参数进行校验
+        Result<Void> resultCheck = paramCheck(pluginDTO, ADD, null);
         if (resultCheck.failed()) {
             return Result.buildFrom(resultCheck);
         }
 
-        Result<Void> result = verifyPluginFileAndModifyPluginName(esPluginDTO);
-        if (result.failed()) {
-            return Result.buildFrom(result);
-        }
-
+        // 2.将对应的插件上传至配置的文件仓库
         Result<String> response = Result.buildFail();
-
-        ESPluginPO esPluginPO = ConvertUtil.obj2Obj(esPluginDTO, ESPluginPO.class);
         try {
-            response = fileStorageService.upload(getGiftName(esPluginPO), esPluginPO.getMd5(),
-                    esPluginDTO.getUploadFile());
+            response = fileStorageService.upload(getGiftName(ConvertUtil.obj2Obj(pluginDTO, Plugin.class)), pluginDTO.getMd5(),
+                    pluginDTO.getUploadFile());
         } catch (Exception e) {
             LOGGER.info("class=ESPluginServiceImpl||method=addESPlugin||pluginName={}||msg=fail to upload the file",
-                    esPluginPO.getName());
+                    pluginDTO.getName());
         }
+
+        // 3.上传成功后返回url，回写到插件信息对象中
         if (response.success()) {
-            esPluginPO.setUrl(response.getData());
+            pluginDTO.setUrl(response.getData());
         } else {
             return Result.buildFail("上传文件失败");
         }
 
+        // 4.插件信息入DB
         boolean succ = false;
+        PluginPO pluginPO = ConvertUtil.obj2Obj(pluginDTO, PluginPO.class);
         try {
-            succ = (1 == esPluginDAO.insert(esPluginPO));
+            succ = (1 == esPluginDAO.insert(pluginPO));
         } catch (Exception e) {
             LOGGER.error("class=ESPluginServiceImpl||method=addESPlugin||pluginName={}||msg=exception",
-                    esPluginPO.getName(), e);
+                    pluginDTO.getName(), e);
         }
 
+        // 5.插件信息入库失败，删除已经上传至文件仓库的文件
         if (!succ) {
-            fileStorageService.remove(getGiftName(esPluginPO));
+            fileStorageService.remove(getGiftName(ConvertUtil.obj2Obj(pluginPO, Plugin.class)));
             LOGGER.info("class=ESPluginServiceImpl||method=addESPlugin||pluginName={}||msg=fail to upload the file",
-                    esPluginPO.getName());
+                    pluginDTO.getName());
         }
 
-        return Result.build(succ, esPluginPO.getId());
+        return Result.build(succ, pluginPO.getId());
     }
 
     /**
      * 校验唯一性的过程就和名称的唯一性结合
-     *
-     * @param esPluginDTO ES插件
-     * @param operator    操作人
+     * @param pluginDTO ES插件
+     * @param operator  操作人
      * @return
      */
     @Override
-    public Result updateESPluginDesc(ESPluginDTO esPluginDTO, String operator) {
-        ESPluginPO oldPlugin = esPluginDAO.getById(esPluginDTO.getId());
+    public Result<Void> updateESPluginDesc(PluginDTO pluginDTO, String operator) {
+        PluginPO oldPlugin = esPluginDAO.getById(pluginDTO.getId());
 
         // 检验插件信息
         if (oldPlugin == null) {
             return Result.buildFail("当前插件不存在");
         }
-        boolean succ = (1 == esPluginDAO.updateDesc(oldPlugin.getId(), esPluginDTO.getDesc()));
+        boolean succ = (1 == esPluginDAO.updateDesc(oldPlugin.getId(), pluginDTO.getDesc()));
 
         if (succ) {
-            operateRecordService.save(ES_CLUSTER_PLUGINS, EDIT, esPluginDTO.getId(), "", operator);
+            operateRecordService.save(ES_CLUSTER_PLUGINS, EDIT, pluginDTO.getId(), "", operator);
         }
         return Result.build(succ);
     }
 
     @Override
-    public ESPluginPO getESPluginById(Long id) {
+    public PluginPO getESPluginById(Long id) {
         return esPluginDAO.getById(id);
     }
 
     @Override
     public Result<Long> deletePluginById(Long id, String operator) {
-        ESPluginDTO esPluginDTO = new ESPluginDTO();
-        esPluginDTO.setId(id);
+        PluginDTO pluginDTO = new PluginDTO();
+        pluginDTO.setId(id);
 
-        Result<Void> result = paramCheck(esPluginDTO, DELETE, operator);
+        // 插件删除操作的参数校验
+        Result<Void> result = paramCheck(pluginDTO, DELETE, operator);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        ESPluginPO esPluginPO = esPluginDAO.getById(id);
-        Result<Void> response = fileStorageService.remove(getGiftName(esPluginPO));
+        // 文件系统删除插件
+        PluginPO pluginPO = esPluginDAO.getById(id);
+        Result<Void> response = fileStorageService.remove(getGiftName(ConvertUtil.obj2Obj(pluginPO, Plugin.class)));
         if (response.failed()) {
             return Result.buildFail("删除文件失败");
         }
 
+        // 删除DB插件信息
         boolean succ = (1 == esPluginDAO.delete(id));
         if (succ) {
             operateRecordService.save(ES_CLUSTER_PLUGINS, DELETE, id, "", operator);
         }
+
         return Result.build(succ, id);
     }
 
     @Override
     public String getAllSysDefaultPluginIds() {
-        List<ESPluginPO> list = esPluginDAO.getAllSysDefaultPlugins();
-        List<Long> idList = list.stream().map(ESPluginPO::getId).collect(Collectors.toList());
+        List<PluginPO> list = esPluginDAO.getAllSysDefaultPlugins();
+        List<Long> idList = list.stream().map(PluginPO::getId).collect(Collectors.toList());
         return ListUtils.longList2String(idList);
     }
 
     @Override
-    public List<ESPlugin> getPluginsByClusterName(String clusterName) {
+    public List<Plugin> getPluginsByClusterName(String clusterName) {
         ClusterPhy clusterPhy = esClusterPhyService.getClusterByName(clusterName);
         if (clusterPhy == null) {
             return Collections.emptyList();
@@ -220,101 +226,125 @@ public class ESPluginServiceImpl implements ESPluginService {
         String plugIds = clusterPhy.getPlugIds();
 
         List<Long> longIds = ListUtils.string2LongList(plugIds);
-        List<ESPluginPO> plugsList = esPluginDAO.listByPlugIds(longIds);
+        List<PluginPO> plugsList = esPluginDAO.listByPlugIds(longIds);
 
-        return ConvertUtil.list2List(plugsList, ESPlugin.class);
+        return ConvertUtil.list2List(plugsList, Plugin.class);
     }
 
     @Override
-    public Result<Void> addESPlugins(List<ESPluginDTO> esPluginDTOs) {
+    public Result<String> addESPlugins(List<PluginDTO> pluginDTOS) {
         List<String> addFail = Lists.newArrayList();
 
-        for (ESPluginDTO esPluginDTO : esPluginDTOs) {
-            Result<Long> result = addESPlugin(esPluginDTO);
+        // 分批次上传插件，并记录上传失败的插件名称
+        for (PluginDTO pluginDTO : pluginDTOS) {
+            Result<Long> result = addESPlugin(pluginDTO);
             if (result.failed()) {
-                addFail.add(esPluginDTO.getFileName());
+                addFail.add(pluginDTO.getFileName());
             }
         }
-        if (addFail.isEmpty()) {
-            return Result.buildSucc();
-        } else {
-            return Result.buildFail("上传插件失败，失败的插件名有：" + addFail);
-        }
+
+        return Result.build(addFail.isEmpty(), "上传插件失败,失败的插件名有：" + addFail);
     }
 
     /**
      * 检验需要进行 delete add updateDsc 传递的插件的参数的基本信息
-     *
-     * @param esPluginDTO 上传的插件
-     * @return
+     * @param pluginDTO 上传的插件
+     * @return 校验结果
      */
-    private Result<Void> paramCheck(ESPluginDTO esPluginDTO, OperationEnum operationEnum, String operator) {
-        if(ADD.equals(operationEnum)) {
-            Result<Void> result = handleAdd(esPluginDTO);
+    private Result<Void> paramCheck(PluginDTO pluginDTO, OperationEnum operationEnum, String operator) {
+        if (ADD.equals(operationEnum)) {
+            Result<Void> result = handleAdd(pluginDTO);
             if (result.failed()) {
                 return result;
             }
         } else if (DELETE.equals(operationEnum)) {
-            Result<Void> result = handleDelete(esPluginDTO, operator);
+            Result<Void> result = handleDelete(pluginDTO, operator);
             if (result.failed()) {
                 return result;
             }
         }
+
         return Result.buildSucc();
     }
 
-    private Result<Void> handleDelete(ESPluginDTO esPluginDTO, String operator) {
+    private Result<Void> handleDelete(PluginDTO pluginDTO, String operator) {
         if (!ariusUserInfoService.isOPByDomainAccount(operator)) {
             return Result.buildFail("非运维人员不能删除插件");
         }
-        Long id = esPluginDTO.getId();
-        if (AriusObjUtils.isNull(id)) {
+
+        Long id = pluginDTO.getId();
+        if (null == id) {
             return Result.buildFail("插件id为空");
         }
 
-        ESPluginPO esPluginPO = getESPluginById(id);
-        if (null == esPluginPO) {
+        PluginPO pluginPO = getESPluginById(id);
+        if (null == pluginPO) {
             return Result.buildFail("对应的插件不存在");
         }
 
+        // 校验集群是否已经安装了指定的插件，如已安装，则首先需要卸载插件
         List<Long> pluginIds = ListUtils.string2LongList(esClusterPhyService
-                .getClusterById(Integer.valueOf(esPluginPO.getPhysicClusterId()))
+                .getClusterById(Integer.valueOf(pluginPO.getPhysicClusterId()))
                 .getPlugIds());
         if (pluginIds.contains(id)) {
             return Result.buildFail("该插件已安装，请先卸载");
         }
+
         return Result.buildSucc();
     }
 
-    private Result<Void> handleAdd(ESPluginDTO esPluginDTO) {
-        if (AriusObjUtils.isNull(esPluginDTO)) {
+    private Result<Void> handleAdd(PluginDTO pluginDTO) {
+        if (AriusObjUtils.isNull(pluginDTO)) {
             return Result.buildFail("插件为空");
         }
 
-        if (esPluginDTO.getPhysicClusterId() == null) {
+        if (pluginDTO.getPhysicClusterId() == null) {
             return Result.buildFail("物理集群id为空");
         }
 
-        if (null == esClusterPhyService.getClusterById(Integer.valueOf(esPluginDTO.getPhysicClusterId()))) {
+        if (null == esClusterPhyService.getClusterById(Integer.valueOf(pluginDTO.getPhysicClusterId()))) {
             return Result.buildFail("物理集群id不存在");
         }
 
-        if (esPluginDTO.getUploadFile() == null) {
+        if (pluginDTO.getUploadFile() == null) {
             return Result.buildFail("文件不存在");
         }
+
+        // 根据插件的类型进行对应的插件文件校验
+        switch (PluginTypeEnum.valueOf(pluginDTO.getPDefault())) {
+            case ES_PLUGIN:
+                return verifyESPluginFileAndModifyPluginName(pluginDTO);
+            case ADMIN_PLUGIN:
+                return verifyAdminPluginFileAndModifyPluginVersion(pluginDTO);
+            case DEFAULT_PLUGIN:
+                return Result.buildFail("不允许上传系统默认插件");
+            default:
+                return Result.buildFail("上传插件类型未知");
+        }
+    }
+
+    /**
+     * 对于平台能力的插件进行内容的校验
+     * @param pluginDTO 插件
+     * @return 校验结果
+     */
+    private Result<Void> verifyAdminPluginFileAndModifyPluginVersion(PluginDTO pluginDTO) {
+        if(null == pluginDTO.getVersion()) {
+            pluginDTO.setVersion(AdminConstant.DEFAULT_PLUGIN_VERSION);
+        }
+
         return Result.buildSucc();
     }
 
     /**
-     * 校验某个插件文件的合法性
-     *
-     * @param esPluginDTO 插件
-     * @return
+     * 校验某个ES能力插件文件的合法性
+     * @param pluginDTO 插件
+     * @return 校验结果
      */
-    private Result<Void> verifyPluginFileAndModifyPluginName(ESPluginDTO esPluginDTO) {
-        MultipartFile pluginFile = esPluginDTO.getUploadFile();
-        if (esPluginDTO.getUploadFile().getSize() > MULTI_PART_FILE_SIZE_MAX) {
-            return Result.buildFail("插件[" + esPluginDTO.getName() + "]文件的大小超过限制，不能超过" + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
+    private Result<Void> verifyESPluginFileAndModifyPluginName(PluginDTO pluginDTO) {
+        MultipartFile pluginFile = pluginDTO.getUploadFile();
+        if (pluginDTO.getUploadFile().getSize() > MULTI_PART_FILE_SIZE_MAX) {
+            return Result.buildFail("插件[" + pluginDTO.getName() + "]文件的大小超过限制，不能超过" + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
         }
         // 读取插件配置信息
         Map<String, String> propsMap = readFromProperties(pluginFile);
@@ -329,7 +359,7 @@ public class ESPluginServiceImpl implements ESPluginService {
         if (name == null || name.isEmpty()) {
             return Result.buildFail("property [name] is missing in [" + pluginFile.getName() + "]");
         }
-        esPluginDTO.setName(name);
+        pluginDTO.setName(name);
 
         // 校验 description
         final String description = propsMap.remove("description");
@@ -343,24 +373,31 @@ public class ESPluginServiceImpl implements ESPluginService {
             return Result.buildFail("property [version] is missing for plugin [" + name + "]");
         }
         if (!ESVersionUtil.isValid(version)) {
-            return Result.buildFail("插件[" + esPluginDTO.getName() + "]的版本号不符合规则，必须是'1.1.1.1'类似的格式");
+            return Result.buildFail("插件[" + pluginDTO.getName() + "]的版本号不符合规则，必须是'1.1.1.1'类似的格式");
         }
         // 插件的版本格式是什么样的
-        esPluginDTO.setVersion(version);
+        pluginDTO.setVersion(version);
 
         // 校验 elasticsearch.version
         final String esVersion = propsMap.get("elasticsearch.version");
         if (esVersion == null) {
             return Result.buildFail("property [version] is missing for plugin [" + name + "]");
         }
-        // 获取当前部署集群的es版本
-        String phyClusterName = esClusterPhyService.getClusterById(Integer.valueOf(esPluginDTO.getPhysicClusterId())).getCluster();
-        String esVersionByESClient = esClusterService.synGetESVersionByCluster(phyClusterName);
 
-        if (esVersionByESClient == null) {
+        // 获取当前部署集群的es版本
+        ClusterPhy clusterPhy = esClusterPhyService.getClusterById(Integer.valueOf(pluginDTO.getPhysicClusterId()));
+        if(AriusObjUtils.isNull(clusterPhy) || AriusObjUtils.isNull(clusterPhy.getCluster())) {
+            return Result.buildFail("插件上传的物理集群不存在");
+        }
+
+        // 从es集群获取实时生效的版本号
+        String esVersionFromESClient = esClusterService.synGetESVersionByCluster(clusterPhy.getCluster());
+        if (esVersionFromESClient == null) {
             return Result.buildFail("无法从物理集群获取版本");
         }
-        if (!esVersionByESClient.equals(esVersion)) {
+
+        // 这里兼容内部4位版本
+        if (!esVersion.startsWith(esVersionFromESClient)) {
             return Result.buildFail("插件适配的es版本和当前运行的es集群版本号不匹配");
         }
 
@@ -369,20 +406,19 @@ public class ESPluginServiceImpl implements ESPluginService {
         if (classname == null) {
             return Result.buildFail("property [classname] is missing for plugin [" + name + "]");
         }
+
         return Result.buildSucc();
     }
 
     /**
      * 从插件中的 plugin-descriptor.properties 文件中读取插件配置信息
-     *
      * @param pluginFile 插件压缩包
      * @return 插件配置信息
-     * @throws IOException
      */
     private Map<String, String> readFromProperties(MultipartFile pluginFile) {
         InputStream bis = null;
         String fileName = pluginFile.getOriginalFilename();
-        if(null == fileName) {
+        if (null == fileName) {
             LOGGER.warn("class=ESPluginServiceImpl||method=readFromProperties||errmsg = MultipartFile.getOriginalFilename() is null ");
             return null;
         }
@@ -392,14 +428,13 @@ public class ESPluginServiceImpl implements ESPluginService {
             if (fileName.endsWith(FileCompressionType.TAR) || fileName.endsWith(FileCompressionType.TAR_GZ)) {
                 bis = CommonUtils.unTar(pluginFile.getInputStream(), "plugin-descriptor.properties");
             } else if (fileName.endsWith(FileCompressionType.ZIP)) {
-                // 解析有问题
                 bis = CommonUtils.unZip(pluginFile.getInputStream(), "plugin-descriptor.properties");
             } else {
                 throw new IllegalStateException("插件文件类型不合法！");
             }
 
+            // 说明压缩包中不存在 plugin-descriptor.properties 文件
             if (bis == null) {
-                // 说明压缩包中不存在 plugin-descriptor.properties 文件
                 return null;
             }
 
@@ -421,7 +456,13 @@ public class ESPluginServiceImpl implements ESPluginService {
         return props.stringPropertyNames().stream().collect(Collectors.toMap(Function.identity(), props::getProperty));
     }
 
-    private String getGiftName(ESPluginPO esPluginPO) {
-        return esPluginPO.getName() + SEPARATOR + esPluginPO.getVersion() + SEPARATOR + esPluginPO.getPhysicClusterId() + FileCompressionType.TAR_GZ;
+    /**
+     * 重构上传至文件仓库系统的名称，作为文件存储的唯一键
+     * @param plugin 插件信息
+     * @return 唯一区别的名称
+     */
+    private String getGiftName(Plugin plugin) {
+        return plugin.getName() + SEPARATOR + plugin.getVersion()
+                + SEPARATOR + plugin.getPhysicClusterId() + SEPARATOR + plugin.getPDefault() + FileCompressionType.TAR_GZ;
     }
 }

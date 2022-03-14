@@ -117,4 +117,9 @@ public class HealthDegreesPO extends BaseESPO {
     public String getKey() {
         return cluster + "_" + template + "_" + timestamp;
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

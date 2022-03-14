@@ -15,13 +15,13 @@ public interface ClusterContextManager {
      * 刷新物理集群上下文
      * @param clusterPhyName  物理集群名称
      */
-    void flushClusterPhyContext(String clusterPhyName);
+    ClusterPhyContext flushClusterPhyContext(String clusterPhyName);
 
     /**
      * 刷新逻辑集群上下文
      * @param clusterLogicId   逻辑集群Id
      */
-    void flushClusterLogicContext(Long clusterLogicId);
+    ClusterLogicContext flushClusterLogicContext(Long clusterLogicId);
 
     /**
      * 根据region信息更新集群上下文
@@ -52,6 +52,15 @@ public interface ClusterContextManager {
      */
     ClusterPhyContext getClusterPhyContext(String cluster);
 
+    ClusterPhyContext getClusterPhyContextCache(String cluster);
+
+    /**
+     * 从缓存中获取逻辑集群上下文
+     *
+     * @param clusterLogicId
+     * @return
+     */
+    ClusterLogicContext getClusterLogicContextCache(Long clusterLogicId);
     /**
      * 构建逻辑集群上下文
      * @param clusterLogicId

@@ -8,12 +8,12 @@ import {
   XForm as XFormComponent,
 } from "component/x-form";
 import "./index.less";
-import { IZoomInfo } from "@types/index-types";
+import { IZoomInfo } from "typesPath/index-types";
 import { KEEP_LIVE_LIST } from "constants/time";
 import { quotaRuleProps } from "constants/table";
 import { getIndexCapacity, getIndexQuotaCost } from "api/cluster-index-api";
 import { getPercent } from "lib/utils";
-import { IWorkOrder } from "@types/params-types";
+import { IWorkOrder } from "typesPath/params-types";
 import { AppState, UserState } from "store/type";
 import { submitWorkOrder } from "api/common-api";
 import { Descriptions } from 'antd'; // TODO: 
