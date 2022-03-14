@@ -19,6 +19,9 @@
 
 package com.didi.arius.gateway.elasticsearch.client.model;
 
+import java.io.IOException;
+import java.util.*;
+
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -32,9 +35,6 @@ import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.jboss.netty.handler.codec.http.HttpMethod;
-
-import java.io.IOException;
-import java.util.*;
 
 public final class RestRequest {
 
@@ -143,7 +143,11 @@ public final class RestRequest {
     }
 
     public Request buildRequest() {
-        Request request = new Request(method, endpoint);
+        String uri = endpoint;
+        if (StringUtils.isNotBlank(endpoint) && !endpoint.startsWith("/")) {
+            uri = "/" + endpoint;
+        }
+        Request request = new Request(method, uri);
         for (Map.Entry<String, String> entry : params.entrySet()) {
             request.addParameter(entry.getKey(), entry.getValue());
         }

@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * ES集群表对应各角色主机列表 Mapper 接口
@@ -21,6 +21,8 @@ public interface ESRoleClusterHostDAO {
     List<String> listHostNamesByRoleId(String roleId);
 
     List<ESRoleClusterHostPO> listByRoleClusterId(Long roleClusterId);
+
+    List<ESRoleClusterHostPO> listByRoleClusterIds(List<Long> roleClusterIds);
 
     List<ESRoleClusterHostPO> listByCondition(ESRoleClusterHostPO param);
 

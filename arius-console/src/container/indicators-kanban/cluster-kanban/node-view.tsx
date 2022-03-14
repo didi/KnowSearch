@@ -21,11 +21,14 @@ import {
   allCheckedData,
   getCheckedData,
   indexConfigData,
+  goldConfig,
 } from "./node-view-config";
 
 import "../style/index";
 import { asyncMicroTasks, resize } from "../../../lib/utils";
 import { setIsUpdate } from "actions/cluster-kanban";
+import * as actions from "../../../actions";
+import { arrayMoveImmutable } from 'array-move';
 
 const { Panel } = Collapse;
 
@@ -48,6 +51,14 @@ export const NodeView = memo(() => {
   const [nodeIp, setNodeIp] = useState("");
   const [nodeIpList, setNodeIpList] = useState([]);
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
+ 
+  const sortEnd = (item, { oldIndex, newIndex }) => {
+    const listsNew = arrayMoveImmutable(checkedData[item], oldIndex, newIndex)
+    checkedData[item] = listsNew;
+    const checkedList = objFlat(checkedData);
+    setCheckedList(NODE, checkedList);
+    setCheckedData({...checkedData});
+  }; 
 
   const dispatch = useDispatch();
 
@@ -129,9 +140,24 @@ export const NodeView = memo(() => {
         optionList={defaultIndexConfigList}
         checkedData={checkedData}
         setCheckedData={setIndexConfigCheckedData}
+        goldConfig={goldConfig}
       />
     );
   };
+
+  const ShowTaskTooltipModal = (clusterPhyName, node, time) => {
+    dispatch(actions.setModalId("chartTableModal", {
+      clusterPhyName,
+      node,
+      time
+    }));
+  }
+
+  useEffect(() => {
+    window['showTaskTooltipModal'] = (clusterPhyName, node, time) => {
+      ShowTaskTooltipModal(clusterPhyName, node, time);     
+    };
+  }, []);
 
   return (
     <>
@@ -169,6 +195,9 @@ export const NodeView = memo(() => {
                         getAsyncViewData={getAsyncNodeViewData}
                         startTime={startTime}
                         endTime={endTime}
+                        clusterPhyName={clusterName}
+                        sortEnd={sortEnd}
+                        item={item}
                       /> : ""
                       }
                   </div>

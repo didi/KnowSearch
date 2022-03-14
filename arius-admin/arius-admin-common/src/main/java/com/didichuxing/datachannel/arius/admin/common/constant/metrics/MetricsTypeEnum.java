@@ -28,6 +28,10 @@ public enum MetricsTypeEnum {
      */
     CLUSTER_INDEX(13, MetricsConstant.CLUSTER,"index"),
     /**
+     * 集群看板下的索引模板指标
+     */
+    CLUSTER_INDEX_TEMPLATE(14, MetricsConstant.CLUSTER,"template"),
+    /**
      * 网关看板下的总览指标
      */
     GATEWAY_OVERVIEW(21, MetricsConstant.GATEWAY,"overview"),
@@ -54,7 +58,11 @@ public enum MetricsTypeEnum {
     /**
      * 字段页展示中的索引查询配置
      */
-    USER_CONFIG_SHOW_INDEX_SEARCH(32,MetricsConstant.USER_SHOW,"indexSearch");
+    USER_CONFIG_SHOW_INDEX_SEARCH(32,MetricsConstant.USER_SHOW,"indexSearch"),
+    /**
+     * 网关看板下的clientNode指标
+     */
+    GATEWAY_CLIENT_NODE(33, MetricsConstant.GATEWAY,"clientNode");
 
 
     MetricsTypeEnum(int code, String firstMetricsType, String secondMetricsType) {

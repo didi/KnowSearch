@@ -52,6 +52,19 @@ public interface ESTemplateService {
                        int retryCount) throws ESOperateException;
 
     /**
+     * 创建模板, 会覆盖之前的存在的
+     * @param settings 模板settings
+     * @param cluster 集群
+     * @param name 模板名字
+     * @param expression 表达式
+     * @param mappings 模板mappings
+     * @param retryCount 重试次数
+     * @return
+     * @throws ESOperateException
+     */
+    boolean syncCreate(Map<String, String> settings, String cluster, String name, String expression, MappingConfig mappings, int retryCount) throws ESOperateException;
+
+    /**
      * 修改模板
      * @param cluster 集群
      * @param name 模板名字
@@ -167,4 +180,11 @@ public interface ESTemplateService {
      * 获取集群模板个数, 不包涵原生自带模板
      */
     long syncGetTemplateNum(String cluster);
+
+    /**
+     * 获取集群模板个数，兼容2.3.3低版本的集群
+     * @param cluster 物理集群名称
+     * @return 集群模板个数
+     */
+    long synGetTemplateNumForAllVersion(String cluster);
 }

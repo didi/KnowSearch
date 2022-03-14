@@ -1,16 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum.*;
-
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -21,8 +16,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
@@ -31,6 +29,15 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum.*;
 
 /**
  * 集群上下文类, 包含以下信息:
@@ -59,6 +66,9 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
 
     private static final Integer           PHY_ASSOCIATED_LOGIC_MAX_NUMBER  = 2 << 9;
 
+    private static     AtomicInteger     flushVersionForClusterLogicContext = new AtomicInteger();
+    private static     AtomicInteger     flushVersionForClusterPhyContext   = new AtomicInteger();
+
     @Autowired
     private ClusterLogicService            clusterLogicService;
 
@@ -70,32 +80,63 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
 
     @Autowired
     private RoleClusterHostService         roleClusterHostService;
-    
-    private static FutureUtil<Void> futureUtil = FutureUtil.initBySystemAvailableProcessors("ClusterContextManagerImpl", 100);
+
+    @Autowired
+    private AriusScheduleThreadPool        ariusScheduleThreadPool;
+
+    private FutureUtil<Void> loadClusterLogicContextFutureUtil = FutureUtil.initBySystemAvailableProcessors("loadClusterLogicContextFutureUtil",100);
+
+    private FutureUtil<Void> loadClusterPhyContextFutureUtil = FutureUtil.initBySystemAvailableProcessors("loadClusterPhyContextFutureUtil",100);
+
+    @PostConstruct
+    private void init(){
+        ariusScheduleThreadPool.submitScheduleAtFixTask(this::flush, 60, 120);
+    }
+
+    private void flush() {
+        clusterLogicService.listAllClusterLogics().stream().map(ClusterLogic::getId)
+                .forEach(id -> loadClusterLogicContextFutureUtil.runnableTask(() -> flushClusterLogicContext(id)));
+
+        loadClusterLogicContextFutureUtil.waitExecute();
+        flushVersionForClusterLogicContext.incrementAndGet();
+        LOGGER.info("class=ClusterContextManagerImpl||method=flush||id2ClusterLogicContextMap key size is {}",
+                id2ClusterLogicContextMap.keySet().size());
+
+        clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster)
+                .forEach(cluster -> loadClusterPhyContextFutureUtil.runnableTask(() -> flushClusterPhyContext(cluster)));
+
+        loadClusterPhyContextFutureUtil.waitExecute();
+        flushVersionForClusterPhyContext.incrementAndGet();
+        LOGGER.info("class=ClusterContextManagerImpl||method=flush||name2ClusterPhyContextMap key size is {}",
+                name2ClusterPhyContextMap.keySet().size());
+    }
 
     @Override
-    public void flushClusterPhyContext(String clusterPhyName) {
+    public ClusterPhyContext flushClusterPhyContext(String clusterPhyName) {
         try {
-            Thread.sleep(1000);
             ClusterPhyContext clusterPhyContext = getClusterPhyContext(clusterPhyName);
             if (null != clusterPhyContext) {
                 name2ClusterPhyContextMap.put(clusterPhyContext.getClusterName(), clusterPhyContext);
+                return clusterPhyContext;
             }
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             LOGGER.error("class=ClusterContextManagerImpl||method=flushClusterPhyContext||clusterPhyName={}||errMsg={}",
                 clusterPhyName, e.getMessage(), e);
         }
+
+        return null;
     }
 
     @Override
-    public void flushClusterLogicContext(Long clusterLogicId) {
+    public ClusterLogicContext flushClusterLogicContext(Long clusterLogicId) {
         try {
-            Thread.sleep(1000);
             ClusterLogicContext clusterLogicContext = getClusterLogicContext(clusterLogicId);
             if (null != clusterLogicContext) {
                 id2ClusterLogicContextMap.put(clusterLogicContext.getClusterLogicId(), clusterLogicContext);
+                return clusterLogicContext;
             }
+
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             LOGGER.error(
@@ -103,6 +144,8 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
                 clusterLogicId, e.getMessage(), e);
 
         }
+
+        return null;
     }
 
     @Override
@@ -112,7 +155,12 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         }
 
         flushClusterPhyContext(clusterRegion.getPhyClusterName());
-        flushClusterLogicContext(clusterRegion.getLogicClusterId());
+
+        // 一个物理集群可以关联多个逻辑集群
+        List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
+        if (!CollectionUtils.isEmpty(logicClusterIds)) {
+            logicClusterIds.forEach(this::flushClusterLogicContext);
+        }
     }
 
     @Override
@@ -140,8 +188,8 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
 
     /**
      *   1. Type为独立, LP = 1, PL = 1
-     *   2. Type为共享, LP = 1, PL = n ,  1 <= n <= 1024
-     * 	 3. Type为独占, LP = n, PL = 1 ,  1 <= n <= 1024
+     *   2. Type为共享, LP = n, PL = 1
+     * 	 3. Type为独享, LP = n, PL = 1
      */
     @Override
     public Result<List<String>> getCanBeAssociatedClustersPhys(Integer clusterLogicType, Long clusterLogicId) {
@@ -155,12 +203,12 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             handleClusterLogicTypePrivate(clusterLogicId, canBeAssociatedClustersPhyNames);
         }
 
-        if (EXCLUSIVE.getCode() == clusterLogicType) {
-            handleClusterLogicTypeExclusive(clusterLogicId, canBeAssociatedClustersPhyNames);
-        }
-
         if (PUBLIC.getCode() == clusterLogicType) {
             handleClusterLogicTypePublic(clusterLogicId, canBeAssociatedClustersPhyNames);
+        }
+
+        if (EXCLUSIVE.getCode() == clusterLogicType) {
+            handleClusterLogicTypeExclusive(clusterLogicId, canBeAssociatedClustersPhyNames);
         }
 
         return Result.buildSucc(canBeAssociatedClustersPhyNames);
@@ -186,22 +234,6 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     }
 
     @Override
-    public ClusterLogicContext getClusterLogicContext(Long clusterLogicId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
-        if (null == clusterLogic) {
-            LOGGER.error(
-                    "class=ClusterContextManagerImpl||method=flushClusterLogicContext||clusterLogicId={}||msg=clusterLogic is empty",
-                    clusterLogicId);
-            return null;
-        }
-
-        ClusterLogicContext build = buildInitESClusterLogicContextByType(clusterLogic);
-        setAssociatedClusterPhyInfo(build);
-        setRegionAndAssociatedClusterPhyDataNodeInfo(build);
-        return build;
-    }
-
-    @Override
     public ClusterPhyContext getClusterPhyContext(String clusterPhyName) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
         if (null == clusterPhy) {
@@ -218,33 +250,42 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
                 .build();
 
         setClusterPhyNodeInfo(build);
-        setRegionAndClusterLogicInfo(build);
+        setRegionAndClusterLogicInfoAndAppId(build);
         return build;
     }
 
-    /***********************************************private*********************************************/
-
-    private void loadClusterLogicContexts() {
-        List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();
-        if (CollectionUtils.isEmpty(clusterLogicList)) {
-            LOGGER.warn("class=ClusterContextManagerImpl||method=loadId2ESClusterLogicContextMap||msg=平台无逻辑集群");
-        }
-
-        for (ClusterLogic clusterLogic : clusterLogicList) {
-            futureUtil.runnableTask(() -> {
-                ClusterLogicContext clusterLogicContext = getClusterLogicContext(clusterLogic.getId());
-                if (null != clusterLogicContext) {
-                    id2ClusterLogicContextMap.put(clusterLogicContext.getClusterLogicId(), clusterLogicContext);
-                }
-            });
-        }
-        futureUtil.waitExecute();
+    @Override
+    public ClusterPhyContext getClusterPhyContextCache(String cluster) {
+        return name2ClusterPhyContextMap.get(cluster);
     }
+
+    @Override
+    public ClusterLogicContext getClusterLogicContextCache(Long clusterLogicId) {
+        return id2ClusterLogicContextMap.get(clusterLogicId);
+    }
+
+    @Override
+    public ClusterLogicContext getClusterLogicContext(Long clusterLogicId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        if (null == clusterLogic) {
+            LOGGER.error(
+                    "class=ClusterContextManagerImpl||method=flushClusterLogicContext||clusterLogicId={}||msg=clusterLogic is empty",
+                    clusterLogicId);
+            return null;
+        }
+
+        ClusterLogicContext build = buildInitESClusterLogicContextByType(clusterLogic);
+        setAssociatedClusterPhyInfo(build);
+        setRegionAndAssociatedClusterPhyDataNodeInfo(build);
+        return build;
+    }
+    /***********************************************private*********************************************/
 
     /**
      *   定义规则:
      *   1. Type为独立, LP = 1, PL = 1
-     *   2. Type为共享, LP = n, PL = 1 ,  1 <= n <= 1024   多个逻辑集群共享一个物理集群, 每个逻辑集群关联物理集群一部分region, 不可跨其他物理集群
+     *   2. Type为共享, LP = n, PL = 1 ,  1 <= n <= 1024   多个逻辑集群共享一个物理集群, 每个逻辑集群关联物理集群一部分region,不可跨其他物理集群，
+     *                                                    多个逻辑集群可关联同一部分region。
      *   3. Type为独占, LP = 1, PL = n ,  1 <= n <= 1024   一个逻辑集群独占一个或者多个物理集群
      */
     private ClusterLogicContext buildInitESClusterLogicContextByType(ClusterLogic clusterLogic) {
@@ -306,40 +347,43 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         build.setAssociatedDataNodeNum(associatedRackClusterHosts.size());
 
         //设置数据节点Ip地址
-        build.setAssociatedDataNodeIps(
-            associatedRackClusterHosts.stream().map(RoleClusterHost::getIp).collect(Collectors.toList()));
+        build.setAssociatedDataNodeIps(associatedRackClusterHosts.stream().map(RoleClusterHost::getIp).collect(Collectors.toList()));
     }
 
-    private void loadClusterPhyContexts() {
-        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
-        if (CollectionUtils.isEmpty(clusterPhyList)) {
-            LOGGER.warn("class=ClusterContextManagerImpl||method=loadClusterPhyContexts||msg=集群上下文信息为空");
-        }
-
-        for (ClusterPhy clusterPhy : clusterPhyList) {
-            futureUtil.runnableTask(() -> {
-                try {
-                    ClusterPhyContext clusterPhyContext = getClusterPhyContext(clusterPhy.getCluster());
-                    if (null != clusterPhyContext) {
-                        name2ClusterPhyContextMap.put(clusterPhyContext.getClusterName(), clusterPhyContext);
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("class=ClusterContextManagerImpl||method=loadClusterPhyContexts||msg={}",e.getMessage(), e);
-                }
-            });
-        }
-        futureUtil.waitExecute();
-    }
-
-    private void setRegionAndClusterLogicInfo(ClusterPhyContext build) {
+    private void setRegionAndClusterLogicInfoAndAppId(ClusterPhyContext build) {
+        // 1. set region
         List<ClusterRegion> regions = regionRackService.listPhyClusterRegions(build.getClusterName());
         build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
 
-        List<Long> associatedClusterLogicIds = regions.stream().map(ClusterRegion::getLogicClusterId).filter(r -> r > 0)
-            .distinct().collect(Collectors.toList());
+        // 2. set ClusterLogicInfo
+        Set<Long> associatedClusterLogicIds = Sets.newHashSet();
+        for (ClusterRegion clusterRegion : regions) {
+            // 添加每一个物理集群下每一个region所被绑定的逻辑集群
+            List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
+               if(!CollectionUtils.isEmpty(logicClusterIds)
+                    && !logicClusterIds.contains(Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))) {
+                associatedClusterLogicIds.addAll(logicClusterIds);
+            }
+        }
 
-        build.setAssociatedClusterLogicIds(associatedClusterLogicIds);
+        build.setAssociatedClusterLogicIds(Lists.newArrayList(associatedClusterLogicIds));
         build.setAssociatedLogicNum(associatedClusterLogicIds.size());
+
+        // 3. set appId
+        Set<Integer> appIdSet   = new HashSet<>();
+        Set<String>  appNameSet = new HashSet<>();
+        if (!CollectionUtils.isEmpty(associatedClusterLogicIds)) {
+            for (Long associatedClusterLogicId : associatedClusterLogicIds) {
+                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(associatedClusterLogicId);
+                if (null != clusterLogic && null != clusterLogic.getAppId() && null != clusterLogic.getName()) {
+                    appIdSet.add(clusterLogic.getAppId());
+                    appNameSet.add(clusterLogic.getName());
+                }
+            }
+        }
+
+        build.setAssociatedAppIds(Lists.newArrayList(appIdSet));
+        build.setAssociatedAppNames(Lists.newArrayList(appNameSet));
     }
 
     private void setClusterPhyNodeInfo(ClusterPhyContext build) {
@@ -389,18 +433,16 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             }
         }
 
-        //独占逻辑集群不能跨集群
-        if (EXCLUSIVE.getCode() == clusterLogicType && associatedPhyNumber > 1) {
-            return Result.buildFail(String.format("集群间关联失败, 逻辑集群类型为独占, 已关联了大集群%s, 不可跨集群", clusterPhyName));
-        }
-
-        if (PUBLIC.getCode() == clusterLogicType && associatedLogicNumber > 1) {
-            return Result.buildFail(String.format("集群间关联失败, 逻辑集群类型为共享, 物理集群%s已有关联逻辑集群, 禁止物理集群夸逻辑集群关联", clusterPhyName));
-        }
-
         return Result.buildSucc(Boolean.TRUE);
     }
 
+    /**
+     * 判断指定的物理集群下的region是否被对应的逻辑集群绑定
+     * @param regionId regionId
+     * @param clusterPhyName 物理集群名称
+     * @param clusterLogicId 逻辑集群id
+     * @return
+     */
     private boolean canClusterLogicBoundRegion(Long regionId, String clusterPhyName, Long clusterLogicId) {
         ClusterRegion region                =  regionRackService.getRegionById(regionId);
         ClusterPhyContext clusterPhyContext =  getClusterPhyContext(clusterPhyName);
@@ -409,7 +451,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             return false;
         }
 
-        if (region.getLogicClusterId() > 0) {
+        if (!region.getLogicClusterIds().equals(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID)) {
             return false;
         }
 
@@ -443,53 +485,65 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     }
 
     /**
-     * LP = n , PL = 1
+     * 校验当前的物理集群可否被指定的共享类型的逻辑集群关联
      * @param clusterLogicId    逻辑集群Id
      * @param clusterPhyContext 物理集群上下文
      * @return                  true/false
-     */
-    private boolean checkForExclusive(Long clusterLogicId, ClusterPhyContext clusterPhyContext) {
-        if (null == clusterLogicId) {
-            if (0 == clusterPhyContext.getAssociatedLogicNum()) {
-                return true;
-            } else {
-                return clusterPhyContext.getAssociatedLogicNum() >= 1
-                       && hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, EXCLUSIVE.getCode());
-            }
-        } else {
-            ClusterLogicContext clusterLogicContext = id2ClusterLogicContextMap.get(clusterLogicId);
-            if (0 == clusterLogicContext.getAssociatedPhyNum() && 0 == clusterPhyContext.getAssociatedLogicNum()) {
-                return true;
-            } else {
-                return (clusterPhyContext.getAssociatedLogicNum() >= 1 && hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, EXCLUSIVE.getCode()))
-                       || (1 == clusterLogicContext.getAssociatedPhyNum() && hasBelongClusterLogicContextAssociatedClusterNames(clusterLogicContext, clusterPhyContext.getClusterName()));
-            }
-        }
-    }
-
-    /**
-     * LP = 1 , PL = n
-     * @param clusterLogicId    逻辑集群Id
-     * @param clusterPhyContext 物理集群上下文
-     * @return true/false
      */
     private boolean checkForPublic(Long clusterLogicId, ClusterPhyContext clusterPhyContext) {
         if (null == clusterLogicId) {
             if (0 == clusterPhyContext.getAssociatedLogicNum()) {
                 return true;
             } else {
-                return clusterPhyContext.getAssociatedLogicNum() == 1
-                       && hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, PUBLIC.getCode());
+                return !hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, PRIVATE.getCode());
             }
         } else {
             ClusterLogicContext clusterLogicContext = id2ClusterLogicContextMap.get(clusterLogicId);
+            //不允许一个逻辑集群绑定多个物理集群
+            if (1 < clusterLogicContext.getAssociatedPhyNum()) {
+                return false;
+            }
+
+            //逻辑集群绑定物理集群数为0 且 物理集群无逻辑集群绑定
             if (0 == clusterLogicContext.getAssociatedPhyNum() && 0 == clusterPhyContext.getAssociatedLogicNum()) {
                 return true;
             } else {
-                return (clusterPhyContext.getAssociatedLogicNum() == 1 && hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, PUBLIC.getCode()))
-                       || (clusterLogicContext.getAssociatedPhyNum() >= 1 && hasBelongClusterLogicContextAssociatedClusterNames(clusterLogicContext,
-                               clusterPhyContext.getClusterName()))
-                       || (clusterLogicContext.getAssociatedPhyNum() >= 1 && clusterPhyContext.getAssociatedLogicNum() == 0);
+                return clusterLogicContext.getAssociatedPhyNum() == 1
+                        && hasBelongClusterLogicContextAssociatedClusterNames(clusterLogicContext, clusterPhyContext.getClusterName())
+                        || clusterPhyContext.getAssociatedLogicNum() > 0
+                        && !hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, PRIVATE.getCode());
+            }
+        }
+    }
+
+    /**
+     * 校验当前的物理集群可否被指定的独享类型的逻辑集群关联
+     * @param clusterLogicId    逻辑集群Id
+     * @param clusterPhyContext 物理集群上下文
+     * @return                  true/false
+     */
+    private  boolean checkForExclusive(Long clusterLogicId, ClusterPhyContext clusterPhyContext) {
+        if (null == clusterLogicId) {
+            if (0 == clusterPhyContext.getAssociatedLogicNum()) {
+                return true;
+            } else {
+                return !hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, PRIVATE.getCode());
+            }
+        } else {
+            ClusterLogicContext clusterLogicContext = id2ClusterLogicContextMap.get(clusterLogicId);
+            //不允许一个逻辑集群绑定多个物理集群
+            if (1 < clusterLogicContext.getAssociatedPhyNum()) {
+                return false;
+            }
+
+            //逻辑集群绑定物理集群数为0 且 物理集群无逻辑集群绑定
+            if (0 == clusterLogicContext.getAssociatedPhyNum() && 0 == clusterPhyContext.getAssociatedLogicNum()) {
+                return true;
+            } else {
+                return clusterLogicContext.getAssociatedPhyNum() == 1
+                        && hasBelongClusterLogicContextAssociatedClusterNames(clusterLogicContext, clusterPhyContext.getClusterName())
+                        || clusterPhyContext.getAssociatedLogicNum() > 0
+                        && !hasClusterPhyContextAssociatedLogicTypeIsCode(clusterPhyContext, PRIVATE.getCode());
             }
         }
     }
@@ -501,9 +555,11 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
      * @return                   true/false
      */
     private boolean hasClusterPhyContextAssociatedLogicTypeIsCode(ClusterPhyContext clusterPhyContext, int code) {
-        Set<Integer> typeSet = clusterPhyContext.getAssociatedClusterLogicIds().stream()
-            .map(this::getClusterLogicContext).map(ClusterLogicContext::getLogicClusterType)
-            .collect(Collectors.toSet());
+        Set<Integer> typeSet = clusterPhyContext.getAssociatedClusterLogicIds()
+                .stream()
+                .map(this::getClusterLogicContext)
+                .map(ClusterLogicContext::getLogicClusterType)
+                .collect(Collectors.toSet());
 
         return 1 == typeSet.size() && typeSet.contains(code);
     }
@@ -519,15 +575,10 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         return clusterLogicContext.getAssociatedClusterPhyNames().contains(clusterName);
     }
 
-    private void handleClusterLogicTypePublic(Long clusterLogicId, List<String> canBeAssociatedClustersPhyNames) {
-        for (ClusterPhyContext clusterPhyContext : name2ClusterPhyContextMap.values()) {
-            if (checkForPublic(clusterLogicId, clusterPhyContext)) {
-                canBeAssociatedClustersPhyNames.add(clusterPhyContext.getClusterName());
-            }
-        }
-    }
-
     private void handleClusterLogicTypeExclusive(Long clusterLogicId, List<String> canBeAssociatedClustersPhyNames) {
+        if (!hasClusterLogicContextMapEmpty()) { return; }
+        if (!hasClusterPhyContextMapEmpty())   { return; }
+
         for (ClusterPhyContext clusterPhyContext : name2ClusterPhyContextMap.values()) {
             if (checkForExclusive(clusterLogicId, clusterPhyContext)) {
                 canBeAssociatedClustersPhyNames.add(clusterPhyContext.getClusterName());
@@ -535,11 +586,33 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         }
     }
 
+    private void handleClusterLogicTypePublic(Long clusterLogicId, List<String> canBeAssociatedClustersPhyNames) {
+        if (!hasClusterLogicContextMapEmpty()) { return; }
+        if (!hasClusterPhyContextMapEmpty())   { return; }
+
+        for (ClusterPhyContext clusterPhyContext : name2ClusterPhyContextMap.values()) {
+            if (checkForPublic(clusterLogicId, clusterPhyContext)) {
+                canBeAssociatedClustersPhyNames.add(clusterPhyContext.getClusterName());
+            }
+        }
+    }
+
     private void handleClusterLogicTypePrivate(Long clusterLogicId, List<String> canBeAssociatedClustersPhyNames) {
+        if (!hasClusterLogicContextMapEmpty()) { return; }
+        if (!hasClusterPhyContextMapEmpty())   { return; }
+
         for (ClusterPhyContext clusterPhyContext : name2ClusterPhyContextMap.values()) {
             if (checkForPrivate(clusterLogicId, clusterPhyContext)) {
                 canBeAssociatedClustersPhyNames.add(clusterPhyContext.getClusterName());
             }
         }
+    }
+
+    private boolean hasClusterPhyContextMapEmpty() {
+        return flushVersionForClusterPhyContext.get() > 0;
+    }
+
+    private boolean hasClusterLogicContextMapEmpty() {
+        return flushVersionForClusterLogicContext.get() > 0;
     }
 }

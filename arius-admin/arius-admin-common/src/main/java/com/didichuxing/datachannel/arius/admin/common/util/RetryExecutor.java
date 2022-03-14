@@ -77,7 +77,7 @@ public class RetryExecutor {
 
     /**
      * 重试操作，要么handler执行成功有返回值,要么报异常
-     * @throws Throwable 操作的异常
+     * @throws Exception 操作的异常
      */
     public boolean execute() throws Exception {
         boolean succ = false;
@@ -99,6 +99,9 @@ public class RetryExecutor {
                         e.getMessage(), name, tryCount, e);
                     throw e;
                 }
+
+                LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
+                        e.getMessage(), name, tryCount,retryCount);
             }
         } while (tryCount++ < retryCount);
 

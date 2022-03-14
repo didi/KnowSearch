@@ -1,5 +1,7 @@
 package com.didi.arius.gateway.core.service.impl;
 
+import java.util.*;
+
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.enums.RunModeEnum;
 import com.didi.arius.gateway.common.metadata.ESCluster;
@@ -7,12 +9,11 @@ import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 import static org.apache.commons.lang.StringUtils.*;
 
@@ -170,10 +171,10 @@ public class ESRestClientServiceImpl implements ESRestClientService {
             }
         }
 
-        //TODO 暂时注释，暂不使用库里的默认值，只是用请求中携带的auth，如果test环境出现问题说明有action没有下传auth到es
-		/*if (!Strings.isEmpty(dataCenter.getPassword())) {
+        //开源gateway为了支持带认证的集群使用gateway访问
+		if (!Strings.isEmpty(dataCenter.getPassword())) {
 			client.setBasicAuth(dataCenter.getPassword());
-		}*/
+		}
 
         if (!client.getEsVersion().startsWith(QueryConsts.ES_VERSION_2_PREFIX)) {
             client.addHeader(new BasicHeader("content-type", "application/json"));

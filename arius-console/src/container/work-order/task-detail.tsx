@@ -5,7 +5,7 @@ import Url from "lib/url-parser";
 import { DcdrPlanSpeed } from "./dcdr-plan-speed";
 import "./index.less";
 import { Menu, PageHeader, Tag } from 'antd';
-import { IDcdrStepDetailInfo } from "@types/task-types";
+import { IDcdrStepDetailInfo } from "typesPath/task-types";
 import { DCDR_TASK_STATUS_TYPE_MAP } from "constants/status-map";
 import { connect } from "react-redux";
 import * as actions from "actions";

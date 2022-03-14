@@ -70,4 +70,9 @@ public class ESIngestStats extends BaseESPO {
     public String getKey() {
         return cluster + "@" + node + "@" + template + "@" + monitorTimestamp2min(timestamp);
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

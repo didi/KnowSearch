@@ -3,7 +3,7 @@ import 'styles/search-filter.less';
 import { getIndexListColumns } from './config';
 import Url from 'lib/url-parser';
 import { getOpIndexList } from 'api/cluster-index-api';
-import { IIndex } from '@types/index-types';
+import { IIndex } from 'typesPath/index-types';
 import { DTable } from 'component/dantd/dtable';
 import { getPhysicalTemplateList } from 'api/op-cluster-index-api';
 

@@ -1,5 +1,5 @@
 import { IFormItem, FormItemType } from "component/x-form";
-import { REGION_LIST, DATA_TYPE_LIST } from "constants/common";
+import { REGION_LIST, DATA_TYPE_LIST, BOOLEAN_LIST, LEVEL_MAP } from "constants/common";
 import {
   CYCLICAL_ROLL_TYPE_LIST,
   fieldTypes,
@@ -19,8 +19,11 @@ import { LogicCluserSelect } from "container/custom-form/logic-cluser-select";
 import store from "store";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { AppState } from "store/type";
-import { getNameCheck } from 'api/cluster-index-api';
+import { getNameCheck, getSizeCheck } from 'api/cluster-index-api';
 import _ from 'lodash';
+import { HotTime } from './hotTime';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 
 const app = {
   app: store.getState().app as AppState,
@@ -33,6 +36,7 @@ export const getStepOneFormMap = (
   cyclicalRoll: string,
   isModifyPage: boolean,
   form?: any,
+  hotTimeState?: boolean,
 ): IFormItem[] => {
   const mapList = [
     {
@@ -40,7 +44,7 @@ export const getStepOneFormMap = (
       label: "索引模板名称",
       attrs: {
         disabled: isModifyPage,
-        placeholder: "请填写索引模板名称，支持大、小写字母、数字、-、_4-128位字符",
+        placeholder: "请填写索引模板名称，支持小写字母、数字、-、_4-128位字符",
       },
       // formAttrs: {
       //   dependencies: ['clusterInfo'],
@@ -53,10 +57,10 @@ export const getStepOneFormMap = (
             if (isModifyPage) return Promise.resolve();
             const reg = /^[.a-z0-9_-]{1,}$/g;
             if (!value || value?.trim().length > 128 || value?.trim().length < 4) {
-              return Promise.reject("请填写索引模板名称，支持大、小写字母、数字、-、_4-128位字符");
+              return Promise.reject("请填写索引模板名称，支持小写字母、数字、-、_4-128位字符");
             }
             if (!reg.test(value)) {
-              return Promise.reject("请填写正确索引模板名称，支持大、小写字母、数字、-、_4-128位字符");
+              return Promise.reject("请填写正确索引模板名称，支持小写字母、数字、-、_4-128位字符");
             }
             if (value) {
               const checkName = await getNameCheck(value);
@@ -99,6 +103,21 @@ export const getStepOneFormMap = (
       ],
     },
     {
+      key: "level",
+      label: "业务等级",
+      type: FormItemType.select,
+      rules: [
+        {
+          required: isModifyPage ? false : true,
+          message: '请选择业务等级',
+        },
+      ],
+      attrs: {
+        disabled: isModifyPage,
+      },
+      options: LEVEL_MAP,
+    },
+    {
       key: "cyclicalRoll",
       label: "是否分区",
       type: FormItemType.select,
@@ -129,28 +148,79 @@ export const getStepOneFormMap = (
       },
     },
     {
+      key: "hotTime",
+      label: "热节点保存周期(天)",
+      invisible: cyclicalRoll !== "more",
+      formAttrs: {
+        dependencies: ['expireTime'],
+      },
+      type: FormItemType.custom,
+      customFormItem: <HotTime disabled={hotTimeState} />,
+      rules: [
+        {
+          required: false,
+          validator: async (rule: any, value) => {
+            const expireTime = await form?.getFieldValue('expireTime');
+
+            if (window.location.pathname == '/es/index/modify') {
+              return Promise.resolve();
+            }
+            if (value < 0 || (value > expireTime && expireTime !== -1)) return Promise.reject('请输入热节点保存周期，自然数，大于等于0，小于等于【保存周期】');
+            return Promise.resolve();
+          },
+        }
+      ],
+      attrs: {
+        // disabled: isModifyPage,
+        style: { width: '100%' },
+        placeholder: '请输入热节点保存周期',
+      },
+    },
+    {
+      key: "disableIndexRollover",
+      label: (
+        <div style={{ position: 'relative' }}>
+          <Tooltip title={'开启后会影响索引Update和Delete能力以及指定id 写入，更新，删除。'}>
+            <InfoCircleOutlined style={{ color: 'green', position: 'absolute', left: -28, top: 2 }} />
+          </Tooltip>
+          <span> 索引模板是否开启RollOver</span>
+        </div>
+      ),
+      defaultValue: 'true',
+      invisible: isModifyPage,
+      type: FormItemType.select,
+      rules: [{ required: true, message: "请选择索引模板是否开启RollOver" }],
+      options: BOOLEAN_LIST,
+    },
+    {
       key: "quota",
       label: "数据大小(GB)",
       // invisible: !Boolean(cyclicalRoll),
+      formAttrs: {
+        dependencies: ['clusterInfo'],
+      },
       defaultValue: 30,
       type: FormItemType.inputNumber,
       rules: [
         {
           required: true,
-          message: "请输入数据大小(GB)，最小3G, 最大3072G",
-          validator: (rule: any, value: number) => {
+          validator: async (rule: any, value: number) => {
+            const clusterInfo = await form?.getFieldValue('clusterInfo');
             if (isModifyPage) return Promise.resolve();
             if (typeof value !== "number") {
-              return Promise.reject();
+              return Promise.reject("请输入数据大小(GB)，最小3G, 最大3072G");
             }
             if (value === Infinity || value < 0) {
-              return Promise.reject();
+              return Promise.reject("请输入数据大小(GB)，最小3G, 最大3072G");
             }
 
             if (value < 3 || value >= 3072) {
-              return Promise.reject();
+              return Promise.reject("请输入数据大小(GB)，最小3G, 最大3072G");
             }
 
+            if (value && clusterInfo?.cluster) {
+              const checkSize = await getSizeCheck(clusterInfo.cluster, value);
+            }
             return Promise.resolve();
           },
         },
@@ -159,22 +229,6 @@ export const getStepOneFormMap = (
         disabled: isModifyPage,
       },
     },
-    // {
-    //   key: "quotaMoney",
-    //   label: "索引成本估算",
-    //   type: FormItemType.custom,
-    //   customFormItem: <RenderText text={"0 元/月"} />,
-    //   invisible: isModifyPage,
-    //   extraElement: (
-    //     <>
-    //       {clusterType === 2 ? (
-    //         <span className="ml-5">独立集群按集群计费，索引不再单独收费</span>
-    //       ) : null}
-    //         Arius成本计价
-    //       </a>
-    //     </>
-    //   ),
-    // },
     {
       key: "responsible",
       label: "业务负责人",
@@ -236,7 +290,6 @@ export const getStepOneFormMap = (
       },
     },
   ] as IFormItem[];
-
   return mapList;
 };
 
@@ -307,7 +360,6 @@ export const getStepTowFormItems = (parmas: {
                 }
               });
             }
-            console.log(2)
             if (messageText) {
               return Promise.reject(messageText);
             } else {
@@ -351,7 +403,7 @@ export const getStepTowFormItems = (parmas: {
       }),
       extraElement:
         (firstLevel === 0 || secondLevel === 0) &&
-        complexType.indexOf(type) > -1 ? (
+          complexType.indexOf(type) > -1 ? (
           <>
             <PlusCircleOutlined
               onClick={() => {
@@ -390,7 +442,7 @@ export const getStepTowFormItems = (parmas: {
         disabled:
           isDetailPage ||
           (type === "text" &&
-            indexStore.formValueMap[`search_${kIndex}`] === 0),
+            indexStore.formValueMap[`search_${kIndex}`] == 0),
         placeholder: "请选择",
       },
     },
@@ -430,7 +482,7 @@ export const getStepTowFormItems = (parmas: {
                 primaryKeyArr.push(values[key]);
               }
             })
-            if (primaryKeyArr.length > 1 && value) {
+            if (primaryKeyArr?.length > 1 && value) {
               return Promise.reject('主键是唯一的')
             }
             return Promise.resolve()
@@ -462,7 +514,7 @@ export const getStepTowFormItems = (parmas: {
                 routingArr.push(values[key]);
               }
             })
-            if (routingArr.length > 1 && value) {
+            if (routingArr?.length > 1 && value) {
               return Promise.reject('routing是唯一的')
             }
             return Promise.resolve()
@@ -480,7 +532,7 @@ export const getStepTowFormItems = (parmas: {
         disabled:
           isDetailPage ||
           (type === "date" &&
-            indexStore.formValueMap[`search_${kIndex}`] === 0),
+            indexStore.formValueMap[`search_${kIndex}`] == 0),
         size: "small",
       },
       type: FormItemType._switch,
@@ -539,9 +591,8 @@ export const mappingPreviewInfo = [
     label: "所属应用",
     key: "app",
     render: (value: any) => (
-      <span>{`${app.app.appInfo()?.name || ""}(${
-        app.app.appInfo()?.id || ""
-      })`}</span>
+      <span>{`${app.app.appInfo()?.name || ""}(${app.app.appInfo()?.id || ""
+        })`}</span>
     ),
   },
   {
@@ -560,6 +611,11 @@ export const mappingPreviewInfo = [
     render: (value: any) => <span>{value.clusterInfo?.clusterName}</span>,
   },
   {
+    label: "业务等级",
+    key: "level",
+    render: (value: any) => <span>{LEVEL_MAP[Number(value?.level) - 1]?.label}</span>,
+  },
+  {
     label: "容量设置",
     key: "cyclicalRoll",
     render: (value: any) => (
@@ -569,6 +625,17 @@ export const mappingPreviewInfo = [
         )?.[0]?.label || ""}
       </span>
     ),
+  },
+  {
+    label: "索引模板是否开启RollOver",
+    key: "disableIndexRollover",
+    render: (value: any) => (
+      value?.disableIndexRollover === 'false' ? '是' : '否'
+    ),
+  },
+  {
+    label: "热节点保存周期",
+    key: "hotTime",
   },
   {
     label: "分区字段",
@@ -672,3 +739,9 @@ export const getJsonMappingData = (postData: any) => {
     dateFieldFormat: formData.timeFormat,
   });
 };
+
+
+export const strNumberToBoolean = (value) => { 
+  // undefined null 0 表示为fasle
+  return !(value === undefined || value === null || value == '0');
+}

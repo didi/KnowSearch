@@ -1,5 +1,7 @@
 package com.didi.arius.gateway.core.service.arius.impl;
 
+import java.util.*;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -36,7 +38,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
 
 import static com.didi.arius.gateway.common.utils.AppUtil.isAdminAppid;
 
@@ -462,11 +463,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         templateAlias.setName(aliasName);
 
         TempaletAliasResponse response = ariusAdminRemoteService.addAdminTemplateAlias(templateAlias);
-		if(null == response || null == response.getData() || !response.getData()){
+        if (null == response || null == response.getData()) {
             logger.error("addTemplateAlias error, response={}, templateAlias={}", JSON.toJSONString(response),
                     JSON.toJSONString(templateAlias));
             return false;
-		}
+        } else if (!response.getData()) {
+            throw new IllegalArgumentException(response.getMessage());
+        }
 
         AppDetail appDetail = appService.getAppDetail(appid);
         if(null == appDetail){

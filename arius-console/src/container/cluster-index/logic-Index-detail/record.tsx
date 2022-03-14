@@ -3,9 +3,18 @@ import 'styles/search-filter.less';
 import { getOperationColumns } from './config';
 import Url from 'lib/url-parser';
 import { DTable } from 'component/dantd/dtable';
-import { getUserRecordList } from 'api/cluster-api';
-import { IOperaRecordt } from '@types/cluster/cluster-types';
+import { getUserRecordMultiList } from 'api/cluster-api';
+import { IOperaRecordt } from 'typesPath/cluster/cluster-types';
+import { connect } from 'react-redux';
+import * as actions from "actions";
 
+const mapDispatchToProps = (dispatch: any) => ({
+  setDrawerId: (modalId: string, params?: any, cb?: Function) =>
+    dispatch(actions.setDrawerId(modalId, params, cb)),
+});
+
+const connects: Function = connect;
+@connects(null, mapDispatchToProps)
 export class OperatingRecord extends React.Component {
   public state = {
     searchKey: '',
@@ -40,8 +49,7 @@ export class OperatingRecord extends React.Component {
     this.setState({
       loading: true
     })
-
-    getUserRecordList({moduleId: 1, bizId: this.id}).then((res) => {
+    getUserRecordMultiList({moduleId: '1, 13', bizId: this.id}).then((res) => {
       this.setState({
         data: res || []
       })
@@ -66,7 +74,7 @@ export class OperatingRecord extends React.Component {
           loading={loading}
           rowKey="id"
           dataSource={this.getData(data)}
-          columns={getOperationColumns()}
+          columns={getOperationColumns((this.props as any)?.setDrawerId)}
           reloadData={this.reloadData}
           tableHeaderSearchInput={{submit: this.handleSubmit}}
         />

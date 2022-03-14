@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.region.impl
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -17,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.region.RegionUnbindE
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -27,6 +29,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Temp
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.region.ClusterRegionDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.CLUSTER_REGION;
@@ -101,7 +101,7 @@ public class RegionRackServiceImpl implements RegionRackService {
         List<ClusterRegion> regions = listAllBoundRegions();
 
         // 根据逻辑集群排序，没有必要但方便调试
-        regions.sort(Comparator.comparing(ClusterRegion::getLogicClusterId));
+        regions.sort(Comparator.comparing(ClusterRegion::getLogicClusterIds));
 
         // 构建rack信息
         return buildRackInfos(regions);
@@ -182,7 +182,7 @@ public class RegionRackServiceImpl implements RegionRackService {
         }
 
         ClusterRegionPO condt = new ClusterRegionPO();
-        condt.setLogicClusterId(logicClusterId);
+        condt.setLogicClusterIds(logicClusterId.toString());
         condt.setPhyClusterName(phyClusterName);
 
         return ConvertUtil.list2List(clusterRegionDAO.listBoundRegionsByCondition(condt), ClusterRegion.class);
@@ -200,30 +200,13 @@ public class RegionRackServiceImpl implements RegionRackService {
 
     @Override
     public Result<Long> createPhyClusterRegion(String clusterName, String racks, Integer share, String operator) {
-
-        // 参数检查
-        if (StringUtils.isBlank(clusterName)) {
-            return Result.buildParamIllegal("物理集群名不能为空");
-        }
-
-        if (esClusterPhyService.getClusterByName(clusterName) == null) {
-            return Result.buildParamIllegal(String.format("物理集群 %s 不存在", clusterName));
-        }
-
-        if (AriusObjUtils.isNull(racks)) {
-            return Result.buildParamIllegal("racks为空");
-        }
-
-        if (share == null) {
-            share = AdminConstant.YES;
-        }
-
-        if (!share.equals(AdminConstant.YES) && !share.equals(AdminConstant.NO)) {
-            return Result.buildParamIllegal("指定的share非法");
+        Result<Void> validResult = validCreateRegionInfo(clusterName, racks, share);
+        if (validResult.failed()) {
+            return Result.buildFrom(validResult);
         }
 
         ClusterRegionPO clusterRegionPO = new ClusterRegionPO();
-        clusterRegionPO.setLogicClusterId(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
+        clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.toString());
         clusterRegionPO.setPhyClusterName(clusterName);
         clusterRegionPO.setRacks(racks);
 
@@ -287,9 +270,19 @@ public class RegionRackServiceImpl implements RegionRackService {
 
         // 已经绑定过的region不能删除
         if (isRegionBound(region)) {
-            // 获取逻辑集群的信息
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(region.getLogicClusterId());
-            return Result.buildFail(String.format("region %d 已经被绑定到逻辑集群 %s", regionId, clusterLogic.getName()));
+            // 获取逻辑集群的信息,一个region可能被多个逻辑集群绑定
+            List<Long> logicClusterIds = ListUtils.string2LongList(region.getLogicClusterIds());
+            List<String> logicClusterNames = Lists.newArrayList();
+            for (Long logicClusterId : logicClusterIds) {
+                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+                if (AriusObjUtils.isNull(clusterLogic)) {
+                    continue;
+                }
+                // 获取被绑定的全部逻辑集群的名称
+                logicClusterNames.add(clusterLogic.getName());
+            }
+
+            return Result.buildFail(String.format("region %d 已经被绑定到逻辑集群 %s", regionId, ListUtils.strList2String(logicClusterNames)));
         }
 
         boolean succeed = clusterRegionDAO.delete(regionId) == 1;
@@ -340,14 +333,22 @@ public class RegionRackServiceImpl implements RegionRackService {
                 return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));
             }
 
-            // 判断在未绑定状态
-            if (isRegionBound(region)) {
-                return Result.buildFail(String.format("region %d 已经被绑定", regionId));
+            // 检查逻辑集群存在
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+            if (AriusObjUtils.isNull(clusterLogic)) {
+                return Result.buildFail(String.format("逻辑集群 %S 不存在", logicClusterId));
             }
 
-            // 检查逻辑集群存在
-            if (clusterLogicService.getClusterLogicById(logicClusterId) == null) {
-                return Result.buildFail(String.format("逻辑集群 %S 不存在", logicClusterId));
+            // 判断在未绑定状态,获取region被绑定的逻辑集群的类型，只有被共享逻辑集群绑定的region才能被另一个共享逻辑集群重复绑定
+            if (isRegionBound(region)) {
+                if (!isRegionBindByPublicLogicCluster(region)) {
+                    return Result.buildFail(String.format("region %d 已经被非共享逻辑集群绑定",regionId));
+                }
+
+                if (!clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())) {
+                    return Result.buildFail(String.format("region %d 已经被绑定,并且逻辑集群 %s 不是共享集群",
+                            regionId, clusterLogic.getName()));
+                }
             }
 
             if (share == null) {
@@ -359,7 +360,7 @@ public class RegionRackServiceImpl implements RegionRackService {
             }
 
             // 绑定
-            updateRegion(regionId, logicClusterId, null);
+            updateRegion(regionId, constructNewLogicIds(logicClusterId,region.getLogicClusterIds()), null);
 
             // 发送消息，添加容量规划area（幂等地），添加容量规划容量信息
             SpringTool.publish(new RegionBindEvent(this, region, share, operator));
@@ -373,6 +374,16 @@ public class RegionRackServiceImpl implements RegionRackService {
                 regionId, logicClusterId, share, operator, e);
             return Result.buildFail(e.getMessage());
         }
+    }
+
+    private String constructNewLogicIds(Long newLogicClusterId, String oldLogicClusterIds) {
+        // region未被绑定，做覆盖操作
+        if (oldLogicClusterIds.equals(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID)) {
+            return newLogicClusterId.toString();
+        }
+
+        // region被绑定,逗号隔开连接
+        return oldLogicClusterIds + "," + newLogicClusterId.toString();
     }
 
     @Override
@@ -407,7 +418,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     }
 
     @Override
-    public Result<Void> unbindRegion(Long regionId, String operator) {
+    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator) {
         try {
             if (regionId == null) {
                 return Result.buildFail("未指定regionId");
@@ -430,7 +441,7 @@ public class RegionRackServiceImpl implements RegionRackService {
             }
 
             // 删除绑定
-            updateRegion(regionId, AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID, null);
+            updateRegion(regionId, getNewBoundLogicIds(region,logicClusterId), null);
 
             // 发送消息，删除容量规划容量信息
             SpringTool.publish(new RegionUnbindEvent(this, region, operator));
@@ -449,6 +460,28 @@ public class RegionRackServiceImpl implements RegionRackService {
     }
 
     /**
+     * 获取region解绑指定逻辑集群之后剩余的逻辑集群id列表
+     * @param region region
+     * @param logicClusterId 逻辑集群id
+     * @return region新的逻辑集群id列表
+     */
+    private String getNewBoundLogicIds(ClusterRegion region, Long logicClusterId) {
+        // 获取region已经关联到的逻辑集群id列表
+        List<Long> boundLogicClusterIds = ListUtils.string2LongList(region.getLogicClusterIds());
+
+        // 当没有指定解绑的逻辑集群id或者region没有被逻辑集群绑定或者region仅被指定解绑的逻辑集群绑定，则回滚至默认值-1
+        if (AriusObjUtils.isNull(logicClusterId)
+                || CollectionUtils.isEmpty(boundLogicClusterIds)
+                || (boundLogicClusterIds.size() == 1 && boundLogicClusterIds.contains(logicClusterId))) {
+            return AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
+        }
+
+        // 解绑指定逻辑集群
+        boundLogicClusterIds.remove(logicClusterId);
+        return ListUtils.longList2String(boundLogicClusterIds);
+    }
+
+    /**
      * 获取逻辑集群拥有的region
      * @param logicClusterId 逻辑集群ID
      * @return 逻辑集群拥有的region
@@ -460,7 +493,12 @@ public class RegionRackServiceImpl implements RegionRackService {
             return new ArrayList<>();
         }
 
-        return ConvertUtil.list2List(clusterRegionDAO.listByLogicClusterId(logicClusterId), ClusterRegion.class);
+        List<ClusterRegionPO> clusterRegionPOS = clusterRegionDAO.listAll()
+                .stream()
+                .filter(clusterRegionPO -> ListUtils.string2LongList(clusterRegionPO.getLogicClusterIds()).contains(logicClusterId))
+                .collect(Collectors.toList());
+
+        return ConvertUtil.list2List(clusterRegionPOS, ClusterRegion.class);
     }
 
     /**
@@ -487,21 +525,41 @@ public class RegionRackServiceImpl implements RegionRackService {
             return false;
         }
 
-        return !region.getLogicClusterId().equals(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
+        return !region.getLogicClusterIds().equals(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
+    }
+
+    /**
+     * 判断region是否被共享类型的逻辑集群绑定
+     * @param region region信息
+     * @return
+     */
+    private boolean isRegionBindByPublicLogicCluster(ClusterRegion region) {
+        if (!isRegionBound(region)) {
+            return false;
+        }
+
+        // 只有共享逻辑集群下的region能够被重复绑定
+        Long logicClusterId = ListUtils.string2LongList(region.getLogicClusterIds()).get(0);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+
+        return !AriusObjUtils.isNull(clusterLogic) && clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode());
     }
 
     @Override
-    public Long getLogicClusterIdByPhyClusterId(Integer phyClusterId) {
+    public Set<Long> getLogicClusterIdByPhyClusterId(Integer phyClusterId) {
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(phyClusterId);
         if (clusterPhy == null) {
             return null;
         }
         List<ClusterRegion> clusterRegions = listRegionsByClusterName(clusterPhy.getCluster());
-        if (clusterRegions == null || clusterRegions.isEmpty()) {
+        if (CollectionUtils.isEmpty(clusterRegions)) {
             return null;
         }
-        ClusterRegion clusterRegion = getRegionById(clusterRegions.get(0).getId());
-        return clusterRegion.getLogicClusterId();
+
+        // 获取物理集群对应的逻辑集群，进行去重的操作
+        Set<Long> logicClusterIds = Sets.newHashSet();
+        clusterRegions.forEach(clusterRegion -> logicClusterIds.addAll(new HashSet<>(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))));
+        return logicClusterIds;
     }
 
     /***************************************** private method ****************************************************/
@@ -518,7 +576,7 @@ public class RegionRackServiceImpl implements RegionRackService {
 
         for (String rack : RackUtils.racks2List(region.getRacks())) {
             ClusterLogicRackInfo rackInfo = new ClusterLogicRackInfo();
-            rackInfo.setLogicClusterId(region.getLogicClusterId());
+            rackInfo.setLogicClusterIds(region.getLogicClusterIds());
             rackInfo.setPhyClusterName(region.getPhyClusterName());
             rackInfo.setRegionId(region.getId());
             rackInfo.setRack(rack);
@@ -543,17 +601,17 @@ public class RegionRackServiceImpl implements RegionRackService {
     /**
      * 根据regionId更新region的logicClusterId或racks
      * @param regionId       要更新的region的ID
-     * @param logicClusterId 逻辑集群ID，为null则不更新
+     * @param logicClusterIds 逻辑集群ID列表，为null则不更新
      * @param racks          racks，为null则不更新
      */
-    private void updateRegion(Long regionId, Long logicClusterId, String racks) {
+    private void updateRegion(Long regionId, String logicClusterIds, String racks) {
         if (regionId == null) {
             return;
         }
 
         ClusterRegionPO updateParam = new ClusterRegionPO();
         updateParam.setId(regionId);
-        updateParam.setLogicClusterId(logicClusterId);
+        updateParam.setLogicClusterIds(logicClusterIds);
         updateParam.setRacks(racks);
 
         clusterRegionDAO.update(updateParam);
@@ -571,6 +629,37 @@ public class RegionRackServiceImpl implements RegionRackService {
         if (!racksInCluster.containsAll(rackSet)) {
             return Result.buildParamIllegal(String.format("racks %s not found in cluster %s",
                 RackUtils.removeRacks(racks, racksInCluster), phyClusterName));
+        }
+
+        return Result.buildSucc();
+    }
+
+    private Result<Void> validCreateRegionInfo(String clusterName, String racks, Integer share) {
+        // 参数检查
+        if (StringUtils.isBlank(clusterName)) {
+            return Result.buildParamIllegal("物理集群名不能为空");
+        }
+
+        if (esClusterPhyService.getClusterByName(clusterName) == null) {
+            return Result.buildParamIllegal(String.format("物理集群 %s 不存在", clusterName));
+        }
+
+        if (AriusObjUtils.isNull(racks)) {
+            return Result.buildParamIllegal("racks为空");
+        }
+
+        //绑定的rack中不能有cold节点
+        List<String> rackList = ListUtils.string2StrList(racks);
+        if (rackList.contains("cold")) {
+            return Result.buildParamIllegal("以cold为标识的冷节点不允许绑定region");
+        }
+
+        if (share == null) {
+            share = AdminConstant.YES;
+        }
+
+        if (!share.equals(AdminConstant.YES) && !share.equals(AdminConstant.NO)) {
+            return Result.buildParamIllegal("指定的share非法");
         }
 
         return Result.buildSucc();

@@ -11,17 +11,17 @@ public enum ClusterHealthEnum {
     /**
      * green
      */
-    GREEN(1, "green"),
+    GREEN(0, "green"),
 
     /**
      * yellow
      */
-    YELLOW(2, "yellow"),
+    YELLOW(1, "yellow"),
 
     /**
      * red
      */
-    RED(3, "red"),
+    RED(2, "red"),
 
     /**
      * 未知

@@ -390,7 +390,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
                 String key = physical.getCluster() + "@" + rack;
                 if (clusterRack2ResourceIdMap.containsKey(key)) {
                     ClusterLogic clusterLogic = resourceId2ResourceLogicMap
-                        .get(clusterRack2ResourceIdMap.get(key).getLogicClusterId());
+                        .get(clusterRack2ResourceIdMap.get(key).getLogicClusterIds());
                     result.put(physical.getId(),
                         clusterLogicService.genClusterLogicConfig(clusterLogic.getConfigJson()));
                     break;

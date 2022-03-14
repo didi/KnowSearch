@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import java.util.List;
+import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterDTO;
@@ -42,6 +43,8 @@ public interface RoleClusterService {
      * @return List<RoleCluster>
      */
     List<RoleCluster> getAllRoleClusterByClusterId(Integer clusterId);
+
+    Map<Long, List<RoleCluster>> getAllRoleClusterByClusterIds(List<Integer> clusterIds);
 
     /**
      * 根据集群Id和roleClusterRole查询角色

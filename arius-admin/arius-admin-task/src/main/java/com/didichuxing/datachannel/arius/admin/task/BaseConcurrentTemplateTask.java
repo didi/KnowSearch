@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.task;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,6 +24,9 @@ public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<Temp
 
     @Autowired
     private IndexTemplateLogicDAO templateLogicDAO;
+
+    @Autowired
+    protected TemplateLogicManager templateLogicManager;
 
     /**
      * 任务全集

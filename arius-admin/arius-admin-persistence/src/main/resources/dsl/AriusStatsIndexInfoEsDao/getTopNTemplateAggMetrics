@@ -1,0 +1,54 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "cluster": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "terms": {
+            "logicTemplateId": "topNameListStr"
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "hist": {
+      "terms": {
+        "field": "logicTemplateId",
+        "size": %d
+      },
+      "aggs": {
+        "hist": {
+          "date_histogram": {
+            "field": "timestamp",
+            "fixed_interval": "{interval}",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 0,
+            "extended_bounds" : {
+            "min" : %d,
+            "max" : %d
+            }
+          },
+          "aggs": {
+             "aggsDsl":1
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,8 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPluginsManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.ESPluginPO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,7 @@ public class ClusterPluginsManagerImpl implements ClusterPluginsManager {
     private ESPluginService       esPluginService;
 
 	@Override
-	public Result<Long> batchAddPlugins(ESPluginDTO plugin) {
+	public Result<Long> addPlugins(PluginDTO plugin) {
 		return esPluginService.addESPlugin(plugin);
 	}
 
@@ -24,7 +23,7 @@ public class ClusterPluginsManagerImpl implements ClusterPluginsManager {
 	}
 
 	@Override
-	public Result<ESPluginPO> editPluginDesc(ESPluginDTO esPluginDTO, String operator) {
-		return esPluginService.updateESPluginDesc(esPluginDTO, operator);
+	public Result<Void> editPluginDesc(PluginDTO pluginDTO, String operator) {
+		return esPluginService.updateESPluginDesc(pluginDTO, operator);
 	}
 }

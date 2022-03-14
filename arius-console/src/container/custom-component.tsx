@@ -7,19 +7,38 @@ import { withRouter, Link } from "react-router-dom";
 import { urlPrefix } from "constants/menu";
 import { ITableBtn } from "component/dantd/dtable";
 import { openSourceTip } from "constants/status-map";
+import { refreshByCacheKey } from 'react-router-cache-route';
 
 interface INavRouterLinkProps {
   element: JSX.Element | string;
   href: string;
   needToolTip?: boolean;
+  onClick?: any;
+  removeCacheKey?: any;
 }
+
+const hiddenTooltipElement = (className: string) => {
+  const navLinkTooltips = document.getElementsByClassName(className);
+  for (let i = 0; i < navLinkTooltips.length; i++) {
+    (navLinkTooltips[i] as any).style = 'top: -1000px; left: -1000px';
+  }
+};
 
 export const NavRouterLink = withRouter<any, any>(
   (props: INavRouterLinkProps) => {
+    const overlayClassName = 'nav-link-tooltip';
+
     return (
-      <Link to={props.href}>
+      <Link
+        onClick={() => {
+          props.onClick && props.onClick();
+          props.needToolTip && hiddenTooltipElement(overlayClassName);
+          props.removeCacheKey && refreshByCacheKey(props.removeCacheKey);
+        }}
+        to={props.href}
+      >
         {props.needToolTip ? (
-          <Tooltip placement="bottomLeft" title={props.element}>
+          <Tooltip overlayClassName={overlayClassName} placement="bottomLeft" title={props.element}>
             {props.element}
           </Tooltip>
         ) : (
@@ -39,10 +58,10 @@ export const showSubmitOrderSuccessModal = (params: {
     onOk: params.onOk
       ? params.onOk
       : () => {
-          // history.pushState(null, '', window.location.pathname);
-          // goToTargetPage(window.location.pathname);
-          window.location.reload();
-        },
+        // history.pushState(null, '', window.location.pathname);
+        // goToTargetPage(window.location.pathname);
+        window.location.reload();
+      },
     okText: "确定",
     title: "提交成功！",
     content: (
@@ -73,8 +92,8 @@ export const showSubmitTaskSuccessModal = (params: {
     onOk: params.onOk
       ? params.onOk
       : () => {
-          window.location.reload();
-        },
+        window.location.reload();
+      },
     okText: "确定",
     title: "提交成功！",
     content: (
@@ -97,8 +116,8 @@ export const showSubmitTaskSuccessModal = (params: {
   });
 };
 
-export const CancelActionModal = (props: { routeHref: string, history?: any, cb?: Function}) => {
-  const onHandleCancel = (routeHref: string,  history?: any, cb?: Function) => {
+export const CancelActionModal = (props: { routeHref: string, history?: any, cb?: Function }) => {
+  const onHandleCancel = (routeHref: string, history?: any, cb?: Function) => {
     Modal.confirm({
       title: "确定取消？",
       content: "取消后当前填写内容将失效，请谨慎操作",
@@ -106,15 +125,15 @@ export const CancelActionModal = (props: { routeHref: string, history?: any, cb?
       cancelText: "取消",
       icon: <QuestionCircleOutlined className="question-icon" />,
       onOk: () => {
-        if (cb) {
-          cb();
-        }
-        window.localStorage.setItem('removePath', window?.location?.pathname)
+        const url = window?.location?.pathname
         setTimeout(() => {
           if (history) {
             history.push(routeHref.replace('/es', ''));
           } else {
             window.location.href = routeHref;
+          }
+          if (cb) {
+            cb(url);
           }
         }, 500)
       },
@@ -140,7 +159,7 @@ export const renderOperationBtns = (btns: ITableBtn[], record: any) => {
 
           if (item.isOpenUp)
             return (
-              <Tooltip key={index} title={openSourceTip}>
+              <Tooltip key={index} title={item.tip || openSourceTip}>
                 <a key={index} style={{ color: "#bfbfbf" }}>
                   {" "}
                   {item.label}{" "}
@@ -247,7 +266,7 @@ interface IMoreBtnsProps {
 
 export const MoreBtns = (props: IMoreBtnsProps) => {
   const { btns, data } = props;
-  
+
   // 当下拉框中选项都禁用时，将 更多 文字置灰
   const flag = btns.length === btns.filter(item => item.isOpenUp).length;
 

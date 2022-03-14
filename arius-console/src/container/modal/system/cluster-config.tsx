@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import * as actions from 'actions';
 import { FormItemType, IFormItem } from 'component/x-form';
 import { notification }  from 'antd';
-import { IDeploy } from '@types/cluster/physics-type';
+import { IDeploy } from 'typesPath/cluster/physics-type';
 import { newDeploy, updateDeploy } from 'api/cluster-api';
 
 const mapStateToProps = state => ({
@@ -48,14 +48,14 @@ export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: a
           { 
             required: true,
             validator: (rule: any, value: string) => {
-              let flat_1_50 = (value && value.length > 0 && value.length <= 50);
+              let flat_1_50 = (value && value.length > 0 && value.length <= 100);
               if (!value) {
                 return Promise.reject('名称不能为空');
               }
               if(flat_1_50) {
                 return Promise.resolve();
               } else {
-                return Promise.reject('请输入1-50字符');
+                return Promise.reject('请输入1-100字符');
               }
             }, 
           },
@@ -102,7 +102,7 @@ export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: a
           }
         ],
         attrs: {
-          placeholder: `请概要描述`,
+          placeholder: `请输入描述信息`,
           rows: 4,
         },
       },
@@ -118,7 +118,7 @@ export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: a
     onSubmit: (result: any) => {
       if (props.params?.id) {
         result.id = props.params?.id;
-        updateDeploy(result).then(() => {
+        return updateDeploy(result).then(() => {
           notification.success({ message: '编辑配置成功' });
           props.dispatch(actions.setModalId(''));
         }).finally(() => {
@@ -127,7 +127,7 @@ export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: a
       } else {
         result.status = 1;
         props.dispatch(actions.setModalId(''));
-        newDeploy(result).then(() => {
+        return newDeploy(result).then(() => {
           notification.success({ message: '新建配置成功' });
         }).finally(() => {
           props.cb && props.cb();

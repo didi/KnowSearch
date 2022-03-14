@@ -41,7 +41,7 @@ public class ESClusterDTO extends PageDTO {
     /**
      * @see ESClusterTypeEnum
      */
-    @ApiModelProperty("集群类型(-1 未知 3 docker集群 4 host集群)")
+    @ApiModelProperty("集群类型(-1 未知 3 docker集群 4 host集群 5 vm集群)")
     private Integer                    type;
 
     @ApiModelProperty("数据中心")
@@ -72,7 +72,7 @@ public class ESClusterDTO extends PageDTO {
     private ESConfigDTO                eSConfigDTO;
 
     @ApiModelProperty("插件包列表")
-    private List<ESPluginDTO>          plugs;
+    private List<PluginDTO>            plugs;
 
     @ApiModelProperty("集群角色列表")
     private List<ESRoleClusterDTO>     roleClusters;
@@ -101,6 +101,18 @@ public class ESClusterDTO extends PageDTO {
     @ApiModelProperty("指定用写client的action")
     private String                     writeAction;
 
-    @ApiModelProperty("集群状态 1 green 2 yellow 3 red -1 未知")
+    @ApiModelProperty("集群状态 0 green 1 yellow 2 red -1 未知")
     private Integer                    health;
+
+    @ApiModelProperty("活跃分片数目")
+    private Long                       activeShardNum;
+
+    @ApiModelProperty("磁盘总量(byte)")
+    private Long                       diskTotal;
+
+    @ApiModelProperty("磁盘使用大小(byte)")
+    private Long                       diskUsage;
+
+    @ApiModelProperty("磁盘使用率(byte)")
+    private Double                     diskUsagePercent;
 }

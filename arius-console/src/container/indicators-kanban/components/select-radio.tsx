@@ -8,38 +8,51 @@ interface propsType {
   setTopNu: (val: number) => void;
   content: string;
   setContent?: (val: string) => void;
-  contentList: string[] | { name: string; value: string }[];
+  contentList: string[] | { name: string; value: string }[] | any;
   placeholder?: string;
+  type?: string;
+  allowClear?: boolean;
 }
 
 export const SelectRadio = memo((props: propsType) => {
-  const { topNu, setTopNu, content, setContent, contentList, placeholder } =
+  const { topNu, setTopNu, content, setContent, contentList, placeholder, allowClear, type } =
     props;
   return (
     <>
-      <Radio.Group
-        className={`${classPrefix}-overview-search-filter-item`}
-        value={topNu}
-        onChange={(e) => {
-          setTopNu(e.target.value);
-          setContent("");
-        }}
-      >
-        {TOP_MAP.map((item) => (
-          <Radio.Button key={item.value} value={item.value}>
-            {item.label}
-          </Radio.Button>
-        ))}
-      </Radio.Group>
+      {
+        type === 'Gateway' ? null : <Radio.Group
+          className={`${classPrefix}-overview-search-filter-item`}
+          value={topNu}
+          onChange={(e) => {
+            if (type === 'Gateway') {
+              setTopNu(e.target.value);
+            } else {
+              setTopNu(e.target.value);
+              setContent("");
+            }
+          }}
+        >
+          {TOP_MAP.map((item) => (
+            <Radio.Button key={item.value} value={item.value}>
+              {item.label}
+            </Radio.Button>
+          ))}
+        </Radio.Group>
+      }
       <Select
         placeholder={placeholder}
-        allowClear={false}
+        // allowClear={false}
         style={{ width: 200 }}
         value={content || undefined}
         onChange={(val) => {
-          setTopNu(0);
-          setContent(val);
+          if (type === 'Gateway') {
+            setContent(val || '');
+          } else {
+            setTopNu(0);
+            setContent(val);
+          }
         }}
+        allowClear={allowClear || false}
         showSearch
         className={`${classPrefix}-overview-search-filter-item`}
       >
@@ -59,6 +72,26 @@ export const SelectRadio = memo((props: propsType) => {
           }
         })}
       </Select>
+      {
+        type === 'Gateway' ? <Radio.Group
+          className={`${classPrefix}-overview-search-filter-item`}
+          value={topNu}
+          onChange={(e) => {
+            if (type === 'Gateway') {
+              setTopNu(e.target.value);
+            } else {
+              setTopNu(e.target.value);
+              setContent("");
+            }
+          }}
+        >
+          {TOP_MAP.map((item) => (
+            <Radio.Button key={item.value} value={item.value}>
+              {item.label}
+            </Radio.Button>
+          ))}
+        </Radio.Group> : null
+      }
     </>
   );
 });

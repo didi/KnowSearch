@@ -20,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
@@ -83,7 +82,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
         }
 
         if (esClusterPhyService.isClusterExists(content.getPhyClusterName())) {
-            return Result.buildParamIllegal("物理集群名称不能重复！");
+            return Result.buildParamIllegal("物理集群名称不能重复");
         }
 
         //ES同一个角色的端口号应该相同，拆解ip和port后进行校验
@@ -241,7 +240,11 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             }
             // 将ip和port中hostname中拆分出来
             String[] ipAndPort = esClusterRoleHost.getAddress().split(":");
+            if(ipAndPort.length<2)  {
+                return Result.buildFail("传入节点的address应该满足【ip:port】格式");
+            }
             esClusterRoleHost.setHostname(ipAndPort[0]);
+            esClusterRoleHost.setIp(ipAndPort[0]);
             esClusterRoleHost.setPort(ipAndPort[1]);
         }
 

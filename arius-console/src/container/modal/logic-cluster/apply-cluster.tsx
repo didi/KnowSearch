@@ -8,9 +8,9 @@ import { StaffSelect } from "container/staff-select";
 import { opAddLogicCluster } from "api/cluster-api";
 import { DataNode, RenderText } from "container/custom-form";
 import { AppState, UserState } from "store/type";
-import { IWorkOrder } from "@types/params-types";
+import { IWorkOrder } from "typesPath/params-types";
 import { submitWorkOrder } from "api/common-api";
-import { RESOURCE_TYPE_LIST } from "constants/common";
+import { RESOURCE_TYPE_LIST, LEVEL_MAP } from "constants/common";
 import { staffRuleProps } from "constants/table";
 
 const mapStateToProps = (state: any) => ({
@@ -73,6 +73,21 @@ const ApplyClusterModal = (props: {
         },
       },
       {
+        key: "level",
+        label: "业务等级",
+        type: FormItemType.select,
+        options: LEVEL_MAP,
+        rules: [
+          {
+            required: true,
+            message: "请选择",
+          },
+        ],
+        attrs: {
+          style: { width: "60%" },
+        },
+      },
+      {
         key: "responsible",
         label: "责任人",
         rules: [
@@ -82,6 +97,7 @@ const ApplyClusterModal = (props: {
           },
         ],
         isCustomStyle: true,
+        CustomStyle: { marginBottom: 0 },
         type: FormItemType.custom,
         customFormItem: <StaffSelect style={{ width: "60%" }} />,
       },
@@ -171,6 +187,7 @@ const ApplyClusterModal = (props: {
           responsible: result.responsible,
           memo: result.memo,
           type: result.type,
+          level: result.level,
         },
         submitorAppid: props.app.appInfo()?.id,
         submitor: props.user.getName('domainAccount'),

@@ -7,8 +7,9 @@ import * as actions from 'actions';
 const mapStateToProps = (state) => ({
   phyClusterConfig: state.configInfo,
 });
+const connects: Function = connect
 
-@connect(mapStateToProps)
+@connects(mapStateToProps)
 export class StepSelect extends React.Component<any> {
 
   public render() {

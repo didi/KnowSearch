@@ -22,7 +22,7 @@ public class ClusterRegionVO extends BaseVO {
     private Long id;
 
     @ApiModelProperty("逻辑集群ID")
-    private Long logicClusterId;
+    private String logicClusterIds;
 
     @ApiModelProperty("物理集群名称")
     private String clusterName;

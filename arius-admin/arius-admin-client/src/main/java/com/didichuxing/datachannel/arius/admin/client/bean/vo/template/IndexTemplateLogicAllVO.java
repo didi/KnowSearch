@@ -112,6 +112,19 @@ public class IndexTemplateLogicAllVO extends BaseVO {
             "writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档")
     private Integer writeRateLimit;
 
+    /**
+     * 是否禁读
+     */
+    @ApiModelProperty("是否禁读")
+    private Boolean blockRead;
+
+    /**
+     * 是否禁写
+     */
+    @ApiModelProperty("是否禁写")
+    private Boolean blockWrite;
+
+
     @ApiModelProperty("创建时间")
     private Date                          createTime;
 

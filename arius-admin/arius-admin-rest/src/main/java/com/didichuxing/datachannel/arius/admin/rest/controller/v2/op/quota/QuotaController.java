@@ -75,9 +75,9 @@ public class QuotaController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicID", value = "逻辑模板ID") })
     public Result<String> clusterCost(@RequestParam("logicId") Integer logicId) {
         if (templateQuotaManager.enableClt(logicId)) {
-            return Result.buildSucc( templateQuotaManager.getCtlRange(logicId));
+            return Result.buildSuccWithMsg( templateQuotaManager.getCtlRange(logicId));
         }
-        return Result.buildSucc("not control");
+        return Result.buildSuccWithMsg("not control");
     }
 
     @GetMapping("/template/record/list.do")

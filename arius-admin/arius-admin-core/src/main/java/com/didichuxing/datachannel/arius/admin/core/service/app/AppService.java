@@ -118,11 +118,12 @@ public interface AppService {
      * @return true/false
      */
     boolean isAppExists(Integer appId);
-
+    boolean isAppExists(App app);
     /**
      * 是否为超级管理员
      */
     boolean isSuperApp(Integer appId);
+    boolean isSuperApp(App app);
 
     /**
      * 用户登录接口

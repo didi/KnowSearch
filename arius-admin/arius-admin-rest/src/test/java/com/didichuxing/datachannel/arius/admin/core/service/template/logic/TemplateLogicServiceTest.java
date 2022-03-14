@@ -1,16 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTests;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,396 +30,316 @@ import java.util.*;
  */
 @Transactional
 @Rollback
-public class TemplateLogicServiceTest extends AriusAdminApplicationTests {
+public class TemplateLogicServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private TemplateLogicService templateLogicService;
 
-    private static final String OPERATOR = "wpk";
+    @MockBean
+    private TemplatePhyService templatePhyService;
+
+    @MockBean
+    private AppLogicTemplateAuthService logicTemplateAuthService;
+
+    @MockBean
+    private AppClusterLogicAuthService logicClusterAuthService;
+
+    @MockBean
+    private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
+
+    @MockBean
+    private IndexTemplateLogicDAO indexTemplateLogicDAO;
+
+    @MockBean
+    private IndexTemplateConfigDAO indexTemplateConfigDAO;
+
+    @MockBean
+    private IndexTemplateTypeDAO indexTemplateTypeDAO;
+
+    @MockBean
+    private ClusterLogicService clusterLogicService;
 
     @Test
-    void editTemplateNameTest() throws AdminOperateException {
+    public void editTemplateNameTest() throws AdminOperateException {
+        Mockito.when(indexTemplateLogicDAO.update(Mockito.any())).thenReturn(1);
         IndexTemplateLogicDTO indexTemplateLogicDTO = new IndexTemplateLogicDTO();
-        Assertions.assertEquals("参数错误:索引ID必填，请检查后再提交！",
-                templateLogicService.editTemplateName(indexTemplateLogicDTO, OPERATOR).getMessage());
+        Assertions.assertTrue(templateLogicService.editTemplateName(indexTemplateLogicDTO, CustomDataSource.OPERATOR).failed());
         indexTemplateLogicDTO.setId(19489);
-        Assertions.assertEquals("参数错误:索引名称必填，请检查后再提交！",
-                templateLogicService.editTemplateName(indexTemplateLogicDTO, OPERATOR).getMessage());
+        Assertions.assertTrue(templateLogicService.editTemplateName(indexTemplateLogicDTO, CustomDataSource.OPERATOR).failed());
         indexTemplateLogicDTO.setName("wpk-tes");
-        Assertions.assertTrue(templateLogicService.editTemplateName(indexTemplateLogicDTO, OPERATOR).success());
+        Assertions.assertTrue(templateLogicService.editTemplateName(indexTemplateLogicDTO, CustomDataSource.OPERATOR).success());
     }
 
     @Test
-    void insertTemplateConfigTest() {
+    public void insertTemplateConfigTest() {
         IndexTemplateConfig config = new IndexTemplateConfig();
+        Mockito.when(indexTemplateConfigDAO.insert(Mockito.any())).thenReturn(1);
         Result<Void> result = templateLogicService.insertTemplateConfig(config);
-        Assertions.assertEquals(0, result.getCode());
+        Assertions.assertTrue(result.success());
     }
 
     @Test
-    void upsertTemplateShardFactorTest() {
-        // 存在的id
-        int logicTemplateId = 1105;
+    public void upsertTemplateShardFactorTest() {
+        Mockito.when(indexTemplateLogicDAO.insert(Mockito.any())).thenReturn(1);
+        Mockito.when(indexTemplateConfigDAO.getByLogicId(Mockito.isNull())).thenReturn(CustomDataSource.templateConfigSource());
+        Mockito.when(indexTemplateConfigDAO.getByLogicId(1)).thenReturn(CustomDataSource.templateConfigSource());
         double factor = 1.0d;
-        templateLogicService.updateTemplateShardFactorIfGreater(logicTemplateId, factor, "admin");
-        // 不存在的id
-        logicTemplateId = 9999999;
-        templateLogicService.updateTemplateShardFactorIfGreater(logicTemplateId, factor, "admin");
+        // 不存在的 logiTemplateId
+        templateLogicService.updateTemplateShardFactorIfGreater(-1, factor, "admin");
+        // 存在的 logiTemplateId
+        templateLogicService.updateTemplateShardFactorIfGreater(1, factor, "admin");
         Assertions.assertNull(null);
     }
 
     @Test
-    void updateTemplateShardFactorIfGreaterTest() {
-        // 存在的id
-        int logicTemplateId = 1105;
+    public void updateTemplateShardFactorIfGreaterTest() {
+        Mockito.when(indexTemplateLogicDAO.insert(Mockito.any())).thenReturn(1);
+        Mockito.when(indexTemplateConfigDAO.getByLogicId(Mockito.isNull())).thenReturn(CustomDataSource.templateConfigSource());
+        Mockito.when(indexTemplateConfigDAO.getByLogicId(1)).thenReturn(CustomDataSource.templateConfigSource());
         double factor = 1.0d;
-        templateLogicService.updateTemplateShardFactorIfGreater(logicTemplateId, factor, "admin");
-        // 不存在的id
-        logicTemplateId = 9999999;
-        templateLogicService.updateTemplateShardFactorIfGreater(logicTemplateId, factor, "admin");
-        // 更大的factor
-        logicTemplateId = 1105;
+        templateLogicService.updateTemplateShardFactorIfGreater(-1, factor, "admin");
         factor = 999.0d;
-        templateLogicService.updateTemplateShardFactorIfGreater(logicTemplateId, factor, "admin");
+        templateLogicService.updateTemplateShardFactorIfGreater(1, factor, "admin");
         Assertions.assertNull(null);
     }
 
     @Test
-    void updateTemplateConfigTest() {
-        IndexTemplateConfigDTO configDTO = null;
-        Result<Void> ret = templateLogicService.updateTemplateConfig(configDTO, "admin");
-        Assertions.assertNotEquals(0, ret.getCode());
-        configDTO = new IndexTemplateConfigDTO();
-        // 不存在id
-        configDTO.setLogicId(9999999);
-        ret = templateLogicService.updateTemplateConfig(configDTO, "admin");
-        Assertions.assertNotEquals(0, ret.getCode());
-        // 存在id
-        configDTO.setLogicId(1105);
-        configDTO.setMappingImproveEnable(1);
-        ret = templateLogicService.updateTemplateConfig(configDTO, "admin");
-        Assertions.assertNotEquals(0, ret.getCode());
+    public void updateTemplateConfigTest() {
+        IndexTemplateConfigDTO configDTO = CustomDataSource.indexTemplateConfigDTOFactory();
+        Assertions.assertTrue(templateLogicService.updateTemplateConfig(null, "admin").failed());
+        configDTO.setLogicId(null);
+        Assertions.assertTrue(templateLogicService.updateTemplateConfig(configDTO, "admin").failed());
+        configDTO = CustomDataSource.indexTemplateConfigDTOFactory();
+        configDTO.setIsSourceSeparated(2);
+        Assertions.assertTrue(templateLogicService.updateTemplateConfig(null, "admin").failed());
+        configDTO = CustomDataSource.indexTemplateConfigDTOFactory();
+        configDTO.setIsSourceSeparated(2);
+        Assertions.assertTrue(templateLogicService.updateTemplateConfig(null, "admin").failed());
+        configDTO = CustomDataSource.indexTemplateConfigDTOFactory();
+        configDTO.setMappingImproveEnable(2);
+        Assertions.assertTrue(templateLogicService.updateTemplateConfig(null, "admin").failed());
+        // 模版不存在
+        Mockito.when(indexTemplateLogicDAO.getById(1)).thenReturn(null);
+        configDTO = CustomDataSource.indexTemplateConfigDTOFactory();
+        Assertions.assertTrue(templateLogicService.updateTemplateConfig(configDTO, "admin").failed());
+        configDTO = CustomDataSource.indexTemplateConfigDTOFactory();
+        Mockito.when(indexTemplateLogicDAO.getById(2)).thenReturn(CustomDataSource.templateLogicSource());
+        configDTO.setLogicId(2);
+        Mockito.when(indexTemplateConfigDAO.update(Mockito.any())).thenReturn(1);
+        Assertions.assertTrue(templateLogicService.updateTemplateConfig(configDTO, "admin").success());
     }
 
     @Test
-    void delTemplateTest() {
-        // 不存的id
-        int logicTemplateId = 9999999;
-        Result<Void> ret = null;
-        try {
-            ret = templateLogicService.delTemplate(logicTemplateId, "admin");
-            Assertions.assertNotEquals(0, ret.getCode());
-        } catch (AdminOperateException e) {
-            e.printStackTrace();
-        }
-        logicTemplateId = 1105;
-        try {
-            ret = templateLogicService.delTemplate(logicTemplateId, "admin");
-            Assertions.assertEquals(0, ret.getCode());
-        } catch (AdminOperateException e) {
-            e.printStackTrace();
-        }
+    public void delTemplateTest() throws AdminOperateException {
+        Mockito.when(indexTemplateLogicDAO.delete(2)).thenReturn(1);
+        Mockito.when(indexTemplateLogicDAO.getById(1)).thenReturn(null);
+        Mockito.when(indexTemplateLogicDAO.getById(2)).thenReturn(CustomDataSource.templateLogicSource());
+        Mockito.when(templatePhyService.delTemplateByLogicId(Mockito.anyInt(), Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(logicTemplateAuthService.deleteTemplateAuthByTemplateId(Mockito.anyInt(), Mockito.anyString())).thenReturn(Result.buildSucc());
+        // 不存在的 id
+        Assertions.assertTrue(templateLogicService.delTemplate(1, "admin").failed());
+        // 存在的 id
+        Assertions.assertTrue(templateLogicService.delTemplate(2, "admin").success());
     }
 
     @Test
-    void getLogicTemplatesTest() {
-        IndexTemplateLogicDTO dto = new IndexTemplateLogicDTO();
-        dto.setName("arius");
-        List<IndexTemplateLogic> ret = templateLogicService.getLogicTemplates(dto);
+    public void getLogicTemplatesTest() {
+        Mockito.when(indexTemplateLogicDAO.listByCondition(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplateLogic> ret = templateLogicService.getLogicTemplates(CustomDataSource.indexTemplateLogicDTOFactory());
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void fuzzyLogicTemplatesByConditionTest() {
-        IndexTemplateLogicDTO dto = new IndexTemplateLogicDTO();
-        dto.setName("arius");
-        List<IndexTemplateLogic> ret = templateLogicService.fuzzyLogicTemplatesByCondition(dto);
+    public void fuzzyLogicTemplatesByConditionTest() {
+        Mockito.when(indexTemplateLogicDAO.likeByCondition(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplateLogic> ret = templateLogicService.fuzzyLogicTemplatesByCondition(CustomDataSource.indexTemplateLogicDTOFactory());
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void pagingGetLogicTemplatesByConditionTest() {
-        IndexTemplateLogicDTO dto = new IndexTemplateLogicDTO();
-        dto.setName("arius");
-        List<IndexTemplateLogic> ret = templateLogicService.pagingGetLogicTemplatesByCondition(dto);
-        Assertions.assertFalse(ret.isEmpty());
+    public void pagingGetLogicTemplatesByConditionTest() {
+       // Mockito.when(indexTemplateLogicDAO.pagingByCondition(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+       //         .thenReturn(CustomDataSource.getTemplateLogicPOList());
+        //List<IndexTemplateLogic> ret = templateLogicService.pagingGetLogicTemplatesByCondition(CustomDataSource.indexTemplateLogicDTOFactory());
+        //Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void fuzzyLogicTemplatesHitByConditionTest() {
-        IndexTemplateLogicDTO dto = new IndexTemplateLogicDTO();
-        dto.setName("arius");
-        List<IndexTemplateLogic> ret = templateLogicService.fuzzyLogicTemplatesByCondition(dto);
-        Assertions.assertFalse(ret.isEmpty());
+    public void fuzzyLogicTemplatesHitByConditionTest() {
+        Mockito.when(indexTemplateLogicDAO.getTotalHitByCondition(Mockito.any())).thenReturn(1l);
+        Long cnt = templateLogicService.fuzzyLogicTemplatesHitByCondition(CustomDataSource.indexTemplateLogicDTOFactory());
+        Assertions.assertEquals(1, cnt);
     }
 
     @Test
-    void getLogicTemplateByNameTest() {
-        String templateName = "arius.dsl.template";
-        List<IndexTemplateLogic> logic = templateLogicService.getLogicTemplateByName(templateName);
-        Assertions.assertFalse(logic.isEmpty());
+    public void getLogicTemplateByNameTest() {
+        Mockito.when(indexTemplateLogicDAO.listByName(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplateLogic> ret = templateLogicService.getLogicTemplateByName("test");
+        Assertions.assertEquals(ret.size(), CustomDataSource.SIZE);
     }
 
     @Test
-    void getLogicTemplateByIdTest() {
-        Integer logicId = 1105;
-        IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(logicId);
+    public void getLogicTemplateByIdTest() {
+        Mockito.when(indexTemplateLogicDAO.getById(Mockito.any())).thenReturn(CustomDataSource.templateLogicSource());
+        IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(1);
         Assertions.assertNotNull(logic);
     }
 
     @Test
-    void getTemplateConfigTest() {
-        Integer logicTemplateId = null;
-        IndexTemplateConfig templateConfig = templateLogicService.getTemplateConfig(logicTemplateId);
-        Assertions.assertNull(templateConfig);
-        logicTemplateId = 1105;
-        templateConfig = templateLogicService.getTemplateConfig(logicTemplateId);
+    public void getTemplateConfigTest() {
+        Mockito.when(indexTemplateConfigDAO.getByLogicId(Mockito.any())).thenReturn(CustomDataSource.templateConfigSource());
+        IndexTemplateConfig templateConfig = templateLogicService.getTemplateConfig(1);
         Assertions.assertNotNull(templateConfig);
     }
 
     @Test
-    void existTest() {
-        int logicTemplateId = 9999999;
-        boolean exist = templateLogicService.exist(logicTemplateId);
-        Assertions.assertFalse(exist);
-        logicTemplateId = 1105;
-        exist = templateLogicService.exist(logicTemplateId);
-        Assertions.assertTrue(exist);
+    public void existTest() {
+        Mockito.when(indexTemplateLogicDAO.getById(Mockito.any())).thenReturn(CustomDataSource.templateLogicSource());
+        Assertions.assertTrue(templateLogicService.exist(1));
     }
 
     @Test
-    void getAllLogicTemplatesTest() {
+    public void getAllLogicTemplatesTest() {
+        Mockito.when(indexTemplateLogicDAO.listAll()).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<IndexTemplateLogic> ret = templateLogicService.getAllLogicTemplates();
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getAllLogicTemplatesMapTest() {
+    public void getAllLogicTemplatesMapTest() {
+        Mockito.when(indexTemplateLogicDAO.listAll()).thenReturn(CustomDataSource.getTemplateLogicPOList());
         Map<Integer, IndexTemplateLogic> map = templateLogicService.getAllLogicTemplatesMap();
         Assertions.assertFalse(map.isEmpty());
     }
 
     @Test
-    void getLogicTemplatesByIdsTest() {
+    public void getLogicTemplatesByIdsTest() {
+        Mockito.when(indexTemplateLogicDAO.listByIds(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<Integer> logicTemplateIds = new ArrayList<>();
+        logicTemplateIds.add(1);
+        logicTemplateIds.add(2);
         List<IndexTemplateLogic> ret = templateLogicService.getLogicTemplatesByIds(logicTemplateIds);
-        Assertions.assertTrue(ret.isEmpty());
-        // 包含不存在的模版id
-        logicTemplateIds.add(1105);
-        logicTemplateIds.add(9999999);
-        ret = templateLogicService.getLogicTemplatesByIds(logicTemplateIds);
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getLogicTemplatesMapByIdsTest() {
+    public void getLogicTemplatesMapByIdsTest() {
+        Mockito.when(indexTemplateLogicDAO.listByIds(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<Integer> logicTemplateIds = new ArrayList<>();
+        logicTemplateIds.add(1);
         Map<Integer, IndexTemplateLogic> map = templateLogicService.getLogicTemplatesMapByIds(logicTemplateIds);
-        Assertions.assertTrue(map.isEmpty());
-        // 包含不存在的模版id
-        logicTemplateIds.add(1105);
-        logicTemplateIds.add(9999999);
-        map = templateLogicService.getLogicTemplatesMapByIds(logicTemplateIds);
         Assertions.assertFalse(map.isEmpty());
     }
 
     @Test
-    void getAppLogicTemplatesByAppIdTest() {
-        // 存在的appid
-        int appid = 1;
-        List<IndexTemplateLogic> ret = templateLogicService.getAppLogicTemplatesByAppId(appid);
+    public void getAppLogicTemplatesByAppIdTest() {
+        Mockito.when(indexTemplateLogicDAO.listByAppId(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplateLogic> ret = templateLogicService.getAppLogicTemplatesByAppId(1);
         Assertions.assertFalse(ret.isEmpty());
-        // 不存在的appid
-        appid = 999;
-        ret = templateLogicService.getAppLogicTemplatesByAppId(appid);
+    }
+
+    @Test
+    public void getLogicClusterTemplatesTest() {
+        Mockito.when(indexTemplateLogicDAO.listAll()).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplateLogic> ret = templateLogicService.getLogicClusterTemplates(1L);
         Assertions.assertTrue(ret.isEmpty());
     }
 
     @Test
-    void getLogicClusterTemplatesTest() {
-        // 存在的逻辑集群
-        long logicClusterId = 63L;
-        List<IndexTemplateLogic> ret = templateLogicService.getLogicClusterTemplates(logicClusterId);
-        Assertions.assertFalse(ret.isEmpty());
-        // 不存在的逻辑集群
-        logicClusterId = 9999999L;
-        ret = templateLogicService.getLogicClusterTemplates(logicClusterId);
-        Assertions.assertTrue(ret.isEmpty());
-    }
-
-    @Test
-    void getLogicTemplatesByAppIdTest() {
-        // 存在的appid
-        int appid = 1;
-        Result<List<Tuple<String, String>>> ret = templateLogicService.getLogicTemplatesByAppId(appid);
-        Assertions.assertFalse(ret.getData().isEmpty());
-        // 不存在的appid
-        appid = 999;
-        ret = templateLogicService.getLogicTemplatesByAppId(appid);
-        Assertions.assertTrue(ret.getData().isEmpty());
-    }
-
-    @Test
-    void getAllLogicTemplatesPhysicalCountTest() {
+    public void getAllLogicTemplatesPhysicalCountTest() {
+        Mockito.when(indexTemplatePhysicalDAO.listAll()).thenReturn(CustomDataSource.getTemplatePhysicalPOList());
+        Mockito.when(templatePhyService.listTemplate()).thenReturn(CustomDataSource.getIndexTemplatePhyList());
         Map<Integer, Integer> ret = templateLogicService.getAllLogicTemplatesPhysicalCount();
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getLogicTemplateTypesTest() {
-        int logicId = 1105;
-        List<IndexTemplateType> ret = templateLogicService.getLogicTemplateTypes(logicId);
-        Assertions.assertFalse(ret.isEmpty());
-        logicId = 9999999;
-        ret = templateLogicService.getLogicTemplateTypes(logicId);
-        Assertions.assertTrue(ret.isEmpty());
-    }
-
-    @Test
-    void getTemplateByResponsibleIdTest() {
-        Long responsibleId = 1L;
-        List<IndexTemplateLogic> ret = templateLogicService.getTemplateByResponsibleId(responsibleId);
+    public void getLogicTemplateTypesTest() {
+        Mockito.when(indexTemplateTypeDAO.listByIndexTemplateId(Mockito.anyInt())).thenReturn(CustomDataSource.getTemplateTypePOList());
+        List<IndexTemplateType> ret = templateLogicService.getLogicTemplateTypes(1);
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getTemplatesByHasAuthClusterTest() {
-        Integer appid = 1;
-        List<IndexTemplateLogic> ret = templateLogicService.getTemplatesByHasAuthCluster(appid);
+    public void getTemplateByResponsibleIdTest() {
+        Mockito.when(indexTemplateLogicDAO.likeByResponsible(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplateLogic> ret = templateLogicService.getTemplateByResponsibleId(1l);
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getHasAuthTemplatesInLogicClusterTest() {
-        Integer appid = 1;
-        Long logicClusterId = 1105L;
-        List<IndexTemplateLogic> ret = templateLogicService.getHasAuthTemplatesInLogicCluster(appid, logicClusterId);
-        Assertions.assertFalse(ret.isEmpty());
-    }
-
-    @Test
-    void getLogicTemplatesWithClusterAndMasterTemplateTest() {
+    public void getLogicTemplatesWithClusterAndMasterTemplateTest() {
+        Mockito.when(indexTemplateLogicDAO.listAll()).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<IndexTemplateLogicWithClusterAndMasterTemplate> ret = templateLogicService.getLogicTemplatesWithClusterAndMasterTemplate();
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getLogicTemplateWithClusterAndMasterTemplateTest() {
-        // 存在逻辑id
-        Integer logicClusterId = 1105;
-        IndexTemplateLogicWithClusterAndMasterTemplate ret = templateLogicService.getLogicTemplateWithClusterAndMasterTemplate(logicClusterId);
+    public void getLogicTemplateWithClusterAndMasterTemplateTest() {
+        Mockito.when(indexTemplateLogicDAO.getById(Mockito.anyInt())).thenReturn(CustomDataSource.templateLogicSource());
+        IndexTemplateLogicWithClusterAndMasterTemplate ret = templateLogicService.getLogicTemplateWithClusterAndMasterTemplate(1);
         Assertions.assertNotNull(ret);
-        logicClusterId = 9999999;
-        ret = templateLogicService.getLogicTemplateWithClusterAndMasterTemplate(logicClusterId);
-        Assertions.assertNull(ret);
     }
 
     @Test
-    void getLogicTemplatesWithClusterAndMasterTemplateMapTest() {
+    public void getLogicTemplatesWithClusterAndMasterTemplateMapTest() {
+        Mockito.when(indexTemplateLogicDAO.listByIds(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         Set<Integer> logicTemplateIds = new HashSet<>();
-        logicTemplateIds.add(1105);
+        logicTemplateIds.add(1);
         Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> ret = templateLogicService.getLogicTemplatesWithClusterAndMasterTemplateMap(logicTemplateIds);
         Assertions.assertFalse(ret.isEmpty());
-        // 包含不存在的id
-        logicTemplateIds.add(9999999);
-        ret = templateLogicService.getLogicTemplatesWithClusterAndMasterTemplateMap(logicTemplateIds);
-        Assertions.assertEquals(1, ret.size());
     }
 
     @Test
-    void getLogicTemplateWithClusterAndMasterTemplateByClustersTest() {
-        Set<Long> logicClusterIds = new HashSet<>();
-        logicClusterIds.add(63L);
-        List<IndexTemplateLogicWithClusterAndMasterTemplate> ret = templateLogicService.getLogicTemplateWithClusterAndMasterTemplateByClusters(logicClusterIds);
-        Assertions.assertFalse(ret.isEmpty());
-        // 包含不存在的id
-        logicClusterIds.add(9999999L);
-        ret = templateLogicService.getLogicTemplateWithClusterAndMasterTemplateByClusters(logicClusterIds);
-        Assertions.assertEquals(1, ret.size());
-    }
-
-    @Test
-    void getLogicTemplateWithClusterAndMasterTemplateByClusterTest() {
-        long logicClusterId = 63L;
-        List<IndexTemplateLogicWithClusterAndMasterTemplate> ret = templateLogicService.getLogicTemplateWithClusterAndMasterTemplateByCluster(logicClusterId);
+    public void getLogicTemplateWithClusterTest() {
+        Mockito.when(indexTemplateLogicDAO.getById(1)).thenReturn(CustomDataSource.templateLogicSource());
+        IndexTemplateLogicWithCluster ret = templateLogicService.getLogicTemplateWithCluster(1);
         Assertions.assertNotNull(ret);
-        logicClusterId = 9999999L;
-        ret = templateLogicService.getLogicTemplateWithClusterAndMasterTemplateByCluster(logicClusterId);
-        Assertions.assertNull(ret);
     }
 
     @Test
-    void getLogicTemplateWithClusterTest() {
-        int logicTemplateId = 1105;
-        IndexTemplateLogicWithCluster ret = templateLogicService.getLogicTemplateWithCluster(logicTemplateId);
-        Assertions.assertNotNull(ret);
-        logicTemplateId = 999;
-        ret = templateLogicService.getLogicTemplateWithCluster(logicTemplateId);
-        Assertions.assertNull(ret);
-    }
-
-    @Test
-    void getLogicTemplateWithClustersTest() {
+    public void getLogicTemplateWithClustersTest() {
+        Mockito.when(indexTemplateLogicDAO.listByIds(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         Set<Integer> logicTemplateIds = new HashSet<>();
-        logicTemplateIds.add(1105);
+        logicTemplateIds.add(1);
         List<IndexTemplateLogicWithCluster> ret = templateLogicService.getLogicTemplateWithClusters(logicTemplateIds);
         Assertions.assertFalse(ret.isEmpty());
-        logicTemplateIds.add(9999999);
-        ret = templateLogicService.getLogicTemplateWithClusters(logicTemplateIds);
-        Assertions.assertEquals(1, ret.size());
     }
 
     @Test
-    void getAllLogicTemplateWithClustersTest() {
+    public void getAllLogicTemplateWithClustersTest() {
+        Mockito.when(indexTemplateLogicDAO.listAll()).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<IndexTemplateLogicWithPhyTemplates> ret = templateLogicService.getAllLogicTemplateWithPhysicals();
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getLogicTemplateWithClustersByClusterIdTest() {
-        long logicClusterId = 63L;
-        List<IndexTemplateLogicWithCluster> ret = templateLogicService.getLogicTemplateWithClustersByClusterId(logicClusterId);
-        Assertions.assertFalse(ret.isEmpty());
-        logicClusterId = 999L;
-        ret = templateLogicService.getLogicTemplateWithClustersByClusterId(logicClusterId);
-        Assertions.assertTrue(ret.isEmpty());
-    }
-
-    @Test
-    void getAllLogicTemplateWithPhysicalsTest() {
+    public void getAllLogicTemplateWithPhysicalsTest() {
+        Mockito.when(indexTemplateLogicDAO.listAll()).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<IndexTemplateLogicWithPhyTemplates> ret = templateLogicService.getAllLogicTemplateWithPhysicals();
         Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
-    void getLogicTemplateWithPhysicalsByIdsTest() {
+    public void getLogicTemplateWithPhysicalsByIdsTest() {
+        Mockito.when(indexTemplateLogicDAO.listByIds(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         Set<Integer> logicTemplateIds = new HashSet<>();
-        logicTemplateIds.add(1105);
+        logicTemplateIds.add(1);
         List<IndexTemplateLogicWithPhyTemplates> ret = templateLogicService.getLogicTemplateWithPhysicalsByIds(logicTemplateIds);
         Assertions.assertFalse(ret.isEmpty());
-        // 包含不存在的id
-        logicTemplateIds.add(9999999);
-        ret = templateLogicService.getLogicTemplateWithPhysicalsByIds(logicTemplateIds);
-        Assertions.assertEquals(1, ret.size());
     }
 
     @Test
-    void getLogicTemplateWithPhysicalsByIdTest() {
-        int logicTemplateId = 1105;
-        IndexTemplateLogicWithPhyTemplates ret = templateLogicService.getLogicTemplateWithPhysicalsById(logicTemplateId);
+    public void getLogicTemplateWithPhysicalsByIdTest() {
+        Mockito.when(indexTemplateLogicDAO.getById(Mockito.any())).thenReturn(CustomDataSource.templateLogicSource());
+        IndexTemplateLogicWithPhyTemplates ret = templateLogicService.getLogicTemplateWithPhysicalsById(1);
         Assertions.assertNotNull(ret);
-        logicTemplateId = 9999999;
-        ret = templateLogicService.getLogicTemplateWithPhysicalsById(logicTemplateId);
-        Assertions.assertNull(ret);
     }
 
     @Test
-    void getTemplateWithPhysicalByDataCenterTest() {
-        String dc = "cn";
-        List<IndexTemplateLogicWithPhyTemplates> ret = templateLogicService.getTemplateWithPhysicalByDataCenter(dc);
+    public void getTemplateWithPhysicalByDataCenterTest() {
+        Mockito.when(indexTemplateLogicDAO.listByDataCenter(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplateLogicWithPhyTemplates> ret = templateLogicService.getTemplateWithPhysicalByDataCenter("cn");
         Assertions.assertFalse(ret.isEmpty());
-        dc = "kk";
-        ret = templateLogicService.getTemplateWithPhysicalByDataCenter(dc);
-        Assertions.assertTrue(ret.isEmpty());
     }
 }

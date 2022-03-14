@@ -1,5 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.query;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.LongAdder;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayJoinPO;
@@ -25,16 +35,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.LongAdder;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
 
@@ -113,9 +113,11 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
         }
 
         indexTemplateList = templatePhyService.listTemplateWithLogic();
-
-        for (IndexTemplatePhyWithLogic indexTemplate : indexTemplateList) {
-            indexTemplateMap.computeIfAbsent(indexTemplate.getName(), templateName -> Lists.newArrayList()).add(indexTemplate);
+        if (CollectionUtils.isNotEmpty(indexTemplateList)) {
+            indexTemplateMap = Maps.newConcurrentMap();
+            for (IndexTemplatePhyWithLogic indexTemplate : indexTemplateList) {
+                indexTemplateMap.computeIfAbsent(indexTemplate.getName(), templateName -> Lists.newArrayList()).add(indexTemplate);
+            }
         }
 
         if (indexTemplateMap == null || indexTemplateList == null) {

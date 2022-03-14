@@ -138,7 +138,7 @@ public class NightingaleClusterRemoteServiceImpl implements NightingaleClusterRe
             }
             List<ZeusSubTaskLog> zeusSubTaskLogs = JSON.parseArray(JSON.toJSONString(result.getData()), ZeusSubTaskLog.class);
             if (zeusSubTaskLogs == null || zeusSubTaskLogs.isEmpty()) {
-                return Result.buildSucc("");
+                return Result.buildSuccWithMsg("");
             }
             return Result.buildSucc(zeusSubTaskLogs.get(0).getStdout(), "");
         } catch (Exception e) {
@@ -163,7 +163,7 @@ public class NightingaleClusterRemoteServiceImpl implements NightingaleClusterRe
             }
             List<ZeusSubTaskLog> zeusSubTaskLogs = JSON.parseArray(JSON.toJSONString(result.getData()), ZeusSubTaskLog.class);
             if (zeusSubTaskLogs == null || zeusSubTaskLogs.isEmpty()) {
-                return Result.buildSucc("");
+                return Result.buildSuccWithMsg("");
             }
             return Result.buildSucc(zeusSubTaskLogs.get(0).getStdout(), "");
         } catch (Exception e) {

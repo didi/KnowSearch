@@ -1,0 +1,173 @@
+spring:
+  profiles:
+    active: epri-test
+  datasource:
+    name: data
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mysql://10.190.27.125:4859/arius_pre?useUnicode=true&characterEncoding=utf8&jdbcCompliantTruncation=true&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2B8
+      username: didi_cCHn
+      password: KEA9kEPR4
+      initialSize: 10
+      validationQueryTimeout: 5000
+      transactionQueryTimeout: 60000
+      minIdle: 10
+      maxActive: 30
+      max-wait: 60000
+      keepAlive: true
+      time-between-eviction-runs-millis: 1000
+      min-evictable-idle-time-millis: 300000
+      defaultAutoCommit: true
+      validationQuery: select 'x'
+      testWhileIdle: true
+      testOnReturn: false
+      testOnBorrow: true
+      logAbandoned: true
+      pool-prepared-statements: true
+      max-open-prepared-statements: 50
+      filters: stat,wall
+  servlet:
+    multipart:
+      max-file-size: 600MB
+      max-request-size: 600MB
+
+# 日志相关配置
+logging:
+  pattern:
+    file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
+  config: classpath:log4j2-test.xml
+  path: .
+  file:
+    max-history: 5
+
+# admin配置
+admin:
+  url:
+    console: https://base.xiaojukeji.com/console/arius/
+  thread:
+    size:
+      task: 2
+      op: 20
+
+# ams服务地址
+arius:
+  server:
+    meta: http://api-kylin-xg02.intra.xiaojukeji.com/bigdata_databus_arius_meta_arius_meta_server_test_test
+    ecm: http://10.88.129.71
+    usadmin: http://10.14.128.13:30782/admin/api
+    ruadmin: http://10.20.128.12:30101/admin/api
+
+ecm.request.author: admin:NBOB6N1VHL5343NWV4IZ
+
+# gateway相关配置
+es.gateway.url: 10.179.117.215
+# gateway server port
+es.gateway.port: 8200
+es.appid: 21,1187,1190
+es.password: helloworld,helloworld,helloworld
+pre.url:
+scroll.timeout: 60s
+
+# 更新ES数据集群名称
+es.update.cluster.name: elk-6-back
+es.maintenance.personnel.name: xiaosonglin
+
+################依赖的thirdpart接口的配置################
+#sso
+sso:
+  base-url: http://mis-test.diditaxi.com.cn
+  app-id: 2875
+  app-key: 8d06ae82218d71783a41e72852da5dc1
+  cookie-name: uid-arius-cn
+  cookie-age-ms: 86400
+
+#n9e
+monitor:
+  n9e:
+    base-url: http://10.86.76.13:8032  #UIC monitor的地址, 类似内部的odin地址
+    sink:
+      base-url: http://10.86.76.13:8008  #UIC monitor上报的地址, 类似内部的odin地址, 上报是另外一个地址
+    account:
+      base-url: http://10.86.76.13:8040
+    user-token: 82957c91ba316b3a1c5cb3a5319d6ae8
+    nid: 4 # 上报的节点id，如果没有需要新建
+
+# ep配置
+ep:
+  mdata:
+    service:
+      http: http://mdata.didichuxing.com/gateway
+      appid: 190222556
+      key: 8351616dacde4805bf428f732a0711ac06c31416ef754160bbea8a6a514f83cf815dd38a717d43179e2fbc68d3293e4d5f80861deff04169a0823867812b0404
+
+#feige
+feige:
+  service:
+    http:
+      token: mtbjowi1owfinzqymtawmaff
+      base: http://10.96.238.10/test_feige_service
+
+# tts配置
+tts:
+  executor:
+    appname: arius-admin-v2-dev
+    logpath: /Users/${USER}/var/logs
+    logretentiondays: 4
+    ip:
+    port: 9999
+  admin:
+    addresses: http://10.179.37.63:8080/tts-admin/
+
+#集群新建
+cluster:
+  sso:
+    disable: false
+    server: http://sso.odin.intra.xiaojukeji.com
+    brokeerName: sys-elastic-ecm
+    secretKey: 2342sdfa@#$@#$@$lfdj234
+
+cloud:
+  default:
+    server: http://ddcloud.xiaojukeji.com/kube/api/v2
+    token: e9bbe810d7567dc28e9240cf4b14d869
+  us01:
+    server: http://us.ddcloud.xiaojukeji.com/kube/api/v2
+    token: 8b1232c1ce661b7ea424987b50934bf5
+  basic:
+    admins: zhuyefeng,dingshilei,xiaosonglin
+    permServer: http://perm.odin.intra.xiaojukeji.com
+    treeServer: http://tree.odin.intra.xiaojukeji.com
+    maxRollbackCnt: 20
+    selfServer: http://10.168.116.116:8081
+  cluster:
+    default:
+      pluginIds: 6,8,10,12,14,16,18,20,22,24
+
+cert:
+  disable: false
+  server: http://cert.odin.intra.xiaojukeji.com
+  calleeName: sys.fd_elastic
+  keyName: CrP2Lv3Hn2aduS61vQ0DND3I2a93M65m
+
+zeus:
+  server: http://zeus.intra.xiaojukeji.com
+  token: f3d54ca06baa1ae8ea31d35958e06933
+  tplid: 3172
+  user: xiaoju
+
+fs:
+  minio:
+    endpoint: http://10.90.27.13:8095
+    accessKeyID: AKDD000000000017NLIIDATA33GNAZ
+    secretAccessKey:
+    bucket: datamarket
+  gift:
+    upload-url: http://10.14.128.20:8000/resource/
+    download-url: http://10.14.128.20:8002/static/
+    namespace: bigdata_kafka
+
+cmdb:
+  depart:
+    url: http://10.79.30.12:8080
+    token: bb504fbae0564066b1a3173db425f23e

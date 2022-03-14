@@ -7,7 +7,7 @@ import "./style.less";
 // import './assets/iconfont/iconfont.css';
 // import './assets/iconfont/iconfont.js';
 import "./assets/iconfont-es/iconfont.js";
-import projectLogo from "../../assets/es-logo.png";
+// import projectLogo from "../../assets/es-logo.png";
 import { CustomAppDropDown } from "../ProjectSelect";
 import { IProject } from "interface/project";
 import { Layout } from "antd";
@@ -134,7 +134,7 @@ export default function index(props: Props) {
         <div className={`${cPrefixCls}-header-left`}>
           <a href="/" className={`${cPrefixCls}-logo`}>
             <img
-              src={projectLogo}
+            //   src={projectLogo}
               alt="logo"
               style={{
                 height: 24,

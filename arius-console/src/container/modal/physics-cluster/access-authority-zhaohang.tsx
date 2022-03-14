@@ -30,7 +30,7 @@ import { clusterJoin } from "api/cluster-api";
 import { VERSION_MAINFEST_TYPE } from "constants/status-map";
 import { AppState } from "store/type";
 import { staffRuleProps } from "constants/table";
-import { IAccessClusterRegion } from "@types/cluster/cluster-types";
+import { IAccessClusterRegion } from "typesPath/cluster/cluster-types";
 
 const { Step } = Steps;
 const mapDispatchToProps = (dispatch: Dispatch) => ({
@@ -395,7 +395,7 @@ const formMap = (app: AppState) => {
           required: true,
           message: "请填写集群名称，支持大、小写字母、数字、-、_，1-128位字符",
           validator: async (rule: any, value: string) => {
-            const reg = /^[.a-z0-9_-]{1,}$/g;
+            const reg = /^[.a-zA-Z0-9_-]{1,}$/g;
             if (!value || value?.trim().length > 128) {
               return Promise.reject("请填写正确集群名称，支持大、小写字母、数字、-、_1-128位字符");
             }

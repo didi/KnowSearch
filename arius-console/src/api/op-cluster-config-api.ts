@@ -1,4 +1,4 @@
-import { IPhyConfig } from '@types/cluster/physics-type';
+import { IPhyConfig } from 'typesPath/cluster/physics-type';
 import fetch from '../lib/fetch';
 
 export const addConfig = (params: IPhyConfig) => {

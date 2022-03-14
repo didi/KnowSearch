@@ -6,16 +6,14 @@ import "codemirror/addon/hint/show-hint.js";
 import "codemirror/addon/hint/sql-hint.js";
 import "codemirror/addon/hint/show-hint.css";
 import * as React from "react";
-import {
-  explainSql,
-  getIndexNameList,
-  getMappingList,
-  toDsl,
-} from "api/cluster-index-api";
-import { Checkbox, Empty, Input, Table }  from 'antd';
+import { explainSql, getIndexNameList, getMappingList, toDsl } from "api/cluster-index-api";
+import { Button, Checkbox, Empty, Input, Table, Tooltip } from "antd";
 import "./sql-index.less";
 import store from "store";
-import { RightOutlined } from "@ant-design/icons";
+import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
+import { copyContentFn } from "../../../d1-packages/Utils/tools";
+import Url from "lib/url-parser";
+import { isArray, isEmpty } from "lodash";
 
 const app = {
   currentAppInfo: {
@@ -34,7 +32,7 @@ interface IIndexItem {
   v2: string;
 }
 
-export class SQLQuery extends React.Component {
+export class SQLQuery extends React.Component<any> {
   public state = {
     checkedList: [] as string[],
     indexStore: [] as IIndexItem[],
@@ -43,7 +41,6 @@ export class SQLQuery extends React.Component {
     mappingList: [] as any,
     sqlData: {} as any,
     loadingMapping: false,
-    consoleVisible: false,
     tableShow: false,
     explainLoading: false,
     tableReady: false,
@@ -55,14 +52,29 @@ export class SQLQuery extends React.Component {
     plainOptions: [] as string[],
     tableHeader: {} as any,
     jsonData: {} as any,
+    phyClusterName: null,
+    toggle: true,
   };
+
+  public componentWillReceiveProps(nextProps) {
+    if (this.state.phyClusterName !== nextProps.phyClusterName) {
+      // 在这里进行异步操作或者更新状态
+      const indexStore = this.state.indexList?.filter((item) => item?.v2 === nextProps?.phyClusterName);
+      this.setState({
+        indexStore,
+        phyClusterName: nextProps.phyClusterName,
+      });
+    }
+  }
 
   public getIndex = () => {
     getIndexNameList().then((data) => {
-      this.setState({
-        indexList: data,
-        indexStore: data,
-      });
+      if (isArray(data)) {
+        this.setState({
+          indexList: data || [],
+          indexStore: data || [],
+        });
+      }
     });
   };
 
@@ -73,7 +85,7 @@ export class SQLQuery extends React.Component {
       const sign = pdom.getAttribute("data-sign");
       const data = this.state.sqlData[sign];
       this.sqlToDsl(data);
-    } else if (dom.classList[0] === "explain_icon") {
+    } else if (dom.classList[0] === "explain_icons") {
       const pdom = dom.parentNode;
       const sign = pdom.getAttribute("data-sign");
       const data = this.state.sqlData[sign];
@@ -87,7 +99,7 @@ export class SQLQuery extends React.Component {
     });
 
     const { value } = info;
-    explainSql(value)
+    explainSql(value, Url().search.phyClusterName)
       .then((data) => {
         data = JSON.parse(data);
         this.setState({
@@ -142,7 +154,7 @@ export class SQLQuery extends React.Component {
           // dom.innerHTML = JSON.stringify(data, null, " ");
           dom.innerHTML = data;
         }
-        this.customAnchor(".bottom-console");
+        // this.customAnchor(".bottom-console");
       })
       .finally(() => {
         this.setState({
@@ -162,7 +174,7 @@ export class SQLQuery extends React.Component {
       const dom = document.querySelector(".querycallback pre");
       dom.innerHTML = data;
       // JSON.stringify(data, 2, " ")
-      this.customAnchor(".bottom-console");
+      // this.customAnchor(".bottom-console");
     });
   };
 
@@ -201,10 +213,7 @@ export class SQLQuery extends React.Component {
       completeSingle: false,
     });
     editor.on("keyup", (cm: any, event: any) => {
-      if (
-        !cm.state.completionActive &&
-        ![13, 8, 9, 32, 27].includes(event.keyCode)
-      ) {
+      if (!cm.state.completionActive && ![13, 8, 9, 32, 27].includes(event.keyCode)) {
         const tables = {} as any;
         this.state.indexStore.forEach((node: any) => {
           tables[node] = [];
@@ -246,9 +255,7 @@ export class SQLQuery extends React.Component {
           }
         }
       });
-      const lineDoms = document.querySelectorAll(
-        ".codemirror .CodeMirror-code>div"
-      );
+      const lineDoms = document.querySelectorAll(".codemirror .CodeMirror-code>div");
       lineDoms.forEach((lineDom) => {
         lineDom.className = "CodeMirror-line-container";
         if (lineDom.querySelector(".query")) {
@@ -263,7 +270,7 @@ export class SQLQuery extends React.Component {
           lineDom &&
             lineDom.insertAdjacentHTML(
               "beforeend",
-              `<span class="query" data-sign="${line}"><span class="dsl_icon">toDSL</span><span class="explain_icon font" /></span>`
+              `<span class="query" data-sign="${line}"><span class="dsl_icon">toDSL</span><span class="explain_icons">执行</span></span>`
             );
         }
       }
@@ -273,7 +280,7 @@ export class SQLQuery extends React.Component {
       const eventDom = document.querySelector(".codemirror");
       eventDom.addEventListener("click", this.eventBox);
     });
-    const cacheKey = `${user.currentUser.getName('domainAccount')}_${app.currentAppInfo.app.appInfo()?.id}_sql_cookie`;
+    const cacheKey = `${user.currentUser.getName("domainAccount")}_${app.currentAppInfo.app.appInfo()?.id}_sql_cookie`;
     if (localStorage.getItem(cacheKey)) {
       editor.setValue(localStorage.getItem(cacheKey));
     }
@@ -283,24 +290,15 @@ export class SQLQuery extends React.Component {
     });
   }
 
-  public onInputIndexChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type?: string
-  ) => {
+  public onInputIndexChange = (e: React.ChangeEvent<HTMLInputElement>, type?: string) => {
     const searchKey = e.target.value.trim();
     if (type === "mapping") {
       return this.setState({
-        mappingStore: searchKey
-          ? this.state.mappingList.filter((row: any) =>
-            row.v1.includes(searchKey)
-          )
-          : this.state.mappingList,
+        mappingStore: searchKey ? this.state.mappingList.filter((row: any) => row.v1.includes(searchKey)) : this.state.mappingList,
       });
     }
     this.setState({
-      indexStore: searchKey
-        ? this.state.indexList.filter((row) => row.v1.includes(searchKey))
-        : this.state.indexList,
+      indexStore: searchKey ? this.state.indexList.filter((row) => row.v1.includes(searchKey)) : this.state.indexList,
     });
   };
 
@@ -317,27 +315,20 @@ export class SQLQuery extends React.Component {
       if (obj.properties) {
         // tslint:disable-next-line:forin
         for (const key in obj.properties) {
-          analyzeField(
-            obj.properties[key],
-            field ? `${field}.${key}` : `${key}`
-          );
+          analyzeField(obj.properties[key], field ? `${field}.${key}` : `${key}`);
         }
       } else {
         allArray.push({
           field,
           type: obj.type,
-          index: obj.index
-            ? obj.index
-            : obj.type === "string"
-              ? "analyzed"
-              : "not_analyzed",
+          index: obj.index ? obj.index : obj.type === "string" ? "analyzed" : "not_analyzed",
         });
       }
     };
 
     getMappingList(item.v2, item.v1)
       .then((data) => {
-        const store = JSON.parse(data || 'null');
+        const store = JSON.parse(data || "null");
         for (const key in store) {
           if (store[key].properties) {
             analyzeField(store[key]);
@@ -345,7 +336,7 @@ export class SQLQuery extends React.Component {
         }
         this.setState({
           mappingStore: allArray,
-          mappingList: JSON.parse(JSON.stringify(allArray) || 'null'),
+          mappingList: JSON.parse(JSON.stringify(allArray) || "null"),
         });
       })
       .finally(() => {
@@ -355,27 +346,20 @@ export class SQLQuery extends React.Component {
       });
   };
 
-  public toggleConsole = () => {
-    this.setState({
-      consoleVisible: !this.state.consoleVisible,
-    });
-  };
-
   public renderIndexTable = () => {
     return (
-      <>
-        <div className="head-tip">索引</div>
+      <div style={{ marginLeft: 20, border: '1px solid #EBEDEF', borderRadius: '0 0 4px 0' }}>
+        <div className="iam-head-tip"><span>索引</span></div>
         <div className="iam-box">
-          <Input
-            onChange={this.onInputIndexChange}
-            placeholder="请输入关键字"
-          />
+          <Input style={{ margin: '20px 32px 16px 20px', width: 'calc(100% - 52px)' }} onChange={this.onInputIndexChange} placeholder="搜索" suffix={<SearchOutlined className="iam-box-icon" />} />
           {this.state.indexStore.length ? (
             <ul className="index-ul">
               {this.state.indexStore.map((item: any, index: number) => {
                 return (
-                  <li key={index} onClick={() => this.getMapping(item)}>
-                    {item.v1 || ""}
+                  <li key={index} onClick={() => copyContentFn(item?.v1 as string)}>
+                    <Tooltip title="点击可复制">
+                      <a href="#">{item?.v1 || ""}</a>
+                    </Tooltip>
                   </li>
                 );
               })}
@@ -384,7 +368,7 @@ export class SQLQuery extends React.Component {
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
           )}
         </div>
-      </>
+      </div>
     );
   };
 
@@ -412,13 +396,9 @@ export class SQLQuery extends React.Component {
     return (
       <>
         <div className="head-tip">
-          Mapping 对照 @{" "}
-          <span className="text-link">{this.state.mappingTitle}</span>
+          Mapping 对照 @ <span className="text-link">{this.state.mappingTitle}</span>
         </div>
-        <Input
-          onChange={(e) => this.onInputIndexChange(e, "mapping")}
-          placeholder="请输入关键字"
-        />
+        <Input onChange={(e) => this.onInputIndexChange(e, "mapping")} placeholder="请输入关键字" />
         <Table
           rowKey="field"
           className="mapping-table"
@@ -439,7 +419,28 @@ export class SQLQuery extends React.Component {
         arr.push({
           title: key,
           dataIndex: key,
+          width: 150,
           key,
+          render: (text) => {
+            if (typeof text === 'object') {
+              let str = '-';
+              try {
+                str = JSON.stringify(text, null, 4)
+              } catch(err) {
+                console.log(err)
+              }
+              return <>
+                <Tooltip title={<div style={{ overflow: "scroll", maxHeight: 500 }}><pre>{str}</pre></div>}>
+                  <div className="text-oh">{str}</div>
+                </Tooltip>
+              </>
+            }
+            return <>
+              <Tooltip title={text}>
+                <div className="text-oh">{text}</div>
+              </Tooltip>
+            </>
+          }
         });
       }
     }
@@ -468,9 +469,7 @@ export class SQLQuery extends React.Component {
   public onChange = (checkedList: string[]) => {
     this.setState({
       checkedList,
-      indeterminate:
-        !!checkedList.length &&
-        checkedList.length < this.state.plainOptions.length,
+      indeterminate: !!checkedList.length && checkedList.length < this.state.plainOptions.length,
       checkAll: checkedList.length === this.state.plainOptions.length,
     });
   };
@@ -479,18 +478,12 @@ export class SQLQuery extends React.Component {
     return (
       <>
         <div className="checkbox-content">
-          <Checkbox
-            indeterminate={this.state.indeterminate}
-            onChange={this.onCheckAllChange}
-            checked={this.state.checkAll}
-          >
-            全选
-          </Checkbox>
-          <CheckboxGroup
-            options={this.state.plainOptions}
-            value={this.state.checkedList}
-            onChange={this.onChange}
-          />
+          <div className="leftbox">
+            <Checkbox className="leftboxchildren" indeterminate={this.state.indeterminate} onChange={this.onCheckAllChange} checked={this.state.checkAll}>
+              全选
+            </Checkbox>
+          </div>
+          <CheckboxGroup className="rightbox" options={this.state.plainOptions} value={this.state.checkedList} onChange={this.onChange} />
         </div>
       </>
     );
@@ -501,62 +494,64 @@ export class SQLQuery extends React.Component {
 
     return (
       <>
-        <div className="cm-s-default result-title">
-          <span>
-            响应时间: <span className="text-success">{tableInfo.took} ms </span>
-          </span>
-          <span>
-            超时:{" "}
-            <span
-              className={tableInfo.timed_out ? "text-error" : "text-success"}
-            >
-              {tableInfo.timed_out ? "是" : "否"}
-            </span>
-          </span>
-          <span>
-            总shard数:{" "}
-            <span className="cm-keyword">{tableInfo["_shards.total"]}</span>
-          </span>
-          <span>
-            失败shard数:{" "}
-            <span className="tableInfo['_shards.failed'] ? 'text-error' : '' ">
-              {tableInfo["_shards.failed"]}
-            </span>
-          </span>
-          <span>
-            总条数:{" "}
-            <span className="cm-keyword">{tableInfo["hits.total"]}</span>
-          </span>
-          <span className="switch-btn" onClick={this.tableToJSON}>
-            JSON
-          </span>
+        <div>
+          {
+            isEmpty(tableInfo) ?
+              <div className="title-text">执行结果</div>
+              :
+              <div className="sql-title">
+                <span className="title-text">执行结果</span>
+                <span className="line"> | </span>
+                <span>
+                  响应时间: <span className="text">{tableInfo.took} ms </span>
+                </span>
+                <span>
+                  超时: <span className="text">{tableInfo.timed_out ? "是" : "否"}</span>
+                </span>
+                <span>
+                  总shard数: <span className="text">{tableInfo["_shards.total"]}</span>
+                </span>
+                <span>
+                  失败shard数: <span className="text">{tableInfo["_shards.failed"]}</span>
+                </span>
+                <span>
+                  总条数: <span className="text">{tableInfo["hits.total"]}</span>
+                </span>
+                <Button type="primary" className="json-button" onClick={this.tableToJSON}>
+                  JSON
+                </Button>
+                <Button icon={<FilterOutlined />} className="filter-button" onClick={() => this.setState({ toggle: !this.state.toggle })} />
+                {this.state.toggle ? <div className="filter-button-before"></div> : null }
+              </div>
+          }
         </div>
-        {this.renderCheckboxList()}
-        <Table
-          dataSource={tableData}
-          className="data-table"
-          columns={this.getResTableColumns()}
-        />
+        {this.state.toggle ? this.renderCheckboxList() : null}
+        <Table dataSource={tableData} className="data-table" columns={this.getResTableColumns()} />
       </>
     );
   };
 
   public renderJsonRes = () => {
     return (
-      <div
-        style={{ display: this.state.tableShow ? "none" : "block" }}
-        className="box-right"
-      >
-        <span
-          onClick={this.jsonToTable}
-          style={{ display: this.state.tableReady ? "block" : "none" }}
-          className="switch-btn"
-        >
-          TABLE
-        </span>
-        <div className="querycallback">
-          <pre />
-        </div>
+      <div>
+        {
+          isEmpty(this.state.jsonData) ?
+            <div className="isempty">
+              <div className="nulltitle-text">执行结果</div>
+              <Empty description="您的执行结果为空~" style={{ marginTop: 100 }} />
+            </div>
+            : <>
+              { this.state.tableShow ? null : <div className="title-text" style={{ marginBottom: 10 }}>执行结果</div>}
+              <div style={{ display: this.state.tableShow ? "none" : "block" }} className="box-right">
+                <Button type="primary" className="jsontotable-button" onClick={this.jsonToTable}>
+                  TABLE
+                </Button>
+                <div className="querycallback">
+                  <pre />
+                </div>
+              </div>
+            </>
+        }
       </div>
     );
   };
@@ -575,25 +570,12 @@ export class SQLQuery extends React.Component {
       <div className="sql-page">
         <div className="top-console-open">
           <div className="codemirror" />
-          <div className="expand-btn">
-            <div
-              className={`console-switch ${this.state.consoleVisible ? "console-switch-open" : ""
-                }`}
-              onClick={this.toggleConsole}
-            >
-               <RightOutlined />
-            </div>
+          <div className="tip-content">
+            {this.renderIndexTable()}
+            {/* {this.renderMappingTable()} */}
           </div>
-
-          {this.state.consoleVisible ? (
-            <div className="tip-content">
-              {this.renderIndexTable()}
-              {this.renderMappingTable()}
-            </div>
-          ) : null}
         </div>
         <div className="bottom-console">
-          <div className="head-tip">执行结果</div>
           {this.renderResultContent()}
         </div>
       </div>

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy>{
+public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
 
     /**
      * 集群id
@@ -152,6 +152,15 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy>{
      * 集群状态
      */
     private Integer               health;
+
+    /**
+     * 活跃的分片数目
+     */
+    private Long                  activeShardNum;
+
+    private Long                  diskTotal;
+    private Long                  diskUsage;
+    private Double                diskUsagePercent;
 
     @Override
     public int compareTo(ClusterPhy o) {

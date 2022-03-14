@@ -17,6 +17,9 @@ public interface AppClusterPhyAuthManager {
      */
     List<AppClusterPhyAuth> getByClusterPhyListAndAppId(Integer appId, List<ClusterPhy> clusterPhyList);
 
+    List<AppClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId, List<ClusterPhy> clusterPhyList);
+
+
     /**
      * 获取项目有访问权限的物理集群列表信息
      * @param appId                项目

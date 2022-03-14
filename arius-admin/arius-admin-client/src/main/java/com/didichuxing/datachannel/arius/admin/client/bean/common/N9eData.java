@@ -52,7 +52,7 @@ public class N9eData {
     @Override
     public String toString() {
         return "N9eData{" + "metric='" + metric + '\'' + ", time=" + time + ", value='" + value + '\''
-               + ", tags=" + tags + '}';
+                + ", tags=" + tags + '}';
     }
 
 }

@@ -87,6 +87,7 @@ public class TemplateLogicDcdrController {
     @ResponseBody
     @ApiOperation(value = "DCDR链路创建接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true)})
+    @Deprecated
     public Result<Void> createDcdr(HttpServletRequest request,
                              @RequestParam(value = "logicId") Integer logicId) throws AdminOperateException {
         return templateDcdrManager.createDcdr(logicId, HttpRequestUtils.getOperator(request));

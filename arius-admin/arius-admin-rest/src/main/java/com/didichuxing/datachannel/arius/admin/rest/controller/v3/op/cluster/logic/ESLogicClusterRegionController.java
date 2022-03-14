@@ -58,9 +58,11 @@ public class ESLogicClusterRegionController {
     @ResponseBody
     @ApiOperation(value = "解绑逻辑集群region接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    public Result<Void> cancelBindingLogicClusterRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
+    public Result<Void> cancelBindingLogicClusterRegion(HttpServletRequest request,
+                                                        @RequestParam("regionId") Long regionId,
+                                                        @RequestParam("logicClusterId")Long logicClusterId) {
 
-        return clusterRegionManager.unbindRegion(regionId, HttpRequestUtils.getOperator(request));
+        return clusterRegionManager.unbindRegion(regionId, logicClusterId, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("")

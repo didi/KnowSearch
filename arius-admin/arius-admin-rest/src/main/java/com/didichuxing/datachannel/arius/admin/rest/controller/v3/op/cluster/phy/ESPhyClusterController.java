@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -70,12 +71,6 @@ public class ESPhyClusterController {
         return Result.buildSucc(ConvertUtil.list2List(roleClusters, ESRoleClusterVO.class));
     }
 
-    /**
-     * @param request
-     * @param id
-     * @return
-     * @deprecated
-     */
     @DeleteMapping("/plugin/{id}")
     @ResponseBody
     @ApiOperation(value = "删除插件接口", notes = "")
@@ -93,9 +88,18 @@ public class ESPhyClusterController {
 
     @PostMapping("/join")
     @ResponseBody
-    @ApiOperation(value = "接入集群", notes = "当前版本仅限host类型")
+    @ApiOperation(value = "接入集群", notes = "支持多类型集群加入")
     public Result<Tuple<Long, String>> clusterJoin(HttpServletRequest request, @RequestBody ClusterJoinDTO param) {
         return clusterPhyManager.clusterJoin(param, HttpRequestUtils.getOperator(request));
+    }
+
+    @PostMapping("/join/{templateSrvId}/checkTemplateService")
+    @ResponseBody
+    @ApiOperation(value = "集群接入的时候校验是否可以开启指定索引服务")
+    public Result<Boolean> addTemplateSrvId(HttpServletRequest request,
+                                            @RequestBody ClusterJoinDTO clusterJoinDTO,
+                                            @PathVariable("templateSrvId") String templateSrvId) {
+        return clusterPhyManager.checkTemplateServiceWhenJoin(clusterJoinDTO, templateSrvId, HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/{clusterId}/regioninfo")
@@ -169,6 +173,15 @@ public class ESPhyClusterController {
     @ApiOperation(value = "新建的逻辑集群绑定region的时候进行物理集群版本的校验")
     public Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(@PathVariable("clusterLogicId") Long clusterLogicId) {
         return clusterPhyManager.getPhyClusterNameWithSameEsVersionAfterBuildLogic(clusterLogicId);
+    }
+
+    @GetMapping("/{clusterPhy}/{clusterLogic}/{templateSize}/bindRack")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表")
+    public Result<Set<String>> getValidRacksListByDiskSize(@PathVariable("clusterPhy") String clusterPhy,
+                                                @PathVariable("clusterLogic") String clusterLogic,
+                                                @PathVariable("templateSize") String templateSize) {
+        return clusterPhyManager.getValidRacksListByTemplateSize(clusterPhy, clusterLogic, templateSize);
     }
 
 }

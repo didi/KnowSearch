@@ -55,6 +55,11 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
     private Integer      expireTime;
 
     /**
+     * 热数据保存天数, 单位天
+     */
+    private Integer hotTime;
+
+    /**
      * 数据总量 单位G
      */
     private Double       diskQuota;
@@ -119,4 +124,14 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
      * 禁用索引_source标识
      */
     private Boolean      disableSourceFlags;
+
+    /**
+     * 禁用rollover标识
+     */
+    private Boolean disableIndexRollover;
+
+    /**
+     * 服务等级
+     */
+    private Integer      level;
 }

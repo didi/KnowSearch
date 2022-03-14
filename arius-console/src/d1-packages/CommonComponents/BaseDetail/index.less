@@ -1,0 +1,33 @@
+@import "./base.less";
+.detail-base-info-box {
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background-color: aliceblue;
+  margin: 20px 0 20px 0;
+  &-row {
+    &-col {
+      display: flex;
+      &-label {
+        .min-title();
+        height: 40px;
+        line-height: 40px;
+        padding-left: 20px;
+        width: 20%;
+      }
+      &-content {
+        .text-content();
+        height: 40px;
+        line-height: 40px;
+      }
+    }
+  }
+  &-activ {
+    background-color: white;
+  }
+}
+
+.detail-base-info-title {
+  .middle-title();
+  border-bottom: 1px solid #dbe0e4;
+  padding-bottom: 8px;
+}

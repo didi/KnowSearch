@@ -1,15 +1,7 @@
-import { IMenuItem, IBaseInfo } from "@types/base-types";
-import {
-  IOpPhysicsClusterDetail,
-  ITemplateSrvData,
-} from "@types/cluster/cluster-types";
+import { IMenuItem, IBaseInfo } from "typesPath/base-types";
+import { IOpPhysicsClusterDetail, ITemplateSrvData } from "typesPath/cluster/cluster-types";
 import React from "react";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EditTwoTone,
-  QuestionCircleOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, EditTwoTone, QuestionCircleOutlined } from "@ant-design/icons";
 import { Button, Modal, Tooltip, notification, message, Input } from "antd";
 import { cellStyle } from "constants/table";
 import { ROLE_TYPE, ROLE_TYPE_NO, colorTheme, isOpenUp } from "constants/common";
@@ -19,29 +11,23 @@ import { NavRouterLink, renderOperationBtns } from "container/custom-component";
 import { PlugnList } from "./plugn-list";
 import moment from "moment";
 import { timeFormat } from "constants/time";
-import {
-  INDEX_AUTH_TYPE_MAP,
-  opTemplateIndexRoleMap,
-  PHY_CLUSTER_TYPE,
-} from "constants/status-map";
-import { IPlug } from "@types/plug-types";
-import { IWorkOrder } from "@types/params-types";
+import { INDEX_AUTH_TYPE_MAP, opTemplateIndexRoleMap, PHY_CLUSTER_TYPE, RESOURCE_TYPE_MAP } from "constants/status-map";
+import { IPlug } from "typesPath/plug-types";
+import { IWorkOrder } from "typesPath/params-types";
 import { submitWorkOrder } from "api/common-api";
 import { editPlug, userDelPlug } from "api/plug-api";
 import store from "store";
-import { IPhyConfig } from "@types/cluster/physics-type";
+import { IPhyConfig } from "typesPath/cluster/physics-type";
 import { PhysicsConfigInfo } from "./physics-config-info.tsx";
-import { IIndex, INodeDivide } from "@types/index-types";
+import { IIndex, INodeDivide } from "typesPath/index-types";
 import { NodeDivide } from "./node-divide";
 import { opNodeStatusMap } from "./constants";
 import { clusterRegionDelete } from "api/op-cluster-region-api";
-import {
-  deletePhysicsClusterTemplateSrv,
-  setPhysicsClusterTemplateSrv,
-} from "api/cluster-api";
+import { deletePhysicsClusterTemplateSrv, setPhysicsClusterTemplateSrv } from "api/cluster-api";
 import { ITableBtn } from "component/dantd/dtable";
 import { EditList } from "./edit-list";
-import { PageIFrameContainer } from 'container/iframe-page';
+import { PageIFrameContainer } from "container/iframe-page";
+import { Sense } from "./sense";
 
 const appInfo = {
   app: store.getState().app,
@@ -58,24 +44,20 @@ export enum TAB_LIST_KEY {
   node = "node",
   region = "region",
   diary = "diary",
-  editList = 'editList',
-  sense = 'sense',
+  editList = "editList",
+  sense = "sense",
 }
 
 export const TAB_LIST = [
   {
     name: "集群概览",
     key: TAB_LIST_KEY.info,
-    content: (logicBaseInfo: IOpPhysicsClusterDetail) => (
-      <ClusterInfo phyBaseInfo={logicBaseInfo} />
-    ),
+    content: (logicBaseInfo: IOpPhysicsClusterDetail) => <ClusterInfo phyBaseInfo={logicBaseInfo} />,
   },
   {
     name: "动态配置",
     key: TAB_LIST_KEY.editList,
-    content: () => (
-      <EditList />
-    ),
+    content: () => <EditList />,
   },
   {
     name: "静态配置",
@@ -95,13 +77,13 @@ export const TAB_LIST = [
   {
     name: "Sense管控",
     key: TAB_LIST_KEY.sense,
-    content: () => <div style={{ height: '700px' }}><PageIFrameContainer src={`/console/arius/kibana7/app/kibana#/dev_tools/console`} /></div>,
+    content: () => <Sense />,
   },
   {
     name: "插件列表",
     key: TAB_LIST_KEY.pluggin,
     content: (logicBaseInfo: IOpPhysicsClusterDetail) => <PlugnList />,
-  }
+  },
 ];
 
 const menuMap = new Map<string, IMenuItem>();
@@ -114,7 +96,7 @@ export const DETAIL_MENU_MAP = menuMap;
 export const baseInfo: any = [
   [
     {
-      label: "ES版本",
+      label: "集群版本",
       key: "esVersion",
     },
     {
@@ -128,13 +110,22 @@ export const baseInfo: any = [
       key: "httpAddress",
       render: (value: string) => (
         <>
-          <span>
-            {value?.length > 56 ? (
-              <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip>
-            ) : (
-              value
-            )}
-          </span>
+          <span>{value?.length > 56 ? <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip> : value}</span>
+        </>
+      ),
+    },
+    {
+      label: "分片数",
+      key: "activeShardNum",
+    },
+  ],
+  [
+    {
+      label: "写地址",
+      key: "httpWriteAddress",
+      render: (value: string) => (
+        <>
+          <span>{value?.length > 56 ? <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip> : value}</span>
         </>
       ),
     },
@@ -146,32 +137,11 @@ export const baseInfo: any = [
   ],
   [
     {
-      label: "写地址",
-      key: "httpWriteAddress",
-      render: (value: string) => (
-        <>
-          <span>
-            {value?.length > 56 ? (
-              <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip>
-            ) : (
-              value
-            )}
-          </span>
-        </>
-      ),
-    },
-    {
       label: "描述",
       key: "desc",
       render: (value: string) => (
         <>
-          <span>
-            {value?.length > 56 ? (
-              <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip>
-            ) : (
-              value || '-'
-            )}
-          </span>
+          <span>{value?.length > 56 ? <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip> : value || "-"}</span>
         </>
       ),
     },
@@ -184,9 +154,7 @@ const formatNodeInfo = (node: any, str: string) => {
   });
   const machineSpecArr = esRoleClusterVOSItem?.machineSpec.split("-");
   return esRoleClusterVOSItem
-    ? `${esRoleClusterVOSItem.podNumber} * CPU${machineSpecArr[0]}核-内存${
-        machineSpecArr[1] || "(-)"
-      }-磁盘${machineSpecArr[2] || "(-)"}`
+    ? `${esRoleClusterVOSItem.podNumber} * CPU${machineSpecArr[0]}核-内存${machineSpecArr[1] || "(-)"}-磁盘${machineSpecArr[2] || "(-)"}`
     : "-";
 };
 
@@ -280,33 +248,60 @@ export const getNodeColumns = () => {
   return cols;
 };
 
+export const arrToStr = (value, length = 10) => {
+  let str = "";
+  let tip = "";
+  if (value && value?.length) {
+    value.forEach((item, index) => {
+      // 数组多个时最后一个没有逗号
+      tip += item + (value.length - index == 1 ? "" : ",");
+      // 识别到已经有胜率号后不在计算添加str
+      if (str.includes("...")) {
+        return;
+      }
+      // 超长会导致换行
+      if (str.length > length || str.length + item.length > length) {
+        str += "...";
+      } else {
+        str += item + (value.length - index == 1 ? "" : ",");
+      }
+    });
+  }
+  return (
+    <>
+      <Tooltip title={tip}>
+        <span>{str || "-"}</span>
+      </Tooltip>
+    </>
+  );
+};
+
 export const DESC_LIST = [
   {
     label: "集群类型",
     key: "type",
     render: (value) => (
       <>
-        <span>
-          {PHY_CLUSTER_TYPE.find((row) => row.value === value)?.label || ""}
-        </span>
+        <span>{PHY_CLUSTER_TYPE.find((row) => row.value === value)?.label || ""}</span>
       </>
     ),
   },
   {
     label: "所属项目",
-    key: "belongAppName",
-    render: (value) => (
-      <>
-        <span>{value || "_"}</span>
-      </>
-    ),
+    key: "belongAppNames",
+    render: arrToStr,
   },
   {
     label: "所属项目ID",
-    key: "belongAppId",
+    key: "belongAppIds",
+    render: arrToStr,
+  },
+  {
+    label: "所属资源类型",
+    key: "tags",
     render: (value) => (
       <>
-        <span>{value || "_"}</span>
+        <span>{RESOURCE_TYPE_MAP[JSON.parse(value)?.resourceType] || "_"}</span>
       </>
     ),
   },
@@ -364,38 +359,26 @@ export const getLogicNodeColumns = () => {
   return columns;
 };
 
-export const onHandleServerTag = (
-  data: ITemplateSrvData,
-  physicsCluster: string,
-  reloadData: Function
-) => {
+export const onHandleServerTag = (data: ITemplateSrvData, physicsCluster: string, reloadData: Function) => {
   Modal.confirm({
-    title: data.status
-      ? `是否确认关闭索引${data.item?.serviceName}服务？`
-      : `是否确认打开索引${data.item?.serviceName}服务?`,
-    content: data.status
-      ? `关闭服务后会可能使相应业务受影响，请谨慎操作！`
-      : `打开服务后会可能使相应业务受影响，请谨慎操作！`,
+    title: data.status ? `是否确认关闭索引${data.item?.serviceName}服务？` : `是否确认打开索引${data.item?.serviceName}服务?`,
+    content: data.status ? `关闭服务后会可能使相应业务受影响，请谨慎操作！` : `打开服务后会可能使相应业务受影响，请谨慎操作！`,
     icon: <QuestionCircleOutlined style={{ color: colorTheme }} />,
     okText: "提交",
     cancelText: "取消",
     onOk: () => {
       if (!data.status) {
-        return setPhysicsClusterTemplateSrv(
-          physicsCluster,
-          data.item.serviceId
-        ).then(() => {
+        setPhysicsClusterTemplateSrv(physicsCluster, data.item.serviceId).then(() => {
           message.success("操作成功");
           reloadData();
           // clusterOp.getPhyClusterTemplateSrvList(physicsCluster); // 如有其他引用可作入参传入
         });
+        return Promise.resolve();
       }
-      deletePhysicsClusterTemplateSrv(physicsCluster, data.item.serviceId).then(
-        () => {
-          reloadData();
-          // clusterOp.getPhyClusterTemplateSrvList(physicsCluster); // 如有其他引用可作入参传入
-        }
-      );
+      deletePhysicsClusterTemplateSrv(physicsCluster, data.item.serviceId).then(() => {
+        reloadData();
+        // clusterOp.getPhyClusterTemplateSrvList(physicsCluster); // 如有其他引用可作入参传入
+      });
     },
   });
 };
@@ -474,13 +457,7 @@ export const getIndexListColumns = () => {
       render: (name: string, record: IIndex) => {
         return (
           <Tooltip placement="bottomLeft" title={name}>
-            <NavRouterLink
-              needToolTip={true}
-              element={name}
-              href={`/index/physics/detail?data=${encodeURI(
-                JSON.stringify(record)
-              )}`}
-            />
+            <NavRouterLink needToolTip={true} element={name} href={`/index/physics/detail?data=${encodeURI(JSON.stringify(record))}`} />
           </Tooltip>
         );
       },
@@ -503,11 +480,7 @@ export const getIndexListColumns = () => {
       render: (name: string, record: IIndex) => {
         return (
           <Tooltip placement="bottomLeft" title={name}>
-            <NavRouterLink
-              needToolTip={true}
-              element={name}
-              href={`/index/logic/detail?id=${record.logicId}`}
-            />
+            <NavRouterLink needToolTip={true} element={name} href={`/index/logic/detail?id=${record.logicId}`} />
           </Tooltip>
         );
       },
@@ -559,10 +532,7 @@ export const getNodeDivideColumns = (
           obj.props.rowSpan = row.rowSpan;
         }
         if (index > 0) {
-          if (
-            value === dataList[dataListIndex - 1]?.regionId &&
-            value !== "_"
-          ) {
+          if (value === dataList[dataListIndex - 1]?.regionId && value !== "_") {
             obj.props.rowSpan = 0;
           }
         }
@@ -621,8 +591,15 @@ export const getNodeDivideColumns = (
             },
           },
         ];
-        // return renderOperationBtns(btns, record);
         return ip;
+      },
+    },
+    {
+      title: "节点规格",
+      dataIndex: "machineSpec",
+      key: "machineSpec",
+      render: (machineSpec: string) => {
+        return machineSpec || "_";
       },
     },
     {
@@ -659,7 +636,6 @@ export const getNodeDivideColumns = (
           str = opNodeStatusMap[status];
         }
         return str;
-        return <>{opNodeStatusMap[status]}</>;
       },
     },
     {
@@ -671,11 +647,7 @@ export const getNodeDivideColumns = (
           {
             label: "编辑",
             clickFunc: () => {
-              setModalId(
-                "newRegionModal",
-                { clusterName, nodeDivideList: dataList, record },
-                reloadDataFn
-              );
+              setModalId("newRegionModal", { clusterName, nodeDivideList: dataList, record }, reloadDataFn);
             },
           },
           // {
@@ -715,17 +687,11 @@ export const getNodeDivideColumns = (
         };
         const dataListIndex = record.index;
 
-        if (
-          index === 0 ||
-          record.regionId !== dataList[dataListIndex - 1]?.regionId
-        ) {
+        if (index === 0 || record.regionId !== dataList[dataListIndex - 1]?.regionId) {
           obj.props.rowSpan = record.rowSpan;
         }
         if (index > 0) {
-          if (
-            record.regionId === dataList[dataListIndex - 1]?.regionId &&
-            record.regionId !== "_"
-          ) {
+          if (record.regionId === dataList[dataListIndex - 1]?.regionId && record.regionId !== "_") {
             obj.props.rowSpan = 0;
           }
         }
@@ -821,31 +787,6 @@ const delPlugn = (data, reloadDataFn) => {
     },
   });
 };
-const editPlugn = (data, reloadDataFn) => {
-  Modal.confirm({
-    title: `是否编辑该${data.name}插件`,
-    icon: <EditOutlined />,
-    content: (
-      <Input
-        className="physics-edit-plugin-input"
-        defaultValue={data?.desc || ""}
-      />
-    ),
-    width: 500,
-    okText: "确定",
-    cancelText: "取消",
-    onOk() {
-      let { value } = document.querySelector(".physics-edit-plugin-input");
-      editPlug(data.id, value).then((res) => {
-        reloadDataFn();
-      });
-      // userDelPlug(data.id).then((res) => {
-      //   reloadDataFn();
-      // });
-    },
-  });
-};
-
 const getPlugnBtnList = (record: IPlug, reloadDataFn: any, setModalId) => {
   const install = {
     label: "安装",
@@ -881,7 +822,7 @@ const getPlugnBtnList = (record: IPlug, reloadDataFn: any, setModalId) => {
   };
 
   const btnList = [];
-  if (record.pdefault) {
+  if (record.pdefault == 0) {
     return btnList;
   }
   if (record.installed) {
@@ -890,6 +831,12 @@ const getPlugnBtnList = (record: IPlug, reloadDataFn: any, setModalId) => {
     btnList.push(install, edit, del);
   }
   return btnList;
+};
+
+export const pDefaultMap = {
+  0: "系统默认",
+  1: "ES能力",
+  2: "平台能力",
 };
 
 export const getPlugnListColumns = (fn: () => any, setModalId) => {
@@ -903,8 +850,9 @@ export const getPlugnListColumns = (fn: () => any, setModalId) => {
       title: "插件类型",
       dataIndex: "pdefault",
       key: "pdefault",
-      render: (value: boolean) => {
-        return <>{value ? "系统默认插件" : "自定义插件"}</>;
+      render: (value: number) => {
+        const text = pDefaultMap[value] || "未知类型";
+        return text;
       },
     },
     {
@@ -924,9 +872,9 @@ export const getPlugnListColumns = (fn: () => any, setModalId) => {
       title: "描述",
       dataIndex: "desc",
       key: "desc",
-      width: '25%',
+      width: "25%",
       render: (value: string) => {
-        return value || '-'
+        return value || "-";
       },
     },
     {
@@ -942,11 +890,7 @@ export const getPlugnListColumns = (fn: () => any, setModalId) => {
   return columns;
 };
 
-export const getConfigInfoColumns = (
-  fn: any,
-  reloadData: () => any,
-  setDrawerId: any
-) => {
+export const getConfigInfoColumns = (fn: any, reloadData: () => any, setDrawerId: any) => {
   const operationList = [
     {
       label: "编辑",
@@ -955,7 +899,7 @@ export const getConfigInfoColumns = (
         fn("editConfig", record, reloadData);
         return;
       },
-    }
+    },
   ] as ITableBtn[];
   const columns = [
     {

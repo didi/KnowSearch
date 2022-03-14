@@ -15,6 +15,7 @@ public class DSLSearchUtils {
     private static final String QUERY_BOOL_MUST_TERM_VALUE = "\"value\":";
     private static final String QUERY_BOOL_MUST_PREFIX     = "\"prefix\":";
     private static final String QUERY_BOOL_MUST_RANGE      = "\"range\":";
+    private static final String QUERY_BOOL_MUST_WILDCARD   = "\"wildcard\":";
     private static final String PLACE_HOLDER               = "\"%s\":";
 
     private static final String QUERY_BOOL_MUST_RANGE_GTE  = "\"gte\":";
@@ -108,17 +109,44 @@ public class DSLSearchUtils {
     }
 
     /**
+     * 构建精确查询子条件
+     * 返回样例：
+     * {
+     *   "term": {
+     *       "appId": {
+     *            "value": true
+     *           }
+     *     }
+     *  }
+     * @param term       值（Boolean）
+     * @param termKey    键
+     * @return
+     */
+    public static String getTermCellForExactSearch(Boolean term, String termKey) {
+        if (term == null || AriusObjUtils.isBlack(termKey)) {
+            return null;
+        }
+
+        StringBuilder termSb = new StringBuilder();
+        termSb.append("{").append(QUERY_BOOL_MUST_TERM).append("{").append(String.format(PLACE_HOLDER, termKey))
+                .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append(term).append("}")
+                .append("}").append("}");
+
+        return termSb.toString();
+    }
+
+    /**
      * 批量构建精确查询子条件
      * 返回样例：
      * {
-     *           "terms": {
-     *             "cluster": [
-     *               "logi-elasticsearch-7.6.0",
-     *               "dc-cluster",
-     *               "dc-es02"
-     *             ]
-     *           }
-     *         }
+     *   "terms": {
+     *     "cluster": [
+     *       "logi-elasticsearch-7.6.0",
+     *       "dc-cluster",
+     *       "dc-es02"
+     *     ]
+     *   }
+     * }
      * @param termList  值
      * @param termsKey  键
      * @return
@@ -146,12 +174,12 @@ public class DSLSearchUtils {
      * 构建最右匹配查询子条件
      * 返回样例：
      *  {
-     *           "wildcard": {
-     *             "index": {
-     *               "value": "test*"
-     *             }
-     *           }
-     *         }
+     *    "wildcard": {
+     *      "index": {
+     *        "value": "test*"
+     *      }
+     *    }
+     *  }
      *
      * @param term    值
      * @param termKey 键
@@ -169,6 +197,32 @@ public class DSLSearchUtils {
                 .append("}").append("}").append("}");
         }
 
+        return termSb.toString();
+    }
+
+    /**
+     * 构建term的模糊查询条件
+     * {
+     *   "wildcard": {
+     *     "index": {
+     *       "value": "*my_index*"
+     *     }
+     *   }
+     * }
+     * @param term 值
+     * @param termKey 键
+     * @return
+     */
+    public static String getTermCellForWildcardSearch(String term, String termKey) {
+        if (AriusObjUtils.isBlack(term) || AriusObjUtils.isBlack(termKey)) {
+            return null;
+        }
+        StringBuilder termSb = new StringBuilder();
+        if (StringUtils.isNotBlank(term)) {
+            termSb.append("{").append(QUERY_BOOL_MUST_WILDCARD).append("{").append(String.format(PLACE_HOLDER, termKey))
+                    .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append("*").append(term).append("*")
+                    .append("\"").append("}").append("}").append("}");
+        }
         return termSb.toString();
     }
 }

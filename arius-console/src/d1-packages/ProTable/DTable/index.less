@@ -1,0 +1,60 @@
+.d-table {
+  background: white;
+
+  &-box {
+    padding: 20px 0px;
+
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0 20px 0;
+
+      &-search {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &-custom {
+          padding-right: 20px;
+        }
+      }
+
+      &-btn {
+        display: flex;
+        button {
+          margin-right: 10px;
+        }
+
+        .reload {
+          width: 30px;
+          height: 30px;
+          line-height: 30px;
+          border: 1px solid #dbe0e4;
+          border-radius: 2px;
+          margin-right: 10px;
+        }
+
+        .reload:hover {
+          color: #2f81f9;
+        }
+      }
+    }
+  }
+  .ant-table-thead {
+    tr th {
+      white-space: nowrap;
+    }
+  }
+  .ant-table-filter-column {
+    line-height: 100%;
+    .ant-table-filter-column-title {
+      flex-grow: 0;
+      padding-right: 5px;
+  
+    }
+    .ant-table-filter-trigger-container {
+      position: relative;
+    }
+  }
+}

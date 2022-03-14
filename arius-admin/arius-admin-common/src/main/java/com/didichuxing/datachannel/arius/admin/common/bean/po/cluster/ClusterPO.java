@@ -126,23 +126,44 @@ public class ClusterPO extends BasePO {
     /**
      * 读写分离时候，指定action（获取写client）
      */
-    private String writeAction;
+    private String  writeAction;
 
     /**
-     * 健康状态 1 green 2 yellow 3 red -1 未知
+     * 健康状态 0 green 1 yellow 2 red -1 未知
      */
     private Integer health;
 
-    @Override
-    public boolean equals(Object o) {
-        ClusterPO other = (ClusterPO)o;
+    /**
+     * 活跃的分片数目
+     */
+    private Long    activeShardNum;
 
-        if (other == null) {
+    private Long    diskTotal;
+    private Long    diskUsage;
+    private Double  diskUsagePercent;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || obj.getClass() != this.getClass()) {
             return false;
-        } else if (StringUtils.isNotBlank(httpAddress) && !httpAddress.equals(other.getHttpAddress())) {
-            return false;
-        } else {
-            return !StringUtils.isNotBlank(other.getHttpAddress()) || other.getHttpAddress().equals(httpAddress);
         }
+
+        ClusterPO other = (ClusterPO) obj;
+
+        if (StringUtils.isNotBlank(httpAddress) && !httpAddress.equals(other.getHttpAddress())) {
+            return false;
+        } else if (StringUtils.isNotBlank(other.getHttpAddress()) && !other.getHttpAddress().equals(httpAddress)) {
+            return false;
+        } else if (StringUtils.isNotBlank(password) && !password.equals(other.getPassword())) {
+            return false;
+        } else if (StringUtils.isNotBlank(other.getPassword()) && !other.getPassword().equals(password)) {
+            return false;
+        } else if (StringUtils.isNotBlank(other.getEsVersion()) && !other.getEsVersion().equals(esVersion)) {
+            return false;
+        } else if (StringUtils.isNotBlank(esVersion) && !esVersion.equals(other.getEsVersion())) {
+            return false;
+        }
+
+        return true;
     }
 }

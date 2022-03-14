@@ -11,5 +11,6 @@ public interface ZeusCollectManager {
 	 * @param esZeusHostInfoDTO      Zeus采集节点信息实体
 	 * @return
 	 */
+	@Deprecated
 	Result<Boolean> updateHttpAddressFromZeus(ESZeusHostInfoDTO esZeusHostInfoDTO);
 }

@@ -141,4 +141,9 @@ public class DslFieldUsePO extends BaseESPO {
     public String getKey() {
         return String.format("%d_%s_%s", id, date, dataCenter);
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

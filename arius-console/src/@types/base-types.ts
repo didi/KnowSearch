@@ -16,6 +16,7 @@ export interface ILabelValue {
   name?: string;
   key?: number;
   text?: string;
+  title?: string;
 }
 
 export interface IStatusMap {

@@ -1,6 +1,5 @@
 // 控制开源环境下部分功能的隐藏和禁用
 export const isOpenUp = true;
-
 // 索引模板服务，开源环境下展示分类
 // 分类: 0 隐藏 1 开源正常展示 2 能力开发中 3 该功能仅面向商业版客户开放
 export const showTag = {
@@ -54,6 +53,18 @@ export const RESOURCE_TYPE_LIST = [
   { value: 3, label: '独享集群' }
 ];
 
+export const LEVEL_MAP = [
+  { value: 1, label: '核心' },
+  { value: 2, label: '重要' },
+  { value: 3, label: '一般' }
+];
+
+export const NEW_RESOURCE_TYPE_LIST = [
+  { value: 1, label: '共享集群' },
+  { value: 2, label: '独立集群' },
+  // { value: 3, label: '独享集群' }
+];
+
 export const LEVEL_LIST = [{
   label: 'normal',
   value: 1,
@@ -93,7 +104,7 @@ export const ROLE_TYPE = [
   { value: 1, label: 'data_node' },
   { value: 2, label: 'client_node' },
   { value: 3, label: 'master_node' },
-  { value: 4, label: 'tribe_node' },
+  { value: 4, label: 'ml_node' },
 ];
 
 export const ROLE_TYPE_NO = [
@@ -101,5 +112,10 @@ export const ROLE_TYPE_NO = [
   { value: 1, label: 'data' },
   { value: 2, label: 'client' },
   { value: 3, label: 'master' },
-  { value: 4, label: 'tribe' },
+  { value: 4, label: 'ml' },
 ];
+
+export const BOOLEAN_LIST = [
+  { value: 'false', label: '是' },
+  { value: 'true', label: '否' }
+]

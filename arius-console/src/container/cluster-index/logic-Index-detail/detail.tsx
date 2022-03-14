@@ -8,9 +8,9 @@ import { Dispatch } from "redux";
 import * as actions from "actions";
 import { connect } from "react-redux";
 import { getIndexBaseInfo } from "api/cluster-index-api";
-import { IUNSpecificInfo } from "@types/base-types";
+import { IUNSpecificInfo } from "typesPath/base-types";
 import { getBtnLogicIndexList } from "../config";
-import { ITemplateLogic } from "@types/cluster/physics-type";
+import { ITemplateLogic } from "typesPath/cluster/physics-type";
 import { AppState } from "store/type";
 import { renderMoreBtns } from "container/custom-component";
 // import { delLogicCluster } from '../config';
@@ -125,7 +125,7 @@ export class LogicIndexDetail extends React.Component<{setModalId: Function, app
                 ? row.render(indexBaseInfo?.[row.key], indexBaseInfo)
                 : `${indexBaseInfo?.[row.key] || ""}`
             }
-            width={250}
+            width={row?.width || 200}
           />
         ))}
       </PageHeader>

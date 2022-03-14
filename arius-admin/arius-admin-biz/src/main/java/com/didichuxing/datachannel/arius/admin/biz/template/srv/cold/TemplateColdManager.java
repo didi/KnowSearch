@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 import java.util.Set;
@@ -23,7 +24,7 @@ public interface TemplateColdManager {
      * @param physicalId 物理模板ID
      * @return set集合
      */
-    Set<String> getColdIndex(Long physicalId);
+    Tuple<Set<String>, Set<String>> getColdAndHotIndex(Long physicalId);
 
     /**
      * fetchClusterDefaultHotDay

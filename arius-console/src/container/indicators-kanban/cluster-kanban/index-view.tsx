@@ -10,6 +10,7 @@ import {
   getCheckedData,
   indexConfigData,
   indexConfigClassifyList,
+  goldConfig,
 } from "./index-view-config";
 import { formatterTimeYMDHMS, objFlat } from "../config";
 import { TOP_MAP } from "constants/status-map";
@@ -22,6 +23,7 @@ import {
 } from "../../../api/cluster-kanban";
 import { asyncMicroTasks, resize } from "../../../lib/utils";
 import { setIsUpdate } from "actions/cluster-kanban";
+import { arrayMoveImmutable } from 'array-move';
 
 export const classPrefix = "rf-monitor";
 const { Panel } = Collapse;
@@ -32,6 +34,14 @@ export const IndexView = memo(() => {
   const [indexNameList, setIndexNameList] = useState([]);
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
   const dispatch = useDispatch();
+
+  const sortEnd = (item, { oldIndex, newIndex }) => {
+    const listsNew = arrayMoveImmutable(checkedData[item], oldIndex, newIndex)
+    checkedData[item] = listsNew;
+    const checkedList = objFlat(checkedData);
+    setCheckedList(INDEX, checkedList);
+    setCheckedData({...checkedData});
+  }; 
 
   const { clusterName, startTime, endTime, isMoreDay, isUpdate } = useSelector(
     (state) => ({
@@ -122,6 +132,7 @@ export const IndexView = memo(() => {
         optionList={defaultIndexConfigList}
         checkedData={checkedData}
         setCheckedData={setIndexConfigCheckedData}
+        goldConfig={goldConfig}
       />
     );
   };
@@ -161,6 +172,8 @@ export const IndexView = memo(() => {
                         getAsyncViewData={getAsyncViewData}
                         startTime={startTime}
                         endTime={endTime}
+                        sortEnd={sortEnd}
+                        item={item}
                       /> : ""
                       }
                   </div>

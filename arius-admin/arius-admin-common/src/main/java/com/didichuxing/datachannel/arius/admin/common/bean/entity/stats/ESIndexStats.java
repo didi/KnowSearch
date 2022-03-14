@@ -1,15 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import io.swagger.annotations.ApiModel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.monitorTimestamp2min;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.monitorTimestamp2min;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
+
+import io.swagger.annotations.ApiModel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -67,5 +68,10 @@ public class ESIndexStats extends BaseESPO {
     @Override
     public String getKey() {
         return cluster + "@" + index + "@" + monitorTimestamp2min(timestamp);
+    }
+
+    @Override
+    public String getRoutingValue() {
+        return index;
     }
 }

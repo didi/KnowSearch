@@ -130,4 +130,9 @@ public class DslMetricsPO extends BaseESPO {
     public String getKey() {
         return null;
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

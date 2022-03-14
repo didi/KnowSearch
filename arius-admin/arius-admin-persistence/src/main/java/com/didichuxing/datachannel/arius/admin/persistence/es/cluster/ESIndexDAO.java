@@ -13,6 +13,7 @@ import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesEx
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesStatsRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
+import com.didiglobal.logi.elasticsearch.client.request.index.updatesettings.ESIndicesUpdateSettingsRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.closeindex.ESIndicesCloseIndexResponse;
@@ -35,6 +36,7 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiInde
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -323,7 +325,7 @@ public class ESIndexDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
                     e.getMessage(), cluster, expression, e);
-            return null;
+            return Maps.newHashMap();
         }
     }
 
@@ -419,6 +421,27 @@ public class ESIndexDAO extends BaseESDAO {
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
         return response.getFaild() == 0;
+    }
+
+    /**
+     * 修改索引配置，多个setting数值的设置
+     * @param cluster 物理集群名称
+     * @param settings key：setting名称 value：setting数值
+     */
+    public boolean putIndexSettings(String cluster, List<String> indices,
+                                    Map</*setting名称*/String, /*setting数值*/String> settings) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null || MapUtils.isEmpty(settings)) {
+            LOGGER.warn("class=ESTemplateDAO||method=putIndexSettings||get settings fail||clusterName={}||indexNames={}",
+                    cluster, indices);
+            return false;
+        }
+
+        ESIndicesUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().indices().prepareUpdateSettings(String.join(",", indices));
+        //依次添加需要设置的setting的字段的名称和数值
+        settings.forEach(updateSettingsRequestBuilder::addSettings);
+
+        return updateSettingsRequestBuilder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getAcknowledged();
     }
 
     /**

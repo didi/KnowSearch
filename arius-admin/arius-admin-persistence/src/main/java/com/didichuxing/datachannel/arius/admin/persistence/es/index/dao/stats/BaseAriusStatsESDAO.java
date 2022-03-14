@@ -14,7 +14,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ESClusterTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
@@ -53,6 +56,9 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
     protected static final int             SCROLL_SIZE           = 5000;
     protected static final Long            ONE_GB                = 1024 * 1024 * 1024L;
+
+    protected static final String     NOW_2M     = "now-2m";
+    protected static final String     NOW_1M     = "now-1m";
 
     /**
      * 不同维度es监控数据
@@ -253,6 +259,8 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     }
 
     /**
+     * 利用反射获取属性
+     * 注意：入参的clazz 中 timeStamp 放置在类属性的第一位置 来适配反射的应用
      * {
      *         "max_shardNu": {
      *           "max": {
@@ -518,5 +526,34 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                 }
             }
         }
+    }
+
+    /**
+     * 构建task detail info
+     * @param esQueryResponse
+     * @return
+     */
+    protected List<ESClusterTaskDetail> buildTaskDetailInfo(ESQueryResponse esQueryResponse) {
+        return esQueryResponse.getHits().getHits().stream().map(hit -> {
+            ((JSONObject) hit.getSource()).getJSONObject("metrics");
+            return ConvertUtil.obj2ObjByJSON(((JSONObject) hit.getSource()).getJSONObject("metrics"), ESClusterTaskDetail.class);
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取有数据的第一个时间点
+     * @param clusterPhyName
+     * @param startTime
+     * @param endTime
+     * @param dslFormat
+     * @return
+     */
+    protected Long getHasDataTime(String clusterPhyName, long startTime, long endTime, String dslFormat) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(dslFormat,
+                clusterPhyName, startTime, endTime);
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
+
+        return gatewayClient.performRequestWithRouting(metadataClusterName, clusterPhyName,
+                realIndexName, TYPE, dsl, s -> s.getHits().getHits().size() > 0 ? ((Map<String, Long>)s.getHits().getHits().get(0).getSource()).get("timestamp") : null, 3);
     }
 }

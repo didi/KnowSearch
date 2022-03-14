@@ -41,6 +41,11 @@ public enum AriusStatsEnum {
     CLUSTER_INFO("cluster_info"),
 
     /**
+     * task维度
+     */
+    TASK_INFO("task_info"),
+
+    /**
      * dcdr维度
      */
     DCDR_INFO("dcdr_info");

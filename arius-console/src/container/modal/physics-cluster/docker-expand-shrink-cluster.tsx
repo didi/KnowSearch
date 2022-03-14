@@ -6,8 +6,8 @@ import { FormItemType, IFormItem } from "component/x-form";
 import { RenderText } from "container/custom-form";
 import { DockerExpectDataNodeNu } from "container/custom-form";
 import { VERSION_MAINFEST_TYPE } from "constants/status-map";
-import { IOpPhysicsClusterDetail } from "@types/cluster/cluster-types";
-import { IWorkOrder } from "@types/params-types";
+import { IOpPhysicsClusterDetail } from "typesPath/cluster/cluster-types";
+import { IWorkOrder } from "typesPath/params-types";
 import { submitWorkOrder } from "api/common-api";
 import { AppState, UserState } from "store/type";
 

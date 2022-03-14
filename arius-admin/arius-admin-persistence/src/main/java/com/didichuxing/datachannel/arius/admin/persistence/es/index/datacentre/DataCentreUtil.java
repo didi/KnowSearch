@@ -98,6 +98,9 @@ public class DataCentreUtil {
     @Value("${es.gateway.info.index.name}")
     private String ariusStatsGatewayInfo;
 
+    @Value("${es.cluster.task.info.index.name:arius_stats_cluster_task_info}")
+    private String ariusStatsClusterTaskInfo;
+
     @PostConstruct
     public void init() {
         LOGGER.info("class=DataCentreUtil||method=init||DataCentreUtil init start.");
@@ -257,6 +260,8 @@ public class DataCentreUtil {
     }
 
     public String getAriusCatIndexInfo(){return getIndexName(ariusCatIndexInfo);}
+
+    public String getAriusStatsClusterTaskInfo(){return getIndexName(ariusStatsClusterTaskInfo);}
 
     /*************************************** private method ***************************************/
     private String getIndexName(String originIndexName) {

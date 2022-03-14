@@ -47,4 +47,9 @@ public class ESNodeToIndexStats extends BaseESPO {
     public String getKey() {
         return cluster + "@" + node + "@" + port + "@" + index + "@" + monitorTimestamp2min(timestamp);
     }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }

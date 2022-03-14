@@ -7,15 +7,16 @@ import { getOpClusterPlugList } from "api/plug-api";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import * as actions from "actions";
-import { IPlug } from "@types/plug-types";
+import { IPlug } from "typesPath/plug-types";
 import { isOpenUp } from "constants/common";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) =>
     dispatch(actions.setModalId(modalId, params, cb)),
 });
+const connects: Function = connect
 
-@connect(null, mapDispatchToProps)
+@connects(null, mapDispatchToProps)
 export class PlugnList extends React.Component<any> {
   public state = {
     searchKey: "",

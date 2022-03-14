@@ -32,6 +32,16 @@ public interface ESIndexCatService {
     int syncUpdateCatIndexDeleteFlag(String cluster, List<String> indexNameList, int retryCount);
 
     /**
+     * 更新索引关闭标识
+     * @param cluster           集群名称
+     * @param indexNameList     索引名称
+     * @param indexNewStatus    true 开启索引标识，false 关闭索引标识
+     * @param retryCount        重试次数
+     * @return
+     */
+    int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus, int retryCount);
+
+    /**
      * 获取索引shard(主)在节点中的分布详情
      * @param cluster   集群名称
      * @param indexName 索引名称
