@@ -182,6 +182,15 @@ ES支持全文检索，查询效率会 wildcard 查询效率高出非常多。�
 ## 3.13 精确匹配字段类型的建议
 精确匹配字段类型的建议设置成 keyword，范围查询字段类型设置成number(integer/long/double/float等)。
 
+## 3.14 最好禁止使用_id的排序
+由于_id的排序是用的fielddata，很容易触发内存熔断，所以_id的排序需要禁止。
+
+## 3.15 text字段最好禁止fielddata
+对于text字段最好不要用fileddata，避免fielddata太大导致内存熔断。
+
+## 3.16 分区裁剪
+指定分区查询，查询Routing设置，indexSort以及总Shard查询命中数限制
+
 # 4.写入优化
 
 查询可以先参考ES官网上的写入优化建议： https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html
@@ -192,11 +201,24 @@ ES支持全文检索，查询效率会 wildcard 查询效率高出非常多。�
 ## 4.2 多线程写入
 多线程能提高写入的性能，但线程不易太多
 
-## 4.3 唯一id
+## 4.3 写入条带化
+一个bulk里面的数据最好写入到单个shard，避免长尾效应导致写入性能上不去
+
+## 4.4 唯一id
 不需要唯一id的，写入不要指定唯一id，让es自动生成id，这样可以避免version和id的检查，提升性能
 
-## 4.4 translog
+## 4.5 translog
 极端情况下比如断电允许丢点数据的，建议translog同步刷磁盘改异步
 
-## 4.5 刷新时间和写入buffer
+## 4.6 刷新时间和写入buffer
 适当可以调大refresh_time和写入buffer
+
+## 4.7 schema mapping设置
+mapping中对于字段无需索引和无需排序的，可以去掉index和doc_value属性，提升写入性能
+
+# 5.部署架构优化
+1.磁盘ssd
+
+2.master和client和datanode角色隔离
+
+3.根据机器规格，可以单机器单实例，单机器多实例，单机器多集群部署
