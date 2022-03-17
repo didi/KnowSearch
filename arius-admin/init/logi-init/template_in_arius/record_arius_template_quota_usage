@@ -1,4 +1,5 @@
 {
+  "level":1,
   "expression": "record_arius_template_quota_usage*",
   "dateFormat": "_yyyy-MM",
   "dataCenter": "cn",

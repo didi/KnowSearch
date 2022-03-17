@@ -1,4 +1,6 @@
 {
+    "tags":"{\"resourceType\":3, \"createSource\":0}",
+    "importRule":"0",
     "type": 4,
     "appId": 1,
     "cluster": "logi-em-matedata-cluster",

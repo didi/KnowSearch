@@ -199,7 +199,7 @@ for file in `ls ${templateDirForArius}`
         # 数据类型-系统数据
         sed -i "s/\"dataType\":.*/\"dataType\": 0,/g" ${file}
 
-        templateContentForArius=`cat ${file}`
+        templateContentForArius=$(cat ${file} | sed "1a \\  \"resourceId\":${logicClusterId},")
 
         curlCmdForTemplate="curl -X PUT 'http://${ariusHost}:${ariusPort}/admin/api/v2/op/template/logic/add' -H 'Cookie: domainAccount=${domainAccount}' -H 'X-SSO-USER: ${ariusResponsible}' -H 'X-ARIUS-APP-ID: ${ariusManagerAppId}' -H 'content-type: application/json' -d '${templateContentForArius}'"
         echo "${curlCmdForTemplate}"

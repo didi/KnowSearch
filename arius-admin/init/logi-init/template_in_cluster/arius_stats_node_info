@@ -70,10 +70,19 @@
             "indices-search-fetch_time_in_millis" : {
               "type" : "double"
             },
+            "indices-segments-stored_fields_memory_in_bytes" : {
+              "type" : "double"
+            },
             "jvm-mem-heap_used_in_bytes" : {
               "type" : "double"
             },
             "jvm-mem-heap_used_percent" : {
+              "type" : "double"
+            },
+            "jvm-mem-pools-young-used_in_bytes" : {
+              "type" : "double"
+            },
+            "jvm-mem-pools-old-used_in_bytes" : {
               "type" : "double"
             },
             "indices-search-query_time_in_millis" : {

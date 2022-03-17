@@ -116,7 +116,7 @@ LogiEM自动化安装
 
 ## 8.1 内部核心成员
 
-zhangliangmike、zhaoqingrong、superhua、linyunan、houxiufeng、caijiamin、wangpengkai、joysunchao、wzhoupeng、fengkun、guoxusheng
+zhangliangmike、zhaoqingrong、superhua、linyunan、houxiufeng、caijiamin、wangpengkai、joysunchao、wzhoupeng、fengkun、guoxusheng、liuchengxiang
 
 ## 8.2 外部贡献者
 

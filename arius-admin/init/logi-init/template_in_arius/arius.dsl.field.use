@@ -1,4 +1,5 @@
 {
+  "level":1,
   "expression": "arius.dsl.field.use",
   "dateFormat": "",
   "dataCenter": "cn",

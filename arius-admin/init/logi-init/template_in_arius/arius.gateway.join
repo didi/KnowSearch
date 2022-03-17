@@ -1,4 +1,5 @@
 {
+  "level":1,
   "expression": "arius.gateway.join*",
   "dateFormat": "_yyyy-MM-dd",
   "dataCenter": "cn",

@@ -17,7 +17,7 @@
         },
         "number_of_shards" : "4",
         "number_of_replicas" : "0",
-        "number_of_routing_size" : "4"，
+        "number_of_routing_size" : "4",
         "sort.field" : "timestamp",
         "sort.order" : "desc"
       }

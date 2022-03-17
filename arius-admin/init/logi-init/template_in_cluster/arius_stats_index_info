@@ -16,7 +16,7 @@
           "single_type" : "true"
         },
         "number_of_shards" : "4",
-        "number_of_replicas" : "1"，
+        "number_of_replicas" : "1",
         "sort.field" : "timestamp",
         "sort.order" : "desc"
       }
@@ -146,6 +146,9 @@
             "segments-points_memory_in_bytes" : {
               "type" : "double"
             },
+            "segments-stored_fields_memory_in_bytes" : {
+              "type" : "double"
+            },
             "indices-search-fetch_avg_time" : {
               "type" : "double"
             },
@@ -189,6 +192,12 @@
               "type" : "double"
             },
             "indices-flush_avg_time" : {
+              "type" : "double"
+            },
+            "indexing-index_total_times" : {
+              "type" : "double"
+            },
+            "indexing-index_time_per_doc" : {
               "type" : "double"
             }
           }

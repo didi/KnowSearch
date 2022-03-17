@@ -1,4 +1,5 @@
 {
+  "level":1,
   "expression": "foundation_fd.data-online.arius.gateway*",
   "dateFormat": "_yyyy-MM-dd",
   "dataCenter": "cn",
