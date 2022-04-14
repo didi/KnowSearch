@@ -17,11 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoard
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricOtherTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
@@ -283,14 +279,6 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
             dashboardTopInfo.add(cluster2NameTuple);
         }
 
-        // 兼容老版本
-        List<String> topNameList = variousLineChartMetrics.getMetricsContents()
-                .stream()
-                .map(MetricsContent::getName)
-                .distinct()
-                .collect(Collectors.toList());
-        dashboardTopMetrics.setTopNames(topNameList);
-
         dashboardTopMetrics.setDashboardTopInfo(dashboardTopInfo);
         return dashboardTopMetrics;
     }
@@ -435,24 +423,6 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     /**
-     * 根据一级指标类型构建最终非负指标类型的查询dsl全文
-     * @param oneLevelType             一级指标类型
-     * @param noNegativeMetric         二级非负指标类型
-     * @param startInterval            起始时刻
-     * @param endInterval              结束时刻
-     * @param dashboardClusterMaxNum   支持的聚合集群总量，平台集群量超出此数查询会异常
-     * @param interval                 agg聚合间隔类型 如1m, 5m 10m 等等
-     * @param aggsDsl                  动态构建的agg聚合子句
-     * @return  dsl全文
-     */
-    private String getFinalClusterNoNegativeDslByOneLevelType(String oneLevelType, String noNegativeMetric, long startInterval, long endInterval,
-                                                              int dashboardClusterMaxNum, String interval, String aggsDsl) {
-        return dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_DASHBOARD_METRIC_EFFICIENT_TOP_NAME_INFO, oneLevelType,
-                startInterval, endInterval, oneLevelType, noNegativeMetric, oneLevelType, oneLevelType,
-                dashboardClusterMaxNum, oneLevelType, interval, aggsDsl);
-    }
-
-    /**
      * 构建单个TopN中的全量数据信息
      * @param buildMetrics              需要构建的元数据
      * @param oneLevelType              一级指标
@@ -460,24 +430,24 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
      * @param dashboardClusterMaxNum    dashboard允许最大的集群数
      * @param startTime                 开始时间
      * @param endTime                   结束时间
-     * @param topMetrics                查询信息，需要取出的topN数据信息（包括topN的集群/模板/索引/等名称）
+     * @param dashboardTopMetrics       查询信息，需要取出的topN数据信息（包括topN的集群/模板/索引/等名称）
      */
     private void buildTopNSingleMetrics(List<VariousLineChartMetrics> buildMetrics, String oneLevelType,
                                         String aggType, int dashboardClusterMaxNum, Long startTime, Long endTime,
-                                        DashboardTopMetrics topMetrics) {
-        List<Tuple<String, String>> dashboardTopInfo = topMetrics.getDashboardTopInfo();
+                                        DashboardTopMetrics dashboardTopMetrics) {
+        List<Tuple<String, String>> dashboardTopInfo = dashboardTopMetrics.getDashboardTopInfo();
         // 获取最终topN集群列表
         List<String> topDistinctClusters = dashboardTopInfo.stream().map(Tuple::getV1).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         String topClustersStr = CollectionUtils.isNotEmpty(topDistinctClusters) ? buildTopNameStr(topDistinctClusters) : null;
         if (StringUtils.isBlank(topClustersStr)) { return;}
 
         // 获取最终topN节点/模板/索引列表
-        List<String> topDistinctNames = topMetrics.getTopNames().stream().distinct().collect(Collectors.toList());
+        List<String> topDistinctNames = dashboardTopInfo.stream().map(Tuple::getV2).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         String topNameStr = CollectionUtils.isNotEmpty(topDistinctNames) ? buildTopNameStr(topDistinctNames) : null;
         if (StringUtils.isBlank(topNameStr)) { return;}
 
         String interval          = MetricsUtils.getIntervalForDashBoard(endTime - startTime);
-        List<String> metricsKeys = Lists.newArrayList(topMetrics.getType());
+        List<String> metricsKeys = Lists.newArrayList(dashboardTopMetrics.getType());
 
         String aggsDsl = dynamicBuildDashboardAggsDSLForTop(oneLevelType, metricsKeys, aggType);
 
@@ -488,7 +458,44 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
         List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName,
                 null, realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, oneLevelType, metricsKeys, null), 3);
 
+        // 过滤出有效指标项，解决不同集群存在相同节点/模板/索引名称的场景
+        filterValidMetricsInfo(variousLineChartMetrics, dashboardTopMetrics);
+
         buildMetrics.addAll(variousLineChartMetrics);
+    }
+
+    /**
+     * 过滤出有效指标项，解决不同集群存在相同节点/模板/索引名称的场景
+     * @param variousLineChartMetrics    源数据信息
+     * @param dashboardTopMetrics        根据类中属性过滤条件
+     */
+    private void filterValidMetricsInfo(List<VariousLineChartMetrics> variousLineChartMetrics, DashboardTopMetrics dashboardTopMetrics) {
+
+        for (VariousLineChartMetrics variousLineChartMetric : variousLineChartMetrics) {
+            if (!dashboardTopMetrics.getType().equals(variousLineChartMetric.getType())) { return;}
+
+            List<MetricsContent> metricsContents = variousLineChartMetric.getMetricsContents();
+            if (CollectionUtils.isEmpty(metricsContents)) { return;}
+
+            List<Tuple<String, String>> dashboardTopInfo = dashboardTopMetrics.getDashboardTopInfo();
+            List<String> validMetricInfo = Lists.newArrayList();
+            for (Tuple<String, String> cluster2NameTuple : dashboardTopInfo) {
+                String cluster      = cluster2NameTuple.getV1();
+                String name         = cluster2NameTuple.getV2();
+                validMetricInfo.add(CommonUtils.getUniqueKey(cluster, name));
+            }
+
+            List<MetricsContent> validMetricsContentList = Lists.newArrayList();
+            for (MetricsContent metricsContent : metricsContents) {
+                String cluster = metricsContent.getCluster();
+                String name    = metricsContent.getName();
+                if (validMetricInfo.contains(CommonUtils.getUniqueKey(cluster, name))) {
+                    validMetricsContentList.add(metricsContent);
+                }
+            }
+            // 更新
+            variousLineChartMetric.setMetricsContents(validMetricsContentList);
+        }
     }
 
     /**

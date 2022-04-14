@@ -14,91 +14,93 @@ import javax.annotation.PostConstruct;
 public class DataCentreUtil {
     private static final ILog LOGGER = LogFactory.getLog(DataCentreUtil.class);
 
-    @Value("${arius.template.qutoa.notiry.record}")
+    @Value("${arius.template.qutoa.notiry.record:arius_template_qutoa_notiry_record}")
     private String ariusTemplateQutoaNotiryRecord;
-
-    @Value("${arius.template.quota.usage}")
+    @Value("${arius.template.quota.usage:arius_template_quota_usage}")
     private String ariusTemplateQuotaUsage;
-
-    @Value("${arius.template.record.quota.usage}")
+    @Value("${arius.template.record.quota.usage:record_arius_template_quota_usage}")
     private String ariusTemplateQuotaUsageRecord;
-
-    @Value("${arius.template.capacity.plan.region.statis}")
+    @Value("${arius.template.capacity.plan.region.statis:arius_capacity_plan_region_statis}")
     private String ariusTemplateCapacityPlanRegionStatis;
 
-    @Value("${es.dsl.analyze.index.name}")
+    @Value("${es.dsl.analyze.index.name:arius.dsl.analyze.result}")
     private String ariusDslAnalyzeResult;
-    @Value("${es.dsl.metrics.index.name}")
+    @Value("${es.dsl.metrics.index.name:arius.dsl.metrics}")
     private String ariusDslMetrices;
-    @Value("${arius.gateway.join.name}")
+    @Value("${arius.gateway.join.name:arius.gateway.join}")
     private String ariusGatewayJoin;
 
-    @Value("${es.dsl.template.index.name}")
+    @Value("${es.dsl.template.index.name:arius.dsl.template}")
     private String ariusDslTemplate;
-    @Value("${es.template.field.index.name}")
+    @Value("${es.template.field.index.name:arius.template.field}")
     private String ariusTemplateField;
-    @Value("${es.dsl.field.use.index.name}")
+    @Value("${es.dsl.field.use.index.name:arius.dsl.field.use}")
     public String ariusDslFieldUse;
-    @Value("${es.template.mapping.index.name}")
+    @Value("${es.template.mapping.index.name:arius.template.mapping}")
     private String ariusTemplateMapping;
-    @Value("${es.index.size.index.name}")
+    @Value("${es.index.size.index.name:arius.index.size}")
     private String ariusIndexSize;
-    @Value("${es.index.cat.info}")
-    private String ariusCatIndexInfo;
-    @Value("${es.template.hit.index.name}")
+    @Value("${es.template.hit.index.name:arius.template.hit}")
     private String ariusTemplateHit;
 
-    @Value("${es.appid.template.access.index.name}")
+    // appid维度访问次数索引
+    @Value("${es.appid.template.access.index.name:arius.appid.template.access}")
     private String  ariusAppidTemplateAccess;
-    @Value("${es.indexname.access.index.name}")
+    // 索引维度访问次数索引
+    @Value("${es.indexname.access.index.name:arius.indexname.access}")
     private String  ariusIndexNameAccess;
-    @Value("${es.template.access.index.name}")
+    // 索引模板维度访问次数索引
+    @Value("${es.template.access.index.name:arius.template.access}")
     private String  ariusTemplateAccess;
-    @Value("${es.template.label.index.name}")
+
+    // es 索引标签数据
+    @Value("${es.template.label.index.name:v2.arius.template.label}")
     private String  ariusTemplateLabel;
 
-    @Value("${es.health.degress.index.name}")
+    // 健康分
+    @Value("${es.health.degress.index.name:index_health_degree}")
     private String ariusIndexHealthDegress;
-    @Value("${es.health.check.info.index.name}")
+    // 健康检查
+    @Value("${es.health.check.info.index.name:health_check_info}")
     private String ariusHealthCheck;
 
-    @Value("${arius.gateway.original.log.index.name}")
+    // 国内原始gateway日志索引
+    @Value("${arius.gateway.original.log.index.name:foundation_fd.data-online.arius.gateway}")
     private String ariusCNGatewayOriginalLog;
 
-    @Value("${es.node_index.info.index.name}")
+    // 不同维度的es监控数据索引
+    @Value("${es.node_index.info.index.name:arius_stats_node_index_info}")
     private String ariusStatsNodeIndexInfo;
-
-    @Value("${es.node.info.index.name}")
+    @Value("${es.node.info.index.name:arius_stats_node_info}")
     private String ariusStatsNodeInfo;
-
-    @Value("${es.dashboard.info.name}")
+    @Value("${es.dashboard.info.name:arius_stats_dashboard_info}")
     private String ariusStatsDashboardInfo;
-
-    @Value("${es.cluster.info.index.name}")
+    @Value("${es.index.info.index.name:arius_stats_index_info}")
+    private String ariusStatsIndexInfo;
+    @Value("${es.index.cat.info:arius_cat_index_info}")
+    private String ariusCatIndexInfo;
+    @Value("${es.cluster.info.index.name:arius_stats_cluster_info}")
     private String ariusStatsClusterInfo;
-
-    @Value("${es.dcdr.info.index.name}")
+    @Value("${es.index_node.info.index.name:arius_stats_index_node_info}")
+    private String ariusStatsIndexNodeInfo;
+    @Value("${es.ingest.info.index.name:arius_stats_ingest_info}")
+    private String ariusStatsIngestInfo;
+    @Value("${es.dcdr.info.index.name:arius_stats_dcdr_info}")
     private String ariusStatsDcdrInfo;
 
-    @Value("${es.index.info.index.name}")
-    private String ariusStatsIndexInfo;
 
-    @Value("${es.index_node.info.index.name}")
-    private String ariusStatsIndexNodeInfo;
-
-    @Value("${es.ingest.info.index.name}")
-    private String ariusStatsIngestInfo;
-
-    @Value("${es.template.health.degree.index.name}")
+    // es 索引健康分
+    @Value("${es.template.health.degree.index.name:arius.template.health.degree}")
     private String ariusTemplateHealthDegree;
 
-    @Value("${es.template.value.index.name}")
+    // es 索引价值
+    @Value("${es.template.value.index.name:arius.template.value}")
     private String ariusTemplateValue;
-
-    @Value("${es.template.value.record.index.name}")
+    @Value("${es.template.value.record.index.name:record.arius.template.value}")
     private String ariusTemplateValueRecord;
 
-    @Value("${es.gateway.info.index.name}")
+    // gateway 访问统计索引
+    @Value("${es.gateway.info.index.name:arius.gateway.join}")
     private String ariusStatsGatewayInfo;
 
     @Value("${es.cluster.task.info.index.name:arius_stats_cluster_task_info}")
