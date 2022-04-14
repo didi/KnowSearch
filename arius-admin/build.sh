@@ -59,7 +59,6 @@ function make_output() {
         cp -rf ./APP_META/Dockerfile $output &&
         mkdir $output/nginx && cp -rf ./APP_META/nginx/conf $output/nginx &&
         mv target/${module}.jar output  #拷贝目标war包或者jar包等 至output目录下
-        mv output  ../
         echo -e "make output ok."
 	) || { echo -e "make output error"; exit 2; } # 填充output目录失败后, 退出码为 非0
 
@@ -68,6 +67,8 @@ function make_output() {
             cp -rf ./APP_META/DockerfileOffline $output/Dockerfile
         fi
         ) || { echo -e "make offline output error"; exit 2; } # 填充output目录失败后, 退出码为 非0
+
+        mv output  ../
 }
 
 ## internals
