@@ -42,8 +42,7 @@ export function formatUrl({ url, params, query }: { url: string; params?: object
  * @export
  */
 export function goLogin() {
-  process.env.RUN_ENV === "inner" ? null :
-    window.location.href = `https://oidc.idc.cmbchina.cn/authorize?client_id=cmbkafka&redirect_uri=${window.location.origin}/login&response_type=code`;
+  window.location.href = '/login';
 }
 
 /**
@@ -52,8 +51,7 @@ export function goLogin() {
  * @param {string} token 获取本地cookie对应的key
  */
 export function goLogout(token: string) {
-  process.env.RUN_ENV === "inner" ? null :
-    window.location.href = `https://oidc.idc.cmbchina.cn/endsession?post_logout_redirect_uri=${window.location.origin}/logout&id_token_hint=${token}&state=logout`;
+  window.location.href = '/login';
 }
 
 
