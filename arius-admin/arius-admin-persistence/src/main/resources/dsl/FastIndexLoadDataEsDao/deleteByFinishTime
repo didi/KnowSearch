@@ -1,0 +1,21 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "finish": {
+              "value": true
+            }
+          }
+        },{
+          "range": {
+            "finishTime": {
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  }
+}

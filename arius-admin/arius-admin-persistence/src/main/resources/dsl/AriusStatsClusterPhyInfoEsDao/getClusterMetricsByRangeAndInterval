@@ -1,0 +1,43 @@
+{
+	"size": 0,
+	"query": {
+		"bool": {
+			"must": [{
+					"term": {
+						"cluster": {
+							"value": "%s"
+						}
+					}
+				},
+				{
+                     "term": {
+                         "physicCluster": {
+                        	 "value": "1"
+                          }
+                     }
+                },
+				{
+					"range": {
+						"timestamp": {
+							"gte": %d,
+							"lte": %d
+						}
+					}
+				}
+			]
+		}
+	},
+	"aggs": {
+		"hist": {
+			"date_histogram": {
+				"field": "timestamp",
+				"fixed_interval": "%s",
+				"time_zone": "Asia/Shanghai",
+				"min_doc_count": 0
+			},
+			"aggs": {
+               %s
+			}
+		}
+	}
+}

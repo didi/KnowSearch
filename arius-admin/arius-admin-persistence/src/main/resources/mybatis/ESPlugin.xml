@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPluginDAO">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="physic_cluster_ids" property="physicClusterId"/>
+        <result column="version" property="version"/>
+        <result column="url" property="url"/>
+        <result column="md5" property="md5"/>
+        <result column="desc" property="desc"/>
+        <result column="p_default" property="pDefault"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="delete_flag" property="deleteFlag"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, `name`, physic_cluster_ids, version, url, md5, `desc`, p_default,creator, create_time, delete_flag
+    </sql>
+
+    <!-- 查询全部插件 -->
+    <select id="listAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_plugin
+        where delete_flag = 0
+        order by id desc
+    </select>
+
+    <!-- 查询所有系统默认的插件 -->
+    <select id="getAllSysDefaultPlugins" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_plugin
+        where delete_flag = 0 and p_default = 0
+    </select>
+
+    <!-- 保存 Es插件信息 -->
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into es_plugin
+        (`name`, physic_cluster_ids, version, url, md5, `desc`, creator, p_default)
+        values (#{name}, #{physicClusterId}, #{version}, #{url}, #{md5}, #{desc}, #{creator}, #{pDefault})
+    </insert>
+
+    <!-- 批量保存 ES 插件信息 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into es_plugin
+        (`name`, physic_cluster_ids, version, url, md5, `desc`, creator, p_default)
+        values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.name}, #{item.physicClusterId}, #{item.version}, #{item.url},
+            #{item.md5}, #{item.desc}, #{item.creator}, #{item.pDefault})
+        </foreach>
+    </insert>
+
+    <!-- 根据ID  查询详情 -->
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_plugin
+        where id = #{id} and delete_flag = 0
+    </select>
+
+    <!-- 根据name  查询详情 -->
+    <select id="getByNameAndVersion" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_plugin
+        where `name` = #{name} and version = #{version} and delete_flag = 0
+    </select>
+
+    <!-- 根据ID  修改插件 -->
+    <update id="update"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO">
+        update es_plugin
+        <set>
+            <if test="name != null">`name` = #{name},</if>
+            <if test="physicClusterId != null">`physic_cluster_ids` = #{physicClusterId},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="md5 != null">md5 = #{md5},</if>
+            <if test="desc != null">`desc` = #{desc},</if>
+        </set>
+        where id = #{id} and delete_flag = 0
+    </update>
+
+    <update id="updateDesc">
+        update es_plugin
+        set `desc` = #{desc}
+        where id = #{id} and delete_flag = 0
+    </update>
+
+    <!-- 查询默认 或者 某个集群名下上传的插件 列表 -->
+    <select id="listByPhyClusterId" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        FROM es_plugin WHERE
+        find_in_set(#{physicClusterId}, physic_cluster_ids)  and delete_flag = 0
+    </select>
+    <!--根据 ID list 查询插件 列表 -->
+    <select id="listByPlugIds" parameterType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        FROM es_plugin
+        <where>
+            <foreach collection="list" item="id" open="id IN (" separator="," close=") AND ">
+                #{id}
+            </foreach>
+            delete_flag = 0
+        </where>
+    </select>
+    <!-- 根据ID  删除插件 -->
+    <update id="delete">
+        update es_plugin
+        set delete_flag = 1
+        where id = #{id}
+    </update>
+
+    <!-- 根据插件 name version physicClusterId 查询插件信息，用于判重-->
+    <select id="getByNameAndVersionAndPhysicClusterId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_plugin
+        where `name` = #{name} and version = #{version} and physic_cluster_ids = #{physicClusterId} and delete_flag = 0
+    </select>
+
+</mapper>

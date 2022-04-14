@@ -1,0 +1,71 @@
+{
+    "order" : 10,
+    "index_patterns" : [
+      "arius_cat_index_info*"
+    ],
+    "settings" : {
+      "index" : {
+        "routing" : {
+          "allocation" : {
+            "include" : {
+              "rack" : ""
+            }
+          }
+        },
+        "mapping" : {
+          "single_type" : "true"
+        },
+        "number_of_shards" : "4",
+        "number_of_routing_size" : "1"
+      }
+    },
+    "mappings" : {
+      "_source" : {
+        "enabled" : true
+      },
+      "properties" : {
+        "priStoreSize" : {
+          "type" : "long"
+        },
+        "cluster" : {
+          "type" : "keyword"
+        },
+        "pri" : {
+          "type" : "long"
+        },
+        "index" : {
+          "type" : "keyword"
+        },
+        "health" : {
+          "type" : "keyword"
+        },
+        "deleteFlag" : {
+          "type" : "boolean"
+        },
+        "docsDeleted" : {
+          "type" : "long"
+        },
+        "storeSize" : {
+          "type" : "long"
+        },
+        "rep" : {
+          "type" : "long"
+        },
+        "docsCount" : {
+          "type" : "long"
+        },
+        "key" : {
+          "ignore_above" : 1024,
+          "type" : "keyword"
+        },
+        "status" : {
+          "type" : "keyword"
+        },
+        "timestamp" : {
+          "format" : "epoch_millis",
+          "type" : "date"
+        }
+      }
+    },
+    "aliases" : { }
+  }

@@ -1,0 +1,24 @@
+{
+  "size":0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "logicId": {
+              "value": "%d"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "typeNames": {
+      "terms": {
+        "field": "typeName",
+        "size": 1000
+      }
+    }
+  }
+}

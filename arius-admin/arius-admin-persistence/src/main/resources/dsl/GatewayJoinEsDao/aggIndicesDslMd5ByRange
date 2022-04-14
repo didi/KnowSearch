@@ -1,0 +1,27 @@
+{
+  "size": 0,
+  "query": {
+    "range": {
+      "timeStamp": {
+        "gte": %d,
+        "lt": %d
+      }
+    }
+  },
+  "aggs": {
+    "indices": {
+      "terms": {
+        "field": "indices",
+        "size": 9999
+      },
+      "aggs": {
+        "md5": {
+          "terms": {
+            "field": "dslTemplateMd5",
+            "size": 0
+          }
+        }
+      }
+    }
+  }
+}

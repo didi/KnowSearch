@@ -1,0 +1,33 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "dltag": {
+              "value": "_arius_query_tcp_request"
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "terms": {
+            "action": [
+              "cluster:monitor/nodes/liveness"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "appid": {
+      "terms": {
+        "field": "appid",
+        "size": 1000
+      }
+    }
+  }
+}

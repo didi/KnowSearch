@@ -1,0 +1,10 @@
+{
+  "size":%d,
+  "query": {
+    "term": {
+      "labelId": {
+        "value": "%s"
+      }
+    }
+  }
+}

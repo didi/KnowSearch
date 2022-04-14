@@ -1,0 +1,41 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "terms": {
+            "index": [
+              %s
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "groupByIndex": {
+      "terms": {
+        "field": "index",
+        "size": 100
+      },
+      "aggs": {
+        "day_bucket": {
+          "date_histogram": {
+            "field": "timestamp",
+            "interval": "1d",
+            "format": "yyyy-MM-dd",
+            "min_doc_count": 1
+          },
+          "aggs": {
+            "query_rate_avg": {
+              "avg": {
+                "field": "metrics.search-query_total_rate"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

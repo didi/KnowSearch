@@ -1,0 +1,36 @@
+{
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": %s,
+      "must_not": [
+        {
+          "prefix": {
+            "indices": {
+              "value": "."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "timeStamp",
+    "indices",
+    "dsl",
+    "esCost",
+    "totalCost",
+    "totalHits",
+    "totalShards",
+    "responseLen",
+    "isTimedOut"
+  ],
+  "sort": [
+    {
+      "timeStamp": {
+        "order": "desc"
+      }
+    }
+  ]
+}

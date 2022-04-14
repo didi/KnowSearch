@@ -1,0 +1,26 @@
+{
+  "size": 0,
+  "query": {
+    "term": {
+      "exceptionName": {
+        "value": "com.didi.arius.gateway.exception.DslRateLimitException"
+      }
+    }
+  },
+  "aggs": {
+    "appid": {
+      "terms": {
+        "field": "appid",
+        "size": 0
+      },
+      "aggs": {
+        "dslTemplateMd5": {
+          "terms": {
+            "field": "dslTemplateMd5",
+            "size": 0
+          }
+        }
+      }
+    }
+  }
+}

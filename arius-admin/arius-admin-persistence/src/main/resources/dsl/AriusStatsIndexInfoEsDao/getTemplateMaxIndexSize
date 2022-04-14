@@ -1,0 +1,54 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "template": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "cluster": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%d",
+              "lte": "%d"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+      "indexList": {
+        "terms": {
+          "field": "index",
+          "size": 1,
+          "order": {
+            "indexSize": "desc"
+          }
+        },
+        "aggs": {
+          "indexSize": {
+            "max": {
+              "field": "metrics.store-size_in_bytes-total"
+            }
+          }
+        }
+      },
+      "sizeMax": {
+        "max_bucket": {
+          "buckets_path": "indexList>indexSize"
+        }
+      }
+  }
+}

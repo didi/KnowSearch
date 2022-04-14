@@ -1,0 +1,55 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%d",
+              "lt": "%d"
+            }
+          }
+        },
+        {
+          "term": {
+            "logicTemplateId": {
+              "value": "%d"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "groupByTemplateId": {
+      "terms": {
+        "field": "templateId",
+        "size": 10
+      },
+      "aggs": {
+        "minute_buckets": {
+          "date_histogram": {
+            "field": "timestamp",
+            "interval": "1m"
+          },
+          "aggs": {
+            "sum_tps": {
+              "sum": {
+                "field": "metrics.indexing-index_total_rate"
+              }
+            }
+          }
+        },
+        "avg_tps": {
+          "percentiles_bucket": {
+            "buckets_path": "minute_buckets>sum_tps",
+            "percents": [
+              50
+            ]
+          }
+        }
+      }
+    }
+  }
+}

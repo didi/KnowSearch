@@ -1,0 +1,26 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "indices": {
+              "value": "%s*"
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "dsl"
+  ]
+}

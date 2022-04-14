@@ -1,0 +1,24 @@
+{
+  "size":1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": "now-7d",
+              "lte": "now"
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

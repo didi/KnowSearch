@@ -1,0 +1,30 @@
+{
+  "size": 10000,
+  "sort": [
+      {
+        "%s.timestamp": {
+          "order": "%s"
+        }
+      }
+  ],
+  "_source": ["%s.cluster", "%s.%s"],
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "%s.%s": "%s"
+          }
+        },
+        {
+          "range": {
+            "%s.timestamp": {
+              "gte": "%s",
+              "lte": "%s"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

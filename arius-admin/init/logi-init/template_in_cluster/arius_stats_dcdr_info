@@ -1,0 +1,134 @@
+{
+  "order": 10,
+  "index_patterns": [
+    "arius_stats_dcdr_info*"
+  ],
+  "settings": {
+    "index": {
+      "routing": {
+        "allocation": {
+          "include": {
+            "rack": ""
+          }
+        }
+      },
+      "mapping": {
+        "single_type": "true"
+      },
+      "number_of_shards": "4",
+      "number_of_replicas": "0"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "template": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "cluster": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "collectTime": {
+        "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+        "type": "date"
+      },
+      "replicaCluster": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "index": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "templateId": {
+        "type": "long"
+      },
+      "logTime": {
+        "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+        "type": "date"
+      },
+      "cleanTime": {
+        "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+        "type": "date"
+      },
+      "shardNu": {
+        "type": "double"
+      },
+      "sinkTime": {
+        "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+        "type": "date"
+      },
+      "metrics": {
+        "properties": {
+          "dcdr-global_checkpoint_delay": {
+            "type": "float"
+          },
+          "dcdr-send_request_avg_time": {
+            "type": "float"
+          },
+          "dcdr-max_time_since_update_replica_checkpoint": {
+            "type": "float"
+          },
+          "dcdr-failed_send_requests": {
+            "type": "float"
+          },
+          "dcdr-global_checkpoint_delay_seconds": {
+            "type": "float"
+          },
+          "dcdr-bytes_send": {
+            "type": "float"
+          },
+          "dcdr-max_seq_no_delay": {
+            "type": "float"
+          },
+          "dcdr-min_available_send_bulk_number": {
+            "type": "float"
+          },
+          "dcdr-total_send_request": {
+            "type": "float"
+          },
+          "dcdr-operations_send": {
+            "type": "float"
+          },
+          "dcdr-min_time_since_last_send_millis": {
+            "type": "float"
+          },
+          "dcdr-failed_recover_count": {
+            "type": "float"
+          },
+          "dcdr-success_recover_count": {
+            "type": "float"
+          },
+          "dcdr-successRecoverCount": {
+            "type": "float"
+          },
+          "dcdr-total_send_time_millis": {
+            "type": "float"
+          },
+          "dcdr-max_time_since_last_send_millis": {
+            "type": "float"
+          },
+          "dcdr-recover_total_time_millis": {
+            "type": "float"
+          },
+          "dcdr-in_sync_translog_offset_size": {
+            "type": "float"
+          }
+        }
+      },
+      "key": {
+        "ignore_above": 512,
+        "type": "keyword"
+      },
+      "logicTemplateId": {
+        "type": "long"
+      },
+      "timestamp": {
+        "format": "epoch_millis",
+        "type": "date"
+      }
+    }
+  },
+  "aliases": {}
+}

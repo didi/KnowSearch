@@ -1,0 +1,77 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%d",
+              "lt": "%d"
+            }
+          }
+        },
+        {
+          "term": {
+            "logicTemplateId": {
+              "value": "%d"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "groupByTemplateId": {
+      "terms": {
+        "field": "templateId",
+        "size": 10
+      },
+      "aggs": {
+        "hour_hist": {
+          "date_histogram": {
+            "field": "timestamp",
+            "interval": "30m",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 1
+          },
+          "aggs": {
+            "minute_hist": {
+              "date_histogram": {
+                "field": "timestamp",
+                "interval": "1m",
+                "time_zone": "Asia/Shanghai",
+                "min_doc_count": 1
+              },
+              "aggs": {
+                "minute_tps_sum": {
+                  "sum": {
+                    "field": "metrics.indexing-index_total_rate"
+                  }
+                }
+              }
+            },
+            "hour_tps_avg": {
+              "percentiles_bucket": {
+                "buckets_path": "minute_hist>minute_tps_sum",
+                "percents": [
+                  50
+                ]
+              }
+            }
+          }
+        },
+        "max_tps": {
+          "max_bucket": {
+            "buckets_path": "hour_hist>hour_tps_avg[50.0]"
+          }
+        }
+      }
+    },
+    "max_tps_templateId": {
+      "max_bucket": {
+        "buckets_path": "groupByTemplateId>max_tps"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "type"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

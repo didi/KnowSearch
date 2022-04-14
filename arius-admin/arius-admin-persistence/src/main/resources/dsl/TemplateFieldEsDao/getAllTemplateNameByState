@@ -1,0 +1,14 @@
+{
+  "size": %d,
+  "query": {
+    "term": {
+      "state": {
+        "value": %d
+      }
+    }
+  },
+  "_source": [
+    "id",
+    "name"
+  ]
+}

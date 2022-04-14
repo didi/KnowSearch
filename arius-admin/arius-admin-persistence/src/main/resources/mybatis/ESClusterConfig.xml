@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterConfigDAO">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO">
+        <id column="id"                 property="id" />
+        <result column="cluster_id"     property="clusterId" />
+        <result column="type_name"      property="typeName" />
+        <result column="engin_name"     property="enginName" />
+        <result column="config_data"    property="configData" />
+        <result column="desc"           property="desc" />
+        <result column="version_tag"    property="versionTag" />
+        <result column="version_config" property="versionConfig" />
+        <result column="selected"       property="selected" />
+        <result column="create_time"    property="createTime" />
+        <result column="update_time"    property="updateTime" />
+        <result column="delete_flag"    property="deleteFlag" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, cluster_id, type_name, engin_name, config_data, `desc`, version_tag, version_config, selected,create_time,update_time, delete_flag
+    </sql>
+
+    <!-- 保存 Es配置信息 -->
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into es_config
+        (cluster_id, type_name, engin_name, config_data, `desc`, version_tag, version_config, selected)
+        values
+        (#{clusterId}, #{typeName}, #{enginName}, #{configData}, #{desc}, #{versionTag}, #{versionConfig}, #{selected})
+    </insert>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO">
+        update es_config
+        <set>
+            <if test="clusterId != null">cluster_id = #{clusterId},</if>
+            <if test="typeName != null">type_name = #{typeName},</if>
+            <if test="enginName != null">engin_name = #{enginName},</if>
+            <if test="configData != null">config_data = #{configData},</if>
+            <if test="desc != null">`desc` = #{desc},</if>
+            <if test="versionTag != null">version_tag = #{versionTag},</if>
+            <if test="versionConfig != null">version_config = #{versionConfig},</if>
+            <if test="selected != null">selected = #{selected},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 根据ID  查询详情 -->
+    <select id="getValidEsConfigById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_config
+        where id = #{id} and selected = 1 and delete_flag = 0;
+    </select>
+
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_config
+        where id = #{id} and delete_flag = 0;
+    </select>
+
+    <select id="getByClusterIdAndTypeAndEngin" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_config
+        where cluster_id = #{clusterId} and type_name = #{type} and engin_name = #{engin} and delete_flag = 0
+        and selected = 1
+    </select>
+
+    <select id="listByClusterId" parameterType="Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_config
+        where cluster_id = #{clusterId} and selected = 1 and delete_flag = 0 order by id desc
+    </select>
+
+    <delete id="delete" parameterType="Long">
+        update es_config
+        set delete_flag = 1, selected = 0
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteByClusterIdAndTypeAndEngin">
+        update es_config
+        set delete_flag = 1, selected = 0
+        where cluster_id = #{clusterId} and type_name = #{type} and engin_name = #{engin}
+    </delete>
+
+    <select id="getByClusterIdAndTypeAndEnginAndVersion" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_config
+        where cluster_id = #{clusterId} and type_name = #{type} and engin_name = #{engin} and version_config = #{version}
+        and delete_flag = 0
+    </select>
+
+    <update id="updateConfigValidById" parameterType="Long">
+        update es_config
+        set selected = 1
+        where id = #{id}
+    </update>
+    <insert id="insertSelective" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into es_config
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="clusterId != null">
+                cluster_id,
+            </if>
+            <if test="typeName != null">
+                type_name,
+            </if>
+            <if test="enginName != null">
+                engin_name,
+            </if>
+            <if test="configData != null">
+                config_data,
+            </if>
+            <if test="desc != null">
+                `desc`,
+            </if>
+            version_config,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="clusterId != null">
+                #{clusterId},
+            </if>
+            <if test="typeName != null">
+                #{typeName},
+            </if>
+            <if test="enginName != null">
+                #{enginName},
+            </if>
+            <if test="configData != null">
+                #{configData},
+            </if>
+            <if test="desc != null">
+                #{desc},
+            </if>
+                #{versionConfig},
+        </trim>
+    </insert>
+</mapper>

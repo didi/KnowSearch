@@ -1,0 +1,38 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "exceptionName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "error"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "top_dsltemplate": {
+      "terms": {
+        "field": "dslTemplateMd5",
+        "size": 0
+      }
+    }
+  }
+}

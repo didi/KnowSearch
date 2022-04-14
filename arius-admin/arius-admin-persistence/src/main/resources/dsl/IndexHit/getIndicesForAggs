@@ -1,0 +1,36 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "dslType": {
+              "value": "aggs"
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": {
+              "term": {
+                "groupByFields": {
+                  "value": ""
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "aggName": {
+      "terms": {
+        "field": "indices",
+        "size": 100000,
+        "min_doc_count": 1
+      }
+    }
+  }
+}

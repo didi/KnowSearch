@@ -1,0 +1,54 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "flinkTime": {
+              "lt": "%s"
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "forceSetQueryLimit": {
+                    "value": "true"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "enable": {
+                    "value": "false"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "checkMode": {
+                    "value": "black"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "flinkTime": {
+        "order": "asc"
+      }
+    }
+  ],
+  "_source": [
+    "appid",
+    "dslTemplateMd5"
+  ]
+}

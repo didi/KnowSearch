@@ -1,0 +1,52 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%d",
+              "lt": "%d"
+            }
+          }
+        },
+        {
+          "term": {
+            "logicTemplateId": {
+              "value": "%d"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "groupByTemplateId": {
+      "terms": {
+        "field": "templateId",
+        "size": 10
+      },
+      "aggs": {
+        "minute_buckets": {
+          "date_histogram": {
+            "field": "timestamp",
+            "interval": "1m"
+          },
+          "aggs": {
+            "sum_failed": {
+              "sum": {
+                "field": "metrics.ingest-failed"
+              }
+            }
+          }
+        },
+        "avg_count_templateId": {
+          "avg_bucket": {
+            "buckets_path": "minute_buckets>sum_failed"
+          }
+        }
+      }
+    }
+  }
+}

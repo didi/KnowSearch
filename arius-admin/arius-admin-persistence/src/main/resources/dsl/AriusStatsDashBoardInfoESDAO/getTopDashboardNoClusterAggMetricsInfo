@@ -1,0 +1,55 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+           "terms": {
+             "%s.cluster": %s
+           }
+        },
+        {
+          "terms": {
+            "%s.%s": %s
+          }
+        },
+        {
+          "range": {
+            "%s.timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "hist": {
+      "terms": {
+        "script": {
+          "source": "doc['%s.cluster'].value+'@'+doc['%s.%s'].value"
+        },
+        "size": %d,
+        "collect_mode": "breadth_first"
+      },
+      "aggs": {
+        "hist": {
+          "date_histogram": {
+            "field": "%s.timestamp",
+            "fixed_interval": "%s",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 0,
+            "extended_bounds": {
+              "min": %d,
+              "max": %d
+            }
+          },
+          "aggs": {
+            %s
+          }
+        }
+      }
+    }
+  }
+}

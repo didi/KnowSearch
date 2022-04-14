@@ -1,0 +1,31 @@
+{
+  "sort": [
+    {
+      "shardNum": {
+        "order": "asc"
+      }
+    }
+  ],
+  "size": 100,
+  "from": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "indexName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "srcTag": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

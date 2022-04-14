@@ -1,0 +1,37 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "ariusCreateTime": {
+              "gte": "%s 00:00:00.000 +0800",
+              "lte": "%s 00:00:00.000 +0800"
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "version": {
+                    "value": "V1"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

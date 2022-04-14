@@ -1,0 +1,38 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "date": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "appid query"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ]
+}

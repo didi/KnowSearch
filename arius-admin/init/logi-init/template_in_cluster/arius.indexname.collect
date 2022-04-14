@@ -1,0 +1,64 @@
+{
+  "order": 10,
+  "index_patterns": [
+    "arius.indexname.collect"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "4",
+      "routing": {
+        "allocation": {
+          "include": {
+            "rack": ""
+          }
+        }
+      },
+      "mapping": {
+        "single_type": "true"
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "date": {
+        "format": "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis||yyyy-MM-dd",
+        "type": "date"
+      },
+      "typeNames": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "typeNameCount": {
+        "type": "integer"
+      },
+      "analyzeResult": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "templateName": {
+        "type": "keyword"
+      },
+      "clusterName": {
+        "type": "keyword"
+      },
+      "allSingleType": {
+        "type": "boolean"
+      },
+      "typeNameSearchInfo": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "detail": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "templateId": {
+        "type": "long"
+      },
+      "logicId": {
+        "type": "long"
+      }
+    }
+  },
+  "aliases": {}
+}

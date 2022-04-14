@@ -1,0 +1,39 @@
+{
+  "size":0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "indices": {
+      "terms": {
+        "field": "indices",
+        "size": 0
+      }
+    }
+  }
+}

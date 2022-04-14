@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESMachineNormsDAO">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO">
+        <id column="id" property="id" />
+        <result column="role" property="role" />
+        <result column="spec" property="spec" />
+        <result column="create_time" property="createTime" />
+        <result column="delete_flag" property="deleteFlag" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, `role`, spec, create_time, delete_flag
+    </sql>
+
+    <select id="listMachineNorms"  resultMap="BaseResultMap" >
+        select
+        <include refid="Base_Column_List"/>
+        from es_machine_norms
+        where delete_flag = '0'
+        order by id desc
+    </select>
+
+    <!-- 根据ID  查询详情 -->
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_machine_norms
+        where id = #{id}
+    </select>
+    <!-- 保存 机器规格信息 -->
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into es_machine_norms
+        (`role`, spec, create_time, delete_flag)
+        values
+        (#{role},#{spec},now(),'0')
+    </insert>
+
+</mapper>

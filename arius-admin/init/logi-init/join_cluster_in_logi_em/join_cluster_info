@@ -1,0 +1,25 @@
+{
+    "tags":"{\"resourceType\":3, \"createSource\":0}",
+    "importRule":"0",
+    "type": 4,
+    "appId": 1,
+    "cluster": "logi-em-matedata-cluster",
+    "divide": true,
+    "esVersion": "7.6.0.1401",
+    "logicCluster": "logi-em-matedata-cluster",
+    "phyClusterDesc": "",
+    "regionRacks": [],
+    "roleClusterHosts": [
+        {
+            "cluster": "logi-em-matedata-cluster",
+            "id": 0,
+            "ip": "10.96.65.63",
+            "nodeSet": "",
+            "port": 8060,
+            "rack": "",
+            "role": 3,
+            "roleClusterId": 0,
+            "status": 0
+        }
+    ]
+}

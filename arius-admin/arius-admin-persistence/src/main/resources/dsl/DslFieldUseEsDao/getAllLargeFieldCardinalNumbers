@@ -1,0 +1,10 @@
+{
+  "size":%d,
+  "query": {
+    "range": {
+      "cardinality": {
+        "gte": 1000000
+      }
+    }
+  }
+}

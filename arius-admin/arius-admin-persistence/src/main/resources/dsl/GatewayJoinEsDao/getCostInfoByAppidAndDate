@@ -1,0 +1,36 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "ariusType": {
+              "value": "type"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "totalCost":{
+      "percentiles": {
+        "field": "totalCost",
+        "percents": [
+          50,
+          75,
+          95,
+          99
+        ]
+      }
+    }
+  }
+}

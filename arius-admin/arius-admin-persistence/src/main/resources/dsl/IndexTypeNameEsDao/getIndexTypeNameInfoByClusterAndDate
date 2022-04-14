@@ -1,0 +1,30 @@
+{
+  "size":10000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "date": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "typeNameCount": {
+              "lte": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "version": {
+              "value": "V2"
+            }
+          }
+        },
+        {
+          "wildcard": {
+            "indices": {
+              "value": "%s*"
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "checkMode": {
+                    "value": "black"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "dslTemplateMd5",
+    "dsl"
+  ]
+}

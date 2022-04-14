@@ -1,0 +1,31 @@
+{
+  "size": 200,
+  "query":{
+        "bool":{
+            "must":[
+                {
+                    "term":{
+                        "name":{
+                            "value":"%s"
+                        }
+                    }
+                },
+                {
+                    "range":{
+                        "date":{
+                            "gte": "%d",
+                            "lte": "%d"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ]
+}

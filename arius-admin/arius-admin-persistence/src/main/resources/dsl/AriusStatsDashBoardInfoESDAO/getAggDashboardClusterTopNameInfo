@@ -1,0 +1,39 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "%s.timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "hist": {
+      "terms": {
+        "field": "%s.%s",
+        "size": %d,
+        "collect_mode": "breadth_first"
+      },
+      "aggs": {
+        "hist": {
+          "date_histogram": {
+            "field": "%s.timestamp",
+            "fixed_interval": "%s",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 0
+          },
+          "aggs": {
+            %s
+          }
+        }
+      }
+    }
+  }
+}

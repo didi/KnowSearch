@@ -1,0 +1,39 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "appid": {
+              "query": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": "%d",
+              "lte": "%d",
+              "format": "epoch_millis"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "size": %d,
+  "sort": [
+    {
+      "totalCost": {
+        "order": "desc"
+      }
+    }
+  ],
+  "_source": [
+    "dslTemplate",
+    "indiceSample",
+    "timeStamp",
+    "dslTemplateMd5",
+    "totalCost"
+    ]
+}

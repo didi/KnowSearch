@@ -1,0 +1,30 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "name": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "date": {
+              "lte": "now-%dd"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ]
+}

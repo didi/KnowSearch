@@ -1,0 +1,23 @@
+{
+  "size": 10000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "runCount": {
+              "lte": 30
+            }
+          }
+        },
+        {
+          "term": {
+            "finish": {
+              "value": "false"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

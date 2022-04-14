@@ -1,0 +1,15 @@
+{
+  "size":%d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "destIndexName"
+          }
+        }
+      ]
+    }
+  },
+  "_source": ["appid","destIndexName","requestId"]
+}

@@ -1,0 +1,28 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "match": {
+            "template": "%s"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "totalScoreAvg": {
+      "avg": {
+        "field": "totalScore"
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+#.gitignore for java
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+**/target/
+**/output/
+**/META-INF/
+# logs
+/stacktrace.log
+/test/reports
+logs/
+*.log
+*.log.*
+
+## .gitignore for intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+.mvn/
+
+## .gitignore for eclipse
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+/*.settings
+polaris-agent/*.project
+polaris-agent/polaris-agent-api/*.classpath
+polaris-agent/polaris-agent-api/*.project
+.DS_Store
+.gitversion

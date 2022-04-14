@@ -1,0 +1,23 @@
+{
+  "level":1,
+  "expression": "arius_meta_job_log*",
+  "dateFormat": "_yyyy-MM-dd",
+  "dataCenter": "cn",
+  "dataType": 0,
+  "dateField": "logTime",
+  "expireTime": "2",
+  "physicalInfos": [
+    {
+      "cluster": "logi-elasticsearch-7.6.0",
+      "rack": "r2",
+      "resourceId": 63,
+      "role": 1,
+      "shard": "4"
+    }
+  ],
+  "quota": 30,
+  "appId": 1,
+  "responsible": "admin",
+  "name": "arius_meta_job_log",
+  "desc": "AMS任务执行器日志"
+}

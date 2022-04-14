@@ -1,0 +1,30 @@
+{
+  "size":1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplateMd5": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "ariusCreateTime": {
+        "order": "desc"
+      }
+    }
+  ]
+}

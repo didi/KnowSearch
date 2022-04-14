@@ -1,0 +1,38 @@
+{
+  "size": 10,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": "now-1h",
+              "lte": "now"
+            }
+          }
+        },
+        {
+          "term": {
+            "searchType": {
+              "value": "dsl"
+            }
+          }
+        },
+        {
+          "term": {
+            "dslTemplate": {
+              "value": "FAILED"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "appid",
+    "indices",
+    "dsl",
+    "requestId",
+    "ariusCreateTime"
+  ]
+}

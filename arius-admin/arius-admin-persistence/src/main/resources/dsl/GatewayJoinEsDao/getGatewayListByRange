@@ -1,0 +1,14 @@
+{
+  "size": %d,
+  "query": {
+    "range": {
+      "timeStamp": {
+        "gte": %d,
+        "lt": %d
+      }
+    }
+  },
+  "_source": [
+    %s
+  ]
+}

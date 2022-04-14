@@ -1,0 +1,23 @@
+{
+  "level":1,
+  "expression": "record_arius_template_quota_usage*",
+  "dateFormat": "_yyyy-MM",
+  "dataCenter": "cn",
+  "dataType": 0,
+  "dateField": "timestamp",
+  "expireTime": "360",
+  "physicalInfos": [
+    {
+      "cluster": "logi-elasticsearch-7.6.0",
+      "rack": "r2",
+      "resourceId": 63,
+      "role": 1,
+      "shard": "4"
+    }
+  ],
+  "quota": 30,
+  "appId": 1,
+  "responsible": "admin",
+  "name": "record_arius_template_quota_usage",
+  "desc": "record_arius_template_quota_usage"
+}

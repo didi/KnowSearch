@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayNodeDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
+        <result column="host_name" jdbcType="VARCHAR" property="hostName"/>
+        <result column="port" jdbcType="INTEGER" property="port"/>
+        <result column="heartbeat_time" jdbcType="TIMESTAMP" property="heartbeatTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time
+    </sql>
+
+    <insert id="recordGatewayNode"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO"
+            keyColumn="id">
+        insert into gateway_node
+            (cluster_name, host_name, port, heartbeat_time)
+        values (#{clusterName}, #{hostName}, #{port}, #{heartbeatTime}) ON DUPLICATE KEY
+        UPDATE heartbeat_time= #{heartbeatTime}
+    </insert>
+
+    <select id="aliveCountByClusterNameAndTime" parameterType="map" resultType="integer">
+        select count(*)
+        from gateway_node
+        where cluster_name = #{clusterName} AND heartbeat_time > #{time}
+    </select>
+
+    <select id="listAliveNodeByClusterNameAndTime" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from gateway_node
+        where cluster_name = #{clusterName} AND heartbeat_time > #{time}
+    </select>
+
+</mapper>

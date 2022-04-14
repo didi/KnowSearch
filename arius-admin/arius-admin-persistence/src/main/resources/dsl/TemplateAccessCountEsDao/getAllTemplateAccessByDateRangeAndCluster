@@ -1,0 +1,31 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "date": {
+              "gte": "%s",
+              "lte": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.ClusterMonitorTaskDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+        <result column="id"             jdbcType="BIGINT"       property="id"/>
+        <result column="cluster_id"     jdbcType="INTEGER"      property="clusterId"/>
+        <result column="cluster"        jdbcType="VARCHAR"      property="cluster"/>
+        <result column="dataCentre"     jdbcType="VARCHAR"      property="dataCentre"/>
+        <result column="monitor_host"   jdbcType="VARCHAR"      property="monitorHost"/>
+        <result column="monitor_time"   jdbcType="TIMESTAMP"    property="monitorTime"/>
+        <result column="gmt_create"     jdbcType="TIMESTAMP"    property="gmtCreate"/>
+        <result column="gmt_modify"     jdbcType="TIMESTAMP"    property="gmtModify"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    id, cluster_id, cluster, dataCentre, monitor_host, monitor_time, gmt_create, gmt_modify
+    </sql>
+
+    <select id="getAllTask" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_monitor_task
+    </select>
+
+    <select id="getAllTaskByDataCentre" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_monitor_task
+        where dataCentre = #{dataCentre}
+    </select>
+
+    <select id="getTaskByHost" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_monitor_task
+        where monitor_host = #{monitorHost} order by monitor_time desc limit #{size}
+    </select>
+
+    <update id="updateMonitorHost" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+        update es_cluster_monitor_task
+        set monitor_host = #{destMonitorHost}, monitor_time = #{monitorTime}
+        where id = #{id} and monitor_host = #{monitorHost}
+    </update>
+
+    <update id="updateMonitorTime" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+        update es_cluster_monitor_task
+        set monitor_time = #{monitorTime}
+        where id = #{id} and monitor_host = #{monitorHost}
+    </update>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into es_cluster_monitor_task
+        (cluster_id)
+        values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.clusterId})
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into es_cluster_monitor_task
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="clusterId != null">
+                cluster_id,
+            </if>
+            <if test="cluster != null">
+                cluster,
+            </if>
+            <if test="dataCentre != null">
+                dataCentre,
+            </if>
+            <if test="monitorHost != null">
+                monitor_host,
+            </if>
+            <if test="monitorTime != null">
+                monitor_time,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModify != null">
+                gmt_modify,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="clusterId != null">
+                #{clusterId,jdbcType=INTEGER},
+            </if>
+            <if test="cluster != null">
+                #{cluster,jdbcType=CHAR},
+            </if>
+            <if test="dataCentre != null">
+                #{dataCentre,jdbcType=CHAR},
+            </if>
+            <if test="monitorHost != null">
+                #{monitorHost,jdbcType=CHAR},
+            </if>
+            <if test="monitorTime != null">
+                #{monitorTime,jdbcType=DATE},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=DATE},
+            </if>
+            <if test="gmtModify != null">
+                #{gmtModify,jdbcType=DATE},
+            </if>
+        </trim>
+    </insert>
+
+    <delete id="deleteBatch" parameterType="list">
+        delete from es_cluster_monitor_task
+        where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

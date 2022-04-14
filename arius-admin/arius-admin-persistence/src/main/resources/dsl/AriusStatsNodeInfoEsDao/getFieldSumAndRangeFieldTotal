@@ -1,0 +1,29 @@
+{
+    "size":0,
+    "query":{
+        "bool":{
+            "filter":[
+                {
+                    "term":{
+                        "cluster":"%s"
+                    }
+                },
+                {
+                    "range":{
+                        "%s":{
+                            "gte":"%s",
+                            "lte":"%s"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "aggs":{
+        "%s":{
+            "%s":{
+                "field":"%s"
+            }
+        }
+    }
+}

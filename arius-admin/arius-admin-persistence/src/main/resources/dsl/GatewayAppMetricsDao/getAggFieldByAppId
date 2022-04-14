@@ -1,0 +1,48 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "appid": "%s"
+          }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "group_by_timeStamp": {
+      "date_histogram": {
+        "field": "timeStamp",
+        "interval": "%s",
+        "time_zone": "Asia/Shanghai",
+        "min_doc_count": 0,
+        "extended_bounds" : {
+            "min" : %d,
+            "max" : %d
+        }
+      },
+      "aggs": {
+        "search_cost_avg": {
+          "avg": {
+            "field": "searchCost"
+          }
+        },
+        "total_cost_avg": {
+          "avg": {
+            "field": "totalCost"
+          }
+        }
+      }
+    }
+  }
+}

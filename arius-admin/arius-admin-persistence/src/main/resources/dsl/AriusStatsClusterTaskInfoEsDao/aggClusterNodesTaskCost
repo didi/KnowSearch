@@ -1,0 +1,37 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "cluster": "%s"
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%s",
+              "lte": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "hist": {
+      "terms": {
+        "field": "metrics.node",
+        "size": %d
+      },
+      "aggs": {
+        "hist": {
+          "sum": {
+            "field": "metrics.runningTime"
+          }
+        }
+      }
+    }
+  }
+}

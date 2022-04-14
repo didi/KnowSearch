@@ -1,0 +1,24 @@
+{
+  "size":%d,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "logicTemplateId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "date": {
+              "gte": "%s",
+              "lte": "%s"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

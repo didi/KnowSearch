@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="logic_id" jdbcType="INTEGER" property="logicId"/>
+        <result column="is_source_separated" jdbcType="TINYINT" property="isSourceSeparated"/>
+        <result column="adjust_rack_tps_factor" jdbcType="DECIMAL" property="adjustRackTpsFactor"/>
+        <result column="adjust_rack_shard_factor" jdbcType="DECIMAL" property="adjustRackShardFactor"/>
+        <result column="dynamic_limit_enable" jdbcType="TINYINT" property="dynamicLimitEnable"/>
+        <result column="mapping_improve_enable" jdbcType="TINYINT" property="mappingImproveEnable"/>
+        <result column="pre_create_flags" jdbcType="TINYINT" property="preCreateFlags" />
+        <result column="disable_source_flags" jdbcType="TINYINT" property="disableSourceFlags" />
+        <result column="disable_index_rollover" jdbcType="TINYINT" property="disableIndexRollover" />
+        <result column="shard_num" jdbcType="INTEGER" property="shardNum" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, logic_id, is_source_separated, adjust_rack_tps_factor, adjust_rack_shard_factor, dynamic_limit_enable,
+    mapping_improve_enable, pre_create_flags, disable_source_flags, disable_index_rollover, shard_num, create_time, update_time
+    </sql>
+
+    <select id="listByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_config
+        <trim prefix="where" prefixOverrides="and">
+            <if test="id != null">and id = #{id}</if>
+            <if test="logicId != null">and logic_id = #{logicId}</if>
+            <if test="isSourceSeparated != null">and is_source_separated = #{isSourceSeparated}</if>
+            <if test="dynamicLimitEnable != null">and dynamic_limit_enable = #{dynamicLimitEnable}</if>
+            <if test="mappingImproveEnable != null">and mapping_improve_enable = #{mappingImproveEnable}</if>
+            <if test="preCreateFlags != null">and pre_create_flags = #{preCreateFlags}</if>
+            <if test="disableSourceFlags != null">and disable_source_flags = #{disableSourceFlags}</if>
+            <if test="disableIndexRollover != null">and disable_index_rollover = #{disableIndexRollover}</if>
+            <if test="shardNum != null">and shard_num = #{shardNum}</if>
+        </trim>
+    </select>
+
+    <select id="listAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_config
+    </select>
+
+    <insert id="insert"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into index_template_config
+        (logic_id, is_source_separated, adjust_rack_tps_factor, adjust_rack_shard_factor,
+            dynamic_limit_enable, mapping_improve_enable,
+            pre_create_flags, disable_source_flags, disable_index_rollover, shard_num)
+        values
+        (#{logicId}, #{isSourceSeparated}, #{adjustRackTpsFactor}, #{adjustRackShardFactor},
+            #{dynamicLimitEnable}, #{mappingImproveEnable},
+            #{preCreateFlags}, #{disableSourceFlags}, #{disableIndexRollover}, #{shardNum})
+    </insert>
+
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_config
+        where id = #{configId}
+    </select>
+
+    <select id="getByLogicId" parameterType="integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_config
+        where logic_id = #{logicId}
+    </select>
+
+    <update id="update"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO">
+        update index_template_config
+        <trim prefix="set" prefixOverrides=",">
+            <if test="isSourceSeparated != null">,is_source_separated = #{isSourceSeparated}</if>
+            <if test="adjustRackTpsFactor != null">,adjust_rack_tps_factor = #{adjustRackTpsFactor}</if>
+            <if test="adjustRackShardFactor != null">,adjust_rack_shard_factor = #{adjustRackShardFactor}</if>
+            <if test="dynamicLimitEnable != null">,dynamic_limit_enable = #{dynamicLimitEnable}</if>
+            <if test="mappingImproveEnable != null">,mapping_improve_enable = #{mappingImproveEnable}</if>
+            <if test="preCreateFlags != null">,pre_create_flags = #{preCreateFlags}</if>
+            <if test="disableSourceFlags != null">,disable_source_flags = #{disableSourceFlags}</if>
+            <if test="disableIndexRollover != null">,disable_index_rollover = #{disableIndexRollover}</if>
+            <if test="shardNum != null">,shard_num = #{shardNum}</if>
+        </trim>
+        where logic_id = #{logicId}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        delete from index_template_config
+        where id = #{configId}
+    </delete>
+
+</mapper>

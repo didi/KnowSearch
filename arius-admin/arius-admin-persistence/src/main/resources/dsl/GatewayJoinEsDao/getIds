@@ -1,0 +1,36 @@
+{
+  "from": 0,
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+        %s
+      ]
+    }
+  },
+  "aggs": {
+    "result": {
+      "terms": {
+        "field": "appid",
+        "size": 10000
+      },
+      "aggs": {
+        "template": {
+          "terms": {
+            "field": "dslTemplateMd5",
+            "size": 10000,
+            "min_doc_count":%d
+          }
+        }
+      }
+    }
+  }
+}

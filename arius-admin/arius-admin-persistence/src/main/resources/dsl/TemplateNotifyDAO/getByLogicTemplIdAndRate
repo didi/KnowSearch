@@ -1,0 +1,30 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "logicTemplateId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "zeroDate": {
+              "value": %s
+            }
+          }
+        },
+        {
+          "term": {
+            "rate": {
+              "value": %s
+            }
+          }
+        }
+      ]
+    }
+  }
+}

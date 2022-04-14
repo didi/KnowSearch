@@ -1,0 +1,34 @@
+{
+  "size": 0,
+  "query": {
+      "bool": {
+        "must": [
+          {
+            "term": {
+              "appid": {
+                "value": %d
+              }
+            }
+          },
+          {
+            "term": {
+              "ariusType": {
+                "value": "type"
+              }
+            }
+          }
+        ]
+      }
+    },
+  "aggs": {
+    "searchCount": {
+      "date_histogram": {
+        "field": "timeStamp",
+        "interval": "1s",
+        "order": {
+          "_count": "desc"
+        }
+      }
+    }
+  }
+}

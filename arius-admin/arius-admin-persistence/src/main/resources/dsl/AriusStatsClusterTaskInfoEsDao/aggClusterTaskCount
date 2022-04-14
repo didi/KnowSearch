@@ -1,0 +1,23 @@
+{
+	"size": 0,
+	"query": {
+		"bool": {
+			"must": [{
+					"term": {
+						"cluster": {
+							"value": "%s"
+						}
+					}
+				},
+				{
+					"range": {
+						"timestamp": {
+							"gte": "%s",
+							"lte": "%s"
+						}
+					}
+				}
+			]
+		}
+	}
+}
