@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class TaskBatch<T> {
     /**
-     * 批次中需要处理的内容
+     * 任务批次中需要处理的内容
      */
     private List<T> items = Lists.newArrayList();
 }
