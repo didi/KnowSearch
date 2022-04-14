@@ -22,6 +22,7 @@ arius-admin-v2由10个主要的工程和扩展增值服务组成:
     region:         容量规划的规划单元,由多个rack组成
  
     
+
 ## 3. 如何使用
     可单独部署，也可配合网关 arius-gateway-v2 一同使用，致力于更高效的管控 Elasticsearch 元数据，由网关提供API审核，查询限流、优化，权限控制等能力，对外提供 rest、tcp 方式，提供 Elasticsearch 查询和写入服务，屏蔽平台内部的细节，更高效的保护和管控ES集群的作用。
 
