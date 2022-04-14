@@ -14,7 +14,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
 /**
- * base任务 模板并发处理
+ * base任务 模板的并发处理
  * @author d06679
  * @date 2019/3/21
  */
