@@ -37,7 +37,7 @@ public class NotifyServiceImpl implements NotifyService {
     @PostConstruct
     public void init(){
         ariusTaskThreadPool = new AriusTaskThreadPool();
-        ariusTaskThreadPool.init(3, "NotifyServiceImpl");
+        ariusTaskThreadPool.init(3, "NotifyServiceImpl", 100);
     }
 
     @Override

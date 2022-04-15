@@ -27,7 +27,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.arius.Ariu
  */
 public abstract class BaseConcurrentTask<T> {
 
-    private static final ILog     LOGGER = LogFactory.getLog(BaseConcurrentTask.class);
+    private static final ILog     LOGGER     = LogFactory.getLog(BaseConcurrentTask.class);
+    private static final int      QUEUE_SIZE = 50000;
 
     protected AriusTaskThreadPool ariusTaskThreadPool;
 
@@ -37,7 +38,7 @@ public abstract class BaseConcurrentTask<T> {
     @PostConstruct
     public void init(){
         ariusTaskThreadPool = new AriusTaskThreadPool();
-        ariusTaskThreadPool.init(poolSize(), getTaskName());
+        ariusTaskThreadPool.init(poolSize(), getTaskName(), QUEUE_SIZE);
     }
 
     /**
@@ -47,7 +48,13 @@ public abstract class BaseConcurrentTask<T> {
         long start = System.currentTimeMillis();
 
         List<TaskBatch<T>> batches = splitBatch(getAllItems());
-
+        int currentQueueWorkerSize = ariusTaskThreadPool.getCurrentQueueWorkerSize();
+        if (currentQueueWorkerSize >= QUEUE_SIZE) {
+            LOGGER.warn(
+                "class=BaseConcurrentTask||method=execute||msg=currentQueueWorkerSize:{} is more than thread pool queue size:{}",
+                getTaskName(), currentQueueWorkerSize, QUEUE_SIZE);
+            return false; 
+        }
         if (CollectionUtils.isEmpty(batches)) {
             LOGGER.warn("class=BaseConcurrentTask||method=execute||batches is empty||task={}", getTaskName());
             return true;
