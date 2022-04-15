@@ -5,6 +5,7 @@ public enum TemplateOperateRecordEnum {
     /**
      * 模板操作类型
      */
+    NEW("new", 0),
     ROLLOVER("rollover", 1),
     MAPPING("mapping", 2),
     SETTING("setting", 3),
