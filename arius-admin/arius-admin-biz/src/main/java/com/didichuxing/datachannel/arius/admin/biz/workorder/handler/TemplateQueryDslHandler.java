@@ -16,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateQueryDslContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateQueryDslNotify;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsls;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
@@ -24,11 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_QUERY_DSL;
 
 /**
  * @author d06679
@@ -173,10 +169,6 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
         // 修改模板quota及保存时长信息
         AuditDsls auditDsls = new AuditDsls(workOrder.getSubmitorAppid(), workOrder.getSubmitor(), dslInfos);
         Result<String> result = dslStatisService.auditDsl(auditDsls);
-
-        sendNotify(WORK_ORDER_TEMPLATE_QUERY_DSL,
-            new TemplateQueryDslNotify(workOrder.getSubmitorAppid(), content.getName()),
-            Arrays.asList(workOrder.getSubmitor()));
 
         return Result.buildFrom(result);
     }

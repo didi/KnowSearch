@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReS
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.PhyClusterPluginNotify;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -35,10 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_PHY_CLUSTER_PLUGIN;
 
 @Service("clusterOpPluginRestartHandler")
 public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
@@ -165,10 +161,6 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         if(null == result || result.failed()){
             return Result.buildFail("生成物理集群插件操作任务失败!");
         }
-
-        // 发送通知消息
-        sendNotify(WORK_ORDER_PHY_CLUSTER_PLUGIN, new PhyClusterPluginNotify(workOrder.getSubmitorAppid(),
-                clusterPhy.getCluster(), approver), Arrays.asList(workOrder.getSubmitor()));
 
         return Result.buildSucc();
     }

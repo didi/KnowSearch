@@ -1,5 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.impl;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
@@ -9,26 +19,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateN
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateQuotaEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTool;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplateQuotaUsageAlarmNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateNotifyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
@@ -55,12 +52,6 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
 
     @Autowired
     protected TemplateNotifyDAO                templateNotifyDAO;
-
-    @Autowired
-    private NotifyService                      notifyService;
-
-    @Autowired
-    private NotifyTool                         notifyTool;
 
     private static final  int                   RATION_80              = 80;
     private static final  int                   RATIO_85               = 85;
@@ -108,19 +99,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
         LOGGER.info("class=TemplateQuotaAlarmSender||method=onApplicationEvent||templateName={}||templateQuotaUsage={}", templateLogic.getName(),
             templateQuotaUsage);
 
-        notifyService.send(NotifyTaskTypeEnum.TEMPLATE_QUOTA_USAGE_ALARM_ERROR,
-                TemplateQuotaUsageAlarmNotifyInfo.builder()
-                        .app(app)
-                        .templateLogic(templateLogic)
-                        .templateQuotaUsage(templateQuotaUsage)
-                        .ariusConsole(adminUrlConsole)
-                        .ctlRange(templateQuotaManager.getCtlRange(templateQuotaUsage.getLogicId())).build(),
-                        Lists.newArrayList(app.getResponsible().split(",")));
-
         Double usage = (templateQuotaUsage.getActualDiskG() / templateQuotaUsage.getQuotaDiskG()) * 100;
-        if (usage > RATIO_95) {
-            notifyTool.bySms(app.getResponsible(), genSmsContent(templateLogic, app));
-        }
     }
 
     /**************************************** private method ****************************************************/

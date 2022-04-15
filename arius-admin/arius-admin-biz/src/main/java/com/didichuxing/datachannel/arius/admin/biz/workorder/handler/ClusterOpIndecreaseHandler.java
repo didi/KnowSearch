@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_HOST;
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_OP_NEW;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandle
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpBaseContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpIndecreaseDockerContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpIndecreaseHostContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.ClusterOpIndecencyNotify;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -213,10 +210,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
 
-        sendNotify(WORK_ORDER_CLUSTER_OP_NEW, new ClusterOpIndecencyNotify(workOrder.getSubmitorAppid(),
-            clusterOpBaseContent.getPhyClusterName(), approver), Arrays.asList(workOrder.getSubmitor()));
         return Result.buildSucc();
-
     }
 
     @Override

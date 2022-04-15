@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.task;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -9,9 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.rd.ScheduleTaskFailNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -32,9 +28,6 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask<Clust
 
     @Autowired
     protected ClusterPhyManager   clusterPhyManager;
-
-    @Autowired
-    protected NotifyService       notifyService;
 
     /**
      * 任务全集
@@ -70,17 +63,11 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask<Clust
                 } else {
                     succ = false;
                     LOGGER.warn("executeByCluster fail||cluster={}||task={}", cluster.getCluster(), getTaskName());
-                    notifyService.send(NotifyTaskTypeEnum.SCHEDULE_TASK_FAILED,
-                        new ScheduleTaskFailNotifyInfo(getTaskName(), "集群_" + cluster.getCluster(), TASK_RETRY_URL),
-                        Arrays.asList());
                 }
             } catch (Exception e) {
                 succ = false;
                 LOGGER.warn("executeByCluster error||cluster={}||task={}||errMsg={}", cluster.getCluster(),
                     getTaskName(), e.getMessage(), e);
-
-                notifyService.send(NotifyTaskTypeEnum.SCHEDULE_TASK_FAILED, new ScheduleTaskFailNotifyInfo(
-                    getTaskName(), "集群_" + cluster.getCluster(), TASK_RETRY_URL, e.getMessage()), Arrays.asList());
             }
         }
 

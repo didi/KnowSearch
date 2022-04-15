@@ -13,17 +13,13 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.QueryDslLimitEditContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.QuryDslLimitNotify;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_QUERY_DSL_LIMIT;
 
 /**
  * @author d06679
@@ -144,10 +140,6 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
         dslQueryLimitList.add(dslQueryLimit);
 
         Result<Boolean> result = dslStatisService.batchUpdateQueryLimit(dslQueryLimitList, approver);
-
-        sendNotify(WORK_ORDER_QUERY_DSL_LIMIT,
-            new QuryDslLimitNotify(workOrder.getSubmitorAppid(), content.getDslTemplate()),
-            Arrays.asList(workOrder.getSubmitor()));
 
         if (result.failed()) {
             return Result.buildFail("模版扩缩容失败！");

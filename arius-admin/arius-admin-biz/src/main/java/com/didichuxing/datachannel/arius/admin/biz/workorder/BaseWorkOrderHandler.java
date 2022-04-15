@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderVO;
@@ -12,9 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRo
 import com.didichuxing.datachannel.arius.admin.common.constant.order.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
@@ -40,9 +36,6 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
 
     @Autowired
     private AriusUserInfoService   ariusUserInfoService;
-
-    @Autowired
-    private NotifyService          notifyService;
 
     @Autowired
     protected OperateRecordService operateRecordService;
@@ -215,11 +208,6 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
 
     protected boolean isOP(String userName) {
         return ariusUserInfoService.isOPByDomainAccount(userName);
-    }
-
-    protected void sendNotify(NotifyTaskTypeEnum type, NotifyInfo data, List<String> receivers) {
-        // 异步发送消息
-        notifyService.sendAsync(type, data, receivers);
     }
 
     /*************************************** privete method ************************************/
