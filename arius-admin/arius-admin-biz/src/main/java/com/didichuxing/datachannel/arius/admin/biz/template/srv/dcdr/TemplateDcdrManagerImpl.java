@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.PLATFORM_OP;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.MASTER;
@@ -177,7 +176,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
     @PostConstruct
     public void init() {
         ariusTaskThreadPool = new AriusTaskThreadPool();
-        ariusTaskThreadPool.init(10, "TemplateDcdrManagerImpl");
+        ariusTaskThreadPool.init(10, "TemplateDcdrManagerImpl", 10000);
     }
 
     private static final FutureUtil<Void>  BATCH_DCDR_FUTURE_UTIL   = FutureUtil.init("BATCH_DCDR_FUTURE_UTIL",10,10,100);

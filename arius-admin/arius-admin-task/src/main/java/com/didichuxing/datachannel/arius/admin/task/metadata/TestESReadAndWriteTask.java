@@ -3,14 +3,6 @@ package com.didichuxing.datachannel.arius.admin.task.metadata;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
-import com.didiglobal.logi.elasticsearch.client.ESClient;
-import com.didiglobal.logi.elasticsearch.client.request.batch.BatchType;
-import com.didiglobal.logi.elasticsearch.client.request.batch.ESBatchRequest;
-import com.didiglobal.logi.elasticsearch.client.response.batch.ESBatchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +13,16 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThread
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.request.batch.BatchType;
+import com.didiglobal.logi.elasticsearch.client.request.batch.ESBatchRequest;
+import com.didiglobal.logi.elasticsearch.client.response.batch.ESBatchResponse;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
 
 import lombok.EqualsAndHashCode;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 /**
  * @author cjm
@@ -57,10 +52,10 @@ public class TestESReadAndWriteTask implements Job {
 
     private AriusTaskThreadPool    ariusTaskThreadPool;
 
-    @PostConstruct
+    //@PostConstruct
     private void init() {
         ariusTaskThreadPool = new AriusTaskThreadPool();
-        ariusTaskThreadPool.init(20, "TestESReadAndWriteTask");
+        ariusTaskThreadPool.init(20, "TestESReadAndWriteTask", 100);
     }
 
 
