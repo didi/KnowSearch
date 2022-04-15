@@ -1,10 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.stereotype.Repository;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -19,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmen
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TimeValueUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -42,13 +50,6 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.stereotype.Repository;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -457,7 +458,7 @@ public class ESClusterDAO extends BaseESDAO {
 
     private ESClusterStatsResponse initESClusterStatsResponse() {
         ESClusterStatsResponse responses = new ESClusterStatsResponse();
-        responses.setStatus(RED.getDesc());
+        responses.setStatus(ClusterHealthEnum.UNKNOWN.getDesc());
         responses.setMemUsed(new ByteSizeValue(0));
         responses.setMemFree(new ByteSizeValue(0));
         responses.setMemTotal(new ByteSizeValue(0));
