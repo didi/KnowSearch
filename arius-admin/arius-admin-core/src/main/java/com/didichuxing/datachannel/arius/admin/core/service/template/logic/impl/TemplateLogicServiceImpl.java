@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
@@ -540,12 +541,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         logicDTO.setAppId(tgtAppId);
         logicDTO.setResponsible(tgtResponsible);
 
-        Result<Void> result = editTemplate(logicDTO, operator);
-        if(result.success()) {
-            operateRecordService.save(TEMPLATE_CONFIG, EDIT, logicId,
-                    JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), "模板转让至:" + tgtAppId)), operator);
-        }
-        return result;
+        return editTemplate(logicDTO, operator);
 
     }
 
@@ -1204,6 +1200,10 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
             if (editPhyResult.failed()) {
                 throw new AdminOperateException("修改物理模板失败");
             }
+
+            // 保存模板修改记录
+            operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, param.getId(), JSON.toJSONString(
+                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), AriusObjUtils.findChangedWithClear(oldPO, editTemplate))), operator);
 
             SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplateLogic.class)
                     , getLogicTemplateById(oldPO.getId())));
