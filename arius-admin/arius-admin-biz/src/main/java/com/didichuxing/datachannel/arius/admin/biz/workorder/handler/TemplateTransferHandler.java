@@ -7,11 +7,13 @@ import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateTransferOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -188,7 +190,8 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             content.getTgtResponsible(), workOrder.getSubmitor());
 
         if (result.success()) {
-            operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), "模板转让: " + JSON.toJSONString(content), approver);
+            operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), JSON.toJSONString(
+                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), "模板从:" + content.getSourceAppId() + "转移到:" + content.getTgtAppId())), approver);
         }
 
         sendNotify(WORK_ORDER_TEMPLATE_TRANSFER,
