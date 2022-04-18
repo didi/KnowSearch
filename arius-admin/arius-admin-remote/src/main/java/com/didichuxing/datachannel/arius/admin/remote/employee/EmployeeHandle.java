@@ -21,11 +21,4 @@ public interface EmployeeHandle extends BaseHandle {
      * @param domainAccounts 域账号列表
      */
     Result<Void> checkUsers(String domainAccounts);
-
-    /**
-     * 根据关键词查找用户信息
-     * @param keyWord
-     * @return
-     */
-    Result<Object> searchOnJobStaffByKeyWord(String keyWord);
 }
