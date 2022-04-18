@@ -8,11 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsls;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;

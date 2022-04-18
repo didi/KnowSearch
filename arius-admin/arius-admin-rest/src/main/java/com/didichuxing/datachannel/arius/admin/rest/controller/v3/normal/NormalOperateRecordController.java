@@ -8,10 +8,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.operaterecord.OperateRecordVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.google.common.collect.Lists;
 

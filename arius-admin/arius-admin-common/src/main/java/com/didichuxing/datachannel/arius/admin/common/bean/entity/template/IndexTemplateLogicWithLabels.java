@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Label;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

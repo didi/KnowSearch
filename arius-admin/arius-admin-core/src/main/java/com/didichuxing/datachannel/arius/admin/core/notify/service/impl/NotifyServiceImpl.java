@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.notify.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.core.notify.*;
 import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;

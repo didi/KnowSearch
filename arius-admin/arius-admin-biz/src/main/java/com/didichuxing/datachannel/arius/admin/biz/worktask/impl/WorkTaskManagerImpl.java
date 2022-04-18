@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskProcessDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskHandleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskHandleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.WorkTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;

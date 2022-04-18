@@ -2,18 +2,18 @@ package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Label;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.UpdateIndexTemplateLabelParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLabelPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateLabelESDAO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;

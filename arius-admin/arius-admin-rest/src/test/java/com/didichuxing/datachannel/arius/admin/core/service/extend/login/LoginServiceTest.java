@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.login;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import org.junit.jupiter.api.Assertions;

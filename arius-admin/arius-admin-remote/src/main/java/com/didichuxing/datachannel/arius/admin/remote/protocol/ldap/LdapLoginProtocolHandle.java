@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.remote.protocol.ldap;
 import com.didichuxing.datachannel.arius.admin.remote.protocol.LoginProtocolHandle;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
 import com.didiglobal.logi.log.ILog;

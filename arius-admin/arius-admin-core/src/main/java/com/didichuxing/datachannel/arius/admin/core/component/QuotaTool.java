@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.component;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

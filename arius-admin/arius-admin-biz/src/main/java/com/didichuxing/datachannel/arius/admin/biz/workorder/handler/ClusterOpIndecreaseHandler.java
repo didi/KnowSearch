@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_DOCKER;
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_HOST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_OP_NEW;
 
 import java.util.*;
@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,18 +22,18 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpIn
 import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.ClusterOpIndecencyNotify;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.host.HostsScaleActionParam;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;

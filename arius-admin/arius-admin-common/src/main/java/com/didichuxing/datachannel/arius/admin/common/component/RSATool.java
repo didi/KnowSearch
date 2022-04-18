@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import java.security.KeyFactory;
 import java.security.KeyPair;

@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.det
 import java.util.Date;
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 
 import lombok.AllArgsConstructor;

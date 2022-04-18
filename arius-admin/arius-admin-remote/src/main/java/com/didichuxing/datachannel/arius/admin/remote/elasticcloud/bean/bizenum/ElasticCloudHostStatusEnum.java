@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum;
 
 public enum ElasticCloudHostStatusEnum {
     PENDING("pending", EcmHostStatusEnum.RUNNING),

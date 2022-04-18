@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.converter;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor.AppMonitorRuleDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor.MonitorExpressionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.AppMonitorRuleDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.MonitorExpressionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.n9e.AlertRule;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.n9e.Exp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.n9e.Expression;

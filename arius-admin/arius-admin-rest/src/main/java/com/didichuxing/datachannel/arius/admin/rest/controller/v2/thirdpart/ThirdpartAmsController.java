@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.thirdpart;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.AmsTemplatePhysicalConfVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AmsTemplatePhysicalConfVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;

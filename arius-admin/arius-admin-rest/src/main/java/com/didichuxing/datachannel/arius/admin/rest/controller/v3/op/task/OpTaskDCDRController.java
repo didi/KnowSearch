@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.DCDRMasterSlaveSwitchDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.WorkTaskVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DCDRTasksDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.DCDRMasterSlaveSwitchDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 

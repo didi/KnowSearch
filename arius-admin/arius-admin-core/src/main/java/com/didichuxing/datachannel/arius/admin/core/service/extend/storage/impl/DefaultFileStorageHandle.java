@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.extend.storage.impl
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
 
 /**

@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.department;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.remote.department.content.DepartmentTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
 /**
  * @author linyunan

@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmOperateAppBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

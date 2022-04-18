@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RegionMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RegionMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;

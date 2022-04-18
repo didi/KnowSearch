@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmTaskBasic;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmOperateAppBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskBasic;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;

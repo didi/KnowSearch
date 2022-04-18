@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.AppClusterPhyAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;

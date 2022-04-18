@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;

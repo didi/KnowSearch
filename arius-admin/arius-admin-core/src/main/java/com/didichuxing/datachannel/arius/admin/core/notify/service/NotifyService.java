@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.notify.service;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyInfo;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
 

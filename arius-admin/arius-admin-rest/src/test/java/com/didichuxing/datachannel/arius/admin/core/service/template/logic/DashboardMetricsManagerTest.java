@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.logic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardListDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.list.MetricListVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;

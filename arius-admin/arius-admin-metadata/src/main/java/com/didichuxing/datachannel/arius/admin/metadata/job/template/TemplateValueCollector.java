@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.template;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.TemplateAccessCountPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateValuePO;

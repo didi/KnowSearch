@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.extend.intfc;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GetTemplateLimitStrategyContext;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLimitStrategy;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GetTemplateLimitStrategyContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy;
 
 /**
  * @author d06679

@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.login.impl;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.account.LoginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;

@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.notify.info.template;
 
-import static com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
+import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
 
 import com.didichuxing.datachannel.arius.admin.core.notify.MailTool;
-import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
@@ -11,7 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyConstant;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyInfo;
-import com.google.common.collect.Lists;
 
 import lombok.Builder;
 import lombok.Data;

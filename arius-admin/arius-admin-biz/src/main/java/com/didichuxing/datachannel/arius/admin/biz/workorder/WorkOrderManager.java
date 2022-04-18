@@ -2,13 +2,13 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.OrderTypeVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.detail.OrderDetailBaseVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.storage.gift;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;

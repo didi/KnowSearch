@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.extend.account;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.account.LoginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

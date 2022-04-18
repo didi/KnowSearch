@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardListDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.list.MetricListVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;

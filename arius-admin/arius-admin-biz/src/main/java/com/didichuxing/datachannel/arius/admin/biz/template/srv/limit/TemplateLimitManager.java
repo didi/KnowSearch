@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.limit;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GetTemplateLimitStrategyContext;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLimitStrategy;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GetTemplateLimitStrategyContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 import java.util.List;

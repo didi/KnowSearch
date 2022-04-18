@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;

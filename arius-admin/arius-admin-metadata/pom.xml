@@ -140,10 +140,6 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>arius-admin-client</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>

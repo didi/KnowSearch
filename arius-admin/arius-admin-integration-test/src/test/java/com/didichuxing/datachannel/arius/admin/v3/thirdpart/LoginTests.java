@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.v3.thirdpart;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.account.LoginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.method.v3.thirdpart.LoginControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.CustomDataSource;
 import org.junit.Assert;

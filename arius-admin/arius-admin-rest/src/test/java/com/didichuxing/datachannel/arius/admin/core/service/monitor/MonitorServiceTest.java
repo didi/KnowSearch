@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.core.service.monitor;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.monitor.AppMonitorRuleDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.AppMonitorRuleDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.MonitorRulePO;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.MonitorRuleDAO;
 import com.didichuxing.datachannel.arius.admin.remote.monitor.RemoteMonitorService;
 import org.junit.jupiter.api.Assertions;

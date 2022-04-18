@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;

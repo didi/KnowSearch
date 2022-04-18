@@ -7,13 +7,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppSearchTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
@@ -52,9 +52,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.APP_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP_CONFIG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
 
 @Service

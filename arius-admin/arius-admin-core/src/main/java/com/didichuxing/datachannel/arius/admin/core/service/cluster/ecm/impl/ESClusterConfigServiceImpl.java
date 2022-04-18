@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESZeusConfigDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO;
@@ -25,10 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.ES_CLUSTER_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.CLUSTER_CONFIG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.ES_CLUSTER_CONFIG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.CLUSTER_CONFIG;
 
 /**
  * @author lyn

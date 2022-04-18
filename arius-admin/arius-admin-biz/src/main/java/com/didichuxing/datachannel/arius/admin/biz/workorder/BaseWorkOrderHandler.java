@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.order.OrderStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyInfo;

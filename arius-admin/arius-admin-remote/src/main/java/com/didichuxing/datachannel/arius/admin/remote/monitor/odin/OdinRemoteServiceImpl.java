@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.N9eData;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Alert;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Metric;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.MetricSinkPoint;

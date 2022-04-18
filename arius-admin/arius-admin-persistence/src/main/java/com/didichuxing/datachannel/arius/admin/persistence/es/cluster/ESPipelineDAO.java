@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ESPipelineProcessor;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;

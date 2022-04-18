@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 

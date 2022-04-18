@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;

@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.app;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.AppManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.ConsoleAppDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.ConsoleAppLoginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ConsoleAppVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ConsoleAppWithVerifyCodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleAppDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleAppLoginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppWithVerifyCodeVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

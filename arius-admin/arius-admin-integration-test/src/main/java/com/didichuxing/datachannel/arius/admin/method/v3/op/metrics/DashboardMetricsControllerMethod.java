@@ -3,12 +3,12 @@ package com.didichuxing.datachannel.arius.admin.method.v3.op.metrics;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardListDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.list.MetricListVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 
 import java.io.IOException;
 import java.util.List;

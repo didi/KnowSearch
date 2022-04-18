@@ -3,15 +3,15 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReS
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpConfigRestartContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.ClusterOpRestartNotify;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.esconfig.EsConfigActionEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.*;
 import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_OP_RESTART;
 
 /**

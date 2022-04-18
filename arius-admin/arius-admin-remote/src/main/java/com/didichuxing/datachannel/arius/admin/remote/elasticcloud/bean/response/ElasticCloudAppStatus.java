@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.ESAppGroupStatusDTO;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.ESAppHostStatusDTO;
 import lombok.AllArgsConstructor;

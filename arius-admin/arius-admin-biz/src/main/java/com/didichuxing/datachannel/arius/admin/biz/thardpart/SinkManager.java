@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.thardpart;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.SinkSdkAppVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.SinkSdkIDCTemplateDeployInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.SinkSdkTemplateDeployInfoVO;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.SinkSdkAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkIDCTemplateDeployInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateDeployInfoVO;
 
 import javax.servlet.http.HttpServletRequest;
 

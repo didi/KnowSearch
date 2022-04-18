@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Alert;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.Metric;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.MetricSinkPoint;

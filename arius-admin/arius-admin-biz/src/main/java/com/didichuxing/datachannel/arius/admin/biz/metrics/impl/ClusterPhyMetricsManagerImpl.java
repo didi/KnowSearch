@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.MetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;

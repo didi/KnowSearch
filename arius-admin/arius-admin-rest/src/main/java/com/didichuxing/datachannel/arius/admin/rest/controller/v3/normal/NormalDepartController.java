@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.normal;
 
 import com.didichuxing.datachannel.arius.admin.biz.extend.department.DepartmentManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

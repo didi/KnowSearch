@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.AppConfigVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.AppVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;

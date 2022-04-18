@@ -10,7 +10,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>arius-admin-client</module>
         <module>arius-admin-persistence</module>
         <module>arius-admin-common</module>
         <module>arius-admin-core</module>

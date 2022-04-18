@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.request;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

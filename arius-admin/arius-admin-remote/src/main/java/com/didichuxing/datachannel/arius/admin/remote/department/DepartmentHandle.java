@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.department;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 
 /**

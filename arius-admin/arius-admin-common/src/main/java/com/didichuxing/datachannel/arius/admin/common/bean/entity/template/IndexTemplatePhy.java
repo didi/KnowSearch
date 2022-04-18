@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplatePhysicalStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import lombok.AllArgsConstructor;

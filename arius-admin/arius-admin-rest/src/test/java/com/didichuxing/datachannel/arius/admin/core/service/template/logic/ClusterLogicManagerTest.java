@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.logic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.Collections;
 import org.junit.jupiter.api.Assertions;

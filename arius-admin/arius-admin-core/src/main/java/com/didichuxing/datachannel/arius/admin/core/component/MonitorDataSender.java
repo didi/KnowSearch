@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.remote.monitor.RemoteMonitorService;

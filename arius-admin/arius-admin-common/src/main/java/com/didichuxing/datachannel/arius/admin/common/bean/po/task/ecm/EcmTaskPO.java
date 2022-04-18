@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import lombok.AllArgsConstructor;
 import lombok.Data;

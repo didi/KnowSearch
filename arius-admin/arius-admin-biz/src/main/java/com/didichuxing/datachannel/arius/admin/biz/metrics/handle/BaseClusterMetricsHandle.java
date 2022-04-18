@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.MetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;

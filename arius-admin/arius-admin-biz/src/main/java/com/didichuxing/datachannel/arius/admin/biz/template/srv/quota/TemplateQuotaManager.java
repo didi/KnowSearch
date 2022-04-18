@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.quota;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GetTemplateQuotaUsageContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GetTemplateQuotaUsageContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;

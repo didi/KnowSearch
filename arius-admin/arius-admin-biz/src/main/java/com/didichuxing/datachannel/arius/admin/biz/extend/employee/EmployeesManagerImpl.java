@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.extend.employee;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;

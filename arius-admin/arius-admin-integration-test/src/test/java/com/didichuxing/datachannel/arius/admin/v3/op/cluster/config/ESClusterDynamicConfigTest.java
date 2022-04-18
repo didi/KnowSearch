@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.cluster.config;
 
 import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterInfoTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.config.ESClusterDynamicConfigControllerMethod;

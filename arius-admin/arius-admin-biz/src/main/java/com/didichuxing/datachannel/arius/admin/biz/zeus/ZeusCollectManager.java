@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.zeus;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESZeusHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusHostInfoDTO;
 
 /**
  * Created by linyunan on 2021-09-14

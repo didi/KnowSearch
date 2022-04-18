@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleDocker;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

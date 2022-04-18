@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;

@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.notify.info.dcdr;
 
 import java.util.Date;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.core.notify.NotifyInfo;

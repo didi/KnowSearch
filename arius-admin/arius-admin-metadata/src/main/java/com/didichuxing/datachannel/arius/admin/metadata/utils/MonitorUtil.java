@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.utils;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
 import org.apache.commons.lang3.StringUtils;
 

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.employee.impl;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;

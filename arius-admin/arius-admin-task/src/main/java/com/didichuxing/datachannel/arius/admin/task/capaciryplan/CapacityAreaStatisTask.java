@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanStatisticsService;
 
 /**

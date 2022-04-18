@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.response;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.ElasticCloudHostStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;

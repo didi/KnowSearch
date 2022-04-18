@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
