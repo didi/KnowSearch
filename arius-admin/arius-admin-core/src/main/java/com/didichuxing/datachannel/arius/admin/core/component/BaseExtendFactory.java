@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.component;
+package com.didichuxing.datachannel.arius.admin.core.component;
 
 import java.util.Map;
 

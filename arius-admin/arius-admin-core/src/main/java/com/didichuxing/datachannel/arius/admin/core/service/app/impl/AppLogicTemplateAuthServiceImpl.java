@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO;
-import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthEditEvent;

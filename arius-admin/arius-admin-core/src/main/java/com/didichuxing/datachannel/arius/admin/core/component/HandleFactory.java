@@ -1,5 +1,6 @@
-package com.didichuxing.datachannel.arius.admin.common.component;
+package com.didichuxing.datachannel.arius.admin.core.component;
 
+import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import org.springframework.stereotype.Component;

@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Mod
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppClusterLogicAuthPO;
-import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppLogicClusterAuthAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppLogicClusterAuthDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppLogicClusterAuthEditEvent;

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.ExtendServiceNotSupportException;
-import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 

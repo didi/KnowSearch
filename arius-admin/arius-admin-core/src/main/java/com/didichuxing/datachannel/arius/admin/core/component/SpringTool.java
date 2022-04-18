@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.component;
+package com.didichuxing.datachannel.arius.admin.core.component;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
