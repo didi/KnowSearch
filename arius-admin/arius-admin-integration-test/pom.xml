@@ -6,7 +6,6 @@
         <artifactId>arius-admin</artifactId>
         <groupId>com.didichuxing.datachannel</groupId>
         <version>${revision}${sha1}${changelist}</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

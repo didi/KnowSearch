@@ -8,7 +8,6 @@
         <groupId>com.didichuxing.datachannel</groupId>
         <artifactId>arius-admin</artifactId>
         <version>${revision}${sha1}${changelist}</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>arius-admin-client</artifactId>
