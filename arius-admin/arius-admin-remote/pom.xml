@@ -7,7 +7,8 @@
     <parent>
         <groupId>com.didichuxing.datachannel</groupId>
         <artifactId>arius-admin</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>${revision}${sha1}${changelist}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>arius-admin-remote</artifactId>

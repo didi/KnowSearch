@@ -6,7 +6,7 @@
 
     <groupId>com.didichuxing.datachannel</groupId>
     <artifactId>arius-admin</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>${revision}${sha1}${changelist}</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -24,7 +24,9 @@
     </modules>
 
     <properties>
-        <arius.admin.version>1.0.1-SNAPSHOT</arius.admin.version>
+        <revision>1.0.1-SNAPSHOT</revision>
+        <sha1/>
+        <changelist/>
         <arius.admin.client.version>1.0.6-SNAPSHOT</arius.admin.client.version>
         <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
         <spring.version>5.0.18.RELEASE</spring.version>
@@ -52,47 +54,47 @@
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-persistence</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-core</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-metadata</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-common</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-rest</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-remote</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-task</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-biz</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>capacity-plan</artifactId>
-                <version>${arius.admin.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
 
             <dependency>
