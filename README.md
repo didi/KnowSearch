@@ -1,6 +1,4 @@
-<img src="./doc/file/KnowSearch.png" width="200" align=left />
-
-
+<img src="./doc/file/KnowSearch.png" width="200"/>
 
 KnowSearch：一站式 Elasticsearch 集群指标监控与运维管控平台。阅读本README文档，您可以了解到滴滴KnowSearch的产品定位、体验地图、快速安装，并可以在线进行产品体验。
 
