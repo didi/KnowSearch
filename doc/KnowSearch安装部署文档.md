@@ -1,6 +1,6 @@
 # 1.部署架构说明
 
-LogiEM 平台由两个后端应用，一个前端应用，一个kibana服务，一个ngnix服务构成，它们之间的部署架构如下图所属：
+KnowSearch由两个后端应用，一个前端应用，一个kibana服务，一个ngnix服务构成，它们之间的部署架构如下图所属：
 
 <img src="http://116.85.24.226/images/3001.png" alt="3001" style="zoom:50%;" />
 
