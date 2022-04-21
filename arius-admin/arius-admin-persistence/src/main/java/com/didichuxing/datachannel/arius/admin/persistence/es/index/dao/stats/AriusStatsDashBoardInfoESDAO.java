@@ -257,7 +257,8 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
             if (null == dsl) { return finalTopMetrics;}
 
             List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
-                s -> fetchMultipleNoNegativeAggMetrics(s, noNegativeMetricsList, topNu), 3);
+                s -> fetchMultipleNoNegativeAggMetrics(s, oneLevelType,noNegativeMetricsList,
+                    topNu), 3);
     
             variousLineChartMetrics.stream().map(this::buildDashboardTopMetrics).forEach(finalTopMetrics::add);
         }
