@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum;
+package com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant;
 
 public enum EcmActionEnum {
     START("start"),

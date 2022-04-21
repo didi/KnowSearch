@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class MetaDataMonitorMetrics2ZHListener implements ApplicationListener<MetaDataMetricsEvent> {
-    protected static final ILog LOGGER = LogFactory.getLog(MetaDataMonitorMetrics2N9eListener.class);
+    protected static final ILog LOGGER = LogFactory.getLog(MetaDataMonitorMetrics2ZHListener.class);
 
     //@Autowired
 //    private ZHKafkaWriterService ZHKafkaWriterService;

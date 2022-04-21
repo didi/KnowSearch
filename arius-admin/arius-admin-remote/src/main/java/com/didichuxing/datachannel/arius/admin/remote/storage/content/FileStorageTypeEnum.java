@@ -9,14 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
  * @date 2021-04-26
  */
 public enum FileStorageTypeEnum {
-                                 /**
-                                  * 本地部门信息, 固定为一个部门即可
-                                  */
-                                 DEFAULT(1, "default"),
-
-                                 S3(2, "s3"),
-
-                                 GIFT(3, "gift"),
+                                 S3(1, "s3"),
 
                                  UNKNOWN(-1, "unknown");
 

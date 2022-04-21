@@ -31,8 +31,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleC
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
-import com.didichuxing.datachannel.arius.admin.remote.monitor.RemoteMonitorService;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import lombok.NoArgsConstructor;
@@ -90,9 +89,6 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     private ESPackageService                    esPackageService;
 
     @Autowired
-    private RemoteMonitorService                remoteMonitorService;
-
-    @Autowired
     private AriusUserInfoService                ariusUserInfoService;
 
     private AriusTaskThreadPool                 ariusTaskThreadPool;
@@ -141,29 +137,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
 
     @Override
     public Result<Void> deleteESCluster(Long clusterId, String operator) {
-        Result<Void> checkResult = validityCheck(clusterId.intValue(), operator);
-        if (checkResult.failed()) {
-            return checkResult;
-        }
-
-        ClusterPhy clusterPhy = esClusterPhyService.getClusterById(clusterId.intValue());
-        if (clusterPhy == null) {
-            return Result.buildFail("clusterPhy is empty");
-        }
-        List<RoleCluster> allRoles = roleClusterService.getAllRoleClusterByClusterId(clusterId.intValue());
-        if (CollectionUtils.isEmpty(allRoles)) {
-            return Result.buildFail("the role of cluster is empty");
-        }
-
-        Result<List<ElasticCloudCommonActionParam>> deleteOdinResult = deleteOdinMachine(clusterPhy, allRoles,
-            operator);
-
-        if (deleteOdinResult.success()) {
-            ariusTaskThreadPool
-                .run(() -> deleteOdinTreeNodeAndLocalDbInfo(deleteOdinResult.getData(), clusterPhy, operator));
-        }
-
-        return Result.buildSuccWithMsg(deleteOdinResult.getMessage());
+        return Result.buildSucc();
     }
 
     @Override
@@ -214,7 +188,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
 
     @Override
     public Result<EcmOperateAppBase> actionUnfinishedESCluster(EcmActionEnum ecmActionEnum, EcmParamBase ecmParamBase, String hostname,
-                                            String operator) {
+                                                               String operator) {
         // 构造请求参数
         Result<EcmParamBase> actionParamBaseResult = supplyCommonActionParamBase(ecmParamBase.getPhyClusterId(),
             ecmParamBase.getRoleName(), ecmParamBase);
@@ -524,65 +498,6 @@ public class EcmHandleServiceImpl implements EcmHandleService {
 
     private AbstractEcmBaseHandle getByClusterType(Integer clusterType) {
         return ecmBaseHandleMap.get(clusterType);
-    }
-
-    private void deleteOdinTreeNodeAndLocalDbInfo(List<ElasticCloudCommonActionParam> elasticCloudActionParams,
-                                                  ClusterPhy clusterPhy, String operator) {
-
-        AtomicBoolean deleteAllTreeNodeFlag = deleteOdinTreeNode(elasticCloudActionParams);
-        if (deleteAllTreeNodeFlag.get()) {
-            LOGGER.info("class=ElasticClusterServiceImpl||method=delOdinTree||clusterId={}||clusterName={}||"
-                        + "msg=success to delete cluster treeNode!",
-                clusterPhy.getId(), clusterPhy.getCluster());
-            //删除odin节点后同步删除本地
-            deleteLocalClusterInfo(clusterPhy, operator);
-        }
-    }
-
-    private AtomicBoolean deleteOdinTreeNode(List<ElasticCloudCommonActionParam> actionParam) {
-        //重复删除多次直到成功
-        int retryTime = 0;
-        AtomicBoolean deleteAllTreeNodeFlag = new AtomicBoolean(false);
-        while (retryTime++ < DELETE_ODIN_TREE_MAX_RETRY_TIMES) {
-            actionParam.stream().filter(Objects::nonNull).forEach(param -> {
-                try {
-                    //等待2s删除odin节点上机器后, 尝试删除tree节点
-                    Thread.sleep(2 * 1000L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    LOGGER.error("class=ElasticClusterServiceImpl||method=deleteOdinTreeNode||errMsg=exception", e);
-                }
-
-                // 删除odin单个子节点
-                String ns = param.getRoleName() + "." + param.getPhyClusterName() + "." + param.getNsTree();
-                remoteMonitorService.deleteTreeNode(ns, CloudClusterCreateParamConstant.ODIN_CATEGORY_SERVICE, ns,
-                    ODIN_CATEGORY_LEVEL_2);
-
-                if (param.getRoleName().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())) {
-                    // 删除odin父节点
-                    String fatherNs = param.getPhyClusterName() + "." + param.getNsTree();
-                    Result<Void> deleteFatherTreeNodeResult = remoteMonitorService.deleteTreeNode(fatherNs,
-                        CloudClusterCreateParamConstant.ODIN_CATEGORY_GROUP, fatherNs, ODIN_CATEGORY_LEVEL_1);
-
-                    if (deleteFatherTreeNodeResult.success()) {
-                        LOGGER.info("class=ElasticClusterServiceImpl||method=delOdinTree||clusterName={}||role={}||"
-                                    + "msg=success to delete cluster treeNode",
-                            param.getPhyClusterName(), param.getRoleName());
-                        deleteAllTreeNodeFlag.set(true);
-                    }
-                }
-            });
-
-            LOGGER.info("class=ElasticClusterServiceImpl||method=delOdinTree||clusterName={}||retryTime={}||"
-                        + "msg=try to delete the Odin cluster",
-                actionParam.get(0).getPhyClusterName(), retryTime);
-
-            if (deleteAllTreeNodeFlag.get()) {
-                return deleteAllTreeNodeFlag;
-            }
-        }
-
-        return deleteAllTreeNodeFlag;
     }
 
     private void deleteLocalClusterInfo(ClusterPhy clusterPhy, String operator) {
