@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard;
 import java.util.List;
 import java.util.Map;
 
+import com.didichuxing.datachannel.arius.admin.task.component.TaskResultBuilder;
 import com.didichuxing.datachannel.arius.admin.task.dashboard.collector.BaseDashboardCollector;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class DashboardAllClusterCollectorTask implements Job {
         LOGGER.info("class=DashboardAllClusterCollectorTask||method=execute||msg=BaseDashboardCollectorTask start.");
         long currentTimeMillis = System.currentTimeMillis();
         long currentTime       = CommonUtils.monitorTimestamp2min(currentTimeMillis);
+        TaskResultBuilder taskResultBuilder = new TaskResultBuilder();
         List<String> clusterNameList = clusterPhyService.listAllClusterNameList();
         if (CollectionUtils.isEmpty(clusterNameList)) {
             LOGGER.warn("class=DashboardAllClusterCollectorTask||method=execute||msg=clusterNameList is empty");
@@ -52,14 +54,16 @@ public class DashboardAllClusterCollectorTask implements Job {
                 Thread.sleep(2000);
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
-                LOGGER.error("class=DashboardAllClusterCollectorTask||collectorName={}||method=execute||errMsg={}",
-                    collector.getName(), e.getMessage(), e);
+                String errLog = "class=DashboardAllClusterCollectorTask||collectorName=" + collector.getName()
+                        + "||method=execute||errMsg=" + e.getMessage();
+                LOGGER.error(errLog, e);
+                taskResultBuilder.append(errLog);
             }
         }
 
         LOGGER.info("class=BaseDashboardCollectorTask||method=execute||msg=BaseDashboardCollectorTask finish, cost:{}ms",
                 System.currentTimeMillis() - currentTimeMillis);
-        return TaskResult.SUCCESS;
+        return taskResultBuilder.build();
     }
 
 }

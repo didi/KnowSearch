@@ -347,9 +347,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return checkResult;
         }
 
+        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getId());
         Result<Void> result = editTemplateWithoutCheck(param, operator, 0);
         if (result.success()) {
-            IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getId());
             String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
             if (StringUtils.isNotBlank(editContent)) {
                 operateRecordService.save(TEMPLATE, EDIT, param.getLogicId(),

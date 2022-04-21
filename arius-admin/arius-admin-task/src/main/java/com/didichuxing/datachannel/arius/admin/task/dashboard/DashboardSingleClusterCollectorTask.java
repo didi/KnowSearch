@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.task.component.TaskResultBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,6 +63,7 @@ public class DashboardSingleClusterCollectorTask implements Job {
 
         long currentTimeMillis = System.currentTimeMillis();
         long currentTime       = CommonUtils.monitorTimestamp2min(currentTimeMillis);
+        TaskResultBuilder taskResultBuilder = new TaskResultBuilder();
 
         // 分组
         List<List<ClusterPhy>> partitionClusterList = Lists.partition(monitorCluster, SINGLE_GROUP_CLUSTER_NUM);
@@ -76,9 +78,10 @@ public class DashboardSingleClusterCollectorTask implements Job {
                             collector.collectSingleCluster(clusterPhy.getCluster(), currentTime);
                         } catch (Exception e) {
                             Thread.currentThread().interrupt();
-                            LOGGER.error(
-                                    "class=DashboardSingleClusterCollectorTask||collectorName={}||method=execute||errMsg={}",
-                                    collector.getName(), e.getMessage(), e);
+                            String errLog = "class=DashboardSingleClusterCollectorTask||collectorName=" + collector.getName()
+                                    + "||method=execute||errMsg=" + e.getMessage();
+                            LOGGER.error(errLog, e);
+                            taskResultBuilder.append(errLog);
                         }
                     });
                 }
@@ -89,6 +92,6 @@ public class DashboardSingleClusterCollectorTask implements Job {
 
         LOGGER.info("class=BaseDashboardCollectorTask||method=execute||msg=BaseDashboardCollectorTask finish, cost:{}ms",
                 System.currentTimeMillis() - currentTimeMillis);
-        return TaskResult.SUCCESS;
+        return taskResultBuilder.build();
     }
 }

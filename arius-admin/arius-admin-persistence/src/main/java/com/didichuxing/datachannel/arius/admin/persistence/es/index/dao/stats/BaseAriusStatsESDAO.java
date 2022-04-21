@@ -420,7 +420,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
      * @return
      */
      List<VariousLineChartMetrics> fetchMultipleNoNegativeAggMetrics(ESQueryResponse response,
-        List<String> metricsKeys, Integer topNu) {
+        String oneLevelType, List<String> metricsKeys, Integer topNu) {
          List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
     
          if (null == response || response.getAggs() == null) {
@@ -432,7 +432,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
          if (null != esAggrMap && null != esAggrMap.get(HIST)) {
              metricsKeys.stream()
                  //对非负型指标进行获取
-                 .map(key -> buildVariousLineNoNegativeChartMetrics(key, esAggrMap))
+                 .map(key -> buildVariousLineNoNegativeChartMetrics(oneLevelType,key, esAggrMap))
                  //过滤除节点指标为空的状态
                  .filter(variousLineChartMetric -> CollectionUtils.isNotEmpty(
                      variousLineChartMetric.getMetricsContents()))
@@ -551,14 +551,15 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         variousLineChartMetrics.setMetricsContents(buildMetricsContents(oneLevelType, key, esAggrMap));
         return variousLineChartMetrics;
     }
-    private VariousLineChartMetrics buildVariousLineNoNegativeChartMetrics(String key,Map<String,
+    private VariousLineChartMetrics buildVariousLineNoNegativeChartMetrics( String oneLevelType,String key,Map<String,
         ESAggr> esAggrMap){
         VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
         variousLineChartMetrics.setType(key);
-        variousLineChartMetrics.setMetricsContents(buildMetricsNoNegativeContents(key, esAggrMap));
+        variousLineChartMetrics.setMetricsContents(buildMetricsNoNegativeContents(oneLevelType,key,
+            esAggrMap));
         return variousLineChartMetrics;
     }
-    private List<MetricsContent> buildMetricsNoNegativeContents(String key, Map<String, ESAggr> esAggrMap) {
+    private List<MetricsContent> buildMetricsNoNegativeContents( String oneLevelType,String key, Map<String, ESAggr> esAggrMap) {
         List<MetricsContent> metricsContents = Lists.newArrayList();
     
         if (Objects.nonNull(esAggrMap.get(HIST))) {
@@ -569,7 +570,22 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                     if (null != esBucket.getUnusedMap()) {
                         MetricsContent metricsContent = new MetricsContent();
                         if (Objects.nonNull(esBucket.getUnusedMap().get(KEY))) {
-                            metricsContent.setName(esBucket.getUnusedMap().get(KEY).toString());
+                            String keyValue = esBucket.getUnusedMap().get(KEY).toString();
+                            if (null != oneLevelType && OneLevelTypeEnum.listNoClusterOneLevelType()
+                                .contains(oneLevelType)) {
+                                // 针对非集群维度指标，需要区分节点、模板、索引等所属集群
+                                String[] keyArr = keyValue.split("@");
+                                if (keyArr.length > 1) {
+                                    String clusterName = keyArr[0];
+                                    String name/*节点、模板、索引等名称*/ = keyArr[1];
+                                    metricsContent.setCluster(clusterName);
+                                    metricsContent.setName(name);
+                                }
+                            } else {
+                                // 针对集群维度指标
+                                metricsContent.setName(keyValue);
+                                metricsContent.setCluster(keyValue);
+                            }
                             final List<MetricsContentCell> metricsContentCells = buildMetricsNoNegativeContentCells(
                                 key, esBucket);
                             //确定指标集合不为空

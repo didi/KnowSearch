@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.MapUtils;
@@ -15,26 +16,25 @@ import java.util.Map;
 @NoArgsConstructor
 public class TemplateSettingOperateRecord extends TemplateOperateRecord {
 
-    /**
-     * 旧的setting
-     */
-    private IndexTemplatePhySettings oldConfig;
-
-    /**
-     * 新的setting
-     */
-    private IndexTemplatePhySettings newConfig;
-
-    /**
-     * 新旧setting 不同的位点
-     */
-    private Map<String, String> diffContext;
-
     public TemplateSettingOperateRecord(IndexTemplatePhySettings oldConfig, IndexTemplatePhySettings newConfig ) {
-        this.oldConfig = oldConfig;
-        this.newConfig = newConfig;
-        this.diffContext = MapUtils.findChangedWithDestV(oldConfig.flatSettings(), newConfig.flatSettings());
         this.operateType = TemplateOperateRecordEnum.SETTING.getCode();
+
+        StringBuilder settingChange = new StringBuilder();
+        JSONObject oldSetting = oldConfig.getSettings().getJSONObject("index");
+        JSONObject newSetting = newConfig.getSettings().getJSONObject("index");
+
+        Integer newSettingShardNum = newSetting.getInteger("number_of_replicas");
+        Integer oldSettingShardNum = oldSetting.getInteger("number_of_replicas");
+        if (oldSettingShardNum != newSettingShardNum) {
+            settingChange.append(newSettingShardNum > 0 ? "关闭取消副本": "开启取消副本").append("，");
+        }
+
+        String newSettingTranslog = newSetting.getJSONObject("translog").getString("durability");
+        String oldSettingTranslog = oldSetting.getJSONObject("translog").getString("durability");
+        if (!oldSettingTranslog.equals(newSettingTranslog)) {
+            settingChange.append(newSettingTranslog.equals("async") ? "开启异步translog" : "关闭异步translog");
+        }
+        this.operateDesc = settingChange.toString();
     }
 
 }

@@ -260,7 +260,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             insertTemplateConfig(defaultTemplateConfig);
 
             // 记录操作记录
-            operateRecordService.save(TEMPLATE, ADD, param.getId(), "", operator);
+            operateRecordService.save(TEMPLATE, ADD, param.getId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")), operator);
 
             SpringTool.publish(new LogicTemplateAddEvent(this, templateLogicService.getLogicTemplateById(param.getId())));
         }
@@ -648,7 +648,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (updateStatusResult.success()) {
                 // rollover状态修改记录(兼容开启或者关闭)
                 operateRecordService.save(TEMPLATE, OperationEnum.EDIT, templateLogicId, JSON.toJSONString(
-                        new TemplateOperateRecord(TemplateOperateRecordEnum.ROLLOVER.getCode(), "rollover状态修改为" + status)), operator);
+                        new TemplateOperateRecord(TemplateOperateRecordEnum.ROLLOVER.getCode(), "rollover状态修改为:" + (newDisable ? "关闭" : "开启"))), operator);
             }
         }
         return Result.buildSucc();
