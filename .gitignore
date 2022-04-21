@@ -44,3 +44,4 @@ polaris-agent/polaris-agent-api/*.classpath
 polaris-agent/polaris-agent-api/*.project
 .DS_Store
 .gitversion
+**/.flattened-pom.xml
