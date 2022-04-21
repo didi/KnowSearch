@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics;
 
-import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 import java.util.Arrays;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -30,7 +30,7 @@ public class MetricsTest extends AriusAdminApplicationTest {
 		final Result<Object> admin = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 1,
 				"admin",
 				ClusterPhyTypeMetricsEnum.CLUSTER);
-		System.out.println(JSON.toJSONString(admin,true));
+		Assertions.assertNotNull(admin.getData());
 	}
 	
 }
