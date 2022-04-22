@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AriusWorkTaskPO extends BasePO {
+public class AriusOpTaskPO extends BasePO {
 
     /**
      * 序列化版本号

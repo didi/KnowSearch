@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.AriusWorkTaskDAO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.AriusOpTaskDAO">
 
-    <resultMap id="WorkTaskMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.AriusWorkTaskPO">
+    <resultMap id="WorkTaskMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.AriusOpTaskPO">
    		<result column="title" jdbcType="VARCHAR" property="title"/>
 		<result column="task_type" jdbcType="INTEGER" property="taskType"/>
 		<result column="business_key" jdbcType="VARCHAR" property="businessKey"/>

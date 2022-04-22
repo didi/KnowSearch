@@ -58,7 +58,7 @@ public class DcdrWorkTaskHandler implements WorkTaskHandler {
 
     @Override
     public boolean existUnClosedTask(String key, Integer type) {
-        List<WorkTask> pengingTaskList = workTaskManager.getPengingTaskByType(type);
+        List<WorkTask> pengingTaskList = workTaskManager.getPendingTaskByType(type);
         if (CollectionUtils.isEmpty(pengingTaskList)) { return false; }
 
         List<String> businessKeyList = pengingTaskList.stream()

@@ -90,7 +90,7 @@ public interface WorkTaskManager {
      *
      * @param taskType 任务类型
      */
-    List<WorkTask> getPengingTaskByType(Integer taskType);
+    List<WorkTask> getPendingTaskByType(Integer taskType);
 
     /**
      * 根据类型获取失败任务
