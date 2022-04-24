@@ -22,7 +22,7 @@ export const EditionCluster = connect(
 )((props: any) => {
   const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject] = useState([]);
+  const [queryFormObject, setqueryFormObject] = useState([]);
   const [data, setData] = useState([]);
 
   React.useEffect(() => {
@@ -31,18 +31,18 @@ export const EditionCluster = connect(
 
   const getData = () => {
     // 查询项的key 要与 数据源的key  对应
-    if (!queryFromObject) return data;
-    const keys = Object.keys(queryFromObject);
+    if (!queryFormObject) return data;
+    const keys = Object.keys(queryFormObject);
     const filterData = data.filter((d) => {
       let b = true;
       keys.forEach((k: string) => {
         if (k === "createTime") {
           const time = moment(d[k]).unix();
-          if (queryFromObject[k][0] > time || time > queryFromObject[k][1]) {
+          if (queryFormObject[k][0] > time || time > queryFormObject[k][1]) {
             b = false;
           }
         } else {
-          (d[k] + "")?.toLowerCase().includes(queryFromObject[k])
+          (d[k] + "")?.toLowerCase().includes(queryFormObject[k])
             ? ""
             : (b = false);
         }
@@ -81,7 +81,7 @@ export const EditionCluster = connect(
         delete result[key];
       }
     }
-    setqueryFromObject(result);
+    setqueryFormObject(result);
   };
 
   const getOpBtns = (): ITableBtn[] => {
@@ -90,7 +90,7 @@ export const EditionCluster = connect(
         label: "新增版本",
         isOpenUp: isOpenUp,
         className: "ant-btn-primary",
-        clickFunc: () => props.setModalId("addPackageModal", {manifest: 4, addPackage: true}, reloadData),
+        clickFunc: () => props.setModalId("addPackageModal", { manifest: 4, addPackage: true }, reloadData),
       },
     ];
   };
@@ -120,7 +120,7 @@ export const EditionCluster = connect(
             columns={getVersionsColumns(props.setModalId, reloadData)}
             reloadData={reloadData}
             getOpBtns={getOpBtns}
-            // tableHeaderSearchInput={{submit: handleSubmit}}
+          // tableHeaderSearchInput={{submit: handleSubmit}}
           />
         </div>
       </div>

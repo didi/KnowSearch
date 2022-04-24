@@ -7,7 +7,6 @@ import "./style.less";
 // import './assets/iconfont/iconfont.css';
 // import './assets/iconfont/iconfont.js';
 import "./assets/iconfont-es/iconfont.js";
-// import projectLogo from "../../assets/es-logo.png";
 import { CustomAppDropDown } from "../ProjectSelect";
 import { IProject } from "interface/project";
 import { Layout } from "antd";

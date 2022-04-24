@@ -20,7 +20,7 @@ interface ISlowList {
 interface IDslList {
   endTime: number;
   startTime: number;
-  from: number;
+  page: number;
   size: number;
   dslTemplateMd5?: string;
   queryIndex?: string;

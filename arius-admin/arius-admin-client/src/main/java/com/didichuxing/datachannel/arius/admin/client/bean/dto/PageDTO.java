@@ -15,9 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "分页实体")
 public class PageDTO extends BaseDTO{
-    @ApiModelProperty("起始点")
-    private Long from;
+    @ApiModelProperty("起始页码 前端需求默认第一页的页码是1而不是0")
+    private Long page;
 
     @ApiModelProperty("当前页数量")
     private Long size;
+
 }

@@ -30,11 +30,12 @@
         <result column="disk_total"                 jdbcType="BIGINT" property="diskTotal"/>
         <result column="disk_usage"                 jdbcType="BIGINT" property="diskUsage"/>
         <result column="disk_usage_percent"         jdbcType="DECIMAL" property="diskUsagePercent"/>
+        <result column="tags"                 jdbcType="VARCHAR" property="tags" />
     </resultMap>
 
     <sql id="Base_Column_List">
        id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`, password, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time, run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent
+        es_version, `level`, password, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time, run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO"
@@ -42,10 +43,11 @@
             keyColumn="id" keyProperty="id">
         insert into es_data_source
         ( cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent)
+        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent, `tags`)
         values
         (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type}, #{dataCenter},#{imageName},#{idc},
-        #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health}, #{password}, #{activeShardNum}, #{diskTotal}, #{diskUsage}, #{diskUsagePercent})
+        #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health}, #{password}, #{activeShardNum}, #{diskTotal}, #{diskUsage}, #{diskUsagePercent},
+         #{tags})
     </insert>
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO">
         update es_data_source
@@ -76,6 +78,7 @@
             <if test="diskTotal != null">, disk_total = #{diskTotal}</if>
             <if test="diskUsage != null">, disk_usage = #{diskUsage}</if>
             <if test="diskUsagePercent != null">, disk_usage_percent = #{diskUsagePercent}</if>
+            <if test="tags != null">, `tags` = #{tags}</if>
         </trim>
         where id = #{id} and is_active = 1;
     </update>
@@ -164,6 +167,11 @@
     <select id="listAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
+        from es_data_source where is_active = 1;
+    </select>
+
+    <select id="listAllName" resultType="String">
+        select cluster
         from es_data_source where is_active = 1;
     </select>
 

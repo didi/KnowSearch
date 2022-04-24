@@ -34,4 +34,18 @@ public class ESLogicClusterRackInfoDTO extends BaseDTO {
     @JSONField(alternateNames = {"rack", "racks"})
     private String racks;
 
+    @ApiModelProperty("逻辑集群ID")
+    private Long resourceId;
+
+    @ApiModelProperty("物理集群名称")
+    private String cluster;
+
+    @ApiModelProperty("rack")
+    private String rack;
+
+    @ApiModelProperty("type：1.共享资源; 2.独立资源; 3.独享资源;")
+    private String type;
+
+
+
 }

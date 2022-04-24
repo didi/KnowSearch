@@ -69,6 +69,8 @@ public interface TemplatePhyManager {
 
     Result<Boolean> upgradeMultipleTemplate(List<TemplatePhysicalUpgradeDTO> params, String operator) throws ESOperateException;
 
+    Result<Void> rolloverUpgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException;
+
     /**
      * 复制 只在目标集群建立模板即可,模板管理的资源都是与逻辑模板id管理,与物理模板没有关系
      *
@@ -118,7 +120,7 @@ public interface TemplatePhyManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> addTemplatesWithoutCheck(Integer logicId,
-                                          List<IndexTemplatePhysicalDTO> physicalInfos) throws ESOperateException;
+                                          List<IndexTemplatePhysicalDTO> physicalInfos) throws AdminOperateException;
 
     /**
      * 新建
@@ -127,7 +129,7 @@ public interface TemplatePhyManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalDTO param) throws ESOperateException;
+    Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalDTO param) throws AdminOperateException;
 
     /**
      * 修改由于逻辑模板修改而物理模板需要同步修改的属性

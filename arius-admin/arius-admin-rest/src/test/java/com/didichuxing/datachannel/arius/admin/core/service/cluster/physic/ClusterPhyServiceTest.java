@@ -339,7 +339,7 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
     private ClusterPhyConditionDTO clusterPhyConditionDTOFactory() {
         ClusterPhyConditionDTO clusterPhyConditionDTO = new ClusterPhyConditionDTO();
         clusterPhyConditionDTO.setCluster(CustomDataSource.PHY_CLUSTER_NAME);
-        clusterPhyConditionDTO.setFrom(0L);
+        clusterPhyConditionDTO.setPage(1L);
         clusterPhyConditionDTO.setSize(1L);
         return clusterPhyConditionDTO;
     }

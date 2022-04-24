@@ -21,7 +21,7 @@
         insert into gateway_node
             (cluster_name, host_name, port, heartbeat_time)
         values (#{clusterName}, #{hostName}, #{port}, #{heartbeatTime}) ON DUPLICATE KEY
-        UPDATE cluster_name= #{clusterName}, heartbeat_time= #{heartbeatTime}
+        UPDATE heartbeat_time= #{heartbeatTime}
     </insert>
 
     <select id="aliveCountByClusterNameAndTime" parameterType="map" resultType="integer">

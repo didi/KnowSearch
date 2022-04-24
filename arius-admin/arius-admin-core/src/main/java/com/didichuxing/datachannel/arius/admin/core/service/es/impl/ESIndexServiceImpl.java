@@ -38,6 +38,7 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiInde
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -95,6 +96,13 @@ public class ESIndexServiceImpl implements ESIndexService {
             return "";
         }
         return mappingConfig.toJson().toString();
+    }
+
+    @Override
+    public Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList) {
+        MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
+        if (null == multiIndexsConfig) { return Maps.newConcurrentMap();}
+        return multiIndexsConfig.getIndexConfigMap();
     }
 
     /**
@@ -395,9 +403,22 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<CatIndexResult> syncCatIndex(String clusterPhyName) {
-        List<CatIndexResult> catIndexResults = esIndexDAO.catIndices(clusterPhyName);
-        return catIndexResults.stream().filter(this::filterOriginalIndices).collect(Collectors.toList());
+    public List<CatIndexResult> syncCatIndex(String clusterPhyName, int tryTimes) {
+        int retryCount = tryTimes < 0 ? 1 : tryTimes;
+        List<CatIndexResult> catIndexResultList = Lists.newArrayList();
+        while (retryCount-- > 0) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
+            }
+            catIndexResultList.addAll(esIndexDAO.catIndices(clusterPhyName));
+            if (CollectionUtils.isNotEmpty(catIndexResultList)) { break;}
+        }
+
+
+        return catIndexResultList.stream().filter(this::filterOriginalIndices).collect(Collectors.toList());
     }
 
     /**
@@ -474,8 +495,7 @@ public class ESIndexServiceImpl implements ESIndexService {
 
             indexResponses = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(), IndexResponse.class);
         }
-        return indexResponses.stream().map(IndexResponse::getIndex).filter(index -> !index.startsWith("."))
-            .collect(Collectors.toList());
+        return indexResponses.stream().map(IndexResponse::getIndex).collect(Collectors.toList());
     }
 
     @Override
@@ -588,8 +608,9 @@ public class ESIndexServiceImpl implements ESIndexService {
             syncDeleteIndexByExpression(cluster, indices, retryCount);
             return true;
         } catch (ESOperateException e) {
-            LOGGER.info("class=ESIndexServiceImpl||method=batchDeleteIndicesInner||cluster={}||indices={}", cluster,
-                indices);
+            LOGGER.error("class=ESIndexServiceImpl||method=batchDeleteIndicesInner||cluster"
+                    + "={}||indices={}", cluster,
+                indices,e);
         }
         return false;
     }

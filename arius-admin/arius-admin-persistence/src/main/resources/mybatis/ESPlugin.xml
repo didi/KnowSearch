@@ -101,7 +101,7 @@
         select
         <include refid="Base_Column_List"/>
         FROM es_plugin WHERE
-        (find_in_set(#{physicClusterId}, physic_cluster_ids) or p_default = 1) and delete_flag = 0
+        find_in_set(#{physicClusterId}, physic_cluster_ids)  and delete_flag = 0
     </select>
     <!--根据 ID list 查询插件 列表 -->
     <select id="listByPlugIds" parameterType="list" resultMap="BaseResultMap">

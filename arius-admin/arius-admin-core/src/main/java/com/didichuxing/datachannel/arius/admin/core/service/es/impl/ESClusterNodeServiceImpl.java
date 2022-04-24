@@ -7,11 +7,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhy
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.SOURCE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TASKS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIME_IN_QUEUE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_MOVING_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PENDING_TASKS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigShardsRequestContent;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShardToNodeRequestContentByIndexName;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -71,7 +68,30 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         }
 
         ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).execute()
-                .actionGet(30, TimeUnit.SECONDS);
+                    .actionGet(30, TimeUnit.SECONDS);
+
+        return response.getNodes();
+    }
+
+    @Override
+    public Map<String, ClusterNodeStats> syncGetNodePartStatsMap(String clusterName) {
+        ESClient esClient = esOpClient.getESClient(clusterName);
+        if (esClient == null) {
+            LOGGER.error(
+                    "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
+                    clusterName);
+            return Maps.newHashMap();
+        }
+
+        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats()
+                .setFs(true)
+                .setOs(true)
+                .setJvm(true)
+                .setThreadPool(true)
+                .level("node")
+                .execute()
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
         return response.getNodes();
     }
 
@@ -79,6 +99,12 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     public List<String> syncGetNodeHosts(String clusterName) {
         return syncGetNodeInfo(clusterName).values().stream().map(ClusterNodeInfo::getHost)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> syncGetNodeIp(String clusterName) {
+        return syncGetNodeInfo(clusterName).values().stream().map(ClusterNodeInfo::getIp)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -159,35 +185,26 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public List<MovingShardMetrics> syncGetMovingShards(String clusterName) {
-        DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", GET_MOVING_SHARD);
-
-        List<MovingShardMetrics> movingShardsMetrics = Lists.newArrayList();
-        if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-
-            movingShardsMetrics = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(),
-                    MovingShardMetrics.class);
-
-        }
-        return movingShardsMetrics;
-    }
-
-    @Override
-    public List<BigShardMetrics> syncGetBigShards(String clusterName) {
-        String bigShardsRequestContent = getBigShardsRequestContent("20s");
+    public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) {
+        String bigShardsRequestContent = getShards2NodeRequestContent("20s");
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", bigShardsRequestContent);
 
-        List<BigShardMetrics> bigShardsMetrics = Lists.newArrayList();
+        Map<String/*node*/, Long /*shardNum*/> node2ShardNumMap = Maps.newHashMap();
         if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-            List<BigShardMetrics> bigShardsMetricsFromES = ConvertUtil
-                    .str2ObjArrayByJson(directResponse.getResponseContent(), BigShardMetrics.class);
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            List<ShardMetrics> bigShardsMetricsFromES = ConvertUtil
+                .str2ObjArrayByJson(directResponse.getResponseContent(), ShardMetrics.class);
 
-            return bigShardsMetricsFromES.stream().filter(this::filterBigShard).collect(Collectors.toList());
+            Map<String, List<ShardMetrics>> node2ShardMetricsListMap = ConvertUtil
+                .list2MapOfList(bigShardsMetricsFromES, ShardMetrics::getNode, ShardMetrics -> ShardMetrics);
+
+            node2ShardMetricsListMap.forEach((key, value) -> {
+                node2ShardNumMap.put(key, (long) value.size());
+            });
+            return node2ShardNumMap;
         }
 
-        return bigShardsMetrics;
+        return node2ShardNumMap;
     }
 
     @Override
@@ -278,20 +295,4 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     /*********************************************private******************************************/
-    private boolean filterBigShard(BigShardMetrics bigShardMetrics) {
-        String store = bigShardMetrics.getStore();
-        StringBuilder sb = new StringBuilder();
-        if (null != store && store.endsWith("gb")) {
-            for (int i = 0; i < store.length(); i++) {
-                if ('g' == (store.charAt(i))) {
-                    break;
-                }
-                sb.append(store.charAt(i));
-            }
-
-            return BIG_SHARD <= Double.valueOf(sb.toString());
-        }
-
-        return false;
-    }
 }

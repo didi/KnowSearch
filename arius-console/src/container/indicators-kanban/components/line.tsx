@@ -1,9 +1,9 @@
-import React, { memo, useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import * as echarts from "echarts/core";
-import { Spin, Empty,  Tooltip, Modal } from "antd";
-import _ from "lodash";
+import { Spin, Empty, Tooltip, Modal } from "antd";
+import _, { cloneDeep } from "lodash";
 import {
   BarChart,
   // 系列类型的定义后缀都为 SeriesOption
@@ -28,6 +28,7 @@ import { CanvasRenderer } from "echarts/renderers";
 import * as actions from "actions";
 import { useMouseoutOutSide } from '../hooks/useMouseoutOutSide';
 import "../style/index";
+import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
 
 const iconSrc = require("../img/full-screen.png");
 
@@ -71,6 +72,8 @@ export interface ILine {
   height?: number | string;
   isLoading?: boolean;
   title?: string;
+  tipSync?: boolean;
+  cb?: Function;
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
@@ -81,25 +84,41 @@ export const DrawLine = connect(
   null,
   mapDispatchToProps
 )(
-  memo(({ index, option, setModalId, bigPicture, width, height }: ILine) => {
+  memo(({ index, option, setModalId, bigPicture, width, height, tipSync, cb }: ILine) => {
     const chartBox = useRef(null);
     const myChart = useRef(null);
     const flag = useRef(true);
+    const [isShowLegend, setIsShowLegend] = useState(false)
 
     const showTip = (params) => {
-      const {offsetX: x, offsetY: y} = params;
-
-      myChart.current.dispatchAction({
+      const { offsetX: x, offsetY: y } = params;
+      if (tipSync) {
+        if (x !== -999 || y !== -999) {
+          (window as any).lineX = x;
+          (window as any).lineY = y;
+          (window as any).lineTag = index;
+        } else if ((window as any).lineTag === index) {
+          (window as any).lineX = x;
+          (window as any).lineY = y;
+        }
+        myChart.current.dispatchAction({
           type: 'showTip',
-          x,
-          y,
-      });
+          x: x === -999 ? (window as any).lineX : x,
+          y: y === -999 ? (window as any).lineY : y,
+        });
+      } else {
+        myChart.current.dispatchAction({
+          type: 'showTip',
+          x: x,
+          y: y,
+        });
+      }
     }
 
     const hideTip = () => {
       // 设置无效的 x, y 隐藏点击显示的 toolTip 和 线
-      showTip({offsetX: -999, offsetY: -999})
-      
+      showTip({ offsetX: -999, offsetY: -999 })
+
       // 重新监听鼠标移动显示 toolTip
       chartMousemove();
 
@@ -122,7 +141,7 @@ export const DrawLine = connect(
       );
 
       // 监听点击事件
-      myChart.current.getZr().on('click', function(params) {
+      myChart.current.getZr().on('click', function (params) {
         if (flag.current) {
           myChart.current.getZr().off('mousemove');
 
@@ -153,15 +172,28 @@ export const DrawLine = connect(
 
     useEffect(() => {
       // 增加true不合并数据
-      option && myChart.current?.setOption(option, true);
-    }, [option]);
+      if (isShowLegend) {
+        const copyOption = cloneDeep(option);
+        (copyOption.legend as any) = null;
+        (copyOption.grid as any).right = '20';
+        copyOption && myChart.current?.setOption(copyOption, true);
+      } else {
+        option && myChart.current?.setOption(option, true);
+      }
+    }, [option, isShowLegend]);
 
     const getBigPictureOption = (option: ECOption): ECOption => {
       option = _.cloneDeep(option);
       (option.title as any).show = false;
       (option.title as any).top = "0";
       (option.legend as any).right = "2%";
-      (option.grid as any).right = "20%";
+      (option.legend as any).itemWidth = 20;
+      (option.legend as any).textStyle = {
+        width: 120,
+        overflow: "truncate",
+        ellipsis: "...",
+      },
+        (option.grid as any).right = "20%";
       (option.grid as any).top = "5";
       return option;
     };
@@ -190,18 +222,25 @@ export const DrawLine = connect(
               height: height ? height : "none",
             }}
           ></div>
-          <Tooltip title="查看大图">
-            <div
-              style={bigPicture ? { display: "none" } : null}
-              onClick={(e) => {
-                hideTip();
-                setModalId("bigPicture", getBigPictureOption(option));
-              }}
-              className={`${overviewClassPrefix}-overview-content-line-enlarge`}
-            >
-              <img src={iconSrc} alt="全屏" />
+          {cb ? cb() : <>
+            <div style={bigPicture ? { display: "none" } : null} className={`${overviewClassPrefix}-overview-content-line-legend`} onClick={() => setIsShowLegend(!isShowLegend)}>
+              <Tooltip title={isShowLegend ? '展开legend' : '收起legend'}>
+                {isShowLegend ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
+              </Tooltip>
             </div>
-          </Tooltip>
+            <Tooltip title="查看大图">
+              <div
+                style={bigPicture ? { display: "none" } : null}
+                onClick={(e) => {
+                  hideTip();
+                  setModalId("bigPicture", getBigPictureOption(option));
+                }}
+                className={`${overviewClassPrefix}-overview-content-line-enlarge`}
+              >
+                <img src={iconSrc} alt="全屏" />
+              </div>
+            </Tooltip>
+          </>}
         </div>
       </>
     );
@@ -215,6 +254,8 @@ export const Line: React.FC<ILine> = ({
   width,
   height,
   title,
+  tipSync,
+  cb,
 }) => {
   const renderLoading = () => {
     return (
@@ -246,7 +287,7 @@ export const Line: React.FC<ILine> = ({
   };
   const renderLine = () => {
     return (
-      <DrawLine width={width} height={height} option={option} index={index} />
+      <DrawLine width={width} height={height} option={option} index={index} tipSync={tipSync} cb={cb} />
     );
   };
   return (
@@ -254,8 +295,8 @@ export const Line: React.FC<ILine> = ({
       {isLoading
         ? renderLoading()
         : !option || Object.keys(option).length == 0
-        ? renderEmpty()
-        : renderLine()}
+          ? renderEmpty()
+          : renderLine()}
     </>
   );
 };

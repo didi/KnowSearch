@@ -373,8 +373,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             ? logicClusterDAO.listByIds(hasAuthLogicClusterIds)
             : new ArrayList<>();
 
-        // 获取作为owner的集群
-        List<ClusterLogicPO> ownedLogicClusters = logicClusterDAO.listByAppId(appId);
+        // 获取作为owner的集群, 这里权限管控逻辑参看 getClusterLogicByAppIdAndAuthType
+        List<ClusterLogicPO> ownedLogicClusters;
+        if (appService.isSuperApp(appId)) {
+            ownedLogicClusters = logicClusterDAO.listAll();
+        } else {
+            ownedLogicClusters = logicClusterDAO.listByAppId(appId);
+        }
 
         // 综合
         for (ClusterLogicPO ownedLogicCluster : ownedLogicClusters) {
@@ -599,7 +604,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
 
         return ConvertUtil.list2List(logicClusterDAO.pagingByCondition(param.getName(), param.getAppId(),
-            param.getType(), param.getHealth(), param.getFrom(), param.getSize(), sortTerm, sortType),
+                        param.getType(), param.getHealth(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType),
             ClusterLogic.class);
     }
 

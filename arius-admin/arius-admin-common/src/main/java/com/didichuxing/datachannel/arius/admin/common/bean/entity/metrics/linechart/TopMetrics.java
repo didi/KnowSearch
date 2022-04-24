@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author lyn
@@ -19,10 +19,10 @@ public class TopMetrics {
      * see ClusterPhyNodeMetricsEnum
      * see ClusterPhyIndicesMetricsEnum
      */
-    private String type;
+    private String       type;
 
     /**
-     * top索引名称/节点名称
+     * 指标看板top信息 集群名称/节点名称/模板名称/索引名称等列表
      */
-    private List<String> topName;
+    private List<String> topNames;
 }

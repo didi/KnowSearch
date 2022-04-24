@@ -6,6 +6,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.util.NamedThreadFactory;
 import org.springframework.stereotype.Component;
@@ -70,6 +71,10 @@ public class MonitorMetricsSender {
 
     public void sendClusterTaskStats(List<ESClusterTaskStats> esClusterTaskStats) {
         send2es(AriusStatsEnum.TASK_INFO, esClusterTaskStats);
+    }
+
+    public void sendDashboardStats(List<DashBoardStats> dashBoardStats) {
+        send2es(AriusStatsEnum.DASHBOARD_INFO, dashBoardStats);
     }
 
     /**

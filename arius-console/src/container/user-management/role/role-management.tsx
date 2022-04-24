@@ -25,20 +25,20 @@ interface IQueryParams {
 const RoleList: React.FC<Props> = (props) => {
   const department: string = localStorage.getItem('current-project');
   const [tableData, setTableData] = React.useState([]);
-  const [queryFromObject, setqueryFromObject] = React.useState([]);
+  const [queryFormObject, setqueryFormObject] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   React.useEffect(() => {
     reloadData();
   }, [department]);
 
   const getData = () => { // 查询项的key 要与 数据源的key  对应
-    if (!queryFromObject) return tableData;
-    const keys = Object.keys(queryFromObject);
+    if (!queryFormObject) return tableData;
+    const keys = Object.keys(queryFormObject);
     const filterData = tableData.filter(
       (d) => {
         let b = true;
         keys.forEach((k: string) => {
-          d[k]?.toLowerCase().includes(queryFromObject[k]) ? '' : b = false;
+          d[k]?.toLowerCase().includes(queryFormObject[k]) ? '' : b = false;
         })
         return b;
       }
@@ -79,7 +79,7 @@ const RoleList: React.FC<Props> = (props) => {
         delete result[key]
       }
     }
-    setqueryFromObject(result);
+    setqueryFormObject(result);
   };
 
   const getOpBtns = (): ITableBtn[] => {

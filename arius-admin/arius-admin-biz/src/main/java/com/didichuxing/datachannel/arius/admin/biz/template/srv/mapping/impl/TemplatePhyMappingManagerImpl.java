@@ -92,6 +92,14 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         return Result.buildSucc();
     }
 
+    @Override
+    public Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig){
+        if (!esIndexDAO.updateIndexMapping(cluster, index, mappingConfig)) {
+            return Result.buildFail("update index mapping fail");
+        }
+        return Result.buildSucc();
+    }
+
     /**
      * 校验模板field
      *

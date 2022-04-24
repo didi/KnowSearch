@@ -555,7 +555,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
             try {
                 MonitorTaskInfo monitorTaskInfo = monitorTaskInfoMap.computeIfAbsent(clusterName, key -> new MonitorTaskInfo(clusterName, 0L, 0L, false));
                 // 如果该集群上一个任务还在运行 并且上个任务开始时间据现在220s(请求超时为50s*4+20s处理时间)内，则返回
-                if (monitorTaskInfo.getRunning().booleanValue() && ((System.currentTimeMillis() - monitorTaskInfo.getStartTick()) < 220 * 1000L)) {
+                if (monitorTaskInfo.getRunning() && ((System.currentTimeMillis() - monitorTaskInfo.getStartTick()) < 220 * 1000L)) {
                     LOGGER.warn("class=MonitorJobHandler||method=collectData||clusterName={}||msg=task is running, monitorTaskInfo {}", clusterName, JSON.toJSONString(monitorTaskInfo));
                     //TODO 未超时的任务先不停掉避免数据时间点缺失
                     //return;

@@ -1,55 +1,30 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplateValue;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLabel;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ConsoleAppVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateCapacityVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateClearVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateDeleteVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateSampleVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateCyclicalRollInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateHealthDegreeRecordVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateValueRecordVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.*;
+import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithLabels;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -60,15 +35,21 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
 /**
  * @author d06679
@@ -82,6 +63,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
 
     private static final String INDEX_NOT_EXISTS_TIPS = "索引不存在";
+    private static final String APP_IS_NOT_EXIST = "应用不存在";
 
     @Autowired
     private AppService               appService;
@@ -106,6 +88,10 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @Autowired
     private TemplatePhyStatisManager templatePhyStatisManager;
+
+    @Autowired
+    private TemplatePipelineManager templatePipelineManager;
+
 
     @GetMapping("/listSample")
     @ResponseBody
@@ -132,7 +118,10 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
     public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "appId", required = false) Integer appId,
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
-
+        App app = appService.getAppById(appId);
+        if (null == app) {
+            return Result.buildNotExist(APP_IS_NOT_EXIST);
+        }
         return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(appId));
     }
 
@@ -388,6 +377,49 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                                                                                @RequestParam(value = "startDate") Long startDate,
                                                                                @RequestParam(value = "endDate") Long endDate) {
         return templatePhyStatisManager.getValueRecordByLogicTemplateId(logicTemplateId, startDate, endDate);
+    }
+
+    /**
+     * 获取模板当前限流值
+     */
+    @GetMapping(path = "/rateLimit")
+    @ResponseBody
+    @ApiOperation(value = "获取模板当前限流值接口", notes = "")
+    @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
+    public Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(@RequestParam("logicId") Integer logicId) throws Exception {    // 一个逻辑模板可能有master slave两种，限流查看时，默认查看master即可
+        List<IndexTemplatePhy> indexTemplatePhysical = templatePhyService.getTemplateByLogicId(logicId);
+        ConsoleTemplateRateLimitVO consoleTemplateRateLimitVO = new ConsoleTemplateRateLimitVO();
+        IndexTemplatePhy indexTemplatePhysicalMaster = new IndexTemplatePhy();
+        for (IndexTemplatePhy item : indexTemplatePhysical) {
+            if (item.getRole() == TemplateDeployRoleEnum.MASTER.getCode()) {
+                indexTemplatePhysicalMaster = item;
+            }
+        }
+        consoleTemplateRateLimitVO.setRateLimit(templatePipelineManager.getRateLimit(indexTemplatePhysicalMaster));
+        return Result.buildSucc(consoleTemplateRateLimitVO);
+    }
+
+    /**
+     * 更新模板当前限流值，更新时复用存量逻辑，调整时以百分比变更[-99,1000]
+     *  @param consoleTemplateRateLimitDTO 索引模板限流调整表单信息
+     *  @return
+     *  @throws AdminOperateException
+     */
+    @PutMapping(path = "/rateLimit")
+    @ResponseBody
+    @ApiOperation(value = "更新模板当前限流值接口", notes = "")
+    public Result updateTemplateRateLimit(@RequestBody ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) {
+        // 判断调整比例是否在区间内
+        int percent = (int) Math.ceil(100.0 * (consoleTemplateRateLimitDTO.getAdjustRateLimit() - consoleTemplateRateLimitDTO.getCurRateLimit()) / consoleTemplateRateLimitDTO.getCurRateLimit());
+        if (percent < -99 || percent > 10000) {
+            return Result.buildFail("限流调整值变化太大，一次调整比例在100倍以内");
+        }
+        try {
+            return templateLogicService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO);
+        } catch (ESOperateException e) {
+            LOGGER.info("限流调整失败", e);
+            return Result.buildFail("限流调整失败！");
+        }
     }
 
     /********************************************private************************************************/

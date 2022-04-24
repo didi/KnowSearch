@@ -12,6 +12,7 @@ import { getIndexAdminData } from 'api/index-admin';
 import { getClusterNameList } from 'api/cluster-kanban';
 import { getCheckedList, setCheckedList } from 'api/search-query';
 import FilterColumns from 'component/filterColumns';
+import { cloneDeep } from 'lodash';
 
 export const IndexAdmin = withRouter((props: { history: any }) => {
   const department: string = localStorage.getItem("current-project");
@@ -38,7 +39,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
     clusterPhyName: null,
     index: "",
     health: "",
-    from: 0,
+    page: 1,
     size: 10,
     orderByDesc: false,
     sortTerm: "",
@@ -47,7 +48,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   const [initValue, setInitValue] = useState({})
 
   const getAsyncData = async (num = 1) => {
-    if(num >= 3) {
+    if (num >= 3) {
       setTotal(0);
       setData([]);
       setIsLoading(false);
@@ -58,9 +59,15 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
         return;
       }
       setIsLoading(true);
-      const res = await getIndexAdminData(queryData);
+      const params = cloneDeep(queryData)
+      if (queryData.clusterPhyName) {
+        params.clusterPhyName = [queryData.clusterPhyName]
+      } else {
+        params.clusterPhyName = []
+      }
+      const res = await getIndexAdminData(params);
       const { bizData, pagination: { total } } = res;
-      if(!bizData) {
+      if (!bizData) {
         // 递归请求三次，后端获取数据可能不成功
         getAsyncData(num + 1);
         return;
@@ -77,18 +84,17 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
       setTotal(0);
       setData([]);
       setIsLoading(false);
-    } 
+    }
   }
 
   const getAsyncClusterName = async () => {
     const clusterNameList = await getClusterNameList();
     if (clusterNameList && clusterNameList.length > 0) {
-      setInitValue({clusterPhyName: clusterNameList[0]})
       setQueryData({
-        clusterPhyName: clusterNameList[0],
+        clusterPhyName: '',
         index: "",
         health: "",
-        from: 0,
+        page: 1,
         size: 10,
         orderByDesc: false,
         sortTerm: "",
@@ -102,15 +108,15 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   };
 
   const handleSubmit = (result) => {
-    for(let key in result) {
+    for (let key in result) {
       result[key] = result[key] || "";
     }
     // 查询可能不足当前页码，页码重置为第一页，
     setCurrent(1);
     setQueryData({
       ...queryData,
-      from: 0,
-      size: 10,
+      page: 1,
+      size: queryData.size,
       ...result
     });
   };
@@ -120,7 +126,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
     const { order, field } = sorter;
     setCurrent(current);
     const page = {
-      from: (current - 1) * pageSize,
+      page: current,
       size: pageSize,
       orderByDesc: order !== 'ascend',
       sortTerm: field
@@ -133,10 +139,10 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
 
   const modalReloadData = function (del?: boolean) {
     // 删除操作，
-    if(del) {
+    if (del) {
       setQueryData({
         ...queryData,
-        from: 0,
+        page: 0,
         size: 10,
       });
       setDelList([]);
@@ -144,7 +150,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
       setCurrent(1)
       return;
     }
-    setQueryData((state) => ({...state}));
+    setQueryData((state) => ({ ...state }));
   }
 
   const onSelectChange = (selectedRowKeys, records) => {
@@ -160,7 +166,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   }, [department]);
 
   useEffect(() => {
-     getAsyncData();
+    getAsyncData();
   }, [queryData, department]);
 
   const renderTitleContent = () => {
@@ -173,7 +179,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   const getOpBtns = useCallback(() => {
     return (
       <>
-        <FilterColumns 
+        <FilterColumns
           columns={getColumns(setModalId, setDrawerId, modalReloadData)}
           setColumns={setColumns}
           checkArr={cherryList}
@@ -199,7 +205,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
     if (checkListStr) {
       try {
         return JSON.parse(checkListStr);
-      } catch(err) {
+      } catch (err) {
         console.log(err);
       }
     } else {
@@ -252,7 +258,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
             showTotal: (t) => `共 ${realTotal} 条`,
             current: current
           }}
-          reloadData={() => {getAsyncData()}}
+          reloadData={() => { getAsyncData() }}
           columns={columns}
           renderInnerOperation={getOpBtns}
         />

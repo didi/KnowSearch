@@ -47,7 +47,7 @@ export const NodeView = memo(() => {
   };
 
   const [topNu, setTopNu] = useState(TOP_MAP[0].value);
-  const [nodeIp, setNodeIp] = useState("");
+  const [nodeIp, setNodeIp] = useState([]);
   const [nodeIpList, setNodeIpList] = useState([]);
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
   const [metricsTypes, setMetricsTypes] = useState([]);
@@ -105,11 +105,12 @@ export const NodeView = memo(() => {
         nodeIp
       );
     },
-    [startTime, endTime, topNu, nodeIp]
+    [startTime, endTime, topNu, nodeIp, isUpdate]
   );
 
   const getAllAsyncViewData = async (metricsTypes) => {
     try {
+      setIsLoading(true);
       const res = await getAsyncViewData(metricsTypes);
       setViewData(
         res.map((item) => getOption(item, indexConfigData, isMoreDay))
@@ -159,6 +160,7 @@ export const NodeView = memo(() => {
         setContent={setNodeIp}
         contentList={nodeIpList}
         placeholder="请选择节点名称"
+        type="node"
       />
     );
   };

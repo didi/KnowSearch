@@ -12,10 +12,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.cluster.*;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,14 +53,17 @@ public class ClusterOverviewMetricsHandle {
     private ESClusterNodeService       esClusterNodeService;
 
     @Autowired
+    private ESShardService             esShardService;
+
+    @Autowired
     private RoleClusterHostService     roleClusterHostService;
 
     @Autowired
     private ESTemplateService          esTemplateService;
 
-    private static final FutureUtil<Void>  getMultipleMetricFutureUtil   = FutureUtil.initBySystemAvailableProcessors("getMultipleMetricFutureUtil",100);
-    private static final FutureUtil<Void>  getClusterBasicInfoFutureUtil = FutureUtil.initBySystemAvailableProcessors("getClusterBasicInfoFutureUtil",50);
-    private static final FutureUtil<Void>  optimizeQueryBurrFutureUtil   = FutureUtil.initBySystemAvailableProcessors("optimizeQueryBurrFutureUtil",50);
+    private static final FutureUtil<Void>  getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",10,10,100);
+    private static final FutureUtil<Void>  getClusterBasicInfoFutureUtil = FutureUtil.init("getClusterBasicInfoFutureUtil",10,10,50);
+    private static final FutureUtil<Void>  optimizeQueryBurrFutureUtil   = FutureUtil.init("optimizeQueryBurrFutureUtil",10,10,50);
 
     /**
      *         metricsTypes 物理集群二级指标类型
@@ -231,8 +235,8 @@ public class ClusterOverviewMetricsHandle {
     }
 
     private void getBigShardsMetrics(ESClusterOverviewMetricsVO metrics) {
-        List<BigShardMetrics> bigShardMetrics = esClusterNodeService.syncGetBigShards(metrics.getClusterName());
-        metrics.setBigShards(ConvertUtil.list2List(bigShardMetrics, BigShardMetricsVO.class));
+        List<ShardMetrics> shardMetrics = esShardService.syncGetBigShards(metrics.getClusterName());
+        metrics.setBigShards(ConvertUtil.list2List(shardMetrics, BigShardMetricsVO.class));
     }
 
     private void getBigIndicesMetrics(ESClusterOverviewMetricsVO metrics) {
@@ -241,7 +245,7 @@ public class ClusterOverviewMetricsHandle {
     }
 
     private void getMovingShardsMetrics(ESClusterOverviewMetricsVO metrics) {
-        List<MovingShardMetrics> movingShardsMetrics = esClusterNodeService.syncGetMovingShards(metrics.getClusterName());
+        List<MovingShardMetrics> movingShardsMetrics = esShardService.syncGetMovingShards(metrics.getClusterName());
         metrics.setMovingShards(ConvertUtil.list2List(movingShardsMetrics, MovingShardMetricsVO.class));
     }
 
@@ -278,7 +282,6 @@ public class ClusterOverviewMetricsHandle {
         basicVO.setMemUsed(clusterMemInfo.getMemUsed());
         basicVO.setMemFreePercent(clusterMemInfo.getMemFreePercent());
         basicVO.setMemUsedPercent(clusterMemInfo.getMemUsedPercent());
-
     }
 
     /**
@@ -288,9 +291,7 @@ public class ClusterOverviewMetricsHandle {
      */
     private void buildBasicMetricsFromClusterStats(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
         ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(clusterName);
-        if (null == clusterStats) {
-            return;
-        }
+        if (null == clusterStats) { return;}
 
         //设置状态
         basicVO.setStatus(clusterStats.getStatus());
@@ -313,7 +314,7 @@ public class ClusterOverviewMetricsHandle {
         basicVO.setStoreFreeUsage((100 - basicVO.getStoreUsage()));
 
         //设置堆内存使用率信息
-        long heapFreeSize = clusterStats.getTotalHeapMem().getBytes()-clusterStats.getUsedHeapMem().getBytes();
+        long heapFreeSize = clusterStats.getTotalHeapMem().getBytes() - clusterStats.getUsedHeapMem().getBytes();
         basicVO.setHeapMemFree(heapFreeSize);
         basicVO.setHeapMemTotal(clusterStats.getTotalHeapMem().getBytes());
         basicVO.setHeapMemUsed(clusterStats.getUsedHeapMem().getBytes());

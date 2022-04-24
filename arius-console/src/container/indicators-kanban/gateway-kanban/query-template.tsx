@@ -22,6 +22,7 @@ import { setIsUpdate } from "actions/gateway-kanban";
 import { arrayMoveImmutable } from 'array-move';
 import DragGroup from './../../../packages/drag-group/DragGroup';
 import * as actions from "../../../actions";
+import { copyString } from "lib/utils";
 
 export const classPrefix = "rf-monitor";
 
@@ -60,10 +61,12 @@ export const QueryTemplate = memo(() => {
   const prevTopNu = useRef(topNu);
 
   const showTooltipModal = (md5, metricsType) => {
-    dispatch(actions.setModalId("chartModal", {
-      md5,
-      metricsType
-    }));
+    copyString(md5)
+    // 修改弹出弹框改为复制MD5
+    // dispatch(actions.setModalId("chartModal", {
+    //   md5,
+    //   metricsType
+    // }));
   }
 
   useEffect(() => {
@@ -106,7 +109,7 @@ export const QueryTemplate = memo(() => {
         dslMd5
       );
     },
-    [startTime, endTime, topNu, dslMd5]
+    [startTime, endTime, topNu, dslMd5, isUpdate]
   );
 
   const getAsyncDslMd5List = async () => {
@@ -121,6 +124,7 @@ export const QueryTemplate = memo(() => {
 
   const getAllAsyncViewData = async (metricsTypes) => {
     try {
+      setIsLoading(true);
       const res = await getAsyncViewData(metricsTypes);
       setViewData(
         res.map((item) => getOption(item, indexConfigData, isMoreDay, false, true))

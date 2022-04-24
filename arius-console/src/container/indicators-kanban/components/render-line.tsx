@@ -47,6 +47,8 @@ export const RenderLine: React.FC<propsType> = memo(
         setIsLoading(false);
         return;
       }
+      setIsLoading(true);
+
       try {
         const metricsList = await getAsyncViewData(metricsTypes, aggType);
         if (

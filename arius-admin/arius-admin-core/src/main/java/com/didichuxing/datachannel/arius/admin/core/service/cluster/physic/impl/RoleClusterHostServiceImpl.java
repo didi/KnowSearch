@@ -17,6 +17,7 @@ import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -348,20 +349,20 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
 
     @Override
     public String buildESClientHttpAddressesStr(List<ESRoleClusterHostDTO> roleClusterHosts) {
-        Map<Integer, List<ESRoleClusterHostDTO>> role2ESRoleClusterHostDTOMap = ConvertUtil.list2MapOfList(
-                roleClusterHosts, ESRoleClusterHostDTO::getRole, esRoleClusterHostDTO -> esRoleClusterHostDTO);
+        return ListUtils.strList2String(buildESClientMasterHttpAddressesList(roleClusterHosts));
+    }
 
-        List<String> httpAddressesList = Lists.newArrayList();
-        List<ESRoleClusterHostDTO> esRoleClusterHostDTOSForClient = role2ESRoleClusterHostDTOMap.get(CLIENT_NODE.getCode());
-        if (null != esRoleClusterHostDTOSForClient) {
-            esRoleClusterHostDTOSForClient.forEach(host -> httpAddressesList.add(host.getIp() + ":" + host.getPort()));
-        }
-        List<ESRoleClusterHostDTO> esRoleClusterHostDTOSForMaster = role2ESRoleClusterHostDTOMap.get(MASTER_NODE.getCode());
-        if (null != esRoleClusterHostDTOSForMaster) {
-            esRoleClusterHostDTOSForMaster.forEach(host -> httpAddressesList.add(host.getIp() + ":" + host.getPort()));
-        }
+    @Override
+    public List<String> buildESClientMasterHttpAddressesList(List<ESRoleClusterHostDTO> roleClusterHosts){
+        List<String> clientAddressesList = buildESRoleNodeHttpAddressesList(roleClusterHosts, CLIENT_NODE.getCode());
+        List<String> masterAddressesList = buildESRoleNodeHttpAddressesList(roleClusterHosts, MASTER_NODE.getCode());
+        return Stream.of(clientAddressesList, masterAddressesList).flatMap(Collection::stream).collect(Collectors.toList());
+    }
 
-        return ListUtils.strList2String(httpAddressesList);
+    @Override
+    public List<String> buildESAllRoleHttpAddressesList(List<ESRoleClusterHostDTO> roleClusterHosts){
+        List<String> dataAddressesList = buildESRoleNodeHttpAddressesList(roleClusterHosts, DATA_NODE.getCode());
+        return Stream.of(dataAddressesList, buildESClientMasterHttpAddressesList(roleClusterHosts)).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     @Override
@@ -720,5 +721,17 @@ public class RoleClusterHostServiceImpl implements RoleClusterHostService {
                     cluster, shouldEdit);
         }
         return true;
+    }
+
+    private List<String> buildESRoleNodeHttpAddressesList(List<ESRoleClusterHostDTO> roleClusterHosts, Integer roleCode){
+        Map<Integer, List<ESRoleClusterHostDTO>> role2ESRoleClusterHostDTOMap = ConvertUtil.list2MapOfList(
+                roleClusterHosts, ESRoleClusterHostDTO::getRole, esRoleClusterHostDTO -> esRoleClusterHostDTO);
+
+        List<String> httpAddressesList = Lists.newArrayList();
+        List<ESRoleClusterHostDTO> esRoleClusterHostDTOS = role2ESRoleClusterHostDTOMap.get(roleCode);
+        if (null != esRoleClusterHostDTOS) {
+            esRoleClusterHostDTOS.forEach(host -> httpAddressesList.add(host.getIp() + ":" + host.getPort()));
+        }
+        return httpAddressesList;
     }
 }

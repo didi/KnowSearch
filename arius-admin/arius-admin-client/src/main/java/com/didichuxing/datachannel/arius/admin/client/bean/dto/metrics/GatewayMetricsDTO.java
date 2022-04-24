@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "gateway指标公共参数")
-public class GatewayMetricsDTO extends BaseDTO {
+public abstract class GatewayMetricsDTO extends BaseDTO {
     private static final Long ONE_HOUR = 60 * 60 * 1000L;
 
     @ApiModelProperty("开始时间")
@@ -40,6 +41,12 @@ public class GatewayMetricsDTO extends BaseDTO {
             throw new RuntimeException("时间跨度不要超过一周");
         }
 
+        if (CollectionUtils.isEmpty(metricsTypes)) {
+            throw new RuntimeException("指标类型为空");
+        }
+
     }
+
+    public abstract String getGroup();
 
 }

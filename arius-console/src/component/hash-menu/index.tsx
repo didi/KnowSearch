@@ -15,10 +15,11 @@ interface propsType {
   MENU_MAP: Map<string, IMenuItem>;
   defaultHash: string;
   data?: any;
+  prefix?: string;
 }
 
 export const HashMenu: React.FC<propsType> = memo(
-  ({ TAB_LIST, MENU_MAP, defaultHash, data }) => {
+  ({ TAB_LIST, MENU_MAP, defaultHash, data, prefix }) => {
     const [menu, setMenu] = useState<string>("");
     const changeMenu = (e) => {
       setMenu(e.key);
@@ -36,15 +37,15 @@ export const HashMenu: React.FC<propsType> = memo(
       return MENU_MAP.get(menu)?.content(data);
     };
     return (
-      <div style={{ background: "#fff" }}>
-        <div className="table-content">
+      <div style={{ background: prefix ? 'none' : "#fff" }}>
+        <div className={`${prefix || ''}table-content`}>
           <Menu selectedKeys={[menu]} mode="horizontal" onClick={changeMenu}>
             {TAB_LIST.map((d) => (
               <Menu.Item key={d.key}>{d.name}</Menu.Item>
             ))}
           </Menu>
         </div>
-        <div className="detail-wrapper" style={{ paddingTop: 0 }}>
+        <div className={`${prefix || ''}detail-wrapper`} style={{ paddingTop: 0 }}>
           {renderContent()}
         </div>
       </div>

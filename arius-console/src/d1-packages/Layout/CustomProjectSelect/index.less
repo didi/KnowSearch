@@ -2,46 +2,43 @@
 
 .dropdown-text {
   color: white;
+
   &:hover {
     color: white;
   }
 }
 
 .app-wrapper {
-  background-color: #4A4A4A;
-  width: 250px;
-  height: 280px;
   overflow: scroll;
   border-radius: 5px;
-  padding: 15px 20px 0px 20px !important;
+  width: 230px;
+  height: 240px;
+  background: #FFFFFF;
+  box-shadow: 0 -2px 4px 0 rgb(0 0 0 / 2%), 0 2px 6px 6px rgb(0 0 0 / 2%), 0 2px 6px 0 rgb(0 0 0 / 6%);
+  padding: 8px 8px 0px 8px !important;
 
   .right-text {
     float: right;
   }
 
   ul {
+    margin-top: 4px;
+
     li {
       text-align: left;
       height: 32px;
       line-height: 32px;
-      color: #878380;
+      margin-left: 8px;
+      font-family: PingFangSC-Regular;
+      font-size: 12px;
+      letter-spacing: 0;
 
       a {
-        color: #878380;
+        color: #212529;
 
         &.active {
           color: @primary-color;
         }
-      }
-
-      &:hover {
-        background: rgba(236, 111, 38, 0.1);
-      }
-    }
-
-    li:nth-child(1) {
-      &:hover {
-        background: transparent;
       }
     }
   }

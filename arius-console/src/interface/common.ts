@@ -136,3 +136,12 @@ export interface IGatewayKanbanAction {
     isMoreDay: boolean
   }
 }
+
+export interface IDashBoardAction {
+  type: string;
+  payload: {
+    startTime: number,
+    endTime: number,
+    isOperation: boolean
+  }
+}

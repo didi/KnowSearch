@@ -131,6 +131,18 @@
             <DefaultRolloverStrategy max="7"/>
         </RollingFile>
 
+        <RollingFile name="sqlLog"
+                     filename="${log.path}/sql.log" filePattern="${log.path}/sql.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
     </appenders>
     <!-- 非开发环境只需要打印到文件就行 -->
     <loggers>
@@ -173,6 +185,11 @@
         <!-- logi job 日子记录 -->
         <AsyncLogger name="com.didiglobal.logi.job" level="INFO" additivity="false">
             <appender-ref ref="logiJobLogger" />
+        </AsyncLogger>
+
+        <!-- 记录sql -->
+        <AsyncLogger name="com.didichuxing.datachannel.arius.admin.persistence.mysql" level="debug" additivity="true">
+            <appender-ref ref="sqlLog" level="debug"/>
         </AsyncLogger>
 
     </loggers>

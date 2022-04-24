@@ -8,7 +8,7 @@
 @dark-gray: #2c333c;
 @layout-header-height: 50px;
 @layout-header-bg: #1F3252; // #282b33;
-@layout-header-bg-light: #2f81f9;
+@layout-header-bg-light: @primary-color;
 @layout-header-color: #fff;
 @layout-left-menu-color: #303A51;
 @primary-color: #526ecc;
@@ -30,7 +30,7 @@ body {
     overflow: hidden;
     background: #fff;
     box-shadow: 2px 0px 6px 0px rgba(37, 38, 94, 0.05);
-    
+
     .ant-menu {
       font-size: 12px;
     }
@@ -491,7 +491,7 @@ body {
   .@{layout-prefix-cls}-main {
     border: 0 none;
     height: calc(~"100vh - @{layout-header-height}");
-    overflow-x: hidden;
+    // overflow-x: hidden;
     overflow-y: auto;
   }
 
@@ -538,8 +538,8 @@ body {
         margin-top: 46px;
         padding: 20px;
         height: calc(~"100vh - @{layout-header-height} - 20px");
-        overflow-x: hidden;
-        overflow-y: auto;
+        // overflow-x: hidden;
+        overflow-y: visible;
       }
 
       >.@{layout-prefix-cls}-main-noBg {
@@ -821,6 +821,7 @@ body {
   height: 16px;
   vertical-align: text-top;
   margin-right: 8px;
+  margin-top: 2px;
   fill: @layout-header-color;
 
   & .small {
@@ -887,6 +888,7 @@ body {
 .user-center-drawer {
   margin-top: 50px;
 }
+
 .ant-layout {
   display: flex;
   flex: auto;

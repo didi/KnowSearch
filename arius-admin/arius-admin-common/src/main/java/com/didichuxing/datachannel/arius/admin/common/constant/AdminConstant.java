@@ -20,6 +20,7 @@ public class AdminConstant {
     public static final String       DEFAULT_TYPE                            = "type";
 
     public static final String       DEFAULT_INDEX_MAPPING_TYPE              = "_doc";
+    public static final String       DEFAULT_DYNAMIC_TEMPLATES_KEY           = "dynamic_templates";
 
     public static final String       SINGLE_TYPE_KEY                         = "index.mapping.single_type";
     public static final String       DEFAULT_SINGLE_TYPE                     = "true";
@@ -33,6 +34,8 @@ public class AdminConstant {
     public static final Integer      NOT_EXPIRE                              = -1;
 
     public static final Double       BYTE_TO_G                               = 1.0 / (1024 * 1024 * 1024);
+
+    public static final Double       BYTE_TO_MB                              = 1.0 / (1024 * 1024);
 
     public static final Double       TO_W                                    = 1.0 / 10000;
 

@@ -21,12 +21,12 @@ export const DESC_LIST = [
     key: "cluster",
     width: 250,
     render: (cluster: string, record: ITemplateLogic) => (
-      <div style={{ 
+      <div style={{
         width: 150,
         overflow: "hidden",
         whiteSpace: 'nowrap',
         textOverflow: 'ellipsis',
-       }}>
+      }}>
         <Tooltip title={cluster}>
           {cluster}
         </Tooltip>
@@ -96,7 +96,7 @@ export const INDEX_TAB_LIST = [
   {
     name: "Mapping",
     key: TAB_LIST_KEY.mapping,
-    content: (data) => <SecondStep isShowPlaceholder={false}/>,
+    content: (data) => <SecondStep isShowPlaceholder={false} />,
   },
   {
     name: "Setting",
@@ -287,14 +287,12 @@ export const getOperationColumns = (setDrawerId) => {
       title: "业务ID",
       dataIndex: "bizId",
       key: "bizId",
-      width: "10%",
       sorter: (a: IOpRecord, b: IOpRecord) => b.id - a.id,
     },
     {
       title: "操作时间",
       dataIndex: "operateTime",
       key: "operateTime",
-      width: "15%",
       sorter: (a: IOpRecord, b: IOpRecord) =>
         new Date(b.operateTime).getTime() - new Date(a.operateTime).getTime(),
       render: (t: number) => moment(t).format(timeFormat),
@@ -303,58 +301,39 @@ export const getOperationColumns = (setDrawerId) => {
       title: "模块",
       dataIndex: "module",
       key: "module",
-      width: "10%",
     },
     {
       title: "操作内容",
       dataIndex: "content",
       key: "content",
-      width: "30%",
+      width: 400,
       render: (text: string, record: any) => {
-        let diffContext: any = '' 
+        let diffContext: any = ''
         try {
-          if (record?.moduleId === 1 && record?.operateId === 3) {
-            const data = text ? JSON.parse(text) : {};
-            diffContext = (<span>编辑Mapping <a href="JavaScript:;" onClick={() => setDrawerId('mappingDiff', data)}>查看</a></span>)
-          } else if (record?.moduleId === 13 && record?.operateId === 3) {
-            const data = text ? JSON.parse(text) : {};
-            for (const key in data.diffContext) {
-              if (diffContext && diffContext.length) {
-                // 如果已经有了的情况加一个分号
-                diffContext += '; ';
-              } else {
-                // 编辑setting文案统一处理 只出现一次
-                diffContext = '编辑setting，';
-              }
-              if (key == 'index.number_of_replicas') {
-                // 0 开启 1关闭
-                diffContext += data.diffContext[key] == "1" ? '关闭取消副本' : '开启取消副本'
-              } else {
-                // request 关闭  anync 开启
-                diffContext += data.diffContext[key] == "async" ? '开启异步translog' : '关闭异步translog'
-              }
-            }
-            // diffContext = data.diffContext && data.diffContext.index.number_of_replica ?  === 1 
+          const data = text ? JSON.parse(text) : {};
+          const { operateDesc, operateType } = data;
+
+          // mapping 类型
+          if (operateType === 2) {
+            return (<span>编辑Mapping <a href="JavaScript:;" onClick={() => setDrawerId('mappingDiff', data)}>查看</a></span>)
           } else {
-            diffContext = text
+            return (<>{operateDesc}</>)
           }
-        } catch(err) {
+        } catch (err) {
           console.log(err)
         }
-        return <>{diffContext || '-'}</>
+        return <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', width: 400 }}><Tooltip placement="top" title={diffContext || '-'}>{diffContext || '-'}</Tooltip></div>
       }
     },
     {
       title: "行为",
       dataIndex: "operate",
       key: "operate",
-      width: "10%",
     },
     {
       title: "操作人",
       dataIndex: "operator",
       key: "operator",
-      width: "10%",
     },
   ];
   return cols;
@@ -429,7 +408,7 @@ export const dcdrInfo: any = [
       key: "templateCheckPointDiff",
       label: "位点差",
       render: (text) => {
-        return <span style={{ color: '#2F81F9', background: 'rgb(243, 249, 255)', padding: '0px 4px' }}>{text || typeof text == "number" ? text : "-"}</span>
+        return <span style={{ color: '#1473FF', background: 'rgb(243, 249, 255)', padding: '0px 4px' }}>{text || typeof text == "number" ? text : "-"}</span>
       },
     },
   ],

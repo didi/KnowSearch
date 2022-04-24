@@ -21,4 +21,9 @@ public class GatewayDslDTO extends GatewayMetricsDTO {
     @ApiModelProperty("top数字")
     private Integer topNu;
 
+    @Override
+    public String getGroup() {
+        return "dsl";
+    }
+
 }

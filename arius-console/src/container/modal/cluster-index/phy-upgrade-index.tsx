@@ -94,6 +94,12 @@ export const PhyUpgradeIndex = connect(mapStateToProps)((props: { dispatch: any,
       for (const [key, value] of formRefMap.current.entries()) {
         const param = await value.current?.validateFields();
         param.physicalId = key;
+        param.logicId = '';
+        data.forEach(item => {
+          if (item.id == key) {
+            param.logicId = item.logicId
+          }
+        })
         params.push(param)
       } 
       updateTemplateIndex(params).then(() => {

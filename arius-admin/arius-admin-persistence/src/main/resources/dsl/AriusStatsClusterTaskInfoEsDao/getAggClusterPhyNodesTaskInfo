@@ -31,11 +31,11 @@
 				"hist": {
 					"date_histogram": {
 						"field": "timestamp",
-						"fixed_interval": "{interval}",
+						"fixed_interval": "%s",
 						"time_zone": "Asia/Shanghai",
 						"min_doc_count": 0
 					},
-					"aggs": "aggsDsl":1
+					"aggs": %s
 				}
 			}
 		}

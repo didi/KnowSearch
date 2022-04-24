@@ -60,6 +60,11 @@ public class ClusterPO extends BasePO {
     private Integer type;
 
     /**
+     * 拓展字段,这里用于存放集群展示用属性标签，如「集群所属资源类型」等等
+     */
+    private String tags;
+
+    /**
      * 数据中心
      */
     private String  dataCenter;

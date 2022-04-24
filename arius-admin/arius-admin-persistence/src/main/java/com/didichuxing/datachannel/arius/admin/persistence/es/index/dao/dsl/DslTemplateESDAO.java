@@ -270,8 +270,8 @@ public class DslTemplateESDAO extends BaseESDAO {
             sortInfo = queryDTO.getSortInfo();
         }
 
-        String dsl = dslLoaderUtil.getFormatDslForCatIndexByCondition(DslsConstant.GET_DSL_TEMPLATE_BY_CONDITION,
-                queryCriteriaDsl, queryDTO.getFrom(), queryDTO.getSize(), sortInfo, sortOrder);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_CONDITION,
+                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortInfo, sortOrder);
 
         return gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName, dsl, DslTemplatePO.class);
     }

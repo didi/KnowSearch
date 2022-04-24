@@ -34,6 +34,7 @@ export const ClusterAuthMaps = {
 } as IStatusMap;
 
 export const StatusMap = {
+  '-1': 'unknown',
   0: 'green',
   1: 'yellow',
   2: 'red',
@@ -50,6 +51,9 @@ export const ClusterStatus = [
   }, {
     title: 'red',
     value: '2',
+  }, {
+    title: 'unknown',
+    value: '-1'
   }] as ILabelValue[];
 
 export const brokerMetrics = {
@@ -321,10 +325,11 @@ export const SPIT_STYLE_MAP = [
 ];
 
 export const NODE_NUMBER_MAP = [
-  { value: 3 },
-  { value: 5 },
+  { value: 2 },
+  { value: 4 },
+  { value: 6 },
+  { value: 8 },
   { value: 10 },
-  { value: 15 },
   { value: 20 },
 ];
 

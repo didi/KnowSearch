@@ -1,15 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.*;
-
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAttrInfo;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStaticsService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
@@ -17,7 +17,11 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNo
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
-import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -35,12 +39,73 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
     private ESClusterService esClusterService;
+    @Autowired
+    private ESClusterPhyStaticsService esClusterPhyStaticsService;
+    @Autowired
+    private DashBoardMetricsService dashBoardMetricsService;
+    
+    
+    @Test
+    public void getToNMetricsTest(){
+        MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO();
+        //gatewaySucPer
+        param.setMetricsTypes(Arrays.asList( "gatewayFailedPer","gatewaySucPer"));
+        param.setStartTime(1649214919299L);
+        param.setEndTime(1649236519299L);
+        param.setTopNu(5);
+        param.setAggType("avg");
+        Assertions.assertNotNull(dashBoardMetricsService.getToNMetrics(param,
+            "cluster"));
+    }
+    
+    
+    @Test
+    public void   getClustersShardTotalTest(){
+        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
+        Assertions.assertEquals(6020L,esClusterPhyStaticsService.getClustersShardTotal(
+            CustomDataSource.PHY_CLUSTER_NAME_LOGI));
+    
+    }
+    @Test
+    public void getWriteRequestTotalTest(){
+        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
+        Assertions.assertEquals(115018L,esClusterPhyStaticsService.getCurrentIndexTotal(
+            CustomDataSource.PHY_CLUSTER_NAME_LOGI));
+    }
+    @Test
+    public void getHttpConnectionTotalTest(){
+        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
+        Assertions.assertEquals(954L,esClusterPhyStaticsService.getHttpConnectionTotal(
+            CustomDataSource.PHY_CLUSTER_NAME_LOGI));
+    }
+    @Test
+    public void getGatewaySuccessRateAndFailureRateTest(){
+        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
+        final Tuple<Double, Double> rateAndFailureRate = esClusterPhyStaticsService.getGatewaySuccessRateAndFailureRate(
+            CustomDataSource.PHY_CLUSTER_NAME_LOGI);
+        Assertions.assertEquals(0.99,rateAndFailureRate.getV1());
+        Assertions.assertEquals(0L,rateAndFailureRate.getV2());
+    }
+    @Test
+    public void getPendingTaskTotalTest(){
+        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
+        Assertions.assertEquals(0L,esClusterPhyStaticsService.getPendingTaskTotal(CustomDataSource.PHY_CLUSTER_NAME_LOGI));
+    
+    }
+    @Test
+    public void getQueryRequestsIncrementTest(){
+        Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
+        Assertions.assertEquals(0L,
+            esClusterPhyStaticsService.getCurrentQueryTotal(CustomDataSource.PHY_CLUSTER_NAME_LOGI));
+    }
 
+    
     @Test
     public void syncCloseReBalanceTest() throws ESOperateException {
         Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
         Assertions.assertTrue(esClusterService.syncCloseReBalance(CustomDataSource.PHY_CLUSTER_NAME, 1));
     }
+   
 
     @Test
     public void syncOpenReBalanceTest() throws ESOperateException {
@@ -171,4 +236,3 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
         Assertions.assertNotNull(esClusterService.synGetESVersionByCluster(CustomDataSource.PHY_CLUSTER_NAME));
     }
 }
-

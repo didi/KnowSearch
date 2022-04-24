@@ -4,8 +4,13 @@ export const indexConfigClassifyList: string[] = ["节点性能指标"];
 
 export const indexConfigData = {
   writeGatewayNode: {
-    name: "gatewayNode写入",
+    name: "gatewayNode写入请求量",
     unit: unitMap.itemMin,
+    classify: indexConfigClassifyList[0],
+  },
+  dslLen: {
+    name: "gatewayNode写入吞吐量",
+    unit: unitMap.characterMin,
     classify: indexConfigClassifyList[0],
   },
   queryGatewayNode: {

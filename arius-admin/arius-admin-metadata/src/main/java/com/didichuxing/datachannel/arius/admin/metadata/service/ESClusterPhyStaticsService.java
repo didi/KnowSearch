@@ -1,16 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentilesMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayNodeMetricsDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterInfoESDAO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 2021-08-05
@@ -21,7 +23,12 @@ public class ESClusterPhyStaticsService {
     @Autowired
     private AriusStatsClusterInfoESDAO ariusStatsClusterInfoEsDao;
 
-    private static final FutureUtil<Void> futureUtil = FutureUtil.initBySystemAvailableProcessors("ESClusterPhyStaticsService", 100);
+    @Autowired
+    private AriusStatsNodeInfoESDAO    ariusStatsNodeInfoESDAO;
+    @Autowired
+    private GatewayNodeMetricsDAO gatewayNodeMetricsDAO;
+
+    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ESClusterPhyStaticsService", 10,10,200);
 
     /**
      * 获取集群维度分位统计信息
@@ -34,7 +41,6 @@ public class ESClusterPhyStaticsService {
      */
     public List<BasePercentilesMetrics> getAggPercentilesMetrics(String clusterName, String clusterMetricsType,
                                                                  String aggType, Long startTime, Long endTime) {
-
         AtomicReference<Map<Long, Double>>   avgAtomic      = new AtomicReference<>();
         AtomicReference<Map<Long, Double>>   st99Atomic     = new AtomicReference<>();
         AtomicReference<Map<Long, Double>>   st95Atomic     = new AtomicReference<>();
@@ -72,10 +78,14 @@ public class ESClusterPhyStaticsService {
         });
 
         for (BasePercentilesMetrics basePercentilesMetrics : basePercentilesMetricList) {
-            basePercentilesMetrics.setSt99(timeSlip2St99ValueMap.get(basePercentilesMetrics.getTimeStamp()));
-            basePercentilesMetrics.setSt95(timeSlip2St95ValueMap.get(basePercentilesMetrics.getTimeStamp()));
-            basePercentilesMetrics.setSt75(timeSlip2St75ValueMap.get(basePercentilesMetrics.getTimeStamp()));
-            basePercentilesMetrics.setSt55(timeSlip2St55ValueMap.get(basePercentilesMetrics.getTimeStamp()));
+            Double value99 = timeSlip2St99ValueMap.get(basePercentilesMetrics.getTimeStamp());
+            Double value95 = timeSlip2St95ValueMap.get(basePercentilesMetrics.getTimeStamp());
+            Double value75 = timeSlip2St75ValueMap.get(basePercentilesMetrics.getTimeStamp());
+            Double value55 = timeSlip2St55ValueMap.get(basePercentilesMetrics.getTimeStamp());
+            basePercentilesMetrics.setSt99(null == value99 ? 0 : value99);
+            basePercentilesMetrics.setSt95(null == value95 ? 0 : value95);
+            basePercentilesMetrics.setSt75(null == value75 ? 0 : value75);
+            basePercentilesMetrics.setSt55(null == value55 ? 0 : value55);
         }
 
         return basePercentilesMetricList;
@@ -93,5 +103,85 @@ public class ESClusterPhyStaticsService {
     public <T> List<T> getAggClusterPhyMetrics(String clusterName, String aggType, Long startTime, Long endTime,
                                                Class<T> clazz) {
         return ariusStatsClusterInfoEsDao.getAggClusterPhyMetrics(clusterName, aggType, startTime, endTime, clazz);
+    }
+
+    /**
+     * 获取集群写入总耗时
+     * @param  cluster 集群名称
+     * @return double
+     */
+    public double getClusterIndexingLatency(String cluster) {
+        return ariusStatsNodeInfoESDAO.getClusterIndexingLatency(cluster);
+    }
+
+    /**
+     * 获取集群查询总耗时
+     * @param  cluster  集群名称
+     * @return double
+     */
+    public double getClusterSearchLatency(String cluster) {
+        return ariusStatsNodeInfoESDAO.getClusterSearchLatency(cluster);
+    }
+    
+    
+    /**
+     * 获取集群shard总数
+     *
+     * @param cluster 集群
+     * @return {@code Long}
+     */
+    public Long getClustersShardTotal(String cluster) {
+        return ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
+    }
+    
+    /**
+     * 获取pending task数量
+     *
+     * @param cluster 集群
+     * @return {@code Long}
+     */
+    public Long getPendingTaskTotal(String cluster) {
+        return ariusStatsClusterInfoEsDao.getPendingTaskTotal(cluster);
+    }
+    
+    /**
+     * 获取网关成功率和失败率
+     *
+     * @param cluster 集群
+     * @return {@code Tuple<Double, Double>} tuple.1:成功率；tuple.2:失败率
+     */
+    public Tuple<Double/*成功率*/, Double/*失败率*/> getGatewaySuccessRateAndFailureRate(String cluster) {
+        return gatewayNodeMetricsDAO.getGatewaySuccessRateAndFailureRate(cluster);
+    }
+    
+    
+    /**
+     * 写入请求数
+     *
+     * @param cluster 集群
+     * @return {@link Long}
+     */
+    public Long getCurrentIndexTotal(String cluster) {
+        return ariusStatsNodeInfoESDAO.getCurrentIndexTotal(cluster);
+    }
+
+    /**
+     * 查询请求数突增量
+     *
+     * @param cluster 集群
+     * @return {@link Long}
+     */
+    public Long getCurrentQueryTotal(String cluster) {
+        return ariusStatsNodeInfoESDAO.getCurrentQueryTotal(cluster);
+    }
+    
+    /**
+     * 集群http连接数
+     *
+     * @param cluster 集群
+     * @return {@link Long}
+     */
+    public Long getHttpConnectionTotal(String cluster) {
+        return ariusStatsNodeInfoESDAO.getHttpConnectionTotal(cluster);
     }
 }

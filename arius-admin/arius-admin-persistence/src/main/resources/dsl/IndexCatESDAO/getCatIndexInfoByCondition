@@ -1,7 +1,7 @@
 {
   "query": {
     "bool": {
-      "must": "boolMustDsl"
+      "must": %s
     }
   },
   "sort": [

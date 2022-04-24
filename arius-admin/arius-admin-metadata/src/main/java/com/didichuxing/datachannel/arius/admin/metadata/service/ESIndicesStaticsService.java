@@ -1,25 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 import java.util.List;
+import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyTemplateDTO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyIndicesDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
+import com.google.common.collect.Maps;
 
 /**
  * Created by linyunan on 2021-08-16
  */
 @Service
 public class ESIndicesStaticsService {
-    @Value("${es.metrics.indices.buckets.max.num}")
-    private int                      indicesBucketsMaxNum;
-
     @Autowired
     private AriusStatsIndexInfoESDAO ariusStatsIndexInfoESDAO;
 
@@ -37,8 +36,7 @@ public class ESIndicesStaticsService {
                 startTime, endTime);
         }
 
-        return ariusStatsIndexInfoESDAO.getTopNIndicesAggMetrics(clusterPhyName, metricsTypes, topNu, aggType,
-                indicesBucketsMaxNum, startTime, endTime);
+        return ariusStatsIndexInfoESDAO.getTopNIndicesAggMetrics(clusterPhyName, metricsTypes, topNu, aggType, startTime, endTime);
     }
 
     /**
@@ -61,6 +59,34 @@ public class ESIndicesStaticsService {
         }
 
         return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetrics(clusterPhyName, metricsTypes, topNu, aggType,
-                indicesBucketsMaxNum, startTime, endTime);
+                startTime, endTime);
     }
+
+    /**
+     * 获取索引search-query数突增量
+     * 上个时间值(now-3,now-2)/(now-5,now-4)上个时间间隔值的两倍 >=2.0
+     *
+     * @param cluster      集群
+     * @param indexList   索引列表
+     * @return {@code Map<String, Double>}
+     */
+    public Map<String, Double> getIndex2CurrentSearchQueryMap(String cluster, List<String> indexList){
+        if (AriusObjUtils.isBlack(cluster) || CollectionUtils.isEmpty(indexList)) { return Maps.newHashMap();}
+        return ariusStatsIndexInfoESDAO.getIndex2CurrentSearchQueryMap(cluster, indexList);
+    }
+
+    /**
+     * 获取索引indexing-index数突增量
+     * 上个时间值(now-3,now-2)/(now-5,now-4)上个时间间隔值的两倍 >=2.0
+     *
+     * @param cluster     集群
+     * @param indexList   索引列表
+     * @return {@code Map<String, Double>}
+     */
+    public Map<String, Double> getIndex2CurrentIndexingIndexMap(String cluster, List<String> indexList) {
+        if (AriusObjUtils.isBlack(cluster) || CollectionUtils.isEmpty(indexList)) { return Maps.newHashMap();}
+        return ariusStatsIndexInfoESDAO.getIndex2CurrentIndexingIndexMap(cluster, indexList);
+    }
+
+
 }

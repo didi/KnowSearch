@@ -57,7 +57,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
     public VariousLineChartMetrics getDslCountByRange(Long startTime, Long endTime, Integer topNu, Integer appId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT, startTime, endTime, appId, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT, startTime, endTime, appId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResult(response, GatewayMetricsTypeEnum.QUERY_DSL_COUNT, topNu, interval), 3);
     }
 
@@ -67,7 +67,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
     public VariousLineChartMetrics getDslCountByRangeAndMd5(Long startTime, Long endTime, String dslMd5, Integer appId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT_BY_MD5, dslMd5, startTime, endTime, appId, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT_BY_MD5, dslMd5, startTime, endTime, appId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResultByMd5(response, GatewayMetricsTypeEnum.QUERY_DSL_COUNT, dslMd5, interval), 3);
     }
 
@@ -77,7 +77,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
     public VariousLineChartMetrics getDslTotalCostByRange(Long startTime, Long endTime, Integer topNu, Integer appId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST, startTime, endTime, appId, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST, startTime, endTime, appId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResult(response, GatewayMetricsTypeEnum.QUERY_DSL_TOTAL_COST, topNu, interval), 3);
     }
 
@@ -87,7 +87,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
     public VariousLineChartMetrics getDslTotalCostByRangeAndMd5(Long startTime, Long endTime, String dslMd5, Integer appId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST_BY_MD5, dslMd5, startTime, endTime, appId, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST_BY_MD5, dslMd5, startTime, endTime, appId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResultByMd5(response, GatewayMetricsTypeEnum.QUERY_DSL_TOTAL_COST, dslMd5, interval), 3);
     }
 
@@ -144,7 +144,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
             Long timeStamp = Long.valueOf(bucket.getUnusedMap().get(KEY).toString());
             String aggKey = gatewayMetricsTypeEnum.getAggKey();
             Double value;
-            if (aggKey.endsWith("_count")) {
+            if (MetricsUtils.needConvertUnit(aggKey)) {
                 value = MetricsUtils.getDoubleValuePerMin(interval, bucket.getUnusedMap().get(aggKey).toString());
             } else {
                 value = MetricsUtils.getAggMapDoubleValue(bucket, aggKey);
@@ -169,7 +169,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
                 Long timeStamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
                 String aggKey = gatewayMetricsTypeEnum.getAggKey();
                 Double value;
-                if (aggKey.endsWith("_count")) {
+                if (MetricsUtils.needConvertUnit(aggKey)) {
                     value = MetricsUtils.getDoubleValuePerMin(interval, esBucket.getUnusedMap().get(aggKey).toString());
                 } else {
                     value = MetricsUtils.getAggMapDoubleValue(esBucket, aggKey);

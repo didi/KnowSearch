@@ -1,5 +1,5 @@
 import { Drawer, } from 'antd'
-import React, { memo,  useEffect, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import { formColumns, getColumns, queryFormText } from './config';
 import QueryForm from 'component/dantd/query-form';
@@ -19,14 +19,14 @@ export const ShardList = memo((props) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
-  const [queryFromObject, setQueryFromObject] = useState({});
+  const [queryFormObject, setQueryFormObject] = useState({});
   const [pageSize, setPageSize] = useState(10);
 
   const handleSubmit = (result) => {
     for (let key in result) {
       result[key] = result[key] || "";
     }
-    setQueryFromObject(result);
+    setQueryFormObject(result);
   };
 
   const mergeCell = (data) => {
@@ -61,14 +61,14 @@ export const ShardList = memo((props) => {
 
   const getData = () => {
     // 查询项的key 要与 数据源的key  对应
-    const keys = Object.keys(queryFromObject);
+    const keys = Object.keys(queryFormObject);
 
-    if (!queryFromObject || !keys.length) return mergeCell(data);
+    if (!queryFormObject || !keys.length) return mergeCell(data);
 
     const filterData = data.filter((d) => {
       let flag = true;
       keys.forEach(item => {
-        if (queryFromObject[item] && d[item] && !d[item].includes(queryFromObject[item])) {
+        if (queryFormObject[item] && d[item] && !d[item].includes(queryFormObject[item])) {
           flag = false;
         }
       })
@@ -135,7 +135,7 @@ export const ShardList = memo((props) => {
 
 
   const pageChange = (pagination) => {
-    if(pagination.pageSize === pageSize) {
+    if (pagination.pageSize === pageSize) {
       return;
     }
     setPageSize(pagination.pageSize);

@@ -1007,6 +1007,9 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
   const dataNode = detail?.roleClusterHosts?.filter(
     (ele: IRoleIpList) => ele.role === "datanode"
   );
+  const coldNode = detail?.roleClusterHosts?.filter(
+    (ele: IRoleIpList) => ele.beCold
+  );
 
   const clusterOpNewList: ILabelValue[] = [
     {
@@ -1067,6 +1070,14 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
     {
       label: "data主机名称",
       value: (dataNode && dataNode[0]?.hostname) || '-',
+    },
+    {
+      label: "coldRole",
+      value: (coldNode && coldNode[0]?.role) || '-',
+    },
+    {
+      label: "cold主机名称",
+      value: (coldNode && coldNode[0]?.hostname) || '-',
     },
     {
       label: "备注",

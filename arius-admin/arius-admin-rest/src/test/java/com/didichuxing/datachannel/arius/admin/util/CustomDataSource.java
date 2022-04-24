@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 public class CustomDataSource {
 
     public static final String PHY_CLUSTER_NAME = "admin_test_1";
+    public static final String PHY_CLUSTER_NAME_LOGI="logi-em-matedata-cluster";
 
     public static final String OPERATOR = "admin";
 

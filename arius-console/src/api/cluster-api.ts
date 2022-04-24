@@ -12,7 +12,7 @@ const app = {
 }
 
 export interface ILogicLike {
-  from: number;
+  page: number;
   size: number;
   authType?: number;
   name?: string;
@@ -25,7 +25,7 @@ export interface ILogicLike {
 }
 
 export interface IClusterList {
-  from: number;
+  page: number;
   size: number;
   authType?: number;
   cluster?: string;

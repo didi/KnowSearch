@@ -10,13 +10,11 @@ import java.util.List;
  */
 public interface AppClusterPhyAuthManager {
     /**
-     * 获取当前项目对物理集群列表的权限信息
+     * 从缓存中获取当前项目对物理集群列表的权限信息
      * @param appId                    项目
      * @param clusterPhyList           物理集群信息列表
      * @return
      */
-    List<AppClusterPhyAuth> getByClusterPhyListAndAppId(Integer appId, List<ClusterPhy> clusterPhyList);
-
     List<AppClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId, List<ClusterPhy> clusterPhyList);
 
 

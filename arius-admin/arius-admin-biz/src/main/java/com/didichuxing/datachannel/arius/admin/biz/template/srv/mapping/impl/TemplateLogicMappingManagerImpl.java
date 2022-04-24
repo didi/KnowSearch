@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateSchemaVO;
 import com.didichuxing.datachannel.arius.admin.client.mapping.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSchemaOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
@@ -133,7 +134,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                 try {
                     fields = convert2Fields(mergeMappingConfig);
                 } catch (Exception t) {
-                    LOGGER.warn("method=getTemplateWithFieldById||msg=mappint to field error||logicId={}", logicId, t);
+                    LOGGER.warn("method=getTemplateWithFieldById||msg=mapping to field error||logicId={}", logicId, t);
                 }
                 if (fields == null) {
                     fields = new ArrayList<>();
@@ -362,6 +363,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         Result<ConsoleTemplateSchemaVO> oldSchemaVO = getSchema(logicId);
+        boolean isSingleIndex = isSingleIndex(logicId);
 
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
@@ -384,7 +386,11 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                 TypeProperties typeProperties = new TypeProperties(ariusTypeProperty.getProperties());
 
                 for (Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()) {
+                    if (isSingleIndex && isExistMappingChanged(entry.getValue().getProperties().getJsonMap(), typeProperties.getJsonMap())) {
+                        return Result.buildFail("非滚动模板禁止修改已有mapping项");
+                    }
                     entry.getValue().setProperties(typeProperties);
+                    entry.getValue().getNotUsedMap().put(AdminConstant.DEFAULT_DYNAMIC_TEMPLATES_KEY, ariusTypeProperty.getDynamicTemplates());
                 }
             }
 
@@ -404,7 +410,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         // 记录操作
         Result<ConsoleTemplateSchemaVO> newSchemaVO = getSchema(logicId);
-        operateRecordService.save(TEMPLATE, EDIT, logicId, JSON.toJSONString(new TemplateMappingRecord(oldSchemaVO.getData(), newSchemaVO.getData())), operator);
+        operateRecordService.save(TEMPLATE, EDIT, logicId, JSON.toJSONString(new TemplateSchemaOperateRecord(oldSchemaVO.getData(), newSchemaVO.getData())), operator);
 
         return Result.buildSucc();
     }
@@ -445,7 +451,12 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         if (schemaDTO.getTypeProperties() != null) {
             Result<Void> result = updateProperties(schemaDTO.getLogicId(), schemaDTO.getTypeProperties(), operator);
             if (result.success()) {
-                templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
+                // 根据是否滚动生成索引 进行index mapping update
+                if (isSingleIndex(schemaDTO.getLogicId())) {
+                    syncTemplateMapping2Index(schemaDTO.getLogicId());
+                } else {
+                    templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
+                }
             }
             return result;
         }
@@ -1178,6 +1189,63 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             name2FieldMap.get(templateLogicWithMapping.getDateField())
                     .setDateFieldFormat(templateLogicWithMapping.getDateFieldFormat());
         }
+    }
+
+    /**
+     * 判断模板是否生成滚动索引
+     * @param logicId
+     * @return
+     */
+    private boolean isSingleIndex(Integer logicId){
+        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+                .getLogicTemplateWithPhysicalsById(logicId);
+        //滚动索引的expression 以* 结尾
+        return !templateLogicWithPhysical.getExpression().endsWith("*");
+    }
+
+    /**
+     * 将模板mapping 更新到非滚动index上
+     * @param logicId
+     * @return
+     */
+    private void syncTemplateMapping2Index(Integer logicId){
+        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+                .getLogicTemplateWithPhysicalsById(logicId);
+
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhy indexTemplatePhy : templatePhysicals) {
+            Result<MappingConfig> result = templatePhyMappingManager.getMapping(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
+            if (result.failed()) {
+                LOGGER.warn("class=TemplateLogicMappingManagerImpl||method=syncTemplateMapping2Index|||logicId={}", logicId);
+            }
+            MappingConfig templateMappingConfig = result.getData();
+            Result<Void> updateResult = templatePhyMappingManager.syncTemplateMapping2Index(indexTemplatePhy.getCluster(), indexTemplatePhy.getExpression(), templateMappingConfig);
+            if (updateResult.failed()) {
+                LOGGER.warn("class=TemplateLogicMappingManagerImpl||method=syncTemplateMapping2Index||mapping={}", templateMappingConfig);
+            }
+        }
+    }
+
+    /**
+     * 判断修改前后两个mapping 对象是否改变，这里只判断「原mapping」已有字段是否被修改，「新增字段」不在判断范围之内
+     * @param src
+     * @param dest
+     * @return
+     */
+    private boolean isExistMappingChanged(Map<String, TypeDefine> src, Map<String, TypeDefine> dest) {
+        if (src == null || dest == null) {
+            return false;
+        }
+        try {
+            for (Map.Entry<String, TypeDefine> entry : src.entrySet()) {
+                if (!entry.getValue().equals(dest.get(entry.getKey()))) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicMappingManagerImpl||method=isExistMappingChanged||errMsg={}", e.getMessage(), e);
+        }
+        return false;
     }
 
 }

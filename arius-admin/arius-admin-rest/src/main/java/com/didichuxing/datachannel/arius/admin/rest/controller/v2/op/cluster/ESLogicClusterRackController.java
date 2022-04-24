@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterRackInfoDTO;
@@ -11,11 +13,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
@@ -44,6 +46,12 @@ public class ESLogicClusterRackController {
     @ApiOperation(value = "获取逻辑资源Rack列表接口", notes = "")
     @Deprecated
     public Result<List<LogicClusterRackVO>> listLogicClusterRacks(@RequestBody ESLogicClusterRackInfoDTO param) {
+        if (null != param.getResourceId() && (null == param.getLogicClusterId() || param.getLogicClusterId() < 1)) {
+            param.setLogicClusterId(param.getResourceId());
+        }
+        if (StringUtils.isNotBlank(param.getCluster()) && StringUtils.isBlank(param.getPhyClusterName())) {
+            param.setPhyClusterName(param.getCluster());
+        }
         return listLogicClusterRacksInner(param);
     }
 

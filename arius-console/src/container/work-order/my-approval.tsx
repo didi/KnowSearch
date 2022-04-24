@@ -18,7 +18,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export const MyApproval = connect(null, mapDispatchToProps)(() => {
   const department: string = localStorage.getItem('current-project');
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject] = useState({ status: '0' });
+  const [queryFormObject, setqueryFormObject] = useState({ status: '0' });
   const [data, setData] = useState([]);
   const [typeList, setTypeList] = useState([] as ITypeEnums[]);
   const [typeEnums, setTypeEnums] = useState({} as IStringMap);
@@ -51,21 +51,21 @@ export const MyApproval = connect(null, mapDispatchToProps)(() => {
   }
 
   const getData = () => { // 查询项的key 要与 数据源的key  对应
-    if (!queryFromObject) return data;
-    const keys = Object.keys(queryFromObject);
+    if (!queryFormObject) return data;
+    const keys = Object.keys(queryFormObject);
     const filterData = data.filter(
       (d) => {
         let b = true;
         keys.forEach((k: string) => {
           if (k === 'createTime') {
             const time = moment(d[k]).unix();
-            if ((queryFromObject[k][0] > time) || (time > queryFromObject[k][1])) {
+            if ((queryFormObject[k][0] > time) || (time > queryFormObject[k][1])) {
               b = false
             }
-          } else if(k === 'type') {
-            d[k] === queryFromObject[k] ? '' : b = false;
+          } else if (k === 'type') {
+            d[k] === queryFormObject[k] ? '' : b = false;
           } else {
-            (d[k] + '')?.toLowerCase().includes(queryFromObject[k]) ? '' : b = false;
+            (d[k] + '')?.includes(queryFormObject[k]) ? '' : b = false;
           }
         })
         return b;
@@ -94,7 +94,7 @@ export const MyApproval = connect(null, mapDispatchToProps)(() => {
         delete result[key]
       }
     }
-    setqueryFromObject(result);
+    setqueryFormObject(result);
   };
 
   const initialValues = {

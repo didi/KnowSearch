@@ -16,12 +16,13 @@ interface propsType {
 
 export const LineShard: React.FC<propsType> = memo(
   ({ metricsTypes, sortEnd, item }) => {
-    const { clusterName, startTime, endTime, isMoreDay } = useSelector(
+    const { clusterName, startTime, endTime, isMoreDay, isUpdate } = useSelector(
       (state) => ({
         clusterName: (state as any).clusterKanban.clusterName,
         startTime: (state as any).clusterKanban.startTime,
         endTime: (state as any).clusterKanban.endTime,
         isMoreDay: (state as any).clusterKanban.isMoreDay,
+        isUpdate: (state as any).clusterKanban.isUpdate,
       }),
       shallowEqual
     );
@@ -75,6 +76,11 @@ export const LineShard: React.FC<propsType> = memo(
     }
 
     const getOverviewLineShardData = async () => {
+      if (!clusterName) {
+        setIsLoading(false);
+        return
+      }
+      setIsLoading(true);
       try {
         // 针对合并数据做特殊处理
         let newMetricsTypes = [];
@@ -106,7 +112,6 @@ export const LineShard: React.FC<propsType> = memo(
 
     useEffect(() => {
       if (isFirst.current || timeDiff.current !== endTime - startTime || oldClusterName.current !== clusterName) {
-        setIsLoading(true);
         timeDiff.current = endTime - startTime;
         isFirst.current = false;
         oldClusterName.current = clusterName;
@@ -118,6 +123,7 @@ export const LineShard: React.FC<propsType> = memo(
       clusterName,
       startTime,
       endTime,
+      isUpdate,
       getOverviewData
     ]);
 
@@ -133,6 +139,7 @@ export const LineShard: React.FC<propsType> = memo(
           index={"overview-view-line-ele-id" + metricsType}
           isLoading={isLoading}
           option={data[metricsType]}
+          tipSync={true}
         />
       }
       return <Shard

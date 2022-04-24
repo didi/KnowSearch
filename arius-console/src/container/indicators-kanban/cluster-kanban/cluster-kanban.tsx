@@ -6,6 +6,7 @@ import { oneDayMillims } from "../../../constants/common";
 import { getClusterNameList } from "../../../api/cluster-kanban";
 import { TAB_LIST, MENU_MAP } from "./config";
 import { KanbanForm, HashMenu, RefreshTime } from "../components";
+import Url from "lib/url-parser";
 
 import "../style";
 
@@ -62,13 +63,17 @@ export const ClusterKanban = () => {
       setClusterNameList(
         clusterNameList.map((item) => ({ text: item, value: item }))
       );
-      setClusterName(clusterNameList[0]);
+      setClusterName(Url().search.cluster || clusterNameList[0]);
     }
     if(oldDepartment.current !== department) {
       const currentTime = new Date().getTime();
       onTimeStampChange(currentTime - ONE_HOUR, currentTime);
     }
   };
+
+  useEffect(() => {
+    setClusterName(Url().search.cluster)
+  }, [Url().search.cluster])
 
   useEffect(() => {
     setSelectClusterName();
@@ -118,7 +123,7 @@ export const ClusterKanban = () => {
           MENU_MAP={MENU_MAP}
           defaultHash="overview"
           // 监听页面权限的变化
-          key={department}
+          key={department + JSON.stringify(Url().search)}
         />
         <div className="refresh-time">
           <RefreshTime changeRefreshTime={setRefreshTime} />

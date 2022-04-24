@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.order.WorkOrderSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalOrderControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.template.TemplateLogicV3ControllerMethod;
@@ -59,6 +60,7 @@ public class TemplateInfoSource {
         templateCreateContent.setAsyncTranslog(false);
         templateCreateContent.setCustomerAnalysis("");
         templateCreateContent.setDynamicTemplates("");
+        templateCreateContent.setLevel(LevelEnum.CORE.getCode());
         workOrderDTO.setContentObj(templateCreateContent);
         Result<WorkOrderSubmittedVO> result = NormalOrderControllerMethod.submit(type, workOrderDTO);
         Assertions.assertTrue(result.success());

@@ -231,6 +231,7 @@ export const getPhysicsColumns = (setModalId: any, setDrawerId: any, reloadDataF
       title: "集群名称",
       dataIndex: "cluster",
       key: "cluster",
+      width: 180,
       render: (text: string, record: IOpPhysicsCluster) => {
         return (
           <NavRouterLink
@@ -245,10 +246,10 @@ export const getPhysicsColumns = (setModalId: any, setDrawerId: any, reloadDataF
       title: "集群状态",
       dataIndex: "health",
       key: "health",
-      render: (health: string) => {
+      render: (health: number) => {
         return (
           <div>
-            <Tag color={StatusMap[health]}>{StatusMap[health]}</Tag>
+            <Tag className={`tag ${StatusMap[health]}`} color={StatusMap[health]}>{StatusMap[health]}</Tag>
           </div>
         );
       },
@@ -327,6 +328,8 @@ export const getPhysicsColumns = (setModalId: any, setDrawerId: any, reloadDataF
       title: "操作",
       dataIndex: "operation",
       key: "operation",
+      width: 180,
+      fixed: 'right',
       render: (id: number, record: IOpPhysicsCluster) => {
         const btns = getPhysicsBtnList(record, setModalId, setDrawerId, reloadDataFn);
         return renderOperationBtns(btns, record);
@@ -442,9 +445,15 @@ const getLogicBtnList = (record: IOpLogicCluster | any, fn: any, reloadDataFn: a
 export const getLogicColumns = (tableData: IOpLogicCluster[], fn: any, reloadDataFn: any) => {
   const columns = [
     {
+      title: "集群ID",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
       title: "集群名称",
       dataIndex: "name",
       key: "name",
+      width: 180,
       render: (text: string, record: IOpLogicCluster) => {
         return (
           <NavRouterLink needToolTip={true} element={text} href={`/cluster/logic/detail?clusterId=${record.id}&type=${record.type}#info`} />
@@ -548,7 +557,8 @@ export const getLogicColumns = (tableData: IOpLogicCluster[], fn: any, reloadDat
       title: "操作",
       dataIndex: "operation",
       key: "operation",
-      width: "15%",
+      width: 180,
+      fixed: 'right',
       render: (id: number, record: IOpLogicCluster) => {
         const btns = getLogicBtnList(record, fn, reloadDataFn);
         return renderOperationBtns(btns, record);

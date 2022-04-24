@@ -118,11 +118,12 @@ export const ProjectView = memo(() => {
         }));
       }
     },
-    [startTime, endTime, topNu, appId, isGetAppIdEnd]
+    [startTime, endTime, topNu, appId, isGetAppIdEnd, isUpdate]
   );
 
   const getAllAsyncViewData = async (metricsTypes) => {
     try {
+      setIsLoading(true);
       const res = await getAsyncViewData(metricsTypes);
       setViewData(
         res.map((item) => getOption(item, indexConfigData, isMoreDay))

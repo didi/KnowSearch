@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.ha
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
@@ -270,6 +271,10 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
             } else {
                 // 根据rack的大小进行排序并且获取新的data节点类型的rack起始值
                 for (RoleClusterHost roleClusterHost : roleClusterHosts) {
+                    if (!Pattern.matches("r.*", roleClusterHost.getRack())) {
+                        // 如果rack 不是r* 形式，则跳过不进行计算, 这里为了与前人逻辑保持一致，hold住特殊case 如cold rack
+                        continue;
+                    }
                     int roleHostRackValue = Integer.parseInt(roleClusterHost.getRack().replaceFirst("r", ""));
                     if (roleHostRackValue > initialRackValue) {
                         initialRackValue = roleHostRackValue;

@@ -2,7 +2,7 @@
   "size": 1000,
   "query": {
     "bool": {
-      "must": "boolMustDsl",
+      "must": %s,
       "must_not": [
         {
           "prefix": {

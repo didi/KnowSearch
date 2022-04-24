@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
@@ -22,17 +28,10 @@ import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @NoArgsConstructor
@@ -129,7 +128,10 @@ public class GatewayServiceImpl implements GatewayService {
             return Result.buildFrom(result);
         }
 
-        String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getGatewayAddress() + postFix;
+
+        String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getSingleGatewayAddress() + postFix;
+//        String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getGatewayAddress() + postFix;
+
         try {
             // gateway的sql语句操作接口直接以字符串的形式返还结果
             String sqlResponse = BaseHttpUtil.postForString(url, sql, buildGatewayHeader(phyClusterName, appId));
@@ -191,7 +193,7 @@ public class GatewayServiceImpl implements GatewayService {
         gatewayNodePO.setHeartbeatTime(new Date());
         gatewayNodePO.setHostName(heartbeat.getHostName().trim());
         gatewayNodePO.setPort(heartbeat.getPort());
-        return gatewayNodeDAO.recordGatewayNode(gatewayNodePO)==1;
+        return gatewayNodeDAO.recordGatewayNode(gatewayNodePO) > 0;
     }
 
     private void saveGatewayCluster(String clusterName) {

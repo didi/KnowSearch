@@ -66,4 +66,6 @@ public interface TemplatePipelineManager {
      * @return true/false
      */
     boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysical, Integer percent) throws ESOperateException;
+
+    Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMaster);
 }

@@ -1,5 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -49,15 +58,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.BeanUtils;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesStatsRequest.HTTP;
 
@@ -118,8 +118,8 @@ public class MonitorClusterJob {
 
     private String                      clusterName;
 
-    private static final FutureUtil<ESNodesStatsResponse>   nodeStatsFuture   = FutureUtil.initBySystemAvailableProcessors("MonitorClusterJob-nodeStats",  20);
-    private static final FutureUtil<ESIndexStatsResponse>   indexStatsFuture  = FutureUtil.initBySystemAvailableProcessors("MonitorClusterJob-indexStats",  20);
+    private static final FutureUtil<ESNodesStatsResponse>   nodeStatsFuture   = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
+    private static final FutureUtil<ESIndexStatsResponse>   indexStatsFuture  = FutureUtil.init("MonitorClusterJob-indexStats",  10,10,20);
 
     private StopWatch indexStopWatch        = new StopWatch();
     private StopWatch nodeStopWatch         = new StopWatch();
@@ -477,7 +477,6 @@ public class MonitorClusterJob {
             indexStatsMap.entrySet().parallelStream().forEach( entry -> {
                 String index = entry.getKey();
                 try {
-                    if(indexSkip(index)){return;}
 
                     IndexTemplatePhyWithLogic indexTemplate = getTemplateNameForCache(ariusClusterName, index);
                     IndexNodes indexStats = entry.getValue();
@@ -612,9 +611,6 @@ public class MonitorClusterJob {
             List<ESIndexDCDRStats> esIndexDCDRStatsList = new ArrayList<>();
             response.getIndicesStats().forEach((index, indexStats) -> {
                 try {
-                    if (indexSkip(index)) {
-                        return ;
-                    }
 
                     IndexTemplatePhyWithLogic indexTemplate = getTemplateNameForCache(cluster, index);
                     if (null == indexTemplate) {
@@ -739,7 +735,8 @@ public class MonitorClusterJob {
         esIndexDCDRStats.setMetrics(Maps.newHashMap());
 
         for (ESDataTempBean esDataTempBean : metricsList) {
-            if (StringUtils.isEmpty(esDataTempBean.getComputeValue()) || "null".equals(esDataTempBean.getComputeValue())) {
+            if (StringUtils.isEmpty(esDataTempBean.getComputeValue()) || "null".equals(esDataTempBean.getComputeValue())
+                    || "Infinity".equals(esDataTempBean.getComputeValue()) || "NaN".equals(esDataTempBean.getComputeValue())) {
                 continue;
             }
             esIndexDCDRStats.putMetrics(esDataTempBean.getValueName().substring(ES_INDICES.length()).replace(".", "-"),
@@ -866,9 +863,6 @@ public class MonitorClusterJob {
         for (Object entry : indexStatMap.entrySet()) {
             Map.Entry indexStatEntry = (Map.Entry) entry;
             String indexName = (String) indexStatEntry.getKey();
-            if (indexSkip(indexName)) {
-                continue;
-            }
 
             IndexTemplatePhyWithLogic indexTemplate = getTemplateNameForCache(node.getCluster(), indexName);
             if(null == indexTemplate){continue;}
@@ -971,6 +965,10 @@ public class MonitorClusterJob {
             Map<String, String> metricsAll = esNodeStats.getMetrics();
 
             for (Map.Entry<String, String> entry : metricsAll.entrySet()) {
+                if (StringUtils.isEmpty(entry.getValue()) || "null".equals(entry.getValue())
+                        || "Infinity".equals(entry.getValue()) || "NaN".equals(entry.getValue())) {
+                    continue;
+                }
                 String key = entry.getKey();
                 if (metricsNameSet.contains(key)) {
                     metrics.put(key, entry.getValue());
@@ -993,7 +991,8 @@ public class MonitorClusterJob {
         esNodeStats.setRack(bean.getRack());
 
         for (ESDataTempBean esDataTempBean : metricsList) {
-            if (StringUtils.isEmpty(esDataTempBean.getComputeValue()) || "null".equals(esDataTempBean.getComputeValue())) {
+            if (StringUtils.isEmpty(esDataTempBean.getComputeValue()) || "null".equals(esDataTempBean.getComputeValue())
+                    || "Infinity".equals(esDataTempBean.getComputeValue()) || "NaN".equals(esDataTempBean.getComputeValue())) {
                 continue;
             }
 
@@ -1016,7 +1015,8 @@ public class MonitorClusterJob {
         esIndexStats.setMetrics(Maps.newHashMap());
 
         for (ESDataTempBean esDataTempBean : metricsList) {
-            if (StringUtils.isEmpty(esDataTempBean.getComputeValue()) || "null".equals(esDataTempBean.getComputeValue())) {
+            if (StringUtils.isEmpty(esDataTempBean.getComputeValue()) || "null".equals(esDataTempBean.getComputeValue())
+                    || "Infinity".equals(esDataTempBean.getComputeValue()) || "NaN".equals(esDataTempBean.getComputeValue())) {
                 continue;
             }
 
@@ -1040,8 +1040,8 @@ public class MonitorClusterJob {
         esNodeToIndexStats.setLogicTemplateId(base.getLogicTemplateId());
         esNodeToIndexStats.setTimestamp(timestamp);
         for (ESNodeToIndexTempBean bean : metricsList) {
-            if (StringUtils.isEmpty(bean.getComputeValue())
-                    || "null".equals(bean.getComputeValue())) {
+            if (StringUtils.isEmpty(bean.getComputeValue()) || "null".equals(bean.getComputeValue())
+                    || "Infinity".equals(bean.getComputeValue()) || "NaN".equals(bean.getComputeValue())) {
                 continue;
             }
 
@@ -1069,8 +1069,8 @@ public class MonitorClusterJob {
         ingestStats.setLogicTemplateId(base.getLogicTemplateId());
         ingestStats.setTimestamp(timestamp);
         for (ESNodeToIndexTempBean bean : metricsList) {
-            if (StringUtils.isEmpty(bean.getComputeValue())
-                    || "null".equals(bean.getComputeValue())) {
+            if (StringUtils.isEmpty(bean.getComputeValue()) || "null".equals(bean.getComputeValue())
+                    || "Infinity".equals(bean.getComputeValue()) || "NaN".equals(bean.getComputeValue())) {
                 continue;
             }
 

@@ -6,16 +6,17 @@ const classPrefix = "rf-monitor";
 interface propsType {
   topNu: number;
   setTopNu: (val: number) => void;
-  content: string;
-  setContent?: (val: string) => void;
+  content: string | string[];
+  setContent?: (val: string | any) => void;
   contentList: string[] | { name: string; value: string }[] | any;
   placeholder?: string;
   type?: string;
   allowClear?: boolean;
+  style?: object
 }
 
 export const SelectRadio = memo((props: propsType) => {
-  const { topNu, setTopNu, content, setContent, contentList, placeholder, allowClear, type } =
+  const { topNu, setTopNu, content, setContent, contentList, placeholder, allowClear, type, style } =
     props;
   return (
     <>
@@ -28,7 +29,7 @@ export const SelectRadio = memo((props: propsType) => {
               setTopNu(e.target.value);
             } else {
               setTopNu(e.target.value);
-              setContent("");
+              setContent(type == 'node' ? [] : "");
             }
           }}
         >
@@ -40,9 +41,10 @@ export const SelectRadio = memo((props: propsType) => {
         </Radio.Group>
       }
       <Select
+        mode={type == 'node' ? 'multiple' : null}
+        maxTagCount="responsive"
         placeholder={placeholder}
-        // allowClear={false}
-        style={{ width: 200 }}
+        style={{ width: type == 'node' ? 350 : 200, ...style }}
         value={content || undefined}
         onChange={(val) => {
           if (type === 'Gateway') {
@@ -54,6 +56,7 @@ export const SelectRadio = memo((props: propsType) => {
         }}
         allowClear={allowClear || false}
         showSearch
+        filterOption={(val, option) => { return option.children.includes(val.trim()) }}
         className={`${classPrefix}-overview-search-filter-item`}
       >
         {contentList.map((item, index) => {
@@ -81,7 +84,7 @@ export const SelectRadio = memo((props: propsType) => {
               setTopNu(e.target.value);
             } else {
               setTopNu(e.target.value);
-              setContent("");
+              setContent(type == 'node' ? [] : "");
             }
           }}
         >

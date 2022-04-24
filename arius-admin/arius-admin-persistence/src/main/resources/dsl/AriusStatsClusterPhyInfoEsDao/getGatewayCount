@@ -1,0 +1,16 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "terms": {
+            "clusterName": [
+              "%s"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,18 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 
 /**
  * @author d06679
@@ -57,6 +57,8 @@ public interface ESIndexService {
      * @return result
      */
     String syncGetIndexMapping(String cluster, String index);
+
+    Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList);
 
     /**
      * 查询集群中的索引
@@ -227,9 +229,10 @@ public interface ESIndexService {
     /**
      * 获取指定集群全量索引列表信息
      * @param cluster  集群名称
+     * @param tryTimes          重试次数
      * @return List<CatIndexResult>
      */
-    List<CatIndexResult> syncCatIndex(String cluster);
+    List<CatIndexResult> syncCatIndex(String cluster, int tryTimes);
 
     /**
      * 获取索引主shard个数

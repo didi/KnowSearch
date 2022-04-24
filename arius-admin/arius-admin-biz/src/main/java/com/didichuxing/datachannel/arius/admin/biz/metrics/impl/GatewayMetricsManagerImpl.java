@@ -6,27 +6,32 @@ import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.gateway.GatewayOverviewMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.linechart.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayMetricsService;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
+
+    private static final ILog LOGGER = LogFactory.getLog(GatewayMetricsManagerImpl.class);
 
     private static final String COMMON = "common";
     private static final String WRITE = "write";
@@ -145,6 +150,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                 } else if (GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE.getType().equals(metricsType)) {
                     VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, appId, dto.getNodeIp());
                     result.add(gatewayMetricsVO);
+                } else if (GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE.getType().equals(metricsType)) {
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeDSLLenMetrics(startTime, endTime,appId, dto.getNodeIp());
+                    result.add(gatewayMetricsVO);
                 }
             });
             nameList.add(dto.getNodeIp());
@@ -155,6 +163,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE.getType().equals(metricsType)) {
                     VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, appId, dto.getTopNu());
+                    result.add(gatewayMetricsVO);
+                } else if (GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE.getType().equals(metricsType)) {
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeDSLLenMetrics(startTime, endTime, appId, dto.getTopNu());
                     result.add(gatewayMetricsVO);
                 }
             });
@@ -169,14 +180,22 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     public Result<List<VariousLineChartMetricsVO>> getMultiGatewayNodesMetrics(MultiGatewayNodesDTO dto, Integer appId) {
         List<VariousLineChartMetricsVO> result = new ArrayList<>();
         GatewayNodeDTO gatewayNodeDTO = ConvertUtil.obj2Obj(dto, GatewayNodeDTO.class);
+        if (AriusObjUtils.isEmptyList(dto.getNodeIps())) {
+            return getGatewayNodeMetrics(gatewayNodeDTO, appId);
+        }
+
         for (String nodeIp : dto.getNodeIps()) {
-            gatewayNodeDTO.setNodeIp(nodeIp);
-            Result<List<VariousLineChartMetricsVO>> nodeMetrics = getGatewayNodeMetrics(gatewayNodeDTO, appId);
-            if (nodeMetrics.success()) {
-                result.addAll(nodeMetrics.getData());
+            try {
+                gatewayNodeDTO.setNodeIp(nodeIp);
+                Result<List<VariousLineChartMetricsVO>> nodeMetrics = getGatewayNodeMetrics(gatewayNodeDTO, appId);
+                if (nodeMetrics.success()) {
+                    result.addAll(nodeMetrics.getData());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("class=GatewayMetricsManagerImpl||method=getMultiGatewayNodesMetrics||errMsg={}", e);
             }
         }
-        return Result.buildSucc(result);
+        return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
     }
 
     @Override
@@ -195,6 +214,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                 } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
                     VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getNodeIp(), dto.getClientNodeIp());
                     result.add(gatewayMetricsVO);
+                } else if (GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE.getType().equals(metricsType)) {
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeDSLLENMetrics(startTime, endTime, appId, dto.getNodeIp(), dto.getClientNodeIp());
+                    result.add(gatewayMetricsVO);
                 }
             });
             clientNodeIpList.add(dto.getClientNodeIp());
@@ -206,6 +228,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                 } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
                     VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getTopNu(), dto.getNodeIp());
                     result.add(gatewayMetricsVO);
+                } else if (GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE.getType().equals(metricsType)) {
+                    VariousLineChartMetrics gatewayMericsVO = gatewayMetricsService.getClientNodeDSLLENMetrics(startTime, endTime, appId, dto.getTopNu(), dto.getNodeIp());
+                    result.add(gatewayMericsVO);
                 }
             });
             clientNodeIpList.addAll(gatewayMetricsService.getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(), dto.getEndTime(), appId));

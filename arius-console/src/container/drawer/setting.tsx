@@ -46,13 +46,11 @@ class EditSetting extends React.Component<any> {
       cancelCopy,
       logicId: this.props.params
     }).then(res => {
-      if (res) {
-        message.success('操作成功');
-        this.props.dispatch(actions.setCreateIndex({
-          settingCount: Math.random()
-        }));
-        this.props.dispatch(actions.setModalId(''));
-      }
+      message.success('操作成功');
+      this.props.dispatch(actions.setCreateIndex({
+        settingCount: Math.random()
+      }));
+      this.props.dispatch(actions.setModalId(''));
     })
   }
 

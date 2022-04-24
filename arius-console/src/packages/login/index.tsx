@@ -53,7 +53,7 @@ export const Login: React.FC<any> = () => {
           critical === true ?
           <div className='login-box-form-center-header-left'>
             <div className='login-box-form-center-header-left-log'></div>
-            ElasticSearch Manager
+            KnowSearch
           </div>
           :
           <div></div>
@@ -72,7 +72,12 @@ export const Login: React.FC<any> = () => {
     <div className='login-box'>
       <div className='login-box-left' style={{display: critical ? 'none' : null}}>
           <div className='login-box-left-img'></div>
-          <div className='login-box-left-title'>LogiEM</div>
+          <div className='login-box-left-title'>KnowSearch</div>
+          {/* <div className='login-box-left-text'>
+            <div className='login-box-left-text-leftline'></div>
+            滴滴开源
+            <div  className='login-box-left-text-rithline'></div>
+          </div> */}
           <div className='login-box-left-conter'>一站式 Elasticsearch</div>
           <div className='login-box-left-conter'>集群指标监控与运维管控平台</div>
       </div>

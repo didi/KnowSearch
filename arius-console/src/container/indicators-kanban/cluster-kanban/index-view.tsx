@@ -24,13 +24,14 @@ import {
 import { asyncMicroTasks, resize } from "../../../lib/utils";
 import { setIsUpdate } from "actions/cluster-kanban";
 import { arrayMoveImmutable } from 'array-move';
+import Url from "lib/url-parser";
 
 export const classPrefix = "rf-monitor";
 const { Panel } = Collapse;
 const INDEX = "index";
 export const IndexView = memo(() => {
   const [topNu, setTopNu] = useState(TOP_MAP[0].value);
-  const [indexName, setIndexName] = useState("");
+  const [indexName, setIndexName] = useState(undefined);
   const [indexNameList, setIndexNameList] = useState([]);
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
   const dispatch = useDispatch();
@@ -40,8 +41,8 @@ export const IndexView = memo(() => {
     checkedData[item] = listsNew;
     const checkedList = objFlat(checkedData);
     setCheckedList(INDEX, checkedList);
-    setCheckedData({...checkedData});
-  }; 
+    setCheckedData({ ...checkedData });
+  };
 
   const { clusterName, startTime, endTime, isMoreDay, isUpdate } = useSelector(
     (state) => ({
@@ -90,13 +91,14 @@ export const IndexView = memo(() => {
         indexName
       );
     },
-    [clusterName, startTime, endTime, topNu, indexName]
+    [clusterName, startTime, endTime, topNu, indexName, isUpdate]
   );
 
   const getAsyncIndexNameList = async () => {
     if (clusterName) {
       try {
         const indexNameList = await getIndexNameList(clusterName);
+        setIndexName(Url().search?.cluster === clusterName ? Url().search?.index : undefined);
         setIndexNameList(indexNameList);
       } catch (error) {
         console.log(error);
@@ -107,6 +109,10 @@ export const IndexView = memo(() => {
   useEffect(() => {
     getAsyncCheckedList();
   }, []);
+
+  useEffect(() => {
+    setIndexName(Url().search?.index)
+  }, [Url().search?.index])
 
   useEffect(() => {
     getAsyncIndexNameList();
@@ -121,6 +127,7 @@ export const IndexView = memo(() => {
         setContent={setIndexName}
         contentList={indexNameList}
         placeholder="请选择索引"
+        style={{ width: 400 }}
       />
     );
   };
@@ -164,18 +171,18 @@ export const IndexView = memo(() => {
                   <div
                     className={`${classPrefix}-overview-content-line  content-margin-top-20`}
                   >
-                       {checkedData[item] && checkedData[item].length ? <RenderLine
-                        metricsTypes={checkedData[item]}
-                        key={item + index + topNu + clusterName}
-                        configData={indexConfigData}
-                        isMoreDay={isMoreDay}
-                        getAsyncViewData={getAsyncViewData}
-                        startTime={startTime}
-                        endTime={endTime}
-                        sortEnd={sortEnd}
-                        item={item}
-                      /> : ""
-                      }
+                    {checkedData[item] && checkedData[item].length ? <RenderLine
+                      metricsTypes={checkedData[item]}
+                      key={item + index + topNu + clusterName}
+                      configData={indexConfigData}
+                      isMoreDay={isMoreDay}
+                      getAsyncViewData={getAsyncViewData}
+                      startTime={startTime}
+                      endTime={endTime}
+                      sortEnd={sortEnd}
+                      item={item}
+                    /> : ""
+                    }
                   </div>
                 </Panel>
               </Collapse>

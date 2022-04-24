@@ -259,16 +259,13 @@ export const getColumns = (
       width: 180,
       render: (item, record) => {
         return <div
-          className="two-row-ellipsis pointer"
-          style={{
-            color: "#526ecc",
-            // width: "8vw"
-          }}>
-            <NavRouterLink 
-              needToolTip
-              element={item}
-              href={`/index-admin/detail?index=${record.index}&cluster=${record.cluster}`}
-            />
+          className="two-row-ellipsis pointer index-name-cell">
+          <NavRouterLink
+            needToolTip
+            maxShowLength={50}
+            element={item}
+            href={`/index-admin/detail?index=${record.index}&cluster=${record.cluster}`}
+          />
         </div>
       },
     },
@@ -407,7 +404,7 @@ const baseInfo = [
       key: "docsDeleted",
     },
   ],
-  [    
+  [
     {
       label: "主分片存储大小",
       key: "priStoreSize",
@@ -424,9 +421,9 @@ export const TAB_LIST = [
     name: "基本信息",
     key: TAB_LIST_KEY.baseInfo,
     content: (data) => <BaseDetail
-              columns={baseInfo}
-              baseDetail={data}
-            />,
+      columns={baseInfo}
+      baseDetail={data}
+    />,
   },
   {
     name: "Mapping",

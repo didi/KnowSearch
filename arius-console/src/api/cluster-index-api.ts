@@ -5,7 +5,7 @@ import store from 'store';
 
 const app = store.getState().app
 export interface IAllIndexList {
-  from: number;
+  page: number;
   size: number;
   //权限
   authType: number;
@@ -228,7 +228,7 @@ export const rolloverSwitch = (templateLogicId: number, disable: string) => {
   });
 };
 
-export const checkHotTimeState = (clusterLogicId: number) => {
+export const getClusterTemplateSrv = (clusterLogicId: number) => {
   return fetch(`/v3/op/logic/cluster/templateSrv/${clusterLogicId} `);
 };
 

@@ -33,7 +33,7 @@ public class PhyClusterInfoSource {
     @Data
     public static class PhyClusterInfo {
         private String phyClusterName;
-        private Integer phyClusterId;
+        private Long phyClusterId;
 
         private ConsoleClusterPhyVO consoleClusterPhyVO;
         // 接入物理集群时的请求体
@@ -59,7 +59,7 @@ public class PhyClusterInfoSource {
         List<ConsoleClusterPhyVO> data = result2.getData().getBizData();
         for(ConsoleClusterPhyVO clusterPhyVO : data) {
             if(clusterPhyVO.getCluster().equals(phyClusterInfo.clusterJoinDTO.getCluster())) {
-                phyClusterInfo.phyClusterId = clusterPhyVO.getId();
+                phyClusterInfo.phyClusterId = Long.valueOf(clusterPhyVO.getId());
                 phyClusterInfo.consoleClusterPhyVO = clusterPhyVO;
                 break;
             }
@@ -70,7 +70,7 @@ public class PhyClusterInfoSource {
     /**
      * 删除物理集群
      */
-    public static void phyClusterRemove(String phyClusterName, Integer phyClusterId) throws IOException {
+    public static void phyClusterRemove(String phyClusterName, Long phyClusterId) throws IOException {
         // 删除物理集群
         // 提交工单
         WorkOrderDTO workOrderDTO = CustomDataSource.getWorkOrderDTO("clusterDelete");

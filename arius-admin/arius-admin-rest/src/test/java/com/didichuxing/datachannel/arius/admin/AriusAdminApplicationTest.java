@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin;
 
-import com.didichuxing.datachannel.arius.admin.common.util.YamlUtil;
-import com.didichuxing.datachannel.arius.admin.rest.AriusAdminApplication;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,12 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import com.didichuxing.datachannel.arius.admin.rest.AriusAdminApplication;
 
 /**
  * @author d06679

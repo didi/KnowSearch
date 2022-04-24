@@ -21,15 +21,13 @@ import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLog
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterImportRuleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicLevelEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.resource.*;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTags;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
@@ -43,6 +41,7 @@ import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
@@ -181,7 +180,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @PostConstruct
     private void init(){
-        ariusScheduleThreadPool.submitScheduleAtFixTask(this::refreshClusterDistInfo,60,180);
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo,60,180);
     }
 
     private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterPhyManagerImpl",20, 40,100);
@@ -318,6 +317,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
+    public List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param) {
+
+        List<ClusterPhy> phyClusters = clusterPhyService.listClustersByCondt(param);
+        List<ConsoleClusterPhyVO> consoleClusterPhyVOS = ConvertUtil.list2List(phyClusters, ConsoleClusterPhyVO.class);
+
+        consoleClusterPhyVOS.parallelStream()
+                .forEach(this::buildClusterRole);
+
+        Collections.sort(consoleClusterPhyVOS);
+
+        return consoleClusterPhyVOS;
+    }
+
+
+    @Override
     public List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId) {
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             return Lists.newArrayList();
@@ -397,6 +411,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return new ConsoleClusterPhyVO();
         }
         ConsoleClusterPhyVO consoleClusterPhyVO = ConvertUtil.obj2Obj(clusterPhy, ConsoleClusterPhyVO.class);
+
         // 构建overView信息
         buildWithOtherInfo(consoleClusterPhyVO, currentAppId);
         buildPhyClusterStatics(consoleClusterPhyVO);
@@ -828,7 +843,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         updateClusterHealth(clusterPhyName, operator);
-        return Result.buildFail();
+        return Result.buildSucc();
     }
 
     @Override
@@ -939,9 +954,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (CollectionUtils.isEmpty(logicBindRegions)) {
             return Result.buildFail("无法获取逻辑集群对应的region信息");
         }
-
+        //TODO: wkp 性能优化 单集群region上千, 模板上万
+       /*
         //获取指定物理集群的r关于rack的磁盘总量分布情况
-        Map</*rack*/String, /*rack上的磁盘总量*/Float> allocationInfoOfRackMap = esClusterService.getAllocationInfoOfRack(clusterPhyName);
+        Map<*//*rack*//*String, *//*rack上的磁盘总量*//*Float> allocationInfoOfRackMap = esClusterService.getAllocationInfoOfRack(clusterPhyName);
         if (MapUtils.isEmpty(allocationInfoOfRackMap)) {
             return Result.buildFail("逻辑集群绑定的物理集群上没有rack的磁盘分布信息");
         }
@@ -955,6 +971,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 .filter(floatStringTuple -> floatStringTuple.getV1() > beSetDiskSize)
                 .sorted(Comparator.comparing(Tuple::getV1, Comparator.reverseOrder()))
                 .map(Tuple::getV2)
+                .collect(Collectors.toSet()); */
+
+        Set<String> canCreateTemplateRegionLists = logicBindRegions
+                .stream()
+                .map(ClusterRegion::getRacks)
                 .collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(canCreateTemplateRegionLists)) {
@@ -1309,6 +1330,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     private Result<Void> validCheckAndInitForClusterJoin(ClusterJoinDTO param, String operator) {
+        ClusterTags clusterTags = ConvertUtil.str2ObjByJson(param.getTags(), ClusterTags.class);
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("参数为空");
         }
@@ -1319,6 +1341,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         if (!ESClusterTypeEnum.validCode(param.getType())) {
             return Result.buildParamIllegal("非支持的集群类型");
+        }
+
+        if (!ESClusterResourceTypeEnum.validCode(clusterTags.getResourceType())) {
+            return Result.buildParamIllegal("非支持的集群所属资源类型");
+        }
+
+        if (ESClusterCreateSourceEnum.ES_IMPORT != ESClusterCreateSourceEnum.valueOf(clusterTags.getCreateSource())) {
+            return Result.buildParamIllegal("非集群接入来源");
         }
 
         if (!ESClusterImportRuleEnum.validCode(param.getImportRule())) {
@@ -1380,6 +1410,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         String esClientHttpAddressesStr = roleClusterHostService.buildESClientHttpAddressesStr(roleClusterHosts);
 
+        //密码验证
+        Result<Void> passwdResult = checkClusterWithoutPasswd(param, esClientHttpAddressesStr);
+        if (passwdResult.failed()) return passwdResult;
+
+        //同集群验证
+        Result<Void> sameClusterResult = checkSameCluster(param.getPassword(), roleClusterHostService.buildESAllRoleHttpAddressesList(roleClusterHosts));
+        if (sameClusterResult.failed()) return Result.buildParamIllegal("禁止同时接入超过两个不同集群节点");
+
         //获取设置rack
         Result<Void> rackSetResult = initRackValueForClusterJoin(param, esClientHttpAddressesStr);
         if (rackSetResult.failed()) return rackSetResult;
@@ -1391,6 +1429,35 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         param.setResponsible(operator);
         return Result.buildSucc();
+    }
+
+    /**
+     * 检测「未设置密码的集群」接入时是否携带账户信息
+     */
+    private Result<Void> checkClusterWithoutPasswd(ClusterJoinDTO param, String esClientHttpAddressesStr) {
+        ClusterConnectionStatus status = esClusterService.checkClusterPassword(esClientHttpAddressesStr, null);
+        if (ClusterConnectionStatus.DISCONNECTED == status) {
+            return Result.buildParamIllegal("集群离线未能连通");
+        }
+
+        if (!Strings.isNullOrEmpty(param.getPassword())) {
+            if (ClusterConnectionStatus.NORMAL == status) {
+                return Result.buildParamIllegal("未设置密码的集群，请勿输入账户信息");
+            }
+            status = esClusterService.checkClusterPassword(esClientHttpAddressesStr, param.getPassword());
+            if (ClusterConnectionStatus.UNAUTHORIZED == status) {
+                return Result.buildParamIllegal("集群的账户信息错误");
+            }
+        } else {
+            if (ClusterConnectionStatus.UNAUTHORIZED == status) {
+                return Result.buildParamIllegal("集群设置有密码，请输入账户信息");
+            }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkSameCluster(String passwd, List<String> esClientHttpAddressesList) {
+        return esClusterService.checkSameCluster(passwd, esClientHttpAddressesList);
     }
 
     /**

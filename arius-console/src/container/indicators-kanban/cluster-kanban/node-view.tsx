@@ -29,6 +29,7 @@ import { asyncMicroTasks, resize } from "../../../lib/utils";
 import { setIsUpdate } from "actions/cluster-kanban";
 import * as actions from "../../../actions";
 import { arrayMoveImmutable } from 'array-move';
+import Url from "lib/url-parser";
 
 const { Panel } = Collapse;
 
@@ -48,17 +49,17 @@ export const NodeView = memo(() => {
     shallowEqual
   );
   const [topNu, setTopNu] = useState(TOP_MAP[0].value);
-  const [nodeIp, setNodeIp] = useState("");
+  const [nodeIp, setNodeIp] = useState(undefined);
   const [nodeIpList, setNodeIpList] = useState([]);
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
- 
+
   const sortEnd = (item, { oldIndex, newIndex }) => {
     const listsNew = arrayMoveImmutable(checkedData[item], oldIndex, newIndex)
     checkedData[item] = listsNew;
     const checkedList = objFlat(checkedData);
     setCheckedList(NODE, checkedList);
-    setCheckedData({...checkedData});
-  }; 
+    setCheckedData({ ...checkedData });
+  };
 
   const dispatch = useDispatch();
 
@@ -84,6 +85,7 @@ export const NodeView = memo(() => {
     if (clusterName) {
       try {
         const ipList = await getNodeIpList(clusterName);
+        setNodeIp((Url().search?.cluster === clusterName && Url().search?.node) ? [Url().search?.node] : undefined);
         setNodeIpList(ipList);
       } catch (error) {
         console.error(error);
@@ -109,12 +111,18 @@ export const NodeView = memo(() => {
         nodeIp
       );
     },
-    [clusterName, startTime, endTime, topNu, nodeIp]
+    [clusterName, startTime, endTime, topNu, nodeIp, isUpdate]
   );
 
   useEffect(() => {
     getAsyncCheckedList();
   }, []);
+
+  useEffect(() => {
+    if (Url().search?.node) {
+      setNodeIp([Url().search?.node])
+    }
+  }, [Url().search?.node])
 
   useEffect(() => {
     getAsyncNodeViewIpList();
@@ -125,10 +133,11 @@ export const NodeView = memo(() => {
       <SelectRadio
         topNu={topNu}
         setTopNu={setTopNu}
-        content={nodeIp}
+        content={nodeIp || []}
         setContent={setNodeIp}
         contentList={nodeIpList}
         placeholder="请选择节点名称"
+        type="node"
       />
     );
   };
@@ -155,7 +164,7 @@ export const NodeView = memo(() => {
 
   useEffect(() => {
     window['showTaskTooltipModal'] = (clusterPhyName, node, time) => {
-      ShowTaskTooltipModal(clusterPhyName, node, time);     
+      ShowTaskTooltipModal(clusterPhyName, node, time);
     };
   }, []);
 
@@ -188,18 +197,18 @@ export const NodeView = memo(() => {
                     className={`${classPrefix}-overview-content-line content-margin-top-20`}
                   >
                     {checkedData[item] && checkedData[item].length ? <RenderLine
-                        metricsTypes={checkedData[item]}
-                        key={item + index + topNu + clusterName}
-                        configData={indexConfigData}
-                        isMoreDay={isMoreDay}
-                        getAsyncViewData={getAsyncNodeViewData}
-                        startTime={startTime}
-                        endTime={endTime}
-                        clusterPhyName={clusterName}
-                        sortEnd={sortEnd}
-                        item={item}
-                      /> : ""
-                      }
+                      metricsTypes={checkedData[item]}
+                      key={item + index + topNu + clusterName}
+                      configData={indexConfigData}
+                      isMoreDay={isMoreDay}
+                      getAsyncViewData={getAsyncNodeViewData}
+                      startTime={startTime}
+                      endTime={endTime}
+                      clusterPhyName={clusterName}
+                      sortEnd={sortEnd}
+                      item={item}
+                    /> : ""
+                    }
                   </div>
                 </Panel>
               </Collapse>

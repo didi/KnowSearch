@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
@@ -63,6 +62,14 @@ public interface RegionRackService {
      * @return result
      */
     List<ClusterLogicRackInfo> listLogicClusterRacks(Long logicClusterId);
+
+    /**
+     * 获取执行逻辑集群拥有的rack信息
+     * @param logicClusterId 逻辑集群ID
+     * @param phyClusterName 物理机群名称
+     * @return result
+     */
+    List<ClusterLogicRackInfo> listLogicClusterRacks(Long logicClusterId, String phyClusterName);
 
     /**
      * 增加Rack到逻辑集群

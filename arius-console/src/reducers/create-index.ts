@@ -23,12 +23,11 @@ export const initialState: any = {
   cancelCopy: false,
   asyncTranslog: false,
   customerAnalysis: false,
-  // dynamicTemplates: false,
   customerAnalysisJson: null,
-  // dynamicTemplatesJson: null,
   customerAnalysisValue: '',
-  // dynamicTemplatesValue: '',
   settingCount: 0,
+  disableHotTimeState: true,
+  dataCenter: 'cn'
 };
 
 // const cloneInitState = _.cloneDeep(initialState);
@@ -90,15 +89,12 @@ export default (state = initialState, action: IAction) => {
         cancelCopy: false,
         asyncTranslog: false,
         customerAnalysis: false,
-        // dynamicTemplates: false,
         customerAnalysisJson: null,
-        // dynamicTemplatesJson: null,
         customerAnalysisValue: '',
-        // dynamicTemplatesValue: '',
       }
     }
     case actionTypes.SET_CREATE_INDEX: {
-      return {...state, ...action.payload }
+      return { ...state, ...action.payload }
     }
   }
 

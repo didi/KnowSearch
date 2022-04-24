@@ -10,6 +10,7 @@ import createIndex from './create-index';
 import task from './task';
 import clusterKanban from './cluster-kanban';
 import gatewayKanban from './gateway-kanban';
+import dashBoard from './dashboard';
 
 export default combineReducers({
   modal,
@@ -23,4 +24,5 @@ export default combineReducers({
   task,
   clusterKanban,
   gatewayKanban,
+  dashBoard,
 });

@@ -114,10 +114,3 @@ export const CHECK_GROUP = [
   //   text: 'dynamic templates设置',
   // },
 ]
-
-export const MAPPING_CHECK_GROUP = [
-  {
-    value: 'dynamicTemplates',
-    text: 'dynamic templates设置',
-  },
-]

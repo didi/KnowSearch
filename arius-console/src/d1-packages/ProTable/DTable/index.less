@@ -22,6 +22,7 @@
 
       &-btn {
         display: flex;
+
         button {
           margin-right: 10px;
         }
@@ -36,23 +37,27 @@
         }
 
         .reload:hover {
-          color: #2f81f9;
+          color: @primary-color;
         }
       }
     }
   }
+
   .ant-table-thead {
     tr th {
       white-space: nowrap;
     }
   }
+
   .ant-table-filter-column {
     line-height: 100%;
+
     .ant-table-filter-column-title {
       flex-grow: 0;
       padding-right: 5px;
-  
+
     }
+
     .ant-table-filter-trigger-container {
       position: relative;
     }

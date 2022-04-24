@@ -38,6 +38,7 @@ const DragGroup: React.FC<propsType> = ({ children, containerProps, dragContaine
             <DragableItem
               dragItemProps={{
                 index: index,
+                disabled: child.key?.indexOf('health') !== -1,
                 ...dragItemProps
               }}
               key={index}>

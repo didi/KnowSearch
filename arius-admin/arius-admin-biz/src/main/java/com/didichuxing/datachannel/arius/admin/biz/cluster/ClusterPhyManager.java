@@ -60,6 +60,8 @@ public interface ClusterPhyManager {
      */
     List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param, Integer currentAppId);
 
+    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param);
+
     /**
      * 构建客户端需要的数据
      *

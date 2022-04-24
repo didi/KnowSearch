@@ -20,4 +20,9 @@ public class GatewayIndexDTO extends GatewayMetricsDTO {
 
     @ApiModelProperty("top数字")
     private Integer topNu;
+
+    @Override
+    public String getGroup() {
+        return "index";
+    }
 }

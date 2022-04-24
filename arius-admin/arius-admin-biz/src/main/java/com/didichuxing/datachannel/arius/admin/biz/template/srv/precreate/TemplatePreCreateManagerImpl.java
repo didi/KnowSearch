@@ -181,8 +181,8 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
             return true;
         }
 
-        String tomorrowIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
-            physicalWithLogic.getLogicTemplate().getDateFormat(), 1, physicalWithLogic.getVersion());
+        String tomorrowIndexName = IndexNameFactory.getNoVersion(physicalWithLogic.getExpression(),
+            physicalWithLogic.getLogicTemplate().getDateFormat(), 1);
         return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
     }
 }

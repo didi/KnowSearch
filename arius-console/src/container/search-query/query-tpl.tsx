@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Row, Col, Form, DatePicker, Input, Radio, Button, Tooltip } from 'antd';
 import moment from 'moment';
 import { getQueryTplColumns, cherryList } from './config';
@@ -14,7 +14,7 @@ import FilterColumns from 'component/filterColumns';
 const CN = 'dsl-query-tpl';
 const Item = Form.Item;
 const tiemOptions = [
-  { label: '今天', value: 1},
+  { label: '今天', value: 1 },
   { label: '近7天', value: 7 },
   { label: '近一月', value: 30 },
 ];
@@ -37,6 +37,7 @@ export const QueryTpl = () => {
   const [form] = Form.useForm();
   const [record, setRecord] = useState({});
   const [columns, setColumns] = useState([]);
+  const error = useRef(false)
 
   const [pagination, setPagination] = useState({
     position: 'bottomRight',
@@ -45,9 +46,11 @@ export const QueryTpl = () => {
     showSizeChanger: true,
     pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
     showTotal: (total) => `共 ${total} 条`,
+    current: 1,
+    pageSize: 10
   });
   const [page, setPage] = useState({
-    from: 0,
+    page: 1,
     size: 10,
     sortInfo: '',
     orderByDesc: true,
@@ -61,7 +64,7 @@ export const QueryTpl = () => {
       setQueryIndex(params?.queryIndex);
       setStartTime(moment(Number(params?.startTime)));
       setEndTime(moment(Number(params?.endTime)));
-      form.setFieldsValue({MD5: params?.dslTemplateMd5, queryIndex: params?.queryIndex})
+      form.setFieldsValue({ MD5: params?.dslTemplateMd5, queryIndex: params?.queryIndex })
       setloading(true);
       const param = {
         ...page,
@@ -71,6 +74,7 @@ export const QueryTpl = () => {
         if (res) {
           setData(res?.bizData);
           sessionStorage.setItem('query-tpl', '')
+          const { pageNo = 0, pageSize = 10 } = res.pagination
           setPagination({
             position: 'bottomRight',
             total: res?.pagination?.total,
@@ -78,6 +82,8 @@ export const QueryTpl = () => {
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
             showTotal: (total) => `共 ${total} 条`,
+            current: pageNo,
+            pageSize: pageSize
           });
         }
       }).finally(() => {
@@ -117,6 +123,10 @@ export const QueryTpl = () => {
   };
 
   const reloadData = () => {
+    // 校验不通过时不发送请求
+    if (error.current) {
+      return
+    }
     setloading(true);
     const params = {
       ...page,
@@ -128,6 +138,7 @@ export const QueryTpl = () => {
     getDslList(params).then((res: any) => {
       if (res) {
         setData(res?.bizData);
+        const { pageNo = 1, pageSize = 10 } = res.pagination
         setPagination({
           position: 'bottomRight',
           total: res?.pagination?.total,
@@ -135,6 +146,8 @@ export const QueryTpl = () => {
           showSizeChanger: true,
           pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
           showTotal: (total) => `共 ${total} 条`,
+          current: pageNo,
+          pageSize: pageSize
         });
       }
     }).finally(() => {
@@ -144,9 +157,9 @@ export const QueryTpl = () => {
 
   const handleChange = (pagination, _, tableParams) => {
     setPage({
-      from: (pagination.current - 1) * pagination.pageSize,
+      page: pagination.current,
       size: pagination.pageSize,
-      sortInfo: (tableParams.order === "ascend" || tableParams.order === "descend") ?  tableParams.field : null,
+      sortInfo: (tableParams.order === "ascend" || tableParams.order === "descend") ? tableParams.field : null,
       orderByDesc: (tableParams.order === "ascend" || tableParams.order === "descend") ? tableParams.order !== "ascend" : null,
     })
   }
@@ -187,8 +200,8 @@ export const QueryTpl = () => {
   const onSearch = () => {
     sessionStorage.setItem('query-tpl', '')
     setPage({
-      from: 0,
-      size: 10,
+      page: 1,
+      size: page.size,
       sortInfo: '',
       orderByDesc: true,
     });
@@ -200,17 +213,41 @@ export const QueryTpl = () => {
         <Form form={form}>
           <Row gutter={20}>
             <Col span={5}>
-              <Item label="查询模板MD5" name="MD5">
+              <Item label="查询模板MD5" name="MD5" rules={[{
+                required: false,
+                validator: (rule, value) => {
+                  if (value?.length > 128) {
+                    error.current = true;
+                    return Promise.reject('上限128字符');
+                  }
+                  error.current = false;
+                  return Promise.resolve();
+                }
+              }]}>
                 <Input placeholder="请输入" onChange={(e) => {
-                  setDslTemplateMd5(e.target.value);
-                }}/>
+                  setDslTemplateMd5(e.target.value.trim());
+                }}
+                  onPressEnter={onSearch}
+                />
               </Item>
             </Col>
             <Col span={5}>
-              <Item label="查询索引" name="queryIndex">
+              <Item label="查询索引" name="queryIndex" rules={[{
+                required: false,
+                validator: (rule, value) => {
+                  if (value?.length > 128) {
+                    error.current = true;
+                    return Promise.reject('上限128字符');
+                  }
+                  error.current = false;
+                  return Promise.resolve();
+                }
+              }]}>
                 <Input placeholder="请输入" onChange={(e) => {
-                  setQueryIndex(e.target.value)
-                }}/>
+                  setQueryIndex(e.target.value.trim())
+                }}
+                  onPressEnter={onSearch}
+                />
               </Item>
             </Col>
             <Col span={14}>
@@ -250,7 +287,7 @@ export const QueryTpl = () => {
     if (checkListStr) {
       try {
         return JSON.parse(checkListStr);
-      } catch(err) {
+      } catch (err) {
         console.log(err);
       }
     } else {
@@ -261,11 +298,11 @@ export const QueryTpl = () => {
   const saveCheckFn = (list: string[]) => {
     window.localStorage.setItem('dslTemplate', JSON.stringify(list))
   }
-  
+
   const getOpBtns = useCallback(() => {
     return (
       <>
-        <FilterColumns 
+        <FilterColumns
           columns={getQueryTplColumns(reloadData, showDrawer, showEditLimit)}
           setColumns={setColumns}
           checkArr={cherryList}
@@ -278,8 +315,9 @@ export const QueryTpl = () => {
           </Button>
         </Tooltip>
       </>
-    )}, [selectItem])
-  
+    )
+  }, [selectItem])
+
   const editCancel = () => {
     setEditVisible(false);
     setRecords([])
@@ -295,8 +333,8 @@ export const QueryTpl = () => {
   }
   return (
     <div>
-      <DslDetail visible={visible} detailData={record} onCancel={onCancel} cb={reloadData} showEditLimit={showEditLimit}/>
-      <EditLimit visible={editVisible} record={records} cancel={editCancel} cb={reloadData}/>
+      <DslDetail visible={visible} detailData={record} onCancel={onCancel} cb={reloadData} showEditLimit={showEditLimit} />
+      <EditLimit visible={editVisible} record={records} cancel={editCancel} cb={reloadData} />
       {renderSearch()}
       <div className="table-content">
         <DTable
@@ -312,7 +350,7 @@ export const QueryTpl = () => {
           paginationProps={pagination}
           attrs={{
             onChange: handleChange,
-            scroll: {x: 1700 - ((13 - columns.length) * 130)},
+            scroll: { x: 1700 - ((13 - columns.length) * 130) },
             rowSelection: rowSelection,
             rowKey: 'dslTemplateMd5'
           }}

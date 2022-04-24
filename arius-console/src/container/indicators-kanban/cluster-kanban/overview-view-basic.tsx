@@ -10,17 +10,22 @@ interface propsType {
   reload?: boolean;
 }
 interface basicPropsType {
-  memFreePercent?: number; // 空闲内存百分比
-  memUsedPercent?: number; // 已用内存百分比
+  // memFreePercent?: number; // 空闲内存百分比
+  heapFreeUsage?: number; // 堆空闲内存百分比
+  // memUsedPercent?: number; // 已用内存百分比
+  heapUsage?: number; // 堆已用内存百分比
   storeUsage?: number; // 已用磁盘百分比
   storeFreeUsage?: number; // 空闲磁盘百分比
   activeNodeNu?: number; // 活跃节点数
   clusterName?: string; // 物理集群名称
   freeStoreSize?: number; // 空闲磁盘
   invalidNodeNu?: number; // 死亡节点
-  memFree?: number; // 空闲内存
-  memTotal?: number; // 内存总量
-  memUsed?: number; // 已用内存
+  heapMemFree?: number; // 堆空闲内存
+  // memFree?: number; // 空闲内存
+  heapMemTotal?: number; // 堆内存总量
+  // memTotal?: number; // 内存总量
+  heapMemUsed?: number; // 堆已用内存
+  // memUsed?: number; // 已用内存
   numberClientNodes?: number; // Clientnode节点数
   numberDataNodes?: number; // Datanode节点数
   numberIngestNode?: number; // IngestNode节点数
@@ -40,12 +45,13 @@ interface basicPropsType {
 export const overviewClassPrefix = "rf-monitor";
 
 export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
-  const { clusterName } = useSelector(
+  const { clusterName, startTime, endTime, isUpdate } = useSelector(
     (state) => ({
       clusterName: (state as any).clusterKanban.clusterName,
       startTime: (state as any).clusterKanban.startTime,
       endTime: (state as any).clusterKanban.endTime,
       isMoreDay: (state as any).clusterKanban.isMoreDay,
+      isUpdate: (state as any).clusterKanban.isUpdate,
     }),
     shallowEqual
   );
@@ -53,8 +59,14 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const getOverviewBasicData = async () => {
+    if (!clusterName) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      const { basic } = await getOverviewData(["basic"], clusterName, 0, 0);
+      const { basic } = await getOverviewData(["basic"], clusterName, startTime, endTime);
       setBasic(basic);
     } catch (error) {
       setBasic({});
@@ -72,9 +84,8 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
   };
 
   useEffect(() => {
-    setIsLoading(true);
     getOverviewBasicData();
-  }, [clusterName, reload]);
+  }, [clusterName, reload, startTime, endTime, isUpdate]);
 
   // 总揽视图列表
   const stateConfigurationList = [
@@ -141,12 +152,17 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
     return val;
   };
 
-  const memUsed = bytesToGB(basic.memUsed) || 0;
-  const memFree = bytesToGB(basic.memFree) || 0;
-  const memTotal = toFixedNum(memUsed + memFree) || 0;
-  const memUsedPercent = toFixedNum(basic.memUsedPercent) || 0;
+  // const memUsed = bytesToGB(basic.memUsed) || 0;
+  const heapMemUsed = bytesToGB(basic?.heapMemUsed) || 0;
+  // const memFree = bytesToGB(basic.memFree) || 0;
+  const heapMemFree = bytesToGB(basic?.heapMemFree) || 0;
+  // const memTotal = toFixedNum(memUsed + memFree) || 0;
+  const heapMemTotal = toFixedNum(heapMemUsed + heapMemFree) || 0;
+  // const memUsedPercent = toFixedNum(basic.memUsedPercent) || 0;
+  const heapUsage = toFixedNum(basic?.heapUsage) || 0;
   // decimalToPercent(memUsed / memTotal) || 0;
-  const memFreePercent = toFixedNum(basic.memFreePercent) || 0;
+  // const memFreePercent = toFixedNum(basic.memFreePercent) || 0;
+  const heapFreeUsage = toFixedNum(basic?.heapFreeUsage) || 0;
   // toFixedNum(100 - memUsedPercent) || 0;
 
   const storeSize = bytesToGB(basic.storeSize) || 0;
@@ -166,28 +182,28 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
     : 0;
 
   const memLegendVal = {
-    已用内存: {
-      value: memUsed + "GB",
-      percent: memUsedPercent,
+    堆已用内存: {
+      value: heapMemUsed + "GB",
+      percent: heapUsage,
     },
-    空闲内存: {
-      value: memFree + "GB",
-      percent: memFreePercent,
+    堆空闲内存: {
+      value: heapMemFree + "GB",
+      percent: heapFreeUsage,
     },
   };
 
   const memoryContrastEChartsData = [
     {
-      value: memUsed,
-      name: "已用内存",
+      value: heapMemUsed,
+      name: "堆已用内存",
     },
     {
-      value: memFree,
-      name: "空闲内存",
+      value: heapMemFree,
+      name: "堆空闲内存",
     },
   ];
 
-  const memoryContrastSubtext = memTotal;
+  const memoryContrastSubtext = heapMemTotal;
 
   const diskLegendVal = {
     已用磁盘: {
@@ -264,7 +280,7 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
                   legendVal={memLegendVal}
                   unit="GB"
                   {...getContrastChartProps(
-                    "物理内存",
+                    "堆内存",
                     memoryContrastEChartsData,
                     memoryContrastSubtext
                   )}
@@ -301,7 +317,7 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
                 "节点",
                 nodeContrastEChartsData,
                 nodeContrastSubtext,
-                ["#2F81F9", "#D3DAE7"]
+                ["#1473FF", "#D3DAE7"]
               )}
             />
           </div>

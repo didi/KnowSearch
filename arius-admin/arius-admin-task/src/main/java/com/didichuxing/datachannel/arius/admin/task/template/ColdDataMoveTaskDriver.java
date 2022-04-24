@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by d06679 on 2018/3/14.
  */
-//@Task(name = "coldDataMoveTaskDriver", description = "admin冷数据搬迁服务", cron = "0 30 22 * * ?", autoRegister = true)
+@Task(name = "coldDataMoveTaskDriver", description = "admin冷数据搬迁服务", cron = "0 30 22 * * ?", autoRegister = true)
 public class ColdDataMoveTaskDriver implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(ColdDataMoveTaskDriver.class);

@@ -60,4 +60,7 @@ public class ClusterJoinDTO extends BaseDTO {
 
     @ApiModelProperty("录入规则 0 自动获取 1 全量录入")
     private Integer importRule;
+
+    @ApiModelProperty("集群展示用属性标签，如「集群所属资源类型」等等")
+    private String tags;
 }

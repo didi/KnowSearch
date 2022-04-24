@@ -25,20 +25,13 @@
         "field": "timeStamp",
         "interval": "%s",
         "time_zone": "Asia/Shanghai",
-        "min_doc_count": 0
-      },
-      "aggs": {
-        "total_cost_avg": {
-          "avg": {
-            "field": "totalCost"
-          }
-        },
-        "response_len_avg": {
-          "avg": {
-            "field": "responseLen"
-          }
+        "min_doc_count": 0,
+        "extended_bounds" : {
+            "min" : %d,
+            "max" : %d
         }
-      }
+      },
+      "aggs": %s
     }
   }
 }

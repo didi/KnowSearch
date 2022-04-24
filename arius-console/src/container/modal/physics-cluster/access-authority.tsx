@@ -178,6 +178,10 @@ class AccessCluster extends React.Component<{
     let arrRoleClusterHosts = [];
     if (baseInfoData.region?.length) {
       baseInfoData.region.forEach((element) => {
+        // 如果没有值就return
+        if (!element.value) {
+          return;
+        }
         const arr = element.value.split("\n").filter((ele: string) => ele !== "");
         let role = null;
         switch (element.type) {

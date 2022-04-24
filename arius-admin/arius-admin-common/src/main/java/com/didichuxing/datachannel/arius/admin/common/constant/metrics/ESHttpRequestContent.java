@@ -7,7 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
  */
 public class ESHttpRequestContent {
 
-    private ESHttpRequestContent(){}
+    private ESHttpRequestContent() {
+    }
 
     /**
      * 获取集群搬迁shard
@@ -18,6 +19,11 @@ public class ESHttpRequestContent {
      * 获取集群pendingTask
      */
     public static final String GET_PENDING_TASKS = "/_cluster/pending_tasks";
+    /**
+     * 获取集群http信息
+     */
+    public static final String GET_STATS_HTTP    = "/_nodes/stats/http?level=cluster";
+    public static final String GET_STATS_FS      = "/_nodes/stats/fs?level=cluster";
 
     /**
      * 获取集群索引信息
@@ -27,13 +33,25 @@ public class ESHttpRequestContent {
     /**
      * 获取集群shard
      */
-    public static final String GET_SHARDS        = "_cat/shards/";
+    public static final String GET_SHARDS        = "/_cat/shards/";
+    /**
+     * 获取集群shard
+     */
+    public static final String GET_CLUSTER_STATS="/_cluster/stats/" ;
 
-    public static final String GET_BIG_SHARDS    = "_cat/shards?v&h=index,prirep,shard,store,ip,node";
+    public static final String GET_SHARDS_ALL    = "_cat/shards?v&h=index,prirep,shard,store,ip,node";
+    public static final String GET_SHARDS_NODE   = "_cat/shards?v&h=node";
 
     public static final String GET_TEMPLATE_NAME = "/_cat/templates?v&h=name";
 
-    private static final String MASTER_TIMEOUT = "&master_timeout=";
+    public static final String MASTER_TIMEOUT    = "&master_timeout=";
+
+    /**
+     * 获取集群模板segments 信息
+     */
+    public static final String GET_PATH_SEGMENTS = "/_cat/segments/";
+
+    public static final String GET_PATH_SEGMENTS_PART_INFO = GET_PATH_SEGMENTS + "?v&h=size,size.memory,index";
 
     /**
      * 获取大索引请求内容
@@ -45,11 +63,18 @@ public class ESHttpRequestContent {
         return GET_INDICES + MASTER_TIMEOUT + masterTimeout;
     }
 
-    public static String getBigShardsRequestContent(String masterTimeout) {
+    public static String getShardsAllInfoRequestContent(String masterTimeout) {
         if (AriusObjUtils.isBlack(masterTimeout)) {
-            return GET_BIG_SHARDS;
+            return GET_SHARDS_ALL;
         }
-        return GET_BIG_SHARDS + MASTER_TIMEOUT + masterTimeout;
+        return GET_SHARDS_ALL + MASTER_TIMEOUT + masterTimeout;
+    }
+
+    public static String getShards2NodeRequestContent(String masterTimeout) {
+        if (AriusObjUtils.isBlack(masterTimeout)) {
+            return GET_SHARDS_NODE;
+        }
+        return GET_SHARDS_NODE + MASTER_TIMEOUT + masterTimeout;
     }
 
     public static String getShardToNodeRequestContentByIndexName(String indexName, String masterTimeout) {
@@ -70,5 +95,9 @@ public class ESHttpRequestContent {
 
     public static String getTemplateNameRequestContent() {
         return GET_TEMPLATE_NAME;
+    }
+
+    public static String getSegmentsPartInfoRequestContent() {
+        return GET_PATH_SEGMENTS_PART_INFO;
     }
 }

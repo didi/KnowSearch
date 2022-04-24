@@ -160,6 +160,11 @@
         from index_template_physical
         where `name` = #{name} and cluster = #{cluster}  and status > 0
     </select>
+    <select id="countListByLogicId" resultMap="BaseResultMap">
+        select id, logic_id
+        from index_template_physical
+        where `status` > 0
+    </select>
 
     <delete id="deleteDirtyByClusterAndName" parameterType="map">
         delete from index_template_physical

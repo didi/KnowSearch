@@ -3,7 +3,7 @@
   "size": %d,
   "query": {
     "bool": {
-      "must": "boolMustDsl",
+      "must": %s,
       "must_not": [
         {
           "prefix": {

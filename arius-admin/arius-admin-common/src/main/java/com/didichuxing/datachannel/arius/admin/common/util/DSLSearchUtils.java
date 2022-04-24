@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -224,5 +225,25 @@ public class DSLSearchUtils {
                     .append("\"").append("}").append("}").append("}");
         }
         return termSb.toString();
+    }
+
+    /**
+     *
+     * @param aggType  聚合算子类型：avg, count, sum, min, max 等
+     * @param field    字段名称
+     * @return         返回的聚合项
+     * eg:
+     * {
+     *     "avg":{
+     *         "field":"totalCost"
+     *     }
+     * }
+     */
+    public static JSONObject buildAggItem(String aggType, String field) {
+        JSONObject aggTypeJson = new JSONObject();
+        JSONObject fieldJson = new JSONObject();
+        fieldJson.put("field", field);
+        aggTypeJson.put(aggType, fieldJson);
+        return aggTypeJson;
     }
 }

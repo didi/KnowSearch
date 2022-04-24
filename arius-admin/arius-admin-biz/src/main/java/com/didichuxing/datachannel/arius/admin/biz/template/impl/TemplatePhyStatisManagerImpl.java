@@ -29,6 +29,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -391,8 +392,11 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
                 if (clusterRack2ResourceIdMap.containsKey(key)) {
                     ClusterLogic clusterLogic = resourceId2ResourceLogicMap
                         .get(clusterRack2ResourceIdMap.get(key).getLogicClusterIds());
-                    result.put(physical.getId(),
-                        clusterLogicService.genClusterLogicConfig(clusterLogic.getConfigJson()));
+                    if (Objects.nonNull(clusterLogic)){
+                        result.put(physical.getId(),
+                            clusterLogicService.genClusterLogicConfig(clusterLogic.getConfigJson()));
+                    }
+                 
                     break;
                 }
             }

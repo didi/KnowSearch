@@ -4,7 +4,12 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
@@ -15,6 +20,11 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,8 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
 
 /**
  * @author cjm
@@ -90,6 +98,7 @@ public class TemplateLogicServiceTest extends AriusAdminApplicationTest {
         templateLogicService.updateTemplateShardFactorIfGreater(1, factor, "admin");
         Assertions.assertNull(null);
     }
+ 
 
     @Test
     public void updateTemplateShardFactorIfGreaterTest() {
@@ -332,7 +341,7 @@ public class TemplateLogicServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getLogicTemplateWithPhysicalsByIdTest() {
         Mockito.when(indexTemplateLogicDAO.getById(Mockito.any())).thenReturn(CustomDataSource.templateLogicSource());
-        IndexTemplateLogicWithPhyTemplates ret = templateLogicService.getLogicTemplateWithPhysicalsById(1);
+        IndexTemplateLogicWithPhyTemplates ret = templateLogicService.getLogicTemplateWithPhysicalsById(37479);
         Assertions.assertNotNull(ret);
     }
 

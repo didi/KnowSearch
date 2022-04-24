@@ -5,12 +5,17 @@ export const urlPrefix = '/' + systemKey;
 export const leftMenus = {
   name: `${systemKey}`,
   path: 'main',
-  icon: '#icon-jiqun',
+  icon: '#',
   children: [
+    {
+      name: 'dashboard',
+      path: 'dashboard',
+      icon: '#iconzhibiaokanban',
+    },
     {
       name: 'cluster',
       path: 'cluster',
-      icon: '#icon-jiqun1',
+      icon: '#iconjiqunguanli',
       children: [
         {
           name: 'physics',
@@ -25,7 +30,7 @@ export const leftMenus = {
           path: 'edition',
           icon: '#icon-jiqun1',
         }],
-    }, 
+    },
     // 注释调索引
     // {
     //   name: 'index',
@@ -45,17 +50,17 @@ export const leftMenus = {
     {
       name: 'index-tpl-management',
       path: 'index-tpl-management',
-      icon: '#icon-jiqun1',
+      icon: '#iconmobanguanli',
     },
     {
       name: 'index-admin',
       path: 'index-admin',
-      icon: '#icon-jiqun1',
+      icon: '#iconsuoyinguanli',
     },
     {
       name: 'search-query',
       path: 'search-query',
-      icon: '#icon-jiqun1',
+      icon: '#iconjiansuochaxun',
       children: [
         {
           name: 'index-search',
@@ -72,7 +77,7 @@ export const leftMenus = {
     {
       name: 'indicators',
       path: 'indicators',
-      icon: '#icon-jiqun1',
+      icon: '#iconzhibiaokanban',
       children: [
         {
           name: 'cluster',
@@ -107,7 +112,7 @@ export const leftMenus = {
     {
       name: 'work-order',
       path: 'work-order',
-      icon: '#icon-jiqun1',
+      icon: '#icongongdanrenwu',
       children: [
         {
           name: 'my-application',
@@ -126,7 +131,7 @@ export const leftMenus = {
     {
       name: 'scheduling',
       path: 'scheduling',
-      icon: '#icon-jiqun1',
+      icon: '#icontiaodurenwu',
       children: [
         {
           name: 'task',
@@ -141,7 +146,7 @@ export const leftMenus = {
     {
       name: 'system',
       path: 'system',
-      icon: '#icon-jiqun1',
+      icon: '#iconxitongguanli',
       children: [
         {
           name: 'config',

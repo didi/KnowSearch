@@ -213,12 +213,9 @@ export class JSONMappingSetting extends React.Component<any> {
       this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.jsonMappingFormData, result));
       try {
         const editor = this.props.createIndex.activeInstance;
-        // 获取 customerAnalysisJson: null,  dynamicTemplatesJson: null 值
         const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
-        // const dynamicTemplatesJsonEditor = this.props.createIndex.dynamicTemplatesJson;
         const value = editor ? editor.getValue() : '';
         const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
-        // const dynamicTemplatesValue = dynamicTemplatesJsonEditor ? dynamicTemplatesJsonEditor.getValue() : '';
         this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
         let jsonValue = {};
 
@@ -251,15 +248,11 @@ export class JSONMappingSetting extends React.Component<any> {
 
       try {
         const editor = this.props.createIndex.activeInstance;
-        // 获取 customerAnalysisJson: null,  dynamicTemplatesJson: null 值
         const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
-        // const dynamicTemplatesJsonEditor = this.props.createIndex.dynamicTemplatesJson;
         const value = editor ? editor.getValue() : '';
         const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
-        // const dynamicTemplatesValue = dynamicTemplatesJsonEditor ? dynamicTemplatesJsonEditor.getValue() : '';
         this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
         let jsonValue = {};
-
         if (value) {
           jsonValue = JSON.parse(value  || 'null');
         }
@@ -320,27 +313,9 @@ export class JSONMappingSetting extends React.Component<any> {
     this.props.dispatch(actions.setCreateIndex({ customerAnalysisJson: editor }));
   }
 
-  // // 获取customerAnalysisJson实例
-  // public dynamicTemplatesJson = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
-  //   const model = editor.getModel();
-  //   const lineNumber = model.getLineCount();
-    
-  //   editor.setPosition({
-  //     lineNumber,
-  //     column: model.getLineMaxColumn(lineNumber),
-  //   });
-    
-  //   editor.onDidChangeModelContent((e) => {
-  //     //
-  //   });
-    
-  //   this.props.dispatch(actions.setCreateIndex({ dynamicTemplatesJson: editor }));
-  // }
-
   public render() {
     const formData = this.props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.jsonMappingFormData) || {};
     const value = this.props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.jsonMappingValue) || '';
-    // const { customerAnalysis, dynamicTemplates, customerAnalysisValue, dynamicTemplatesValue } = this.props.createIndex
     // 索引管理页面也是只读属性
     const isDetailPage = window.location.pathname.includes('/detail');
     const loading = this.props.createIndex.loadingMap['mapping-loading'];
@@ -400,33 +375,6 @@ export class JSONMappingSetting extends React.Component<any> {
               }}
             />}
           </div>
-          {/* {
-            dynamicTemplates && !this.isModifyPage ? 
-              <div className={isDetailPage ? 'json-editor-wrapper detail' : 'json-editor-wrapper'} style={isDetailPage ? { marginTop: 0 } : null}>
-                <div className="json-content-title">
-                  dynamic编辑器
-                </div>
-                <CodeMirror
-                  options={{
-                    mode: 'application/json',
-                    lineNumbers: true,
-                    // 自动缩进
-                    smartIndent: true,
-                    //start-设置支持代码折叠
-                    lineWrapping: true,
-                    foldGutter: true,
-                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'], //end
-                    indentUnit: 4, // 缩进配置（默认为2）
-                    readOnly: isDetailPage,
-                  }}
-                  editorDidMount={(editor) => {
-                    editor.setValue(dynamicTemplatesValue);
-                    this.props.dispatch(actions.setCreateIndex({ dynamicTemplatesJson: editor }));
-                  }}
-                />
-              </div>
-            :null
-          } */}
         </Spin>
       </div>
     );

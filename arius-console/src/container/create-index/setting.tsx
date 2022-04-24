@@ -47,9 +47,7 @@ export class Setting extends React.Component<any> {
             asyncTranslog: res.asyncTranslog,
             cancelCopy: res.cancelCopy,
             customerAnalysisValue: res.analysis ? JSON.stringify(res.analysis, null, 4) : '',
-            // dynamicTemplatesValue: res.dynamicTemplates ? JSON.stringify(res.dynamicTemplates, null, 4) : '',
             customerAnalysis: res.analysis ? true : false,
-            // dynamicTemplates: res.dynamicTemplates ? true : false,
           }))
         }
       })
@@ -72,9 +70,7 @@ export class Setting extends React.Component<any> {
             asyncTranslog: res.asyncTranslog,
             cancelCopy: res.cancelCopy,
             customerAnalysisValue: res.analysis ? JSON.stringify(res.analysis, null, 4) : '',
-            // dynamicTemplatesValue: res.dynamicTemplates ? JSON.stringify(res.dynamicTemplates, null, 4) : '',
             customerAnalysis: res.analysis ? true : false,
-            // dynamicTemplates: res.dynamicTemplates ? true : false,
           }))
         }
       })
@@ -83,10 +79,15 @@ export class Setting extends React.Component<any> {
 
   public skip = () => {
     // 获取 customerAnalysisJson: null
-    const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
-    const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
-    this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
-    this.props.dispatch(actions.setCurrentStep(3));
+    if (this.props.createIndex.isSetting) {
+      const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
+      const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
+      this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
+      this.props.dispatch(actions.setCurrentStep(3));
+    } else {
+      this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue: '' }))
+      this.props.dispatch(actions.setCurrentStep(3));
+    }
   }
 
   public onHandleNextStep = () => {
@@ -96,17 +97,27 @@ export class Setting extends React.Component<any> {
     // if (this.state.activeKey === MAPPING_TYPE.json) {
     //   this.$jsonFormRef.handleSubmit();
     // }
-    const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
-    const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
-    this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
-    this.props.dispatch(actions.setCurrentStep(3));
+    if (this.props.createIndex.isSetting) {
+      const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
+      const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
+      this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
+      this.props.dispatch(actions.setCurrentStep(3));
+    } else {
+      this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue: '' }))
+      this.props.dispatch(actions.setCurrentStep(3));
+    }
   }
 
   public onHandlePrevStep = () => {
-    const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
-    const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
-    this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
-    this.props.dispatch(actions.setCurrentStep(1));
+    if (this.props.createIndex.isSetting) {
+      const customerAnalysisJsonEditor = this.props.createIndex.customerAnalysisJson;
+      const customerAnalysisValue = customerAnalysisJsonEditor ? customerAnalysisJsonEditor.getValue() : '';
+      this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue }))
+      this.props.dispatch(actions.setCurrentStep(1));
+    } else {
+      this.props.dispatch(actions.setCreateIndex({ customerAnalysisValue: '' }))
+      this.props.dispatch(actions.setCurrentStep(1));
+    }
   }
 
   // public onSave = () => {
@@ -144,17 +155,17 @@ export class Setting extends React.Component<any> {
           {
             this.isDetailPage ? <>
               {
-              CHECK_GROUP.map(item => {
-                return <Checkbox disabled={this.isDetailPage} className={'setingcheck-disabled'} style={{ marginRight: 100 }} checked={this.props.createIndex[item.value]} key={item.value} onChange={(e) => {
-                  this.handleCheckGroup(item.value, e.target.checked);
-                }}>{item.text}</Checkbox>
-              })
+                CHECK_GROUP.map(item => {
+                  return <Checkbox disabled={this.isDetailPage} className={'setingcheck-disabled'} style={{ marginRight: 100 }} checked={this.props.createIndex[item.value]} key={item.value} onChange={(e) => {
+                    this.handleCheckGroup(item.value, e.target.checked);
+                  }}>{item.text}</Checkbox>
+                })
               }
               <Tooltip title="打开自定义分词器显示相应编辑器"><InfoCircleFilled style={{ width: 14, height: 14, color: '#495057', position: 'absolute', left: 500, top: 10 }} /></Tooltip>
             </>
               : <div className="setting-check">
                 <div className="left-box">
-                  <Checkbox  indeterminate={!(this.props.createIndex['asyncTranslog'] && this.props.createIndex['cancelCopy'] && this.props.createIndex['customerAnalysis']) && (this.props.createIndex['asyncTranslog'] || this.props.createIndex['cancelCopy'] || this.props.createIndex['customerAnalysis'])} checked={this.props.createIndex['asyncTranslog'] && this.props.createIndex['cancelCopy'] && this.props.createIndex['customerAnalysis']} onChange={(e) => this.handleCheckAllGroup(e.target.checked)}>全选</Checkbox>
+                  <Checkbox indeterminate={!(this.props.createIndex['asyncTranslog'] && this.props.createIndex['cancelCopy'] && this.props.createIndex['customerAnalysis']) && (this.props.createIndex['asyncTranslog'] || this.props.createIndex['cancelCopy'] || this.props.createIndex['customerAnalysis'])} checked={this.props.createIndex['asyncTranslog'] && this.props.createIndex['cancelCopy'] && this.props.createIndex['customerAnalysis']} onChange={(e) => this.handleCheckAllGroup(e.target.checked)}>全选</Checkbox>
                 </div>
                 <div className="right-box">
                   {CHECK_GROUP.map(item => {

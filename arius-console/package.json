@@ -7,7 +7,8 @@
   "scripts": {
     "build": "rm -rf ./pub & fetk run build",
     "lint": "fetk run lint",
-    "start": "fetk run devServer"
+    "start": "fetk run devServer",
+    "pre-build": "rm -rf ./pub & cross-env PRE_BUILD=true fetk run build"
   },
   "repository": {
     "type": "git",

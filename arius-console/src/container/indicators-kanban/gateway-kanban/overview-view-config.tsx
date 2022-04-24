@@ -6,7 +6,7 @@ export const indexConfigClassifyList: string[] = ["总览性能指标"];
 
 export const indexConfigData = {
   writeDocCount: {
-    name: "写入量",
+    name: "写入请求量",
     unit: unitMap.itemMin,
     classify: indexConfigClassifyList[0],
   },
@@ -48,6 +48,11 @@ export const indexConfigData = {
   queryFailedShardsAvg: {
     name: "查询失败shard平均数",
     unit: unitMap.countM,
+    classify: indexConfigClassifyList[0],
+  },
+  dslLen: {
+    name: "写入吞吐量",
+    unit: unitMap.characterMin,
     classify: indexConfigClassifyList[0],
   },
 };

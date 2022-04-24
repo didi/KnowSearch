@@ -2,10 +2,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
@@ -44,31 +43,6 @@ public class ESClusterNodeServiceTest extends AriusAdminApplicationTest {
         directResponse.setResponseContent("{\"tasks\": [{\"time_in_queue\": 10},{\"time_in_queue\": 11},{\"time_in_queue\": 12}]}");
         Mockito.when(esClusterNodeDAO.getDirectResponse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(directResponse);
         Assertions.assertFalse(esClusterNodeService.syncGetPendingTask(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
-    }
-
-    @Test
-    public void syncGetMovingShardsTest() {
-        DirectResponse directResponse = new DirectResponse();
-        directResponse.setRestStatus(RestStatus.OK);
-        List<MovingShardMetrics> list = new ArrayList<>();
-        MovingShardMetrics movingShardMetrics = new MovingShardMetrics();
-        list.add(movingShardMetrics);
-        directResponse.setResponseContent(JSON.toJSONString(list));
-        Mockito.when(esClusterNodeDAO.getDirectResponse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(directResponse);
-        Assertions.assertEquals(list.size(), esClusterNodeService.syncGetMovingShards(CustomDataSource.PHY_CLUSTER_NAME).size());
-    }
-
-    @Test
-    public void syncGetBigShardsTest() {
-        DirectResponse directResponse = new DirectResponse();
-        List<BigShardMetrics> list = new ArrayList<>();
-        BigShardMetrics bigShardMetrics = new BigShardMetrics();
-        bigShardMetrics.setStore((BIG_SHARD + 10) + "gb");
-        list.add(bigShardMetrics);
-        directResponse.setRestStatus(RestStatus.OK);
-        directResponse.setResponseContent(JSON.toJSONString(list));
-        Mockito.when(esClusterNodeDAO.getDirectResponse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(directResponse);
-        Assertions.assertEquals(list.size(), esClusterNodeService.syncGetBigShards(CustomDataSource.PHY_CLUSTER_NAME).size());
     }
 
     @Test

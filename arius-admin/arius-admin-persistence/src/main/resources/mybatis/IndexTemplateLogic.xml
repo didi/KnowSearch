@@ -216,4 +216,11 @@
         where id = #{logicId} and is_active = 1
     </update>
 
+    <select id="listAllNames" resultType="java.lang.String">
+        select `name`
+        from index_template
+        where is_active = 1
+        order by id desc
+    </select>
+
 </mapper>

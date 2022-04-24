@@ -51,4 +51,5 @@ public interface IndexTemplateLogicDAO {
 
     int updateBlockWriteState(@Param("logicId") Integer logicId, @Param("blockWrite") Boolean blockWrite);
 
+    List<String> listAllNames();
 }

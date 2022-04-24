@@ -95,15 +95,12 @@ export const getLogicIndexColumns = (
       title: "模板名称",
       dataIndex: "name",
       key: "name",
-      width: 150,
-      // onCell: () => ({
-      //   style: cellStyle,
-      // }),
+      width: 160,
       render: (text: string, record: IIndex) => {
         const href = `/index/logic/detail?id=${record.id}&authType=${record.authType}`;
         return (
-          <div className="intro-step-8 two-row-ellipsis pointer">
-            <NavRouterLink needToolTip={true} element={text} href={href} />
+          <div className="two-row-ellipsis pointer template-name-cell">
+            <NavRouterLink needToolTip={true} element={text} href={href} maxShowLength={30} />
           </div>
         );
       },
@@ -351,7 +348,7 @@ export const getBtnLogicIndexList = (
               content: res.message || "",
               okText: "确认",
               cancelText: "取消",
-              onOk: () => {},
+              onOk: () => { },
             });
           } else {
             Modal.confirm({
@@ -381,7 +378,7 @@ export const getBtnLogicIndexList = (
               content: res.message || "",
               okText: "确认",
               cancelText: "取消",
-              onOk: () => {},
+              onOk: () => { },
             });
           } else {
             setModalId("editSetting", record.id, reloadData);
@@ -394,24 +391,40 @@ export const getBtnLogicIndexList = (
       isOpenUp: currentIsOpenUp,
       tip: isSystemData ? "预置系统数据，不支持操作" : "",
       clickFunc: () => {
-        Modal.confirm({
-          title: "提示",
-          width: 550,
-          content: (
-            <>
-              <div>确定{record.disableIndexRollover ? "开启" : "关闭"}索引RollOver能力?</div>
-              <div>{record.disableIndexRollover ? "开启后会影响索引Update和Delete能力以及指定id 写入，更新，删除" : null}</div>
-            </>
-          ),
-          okText: "确认",
-          cancelText: "取消",
-          onOk: () => {
-            rolloverSwitch(record.id, record.disableIndexRollover ? "1" : "0").then(() => {
-              message.success("操作成功");
-              reloadData();
+        checkEditTemplateSrv(record.id, 12).then(res => {
+          if (res.code !== 0 && res.code !== 200) {
+            Modal.confirm({
+              title: '提示',
+              width: 550,
+              content: (
+                <>
+                  <div>{res?.message ?? '该模板归属集群未开启索引规划服务'}</div>
+                </>
+              ),
+              okText: "确认",
+              cancelText: "取消",
+            })
+          } else {
+            Modal.confirm({
+              title: "提示",
+              width: 550,
+              content: (
+                <>
+                  <div>确定{record.disableIndexRollover ? '开启' : '关闭'}索引RollOver能力?</div>
+                  <div>{record.disableIndexRollover ? '开启后会影响索引Update和Delete能力以及指定id 写入，更新，删除' : null}</div>
+                </>
+              ),
+              okText: "确认",
+              cancelText: "取消",
+              onOk: () => {
+                rolloverSwitch(record.id, record.disableIndexRollover ? '1' : '0').then(() => {
+                  message.success('操作成功');
+                  reloadData();
+                })
+              },
             });
-          },
-        });
+          }
+        })
       },
     },
     {
@@ -434,9 +447,20 @@ export const getBtnLogicIndexList = (
       label: !record.blockRead ? "禁用读" : "启用读",
       isOpenUp: currentIsOpenUp,
       clickFunc: () => {
-        disableRead({ blockRead: !record.blockRead, id: record.id }).then(() => {
-          message.success("操作成功");
-          reloadData();
+        Modal.confirm({
+          icon: <QuestionCircleOutlined />,
+          content: `确定${record.blockRead ? '启用' : '禁用'}模版 ${record.name} 的读操作？`,
+          okText: '确认',
+          cancelText: '取消',
+          onOk: async () => {
+            disableRead({ blockRead: !record.blockRead, id: record.id }).then(() => {
+              message.success("操作成功");
+            }).catch(error => {
+              message.error(`${record.blockRead ? '启用' : '禁用'}读失败`)
+            }).finally(() => {
+              reloadData();
+            })
+          }
         });
       },
     },
@@ -444,9 +468,20 @@ export const getBtnLogicIndexList = (
       label: !record.blockWrite ? "禁用写" : "启用写",
       isOpenUp: currentIsOpenUp,
       clickFunc: () => {
-        disableWrite({ blockWrite: !record.blockWrite, id: record.id }).then(() => {
-          message.success("操作成功");
-          reloadData();
+        Modal.confirm({
+          icon: <QuestionCircleOutlined />,
+          content: `确定${record.blockWrite ? '启用' : '禁用'}模版 ${record.name} 的写操作？`,
+          okText: '确认',
+          cancelText: '取消',
+          onOk: async () => {
+            disableWrite({ blockWrite: !record.blockWrite, id: record.id }).then(() => {
+              message.success("操作成功");
+            }).catch(error => {
+              message.error(`${record.blockWrite ? '启用' : '禁用'}写失败`)
+            }).finally(() => {
+              reloadData();
+            })
+          }
         });
       },
     },

@@ -6,6 +6,7 @@ import { FormItemType, IFormItem } from 'component/x-form';
 import { notification, Modal, Spin } from 'antd';
 import { getPhysicalTemplateIndexDetail, editTemplateIndex } from 'api/cluster-index-api';
 import { IOpTemplateIndexDetail } from 'typesPath/index-types';
+import { regNonnegativeInteger } from 'constants/reg';
 
 const mapStateToProps = state => ({
   params: state.modal.params,
@@ -90,9 +91,9 @@ export const PhyModifyIndex = connect(mapStateToProps)((props: { dispatch: any, 
         rules: [
           {
             required: true,
-            message: '请填写shard个数',
-            validator: (rule: any, value: number) => {
-              if(typeof (value) === 'number') return Promise.resolve();
+            message: '请填写shard个数（正整数）',
+            validator: (rule: any, value: any) => {
+              if(new RegExp(regNonnegativeInteger).test(value)) return Promise.resolve();
               return Promise.reject();
             },
           },

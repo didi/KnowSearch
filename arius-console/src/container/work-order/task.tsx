@@ -17,7 +17,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export const TaskList = connect(null, mapDispatchToProps)(() => {
   const department: string = localStorage.getItem('current-project');
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject] = useState(null);
+  const [queryFormObject, setqueryFormObject] = useState(null);
   const [data, setData] = useState([] as ITask[]);
 
   React.useEffect(() => {
@@ -26,19 +26,19 @@ export const TaskList = connect(null, mapDispatchToProps)(() => {
 
 
   const getData = () => { // 查询项的key 要与 数据源的key  对应
-    if (!queryFromObject) return data;
-    const keys = Object.keys(queryFromObject);
+    if (!queryFormObject) return data;
+    const keys = Object.keys(queryFormObject);
     const filterData = data.filter(
       (d) => {
         let b = true;
         keys.forEach((k: string) => {
-          if (k === 'createTime' && queryFromObject[k]) {
-            const sT = moment(queryFromObject[k][0]).valueOf();
-            const eT = moment(queryFromObject[k][1]).valueOf();
+          if (k === 'createTime' && queryFormObject[k]) {
+            const sT = moment(queryFormObject[k][0]).valueOf();
+            const eT = moment(queryFormObject[k][1]).valueOf();
             const dT = moment(d[k]).valueOf();
             (dT >= sT && dT <= eT) ? '' : b = false;
           } else {
-            (d[k] + '')?.toLowerCase().includes(queryFromObject[k]) ? '' : b = false;
+            (d[k] + '')?.includes(queryFormObject[k]) ? '' : b = false;
           }
         })
         return b;
@@ -63,20 +63,20 @@ export const TaskList = connect(null, mapDispatchToProps)(() => {
       setloading(false)
     })
   }
-
+  // 移除无意义筛选条件(undefined,null,'')
   const handleSubmit = (result) => {
     for (var key in result) {
-      if (result[key] === '' || result[key] === undefined) {
+      if (result[key] === '' || result[key] == undefined) {
         delete result[key]
       }
     }
-    setqueryFromObject(result);
+    setqueryFormObject(result);
   };
 
   return (
     <>
       <div className="table-header">
-        <QueryForm  showCollapseButton={false} {...queryFormText} defaultCollapse columns={getTaskQueryXForm()} onChange={() => null} onReset={handleSubmit} onSearch={handleSubmit} initialValues={{}} isResetClearAll />
+        <QueryForm showCollapseButton={false} {...queryFormText} defaultCollapse columns={getTaskQueryXForm()} onChange={() => null} onReset={handleSubmit} onSearch={handleSubmit} initialValues={{}} isResetClearAll />
       </div>
       <div>
         <div className="table-content">

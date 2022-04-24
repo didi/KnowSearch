@@ -31,7 +31,12 @@ public class MonitorCollectMetrics {
         indexWorkOrders.add(new CollectMetrics.Builder()
                 .valueName("es.indices.indexing.index_total")
                 .valueRoute(INDEXING_INDEX_TOTAL)
-                .computeType(NONE).build());
+                .computeType(MINUS).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder()
+                .valueName("es.indices.indexing.index_total_times")
+                .valueRoute(INDEXING_INDEX_TOTAL)
+                .computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder()
                 .valueName("es.indices.indexing.index_total_rate")
@@ -112,6 +117,11 @@ public class MonitorCollectMetrics {
                 .valueName("es.indices.search.query_total_rate")
                 .valueRoute("search.query_total")
                 .computeType(AVG).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder()
+                .valueName("es.indices.search.query_total")
+                .valueRoute("search.query_total")
+                .computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder()
                 .valueName("es.indices.search.fetch_total_rate")
@@ -207,6 +217,12 @@ public class MonitorCollectMetrics {
                 .valueName("es.indices.segments.memory_in_bytes")
                 .valueRoute("segments.memory_in_bytes")
                 .computeType(NONE).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder()
+                .valueName("es.indices.indices.indexing.index_time_per_doc")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.indexing.index_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.indices.indexing.index_total_times")
+                .computeType(DERIVE_DIVISION).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder()
                 .valueName("es.indices.indices.indexing.index_latency")
@@ -473,6 +489,16 @@ public class MonitorCollectMetrics {
         nodeWorkOrders.add(new CollectMetrics.Builder()
                 .valueName("es.node.jvm.mem.non_heap_used_in_bytes")
                 .valueRoute("jvm.mem.non_heap_used_in_bytes")
+                .computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder()
+                .valueName("es.node.jvm.mem.pools.young.used_in_bytes")
+                .valueRoute("jvm.mem.pools.young.used_in_bytes")
+                .computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder()
+                .valueName("es.node.jvm.mem.pools.old.used_in_bytes")
+                .valueRoute("jvm.mem.pools.old.used_in_bytes")
                 .computeType(NONE).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder()

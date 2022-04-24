@@ -117,6 +117,8 @@ const App = () => {
             );
           }
         }
+        // 解决刷新两次
+        (window as any).setProjectList = true;
         setProjectList(data);
       });
     }

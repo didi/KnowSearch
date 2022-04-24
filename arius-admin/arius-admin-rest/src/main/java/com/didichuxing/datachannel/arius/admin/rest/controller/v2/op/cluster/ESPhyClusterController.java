@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
@@ -23,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
@@ -60,7 +61,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "获取集群列表接口")
     public Result<List<ConsoleClusterPhyVO>> list(@RequestBody ESClusterDTO param, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhyVOS(param, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhyVOS(param));
     }
 
     @GetMapping("/get")
@@ -68,7 +69,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "获取单个集群详情接口")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "clusterId", value = "集群ID", required = true) })
     public Result<ConsoleClusterPhyVO> get(@RequestParam("clusterId") Integer clusterId, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhyVO(clusterId, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhy(clusterId, HttpRequestUtils.getAppId(request)));
     }
 
     @DeleteMapping("/del")

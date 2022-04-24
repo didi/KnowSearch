@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { getSchedulingLogQueryXForm, getSchedulingLogColumns, mockData } from './config';
 import QueryForm from 'component/dantd/query-form';
 import { getLogsList } from 'api/Scheduling';
@@ -14,7 +14,11 @@ import getUrlParams from 'lib/url-parser';
 export const Schedulinglog = () => {
   const department: string = localStorage.getItem('current-project');
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject] = useState(null);
+  const [queryFormObject, setqueryFormObject]: any = useState({});
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10
+  })
   const [data, setData] = useState([] as any[]);
   // 控制调度日志的状态
   const [visible, setVisible] = useState(false);
@@ -22,43 +26,25 @@ export const Schedulinglog = () => {
   // 控制执行日志的状态
   const [logVisible, setLogVisible] = useState(false);
   const [urlParams, setUrlParams]: any = useState(getUrlParams().search);
-  const [pagination, setPagination] = useState({
-    position: 'bottomRight',
-    showQuickJumper: true,
-    total: 0,
-    showSizeChanger: true,
-    pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
-    showTotal: (total) => `共 ${total} 条`,
-  });
-  const [page, setPage] = useState({
-    page: 1,
-    size: 10,
-  })
-
+  const [total, setTotal] = useState(0)
   useEffect(() => {
-    reloadData();
-  }, [department, urlParams, page, queryFromObject]);
+    reloadData({});
+  }, [department, urlParams, queryFormObject]);
 
-  const reloadData = () => {
+  const reloadData = ({ page = pagination.current, size = pagination.pageSize }) => {
     setloading(true)
     const params = {
-      ...page,
       ...urlParams,
-      ...queryFromObject,
-      beginTime: queryFromObject?.createTime?.length ? queryFromObject?.createTime[0]?.valueOf() : '',
-      endTime: queryFromObject?.createTime?.length ? queryFromObject?.createTime[1]?.valueOf() : '',
+      ...queryFormObject,
+      page,
+      size,
+      beginTime: queryFormObject?.createTime?.length ? queryFormObject?.createTime[0]?.valueOf() : '',
+      endTime: queryFormObject?.createTime?.length ? queryFormObject?.createTime[1]?.valueOf() : '',
     }
     getLogsList(params).then((res: any) => {
       if (res) {
         setData(res?.bizData);
-        setPagination({
-          position: 'bottomRight',
-          total: res.pagination.total,
-          showQuickJumper: true,
-          showSizeChanger: true,
-          pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
-          showTotal: (total) => `共 ${total} 条`,
-        });
+        setTotal(res.pagination.total)
       }
     }).finally(() => {
       setloading(false)
@@ -71,7 +57,8 @@ export const Schedulinglog = () => {
         delete result[key]
       }
     }
-    setqueryFromObject(result);
+    setPagination({ ...pagination, current: 1 })
+    setqueryFormObject({ ...result });
   };
 
   const renderTitleContent = () => {
@@ -99,10 +86,14 @@ export const Schedulinglog = () => {
     setLogVisible(false)
   }
 
-  const handleChange = (pagination) => {
-    setPage({
-      page: pagination.current,
-      size: pagination.pageSize,
+  const handleChange = ({ current, pageSize }) => {
+    setPagination({
+      current,
+      pageSize
+    })
+    reloadData({
+      page: current,
+      size: pageSize
     })
   }
 
@@ -120,7 +111,16 @@ export const Schedulinglog = () => {
             loading={loading}
             rowKey="jobCode"
             dataSource={data}
-            paginationProps={pagination}
+            paginationProps={{
+              position: 'bottomRight',
+              showQuickJumper: true,
+              total: total,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
+              showTotal: (total) => `共 ${total} 条`,
+              current: pagination.current,
+              pageSize: pagination.pageSize
+            }}
             attrs={{
               onChange: handleChange
             }}

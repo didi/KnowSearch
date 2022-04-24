@@ -1,0 +1,22 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "%s"
+          }
+        }
+      ]
+    }
+  },
+  "_source": "%s",
+  "sort": [
+    {
+      "timestamp": {
+        "order": "desc"
+      }
+    }
+  ]
+}

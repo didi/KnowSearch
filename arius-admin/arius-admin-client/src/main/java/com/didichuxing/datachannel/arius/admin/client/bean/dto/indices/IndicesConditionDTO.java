@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 /**
  * @author lyn
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "索引条件查询实体")
 public class IndicesConditionDTO extends PageDTO {
     @ApiModelProperty("集群名称")
-    private String clusterPhyName;
+    private List<String> clusterPhyName;
 
     @ApiModelProperty("索引名称")
     private String index;

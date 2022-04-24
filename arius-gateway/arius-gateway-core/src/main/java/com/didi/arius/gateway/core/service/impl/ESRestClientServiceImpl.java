@@ -74,7 +74,10 @@ public class ESRestClientServiceImpl implements ESRestClientService {
             ESCluster newDataCenter = entry.getValue();
             try {
                 if (this.esClusterMap.containsKey(newClusterName)) {
-                    if (alreadyInitialCenter(noNeedClose, newClusterName, newDataCenter)) continue;
+                    if (alreadyInitialCenter(noNeedClose, newClusterName, newDataCenter)) {
+                        clientKeepalive(newDataCenter);
+                        continue;
+                    }
                 }
                 bootLogger.info("add http dateCenter, cluster={}||addr={}", newDataCenter.getCluster(), newDataCenter.getHttpAddress());
                 initClient(newDataCenter);
@@ -90,6 +93,23 @@ public class ESRestClientServiceImpl implements ESRestClientService {
                 closeOldClient(entry);
             }
             /*entry.getValue().setEsClient(null);*/
+        }
+    }
+
+    /**
+     *  es client的报活
+     * @param newDataCenter 集群
+     */
+    private void clientKeepalive(ESCluster newDataCenter) {
+        ESClient esClient = newDataCenter.getEsClient();
+        ESClient esWriteClient = newDataCenter.getEsWriteClient();
+        if (null != esClient && !esClient.isActualRunning()) {
+            logger.warn(String.format("cluster[%s] client is stop, start rebuild", esClient.getClusterName()));
+            esClient.start();
+        }
+        if (null != esWriteClient && !esWriteClient.isActualRunning()) {
+            logger.warn(String.format("cluster[%s] write client is stop, start rebuild", esWriteClient.getClusterName()));
+            esWriteClient.start();
         }
     }
 

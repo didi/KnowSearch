@@ -36,7 +36,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.BaseClusterHostOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpNewHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
@@ -783,7 +782,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     private void delayCollectNodeSettingsTask(List<EcmParamBase> ecmParamBases) {
-        ariusScheduleThreadPool.submitScheduleAtFixTask(() -> {
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(() -> {
             String clusterPhyName = getClusterPhyNameFromEcmParamBases(ecmParamBases);
             roleClusterHostService.collectClusterNodeSettings(clusterPhyName);
         }, 30, 600);

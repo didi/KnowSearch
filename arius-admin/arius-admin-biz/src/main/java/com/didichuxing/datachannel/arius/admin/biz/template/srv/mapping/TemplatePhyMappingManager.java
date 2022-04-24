@@ -60,6 +60,15 @@ public interface TemplatePhyMappingManager {
                            MappingConfig mappingConfig);
 
     /**
+     * 将模板mapping 更新到非滚动index上
+     * @param cluster
+     * @param index
+     * @param mappingConfig
+     * @return
+     */
+    Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig);
+
+    /**
      * 将index的mapping同步到template上
      * @param cluster 集群
      * @param template 模板

@@ -65,3 +65,9 @@ export interface GatewayState {
   isMoreDay?: boolean;
   isUpdate?: boolean;
 }
+// dashboard
+export interface DashboardState {
+  startTime: number;
+  endTime: number;
+  tabs: string;
+}

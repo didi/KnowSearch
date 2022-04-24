@@ -1,5 +1,6 @@
-// 控制开源环境下部分功能的隐藏和禁用
-export const isOpenUp = true;
+// 控制开源环境下部分功能的隐藏和禁用 true 禁用 false 启用
+export const isOpenUp = false;
+
 // 索引模板服务，开源环境下展示分类
 // 分类: 0 隐藏 1 开源正常展示 2 能力开发中 3 该功能仅面向商业版客户开放
 export const showTag = {
@@ -16,7 +17,7 @@ export const showTag = {
   "写入限流": 3,
   "容量规划": 3,
   "跨集群同步(DCDR)": 3,
-} 
+}
 
 export const oneDayMillims = 24 * 60 * 60 * 1000;
 

@@ -279,16 +279,13 @@ public class AppClusterLogicAuthServiceImpl implements AppClusterLogicAuthServic
 
         // 从逻辑集群表获取创建信息
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
-        AppClusterLogicAuthEnum authFromCreateRecord = (clusterLogic != null
-                                                        && clusterLogic.getAppId().equals(appId))
+        AppClusterLogicAuthEnum authFromCreateRecord = (clusterLogic != null && appId.equals(clusterLogic.getAppId()))
                                                             ? AppClusterLogicAuthEnum.OWN
                                                             : AppClusterLogicAuthEnum.NO_PERMISSIONS;
 
         // 从权限表获取权限信息
         AppClusterLogicAuthPO authPO = logicClusterAuthDAO.getByAppIdAndLogicCluseterId(appId, logicClusterId);
-        AppClusterLogicAuthEnum authFromAuthRecord = (authPO != null)
-            ? AppClusterLogicAuthEnum.valueOf(authPO.getType())
-            : AppClusterLogicAuthEnum.NO_PERMISSIONS;
+        AppClusterLogicAuthEnum authFromAuthRecord = authPO != null ? AppClusterLogicAuthEnum.valueOf(authPO.getType()) : AppClusterLogicAuthEnum.NO_PERMISSIONS;
 
         // 都没有权限
         if (authFromCreateRecord == AppClusterLogicAuthEnum.NO_PERMISSIONS
@@ -387,6 +384,11 @@ public class AppClusterLogicAuthServiceImpl implements AppClusterLogicAuthServic
         appClusterLogicAuth.setLogicClusterId(clusterLogicId);
         appClusterLogicAuth.setType(appClusterLogicAuthEnum.getCode());
         return appClusterLogicAuth;
+    }
+
+    @Override
+    public List<AppClusterLogicAuth> list() {
+        return  ConvertUtil.list2List(logicClusterAuthDAO.listByCondition(null), AppClusterLogicAuth.class);
     }
 
     /**************************************** private method ****************************************************/

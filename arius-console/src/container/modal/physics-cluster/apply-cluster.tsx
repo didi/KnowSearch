@@ -32,6 +32,7 @@ const mapStateToProps = (state: any) => ({
 
 const ApplyPhyClusterModal = (props: { dispatch: any; cb: Function; app: AppState; user: UserState; params: any }) => {
   const getRoleClusterHosts = (result) => {
+    console.log(result)
     // 聚合成接口请求的格式
     const masternodeRoleArr = [];
     const masternodeRoleArrKey = [];
@@ -94,7 +95,9 @@ const ApplyPhyClusterModal = (props: { dispatch: any; cb: Function; app: AppStat
           obj[addRoleformMap[4].key]
         }`,
       };
-      arr.push(realDataStructure);
+      if (obj[addRoleformMap[0].key] || obj[addRoleformMap[1].key] || obj[addRoleformMap[2].key] || obj[addRoleformMap[3].key] || obj[addRoleformMap[4].key]) {
+        arr.push(realDataStructure);
+      }
     });
     return arr;
   };

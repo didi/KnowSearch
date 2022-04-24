@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @Api("web应用探活接口(REST)")
 public class HealthController {
 
+
     /**
      * 探活接口
      *
@@ -21,4 +22,5 @@ public class HealthController {
     public Result<String> demo() {
         return Result.buildSuccWithMsg("let's go");
     }
+
 }

@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { Button, Form, Input } from "antd";
 import "./search-query-form.less";
 import { SelectTime } from "./select-time";
@@ -18,11 +18,16 @@ export const SearchQueryForm: React.FC<SearchQueryFormPropsType> = memo(
     const [queryIndex, setQueryIndex] = useState("");
     const [totalCost, setTotalCost] = useState("");
     const [form] = Form.useForm();
+    const error = useRef(false);
     const onTimeStampChange = (startDate, endDate) => {
       setStartTime(startDate);
       setEndTime(endDate);
     };
     const onSearch = () => {
+      // 校验不通过时不发送请求
+      if (error.current) {
+        return
+      }
       setSearchQuery &&
         setSearchQuery({
           queryIndex,
@@ -67,28 +72,50 @@ export const SearchQueryForm: React.FC<SearchQueryFormPropsType> = memo(
         <div className="search-query-from-box">
           <div className="search-query-from-box-item">
             {
-              isSlow ? <Form.Item label="总耗时" name="totalCost">
+              isSlow ? <Form.Item label="总耗时" name="totalCost" rules={[{
+                required: false,
+                validator: (rule, value) => {
+                  if (value?.length > 128) {
+                    error.current = true;
+                    return Promise.reject('上限128字符');
+                  }
+                  error.current = false;
+                  return Promise.resolve();
+                }
+              }]}>
                 <Input
                   style={{ width: 200, marginRight: 20 }}
                   value={totalCost}
                   onChange={(e) => {
                     const { value } = e.target;
-                    setTotalCost(value);
+                    setTotalCost(value.trim());
                   }}
                   placeholder="请输入"
+                  onPressEnter={onSearch}
                 />
               </Form.Item>
                 : null
             }
-            <Form.Item label="查询索引" name="queryIndex">
+            <Form.Item label="查询索引" name="queryIndex" rules={[{
+              required: false,
+              validator: (rule, value) => {
+                if (value?.length > 128) {
+                  error.current = true;
+                  return Promise.reject('上限128字符');
+                }
+                error.current = false;
+                return Promise.resolve();
+              }
+            }]}>
               <Input
                 placeholder="请输入"
                 style={{ width: 200 }}
                 value={queryIndex}
                 onChange={(e) => {
                   const { value } = e.target;
-                  setQueryIndex(value);
+                  setQueryIndex(value.trim());
                 }}
+                onPressEnter={onSearch}
               />
             </Form.Item>
           </div>

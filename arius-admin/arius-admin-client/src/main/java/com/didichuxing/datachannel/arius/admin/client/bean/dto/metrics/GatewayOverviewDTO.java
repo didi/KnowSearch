@@ -9,4 +9,8 @@ import lombok.Data;
 @Data
 @ApiModel(description = "gateway总览查询")
 public class GatewayOverviewDTO extends GatewayMetricsDTO {
+    @Override
+    public String getGroup() {
+        return "overview";
+    }
 }

@@ -90,7 +90,7 @@
         FROM
             arius_work_task
         WHERE task_type = #{taskType}
-        AND status in ('waiting','pause','running','failed')
+        AND status in ('waiting','pause','running')
     </select>
 
     <select id="getSuccessTaskByType" resultMap="WorkTaskMap">

@@ -72,4 +72,13 @@ public class ClusterLogicStatisPO {
      * pengdingtask梳理
      */
     private long        numberPendingTasks;
+
+    /**
+     * 节点存活率
+     */
+    private int    alivePercent;
+    /**
+     * cpu相关
+     */
+    private double cpuUsedPercent;
 }

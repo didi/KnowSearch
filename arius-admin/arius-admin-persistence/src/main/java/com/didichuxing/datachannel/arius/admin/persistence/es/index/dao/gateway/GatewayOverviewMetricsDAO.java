@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -43,7 +45,8 @@ public class GatewayOverviewMetricsDAO extends BaseESDAO {
     public List<GatewayOverviewMetrics> getAggCommonMetricsByRange(List<String> metricsTypes, Long startTime, Long endTime) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_COMMON_METRICS, startTime, endTime, interval);
+        String aggDsl = getAggDsl(metricsTypes);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_COMMON_METRICS, startTime, endTime, interval, startTime, endTime, aggDsl);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchCommonAggMetrics(response, metricsTypes, interval), 3);
     }
 
@@ -53,7 +56,7 @@ public class GatewayOverviewMetricsDAO extends BaseESDAO {
     public GatewayOverviewMetrics getAggSingleMetricsByRange(String dslTemplate, GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(dslTemplate, startTime, endTime, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(dslTemplate, startTime, endTime, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchSingleAggMetrics(response, gatewayMetricsTypeEnum, interval), 3);
     }
 
@@ -63,7 +66,8 @@ public class GatewayOverviewMetricsDAO extends BaseESDAO {
     public List<GatewayOverviewMetrics> getAggWriteMetricsByRange(List<String> metricsTypes, Long startTime, Long endTime) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_WRITE_METRICS, startTime, endTime, interval);
+        String aggDsl = getAggDsl(metricsTypes);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_WRITE_METRICS, startTime, endTime, interval, startTime, endTime, aggDsl);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchCommonAggMetrics(response, metricsTypes, interval), 3);
     }
 
@@ -88,7 +92,7 @@ public class GatewayOverviewMetricsDAO extends BaseESDAO {
                 continue;
             }
             double value;
-            if (aggKey.endsWith("_count")) {
+            if (MetricsUtils.needConvertUnit(aggKey)) {
                 value = MetricsUtils.getDoubleValuePerMin(interval, esBucket.getUnusedMap().get(aggKey).toString());
             } else {
                 value = MetricsUtils.getAggMapDoubleValue(esBucket, aggKey);
@@ -115,7 +119,7 @@ public class GatewayOverviewMetricsDAO extends BaseESDAO {
                 Long timeStamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
                 String aggKey = metricsType.getAggKey();
                 Double value;
-                if (aggKey.endsWith("_count")) {
+                if (MetricsUtils.needConvertUnit(aggKey)) {
                     value = MetricsUtils.getDoubleValuePerMin(interval, esBucket.getUnusedMap().get(aggKey).toString());
                 } else {
                     value = Double.valueOf(esBucket.getUnusedMap().get(aggKey).toString());
@@ -125,5 +129,27 @@ public class GatewayOverviewMetricsDAO extends BaseESDAO {
             }
         }
         return gatewayOverviewMetrics;
+    }
+
+    private String getAggDsl(List<String> metricsTypes) {
+        JSONObject json = new JSONObject();
+        for (String metricsType : metricsTypes) {
+            if (GatewayMetricsTypeEnum.QUERY_TOTAL_HITS_AVG_COUNT.getType().equals(metricsType)) {
+                json.put(GatewayMetricsTypeEnum.QUERY_TOTAL_HITS_AVG_COUNT.getAggKey(), DSLSearchUtils.buildAggItem("avg", "totalHits"));
+            } else if (GatewayMetricsTypeEnum.QUERY_COST_AVG.getType().equals(metricsType)) {
+                json.put(GatewayMetricsTypeEnum.QUERY_COST_AVG.getAggKey(), DSLSearchUtils.buildAggItem("avg", "totalCost"));
+            } else if (GatewayMetricsTypeEnum.QUERY_TOTAL_SHARDS_AVG.getType().equals(metricsType)) {
+                json.put(GatewayMetricsTypeEnum.QUERY_TOTAL_SHARDS_AVG.getAggKey(), DSLSearchUtils.buildAggItem("avg", "totalShards"));
+            } else if (GatewayMetricsTypeEnum.QUERY_FAILED_SHARDS_AVG.getType().equals(metricsType)) {
+                json.put(GatewayMetricsTypeEnum.QUERY_FAILED_SHARDS_AVG.getAggKey(), DSLSearchUtils.buildAggItem("avg", "failedShards"));
+            } else if (GatewayMetricsTypeEnum.WRITE_TOTAL_COST.getType().equals(metricsType)) {
+                json.put(GatewayMetricsTypeEnum.WRITE_TOTAL_COST.getAggKey(), DSLSearchUtils.buildAggItem("avg", "totalCost"));
+            } else if (GatewayMetricsTypeEnum.WRITE_RESPONSE_LEN.getType().equals(metricsType)) {
+                json.put(GatewayMetricsTypeEnum.WRITE_RESPONSE_LEN.getAggKey(), DSLSearchUtils.buildAggItem("avg", "responseLen"));
+            } else if (GatewayMetricsTypeEnum.DSL_LEN.getType().equals(metricsType)) {
+                json.put(GatewayMetricsTypeEnum.DSL_LEN.getAggKey(), DSLSearchUtils.buildAggItem("avg", "dslLen"));
+            }
+        }
+        return json.toString();
     }
 }

@@ -296,6 +296,10 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
 
         String cluster = esClusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue()).getCluster();
         Map</*节点名称*/String, /*插件名称列表*/List<String>> node2PluginMap = esClusterService.syncGetNode2PluginsMap(cluster);
+        if (null == node2PluginMap) {
+            LOGGER.warn("class=EcmWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||cluster={}||errMsg={node2PluginMap is null}", cluster);
+            return;
+        }
         String pluginName = esPluginService.getESPluginById(content.getPluginId()).getName();
 
         // 记录插件安装或者卸载失败的集群节点名称

@@ -61,4 +61,5 @@ export default {
   [`menu.${systemKey}.index-admin`]: '索引管理',
   [`menu.${systemKey}.index-admin.detail`]: '索引管理详情',
   [`menu.${systemKey}.index-tpl-management`]: '模板管理',
+  [`menu.${systemKey}.dashboard`]: 'Dashboard',
 };

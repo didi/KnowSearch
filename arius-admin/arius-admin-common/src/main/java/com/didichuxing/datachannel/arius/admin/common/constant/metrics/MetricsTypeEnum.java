@@ -62,8 +62,22 @@ public enum MetricsTypeEnum {
     /**
      * 网关看板下的clientNode指标
      */
-    GATEWAY_CLIENT_NODE(33, MetricsConstant.GATEWAY,"clientNode");
+    GATEWAY_CLIENT_NODE(33, MetricsConstant.GATEWAY,"clientNode"),
 
+    /**
+     * dashboard 集群指标配置
+     */
+    DASHBOARD_CLUSTER(41, MetricsConstant.DASHBOARD, "cluster"),
+
+    /**
+     * dashboard 节点指标配置
+     */
+    DASHBOARD_NODE(42, MetricsConstant.DASHBOARD, "node"),
+
+    /**
+     * dashboard 索引指标配置
+     */
+    DASHBOARD_INDEX(43, MetricsConstant.DASHBOARD, "index");
 
     MetricsTypeEnum(int code, String firstMetricsType, String secondMetricsType) {
         this.code = code;

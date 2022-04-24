@@ -199,6 +199,18 @@ public interface RoleClusterHostService {
     String buildESClientHttpAddressesStr(List<ESRoleClusterHostDTO> roleClusterHosts);
 
     /**
+     * 构建集群client, master角色的HttpAddresses地址
+     * @return List<ip:port>
+     */
+    List<String> buildESClientMasterHttpAddressesList(List<ESRoleClusterHostDTO> roleClusterHosts);
+
+    /**
+     * 构建集群master,client,data角色的HttpAddresses地址
+     * @return List<ip:port>
+     */
+    List<String> buildESAllRoleHttpAddressesList(List<ESRoleClusterHostDTO> roleClusterHosts);
+
+    /**
      * 获取角色id对应的机器数（ip数目）
      */
     int getPodNumberByRoleId(Long roleId);

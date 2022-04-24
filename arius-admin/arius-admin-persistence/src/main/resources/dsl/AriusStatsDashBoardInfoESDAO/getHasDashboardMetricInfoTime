@@ -1,0 +1,25 @@
+{
+  "_source": "%s.timestamp",
+  "size": 1,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "%s.timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "%s.timestamp": {
+        "order": "desc"
+      }
+    }
+  ]
+}

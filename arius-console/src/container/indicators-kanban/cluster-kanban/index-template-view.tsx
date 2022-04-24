@@ -25,13 +25,14 @@ import {
 import { asyncMicroTasks, resize } from "../../../lib/utils";
 import { setIsUpdate } from "actions/cluster-kanban";
 import { arrayMoveImmutable } from 'array-move';
+import Url from "lib/url-parser";
 
 export const classPrefix = "rf-monitor";
 const { Panel } = Collapse;
 const TEMPLATE = "template";
 export const IndexTemplateView = memo(() => {
   const [topNu, setTopNu] = useState(TOP_MAP[0].value);
-  const [logicTemplateId, setLogicTemplateId] = useState("");
+  const [logicTemplateId, setLogicTemplateId] = useState(undefined);
   const [indexTemplateList, setIndexTemplateList] = useState([]);
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
   const dispatch = useDispatch();
@@ -41,8 +42,8 @@ export const IndexTemplateView = memo(() => {
     checkedData[item] = listsNew;
     const checkedList = objFlat(checkedData);
     setCheckedList(TEMPLATE, checkedList);
-    setCheckedData({...checkedData});
-  }; 
+    setCheckedData({ ...checkedData });
+  };
 
   const { clusterName, startTime, endTime, isMoreDay, isUpdate } = useSelector(
     (state) => ({
@@ -82,6 +83,7 @@ export const IndexTemplateView = memo(() => {
 
   const getAsyncViewData = useCallback(
     async (metricsTypes, aggType?: string) => {
+      if (typeof logicTemplateId === 'string' && logicTemplateId !== '') return
       return await getTemplateViewData(
         metricsTypes,
         clusterName,
@@ -92,14 +94,16 @@ export const IndexTemplateView = memo(() => {
         aggType
       );
     },
-    [clusterName, startTime, endTime, topNu, logicTemplateId]
+    [clusterName, startTime, endTime, topNu, logicTemplateId, isUpdate]
   );
 
   const getAsyncIndexTemplateList = async () => {
     if (clusterName) {
       try {
         const data = await getListTemplates(clusterName);
-        const indexTemplateList = data.map(item => ({ "name": item.name, "value": String(item.id) }));
+        const indexTemplateList = data.map(item => ({ "name": item.name, "value": item.id }));
+        const id = Url().search?.cluster === clusterName ? indexTemplateList.find(v => v.name === Url().search?.template)?.value : undefined
+        setLogicTemplateId(id)
         setIndexTemplateList(indexTemplateList);
       } catch (error) {
         console.log(error);
@@ -112,9 +116,13 @@ export const IndexTemplateView = memo(() => {
   }, []);
 
   useEffect(() => {
+    setLogicTemplateId(Url().search?.template)
+  }, [Url().search?.template])
+
+  useEffect(() => {
     getAsyncIndexTemplateList();
   }, [clusterName]);
- 
+
   const renderTopWhat = () => {
     return (
       <SelectRadio
@@ -124,6 +132,7 @@ export const IndexTemplateView = memo(() => {
         setContent={setLogicTemplateId}
         contentList={indexTemplateList}
         placeholder="请选择索引模板"
+        style={{ width: 280 }}
       />
     );
   };
@@ -167,19 +176,19 @@ export const IndexTemplateView = memo(() => {
                   <div
                     className={`${classPrefix}-overview-content-line  content-margin-top-20`}
                   >
-                       {checkedData[item] && checkedData[item].length ? <RenderLine
-                        metricsTypes={checkedData[item]}
-                        key={item + index + topNu + clusterName}
-                        configData={indexConfigData}
-                        isMoreDay={isMoreDay}
-                        getAsyncViewData={getAsyncViewData}
-                        startTime={startTime}
-                        endTime={endTime}
-                        sortEnd={sortEnd}
-                        item={item}
-                        aggType={aggTypeMap[item]}
-                      /> : ""
-                      }
+                    {checkedData[item] && checkedData[item].length ? <RenderLine
+                      metricsTypes={checkedData[item]}
+                      key={item + index + topNu + clusterName}
+                      configData={indexConfigData}
+                      isMoreDay={isMoreDay}
+                      getAsyncViewData={getAsyncViewData}
+                      startTime={startTime}
+                      endTime={endTime}
+                      sortEnd={sortEnd}
+                      item={item}
+                      aggType={aggTypeMap[item]}
+                    /> : ""
+                    }
                   </div>
                 </Panel>
               </Collapse>

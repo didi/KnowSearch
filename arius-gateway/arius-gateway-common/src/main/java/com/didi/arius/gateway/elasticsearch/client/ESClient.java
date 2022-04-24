@@ -4,6 +4,7 @@ package com.didi.arius.gateway.elasticsearch.client;
 import com.didi.arius.gateway.elasticsearch.client.model.*;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.action.*;
 import org.elasticsearch.client.ResponseException;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -244,6 +246,18 @@ public class ESClient extends ESAbstractClient {
 
     public List<HttpHost> getNodes() {
         return nodes;
+    }
+
+    public boolean isActualRunning() {
+        try {
+            Field field = restClient.getClass().getDeclaredField("client");
+            field.setAccessible(true);
+            CloseableHttpAsyncClient httpAsyncClient = (CloseableHttpAsyncClient) field.get(restClient);
+            return httpAsyncClient.isRunning();
+        } catch (Exception e) {
+            logger.warn("get running status error.", e);
+            return true;
+        }
     }
 
 }

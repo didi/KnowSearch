@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 索引的基本统计信息
@@ -54,4 +54,8 @@ public class TemplateStatsInfoPO {
      * 索引对应的topic
      */
     private List<String> topics = new ArrayList<>();
+    /**
+     * 索引存储容量
+     */
+    private double storeBytes;
 }

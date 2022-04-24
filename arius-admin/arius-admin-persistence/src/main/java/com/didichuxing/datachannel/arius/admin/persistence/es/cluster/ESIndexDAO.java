@@ -13,6 +13,7 @@ import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesEx
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesStatsRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
+import com.didiglobal.logi.elasticsearch.client.request.index.updatemapping.ESIndicesUpdateMappingRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.request.index.updatesettings.ESIndicesUpdateSettingsRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
@@ -177,6 +178,7 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) { return null;}
         ESIndicesGetIndexResponse response = client.admin().indices().prepareGetIndex(indexName).execute()
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
@@ -204,9 +206,14 @@ public class ESIndexDAO extends BaseESDAO {
 
         for(Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()){
             String typeName = entry.getKey();
-            ESIndicesUpdateMappingResponse response = client.admin().indices().prepareUpdateMapping()
-                .setIndex(indexName).setType(typeName).setTypeConfig(typeConfigMap.get(typeName)).execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            ESIndicesUpdateMappingRequestBuilder builder = client.admin().indices().prepareUpdateMapping();
+            builder.setIndex(indexName).setType(typeName).setTypeConfig(typeConfigMap.get(typeName));
+            // es 集群版本7 以上需要带includeTypeName 参数，方可以更新index mapping
+            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) >= 7) {
+                builder.setIncludeTypeName(true);
+            }
+            ESIndicesUpdateMappingResponse response = builder.execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);;
 
             if (!response.getAcknowledged().booleanValue()) {
                 return false;
