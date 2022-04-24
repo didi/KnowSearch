@@ -5,12 +5,13 @@ import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMet
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.MetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.cluster.ESClusterTaskDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.linechart.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.MetricsConfigService;
@@ -78,9 +79,11 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
             }
 
             if (metricsTypeEnum.isCollectCurveMetricsList()) {
+                // 折线图数据
                 Result<List<VariousLineChartMetricsVO>> clusterPhyMetricsResult = metricsHandle.getClusterPhyRelatedCurveMetrics(param, appId, domainAccount);
                 result = clusterPhyMetricsResult.success() ? (T) clusterPhyMetricsResult.getData() : null;
             } else {
+                // 折线图和列表图数据
                 Result<MetricsVO> metricsVoResult = metricsHandle.getOtherClusterPhyRelatedMetricsVO(param, appId, domainAccount);
                 result = metricsVoResult.success() ? (T) metricsVoResult.getData() : null;
             }
@@ -94,21 +97,29 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
 
     @Override
     public Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
-        try {
-            List<VariousLineChartMetricsVO> result = new ArrayList<>();
-            MetricsClusterPhyNodeDTO phyNodeDTO =  ConvertUtil.obj2Obj(param, MetricsClusterPhyNodeDTO.class);
-            for (String nodeName : param.getNodeNames()) {
+        MetricsClusterPhyNodeDTO phyNodeDTO;
+        if (metricsTypeEnum == ClusterPhyTypeMetricsEnum.NODE) {
+            phyNodeDTO = ConvertUtil.obj2Obj(param, MetricsClusterPhyNodeDTO.class);
+        } else {
+            phyNodeDTO = ConvertUtil.obj2Obj(param, MetricsClusterPhyNodeTaskDTO.class);
+        }
+        if (AriusObjUtils.isEmptyList(param.getNodeNames())) {
+            return getClusterMetricsByMetricsType(phyNodeDTO, appId, domainAccount, metricsTypeEnum);
+        }
+
+        List<VariousLineChartMetricsVO> result = new ArrayList<>();
+        for (String nodeName : param.getNodeNames()) {
+            try {
                 phyNodeDTO.setNodeName(nodeName);
                 Result<List<VariousLineChartMetricsVO>> nodeMetrics = getClusterMetricsByMetricsType(phyNodeDTO, appId, domainAccount, metricsTypeEnum);
                 if (nodeMetrics.success()) {
                     result.addAll(nodeMetrics.getData());
                 }
+            } catch (Exception e) {
+                LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getMultiClusterMetrics||errMsg={}", e);
             }
-            return Result.buildSucc(result);
-        } catch (Exception e) {
-            LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getClusterMetricsFromEs||errMsg={}", e);
-            return Result.buildFail();
         }
+        return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
     }
 
     @Override

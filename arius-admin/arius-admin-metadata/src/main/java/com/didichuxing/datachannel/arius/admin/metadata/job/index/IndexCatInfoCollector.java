@@ -97,7 +97,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         List<IndexCatCellPO> catIndexCellList = Lists.newArrayList();
         for (String clusterName : clusterNameList) {
             long timeMillis                      = System.currentTimeMillis();
-            List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName);
+            List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 2);
             List<IndexCatCellPO> indexCatCellPOS = buildIndexCatCellPOS(catIndexResults, clusterName, timeMillis);
             catIndexCellList.addAll(indexCatCellPOS);
         }

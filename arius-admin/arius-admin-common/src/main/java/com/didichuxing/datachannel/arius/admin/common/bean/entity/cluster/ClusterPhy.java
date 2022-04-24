@@ -59,6 +59,11 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
     private Integer               type;
 
     /**
+     * 集群展示用属性标签，如「集群所属资源类型」等等
+     */
+    private String tags;
+
+    /**
      * 数据中心
      */
     private String                dataCenter;

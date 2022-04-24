@@ -20,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
@@ -31,7 +30,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -278,9 +276,6 @@ public class TemplateLogicOpController {
     }
 
     private Result<List<OpLogicTemplateVO>> getLogicTemplateList(IndexTemplateLogicDTO param){
-        if (StringUtils.isBlank(param.getDataCenter())) {
-            param.setDataCenter(EnvUtil.getDC().getCode());
-        }
         return Result
                 .buildSucc(ConvertUtil.list2List(templateLogicService.getLogicTemplates(param), OpLogicTemplateVO.class));
     }

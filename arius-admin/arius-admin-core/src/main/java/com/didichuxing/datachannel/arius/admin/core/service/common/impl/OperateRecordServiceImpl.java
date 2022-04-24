@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +28,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
- * 
+ *
  * @author d06679
  * @date 2019/3/14
  */
@@ -194,6 +195,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
             Result<List<OperateRecordVO>> result = list(operateRecordDTO);
             operateRecordVOS.addAll(result.getData());
         }
+        operateRecordVOS.sort(Comparator.comparing(OperateRecordVO::getOperateTime).reversed());
         return Result.buildSucc(operateRecordVOS);
     }
 

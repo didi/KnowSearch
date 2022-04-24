@@ -72,8 +72,7 @@ public class AriusClient {
         try (Response response = client.newCall(request).execute()) {
             String responseBody = Objects.requireNonNull(response.body()).string();
             long end = System.currentTimeMillis();
-            LOGGER.info("class=AriusClient||method=run||msg=used time {}ms", end - start);
-            LOGGER.info("class=AriusClient||method=run||msg={}", responseBody);
+            LOGGER.info("class=AriusClient||method={}||path={}||requestBody={}||msg={}||used time {}ms", method, path, requestBody, responseBody, end - start);
             return responseBody;
         }
     }

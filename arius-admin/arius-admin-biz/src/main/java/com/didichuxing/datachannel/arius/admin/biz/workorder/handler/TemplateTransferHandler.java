@@ -2,14 +2,18 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateTransferOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -184,6 +188,11 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
 
         Result<Void> result = templateLogicService.turnOverLogicTemplate(content.getId(), content.getTgtAppId(),
             content.getTgtResponsible(), workOrder.getSubmitor());
+
+        if (result.success()) {
+            operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), JSON.toJSONString(
+                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), "模板从 appId:" + content.getSourceAppId() + "转移到 appId:" + content.getTgtAppId())), approver);
+        }
 
         sendNotify(WORK_ORDER_TEMPLATE_TRANSFER,
             new TemplateTransferNotify(workOrder.getSubmitorAppid(), content.getTgtAppId(), content.getName()),

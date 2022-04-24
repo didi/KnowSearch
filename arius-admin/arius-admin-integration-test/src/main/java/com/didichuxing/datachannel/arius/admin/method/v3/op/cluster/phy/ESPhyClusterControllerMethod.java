@@ -24,7 +24,7 @@ public class ESPhyClusterControllerMethod {
 
     public static final String PHY_CLUSTER = V3_OP + "/phy/cluster";
 
-    public static Result<List<ESRoleClusterVO>> roleList(Integer clusterId) throws IOException {
+    public static Result<List<ESRoleClusterVO>> roleList(Long clusterId) throws IOException {
         String path = String.format("%s/%d/roles", PHY_CLUSTER, clusterId);
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESRoleClusterVO>>>(){});
     }
@@ -49,7 +49,7 @@ public class ESPhyClusterControllerMethod {
         return JSON.parseObject(AriusClient.post(path, clusterJoinDTO), new TypeReference<Result<Boolean>>(){});
     }
 
-    public static Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Integer clusterId) throws IOException {
+    public static Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Long clusterId) throws IOException {
         String path = String.format("%s/%d/regioninfo", PHY_CLUSTER, clusterId);
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESRoleClusterHostVO>>>(){});
     }
@@ -84,7 +84,7 @@ public class ESPhyClusterControllerMethod {
         return JSON.parseObject(AriusClient.post(path, condition), new TypeReference<PaginationResult<ConsoleClusterPhyVO>>(){});
     }
 
-    public static Result<ConsoleClusterPhyVO> get(Integer clusterId) throws IOException {
+    public static Result<ConsoleClusterPhyVO> get(Long clusterId) throws IOException {
         String path = String.format("%s/%d/overView", PHY_CLUSTER, clusterId);
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<ConsoleClusterPhyVO>>(){});
     }

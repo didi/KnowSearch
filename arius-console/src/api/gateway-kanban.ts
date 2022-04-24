@@ -52,15 +52,15 @@ export const getOverviewData = (metricsTypes: string[], startTime: number, endTi
 }
 
 // 获取节点视图
-export const getNodeViewData = (metricsTypes: string[], startTime: number, endTime: number, topNu: number, nodeIp: string) => {
-  return fetch("/v3/op/gateway/metrics/node", {
+export const getNodeViewData = (metricsTypes: string[], startTime: number, endTime: number, topNu: number, nodeIp: string[]) => {
+  return fetch("/v3/op/gateway/metrics/nodes", {
     prefix: Prefix,
     method: POST,
     body: {
       metricsTypes,
       startTime,
       endTime,
-      nodeIp,
+      nodeIps: nodeIp,
       topNu
     }
   });

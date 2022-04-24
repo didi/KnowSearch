@@ -141,7 +141,7 @@
         <include refid="Base_Column_List"/>
         from arius_resource_logic
         where id > 0
-        <if test="name != null">  and  `name` LIKE CONCAT(#{name},'%')</if>
+        <if test="name != null">  and  `name` LIKE CONCAT('%',#{name},'%')</if>
         <if test="appId != null"> and  app_id = #{appId}</if>
         <if test="health != null">and  health = #{health}</if>
         <if test="type != null">  and  type = #{type}</if>
@@ -156,7 +156,7 @@
         count(1)
         from arius_resource_logic
         where id > 0
-        <if test="name != null">  and  `name` LIKE CONCAT(#{name},'%')</if>
+        <if test="name != null">  and  `name` LIKE CONCAT('%',#{name},'%')</if>
         <if test="appId != null"> and  app_id = #{appId}</if>
         <if test="health != null">and  health = #{health}</if>
         <if test="type != null">  and  type = #{type}</if>

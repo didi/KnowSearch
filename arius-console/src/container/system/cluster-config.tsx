@@ -20,7 +20,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export const ClusterConfig = connect(null, mapDispatchToProps)((props: any) => {
   const department: string = localStorage.getItem('current-project');
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject] = useState(null);
+  const [queryFormObject, setqueryFormObject] = useState(null);
   const [data, setData] = useState([]);
 
   React.useEffect(() => {
@@ -28,13 +28,13 @@ export const ClusterConfig = connect(null, mapDispatchToProps)((props: any) => {
   }, [department]);
 
   const getData = () => { // 查询项的key 要与 数据源的key  对应
-    if (!queryFromObject) return data;
-    const keys = Object.keys(queryFromObject);
+    if (!queryFormObject) return data;
+    const keys = Object.keys(queryFormObject);
     const filterData = data.filter(
       (d) => {
         let b = true;
         keys.forEach((k: string) => {
-          (d[k] + '')?.toLowerCase().includes(queryFromObject[k]) ? '' : b = false;
+          (d[k] + '').includes(queryFormObject[k]) ? '' : b = false;
         })
         return b;
       }
@@ -65,7 +65,7 @@ export const ClusterConfig = connect(null, mapDispatchToProps)((props: any) => {
         delete result[key]
       }
     }
-    setqueryFromObject(result);
+    setqueryFormObject(result);
   };
 
 

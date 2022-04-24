@@ -1,11 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor;
 
-import com.alibaba.fastjson.JSON;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
@@ -13,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHe
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorClusterEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitorTask.ClusterMonitorTaskService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
@@ -21,26 +28,18 @@ import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmo
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.ClusterMonitorTaskDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
@@ -78,7 +77,10 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     private AriusStatsClusterTaskInfoESDAO ariusStatsClusterTaskInfoESDAO;
 
     @Autowired
-    private ClusterMonitorTaskDAO    clusterMonitorTaskDAO;
+    private ClusterMonitorTaskService clusterMonitorTaskService;
+
+    @Autowired
+    private TemplateAccessESDAO templateAccessESDAO;
 
     private String  hostName     = HttpHostUtil.HOST_NAME;
 
@@ -96,6 +98,8 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     private FutureUtil<Void> futureUtil;
 
+    private long timestamp = CommonUtils.monitorTimestamp2min(System.currentTimeMillis());
+
     @PostConstruct
     public void init() {
         futureUtil = FutureUtil.init("ClusterMonitorJobHandler", 3 * maxPoolSize, 3 * maxPoolSize, 100);
@@ -104,7 +108,6 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     @Override
     public Object handleJobTask(String params) {
         LOGGER.info("class=ClusterMonitorJobHandler||method=handleJobTask||params={}", params);
-
         // 处理逻辑集群的统计数据
         List<ESClusterStats> esClusterStatsList = Lists.newCopyOnWriteArrayList();
 
@@ -112,37 +115,16 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
         Map<ClusterPhy, ESClusterHealthResponse> clusterHealthResponseMap = handlePhysicalClusterStats(esClusterStatsList);
 
         SpringTool.publish(new MetricsMonitorClusterEvent(this, esClusterStatsList, clusterHealthResponseMap, hostName));
+
         return JOB_SUCCESS;
     }
 
     /**************************************** private methods ****************************************/
     private Map<ClusterPhy, ESClusterHealthResponse> handlePhysicalClusterStats(List<ESClusterStats> esClusterStatsList) {
-        long timestamp = CommonUtils.monitorTimestamp2min(System.currentTimeMillis());
-        List<ClusterPhy> phyClusters = clusterPhyService.listAllClusters();
-        if (CollectionUtils.isEmpty(phyClusters)) {
-            LOGGER.warn("class=ClusterMonitorJobHandler||method=handlePhysicalClusterStats||msg=phyClusters is empty");
-            return null;
-        }
+        this.timestamp = CommonUtils.monitorTimestamp2min(System.currentTimeMillis());
 
-        List<ClusterPhy> monitorCluster = new ArrayList<>();
-
-        List<ClusterMonitorTaskPO> clusterMonitorTaskPOS = clusterMonitorTaskDAO.getTaskByHost(hostName, maxPoolSize);
-        if(CollectionUtils.isEmpty(clusterMonitorTaskPOS)){
-            LOGGER.info("class=ClusterMonitorJobHandler||method=handlePhysicalClusterStats||msg=clusterMonitorTaskPOS is empty");
-        }else {
-            Map<String, ClusterMonitorTaskPO> taskPOMap = clusterMonitorTaskPOS.stream()
-                                            .collect(Collectors.toMap(ClusterMonitorTaskPO::getCluster, c -> c));
-
-            for(ClusterPhy clusterPhy : phyClusters){
-                if(null != taskPOMap.get(clusterPhy.getCluster())){
-                    monitorCluster.add(clusterPhy);
-                }
-            }
-        }
-
-        LOGGER.info("class=ClusterMonitorJobHandler||method=handlePhysicalClusterStats||monitorCluster={}",
-                JSON.toJSONString(monitorCluster));
-
+        // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
+        List<ClusterPhy> monitorCluster = clusterMonitorTaskService.getSingleMachineMonitorCluster(hostName);
 
         final Map<String, Integer> clusterPhyName2TemplateCountMap = templatePhyService.getClusterTemplateCountMap();
 
@@ -150,11 +132,11 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
 
         Map<ClusterPhy, ESClusterHealthResponse> clusterHealthResponseMap = Maps.newConcurrentMap();
         int clusterSize = monitorCluster.size();
-
+        Map<String,Future> futureMap = new HashMap<>();
         // 1. build multiple clusters status
         monitorCluster.forEach(dataSource -> {
-            if(checkThreadPool()){
-                threadPool.execute( () -> {
+            if (checkThreadPool()) {
+                futureMap.put(dataSource.getCluster(),threadPool.submit( () -> {
                     try {
                         if (EnvUtil.getDC().getCode().equals(dataSource.getDataCenter())) {
                             ESClusterHealthResponse clusterHealthResponse = esClusterService.syncGetClusterHealth(dataSource.getCluster());
@@ -162,10 +144,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                                     clusterPhyName2TemplateCountMap, appIdCount, clusterHealthResponse);
 
                             monitorMetricsSender.sendClusterStats(esClusterStatusList);
-
                             buildAndSendTaskStats(timestamp, dataSource);
-
-                            esClusterStatsList.addAll(esClusterStatusList);
 
                             if (clusterHealthResponse == null) {
                                 clusterHealthResponse = new ESClusterHealthResponse();
@@ -174,6 +153,8 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                                 clusterHealthResponse.setActiveShards(0);
                             }
                             clusterHealthResponseMap.put(dataSource, clusterHealthResponse);
+
+                            esClusterStatsList.addAll(esClusterStatusList);
 
                             // 更新物理集群的健康度信息和活跃的分片数目信息
                             handleSaveClusterHealthToDB(dataSource, clusterHealthResponse);
@@ -189,9 +170,20 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                                         + "||errMsg= dataSource mismatch",
                                 dataSource.getCluster(), dataSource.getDataCenter(), e);
                     }
-                } );
+                } ));
             }
         });
+
+        if (MapUtils.isNotEmpty(futureMap)) {
+            futureMap.forEach((key, val) -> {
+                try {
+                    val.get(50,TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    val.cancel(true);
+                    LOGGER.error("class=ClusterMonitorJobHandler||method=handlePhysicalClusterStats||clusterPhyName={}||errMsg= dataSource mismatch", key);
+                }
+            });
+        }
 
         return clusterHealthResponseMap;
     }
@@ -238,7 +230,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
             esClusterStats.setCluster(dataSource.getCluster());
             esClusterStats.setPercentilesType(percentilesType);
             esClusterStats.setPhysicCluster(PHY_CLUSTER);
-            esClusterStats.setTimestamp(System.currentTimeMillis());
+            esClusterStats.setTimestamp(this.timestamp);
             esClusterStats.setDataCenter(dataSource.getDataCenter());
 
             esClusterStatsList.add(esClusterStats);
@@ -426,6 +418,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                 .runnableTask(() -> esClusterStats.setRecvTransSize(ariusStatsNodeInfoEsDao.getClusterRx(clusterName)))
                 .runnableTask(() -> esClusterStats.setSendTransSize(ariusStatsNodeInfoEsDao.getClusterTx(clusterName)))
                 .runnableTask(() -> setClusterOtherStats(clusterName, esClusterStats))
+                .runnableTask(() -> esClusterStats.setQueryTimesPreDay(templateAccessESDAO.getYesterDayAllTemplateAccess(clusterName)))
                 .waitExecute();
     }
 

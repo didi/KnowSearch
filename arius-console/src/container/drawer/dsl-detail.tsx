@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Drawer, Descriptions, Button, Tooltip, message, Modal } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import { copyString } from '../../lib/utils';
-import { changeStatus, getDslDetail  } from 'api/search-query';
+import { changeStatus, getDslDetail } from 'api/search-query';
 import EditLimit from '../search-query/components/editLimit';
 import moment from 'moment';
 
@@ -34,7 +34,7 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
         setRecords([res]);
       })
   }
-  
+
   const editCancel = () => {
     setEditVisible(false);
   }
@@ -44,7 +44,7 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
   }
 
   useEffect(() => {
-    if(props.visible) {
+    if (props.visible) {
       getDetail();
     }
     return () => {
@@ -56,15 +56,15 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
   const typeMap = [
     {
       type: '查询索引示例',
-      value: <div className="dsl-drawer-box" title={data?.indiceSample}>{data?.indiceSample} <CopyOutlined className="dsl-drawer-icon" onClick={() => copyString(data?.indiceSample)}/></div>,
+      value: <div className="dsl-drawer-box" title={data?.indiceSample}>{data?.indiceSample} <CopyOutlined className="dsl-drawer-icon" onClick={() => copyString(data?.indiceSample)} /></div>,
     },
     {
       type: '查询模板',
-      value: <div className="dsl-drawer-box" title={data?.dslTemplate}>{data?.dslTemplate} <CopyOutlined className="dsl-drawer-icon" onClick={() => copyString(data?.dslTemplate)}/></div>,
+      value: <div className="dsl-drawer-box" title={data?.dslTemplate}>{data?.dslTemplate} <CopyOutlined className="dsl-drawer-icon" onClick={() => copyString(data?.dslTemplate)} /></div>,
     },
     {
       type: '查询语句示例',
-      value: <div className="dsl-drawer-box" title={data?.dsl}>{data?.dsl} <CopyOutlined className="dsl-drawer-icon" onClick={() => copyString(`GET ${data?.indices}/_search\n${data?.dsl}`)}/></div>,
+      value: <div className="dsl-drawer-box" title={data?.dsl}>{data?.dsl} <CopyOutlined className="dsl-drawer-icon" onClick={() => copyString(`GET ${data?.indices}/_search\n${data?.dsl}`)} /></div>,
     },
     {
       type: '创建时间',
@@ -78,6 +78,10 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
       type: '最近使用时间',
       value: moment(data?.flinkTime).format('YYYY-MM-DD HH:mm:ss'),
     },
+    {
+      type: 'MD5信息',
+      value: <div className="dsl-drawer-box" title={data?.dslTemplateMd5}>{data?.dslTemplateMd5}</div>,
+    },
   ]
   const detailMap = [
     {
@@ -86,39 +90,39 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
     },
     {
       type: '查询语句长度',
-      value:  Number(data?.dslLenAvg).toFixed(2),
+      value: Number(data?.dslLenAvg).toFixed(2),
     },
     {
       type: '响应长度',
-      value:  Number(data?.responseLenAvg).toFixed(2),
+      value: Number(data?.responseLenAvg).toFixed(2),
     },
     {
       type: '耗时（ms）',
-      value:  Number(data?.totalCostAvg).toFixed(2),
+      value: Number(data?.totalCostAvg).toFixed(2),
     },
     {
       type: 'es响应时间（ms）',
-      value:  Number(data?.esCostAvg).toFixed(2),
+      value: Number(data?.esCostAvg).toFixed(2),
     },
     {
       type: '预处理时间（ms）',
-      value:  Number(data?.beforeCostAvg).toFixed(2),
+      value: Number(data?.beforeCostAvg).toFixed(2),
     },
     {
       type: '总Shard个数',
-      value:  Number(data?.totalShardsAvg).toFixed(2),
+      value: Number(data?.totalShardsAvg).toFixed(2),
     },
     {
       type: '失败Shard个数',
-      value:  Number(data?.failedShardsAvg).toFixed(2),
+      value: Number(data?.failedShardsAvg).toFixed(2),
     },
     {
       type: '总命中数',
-      value:  Number(data?.totalHitsAvg).toFixed(2),
+      value: Number(data?.totalHitsAvg).toFixed(2),
     },
     {
       type: '查询限流值',
-      value:  Number(data?.queryLimit).toFixed(2),
+      value: Number(data?.queryLimit).toFixed(2),
     },
     {
       type: '语句类型',
@@ -167,7 +171,7 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
     return <div className="dsl-drawer-title">{text}</div>
   }
 
-  const contentStyle: any = {  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', }
+  const contentStyle: any = { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', }
 
   return (
     <Drawer
@@ -180,7 +184,7 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
       bodyStyle={{ padding: '0px' }}
     >
       <div className="dsl-drawer">
-        <EditLimit visible={editVisible} record={records} cancel={editCancel} cb={getDetail}/>
+        <EditLimit visible={editVisible} record={records} cancel={editCancel} cb={getDetail} />
         {title('基本信息')}
         <Descriptions column={3} contentStyle={contentStyle} style={{ paddingLeft: 24 }}>
           {typeMap.map((item, index) => (<DescriptionsItem key={index} label={item.type} >{item.value}</DescriptionsItem>))}
@@ -188,7 +192,7 @@ const DslDetail: React.FC<IProps> = (props: IProps) => {
       </div>
       <div className="dsl-drawer">
         {title('业务信息')}
-        <Descriptions column={3} contentStyle={contentStyle}  style={{ paddingLeft: 24 }}>
+        <Descriptions column={3} contentStyle={contentStyle} style={{ paddingLeft: 24 }}>
           {detailMap.map((item, index) => (<DescriptionsItem key={index} label={item.type} ><Tooltip title={item.value}>{item.value}</Tooltip></DescriptionsItem>))}
         </Descriptions>
       </div>

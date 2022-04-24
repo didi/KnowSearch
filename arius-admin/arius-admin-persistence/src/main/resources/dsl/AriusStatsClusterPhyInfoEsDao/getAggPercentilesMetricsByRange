@@ -39,14 +39,14 @@
     "hist": {
       "date_histogram": {
         "field": "timestamp",
-        "fixed_interval": "{interval}",
+        "fixed_interval": "%s",
         "time_zone": "Asia/Shanghai",
         "min_doc_count": 0
       },
       "aggs": {
-        "{aggType}_{clusterPhyMetrics}": {
-          "{aggType}": {
-            "field": "statis.{clusterPhyMetrics}"
+        "%s": {
+          "%s": {
+            "field": "statis.%s"
           }
         }
       }

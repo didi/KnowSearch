@@ -91,10 +91,11 @@ export const IndexView = memo(() => {
         indexName
       );
     },
-    [startTime, endTime, topNu, indexName]
+    [startTime, endTime, topNu, indexName, isUpdate]
   );
   const getAllAsyncViewData = async (metricsTypes) => {
     try {
+      setIsLoading(true);
       const res = await getAsyncViewData(metricsTypes);
       setViewData(
         res.map((item) => getOption(item, indexConfigData, isMoreDay))
@@ -153,6 +154,7 @@ export const IndexView = memo(() => {
         setContent={setIndexName}
         contentList={indexNameList}
         placeholder="请选择索引"
+        style={{ width: 400 }}
       />
     );
   };

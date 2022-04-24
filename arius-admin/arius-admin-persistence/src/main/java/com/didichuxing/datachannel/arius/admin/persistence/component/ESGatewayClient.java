@@ -43,6 +43,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -141,6 +142,16 @@ public class ESGatewayClient {
     }
 
     /**
+     * 获取一个gateway读写地址
+     */
+    public String getSingleGatewayAddress() {
+        List<String> urls = ListUtils.string2StrList(gatewayUrl);
+        Random random = new Random();
+        int n = random.nextInt(urls.size());
+        return urls.get(n) +":" + gatewayPort;
+    }
+
+    /**
      * 执行sql查询
      * @param sql
      * @return
@@ -236,6 +247,12 @@ public class ESGatewayClient {
             new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl));
     }
 
+    public ESQueryResponse performRequestWithRouting(String clusterName, String routing, String indexName,
+                                                     String typeName, String queryDsl) {
+        return doQuery(clusterName, indexName,
+                new ESQueryRequest().indices(indexName).routing(routing).types(typeName).source(queryDsl));
+    }
+
     /**
      * 获取命中总数
      *
@@ -247,6 +264,28 @@ public class ESGatewayClient {
     public Long performRequestAndGetTotalCount(String indexName, String typeName, String queryDsl) {
         return performRequestAndGetTotalCount(null, indexName, typeName, queryDsl);
     }
+    /**
+     * 获取命中总数
+     *
+     * @param indexName
+     * @param typeName
+     * @param queryDsl
+     * @return
+     */
+    public Long performRequestAndGetTotalCount(String clusterName, String indexName,
+        String typeName, String queryDsl, int tryTimes) {
+        return performRequest(clusterName, indexName, typeName, queryDsl,
+            esQueryResponse -> {
+                if (null == esQueryResponse || esQueryResponse.getHits() == null) {
+                    return 0L;
+                }
+                return Long
+                    .valueOf(esQueryResponse.getHits().getUnusedMap()
+                        .getOrDefault(ESConstant.HITS_TOTAL, "0").toString());
+            }
+            , tryTimes);
+    }
+    
 
     /**
      * 获取命中总数

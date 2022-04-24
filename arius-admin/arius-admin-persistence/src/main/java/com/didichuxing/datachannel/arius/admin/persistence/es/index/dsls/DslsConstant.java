@@ -58,6 +58,19 @@ public class DslsConstant {
      */
     public static final String GET_CLUSTER_METRICS_BY_RANGE_AND_INTERVAL                     = "AriusStatsClusterPhyInfoEsDao/getClusterMetricsByRangeAndInterval";
 
+    /**
+     * 获取网关数量
+     */
+    public static final String GET_GATEWAY_COUNT                                             = "AriusStatsClusterPhyInfoEsDao/getGatewayCount";
+    /**
+     * 获得网关成功数
+     */
+    public static final String GET_GATEWAY_SUCCESS_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewaySuccessCount";
+    /**
+     * 获得网关失败数
+     */
+    public static final String GET_GATEWAY_FAILURE_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewayFailureCount";
+
     /************************************************************** AriusStatsIndexInfoEsDao **************************************************************/
     /**
      * 查询索引模板一段时间访问内的最大容量
@@ -151,17 +164,22 @@ public class DslsConstant {
     /**
      * 查询第一个时间分片中指标数值的逻辑模板指标信息
      */
-    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS                 = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetrics";
+    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS              = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetrics";
 
     /**
      * 查询topN索引聚合信息
      */
-    public static final String GET_TOPN_TEMPLATE_AGG_METRICS                                    = "AriusStatsIndexInfoEsDao/getTopNTemplateAggMetrics";
+    public static final String GET_TOPN_TEMPLATE_AGG_METRICS                                 = "AriusStatsIndexInfoEsDao/getTopNTemplateAggMetrics";
 
     /**
      * 查询单个模板聚合信息
      */
-    public static final String GET_AGG_SINGLE_TEMPLATE_METRICS                                  = "AriusStatsIndexInfoEsDao/getAggSingleTemplateMetrics";
+    public static final String GET_AGG_SINGLE_TEMPLATE_METRICS                               = "AriusStatsIndexInfoEsDao/getAggSingleTemplateMetrics";
+
+    /**
+     * 获取单个指标项
+     */
+    public static final String GET_SINGLE_METRICS                                            = "AriusStatsIndexInfoEsDao/getSingleMetrics";
 
     /************************************************************** AriusStatsIndexNodeInfoEsDao **************************************************************/
     /**
@@ -202,11 +220,10 @@ public class DslsConstant {
      */
     public static final String AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT                         = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentiles";
 
-
     /**
      * 获取集群磁盘空闲率实时分位值和平均使用率
      */
-    public static final String AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT  = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentilesForDiskFreeUsagePercent";
+    public static final String AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT       = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentilesForDiskFreeUsagePercent";
 
     /**
      * 获取获取集群写入耗时最大值
@@ -236,6 +253,11 @@ public class DslsConstant {
      * 获取指定集群节点有节点信息的时间戳
      */
     public static final String GET_HAS_NODE_METRICS_DATA_TIME                                = "AriusStatsNodeInfoEsDao/getHasNodeMetricInfoTime";
+    /**
+     * 获取某个区间范围内的某个sum聚合值
+     */
+    public static final String GET_FIELD_SUM_AND_RANGE_FIELD_TOTAL                           = "AriusStatsNodeInfoEsDao"
+                                                                                               + "/getFieldSumAndRangeFieldTotal";
 
     /************************************************************** TemplateAccessCountEsDao **************************************************************/
     /**
@@ -511,17 +533,17 @@ public class DslsConstant {
     /**
      * 获取 topN clientNode 写分布
      */
-    public static final String GET_CLIENT_NODE_WRITE                                        = "GatewayNodeMetricsDao/getClientNodeAggWrite";
+    public static final String GET_CLIENT_NODE_WRITE                                         = "GatewayNodeMetricsDao/getClientNodeAggWrite";
 
     /**
      * 获取某 clientNode 写分布
      */
-    public static final String GET_CLIENT_NODE_WRITE_BY_IP                                  = "GatewayNodeMetricsDao/getClientNodeAggWriteByIp";
+    public static final String GET_CLIENT_NODE_WRITE_BY_IP                                   = "GatewayNodeMetricsDao/getClientNodeAggWriteByIp";
 
     /**
      * 获取 gatewayNode 相关的 clientNode ip 信息
      */
-    public static final String GET_CLIENT_NODE_BY_GATEWAY_NODE                              = "GatewayNodeMetricsDao/getClientNodeByGatewayNode";
+    public static final String GET_CLIENT_NODE_BY_GATEWAY_NODE                               = "GatewayNodeMetricsDao/getClientNodeByGatewayNode";
 
     /************************************************************** GatewayAppMetricsDao **************************************************************/
     /**
@@ -820,6 +842,11 @@ public class DslsConstant {
     public static final String AGG_CLUSTER_TASK_COUNT                                        = "AriusStatsClusterTaskInfoEsDao/aggClusterTaskCount";
 
     /**
+     * 获取集群各个节点上的任务总耗时
+     */
+    public static final String AGG_CLUSTER_NODES_TASK_COST                                   = "AriusStatsClusterTaskInfoEsDao/aggClusterNodesTaskCost";
+
+    /**
      * 获取集群节点task统计信息
      */
     public static final String GET_AGG_CLUSTER_NODE_TASK_INFO                                = "AriusStatsClusterTaskInfoEsDao/getAggClusterPhyNodesTaskInfo";
@@ -843,4 +870,48 @@ public class DslsConstant {
      * 获取指定集群节点有task信息的时间戳
      */
     public static final String GET_HAS_CLUSTER_NODE_TASK_DATA_TIME                           = "AriusStatsClusterTaskInfoEsDao/getHasNodeTaskInfoTime";
+
+    /***********************************************   AriusStatsDashBoardInfoESDAO   **************************************************************/
+    public static final String FETCH_CLUSTER_HEALTH_INFO                                     = "AriusStatsDashBoardInfoESDAO/fetchClusterHealthInfo";
+
+    public static final String GET_HAS_DASHBOARD_METRICS_DATA_TIME                           = "AriusStatsDashBoardInfoESDAO/getHasDashboardMetricInfoTime";
+
+    /**
+     * 根据一级指标类型构建最终查询dsl（针对cluster\clusterThreadPoolQueue维度指标）
+     */
+    public static final String GET_AGG_DASHBOARD_CLUSTER_TOP_NAME_INFO                       = "AriusStatsDashBoardInfoESDAO/getAggDashboardClusterTopNameInfo";
+    /**
+     * 根据一级指标类型构建最终查询dsl（针对非cluster维度指标）
+     */
+    public static final String GET_AGG_DASHBOARD_NO_CLUSTER_TOP_NAME_INFO                    = "AriusStatsDashBoardInfoESDAO/getAggDashboardNoClusterTopNameInfo";
+
+    /**
+     * 获取filter agg 的过滤片段
+     */
+    public static final String GET_AGG_FILTER_FRAGMENT                                       = "AriusStatsDashBoardInfoESDAO/getAggFilterFragment";
+
+    /**
+     * 根据一级指标类型构建最终非负指标类型的查询dsl全文
+     */
+    public static final String GET_AGG_DASHBOARD_METRIC_EFFICIENT_TOP_NAME_INFO              = "AriusStatsDashBoardInfoESDAO/getAggDashboardSingleMetricEfficientTopNameInfo";
+
+    /**
+     * 获取top Dashboard维度统计信息(针对cluster维度、clusterThreadPoolQueue维度指标)
+     */
+    public static final String GET_TOP_DASHBOARD_CLUSTER_AGG_METRICS_INFO                    = "AriusStatsDashBoardInfoESDAO/getTopDashboardClusterAggMetricsInfo";
+
+    /**
+     * 获取top Dashboard维度统计信息(针对非cluster维度指标)
+     */
+    public static final String GET_TOP_DASHBOARD_NO_CLUSTER_AGG_METRICS_INFO                    = "AriusStatsDashBoardInfoESDAO/getTopDashboardNoClusterAggMetricsInfo";
+
+    /**
+     * 获取List类型 Dashboard维度统计信息(带标识的类型)
+     */
+    public static final String FETCH_LIST_FLAG_METRIC                                        = "AriusStatsDashBoardInfoESDAO/fetchListFlagMetric";
+
+    /**
+     * 获取List类型 Dashboard维度统计信息(带数据值的类型)
+     */
+    public static final String FETCH_LIST_VALUE_METRIC                                       = "AriusStatsDashBoardInfoESDAO/fetchListValueMetrics";
 }

@@ -1,28 +1,71 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.MetricsContentVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by linyunan on 2021-08-05
  */
 public class MetricsUtils {
+    /**
+     * 突增定义倍数 上个时间间隔请求数的两倍，
+     * 例子: 上一个时间间隔是 1000r/s  当前时间间隔是 2500 r/s 超过2000, 则定义为突增
+     */
+    private static final double UPRUSH_THRESHOLD = 2.0;
+
     private static final long ONE_HOUR   = 60 * 60 * 1000L;
     private static final long ONE_DAY    = 24 * 60 * 60 * 1000L;
     private static final long SEVEN_DAY  = 7 * 24 * 60 * 60 * 1000L;
     private static final char COLON      = ':';
     private static final char SPACE      = ' ';
 
+    /**
+     *   指标看板返回值中的时间间隔:
+     *   1小时            1min为一时间分片
+     *   1小时 ~ 24小时   20min为一时间分片
+     *   1天到7天         1h为一时间分片
+     *   7天以后          1h为一时间分片
+     * @param intervalTime     起始结束时间差值
+     * @return  返回dsl时间分隔值
+     */
     public static String getInterval(Long intervalTime) {
         if (intervalTime > 0 && intervalTime <= ONE_HOUR) {
             return Interval.ONE_MIN.getStr();
+        } else if (intervalTime > ONE_HOUR && intervalTime <= ONE_DAY) {
+            return Interval.TWENTY_MIN.getStr();
+        } else if (intervalTime > ONE_DAY && intervalTime <= SEVEN_DAY) {
+            return Interval.ONE_HOUR.getStr();
+        } else if (intervalTime > SEVEN_DAY) {
+            return Interval.ONE_HOUR.getStr();
+        } else {
+            return Interval.ONE_HOUR.getStr();
+        }
+    }
+
+    /**
+     *   dashboard返回值中的时间间隔:
+     *   1小时            5min为一时间分片
+     *   1小时 ~ 24小时   20min为一时间分片
+     *   1天到7天         1h为一时间分片
+     *   7天以后          1h为一时间分片
+     * @param intervalTime     起始结束时间差值
+     * @return  返回dsl时间分隔值
+     */
+    public static String getIntervalForDashBoard(Long intervalTime) {
+        if (intervalTime > 0 && intervalTime <= ONE_HOUR) {
+            return Interval.FIVE_MIN.getStr();
         } else if (intervalTime > ONE_HOUR && intervalTime <= ONE_DAY) {
             return Interval.TWENTY_MIN.getStr();
         } else if (intervalTime > ONE_DAY && intervalTime <= SEVEN_DAY) {
@@ -71,81 +114,6 @@ public class MetricsUtils {
         }
     }
 
-    /**
-     * 获取时刻所属的聚合区间, 如按20m间隔, 则聚合区间在0 ~ 20 , 20 ~ 40 , 40 ~ 60
-     * @param startTime  开始时间
-     * @param endTime    结束时间
-     * @param delayTime  针对分钟级别间隔的延迟时间 20分钟和小时级别不做延迟
-     * @return
-     */
-    public static Tuple<Long, Long> getSortInterval(Long startTime, Long endTime, Long delayTime) {
-        String dateTimeStr = DateTimeUtil.getDateTimeStr(endTime);
-        String[] dateTimeArr = StringUtils.split(dateTimeStr, SPACE);
-        String date         = null;
-        String startHourStr = null;
-        String endHourStr;
-        String startMinuteStr = null;
-        String endMinuteStr   = null;
-        if (dateTimeArr.length > 0) {
-            date = dateTimeArr[0];
-            String time = dateTimeArr[1];
-            String[] timeArr = StringUtils.split(time, COLON);
-            if (timeArr.length > 1) {
-                startHourStr   = timeArr[0];
-                startMinuteStr = timeArr[1];
-            }
-        }
-
-        String interval = getInterval(endTime - startTime);
-        if (Interval.ONE_MIN.getStr().equals(interval)) {
-            endHourStr   = startHourStr;
-            endMinuteStr = String.valueOf(Integer.valueOf(startMinuteStr) + 1);
-            return buildIntervalTuple(date, startHourStr, endHourStr, startMinuteStr, endMinuteStr, delayTime);
-        } else if (Interval.TWENTY_MIN.getStr().equals(interval)) {
-            int startMinute = Integer.valueOf(startMinuteStr);
-            endHourStr = startHourStr;
-            if (0 <= startMinute && startMinute <= 20) {
-                startMinuteStr = "00";
-                endMinuteStr   = "20";
-            } else if (20 < startMinute && startMinute <= 40) {
-                startMinuteStr = "20";
-                endMinuteStr   = "40";
-            } else if (40 < startMinute && startMinute <= 59) {
-                startMinuteStr = "40";
-                endMinuteStr   = "60";
-            }
-            return buildIntervalTuple(date, startHourStr, endHourStr, startMinuteStr, endMinuteStr,null);
-        } else if (Interval.ONE_HOUR.getStr().equals(interval)) {
-            endHourStr = String.valueOf(Integer.valueOf(startHourStr) + 1);
-            startMinuteStr = "00";
-            endMinuteStr   = "00";
-            return buildIntervalTuple(date, startHourStr, endHourStr, startMinuteStr, endMinuteStr,null);
-        } else {
-            return new Tuple<>();
-        }
-    }
-
-    public static Tuple<Long, Long> buildIntervalTuple(String date, String startHourStr, String endHourStr,
-                                                       String startMinuteStr, String endMinuteStr, Long delayTime) {
-        Tuple<Long, Long> t           = new Tuple<>();
-        StringBuilder     startDateSb = new StringBuilder();
-        StringBuilder     endDateSb   = new StringBuilder();
-
-        startDateSb.append(date).append(" ").append(startHourStr).append(":").append(startMinuteStr).append(":").append("00");
-        endDateSb.append(date).append(" ").append(endHourStr).append(":").append(endMinuteStr).append(":").append("00");
-        Long startTime = DateTimeUtil.getTimeEpochMilli(startDateSb.toString());
-        Long endTime = DateTimeUtil.getTimeEpochMilli(endDateSb.toString());
-
-        if(null != delayTime) {
-            startTime = startTime - delayTime;
-            endTime   = endTime   - delayTime;
-        }
-
-        t.setV1(startTime);
-        t.setV2(endTime);
-        return t;
-    }
-
     public static Double getDoubleValuePerMin(String interval, String value) {
         if (Interval.ONE_MIN.getStr().equals(interval)) {
             return Double.valueOf(value);
@@ -155,6 +123,16 @@ public class MetricsUtils {
             return Double.valueOf(value) / 60.00;
         }
         return Double.valueOf(value);
+    }
+
+
+    /**
+     * 判断是否需要单位转化，一般以_count结尾的指标都是累加的结果，需要单位转化。
+     * eg: 20分钟聚合的指标数据/20 = 个/min
+     * @return
+     */
+    public static boolean needConvertUnit(String aggKey) {
+        return aggKey.endsWith("_count");
     }
 
     /**
@@ -192,34 +170,30 @@ public class MetricsUtils {
             .map(d -> Double.valueOf(d.toString())).orElse(0.0);
     }
 
-    public enum MetricsTimeType {
-
-                                 MINUTE("minute"), TWENTY_MINUTES("twentyMinutes"), HOUR("hour");
-
-        private String str;
-
-        private MetricsTimeType(String str) {
-            this.str = str;
-        }
-
-        public String getStr() {
-            return str;
-        }
-
-        public static MetricsUtils.MetricsTimeType getByStr(String str) {
-            for (MetricsUtils.MetricsTimeType type : MetricsUtils.MetricsTimeType.values()) {
-                if (type.str.equalsIgnoreCase(str)) {
-                    return type;
-                }
+    public static List<VariousLineChartMetricsVO> joinDuplicateTypeVOs(List<VariousLineChartMetricsVO> duplicatedVOs) {
+        List<VariousLineChartMetricsVO> result = new ArrayList<>();
+        Map<String, List<MetricsContentVO>> chartMetricsMap = new HashMap<>();
+        for (VariousLineChartMetricsVO vo : duplicatedVOs) {
+            if (!chartMetricsMap.containsKey(vo.getType())) {
+                chartMetricsMap.put(vo.getType(), vo.getMetricsContents());
+            } else {
+                chartMetricsMap.get(vo.getType()).addAll(vo.getMetricsContents());
             }
-
-            return null;
         }
+        for (Map.Entry<String, List<MetricsContentVO>> entry : chartMetricsMap.entrySet()) {
+            VariousLineChartMetricsVO variousLineChartMetricsVO = new VariousLineChartMetricsVO();
+            variousLineChartMetricsVO.setType(entry.getKey());
+            variousLineChartMetricsVO.setMetricsContents(entry.getValue());
+            result.add(variousLineChartMetricsVO);
+        }
+        return result;
     }
 
     public enum Interval {
-
-                          ONE_MIN("1m"), TWENTY_MIN("20m"), ONE_HOUR("1h");
+        ONE_MIN("1m"),
+        FIVE_MIN("5m"),
+        TWENTY_MIN("20m"),
+        ONE_HOUR("1h");
 
         private String str;
 
@@ -240,6 +214,25 @@ public class MetricsUtils {
 
             return null;
         }
+    }
+
+    /**
+     * 具体计算突增逻辑处
+     * @param currentTimeValue      当前采集值
+     * @param lastTimeValue         上次采集值
+     * @return
+     */
+    public static Double computerUprushNum(Double currentTimeValue, Double lastTimeValue) {
+        if (null == lastTimeValue || null == currentTimeValue) { return 0d;}
+
+        if (0 == lastTimeValue && 0 > currentTimeValue) {
+            return currentTimeValue;
+        }
+        if (0 == lastTimeValue && 0 < currentTimeValue) {
+            return 0d;
+        }
+
+        return (currentTimeValue / lastTimeValue) >= UPRUSH_THRESHOLD ? currentTimeValue : 0d;
     }
 
 }

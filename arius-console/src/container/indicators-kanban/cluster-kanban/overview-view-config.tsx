@@ -108,7 +108,7 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[2],
   },
   bigIndices: {
-    name: "大于20亿文档数索引列表",
+    name: "大于10亿文档数索引列表",
     classify: indexConfigClassifyList[2],
   },
   invalidNodes: {

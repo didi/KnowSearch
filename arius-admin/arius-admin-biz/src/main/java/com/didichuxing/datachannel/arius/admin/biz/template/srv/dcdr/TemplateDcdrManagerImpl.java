@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.PLATFORM_OP;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.MASTER;
@@ -21,6 +20,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.google.common.base.Strings;
 import org.apache.commons.collections4.CollectionUtils;
@@ -175,11 +176,10 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
     @PostConstruct
     public void init() {
         ariusTaskThreadPool = new AriusTaskThreadPool();
-        ariusTaskThreadPool.init(10, "TemplateDcdrManagerImpl");
+        ariusTaskThreadPool.init(10, "TemplateDcdrManagerImpl", 10000);
     }
 
-    private static final FutureUtil<Void>  BATCH_DCDR_FUTURE_UTIL   = FutureUtil.initBySystemAvailableProcessors(
-            "BATCH_DCDR_FUTURE_UTIL",100);
+    private static final FutureUtil<Void>  BATCH_DCDR_FUTURE_UTIL   = FutureUtil.init("BATCH_DCDR_FUTURE_UTIL",10,10,100);
 
     /**
      * 创建dcdr
@@ -204,16 +204,34 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
 
         IndexTemplatePhy slavePhyTemplate = templateLogicWithPhysical.getSlavePhyTemplate();
         if (null != slavePhyTemplate) {
-            //2.1删除dcdr链路
+            //1.1删除dcdr链路
             Result<Void> deleteDcdrResult = deleteDcdr(templateId, operator);
             if (deleteDcdrResult.failed()) {return deleteDcdrResult;}
 
-            //2.2清理slave模板
+            //1.2清理slave模板
             Result<Void> delTemplateResult = templatePhyService.delTemplate(slavePhyTemplate.getId(), operator);
             if (delTemplateResult.failed()) { return delTemplateResult; }
         }
 
-        // 2. 执行复制流程
+        // 2. 校验目标集群合法性
+        ClusterPhy targetClusterPhy = clusterPhyService.getClusterByName(targetCluster);
+        if (null == targetClusterPhy) { return Result.buildFail(String.format("目标集群[%s]不存在", targetCluster));}
+        IndexTemplatePhy masterPhyTemplate = templateLogicWithPhysical.getMasterPhyTemplate();
+        if (null == masterPhyTemplate) {
+            return Result.buildFail(String.format("模板Id[%s]不存在", templateId));
+        }
+
+        if (AriusObjUtils.isBlack(masterPhyTemplate.getCluster())) {
+            return Result.buildFail(String.format("模板Id[%s]所在集群[%s]不存在", templateId, masterPhyTemplate.getCluster()));
+        }
+
+        ClusterPhy sourceClusterPhy = clusterPhyService.getClusterByName(masterPhyTemplate.getCluster());
+        if (null == sourceClusterPhy) { return Result.buildFail(String.format("原集群[%s]不存在", masterPhyTemplate.getCluster()));}
+        if (null != sourceClusterPhy.getEsVersion() && !sourceClusterPhy.getEsVersion().equals(targetClusterPhy.getEsVersion())){
+            return Result.buildFail("主从集群版本必须一致");
+        }
+
+        // 3. 执行复制流程
         TemplatePhysicalCopyDTO templatePhysicalCopyDTO = buildTemplatePhysicalCopyDTO(templateId, targetCluster, rack);
         if (null == templatePhysicalCopyDTO) {
             return Result.buildFail(TEMPLATE_NO_EXIST);
@@ -1652,7 +1670,6 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
         if (DcdrStatusEnum.RUNNING.getCode().equals(dcdrTasksDetail.getState())) {
             taskForDcdrSwitch.setStatus(WorkTaskStatusEnum.RUNNING.getStatus());
         }
-        taskForDcdrSwitch.setUpdateTime(new Date());
 
         // 解决分布式部署由于时序不一致带来更新不一致的问题
         Result<WorkTask> workTaskResult = workTaskManager.getById(taskForDcdrSwitch.getId());
@@ -1660,6 +1677,13 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
             && WorkTaskStatusEnum.SUCCESS.getStatus().equals(workTaskResult.getData().getStatus())) {
             return;
         }
+
+        // 这里由于多线程更新，可能会出现不可重复读的问题，所以这里加上了一个判断
+        // 临时打个补丁，等待下一个版本ecm 重构
+        if (workTaskResult.getData().getUpdateTime().after(taskForDcdrSwitch.getUpdateTime())) {
+            return;
+        }
+        taskForDcdrSwitch.setUpdateTime(new Date());
 
         workTaskManager.updateTask(taskForDcdrSwitch);
     }

@@ -48,7 +48,12 @@ public enum AriusStatsEnum {
     /**
      * dcdr维度
      */
-    DCDR_INFO("dcdr_info");
+    DCDR_INFO("dcdr_info"),
+
+    /**
+     * dashboard
+     */
+    DASHBOARD_INFO("dashboard_info");
 
     private String type;
 

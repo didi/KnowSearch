@@ -73,8 +73,16 @@ const Container: React.FC<propsType> = (props) => {
         const span = typeof (grid) === 'number' ?
             Array(itemNumber).fill(grid || Math.round(24 / itemNumber)) : grid;
 
-        return items.map((child: React.ReactNode, index: number) =>
-            <Col span={span[index]} key={index}>{child}</Col>
+        return items.map((child: React.ReactNode, index: number) => {
+            try {
+                if ((child as any)?.key?.indexOf('health') !== -1) {
+                    return<Col span={16} key={index}>{child}</Col>
+                }
+            } catch (err) {
+                console.log(err);
+            }
+            return<Col span={span[index]} key={index}>{child}</Col>
+        }
         )
     };
 

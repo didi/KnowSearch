@@ -22,8 +22,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 const PhysicsClusterBox = (props) => {
   const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject]: any = useState({
-    from: 0,
+  const [queryFormObject, setqueryFormObject]: any = useState({
+    current: 1,
     size: 10,
   });
   const [data, setData] = useState([]);
@@ -31,7 +31,7 @@ const PhysicsClusterBox = (props) => {
 
   React.useEffect(() => {
     reloadData();
-  }, [department, queryFromObject]);
+  }, [department, queryFormObject]);
 
   const reloadData = () => {
     const app = JSON.parse(localStorage.getItem("current-project"));
@@ -40,14 +40,14 @@ const PhysicsClusterBox = (props) => {
     }
     setloading(true);
     const Params: IClusterList = {
-      from: queryFromObject.from,
-      size: queryFromObject.size,
-      authType: queryFromObject.currentAppAuth,
-      health: queryFromObject.health,
-      cluster: queryFromObject.cluster,
-      esVersion: queryFromObject.esVersion,
-      sortTerm: queryFromObject.sortTerm,
-      orderByDesc: queryFromObject.orderByDesc,
+      page: queryFormObject.current,
+      size: queryFormObject.size,
+      authType: queryFormObject.currentAppAuth,
+      health: queryFormObject.health,
+      cluster: queryFormObject.cluster,
+      esVersion: queryFormObject.esVersion,
+      sortTerm: queryFormObject.sortTerm,
+      orderByDesc: queryFormObject.orderByDesc,
     };
     getOpPhysicsClusterList(Params)
       .then((res) => {
@@ -83,7 +83,7 @@ const PhysicsClusterBox = (props) => {
         delete result[key];
       }
     }
-    setqueryFromObject({ ...result, from: 0, size: 10 });
+    setqueryFormObject({ ...result, size: queryFormObject.size, current: 1 });
   };
 
   const getModalData = () => {
@@ -166,7 +166,7 @@ const PhysicsClusterBox = (props) => {
           break;
       }
     }
-    setqueryFromObject((state) => {
+    setqueryFormObject((state) => {
       if (!sorter.order) {
         delete state.sortTerm;
         delete state.orderByDesc;
@@ -175,7 +175,7 @@ const PhysicsClusterBox = (props) => {
       return {
         ...state,
         ...sorterObject,
-        from: (pagination.current - 1) * pagination.pageSize,
+        current: pagination.current,
         size: pagination.pageSize,
       };
     });
@@ -205,12 +205,15 @@ const PhysicsClusterBox = (props) => {
             dataSource={data}
             attrs={{
               onChange: handleChange,
+              scroll: {
+                x: true
+              }
             }}
             key={JSON.stringify({
-              authType: queryFromObject.authType,
-              health: queryFromObject.health,
-              cluster: queryFromObject.cluster,
-              esVersion: queryFromObject.esVersion,
+              authType: queryFormObject.authType,
+              health: queryFormObject.health,
+              cluster: queryFormObject.cluster,
+              esVersion: queryFormObject.esVersion,
             })}
             columns={getPhysicsColumns(props.setModalId, props.setDrawerId, reloadData)}
             reloadData={reloadData}
@@ -222,6 +225,7 @@ const PhysicsClusterBox = (props) => {
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
               showTotal: (total) => `共 ${total} 条`,
+              current: queryFormObject.current
             }}
           />
         </div>

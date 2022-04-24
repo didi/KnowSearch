@@ -225,6 +225,17 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
+    public List<String> listAllClusterNameList() {
+        List<String> clusterNameList = Lists.newArrayList();
+        try {
+            clusterNameList.addAll(clusterDAO.listAllName());
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterPhyServiceImpl||method=listAllClusterNameList||errMsg={}",e.getMessage(), e);
+        }
+        return clusterNameList;
+    }
+
+    @Override
     public List<ClusterPhy> listClustersByNames(List<String> names) {
         if (CollectionUtils.isEmpty(names)) {
             return new ArrayList<>();
@@ -356,7 +367,9 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public ClusterPhy getClusterById(Integer phyClusterId) {
-        return ConvertUtil.obj2Obj(clusterDAO.getById(phyClusterId), ClusterPhy.class);
+        ClusterPO clusterPO = clusterDAO.getById(phyClusterId);
+        ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
+        return clusterPhy;
     }
 
     /**
@@ -436,7 +449,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         List<ClusterPO> clusterPOS = Lists.newArrayList();
         try {
             clusterPOS = clusterDAO.pagingByCondition(param.getCluster(), param.getHealth(),
-                    param.getEsVersion(), param.getFrom(), param.getSize(), sortTerm, sortType);
+                    param.getEsVersion(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(), e);
         }
@@ -659,7 +672,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             param.setWriteAction(DEFAULT_WRITE_ACTION);
         }
 
-        if (StringUtils.isBlank(param.getTemplateSrvs())){
+        if (param.getTemplateSrvs() == null){
             param.setTemplateSrvs(TemplateServiceEnum.getDefaultSrvs());
         }
 

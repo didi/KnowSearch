@@ -44,10 +44,7 @@ const filter = (init: IInit) => (res: IRes) => {
   if (init.returnRes) {
     return res;
   }
-  return res.data ? res.data : {
-    message: '提示',
-    description: res.message || '服务错误，请重试！',
-  };
+  return res.data;
 };
 
 interface IInit extends RequestInit {

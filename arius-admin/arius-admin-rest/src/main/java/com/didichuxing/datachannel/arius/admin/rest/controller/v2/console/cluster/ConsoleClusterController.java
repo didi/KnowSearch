@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.cluster;
 
+import java.util.List;
+import java.util.Set;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ConsoleLogicClusterDTO;
@@ -7,8 +10,8 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -22,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Set;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
@@ -49,7 +50,7 @@ public class ConsoleClusterController {
     @GetMapping("/listAll")
     @ResponseBody
     @ApiOperation(value = "获取平台所有的集群列表", notes = "")
-    public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(@RequestParam("appId") Integer appId) {
+    public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(@RequestParam(value = "appId",required = false) Integer appId) {
         return clusterLogicManager.getDataCenterLogicClusters(appId);
     }
 
@@ -67,10 +68,10 @@ public class ConsoleClusterController {
     @ResponseBody
     @ApiOperation(value = "用户编辑集群接口", notes = "支持修改责任人、备注、成本部门")
     public Result<Void> editLogicClusterConfig(HttpServletRequest request,
-                                         @RequestBody ConsoleLogicClusterDTO resourceLogicDTO) {
-        return clusterLogicService
-                .editClusterLogic(ConvertUtil.obj2Obj(resourceLogicDTO, ESLogicClusterDTO.class),
-            HttpRequestUtils.getOperator(request));
+                                               @RequestBody ConsoleLogicClusterDTO resourceLogicDTO) {
+        return clusterLogicManager
+                .editLogicCluster(ConvertUtil.obj2Obj(resourceLogicDTO, ESLogicClusterDTO.class),
+                        HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/offlineInfo")

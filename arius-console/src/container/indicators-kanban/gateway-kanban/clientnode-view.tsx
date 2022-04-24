@@ -117,11 +117,12 @@ export const ClientNodeView = memo(() => {
         clientNodeIp,
       );
     },
-    [startTime, endTime, topNu, nodeIp, clientNodeIp]
+    [startTime, endTime, topNu, nodeIp, clientNodeIp, isUpdate]
   );
 
   const getAllAsyncViewData = async (metricsTypes) => {
     try {
+      setIsLoading(true);
       let res = await getAsyncViewData(metricsTypes);
       // 去空
       res = res.filter(item => {
@@ -204,6 +205,8 @@ export const ClientNodeView = memo(() => {
           }
         }}
         value={clientNodeIp || null}
+        showSearch
+        filterOption={(val, option) => { return option.children.includes(val.trim()) }}
         style={{ marginRight: 8, width: 200 }}
         allowClear
       >
@@ -211,7 +214,7 @@ export const ClientNodeView = memo(() => {
       </Select>
     );
   };
-  
+
   const renderConfig = () => {
     return (
       <IndexConfig
@@ -237,9 +240,9 @@ export const ClientNodeView = memo(() => {
         </div>
       </div>
       <div className={`${classPrefix}-overview-content-line`}>
-      <DragGroup
+        <DragGroup
           dragContainerProps={{
-            onSortEnd:  sortEnd,
+            onSortEnd: sortEnd,
             axis: "xy",
             distance: 100
           }}
@@ -249,14 +252,14 @@ export const ClientNodeView = memo(() => {
           }}
         >
           {metricsTypes.map((item, index) => (
-          <Line
-            key={`${item}`}
-            title={indexConfigData[item]?.title()}
-            index={`${item}_${index}`}
-            option={viewData[index] || {}}
-            isLoading={isLoading}
-          />
-        ))}
+            <Line
+              key={`${item}`}
+              title={indexConfigData[item]?.title()}
+              index={`${item}_${index}`}
+              option={viewData[index] || {}}
+              isLoading={isLoading}
+            />
+          ))}
         </DragGroup>
       </div>
     </>

@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
@@ -18,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateL
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -36,11 +38,14 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +92,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
 
     @Autowired
     private CacheSwitch                                    cacheSwitch;
+    private Cache<String, List<?>> templatePhyListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
      * 条件查询
@@ -151,9 +157,15 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
     }
 
     @Override
-    public Result<Long> insert(IndexTemplatePhysicalDTO param) {
+    public Result<Long> insert(IndexTemplatePhysicalDTO param) throws AdminOperateException {
         TemplatePhysicalPO newTemplate = ConvertUtil.obj2Obj(param, TemplatePhysicalPO.class);
-        boolean succ = (1 == indexTemplatePhysicalDAO.insert(newTemplate));
+        boolean succ;
+        try {
+            succ = (1 == indexTemplatePhysicalDAO.insert(newTemplate));
+        } catch (DuplicateKeyException e) {
+            LOGGER.warn("class=TemplatePhyServiceImpl||method=insert||errMsg={}", e.getMessage());
+            throw new AdminOperateException(String.format("保存物理模板【%s】失败：物理模板已存在！", newTemplate.getName()));
+        }
         return Result.build(succ,newTemplate.getId());
     }
 
@@ -482,6 +494,15 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
         return ConvertUtil.list2List(indexTemplatePhysicalDAO.listAll(), IndexTemplatePhy.class);
     }
 
+    @Override
+    public List<IndexTemplatePhy> listTemplateWithCache() {
+        try {
+            return (List<IndexTemplatePhy>) templatePhyListCache.get("listTemplate", this::listTemplate);
+        } catch (Exception e) {
+            return listTemplate();
+        }
+    }
+
     /**
      * 获取IndexTemplatePhysicalWithLogic
      *
@@ -491,6 +512,15 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
     public List<IndexTemplatePhyWithLogic> listTemplateWithLogic() {
         List<TemplatePhysicalPO> templatePhysicalPOS = indexTemplatePhysicalDAO.listAll();
         return batchBuildTemplatePhysicalWithLogic(templatePhysicalPOS);
+    }
+
+    @Override
+    public List<IndexTemplatePhyWithLogic> listTemplateWithLogicWithCache() {
+        try {
+            return (List<IndexTemplatePhyWithLogic>) templatePhyListCache.get("listTemplateWithLogic", this::listTemplateWithLogic);
+        } catch (Exception e) {
+            return listTemplateWithLogic();
+        }
     }
 
     @Override
@@ -619,6 +649,16 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
         }
 
         return getNormalTemplateByClusterAndRack(region.getPhyClusterName(), RackUtils.racks2List(region.getRacks()));
+    }
+
+    @Override
+    public Map<Integer, Integer> getAllLogicTemplatesPhysicalCount() {
+        Map<Integer, Integer> map = new HashMap<>();
+        List<TemplatePhysicalPO> list = indexTemplatePhysicalDAO.countListByLogicId();
+        if (CollectionUtils.isNotEmpty(list)) {
+            map = list.stream().collect(Collectors.toMap(TemplatePhysicalPO::getLogicId, o -> 1, Integer::sum));
+        }
+        return map;
     }
 
 

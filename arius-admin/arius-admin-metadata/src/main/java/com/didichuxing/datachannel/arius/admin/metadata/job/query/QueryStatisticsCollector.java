@@ -91,9 +91,9 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
     private static final Set<String> skipIndexNameSet = Sets.newHashSet("_aliases", "_mapping", ".arius_info",
             "logstash-*/_mapping/field/*", "_search/scroll", "_sql/explain", "_cluster/health");
 
+    private static final FutureUtil<Map<Integer, Map<String, LongAdder>>> futureUtil = FutureUtil.init("QueryStatisticsCollector",10,20,100);
 
-    private static final FutureUtil<Map<Integer, Map<String, LongAdder>>> futureUtil = FutureUtil.init("QueryStatisticsCollector");
-
+    private static final Integer TIMEOUT_SECOND = 60 * 60 * 2;
     /**
      * 处理任务
      *
@@ -195,7 +195,6 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
                     gatewayJoinClusterName, gatewayJoinIndexName);
             primaryShardNumber = 40;
         }
-
         // 按shard个数任务切分
         for (int i = 0; i < primaryShardNumber; ++i) {
             futureUtil.callableTask(new QueryStatisticsCollectorCallable(date, i));
@@ -205,7 +204,7 @@ public class QueryStatisticsCollector extends AbstractMetaDataJob {
 
         Map<Integer/*appId*/, Map<String/*indexName*/, Long/*access indexName count*/>> map = Maps.newTreeMap();
 
-        List<Map<Integer/*appId*/, Map<String/*indexName*/, LongAdder/*access indexName count*/>>> rets = futureUtil.waitResult();
+        List<Map<Integer/*appId*/, Map<String/*indexName*/, LongAdder/*access indexName count*/>>> rets = futureUtil.waitResult(TIMEOUT_SECOND);
 
         // 汇聚每个shard统计的结果
         collectShardCountResult(map, rets);

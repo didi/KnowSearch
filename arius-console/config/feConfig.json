@@ -1,9 +1,9 @@
 {
   "header": {
     "mode": "complicated",
-    "logo": "../../assets/es-logo.png",
+    "logo": "../../assets/nav-logo.png",
     "userIconSrc": "../../assets/avatars.png",
-    "subTitle": "LogiEM",
+    "subTitle": "KnowSearch",
     "theme": "light",
     "rightEle": [
       {

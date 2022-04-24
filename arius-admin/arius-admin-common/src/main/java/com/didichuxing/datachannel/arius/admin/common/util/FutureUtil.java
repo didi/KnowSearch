@@ -134,6 +134,46 @@ public class FutureUtil<T> {
         }
     }
 
+    /**
+     * 带有错误容忍的waitExecute，当连续有超过continuousFailThres 个任务失败时
+     * 则认为这一堆任务不稳定，终止并清空
+     * @param timeOutSeconds 单个任务超时上限
+     * @param continuousFailThres 连续失败任务数量上限
+     */
+    public void waitExecuteWithErrorTolerance(long timeOutSeconds, int continuousFailThres) {
+        Long currentThreadId = Thread.currentThread().getId();
+        List<Future<T>> currentFutures = futuresMap.get(currentThreadId);
+        boolean lastFail = false;
+        int failCnt = 0;
+        if(CollectionUtils.isEmpty(currentFutures)){return;}
+        for (Future<T> f : currentFutures) {
+            try {
+                if (lastFail && failCnt >= continuousFailThres) {
+                    throw new Exception("exceed error tolerance upper bound");
+                }
+                f.get(timeOutSeconds, TimeUnit.SECONDS);
+                lastFail = false;
+                failCnt = 0;
+            } catch (Exception e) {
+                lastFail = true;
+                failCnt += 1;
+                f.cancel(true);
+                LOGGER.error("class=FutureUtil||method=waitExecute||msg=exception", e);
+            }finally {
+                currentFutures.remove(f);
+            }
+        }
+
+        if(CollectionUtils.isEmpty(currentFutures)){
+            futuresMap.remove(currentThreadId);
+        }
+
+        if(!EnvUtil.isOnline()){
+            LOGGER.info("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!",
+                    name, currentFutures.size());
+        }
+    }
+
     public void waitExecute() {
         waitExecute(30);
     }

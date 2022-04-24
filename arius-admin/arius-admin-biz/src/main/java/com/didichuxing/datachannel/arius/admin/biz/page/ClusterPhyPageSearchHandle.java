@@ -18,7 +18,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClu
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -79,7 +79,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
                 return Result.buildParamIllegal("物理集群名称不允许带类似*, ?等通配符查询");
             }
 
-            if (null != clusterPhyConditionDTO.getSortTerm() && !SortEnum.isExit(clusterPhyConditionDTO.getSortTerm())) {
+            if (null != clusterPhyConditionDTO.getSortTerm() && !SortTermEnum.isExit(clusterPhyConditionDTO.getSortTerm())) {
                 return Result.buildParamIllegal(String.format("暂且不支持排序字段[%s]", clusterPhyConditionDTO.getSortTerm()));
             }
 
@@ -103,7 +103,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
         // 1. 获取管理/读写/读/无权限的物理集群信息
         List<ClusterPhy> appAuthClusterPhyList = clusterPhyManager.getClusterPhyByAppIdAndAuthType(appId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthClusterPhyList)) {
-            return PaginationResult.buildSucc();
+            return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
 
         // 2. 过滤出符合条件的列表
@@ -117,11 +117,9 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
         // 4. 根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
         sort(meetConditionClusterPhyListVOList, condition.getSortTerm(), condition.getOrderByDesc());
 
-        // 5. 最后页临界点处理
-        long size = getLastPageSize(condition, meetConditionClusterPhyList.size());
+        // 5. 内存分页
+        List<ConsoleClusterPhyVO> fuzzyAndLimitConsoleClusterPhyVOList  = filterFullDataByPage(meetConditionClusterPhyListVOList, pageDTO);
 
-        List<ConsoleClusterPhyVO> fuzzyAndLimitConsoleClusterPhyVOList  = meetConditionClusterPhyListVOList.subList(condition.getFrom().intValue(), (int)size);
-        
         // 6. 设置权限
         fuzzyAndLimitConsoleClusterPhyVOList.forEach(consoleClusterPhyVO -> consoleClusterPhyVO.setCurrentAppAuth(condition.getAuthType()));
 
@@ -138,7 +136,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
         }
         futureUtil.waitExecute();
         
-        return PaginationResult.buildSucc(fuzzyAndLimitConsoleClusterPhyVOList, hitTotal, condition.getFrom(), condition.getSize());
+        return PaginationResult.buildSucc(fuzzyAndLimitConsoleClusterPhyVOList, hitTotal, condition.getPage(), condition.getSize());
     }
 
     @Override
@@ -150,7 +148,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
         List<ConsoleClusterPhyVO> consoleClusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList, appId);
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
-        return PaginationResult.buildSucc(consoleClusterPhyVOList, totalHit, condition.getFrom(), condition.getSize());
+        return PaginationResult.buildSucc(consoleClusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
     }
     
     /****************************************private***********************************************/
@@ -199,25 +197,28 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     }
 
     /**
-     * 根据条件排序
-     * @param meetConditionClusterPhyListVOList
-     * @param sortTerm
-     * @param orderByDesc
+     * 对条件匹配后的结果集进行排序
+     * @param meetConditionClusterPhyListVOList      条件匹配结果集
+     * @param sortTerm                               排序字段
+     * @see   SortTermEnum                           支持的排序字段枚举
+     * @param orderByDesc                            是否降序排序 true 是 false 否
      */
     private void sort(List<ConsoleClusterPhyVO> meetConditionClusterPhyListVOList, String sortTerm, Boolean orderByDesc) {
+        // 使用默认排序
         if (null == sortTerm) {
             Collections.sort(meetConditionClusterPhyListVOList);
             return;
         }
 
         meetConditionClusterPhyListVOList.sort((o1, o2) -> {
-            if (SortEnum.DISK_FREE_PERCENT.getType().equals(sortTerm)) {
+            // 可在此添加需要排序的项
+            if (SortTermEnum.DISK_FREE_PERCENT.getType().equals(sortTerm)) {
                 return orderByDesc ? o2.getDiskUsagePercent().compareTo(o1.getDiskUsagePercent()) :
                         o1.getDiskUsagePercent().compareTo(o2.getDiskUsagePercent());
             }
 
-            // 可在此添加需要排序的项
-            if (SortEnum.ACTIVE_SHARD_NUM.getType().equals(sortTerm)) {
+
+            if (SortTermEnum.ACTIVE_SHARD_NUM.getType().equals(sortTerm)) {
                 return orderByDesc ? o2.getActiveShardNum().compareTo(o1.getActiveShardNum()) :
                         o1.getActiveShardNum().compareTo(o2.getActiveShardNum());
             }

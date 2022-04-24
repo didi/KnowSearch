@@ -82,11 +82,15 @@ export const unitMap = {
     name: "个/min",
     formatter: toFixedNum,
   },
+  characterMin: {
+    name: "字符/min",
+    formatter: toFixedNum,
+  },
 };
 
 // 图表标题
 const title = function () {
-  const unit = this.unit.name ? `(${this.unit.name})` : "";
+  const unit = this.unit?.name ? `(${this.unit?.name})` : "";
   return this.name + unit;
 }
 
@@ -172,6 +176,8 @@ const markLine = (val1 = 50000, val2 = 100000) => ({
 
 // 图表 tooltip 展示的样式
 const tooltipFormatter = (date, arr, unit, isShowTooltipModal, metricsType, isShowTaskTooltipModal, clusterPhyName) => {
+  // 新增从大到小排序
+  arr = arr.sort((a, b) => b.value - a.value);
   const str = arr
     .map(
       (item) => `<div style="margin: 3px 0;line-height:1;">
@@ -357,13 +363,13 @@ export const getLineOption = ({
       type: "scroll",
       orient: "vertical",
       right: "10",
-      top: "20%",
+      top: "16%",
       bottom: "20%",
       icon: "rect",
       itemHeight: 2,
-      itemWidth: 12,
+      itemWidth: 14,
       textStyle: {
-        width: 70,
+        width: 135,
         overflow: "truncate",
         ellipsis: "...",
       },
@@ -373,7 +379,7 @@ export const getLineOption = ({
     } : null,
     grid: {
       left: showLegend ? "20" : 0,
-      right: showLegend ? "120" : 20,
+      right: showLegend ? "165" : 20,
       bottom: showLegend ? "3%" : 0,
       containLabel: true,
     },
@@ -403,7 +409,7 @@ export const getLineOption = ({
           if (value < 10000) {
             return value;
           }
-          return Math.ceil(value / 10000) + "W";
+          return (value / 10000).toFixed(1) + "W";
         },
       },
     },

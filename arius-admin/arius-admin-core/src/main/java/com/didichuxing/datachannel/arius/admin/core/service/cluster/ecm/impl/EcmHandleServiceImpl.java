@@ -108,7 +108,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     @PostConstruct
     public void init() {
         ariusTaskThreadPool = new AriusTaskThreadPool();
-        ariusTaskThreadPool.init(10, "EcmHandleServiceImpl");
+        ariusTaskThreadPool.init(10, "EcmHandleServiceImpl", 100);
         ecmBaseHandleMap.put(ecmHostHandler.getEsClusterTypeEnum().getCode(), ecmHostHandler);
         ecmBaseHandleMap.put(ecmDockerHandler.getEsClusterTypeEnum().getCode(), ecmDockerHandler);
     }

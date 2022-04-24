@@ -57,17 +57,17 @@ export class ThirdStep extends React.Component<any> {
       cancelCopy,
       asyncTranslog,
       customerAnalysis,
-      // dynamicTemplates,
       customerAnalysisValue,
+      dataCenter,
       // dynamicTemplatesValue,
     } = this.props.createIndex;
     const postData = {
       name: `${formData.name}`, // 暂时cn TODO：
-      dataCenter: 'cn',
+      dataCenter,
       dataType: formData.dataType,
       // libraDepartment: department.departmentList.find(row => row.idAlias === formData.department)?.name,
       // libraDepartmentId: formData.department,
-      responsible: formData.responsible.join(),
+      responsible: formData.responsible?.join(),
       desc: formData.desc,
       expireTime: formData.cyclicalRoll === 'more' ? formData.expireTime : -1,
       cyclicalRoll: formData.cyclicalRoll === 'more' ? 1 : 0,
@@ -85,7 +85,6 @@ export class ThirdStep extends React.Component<any> {
       cancelCopy,
       asyncTranslog,
       customerAnalysis: customerAnalysis ? customerAnalysisValue : '',
-      // dynamicTemplates: dynamicTemplates ? dynamicTemplatesValue : '',
     };
     const backUrl = '/index-tpl-management';
     // this.props.dispatch(actions.setLoadingMap('create-loading', true));
@@ -129,7 +128,7 @@ export class ThirdStep extends React.Component<any> {
           </Tabs.TabPane>
         </Tabs>
         <div className="op-btn-group">
-          <Button onClick={() => this.props.dispatch(actions.setCurrentStep(1))}>上一步</Button>
+          <Button onClick={() => this.props.dispatch(actions.setCurrentStep(2))}>上一步</Button>
           <Button type="primary" loading={this.props.createIndex.loadingMap['create-loading']} onClick={this.onSubmit}>提交申请</Button>
           <CancelActionModal routeHref={url} history={this.props?.history} cb={this.clearStore}/>
         </div>

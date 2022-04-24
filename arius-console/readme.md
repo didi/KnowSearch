@@ -1,44 +1,6 @@
-## 项目结构
-
-```
-.
-├── README.md
-├── config // 配置文件
-│   ├── feConfig.json
-│   ├── theme.js
-│   ├── webpack.build.config.js  
-│   ├── webpack.dev.config.js
-│   └── webpackConfigResolveAlias.js
-├── favicon.ico
-├── fetk.config.js // 打包构建配置
-├── package.json
-├── src
-│   ├── @types // 类型定义
-│   ├── actions // redux actions
-│   ├── api
-│   ├── app.tsx // 路由入口
-│   ├── assets // 资源文件
-│   ├── component
-│   ├── constants
-│   ├── container
-│   ├── index.html
-│   ├── index.tsx // 项目入口
-│   ├── interface
-│   ├── lib 
-│   ├── locales // 国际化
-│   ├── packages
-│   ├── pages // 页面入口
-│   ├── reducers
-│   ├── store
-│   └── styles
-└── tsconfig.json
-
-```
-## 兼容性
-* chrome 80+
-* IE >= 11
-## 环境依赖
-* node V12+
+## Environment Support
+* Modern browsers and Internet Explorer 11
+* node V10+
 ## Getting Started
 ### install
 ```js
@@ -51,7 +13,6 @@ or
 
 ### Development
 #### start
-启动前确认fetk.config.js中devServer.proxy配置的接口地址是否正确
 ```js
   npm run start
 ```

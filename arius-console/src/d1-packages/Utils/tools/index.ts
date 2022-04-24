@@ -54,7 +54,6 @@ export function goLogout(token: string) {
   window.location.href = '/login';
 }
 
-
 /**
  * @method getCookie 获取本地Cookie
  * @export

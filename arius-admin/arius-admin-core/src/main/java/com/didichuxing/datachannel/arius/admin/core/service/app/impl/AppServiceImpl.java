@@ -161,21 +161,13 @@ public class AppServiceImpl implements AppService {
             return Result.buildParamIllegal("责任人非法");
         }
 
-        if (EDIT.equals(operation)) {
+        if (ADD.equals(operation)) {
+            if (AriusObjUtils.isNull(appDTO.getName())) {
+                return Result.buildParamIllegal("应用名称为空");
+            }
+        } else if (EDIT.equals(operation)) {
             if (AriusObjUtils.isNull(appDTO.getId())) {
                 return Result.buildParamIllegal("应用ID为空");
-            }
-
-            if (appDTO.getIsRoot() == null || !AdminConstant.yesOrNo(appDTO.getIsRoot())) {
-                return Result.buildParamIllegal("超管标记非法");
-            }
-
-            AppSearchTypeEnum searchTypeEnum = AppSearchTypeEnum.valueOf(appDTO.getSearchType());
-            if (searchTypeEnum.equals(AppSearchTypeEnum.UNKNOWN)) {
-                return Result.buildParamIllegal("查询模式非法");
-            }
-            if (StringUtils.isBlank(appDTO.getVerifyCode())) {
-                return Result.buildParamIllegal("校验码不能为空");
             }
 
             AppPO oldApp = appDAO.getById(appDTO.getId());
@@ -184,6 +176,17 @@ public class AppServiceImpl implements AppService {
             }
         }
 
+        if (appDTO.getIsRoot() == null || !AdminConstant.yesOrNo(appDTO.getIsRoot())) {
+            return Result.buildParamIllegal("超管标记非法");
+        }
+
+        AppSearchTypeEnum searchTypeEnum = AppSearchTypeEnum.valueOf(appDTO.getSearchType());
+        if (searchTypeEnum.equals(AppSearchTypeEnum.UNKNOWN)) {
+            return Result.buildParamIllegal("查询模式非法");
+        }
+        if (StringUtils.isBlank(appDTO.getVerifyCode())) {
+            return Result.buildParamIllegal("校验码不能为空");
+        }
         // 名字不能重复
         AppPO oldAppPO = getByName(appDTO.getName());
         if (oldAppPO != null && !oldAppPO.getId().equals(appDTO.getId())) {
@@ -645,9 +648,6 @@ public class AppServiceImpl implements AppService {
     }
 
     private Result<Void> validateAppFieldIsNull(AppDTO appDTO) {
-        if (AriusObjUtils.isNull(appDTO.getName())) {
-            return Result.buildParamIllegal("应用名称为空");
-        }
         if (appDTO.getMemo() == null) {
             return Result.buildParamIllegal("备注为空");
         }

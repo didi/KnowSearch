@@ -52,6 +52,12 @@ public enum ClusterPhyNodeMetricsEnum {
 
                                        INDICES_MERGE_CONSUME("indices-merges-total_time_in_millis", "Merge操作耗时"),
 
+                                       INDICES_MERGES_TOTAL("indices-merges-total","每分钟merges操作耗时"),
+
+                                       INDICES_FLUSH_TOTAL("indices-flush-total","每分钟indices操作耗时"),
+
+                                       INDICES_REFRESH_TOTAL("indices-refresh-total","每分钟refresh操作耗时"),
+
                                        INDICES_REFRESH_CONSUME("indices-refresh-total_time_in_millis", "Refresh操作耗时"),
 
                                        INDICES_FLUSH_CONSUME("indices-flush-total_time_in_millis", "Flush操作耗时"),
@@ -128,6 +134,12 @@ public enum ClusterPhyNodeMetricsEnum {
                                        JVM_MEM_NON_HEAP_USED("jvm-mem-non_heap_used_in_bytes", "JVM堆外存使用量"),
 
                                        JVM_MEM_HEAP_PERCENT("jvm-mem-heap_used_percent", "JVM堆使用率"),
+
+                                       JVM_MEM_POOLS_YOUNG_USED_IN_BYTES("jvm-mem-pools-young-used_in_bytes", "jvm堆内存young区使用空间"),
+
+                                       JVM_MEM_POOLS_OLD_USED_IN_BYTES("jvm-mem-pools-old-used_in_bytes", "jvm堆内存old区使用空间"),
+
+                                       STORED_FIELDS_MEMORY_IN_BYTES("indices-segments-stored_fields_memory_in_bytes", "indices-segments-stored_fields内存大小"),
 
                                        /*************************************5.TASK指标******************************************/
                                        TASK_COUNT("taskId", "task id"),

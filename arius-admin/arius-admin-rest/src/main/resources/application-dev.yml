@@ -63,7 +63,7 @@ admin:
       op: 20
 
 # gateway相关配置
-es.gateway.url:  10.190.34.104
+es.gateway.url:  10.190.34.104,10.190.13.74,10.190.13.155
 # gateway server http port
 es.gateway.port: 8200
 es.appid: 1
@@ -78,6 +78,16 @@ es.client.cluster.port: 8061
 
 #es连接线程数
 es.client.io.thread.count: 2
+
+monitorJob:
+  thread:
+    initsize : 20
+    maxsize  : 30
+
+dashboard:
+  thread:
+    initsize : 5
+    maxsize  : 10
 
 #健康检查
 health.check.empty.indices.threshold.day: 30

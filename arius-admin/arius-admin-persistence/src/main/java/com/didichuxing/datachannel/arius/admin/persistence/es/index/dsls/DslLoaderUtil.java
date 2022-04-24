@@ -107,41 +107,6 @@ public class DslLoaderUtil {
 
         return dsl;
     }
-
-    public String getFormatDslForCatIndexByCondition(String fileName, String boolMustDsl, Object... args) {
-        String formatDslByFileName = getFormatDslByFileName(fileName, args);
-
-        return formatDslByFileName.replace("\"boolMustDsl\"", boolMustDsl);
-    }
-
-    public String getFormatDslByFileNameByAggParam(String fileName, String clusterPhyMetrics, String interval,
-                                                   String aggType, Object... args) {
-        String formatDslByFileName = getFormatDslByFileName(fileName, args);
-
-        return formatDslByFileName
-                .replace("{interval}", interval)
-                .replace("{clusterPhyMetrics}", clusterPhyMetrics)
-                .replace("{aggType}", aggType);
-    }
-
-    public String getFormatDslByFileNameAndOtherParam(String fileName, String interval, String aggsDsl,
-                                                      Object... args) {
-        String formatDslByFileName = getFormatDslByFileName(fileName, args);
-        return formatDslByFileName
-                .replace("{interval}", interval)
-                .replace("\"aggsDsl\":1", aggsDsl);
-    }
-
-
-    public String getDslByTopNNameInfo(String fileName, String interval, String topNameStr, String aggsDsl,
-                                       Object... args) {
-        String formatDslByFileName = getFormatDslByFileName(fileName, args);
-        return formatDslByFileName
-                .replace("{interval}", interval)
-                .replace("\"aggsDsl\":1", aggsDsl)
-                .replace("\"topNameListStr\"", topNameStr);
-    }
-
     /**************************************** private method ****************************************************/
     /**
      * 去除json中的空格

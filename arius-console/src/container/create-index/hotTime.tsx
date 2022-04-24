@@ -31,6 +31,7 @@ export class HotTime extends React.Component<IHotTimeProps> {
           style={{
             width: '100%'
           }}
+          value={this.props.value === -1 ? '' : this.props.value}
           placeholder="请输入热节点保存周期"
           disabled={this.props.disabled}
         />

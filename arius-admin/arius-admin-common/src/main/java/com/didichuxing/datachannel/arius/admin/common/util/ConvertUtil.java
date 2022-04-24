@@ -209,7 +209,7 @@ public class ConvertUtil {
         return result;
     }
 
-    public static Map<String, Object> Obj2Map(Object obj) {
+    public static Map<String, Object> obj2Map(Object obj) {
         if (null == obj) {
             return null;
         }
@@ -221,7 +221,7 @@ public class ConvertUtil {
             try {
                 map.put(field.getName(), field.get(obj));
             } catch (IllegalAccessException e) {
-                LOGGER.warn("class=ConvertUtil||method=Obj2Map||msg={}", e.getMessage(), e);
+                LOGGER.warn("class=ConvertUtil||method=obj2Map||msg={}", e.getMessage(), e);
             }
         }
         return map;

@@ -51,7 +51,7 @@ export const RenderText = forwardRef((props: any, ref) => {
 export const DataNode: React.FC<Props> = forwardRef((props, ref) => {
   const [dataNode, setDataNode] = React.useState([]);
   const [dataNodeSpec, setDataNodeSpec] = React.useState("");
-  const [dataNodeNu, setDataNodeNu] = React.useState(0);
+  const [dataNodeNu, setDataNodeNu] = React.useState(2);
 
   React.useEffect(() => {
     getNodeList().then((res) => {
@@ -78,9 +78,10 @@ export const DataNode: React.FC<Props> = forwardRef((props, ref) => {
   };
 
   const handleChangeNuber = (value) => {
-    setDataNodeNu(value);
+    const _value = value.length ? +value[value.length - 1] : null as any;
+    setDataNodeNu(_value);
     const { onChange } = props;
-    onChange && onChange({ dataNodeSpec, dataNodeNu: value });
+    onChange && onChange({ dataNodeSpec, dataNodeNu: _value });
   };
 
   return (
@@ -105,6 +106,9 @@ export const DataNode: React.FC<Props> = forwardRef((props, ref) => {
       <Select
         placeholder="请输入节点个数"
         onChange={handleChangeNuber}
+        mode="tags"
+        value={props.value?.dataNodeNu || []}
+        maxTagCount={1}
         style={{ width: 250 }}
       >
         {NODE_NUMBER_MAP.map((v) => (

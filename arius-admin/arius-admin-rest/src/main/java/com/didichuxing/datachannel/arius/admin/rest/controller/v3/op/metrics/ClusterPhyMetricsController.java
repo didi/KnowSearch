@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.cluster.ESClusterOverviewMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.cluster.ESClusterTaskDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.linechart.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.cluster.ESClusterOverviewMetricsVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import io.swagger.annotations.Api;
@@ -117,9 +117,9 @@ public class ClusterPhyMetricsController {
     @PostMapping("/node/task")
     @ResponseBody
     @ApiOperation(value = "获取物理集群节点task指标信息")
-    public Result<List<VariousLineChartMetricsVO>> getClusterPhyNodesTaskMetrics(@RequestBody MetricsClusterPhyNodeTaskDTO param,
+    public Result<List<VariousLineChartMetricsVO>> getClusterPhyNodesTaskMetrics(@RequestBody MultiMetricsClusterPhyNodeTaskDTO param,
                                                                                  HttpServletRequest request) {
-        return clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, HttpRequestUtils.getAppId(request),
+        return clusterPhyMetricsManager.getMultiClusterMetrics(param, HttpRequestUtils.getAppId(request),
                 HttpRequestUtils.getOperator(request), ClusterPhyTypeMetricsEnum.NODE_TASKS);
     }
 }

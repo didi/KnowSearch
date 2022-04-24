@@ -44,7 +44,7 @@ public class ClusterConstant {
      */
     public static final String  DEFAULT_CLUSTER_IDC             = "ys02";
 
-    public static final Integer DEFAULT_CLUSTER_HEALTH          = 3;
+    public static final Integer DEFAULT_CLUSTER_HEALTH          = 2;
 
     /**
      * 集群默认实例数

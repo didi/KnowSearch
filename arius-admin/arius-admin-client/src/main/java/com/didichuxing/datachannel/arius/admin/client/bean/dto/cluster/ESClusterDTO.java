@@ -44,6 +44,9 @@ public class ESClusterDTO extends PageDTO {
     @ApiModelProperty("集群类型(-1 未知 3 docker集群 4 host集群 5 vm集群)")
     private Integer                    type;
 
+    @ApiModelProperty("集群展示用属性标签，如「集群所属资源类型」等等")
+    private String                     tags;
+
     @ApiModelProperty("数据中心")
     private String                     dataCenter;
 

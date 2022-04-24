@@ -36,5 +36,7 @@ public interface ClusterDAO {
 
     List<ClusterPO> listAll();
 
+    List<String> listAllName();
+
     List<ClusterPO> listByIds(@Param("ids") Set<Long> ids);
 }

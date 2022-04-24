@@ -28,24 +28,27 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
     shallowEqual
   );
   const [time, setTime] = useState("oneHour");
+  const [hackValue, setHackValue] = useState(null);
   const [dates, setDates] = useState([undefined, undefined]);
+  const [calendarDates,setCalendarDates] = useState([])
   const didMount = useRef(false);
   const timer = useRef(null);
 
   const disabledDate = (current) => {
-    if (!dates || dates.length === 0) {
-      return false;
+    if (!calendarDates || calendarDates.length === 0) {
+      return current > moment().endOf('day');
     }
-    // const tooLate = dates[0] && current.diff(dates[0], "days") > 6;
-    // const tooEarly = dates[1] && dates[1].diff(current, "days") > 6;
-    return current > moment().endOf("day");
+    const tooLate = (calendarDates[0] && current.diff(calendarDates[0], "days") > 6) || current > moment().endOf('day');
+    const tooEarly = calendarDates[1] && calendarDates[1].diff(current, "days") > 6;
+    return tooLate || tooEarly
   };
 
   const updateTimeStamp = (key: string) => {
-    const dates = PERIOD_RADIO_MAP.get(key).dateRange;
-    setDates(dates);
+    const _dates = PERIOD_RADIO_MAP.get(key)?.dateRange || dates;
+    if (!_dates) return;
+    setDates(_dates);
     onTimeStampChange &&
-      onTimeStampChange(dates[0].valueOf(), dates[1].valueOf());
+      onTimeStampChange(_dates[0].valueOf(), _dates[1].valueOf());
   };
 
   const onRadioChange = (e) => {
@@ -59,6 +62,15 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
     setDates(dates);
     onTimeStampChange &&
       onTimeStampChange(dates[0].valueOf(), dates[1].valueOf());
+  };
+
+  const onOpenChange = open => {
+    if (open) {
+      setHackValue([]);
+      setCalendarDates([]);
+    } else {
+      setHackValue(undefined);
+    }
   };
 
   const setTimer = () => {
@@ -107,12 +119,13 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
       </Radio.Group>
       <RangePicker
         disabledDate={disabledDate}
-        onCalendarChange={(val) => setDates(val)}
+        onCalendarChange={(val) => setCalendarDates(val)}
         format="YYYY-MM-DD HH:mm"
         allowClear={false}
-        value={dates as [moment.Moment, moment.Moment]}
+        value={ (hackValue || dates) as [moment.Moment, moment.Moment]}
         onChange={onRangeChange}
-        showTime
+        onOpenChange={onOpenChange}
+        showTime={{format:'HH:mm',defaultValue:[moment('00:00:00','HH:mm'),moment('23:59:59','HH:mm')]}}
       />
     </div>
   );

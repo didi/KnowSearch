@@ -1,16 +1,16 @@
 import * as React from 'react';
-import CommonRoutePage from './common';
 import { PhysicsCluster } from '../container/cluster';
 import { LogicCluster } from '../container/cluster';
 import { LogicClusterDetail } from 'container/cluster/logic-detail/detail';
 import { PhyClusterDetail } from 'container/cluster/physics-detail/detail';
 import { EditionCluster } from 'container/cluster/cluster-edition';
+import { DashBoard } from '../container/dashboard/index';
 
 export const ClusterAdminPageRoutes = [
   {
     path: '/',
     exact: true,
-    component: PhysicsCluster,
+    component: DashBoard,
   },
   {
     path: '/cluster',

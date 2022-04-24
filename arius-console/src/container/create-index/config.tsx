@@ -165,6 +165,10 @@ export const getStepOneFormMap = (
             if (window.location.pathname == '/es/index/modify') {
               return Promise.resolve();
             }
+            // 该情况不需要校验
+            if (hotTimeState) {
+              return Promise.resolve();
+            }
             if (value < 0 || (value > expireTime && expireTime !== -1)) return Promise.reject('请输入热节点保存周期，自然数，大于等于0，小于等于【保存周期】');
             return Promise.resolve();
           },

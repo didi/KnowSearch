@@ -67,8 +67,13 @@ monitorJob:
     initsize : 20
     maxsize  : 30
 
+dashboard:
+  thread:
+    initsize : 5
+    maxsize  : 10
+
 # gateway相关配置
-es.gateway.url:  10.190.34.104
+es.gateway.url:  10.190.34.104,10.190.13.74,10.190.13.155
 # gateway server http port
 es.gateway.port: 8200
 es.appid: 1

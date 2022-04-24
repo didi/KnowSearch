@@ -1,0 +1,27 @@
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "cluster": "%s"
+          }
+        },
+        {
+          "terms": {
+            "index": %s
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%s",
+              "lte": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": ["metrics.%s","index"]
+}

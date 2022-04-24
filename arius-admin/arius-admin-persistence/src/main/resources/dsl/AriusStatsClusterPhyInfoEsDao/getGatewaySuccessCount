@@ -1,0 +1,23 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "terms": {
+            "clusterName": [
+              "%s"
+            ]
+          }
+        },
+        {
+          "term": {
+            "status": {
+              "value": "200"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -35,7 +35,18 @@
             "field": "timeStamp",
             "interval": "%s",
             "time_zone": "Asia/Shanghai",
-            "min_doc_count": 0
+            "min_doc_count": 0,
+            "extended_bounds" : {
+                "min" : %d,
+                "max" : %d
+            }
+          },
+          "aggs": {
+            "dsl_len": {
+              "avg": {
+                "field": "dslLen"
+              }
+            }
           }
         }
       }

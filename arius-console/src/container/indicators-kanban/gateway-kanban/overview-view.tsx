@@ -62,7 +62,7 @@ export const OverviewView = memo(() => {
     async (metricsTypes) => {
       return await getOverviewData(metricsTypes, startTime, endTime);
     },
-    [startTime, endTime]
+    [startTime, endTime, isUpdate]
   );
 
   const getAsyncCheckedList = async () => {
@@ -88,6 +88,7 @@ export const OverviewView = memo(() => {
 
   const getAllAsyncOverviewData = async (metricsTypes) => {
     try {
+      setIsLoading(true);
       const res = await getAsyncOverviewData(metricsTypes);
       setViewData(
         res.map((item) => getOverviewOption(item, indexConfigData, isMoreDay))

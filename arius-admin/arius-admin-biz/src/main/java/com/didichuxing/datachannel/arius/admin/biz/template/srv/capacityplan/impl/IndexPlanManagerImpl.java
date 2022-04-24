@@ -168,7 +168,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
     private String getIndexNameByDateFormat(IndexTemplateLogic logiTemplate, IndexTemplatePhy phyTemplate) {
         if(TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {
             // 按天分区则获取模版对应当天索引拼接版本信息
-            return IndexNameUtils.genDailyIndexNameWithVersion(phyTemplate.getName(), 0, phyTemplate.getVersion());
+            return IndexNameUtils.genDailyIndexName(phyTemplate.getName(), 0);
         } else if(TemplateUtils.isSaveByMonth(logiTemplate.getDateFormat())) {
             // 按月分区则获取模版对应当月索引拼接版本信息
             return IndexNameUtils.genCurrentMonthlyIndexNameWithVersion(phyTemplate.getName(), phyTemplate.getVersion());
@@ -356,7 +356,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
         param.setShard(templatePhy.getShard());
 
         try {
-            Result<Void> result = templatePhyManager.upgradeTemplate(param, AriusUser.CAPACITY_PLAN.getDesc());
+            Result<Void> result = templatePhyManager.rolloverUpgradeTemplate(param, AriusUser.CAPACITY_PLAN.getDesc());
             if(result.failed()) {
                 throw new ESOperateException(result.getMessage());
             }

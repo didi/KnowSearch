@@ -25,10 +25,12 @@
   width: calc(100% + 80px);
   background: #fff;
   z-index: 10;
+
   :first-child {
     margin-left: -16px;
     margin-right: 8px;
   }
+
   :last-child {
     margin-left: 8px;
   }
@@ -36,12 +38,13 @@
 
 .tab-content {
   margin-top: 20px;
+
   &.no-nav {
     .ant-tabs-nav {
       display: none;
     }
   }
-  
+
   &.no-margin {
     margin-top: 0px;
   }
@@ -50,7 +53,7 @@
     padding: 15px 0px 15px 17px;
     height: 520px;
 
-    .ant-descriptions-row > td {
+    .ant-descriptions-row>td {
       padding-bottom: 40px;
     }
   }
@@ -75,6 +78,7 @@
 
       .first-level {
         width: 100%;
+
         .name-box {
           width: 14.5%;
         }
@@ -82,6 +86,7 @@
 
       .second-level {
         width: 100%;
+
         .name-box {
           width: 13.5%;
         }
@@ -89,6 +94,7 @@
 
       .third-level {
         width: 100%;
+
         .name-box {
           width: 13%;
         }
@@ -127,20 +133,20 @@
       }
     }
 
-    .ant-collapse > .ant-collapse-item:last-child,
-    .ant-collapse > .ant-collapse-item:last-child > .ant-collapse-header {
+    .ant-collapse>.ant-collapse-item:last-child,
+    .ant-collapse>.ant-collapse-item:last-child>.ant-collapse-header {
       border-bottom: none;
     }
 
-    .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+    .ant-collapse>.ant-collapse-item>.ant-collapse-header {
       padding: 0px 10px 0px 40px;
     }
 
-    .ant-collapse-borderless > .ant-collapse-item {
+    .ant-collapse-borderless>.ant-collapse-item {
       border-bottom: none;
     }
 
-    .ant-collapse-content > .ant-collapse-content-box {
+    .ant-collapse-content>.ant-collapse-content-box {
       padding: 0px;
       padding-left: 12px;
       padding-right: 3px;
@@ -153,9 +159,11 @@
     background: #FFFFFF;
     border: 1px solid #EBEDEF;
     border-radius: 4px;
+
     .CodeMirror {
       height: 362px;
     }
+
     .tip {
       margin-right: 20px;
       text-align: right;
@@ -194,6 +202,7 @@
   display: flex;
   align-items: center;
   height: 80px;
+
   .ant-form-item {
     margin-bottom: 0;
   }
@@ -202,10 +211,12 @@
 .ant-tree .ant-tree-node-content-wrapper {
   width: 100%;
 }
+
 .ant-tree-show-line .ant-tree-switcher {
   display: flex;
   align-items: center;
 }
+
 .extra-element {
   .ant-form-item-control-input-content {
     display: flex;
@@ -213,12 +224,13 @@
   }
 }
 
-.setingcheck-disabled{
+.setingcheck-disabled {
   span {
     color: black;
     position: relative;
     top: 4px
   }
+
   // .ant-checkbox-checked .ant-checkbox-inner {
   //   background-color: #526ecc;
   //   border-color: #526ecc;
@@ -233,6 +245,7 @@
   // margin-top: 24px;
   background: #FFFFFF;
   border: 1px solid #EBEDEF;
+
   .left-box {
     width: 180px;
     height: 50px;
@@ -241,6 +254,7 @@
     display: inline-block;
     padding: 18px 0px 0px 24px;
   }
+
   .right-box {
     display: inline-block;
     padding: 18px 0px 0px 24px;
@@ -257,6 +271,7 @@
   display: flex;
   padding: 4px;
   justify-content: space-between;
+
   &-item {
     width: 72px;
     height: 24px;
@@ -270,6 +285,7 @@
     user-select: text;
     padding: 2px 8px 2px 8px;
   }
+
   &-item-json {
     width: 82px;
     height: 24px;
@@ -283,8 +299,9 @@
     user-select: text;
     padding: 2px 8px 2px 8px;
   }
+
   .check {
     background: #FFFFFF;
-    color: #2F81F9;
+    color: @primary-color;
   }
 }

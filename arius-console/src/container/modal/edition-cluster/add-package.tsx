@@ -61,9 +61,9 @@ const AddPackageModal = (props: {
         rules: [{ 
           required: true, 
           validator: (rule: any, value: string) => {
-            const reg = /^([1-9]\d|[1-9])(.([1-9]\d|\d)){3}$/;
+            const reg = /^([1-9]\d|[1-9])(.([1-9]\d|\d)){2}(.(\d|[1-9]\d|[1-9]\d\d|[1-9]\d\d\d))$/;
             if(!value || !reg.test(value)) {
-              return Promise.reject('必须是4位，x.x.x.x的形式, 每位x的范围分别为1-99,0-99,0-99,0-99');
+              return Promise.reject('必须是4位，x.x.x.x的形式, 每位x的范围分别为1-99,0-99,0-99,0-9999');
             }
             return Promise.resolve();
           }, 

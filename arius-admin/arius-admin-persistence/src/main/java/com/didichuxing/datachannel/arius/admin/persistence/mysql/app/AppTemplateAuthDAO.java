@@ -24,9 +24,11 @@ public interface AppTemplateAuthDAO {
 
     int deleteByTemplate(Integer templateId);
 
+    int batchDeleteByTemplateIds(List<Integer> templateIds);
+
     List<AppTemplateAuthPO> listWithRwAuthsByAppId(int appId);
 
-    AppTemplateAuthPO getByTemplateId(Integer templateId);
+    List<AppTemplateAuthPO> getByTemplateId(Integer templateId);
 
     AppTemplateAuthPO getById(Long authId);
 

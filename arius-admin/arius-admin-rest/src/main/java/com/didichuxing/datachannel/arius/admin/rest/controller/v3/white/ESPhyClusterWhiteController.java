@@ -60,7 +60,7 @@ public class ESPhyClusterWhiteController {
 
     @DeleteMapping("{clusterPhyName}/del")
     @ResponseBody
-    @ApiOperation(value = "集群是否存在")
+    @ApiOperation(value = "删除存在的集群")
     public Result<Boolean> deleteClusterExit(HttpServletRequest request, @PathVariable String clusterPhyName) {
         return clusterPhyManager.deleteClusterExit(clusterPhyName, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));

@@ -1,5 +1,27 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.compress.utils.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -10,6 +32,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.settin
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -34,21 +58,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.compress.utils.Sets;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.net.InetAddress;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -119,6 +128,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public boolean hasSettingExist(String cluster, String settingFlatName) {
         Map<String, Object> clusterSettingMap = esClusterDAO.getPersistentClusterSettings(cluster);
+        if (null == clusterSettingMap) { return false;}
         return clusterSettingMap.containsKey(settingFlatName);
     }
 
@@ -433,6 +443,31 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
+    public Result<Void> checkSameCluster(String password, List<String> addresses){
+        Set<String> clusters = new HashSet<>();
+        for(String address: addresses) {
+            ESClient client = new ESClient();
+            try {
+                if (StringUtils.isNotBlank(password)) {
+                    client.setPassword(password);
+                }
+                client.addTransportAddresses(address);
+                client.start();
+                ESClusterNodesSettingResponse response = client.admin().cluster().prepareNodesSetting().execute()
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                if (RestStatus.OK.getStatus() == response.getRestStatus().getStatus()) {
+                    clusters.add(response.getClusterName());
+                }
+            } catch (Exception e) {
+                LOGGER.error("class=ESClusterServiceImpl||method=getClusterRackByHttpAddress||msg=get rack error||httpAddress={}||msg=client start error", addresses);
+            } finally {
+                client.close();
+            }
+        }
+        return clusters.size() > 1 ? Result.buildFail() : Result.buildSucc();
+    }
+
+    @Override
     public String synGetESVersionByHttpAddress(String addresses, String password) {
         ESClient client = new ESClient();
         client.addTransportAddresses(addresses);
@@ -461,6 +496,51 @@ public class ESClusterServiceImpl implements ESClusterService {
         } finally {
             client.close();
         }
+    }
+
+    @Override
+    public ClusterConnectionStatus checkClusterPassword(String addresses, String password) {
+        ESClient client = new ESClient();
+        client.addTransportAddresses(addresses);
+        if (StringUtils.isNotBlank(password)) {
+            client.setPassword(password);
+        }
+
+        try {
+            client.start();
+            DirectRequest directRequest = new DirectRequest("GET", "");
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            return ClusterConnectionStatus.NORMAL;
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterServiceImpl||method=checkClusterWithoutPassword||address={}||mg=get es segments fail", addresses, e);
+            if (e.getCause().getMessage().contains("Unauthorized")) {
+                return ClusterConnectionStatus.UNAUTHORIZED;
+            } else {
+                return ClusterConnectionStatus.DISCONNECTED;
+            }
+        } finally {
+            client.close();
+        }
+    }
+
+    @Override
+    public ESClusterThreadStats syncGetThreadStatsByCluster(String cluster) {
+        List<ESClusterThreadPO> threadStats = esClusterDAO.syncGetThreadStatsByCluster(cluster);
+        ESClusterThreadStats esClusterThreadStats = new ESClusterThreadStats(cluster, 0L, 0L, 0L, 0L, 0L, 0L);
+        if (threadStats != null) {
+            esClusterThreadStats.setManagement(threadStats.stream().filter(thread -> thread.getThreadName().equals("management")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setRefresh(threadStats.stream().filter(thread -> thread.getThreadName().equals("refresh")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setFlush(threadStats.stream().filter(thread -> thread.getThreadName().equals("flush")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setMerge(threadStats.stream().filter(thread -> thread.getThreadName().equals("force_merge")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setSearch(threadStats.stream().filter(thread -> thread.getThreadName().equals("search")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setWrite(threadStats.stream().filter(thread -> thread.getThreadName().equals("write")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+        }
+        return esClusterThreadStats;
+    }
+
+    @Override
+    public ESClusterHealthResponse syncGetClusterHealthAtIndicesLevel(String phyClusterName) {
+        return esClusterDAO.getClusterHealthAtIndicesLevel(phyClusterName);
     }
 
     /***************************************** private method ****************************************************/

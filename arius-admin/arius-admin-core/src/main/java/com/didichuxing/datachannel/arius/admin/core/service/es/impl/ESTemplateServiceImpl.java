@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentsPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -22,6 +24,8 @@ import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PATH_SEGMENTS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 

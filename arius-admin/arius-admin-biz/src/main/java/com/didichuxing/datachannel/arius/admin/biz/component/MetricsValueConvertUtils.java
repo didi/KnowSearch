@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.ESPercentilesMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.cluster.*;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.percentiles.ESPercentilesMetricsVO;
+import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
@@ -25,11 +25,9 @@ public class MetricsValueConvertUtils {
 	 */
 	public static void convertClusterOverviewMetricsPercent(ESClusterOverviewMetricsVO esClusterOverviewMetricsVO) {
 		List<DiskUsageMetricsVO> diskUsagesMetrics = esClusterOverviewMetricsVO.getDiskUsage();
-		if (CollectionUtils.isEmpty(diskUsagesMetrics)) {
-			return;
-		}
+		if (CollectionUtils.isEmpty(diskUsagesMetrics)) { return;}
 
-		diskUsagesMetrics.parallelStream().forEach(element->{
+		diskUsagesMetrics.forEach(element->{
 			element.setAggType(element.getAggType() * 100);
 			element.setSt99(element.getSt99() * 100);
 			element.setSt95(element.getSt95() * 100);
@@ -301,28 +299,32 @@ public class MetricsValueConvertUtils {
 				if (CollectionUtils.isEmpty(metricsContentCellList)) return;
 
 				for (int i = 0; i < metricsContentCellList.size(); i++) {
-					MetricsContentCell currentMetrics = metricsContentCellList.get(i);
-					MetricsContentCell frontMetrics   = null;
-					MetricsContentCell backMetrics    = null;
-					MetricsContentCell backNextMetrics    = null;
-
-					if (i == 0) backMetrics = metricsContentCellList.get(i + 1);
-					else if (i == metricsContentCellList.size() - 1) frontMetrics = metricsContentCellList.get(i - 1);
-					else {
-						if (i != metricsContentCellList.size() - 2) backNextMetrics = metricsContentCellList.get(i + 2);
-						backMetrics  = metricsContentCellList.get(i + 1);
-						frontMetrics = metricsContentCellList.get(i - 1);
-					}
-
-					if (currentMetrics.getValue() <= 0) {
-						double frontValue = null != frontMetrics ? frontMetrics.getValue() : 0;
-						double backValue  = null != backMetrics  ? backMetrics.getValue()  : 0;
-						double backNextValue  = null != backNextMetrics  ? backNextMetrics.getValue()  : 0;
-						currentMetrics.setValue(compute(currentMetrics.getValue(), frontValue, backValue, backNextValue));
-					}
+					compensateAbnormalValue(metricsContentCellList, i);
 				}
 			}
 		});
+	}
+
+	private static void compensateAbnormalValue(List<MetricsContentCell> metricsContentCellList, int i) {
+		MetricsContentCell currentMetrics = metricsContentCellList.get(i);
+		double frontValue = i == 0 ? 0 : metricsContentCellList.get(i - 1).getValue();
+		double backValue = i == metricsContentCellList.size() - 1 ? 0 : metricsContentCellList.get(i + 1).getValue();
+		double compensateValue;
+
+		if (i == 0) {
+			// 处理头部掉底
+			compensateValue = backValue;
+		} else if (i == metricsContentCellList.size() - 1) {
+			// 处理尾部掉底
+			compensateValue = frontValue;
+		} else {
+			// 处理中部掉底
+			compensateValue = Math.min(frontValue, backValue);
+		}
+
+		if (currentMetrics.getValue() <= 0) {
+			currentMetrics.setValue(compensateValue);
+		}
 	}
 
 	/***************************************************cluster indices*************************************************/

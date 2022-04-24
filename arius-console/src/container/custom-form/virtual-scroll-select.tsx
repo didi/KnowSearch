@@ -1,12 +1,11 @@
-import * as React from 'react';
-import { debounce } from 'lodash';
-import { ILabelValue } from '@types/base-types';
-import { searchProps } from 'constants/table';
-import { Select, Tooltip } from 'antd';
-
+import * as React from "react";
+import { debounce } from "lodash";
+import { ILabelValue } from "typesPath/base-types";
+import { searchProps } from "constants/table";
+import { Select, Tooltip } from "antd";
 
 interface IAttars {
-  mode?: 'multiple' | 'tags';
+  mode?: "multiple" | "tags";
   placeholder?: string;
 }
 

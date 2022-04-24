@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
@@ -10,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
+import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionBindEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionCreateEvent;
@@ -20,7 +24,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
-import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
@@ -38,14 +41,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.CLUSTER_REGION;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.REGION;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.DELETE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
 
 /**
  * @Author: lanxinzheng
@@ -110,17 +108,26 @@ public class RegionRackServiceImpl implements RegionRackService {
 
     @Override
     public List<ClusterLogicRackInfo> listLogicClusterRacks(ESLogicClusterRackInfoDTO param) {
-        // 目前仅逻辑集群ID条件有效，为兼容暂时保留该方法
-        if (param == null || param.getLogicClusterId() == null) {
-            return new ArrayList<>();
-        }
-
-        return listLogicClusterRacks(param.getLogicClusterId());
+        return listLogicClusterRacks(param.getLogicClusterId(), param.getPhyClusterName());
     }
 
     @Override
     public List<ClusterLogicRackInfo> listLogicClusterRacks(Long logicClusterId) {
         List<ClusterRegion> regions = listLogicClusterRegions(logicClusterId);
+        return buildRackInfos(regions);
+    }
+
+    @Override
+    public List<ClusterLogicRackInfo> listLogicClusterRacks(Long logicClusterId, String phyClusterName) {
+        ClusterRegionPO condt = new ClusterRegionPO();
+        if (null != logicClusterId) {
+            condt.setLogicClusterIds(logicClusterId.toString());
+        }
+        if (StringUtils.isNotBlank(phyClusterName)) {
+            condt.setPhyClusterName(phyClusterName);
+        }
+
+        List<ClusterRegion> regions = ConvertUtil.list2List(clusterRegionDAO.listBoundRegionsByCondition(condt), ClusterRegion.class);
         return buildRackInfos(regions);
     }
 
@@ -144,8 +151,7 @@ public class RegionRackServiceImpl implements RegionRackService {
         // 获取逻辑集群有的region
         List<ClusterRegion> regions = listLogicClusterRegions(logicClusterId);
         // 从region获取物理集群名
-        Set<String> clusterNames = regions.stream().map(ClusterRegion::getPhyClusterName).collect(Collectors.toSet());
-        return new ArrayList<>(clusterNames);
+        return regions.stream().map(ClusterRegion::getPhyClusterName).distinct().collect(Collectors.toList());
     }
 
     @Override

@@ -2,16 +2,18 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.physic;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author d06679
@@ -58,7 +60,7 @@ public interface TemplatePhyService {
      * @param param 物理索引模板
      * @return result
      */
-    Result<Long> insert(IndexTemplatePhysicalDTO param);
+    Result<Long> insert(IndexTemplatePhysicalDTO param) throws AdminOperateException;
 
     /**
      * 删除
@@ -179,12 +181,14 @@ public interface TemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhy> listTemplate();
+    List<IndexTemplatePhy> listTemplateWithCache();
 
     /**
      * 获取IndexTemplatePhysicalWithLogic
      * @return list
      */
     List<IndexTemplatePhyWithLogic> listTemplateWithLogic();
+    List<IndexTemplatePhyWithLogic> listTemplateWithLogicWithCache();
 
     /**
      * 获取集群模板量统计映射
@@ -257,4 +261,5 @@ public interface TemplatePhyService {
     List<IndexTemplatePhy> getTemplateByRegionId(Long regionId);
 
 
+    Map<Integer, Integer> getAllLogicTemplatesPhysicalCount();
 }

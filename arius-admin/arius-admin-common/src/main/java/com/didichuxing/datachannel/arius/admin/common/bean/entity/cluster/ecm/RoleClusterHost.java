@@ -58,7 +58,7 @@ public class RoleClusterHost extends BaseEntity {
     private String  rack;
 
     /**
-     * set 冷热存
+     * 节点名称
      */
     private String  nodeSet;
 

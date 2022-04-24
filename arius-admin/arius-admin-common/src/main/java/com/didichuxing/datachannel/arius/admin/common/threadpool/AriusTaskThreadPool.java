@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
+import java.util.List;
+import java.util.concurrent.*;
+
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import lombok.NoArgsConstructor;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-
-import java.util.List;
-import java.util.concurrent.*;
 
 /**
  * admin执行任务的线程池
@@ -24,12 +24,18 @@ public class AriusTaskThreadPool {
 
     private ThreadFactory springThreadFactory = new CustomizableThreadFactory("AriusTaskThreadPool");
 
-    public void init(int poolSize, String taskName) {
+    public void init(int poolSize, String taskName, int queueLen) {
         this.poolSize   = poolSize;
 
         LOGGER.warn("class=AriusTaskThreadPool||method=init||poolSize={}||taskName={}", poolSize, taskName);
 
-        pool = Executors.newFixedThreadPool(poolSize, springThreadFactory);
+        // 这里注意需要 LinkedBlockingQueue 的容量大小设置，默认为接近无限大,
+        // 随着worker数量积增，会导致内存压力持续上升，若部署在容器中, 服务会被容器主动kill掉
+        pool = new ThreadPoolExecutor(poolSize, poolSize,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(queueLen),
+                springThreadFactory);
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             pool.shutdown();
             try {
@@ -59,5 +65,10 @@ public class AriusTaskThreadPool {
 
     public int getPoolSize() {
         return poolSize;
+    }
+
+    public int getCurrentQueueWorkerSize() {
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) pool;
+        return threadPoolExecutor.getQueue().size();
     }
 }

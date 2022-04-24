@@ -2,13 +2,16 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
@@ -17,17 +20,18 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -37,6 +41,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicA
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -48,6 +53,8 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -55,6 +62,7 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,7 +114,12 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
     private ClusterLogicService         clusterLogicService;
 
     @Autowired
+    private ClusterPhyService clusterPhyService;
+
+    @Autowired
     private RegionRackService           regionRackService;
+
+    private Cache<String, List<IndexTemplateLogic>> templateListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
      * 条件查询
@@ -140,8 +153,8 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         List<TemplateLogicPO> templateLogicPOS = Lists.newArrayList();
         try {
-            templateLogicPOS = indexTemplateLogicDAO.pagingByCondition(param.getName(), 
-                    param.getDataType(), param.getHasDCDR(), param.getFrom(), param.getSize(), sortTerm, sortType);
+            templateLogicPOS = indexTemplateLogicDAO.pagingByCondition(param.getName(),
+                    param.getDataType(), param.getHasDCDR(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicServiceImpl||method=pagingGetLogicTemplatesByCondition||err={}",
                 e.getMessage(), e);
@@ -208,6 +221,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
             if (result.failed()) {
                 throw new AdminOperateException("删除模板失败");
             } else {
+                operateRecordService.save(TEMPLATE, DELETE, logicTemplateId, String.format("模板%d下线", logicTemplateId), operator);
                 LOGGER.info("class=TemplateLogicServiceImpl||method=delTemplate||logicId={}||msg=delTemplateByLogicId succ", logicTemplateId);
             }
 
@@ -289,9 +303,16 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
     }
 
     @Override
-    public Result<Void> addTemplateWithoutCheck(IndexTemplateLogicDTO param) {
+    public Result<Void> addTemplateWithoutCheck(IndexTemplateLogicDTO param) throws AdminOperateException {
         TemplateLogicPO templatePO = responsibleConvertTool.obj2Obj(param, TemplateLogicPO.class);
-        boolean succ = 1 == indexTemplateLogicDAO.insert(templatePO);
+        boolean succ;
+        try {
+            succ = (1 == indexTemplateLogicDAO.insert(templatePO));
+        } catch (DuplicateKeyException e) {
+            LOGGER.warn("class=TemplateLogicServiceImpl||method=addTemplateWithoutCheck||errMsg={}", e.getMessage());
+            throw new AdminOperateException(String.format("保存逻辑模板【%s】失败：模板名称已存在！", templatePO.getName()));
+        }
+
         param.setId(templatePO.getId());
         return Result.build(succ);
     }
@@ -334,8 +355,8 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         boolean succ = 1 == indexTemplateConfigDAO
             .update(responsibleConvertTool.obj2Obj(configDTO, TemplateConfigPO.class));
         if (succ) {
-            operateRecordService.save(TEMPLATE_CONFIG, EDIT, configDTO.getLogicId(),
-                AriusObjUtils.findChangedWithClear(oldConfigPO, configDTO), operator);
+            //由于会出现重复record， 这里把底层内部的操作记录注释掉，统一在外层进行记录
+            //operateRecordService.save(TEMPLATE_CONFIG, EDIT, configDTO.getLogicId(),AriusObjUtils.findChangedWithClear(oldConfigPO, configDTO), operator);
         }
 
         return Result.build(succ);
@@ -521,6 +542,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         logicDTO.setResponsible(tgtResponsible);
 
         return editTemplate(logicDTO, operator);
+
     }
 
     /**
@@ -530,17 +552,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
      */
     @Override
     public Map<Integer, Integer> getAllLogicTemplatesPhysicalCount() {
-        Map<Integer, Integer> logicTemplatePhysicalTemplateCountMappings = Maps.newHashMap();
-
-        Multimap<Integer, IndexTemplatePhy> logicTemplateId2PhysicalsMappings = ConvertUtil
-            .list2MulMap(templatePhyService.listTemplate(), IndexTemplatePhy::getLogicId);
-
-        for (Map.Entry<Integer, Collection<IndexTemplatePhy>> entry : logicTemplateId2PhysicalsMappings.asMap()
-                .entrySet()) {
-            logicTemplatePhysicalTemplateCountMappings.put(entry.getKey(), entry.getValue().size());
-        }
-
-        return logicTemplatePhysicalTemplateCountMappings;
+        return templatePhyService.getAllLogicTemplatesPhysicalCount();
     }
 
     /**
@@ -551,6 +563,15 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
     @Override
     public List<IndexTemplateLogic> getAllLogicTemplates() {
         return responsibleConvertTool.list2List(indexTemplateLogicDAO.listAll(), IndexTemplateLogic.class);
+    }
+
+    @Override
+    public List<IndexTemplateLogic> getAllLogicTemplatesWithCache() {
+        try {
+            return templateListCache.get("getAllLogicTemplates", this::getAllLogicTemplates);
+        } catch (Exception e) {
+            return getAllLogicTemplates();
+        }
     }
 
     /**
@@ -852,7 +873,8 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         if (1 != row) {
             return Result.buildFail("修改禁读状态失败");
         }
-        operateRecordService.save(TEMPLATE, BLOCK_READ, -1, blockRead.toString(), operator);
+        operateRecordService.save(TEMPLATE, EDIT, logicId, JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.READ.getCode(),
+                "更新读状态为:" + (blockRead ? "禁用读" : "启用读"))), operator);
         return Result.buildSucc(row);
     }
 
@@ -872,10 +894,57 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         if (1 != row) {
             return Result.buildFail("修改禁写状态失败");
         }
-        operateRecordService.save(TEMPLATE, BLOCK_WRITE, -1, blockWrite.toString(), operator);
+        operateRecordService.save(TEMPLATE, EDIT, logicId, JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.WRITE.getCode(),
+                "更新写状态为:" + (blockWrite ? "禁用写" : "启用写"))), operator);
         return Result.buildSucc(row);
     }
 
+    @Override
+    public Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO dto) throws ESOperateException {
+        List<IndexTemplatePhy> phyList = templatePhyService.getTemplateByLogicId(dto.getLogicId());
+        for (IndexTemplatePhy indexTemplatePhy : phyList) {
+            ClusterPhy clusterPhy = clusterPhyService.getClusterByName(indexTemplatePhy.getCluster());
+            List<String> templateServices = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
+            if (!templateServices.contains(TemplateServiceEnum.TEMPLATE_LIMIT_W.getCode().toString())) {
+                return Result.buildFail("指定物理集群没有开启写入限流服务");
+            }
+        }
+        TemplateLogicPO oldPO = indexTemplateLogicDAO.getById(dto.getLogicId());
+        TemplateLogicPO editTemplate = responsibleConvertTool.obj2Obj(dto, TemplateLogicPO.class);
+        editTemplate.setId(dto.getLogicId());
+        editTemplate.setWriteRateLimit(dto.getAdjustRateLimit());
+        int update = indexTemplateLogicDAO.update(editTemplate);
+        if (update > 0) {
+            IndexTemplateLogicDTO param = responsibleConvertTool.obj2Obj(editTemplate, IndexTemplateLogicDTO.class);
+            param.setId(dto.getLogicId());
+            // 将修改同步到物理模板
+            Result editPhyResult = templatePhyService.editTemplateFromLogic(param, AriusUser.SYSTEM.getDesc());
+            if (editPhyResult.failed()) {
+                return Result.buildFail("修改限流，修改物理模板失败");
+            }
+            operateRecordService.save(TEMPLATE, EDIT, dto.getLogicId(), String.format("数据库写入限流值修改%s->%s", dto.getCurRateLimit(), dto.getAdjustRateLimit()), dto.getSubmitor());
+            SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplateLogic.class), getLogicTemplateById(oldPO.getId())));
+            return Result.buildSucc();
+        }
+        return Result.buildFail();
+    }
+
+    @Override
+    public Result<Void> preCheckTemplateName(String name) {
+        if (name == null) {
+            return Result.buildParamIllegal("模板名称为空");
+        }
+        List<String> pos = indexTemplateLogicDAO.listAllNames();
+        for (String po : pos) {
+            if (name.equals(po)) {
+                return Result.buildDuplicate("模板名称已经存在");
+            }
+            if (name.startsWith(po) || po.startsWith(name)) {
+                return Result.buildParamIllegal("索引模板" + name + "与【" + po + "】冲突,不能互为前缀,模板表达式匹配时会重叠");
+            }
+        }
+        return Result.buildSuccWithMsg("索引模板可以使用");
+    }
 
 
     /**************************************** private method ****************************************************/
@@ -1132,9 +1201,10 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
                 throw new AdminOperateException("修改物理模板失败");
             }
 
-            // 记录操作记录
-            operateRecordService.save(TEMPLATE, EDIT, oldPO.getId(), AriusObjUtils.findChangedWithClear(oldPO, editTemplate),
-                    operator);
+            // 保存模板修改记录
+            operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, param.getId(), JSON.toJSONString(
+                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), AriusObjUtils.findChangedWithClear(oldPO, editTemplate))), operator);
+
             SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplateLogic.class)
                     , getLogicTemplateById(oldPO.getId())));
         }

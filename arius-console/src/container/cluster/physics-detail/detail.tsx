@@ -86,7 +86,7 @@ export class PhyClusterDetail extends React.Component<any> {
         className="detail-header"
         backIcon={false}
         title={clusterInfo?.cluster || ""}
-        tags={<Tag color={StatusMap[clusterInfo.health]}>{StatusMap[clusterInfo.health]}</Tag>}
+        tags={<Tag className={`tag ${StatusMap[clusterInfo.health]}`} color={StatusMap[clusterInfo.health]}>{StatusMap[clusterInfo.health]}</Tag>}
         extra={this.state.clusterInfo?.currentAppAuth === 1 || this.state.clusterInfo?.currentAppAuth === 0 ? this.getOpBtns() : null}
       >
         {DESC_LIST.map((row, index) => {

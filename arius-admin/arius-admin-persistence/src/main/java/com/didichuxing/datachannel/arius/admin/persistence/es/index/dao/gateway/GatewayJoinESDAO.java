@@ -1257,7 +1257,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
     public List<GatewayJoinPO> getGatewayJoinSlowList(Integer appId, GatewayJoinQueryDTO queryDTO) {
         String queryCriteriaDsl = buildGatewayJoinSlowQueryCriteriaDsl(appId, queryDTO);
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
-        String dsl = dslLoaderUtil.getFormatDslForCatIndexByCondition(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_CONDITION,
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_CONDITION,
                 queryCriteriaDsl);
         return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
     }
@@ -1271,7 +1271,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
     public List<GatewayJoinPO> getGatewayJoinErrorList(Integer appId, GatewayJoinQueryDTO queryDTO) {
         String queryCriteriaDsl = buildGatewayJoinErrorQueryCriteriaDsl(appId, queryDTO);
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
-        String dsl = dslLoaderUtil.getFormatDslForCatIndexByCondition(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_CONDITION,
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_CONDITION,
                 queryCriteriaDsl);
         return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
     }

@@ -4,7 +4,7 @@ const Prefix = "admin";
 const POST = "POST";
 
 interface indexAdminType {
-  from: number,
+  page: number,
   size: number,
   clusterPhyName?: string,
   index?: string,

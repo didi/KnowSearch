@@ -8,49 +8,33 @@ import { queryFormText } from 'constants/status-map';
 import { DTable } from 'component/dantd/dtable';
 import { RenderTitle } from 'component/render-title';
 import TaskListDetail from './../drawer/tasklist-detail'
+import { cloneDeep } from 'lodash'
 
 export const TaskList = () => {
   const department: string = localStorage.getItem('current-project');
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject] = useState(null);
+  const [queryFormObject, setqueryFormObject]: any = useState({
+    page: 1,
+    size: 10,
+    current: 1
+  });
   const [data, setData] = useState([] as any[]);
   // 控制抽屉的状态
   const [visible, setVisible] = useState(false);
   const [detailData, setDetailData] = useState({});
-  const [pagination, setPagination] = useState({
-    position: 'bottomRight',
-    showQuickJumper: true,
-    total: 0,
-    showSizeChanger: true,
-    pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
-    showTotal: (total) => `共 ${total} 条`,
-  });
-  const [page, setPage] = useState({
-    page: 1,
-    size: 10,
-  })
-
+  const [total, setTotal] = useState(0)
   React.useEffect(() => {
     reloadData();
-  }, [department, queryFromObject, page]);
+  }, [department, queryFormObject]);
 
   const reloadData = () => {
     setloading(true);
-    const params = {
-      ...page,
-      ...queryFromObject,
-    }
+    const params = cloneDeep(queryFormObject)
+    delete params.current
     getTaskList(params).then((res: any) => {
       if (res) {
         setData(res.bizData);
-        setPagination({
-          position: 'bottomRight',
-          total: res.pagination.total,
-          showQuickJumper: true,
-          showSizeChanger: true,
-          pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
-          showTotal: (total) => `共 ${total} 条`,
-        });
+        setTotal(res.pagination.total)
       }
     }).finally(() => {
       setloading(false)
@@ -63,7 +47,7 @@ export const TaskList = () => {
         delete result[key]
       }
     }
-    setqueryFromObject(result);
+    setqueryFormObject({ ...result, page: 1, size: queryFormObject.size, current: 1 });
   };
 
   const renderTitleContent = () => {
@@ -83,16 +67,18 @@ export const TaskList = () => {
   }
 
   const handleChange = (pagination) => {
-    setPage({
-      page: pagination.current,
+    setqueryFormObject({
+      ...queryFormObject,
       size: pagination.pageSize,
+      page: pagination.current,
+      current: pagination.current
     })
   }
   return (
     <>
       <div className="table-header">
         <RenderTitle {...renderTitleContent()} />
-        <TaskListDetail visible={visible} onCancel={onCancel} detailData={detailData}/>
+        <TaskListDetail visible={visible} onCancel={onCancel} detailData={detailData} />
         <QueryForm {...queryFormText} defaultCollapse columns={getTaskListQueryXForm()} onChange={() => null} onReset={handleSubmit} onSearch={handleSubmit} initialValues={{}} isResetClearAll />
       </div>
       <div>
@@ -101,7 +87,15 @@ export const TaskList = () => {
             loading={loading}
             rowKey="id"
             dataSource={data}
-            paginationProps={pagination}
+            paginationProps={{
+              position: 'bottomRight',
+              showQuickJumper: true,
+              total: total,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
+              showTotal: (total) => `共 ${total} 条`,
+              current: queryFormObject.current
+            }}
             attrs={{
               onChange: handleChange,
               scroll: { x: 1170 }

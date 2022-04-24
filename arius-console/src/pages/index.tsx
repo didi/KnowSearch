@@ -8,6 +8,7 @@ import { SchedulingPageRoutes } from './scheduling';
 import { SearchQueryPageRoutes } from './search-query';
 import { UserManagementPageRoutes } from './user-management';
 import { workOrderPageRouter } from './work-order';
+import { DashBoardPageRoutes } from './dashboard';
 import "../styles/common.less";
 import "./index.less";
 
@@ -22,4 +23,5 @@ export const PageRoutes = [
   ...SearchQueryPageRoutes,
   ...UserManagementPageRoutes,
   ...workOrderPageRouter,
+  ...DashBoardPageRoutes,
 ]

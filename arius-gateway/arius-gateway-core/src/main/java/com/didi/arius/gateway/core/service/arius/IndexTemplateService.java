@@ -1,12 +1,13 @@
 package com.didi.arius.gateway.core.service.arius;
 
 import com.didi.arius.gateway.common.enums.TemplateBlockTypeEnum;
+import com.didi.arius.gateway.common.exception.IndexNotFoundException;
 import com.didi.arius.gateway.common.exception.TooManyIndexException;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.metadata.TemplateInfo;
-import org.elasticsearch.index.IndexNotFoundException;
+
 
 import java.util.List;
 import java.util.Map;

@@ -36,6 +36,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -282,19 +283,22 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     public Result<Void> deleteTemplateAuthByTemplateId(Integer templateId, String operator) {
         boolean succeed = false;
         try {
-            AppTemplateAuthPO oldAppTemplateAuthPO = templateAuthDAO.getByTemplateId(templateId);
-            if (null == oldAppTemplateAuthPO ) {
+            List<AppTemplateAuthPO> oldAppTemplateAuthPO = templateAuthDAO.getByTemplateId(templateId);
+            if (CollectionUtils.isEmpty(oldAppTemplateAuthPO)) {
                 return Result.buildSucc();
             }
 
-            succeed = 1 <= templateAuthDAO.deleteByTemplate(templateId);
+            List<Integer> oldTemplateIds = oldAppTemplateAuthPO.stream().map(AppTemplateAuthPO::getTemplateId).collect(Collectors.toList());
+            succeed = oldTemplateIds.size() == templateAuthDAO.batchDeleteByTemplateIds(oldTemplateIds);
             if (succeed) {
                 operateRecordService.save(ModuleEnum.LOGIC_TEMPLATE_PERMISSIONS, OperationEnum.DELETE, templateId,
-                    StringUtils.EMPTY, operator);
+                        StringUtils.EMPTY, operator);
+            } else {
+                LOGGER.error("class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||delete infos failed");
             }
         } catch (Exception e) {
             LOGGER.error("class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||errMsg={}",
-                e.getMessage(), e);
+                    e.getMessage(), e);
         }
 
         return Result.build(succeed);

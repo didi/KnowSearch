@@ -19,10 +19,13 @@ public interface ESClusterNodeService {
      */
     Map<String, ClusterNodeStats> syncGetNodeFsStatsMap(String clusterName);
 
+    Map<String, ClusterNodeStats> syncGetNodePartStatsMap(String clusterName);
+
     /**
      * 获取ES集群节点ip列表
      */
     List<String> syncGetNodeHosts(String clusterName);
+    List<String> syncGetNodeIp(String clusterName);
 
     /**
      * 获取ES集群节点
@@ -39,15 +42,7 @@ public interface ESClusterNodeService {
      */
     List<PendingTask> syncGetPendingTask(String clusterName);
 
-    /**
-     * 获取ES集群movingShard信息
-     */
-    List<MovingShardMetrics> syncGetMovingShards(String clusterName);
-
-    /**
-     * 获取ES集群大Shard信息
-     */
-    List<BigShardMetrics> syncGetBigShards(String clusterName);
+    Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName);
 
     /**
      * 获取ES集群大索引(大于10亿文档数)信息

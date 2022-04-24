@@ -1,7 +1,7 @@
 const config = {
-  primaryColor: '#526ecc',
+  primaryColor: '#1473FF',
   theme: {
-    "primary-color": "#526ecc",
+    "primary-color": "#1473FF",
     "border-radius-base": "2px",
     "border-radius-sm": "2px",
     "font-size-base": "12px",

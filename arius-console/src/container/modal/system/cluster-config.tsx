@@ -71,11 +71,11 @@ export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: a
             if (!value) {
               return Promise.resolve();
             }
-            let flat_0_100 = (value.length >= 0 && value.length <= 100);
+            let flat_0_100 = (value.length >= 0 && value.length <= 1000);
             if(flat_0_100) {
               return Promise.resolve();
             } else {
-              return Promise.reject('请输入0-100个字符');
+              return Promise.reject('请输入0-1000个字符');
             }
           }
         }],

@@ -79,6 +79,9 @@ export const addRoleformMap: IFormItem[] = [
       {
         required: true,
         validator: (rule: any, value: string) => {
+          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+            return Promise.resolve();
+          }
           if (!value) {
             return Promise.reject("请输入IP:端口号，例如：127.1.1.1:8888");
           }
@@ -126,6 +129,15 @@ export const addRoleformMap: IFormItem[] = [
       {
         required: true,
         message: "请选择",
+        validator: (rule: any, value: string) => {
+          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+            return Promise.resolve();
+          }
+          if (!value) {
+            return Promise.reject();
+          }
+          return Promise.resolve();
+        },
       },
     ],
     options: cpuOptions,
@@ -138,6 +150,15 @@ export const addRoleformMap: IFormItem[] = [
       {
         required: true,
         message: "请选择",
+        validator: (rule: any, value: string) => {
+          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+            return Promise.resolve();
+          }
+          if (!value) {
+            return Promise.reject();
+          }
+          return Promise.resolve();
+        },
       },
     ],
     options: memoryOptions,
@@ -150,6 +171,15 @@ export const addRoleformMap: IFormItem[] = [
       {
         required: true,
         message: "请选择",
+        validator: (rule: any, value: string) => {
+          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+            return Promise.resolve();
+          }
+          if (!value) {
+            return Promise.reject();
+          }
+          return Promise.resolve();
+        },
       },
     ],
     options: diskTypeOptions,
@@ -162,6 +192,15 @@ export const addRoleformMap: IFormItem[] = [
       {
         required: true,
         message: "请选择",
+        validator: (rule: any, value: string) => {
+          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+            return Promise.resolve();
+          }
+          if (!value) {
+            return Promise.reject();
+          }
+          return Promise.resolve();
+        },
       },
     ],
     options: diskSizeOptions,

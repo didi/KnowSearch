@@ -1,4 +1,4 @@
-import { Dropdown, Input, Tooltip } from 'antd';
+import { Dropdown, Input, Select, Tooltip } from 'antd';
 import * as React from 'react';
 import { CaretDownOutlined } from '@ant-design/icons';
 import './index.less';
@@ -32,7 +32,7 @@ export const CustomAppDropDown = (props: {
               key="2"
               overlayClassName="app-wrapper"
               overlay={<ProjectSelect setCurrentProject={setCurrentProject} list={projectList} currentProject={currentProject} />}
-              trigger={['click', 'hover']}
+              trigger={['hover']}
               placement="bottomCenter"
             >
               <span className="dropdown-content">
@@ -58,6 +58,7 @@ export const CustomAppDropDown = (props: {
 class ProjectSelect extends React.Component<IProjectDropDown> {
   public state = {
     list: this.props.list || [] as IProject[],
+    isSearch: false,
   };
 
   public onHandleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -66,6 +67,7 @@ class ProjectSelect extends React.Component<IProjectDropDown> {
     const list = value?.trim() ? originList.filter(item => item.name.includes(value?.trim()) || (item.id + '').includes(value?.trim())) : originList;
     this.setState({
       list,
+      isSearch: true,
     });
   }
 
@@ -74,14 +76,18 @@ class ProjectSelect extends React.Component<IProjectDropDown> {
   }
 
   public render() {
-    const { list } = this.state;
+    const { list, isSearch } = this.state;
     const { currentProject } = this.props;
     return (
       <>
         <>
-          <Input onChange={this.onHandleInputChange} placeholder="请输入项目名称或项目ID" />
+          <Input onChange={this.onHandleInputChange} placeholder="请输入项目名称或项目ID" prefix={<svg className="icon svg-icon" aria-hidden="true">
+            <use xlinkHref="#icontubiao-sousuo"></use>
+          </svg>} />
         </>
         <ul>
+          {isSearch && !list.length ? <li>无匹配结果</li> : null}
+          {!isSearch && !list.length ? <li>无项目</li> : null}
           {
             list.map((item, index) =>
             (<li key={index}>

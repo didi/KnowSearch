@@ -131,7 +131,7 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[1],
   },
   "thread_pool-search-queue": {
-    name: "SearchQueue大小",
+    name: "SearchQueue个数",
     unit: unitMap.count,
     classify: indexConfigClassifyList[1],
   },
@@ -155,14 +155,29 @@ export const indexConfigData = {
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
+  "indices-merges-total": {
+    name: "每分钟merge次数",
+    unit: unitMap.mins,
+    classify: indexConfigClassifyList[1],
+  },
   "indices-refresh-total_time_in_millis": {
     name: "Refresh操作耗时",
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
+  "indices-refresh-total": {
+    name: "每分钟refresh次数",
+    unit: unitMap.mins,
+    classify: indexConfigClassifyList[1],
+  },
   "indices-flush-total_time_in_millis": {
     name: "Flush操作耗时",
     unit: unitMap.ms,
+    classify: indexConfigClassifyList[1],
+  },
+  "indices-flush-total": {
+    name: "每分钟flush次数",
+    unit: unitMap.mins,
     classify: indexConfigClassifyList[1],
   },
   "indices-query_cache-hit_count": {
@@ -267,7 +282,11 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[2],
     newquota: 'cardinality',
   },
-
+  "indices-segments-stored_fields_memory_in_bytes": {
+    name: "stored_fields_memory大小",
+    unit: unitMap.MB,
+    classify: indexConfigClassifyList[2],
+  },
   "jvm-gc-young-collection_count_rate": {
     name: "young-gc次数",
     unit: unitMap.ss,
@@ -301,6 +320,16 @@ export const indexConfigData = {
   "jvm-mem-heap_used_percent": {
     name: "JVM堆使用率",
     unit: unitMap.percent,
+    classify: indexConfigClassifyList[3],
+  },
+  "jvm-mem-pools-young-used_in_bytes": {
+    name: "堆内存young区使用空间",
+    unit: unitMap.MB,
+    classify: indexConfigClassifyList[3],
+  },
+  "jvm-mem-pools-old-used_in_bytes": {
+    name: "堆内存old区使用空间",
+    unit: unitMap.MB,
     classify: indexConfigClassifyList[3],
   },
 };

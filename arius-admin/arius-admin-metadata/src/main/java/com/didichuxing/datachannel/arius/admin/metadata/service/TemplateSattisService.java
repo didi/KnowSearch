@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.*;
@@ -12,16 +18,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateStatsInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.weekly.AppQuery;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslFieldUsePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppIdTemplateAccessCountPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppQueryPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.TemplateAccessCountPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.TemplateTpsMetricPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateStatsInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppIdTemplateAccessCountPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppQueryPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.TemplateTpsMetricPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app.AppIdTemplateAccessESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslFieldUseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
@@ -41,9 +47,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.formatDouble;
 
@@ -473,6 +476,7 @@ public class TemplateSattisService {
             templateStatsInfoPO.setIndexHealthDegree(formatDouble(indexHealthDegree, 2));
         }).runnableTask(() -> {
             double totalSizeInBytes = ariusStatsIndexInfoESDAO.getLogicTemplateTotalSize(logicTemplateId);
+            templateStatsInfoPO.setStoreBytes(totalSizeInBytes);
             templateStatsInfoPO.setStore(formatDouble(totalSizeInBytes / ONE_GB, 2));
         }).runnableTask(() -> {
             double maxTps = ariusStatsIndexInfoESDAO.getTemplateMaxTpsByTimeRange(logicTemplateId, current - ONE_DAY,

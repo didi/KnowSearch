@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { TableMappingForm } from './table-mapping-setting';
 import { JSONMappingSetting } from './json-mapping-setting';
-import { DATE_FORMAT_BY_ES, TEMP_FORM_MAP_KEY, MAPPING_TYPE, MAPPING_CHECK_GROUP } from './constant';
+import { DATE_FORMAT_BY_ES, TEMP_FORM_MAP_KEY, MAPPING_TYPE } from './constant';
 import { getFormatJsonStr } from 'lib/utils';
 import Url from 'lib/url-parser';
 import { getTableMappingData, strNumberToBoolean } from './config';
 import { updateIndexMappingInfo, checkIndexMappingInfo, getIndexBaseInfo, getIndexMappingInfo } from 'api/cluster-index-api';
-import { Tabs, Button, Modal, message, Checkbox, Tooltip, PageHeader } from 'antd';
+import { Tabs, Button, Modal, message, Checkbox, Tooltip, PageHeader, Empty } from 'antd';
 import * as actions from 'actions';
 import { connect } from "react-redux";
 import { tuple } from 'antd/lib/_util/type';
@@ -19,7 +19,6 @@ import { InfoItem } from 'component/info-item';
 interface IMappingItem {
   type: string;
   enabled?: boolean;
-  // dynamic?: boolean;
   doc_values?: boolean;
   store?: boolean;
   properties?: IMappingItem;
@@ -77,9 +76,7 @@ export class SecondStep extends React.Component<any> {
             asyncTranslog: res.asyncTranslog,
             cancelCopy: res.cancelCopy,
             customerAnalysisValue: res.analysis ? JSON.stringify(res.analysis, null, 4) : '',
-            // dynamicTemplatesValue: res.dynamicTemplates ? JSON.stringify(res.dynamicTemplates, null, 4) : '',
             customerAnalysis: res.analysis ? true : false,
-            // dynamicTemplates: res.dynamicTemplates ? true : false,
           }))
         }
       })
@@ -107,9 +104,7 @@ export class SecondStep extends React.Component<any> {
             asyncTranslog: res.asyncTranslog,
             cancelCopy: res.cancelCopy,
             customerAnalysisValue: res.analysis ? JSON.stringify(res.analysis, null, 4) : '',
-            // dynamicTemplatesValue: res.dynamicTemplates ? JSON.stringify(res.dynamicTemplates, null, 4) : '',
             customerAnalysis: res.analysis ? true : false,
-            // dynamicTemplates: res.dynamicTemplates ? true : false,
           }))
         }
       })
@@ -236,7 +231,7 @@ export class SecondStep extends React.Component<any> {
     switch (type) {
       case 'object':
         result.enabled = strNumberToBoolean(values[`search_${key}`]); // 检索
-        // result.dynamic = strNumberToBoolean(values[`dynamic_${key}`]);
+        result.dynamic = strNumberToBoolean(values[`dynamic_${key}`]);
         result.doc_values = strNumberToBoolean(values[`sort_${key}`]);
         break;
       case 'nested':
@@ -361,7 +356,19 @@ export class SecondStep extends React.Component<any> {
     this.props.dispatch(actions.setCreateIndex({ [key]: check }))
   }
 
+  public onClearAndNext = () => {
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingKeys, {}));
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.tableMappingValues, {}));
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.thirdStepPreviewJson, {}));
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingValue, JSON.stringify({})));
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.jsonMappingValue, ''));
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.thirdStepPreviewJson, ''));
+    this.props.dispatch(actions.setTemporaryFormMap(TEMP_FORM_MAP_KEY.mappingValue, ''));
+    this.props.dispatch(actions.setCurrentStep(2));
+  }
+
   public render() {
+    const { isMapping } = this.props.createIndex;
     const isDetailPage = window.location.pathname.includes('/index/logic/detail');
     return (
       <div id="mappingName">
@@ -385,22 +392,6 @@ export class SecondStep extends React.Component<any> {
           />
         ))}</PageHeader> : null}
         <div className={this.isModifyPage ? 'content-wrapper' : ''}>
-          {/* {
-            !this.isModifyPage ?
-              <div style={{ marginTop: 10, position: 'absolute', right: 0, zIndex: 10 }}>
-                {MAPPING_CHECK_GROUP.map(item => {
-                  return (
-                    <Checkbox disabled={this.isDetailPage} checked={this.props.createIndex[item.value]} key={item.value} onChange={(e) => {
-                        this.handleCheckGroup(item.value, e.target.checked);
-                      }}>
-                      {item.text}
-                    </Checkbox>
-                  )
-                })}
-                <Tooltip title="打开dynamic templates设置显示相应编辑器"><span><InfoCircleFilled style={{ width: 14, height: 14, color: '#495057' }} /></span></Tooltip>
-              </div>
-              : null
-          } */}
           {
             isDetailPage ?
               <div className="detail-tabs">

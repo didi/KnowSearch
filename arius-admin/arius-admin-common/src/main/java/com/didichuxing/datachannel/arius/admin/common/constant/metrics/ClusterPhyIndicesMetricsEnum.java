@@ -61,7 +61,18 @@ public enum ClusterPhyIndicesMetricsEnum {
                                           INDEX_WRITE_MEM_SIZE("segments-index_writer_memory_in_bytes",
                                                                "index_writer_memory大小"),
 
-                                          TRANSLOG_SIZE("translog-size_in_bytes", "translog大小");
+                                          TRANSLOG_SIZE("translog-size_in_bytes", "translog大小"),
+
+                                          INDEXING_TIME_PER_DOC("indexing-time_per_doc", "索引单次操作文档耗时"),
+
+                                          MERGES_AVG_TIME("merges_avg_time", "单次merges操作耗时"),
+
+                                          REFRESH_AVG_TIME("refresh_avg_time", "单次refresh操作耗时"),
+
+                                          FLUSH_AVG_TIME("flush_avg_time", "单次flush操作耗时"),
+
+                                          SEGMENTS_STORED_FIELDS("segments-stored_fields_memory_in_bytes", "segments-stored_fields内存大小");
+
 
     ClusterPhyIndicesMetricsEnum(String type, String desc) {
         this.type = type;

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,8 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,7 +71,7 @@ public class ESOpClient {
                 }
             } else {
                 ClusterPO cachedCluster = esClusterMap.get(clusterPO.getCluster());
-                if (cachedCluster != null && !cachedCluster.equals(clusterPO)) {
+                if ((cachedCluster != null && !cachedCluster.equals(clusterPO)) || !isActualRunning(clusterPO.getCluster())) {
                     LOGGER.info("class=ESOpClient||method=refreshConnect||msg=clusterMetaUpdate||" +
                                     "cluster={}||cachedClusterMeta={}||currentClusterMeta={}",
                             clusterPO.getCluster(), JSON.toJSONString(cachedCluster), JSON.toJSONString(clusterPO));
@@ -136,7 +139,8 @@ public class ESOpClient {
      */
     public void reConnect(String cluster) {
         removeAndCloseESClient(cluster);
-        connect(cluster);
+        //connect(cluster);
+        connect(clusterDAO.getByName(cluster));
     }
 
     /**************************************** private method ****************************************************/
@@ -183,6 +187,29 @@ public class ESOpClient {
             client.close();
             LOGGER.error("class=ESOpClient||method=connect||msg=connect es by http error||cluster={}||hosts={}||msg=client start error", clusterPO.getCluster(),
                     clusterPO.getHttpAddress());
+        }
+    }
+
+    public boolean isActualRunning(String cluster) {
+        ESClient esClient = esClientMap.get(cluster);
+        if (esClient != null) {
+            return isActualRunning(esClient);
+        }
+        return false;
+    }
+
+    public boolean isActualRunning(ESClient esClient) {
+        try {
+            Field field = esClient.getClass().getDeclaredField("restClient");
+            field.setAccessible(true);
+            RestClient restClient = (RestClient) field.get(esClient);
+            field = restClient.getClass().getDeclaredField("client");
+            field.setAccessible(true);
+            CloseableHttpAsyncClient httpAsyncClient = (CloseableHttpAsyncClient) field.get(restClient);
+            return httpAsyncClient.isRunning();
+        } catch (Exception e) {
+            LOGGER.warn("get running status error.", e);
+            return true;
         }
     }
 }

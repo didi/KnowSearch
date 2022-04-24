@@ -12,7 +12,7 @@ export const indexConfigData = {
     classify: indexConfigClassifyList[0],
   },
   queryDslTotalCost: {
-    name: " 查询模版访问耗时",
+    name: "查询模版访问耗时",
     unit: unitMap.ms,
     title: function () {
       return this.name + "(ms)";

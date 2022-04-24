@@ -1,7 +1,39 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.AVG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.DOUBLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.FIELD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.HIST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.INT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.KEY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.LONG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.METRICS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.PERCENTILES;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.STATIS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIME_STAMP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUES;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ESClusterTaskDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
+import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -12,53 +44,48 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ESClusterTaskDetail;
-import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentilesMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
-import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Value;
 
 @NoArgsConstructor
 public class BaseAriusStatsESDAO extends BaseESDAO {
 
-    @Value("${es.update.cluster.name}")
-    protected String                        metadataClusterName;
+    @Value("${es.metrics.cluster.buckets.max.num}")
+    protected int                                                         clusterMaxNum;
 
+    @Value("${es.metrics.nodes.buckets.max.num}")
+    protected int                                                         esNodesMaxNum;
+
+    @Value("${es.update.cluster.name}")
+    protected String                                                      metadataClusterName;
+
+    @Value("${es.metrics.indices.buckets.max.num}")
+    protected int                                                         indicesBucketsMaxNum;
     /**
      * 操作的索引名称
      */
-    protected String                       indexName;
+    protected String                                                      indexName;
 
     /**
      * 索引type名称为type
      */
-    protected static final String          TYPE      = "type";
+    protected static final String                                         TYPE               = "type";
 
-    protected static final int             SCROLL_SIZE           = 5000;
-    protected static final Long            ONE_GB                = 1024 * 1024 * 1024L;
+    protected static final int                                            SCROLL_SIZE        = 5000;
+    protected static final Long                                           ONE_GB             = 1024 * 1024 * 1024L;
 
-    protected static final String     NOW_2M     = "now-2m";
-    protected static final String     NOW_1M     = "now-1m";
+    protected static final String                                         NOW_7M             = "now-7m";
+    protected static final String                                         NOW_6M             = "now-6m";
+    protected static final String                                         NOW_5M             = "now-5m";
+    protected static final String                                         NOW_4M             = "now-4m";
+    protected static final String                                         NOW_2M             = "now-2m";
+    protected static final String                                         NOW_3M             = "now-3m";
+    protected static final String                                         NOW_1M             = "now-1m";
+    protected static final String                                         DEFAULT_AGG        = "avg";
+    public static final String                                            INDEX_INDEX_TOTAL_DIFF = "indexing-index_total";
+    public static final String                                            SEARCH_QUERY_TOTAL_DIFF = "search-query_total";
 
     /**
      * 不同维度es监控数据
@@ -82,7 +109,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
     /**
      * 批量插入索引统计信息
-    
+
      * @param statsInfo
      * @return
      */
@@ -180,7 +207,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return this.indexName.concat("*");
     }
 
-    <T> List<T> fetchAggClusterPhyMetrics(ESQueryResponse response, String aggType, Class<T> clazz) {
+    <T> List<T> fetchAggClusterPhyMetrics(ESQueryResponse response, Class<T> clazz) {
         List<T> aggMetrics = Lists.newCopyOnWriteArrayList();
 
         if (response == null || response.getAggs() == null) {
@@ -199,24 +226,24 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                         if (null != r.getUnusedMap() && null != r.getUnusedMap().get(KEY)) {
                             timeStamp = Long.valueOf(r.getUnusedMap().get(KEY).toString());
                         }
-                        handleFields(aggType, r, obj, timeStamp);
+                        handleFields(r, obj, timeStamp);
                         aggMetrics.add(obj);
                     } catch (Exception e) {
                         LOGGER.error(
-                                "class=AriusStatsClusterInfoEsDao||method=fetchAggClusterPhyMetrics||errMsg=exception! response:{}",
+                                "class=BaseAriusStatsESDAO||method=fetchAggClusterPhyMetrics||errMsg=exception! response:{}",
                                 response.toString(), e);
                     }
                 });
             }
         } catch (Exception e) {
             LOGGER.error(
-                "class=AriusStatsClusterInfoEsDao||method=fetchAggClusterPhyMetrics||errMsg=exception! response:{}",
+                "class=BaseAriusStatsESDAO||method=fetchAggClusterPhyMetrics||errMsg=exception! response:{}",
                 response.toString(), e);
         }
         return aggMetrics;
     }
 
-    private <T> void handleFields(String aggType, ESBucket eSBucket, T obj, long timeStamp) throws IntrospectionException, IllegalAccessException, InvocationTargetException {
+    private <T> void handleFields(ESBucket eSBucket, T obj, long timeStamp) throws IntrospectionException, IllegalAccessException, InvocationTargetException {
         for (Field field : Objects.requireNonNull(obj).getClass().getDeclaredFields()) {
             PropertyDescriptor pd = new PropertyDescriptor(field.getName(), obj.getClass());
             //1. get method of setter
@@ -233,12 +260,12 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             }
 
             //获取统计数据
-            handleStatisticalData(aggType, eSBucket, obj, field, writeMethod, parameterTypes);
+            handleStatisticalData(eSBucket, obj, field, writeMethod, parameterTypes);
         }
     }
 
-    private <T> void handleStatisticalData(String aggType, ESBucket eSBucket, T obj, Field field, Method writeMethod, Class<?>[] parameterTypes) throws IllegalAccessException, InvocationTargetException {
-        String metricKey = aggType + "_" + field.getName();
+    private <T> void handleStatisticalData(ESBucket eSBucket, T obj, Field field, Method writeMethod, Class<?>[] parameterTypes) throws IllegalAccessException, InvocationTargetException {
+        String metricKey = field.getName();
         if (null != eSBucket.getAggrMap() && null != eSBucket.getAggrMap().get(metricKey)
             && null != eSBucket.getAggrMap().get(metricKey).getUnusedMap().get(VALUE)
             && parameterTypes.length > 0) {
@@ -295,12 +322,25 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return sb.toString();
     }
 
+    /**
+     * example
+     *
+     * "os-cpu-percent":{"max":{"field":"metrics.os-cpu-percent"}},
+     * "fs-total-disk_free_percent":{"max":{"field":"metrics.fs-total-disk_free_percent"}},
+     * "os-cpu-load_average-1m":{"max":{"field":"metrics.os-cpu-load_average-1m"}},
+     * "os-cpu-load_average-5m":{"max":{"field":"metrics.os-cpu-load_average-5m"}},
+     * "os-cpu-load_average-15m":{"max":{"field":"metrics.os-cpu-load_average-15m"}},
+     * "transport-tx_count_rate":{"max":{"field":"metrics.transport-tx_count_rate"}},
+     *
+     * @param metrics
+     * @param aggType
+     * @return
+     */
     String buildAggsDSL(List<String> metrics, String aggType) {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < metrics.size(); i++) {
-            String metricName = metrics.get(i).substring(4);
-
+            String metricName = metrics.get(i);
             Map<String, String> aggsSubSubCellMap = Maps.newHashMap();
             aggsSubSubCellMap.put(FIELD, METRICS + metricName);
 
@@ -313,27 +353,17 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return sb.toString();
     }
 
-    private void buildAggsDslMap(String aggType, StringBuilder sb, String metricName,
+    protected void buildAggsDslMap(String aggType, StringBuilder sb, String metricName,
                                  Map<String, String> aggsSubSubCellMap) {
         Map<String, Object> aggsSubCellMap = Maps.newHashMap();
         aggsSubCellMap.put(aggType, aggsSubSubCellMap);
 
         Map<String, Object> aggsCellMap = Maps.newHashMap();
-        String dslCellKey = aggType + "_" + metricName;
-        aggsCellMap.put(dslCellKey, aggsSubCellMap);
+        aggsCellMap.put(metricName, aggsSubCellMap);
 
         JSONObject jsonObject = new JSONObject(aggsCellMap);
         String str = jsonObject.toJSONString();
         sb.append(str, 1, str.length() - 1);
-    }
-
-    List<String> getAggMetricsStr(List<String> metrics, String aggType) {
-        List<String> keyMetrics = Lists.newArrayList();
-
-        for (String metric : metrics) {
-            keyMetrics.add(aggType + "_" + metric);
-        }
-        return keyMetrics;
     }
 
     /**
@@ -344,53 +374,103 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         List<MetricsContent> sortedList = variousLineChartsMetrics.getMetricsContents()
                 .stream()
                 .sorted(Comparator.comparing(x -> x.getMetricsContentCells().get(0).getValue(), Comparator.reverseOrder()))
-                .limit(topNu)
+                .limit(topNu != null ? topNu : 0)
                 .collect(Collectors.toList());
 
         variousLineChartsMetrics.setMetricsContents(sortedList);
     }
 
     /**
-     * 获取单个ES实例/索引名称的指标信息        
+     * 获取单个ES实例/索引名称的指标信息
      * @param s                es响应体
      * @param metricsKeys      指标key
-     * @param name             ES节点名称/索引名称
+     * @param name             ES节点名称/索引名称/节点任务
      * @return
      */
     List<VariousLineChartMetrics> fetchSingleAggMetrics(ESQueryResponse s, List<String> metricsKeys, String name) {
         List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
 
         if (null == s || s.getAggs() == null) {
-            LOGGER.warn("class=AriusStatsNodeInfoESDAO||method=fetchSingleAggMetrics||msg=esQueryResponse is null");
+            LOGGER.warn("class=BaseAriusStatsESDAO||method=fetchSingleAggMetrics||msg=esQueryResponse is null");
             return variousLineChartsMetrics;
         }
 
         Map<String, ESAggr> esAggrMap = s.getAggs().getEsAggrMap();
         if (null != esAggrMap && null != esAggrMap.get(HIST)) {
-            metricsKeys.forEach(
-                key -> variousLineChartsMetrics.add(buildVariousLineChartMetricsForOneNode(key, name, esAggrMap)));
+            for (String metricsKey : metricsKeys) {
+
+                try {
+                    variousLineChartsMetrics.add(buildVariousLineChartMetricsForOneNode(metricsKey, name, esAggrMap));
+                } catch (Exception e) {
+                    LOGGER.error(
+                        "class=BaseAriusStatsESDAO||method=fetchSingleAggMetrics||name={}||metricsKey={}||errMsg=exception! response:{}",
+                        name, metricsKey, e);
+                }
+            }
         }
 
         return variousLineChartsMetrics;
     }
+    
+    /**
+     *  此方法是用来处理非负型指标
+     * @param
+     * @param
+     * @param topNu
+     * @return
+     */
+     List<VariousLineChartMetrics> fetchMultipleNoNegativeAggMetrics(ESQueryResponse response,
+        String oneLevelType, List<String> metricsKeys, Integer topNu) {
+         List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
+    
+         if (null == response || response.getAggs() == null) {
+             LOGGER.warn(
+                 "class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
+             return variousLineChartsMetrics;
+         }
+         Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+         if (null != esAggrMap && null != esAggrMap.get(HIST)) {
+             metricsKeys.stream()
+                 //对非负型指标进行获取
+                 .map(key -> buildVariousLineNoNegativeChartMetrics(oneLevelType,key, esAggrMap))
+                 //过滤除节点指标为空的状态
+                 .filter(variousLineChartMetric -> CollectionUtils.isNotEmpty(
+                     variousLineChartMetric.getMetricsContents()))
+                 .forEach(variousLineChartsMetrics::add);
+         }
+    
+         //get topNu
+         if (topNu != null) {
+             variousLineChartsMetrics.forEach(metrics -> mergeTopNu(metrics, topNu));
+         }
+        return variousLineChartsMetrics;
+    }
 
-    List<VariousLineChartMetrics> fetchMultipleAggMetrics(ESQueryResponse response, List<String> metricsKeys,
-                                                          Integer topNu, boolean sortFlag) {
+    /**
+     *
+     * @param response         返回值
+     * @param oneLevelType     一级指标类型(@link OneLevelTypeEnum)
+     * @param metricsKeys      多个指标类型
+     * @param topNu            topN
+     * @return                 结果
+     */
+    List<VariousLineChartMetrics> fetchMultipleAggMetrics(ESQueryResponse response, String oneLevelType, List<String> metricsKeys,
+                                                          Integer topNu) {
         List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
 
         if (null == response || response.getAggs() == null) {
             LOGGER.warn(
-                    "class=AriusStatsNodeInfoESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
+                    "class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
             return variousLineChartsMetrics;
         }
 
         Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
         if (null != esAggrMap && null != esAggrMap.get(HIST)) {
-            metricsKeys.forEach(key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(key, esAggrMap)));
+            metricsKeys.forEach(key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType ,key, esAggrMap)));
         }
 
         //get topNu
-        if (sortFlag) {
+        if (topNu != null) {
             variousLineChartsMetrics.forEach(metrics -> mergeTopNu(metrics, topNu));
         }
 
@@ -402,7 +482,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         topMetrics.setType(variousLineChartMetrics.getType());
         List<String> topNames = variousLineChartMetrics.getMetricsContents().stream().map(MetricsContent::getName)
                 .collect(Collectors.toList());
-        topMetrics.setTopName(topNames);
+        topMetrics.setTopNames(topNames);
         return topMetrics;
     }
 
@@ -425,7 +505,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     private VariousLineChartMetrics buildVariousLineChartMetricsForOneNode(String key, String nodeName,
                                                                            Map<String, ESAggr> esAggrMap) {
         VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
-        variousLineChartMetrics.setType(key.substring(4));
+        variousLineChartMetrics.setType(key);
         variousLineChartMetrics.setMetricsContents(buildMetricsContentsForOneNode(key, nodeName, esAggrMap));
         return variousLineChartMetrics;
     }
@@ -465,21 +545,87 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return metricsContentCell;
     }
 
-    private VariousLineChartMetrics buildVariousLineChartMetrics(String key, Map<String, ESAggr> esAggrMap) {
+    private VariousLineChartMetrics buildVariousLineChartMetrics(String oneLevelType, String key, Map<String, ESAggr> esAggrMap) {
         VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
-        variousLineChartMetrics.setType(key.substring(4));
-        variousLineChartMetrics.setMetricsContents(buildMetricsContents(key, esAggrMap));
+        variousLineChartMetrics.setType(key);
+        variousLineChartMetrics.setMetricsContents(buildMetricsContents(oneLevelType, key, esAggrMap));
         return variousLineChartMetrics;
     }
+    private VariousLineChartMetrics buildVariousLineNoNegativeChartMetrics( String oneLevelType,String key,Map<String,
+        ESAggr> esAggrMap){
+        VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
+        variousLineChartMetrics.setType(key);
+        variousLineChartMetrics.setMetricsContents(buildMetricsNoNegativeContents(oneLevelType,key,
+            esAggrMap));
+        return variousLineChartMetrics;
+    }
+    private List<MetricsContent> buildMetricsNoNegativeContents( String oneLevelType,String key, Map<String, ESAggr> esAggrMap) {
+        List<MetricsContent> metricsContents = Lists.newArrayList();
+    
+        if (Objects.nonNull(esAggrMap.get(HIST))) {
+            final List<ESBucket> bucketList = esAggrMap.get(HIST).getBucketList();
+            if (CollectionUtils.isNotEmpty(bucketList)) {
+                for (ESBucket esBucket : bucketList) {
+                    //get nodeName
+                    if (null != esBucket.getUnusedMap()) {
+                        MetricsContent metricsContent = new MetricsContent();
+                        if (Objects.nonNull(esBucket.getUnusedMap().get(KEY))) {
+                            String keyValue = esBucket.getUnusedMap().get(KEY).toString();
+                            if (null != oneLevelType && OneLevelTypeEnum.listNoClusterOneLevelType()
+                                .contains(oneLevelType)) {
+                                // 针对非集群维度指标，需要区分节点、模板、索引等所属集群
+                                String[] keyArr = keyValue.split("@");
+                                if (keyArr.length > 1) {
+                                    String clusterName = keyArr[0];
+                                    String name/*节点、模板、索引等名称*/ = keyArr[1];
+                                    metricsContent.setCluster(clusterName);
+                                    metricsContent.setName(name);
+                                }
+                            } else {
+                                // 针对集群维度指标
+                                metricsContent.setName(keyValue);
+                                metricsContent.setCluster(keyValue);
+                            }
+                            final List<MetricsContentCell> metricsContentCells = buildMetricsNoNegativeContentCells(
+                                key, esBucket);
+                            //确定指标集合不为空
+                            if (CollectionUtils.isNotEmpty(metricsContentCells)) {
+                                metricsContent.setMetricsContentCells(metricsContentCells);
+                                metricsContents.add(metricsContent);
+                            }
+                        }
+                    
+                    
+                    }
+                }
+            }
+        }
+        return metricsContents;
+    }
 
-    private List<MetricsContent> buildMetricsContents(String key, Map<String, ESAggr> esAggrMap) {
+    private List<MetricsContent> buildMetricsContents(String oneLevelType, String key, Map<String, ESAggr> esAggrMap) {
         List<MetricsContent> metricsContents = Lists.newArrayList();
 
         esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
             //get nodeName
             if (null != esBucket.getUnusedMap().get(KEY)) {
                 MetricsContent metricsContent = new MetricsContent();
-                metricsContent.setName(esBucket.getUnusedMap().get(KEY).toString());
+                String keyValue = esBucket.getUnusedMap().get(KEY).toString();
+                if (null != oneLevelType && OneLevelTypeEnum.listNoClusterOneLevelType().contains(oneLevelType)){
+                    // 针对非集群维度指标，需要区分节点、模板、索引等所属集群
+                    String[] keyArr = keyValue.split("@");
+                    if (keyArr.length > 1) {
+                        String clusterName                 = keyArr[0];
+                        String name/*节点、模板、索引等名称*/  = keyArr[1];
+                        metricsContent.setCluster(clusterName);
+                        metricsContent.setName(name);
+                    }
+                }else {
+                    // 针对集群维度指标
+                    metricsContent.setName(keyValue);
+                    metricsContent.setCluster(keyValue);
+                }
+
                 metricsContent.setMetricsContentCells(buildMetricsContentCells(key, esBucket));
                 metricsContents.add(metricsContent);
             }
@@ -508,6 +654,79 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             metricsContentCells.add(metricsContentCell);
         });
 
+        return metricsContentCells;
+    }
+    private List<MetricsContentCell> buildMetricsNoNegativeContentCells(String key, ESBucket esBucket) {
+        List<MetricsContentCell> metricsContentCells = Lists.newArrayList();
+        
+        esBucket.getAggrMap().get(HIST).getBucketList().forEach(esSubBucket -> {
+            MetricsContentCell metricsContentCell = new MetricsContentCell();
+            
+            // get timeStamp
+            final Object time = JSONPath.eval(esSubBucket.toJson(), String.format("$.%s", KEY));
+            if (Objects.nonNull(time)) {
+                metricsContentCell.setTimeStamp(Long.valueOf(String.valueOf(time)));
+            }
+         
+            
+            //get value
+            final Object value = JSONPath.eval(esSubBucket.toJson(), String.format("$.%s.%s.%s", key,
+                key,VALUE));
+            /**
+             * 由于采用了<em></>agg</em>中<em>filter</em>聚合模式，会导致到聚合字段的结果在获取不到的状态下是null状态，
+             * 这里采用jsonpath{@link  JSONPath#eval(Object, String)}解析出来结果值，为了保证我们处理到的value不为空，所以将集合添加这一块一并加入判断
+             * ，如果后续需要加入value值为空的，那么放开即可，但是同时需要对
+             * {@link BaseAriusStatsESDAO#mergeTopNu(VariousLineChartMetrics, Integer)}中的<em>sorted</em>
+             * 进行修改
+             *   {
+             *           "key" : "iNGVb_yJUrm",
+             *           "doc_count" : 1,
+             *           "hist" : {
+             *             "buckets" : [
+             *               {
+             *                 "key_as_string" : "1648810200000",
+             *                 "key" : 1648810200000,
+             *                 "doc_count" : 1,
+             *                 "gatewayFailedPer" : {
+             *                   "doc_count" : 0,
+             *                   "gatewayFailedPer" : {
+             *                     "value" : null
+             *                   }
+             *                 }
+             *               }
+             *             ]
+             *           }
+             *         }，
+             *          {
+             *           "key" : "logi-elasticsearch-7.6.0",
+             *           "doc_count" : 1,
+             *           "hist" : {
+             *             "buckets" : [
+             *               {
+             *                 "key_as_string" : "1648810200000",
+             *                 "key" : 1648810200000,
+             *                 "doc_count" : 1,
+             *                 "gatewayFailedPer" : {
+             *                   "doc_count" : 1,
+             *                   "gatewayFailedPer" : {
+             *                     "value" : 0.0
+             *                   }
+             *                 }
+             *               }
+             *             ]
+             *           }
+             *         }
+             *
+             */
+            
+            if (Objects.nonNull(value)) {
+                metricsContentCell.setValue(Double.valueOf(String.valueOf(value)));
+                metricsContentCells.add(metricsContentCell);
+    
+            }
+            
+        });
+        
         return metricsContentCells;
     }
 
@@ -553,7 +772,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                 clusterPhyName, startTime, endTime);
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, clusterPhyName,
+        return gatewayClient.performRequestWithRouting(metadataClusterName, null,
                 realIndexName, TYPE, dsl, s -> s.getHits().getHits().size() > 0 ? ((Map<String, Long>)s.getHits().getHits().get(0).getSource()).get("timestamp") : null, 3);
     }
 }

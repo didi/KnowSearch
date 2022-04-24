@@ -30,10 +30,11 @@ export class ClusterInfo extends React.Component<{
 }> {
   public clusterId: number;
   public physicsCluster: string;
-
+  public auth: string
   constructor(props: any) {
     super(props);
     const url = Url();
+    this.auth = url.search.auth
     this.clusterId = Number(url.search.clusterId);
     this.physicsCluster = url.search.physicsCluster;
   }
@@ -52,7 +53,7 @@ export class ClusterInfo extends React.Component<{
       getPhyClusterAvalibleTemplateSrv(this.physicsCluster),
       getPhyClusterTemplateSrv(this.physicsCluster),
     ]).then((res) => {
-        this.setPhyClusterTemplateSrvs(res);
+      this.setPhyClusterTemplateSrvs(res);
     });
   }
 
@@ -68,14 +69,15 @@ export class ClusterInfo extends React.Component<{
     const hasCapacityServer = !!currentSrvs.find((row) => row.serviceId === 11);
 
     for (const item of avalibleSrvs) {
-      let disabled = false;
-      if(isOpenUp) {
+      // -1 -> 无权限
+      let disabled = this.auth === "-1" ? true : false;
+      if (isOpenUp) {
         // 开源环境部分功能禁用
         if (showTag[item.serviceName] === 3) {
           disabled = true
         }
         // 在开源环境下，分类为 0 隐藏
-        if(showTag[item.serviceName] !== 0) {
+        if (showTag[item.serviceName] !== 0) {
           phyClusterTemplateSrvs.push({
             disabled,
             item,
@@ -98,7 +100,7 @@ export class ClusterInfo extends React.Component<{
 
   public renderTip = (label: string) => {
     let tip = "暂无相关信息";
-    if(isOpenUp) {
+    if (isOpenUp) {
       if (showTag[label] === 3) {
         return '该功能仅面向商业版客户开放';
       }
@@ -152,7 +154,7 @@ export class ClusterInfo extends React.Component<{
                 />
               </div>
             ))}
-            {clusterTemplateSrvs && clusterTemplateSrvs.length < 1 ? <Empty style={{ width: '100%', margin: '20px 0px' }} description="该集群版本不支持索引模板服务"/> : null}
+            {clusterTemplateSrvs && clusterTemplateSrvs.length < 1 ? <Empty style={{ width: '100%', margin: '20px 0px' }} description="该集群版本不支持索引模板服务" /> : null}
           </div>
         </div>
         {/* <EditList /> */}

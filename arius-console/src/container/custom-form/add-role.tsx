@@ -5,7 +5,6 @@ import './index.less'
 import { regIp } from 'constants/reg';
 
 const { TextArea } = Input;
-
 interface Item {
   value: string;
   disabled: boolean;
@@ -15,6 +14,8 @@ interface Item {
 *保存
 *重现
 */
+
+const IP_TIP = '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割'
 export class AddRole extends React.Component<any> {
   state = {
     itemArr: [
@@ -224,7 +225,7 @@ export class AddRole extends React.Component<any> {
           flatPost = true;
         }
         if (isPostArr[1] && (flatIp === false)) {
-          if (isPostArr[1].length > 4) {
+          if (+isPostArr[1] > 25535) {
             flatLength = true;
           }
         }
@@ -233,31 +234,31 @@ export class AddRole extends React.Component<any> {
     // 多个相同 ip
     if ((new Set(ipArr)).size != ipArr.length) {
       obj[type] = {
-        tipText: '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割且 ip 不能相同',
+        tipText: `${IP_TIP}且 ip 不能相同`,
         isTip: true
       }
     } else if (flat) {
       obj[type] = {
         // 格式错误，没有:号, 列：127.1.1.1:8888 => ip:端口
-        tipText: '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割',
+        tipText: IP_TIP,
         isTip: true
       }
     } else if (flatIp) {
       // 格式错误，ip不符合规范, 列：127.1.1.1:8888 => ip:端口
       obj[type] = {
-        tipText: '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割',
+        tipText: IP_TIP,
         isTip: true
       }
     } else if (flatPost) {
       // 格式错误，:号后面没有端口, 列：127.1.1.1:8888 => ip:端口
       obj[type] = {
-        tipText: '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割',
+        tipText: IP_TIP,
         isTip: true
       }
     } else if (flatLength) {
       // 格式错误，:号端口格式不正确, 多个请换行。
       obj[type] = {
-        tipText: '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割',
+        tipText: `${IP_TIP}，输入端口号超最大值25535`,
         isTip: true
       }
     }
@@ -411,7 +412,7 @@ export class AddRole extends React.Component<any> {
       <TextArea value={itemArr[0].value} rows={2} onChange={(value) => this.handleTextArea(value, 'masternode')} placeholder={this.props.isHost ? '请输入ip列：127.1.1.1，多个换行分割（回车键换行）。' : '请按照 IP:端口号的形式填写，例如：127.1.1.1:8888 ，不同IP用换行符分隔。'} />
       {
         check['masternode']?.isTip || (window as any)?.masternodeErr ?
-          <p style={{ color: '#ff4d4f' }}>{check['masternode']?.tipText || '请输入IP:端口号，例如：127.1.1.1:8888。多个IP用换行分割'}</p>
+          <p style={{ color: '#ff4d4f' }}>{check['masternode']?.tipText || IP_TIP}</p>
           :
           null
       }

@@ -122,4 +122,10 @@ public interface AppClusterLogicAuthService {
      */
     AppClusterLogicAuth buildClusterLogicAuth(Integer appId, Long clusterLogicId,
                                               AppClusterLogicAuthEnum appClusterLogicAuthEnum);
+
+    /**
+     * 获取全量权限信息
+     * @return
+     */
+    List<AppClusterLogicAuth> list();
 }

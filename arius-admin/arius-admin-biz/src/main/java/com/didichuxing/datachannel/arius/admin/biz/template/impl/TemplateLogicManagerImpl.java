@@ -1,61 +1,39 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum.*;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
-import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl.NOT_CHECK;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplateValue;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.QuotaUsage;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.*;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
@@ -78,6 +56,21 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import static com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum.OWN;
+import static com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum.isTemplateAuthExitByCode;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_LOGIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
+import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl.NOT_CHECK;
 
 @Component
 public class TemplateLogicManagerImpl implements TemplateLogicManager {
@@ -275,7 +268,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             insertTemplateConfig(defaultTemplateConfig);
 
             // 记录操作记录
-            operateRecordService.save(TEMPLATE, ADD, param.getId(), "", operator);
+            operateRecordService.save(TEMPLATE, ADD, param.getId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")), operator);
 
             SpringTool.publish(new LogicTemplateAddEvent(this, templateLogicService.getLogicTemplateById(param.getId())));
         }
@@ -610,17 +603,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
         }
 
-        if (CollectionUtils.isNotEmpty(templateLogicService.getLogicTemplateByName(templateName))) {
-            return Result.buildDuplicate("模板名称已经存在");
-        }
-
-        // 前缀匹配校验
-        Result<Void> checkNamePrefixResult = checkTemplateNamePrefix(templateName);
-        if (checkNamePrefixResult.failed()) {
-            return Result.buildFrom(checkNamePrefixResult);
-        }
-
-        return Result.buildSucc();
+        return templateLogicService.preCheckTemplateName(templateName);
     }
 
     @Override
@@ -669,7 +652,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             // 如果状态不同则更新状态
             IndexTemplateConfigDTO indexTemplateConfigDTO = ConvertUtil.obj2Obj(templateConfig, IndexTemplateConfigDTO.class);
             indexTemplateConfigDTO.setDisableIndexRollover(newDisable);
-            return templateLogicService.updateTemplateConfig(indexTemplateConfigDTO, operator);
+            Result<Void> updateStatusResult = templateLogicService.updateTemplateConfig(indexTemplateConfigDTO, operator);
+            if (updateStatusResult.success()) {
+                // rollover状态修改记录(兼容开启或者关闭)
+                operateRecordService.save(TEMPLATE, OperationEnum.EDIT, templateLogicId, JSON.toJSONString(
+                        new TemplateOperateRecord(TemplateOperateRecordEnum.ROLLOVER.getCode(), "rollover状态修改为:" + (newDisable ? "关闭" : "开启"))), operator);
+            }
         }
         return Result.buildSucc();
     }
@@ -708,7 +696,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         for (String clusterPhyName : clusterPhyNameList) {
             Result<Boolean> checkResult = checkTemplateSrvByClusterName(clusterPhyName, templateSrvId);
             if (checkResult.failed()) {
-                return Result.buildFrom(checkResult);
+                return Result.buildFailWithMsg(false, checkResult.getMessage());
             }
         }
 

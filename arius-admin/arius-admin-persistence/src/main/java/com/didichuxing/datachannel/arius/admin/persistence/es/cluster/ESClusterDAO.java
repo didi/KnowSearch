@@ -1,5 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.stereotype.Repository;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -12,6 +25,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.settin
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TimeValueUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -23,6 +38,7 @@ import com.didiglobal.logi.elasticsearch.client.request.cat.ESCatRequest;
 import com.didiglobal.logi.elasticsearch.client.request.cluster.getsetting.ESClusterGetSettingsRequest;
 import com.didiglobal.logi.elasticsearch.client.request.cluster.health.ESClusterHealthRequest;
 import com.didiglobal.logi.elasticsearch.client.request.cluster.updatesetting.ESClusterUpdateSettingsRequestBuilder;
+import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import com.didiglobal.logi.elasticsearch.client.response.cat.ESCatResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.getsetting.ESClusterGetSettingsResponse;
@@ -34,16 +50,6 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.stereotype.Repository;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -59,6 +65,7 @@ public class ESClusterDAO extends BaseESDAO {
      */
     public boolean configReBalanceOperate(String cluster, String value) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) { return false;}
 
         ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
             .addPersistent(REBALANCE, value).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
@@ -73,6 +80,7 @@ public class ESClusterDAO extends BaseESDAO {
      */
     public Map<String, Object> getPersistentClusterSettings(String cluster) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) { return null;}
 
         ESClusterGetSettingsRequest request = new ESClusterGetSettingsRequest();
         ESClusterGetSettingsResponse response = client.admin().cluster().getSetting(request)
@@ -107,6 +115,7 @@ public class ESClusterDAO extends BaseESDAO {
      */
     public boolean putPersistentRemoteClusters(String cluster, String remoteCluster, List<String> tcpAddresses) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) { return false;}
 
         JSONArray addresses = new JSONArray();
         addresses.addAll(tcpAddresses);
@@ -125,6 +134,7 @@ public class ESClusterDAO extends BaseESDAO {
      */
     public boolean putPersistentConfig(String cluster, Map<String, Object> configMap) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) { return false;}
 
         ESClusterUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().cluster()
             .prepareUpdateSettings();
@@ -148,6 +158,7 @@ public class ESClusterDAO extends BaseESDAO {
      */
     public Map<String/*nodeName*/, List<String>/*pluginName*/> getNode2PluginsMap(String cluster) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) { return null;}
 
         ESCatRequest esCatRequest = new ESCatRequest();
         esCatRequest.setUri("plugins");
@@ -241,6 +252,7 @@ public class ESClusterDAO extends BaseESDAO {
     public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster) {
         try {
             ESClient client = esOpClient.getESClient(cluster);
+            if (null == client) { return null;}
             ESClusterNodesSettingResponse response = client.admin().cluster().prepareNodesSetting().execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getNodes();
@@ -370,7 +382,6 @@ public class ESClusterDAO extends BaseESDAO {
                 JSONObject jvmHeapObj = jvmObj.getJSONObject(MEM);
                 responses.setTotalHeapMem(new ByteSizeValue(jvmHeapObj.getLongValue(HEAP_MAX_IN_BYTES)));
                 responses.setUsedHeapMem(new ByteSizeValue(jvmHeapObj.getLongValue(HEAP_USED_IN_BYTES)));
-
             }
 
         } catch (Exception e) {
@@ -384,6 +395,8 @@ public class ESClusterDAO extends BaseESDAO {
     public List<ESClusterTaskStatsResponse> getClusterTaskStats(String clusterName) {
         List<ESClusterTaskStatsResponse> responses = Lists.newArrayList();
         ESClient esClient = esOpClient.getESClient(clusterName);
+        if (null == esClient) { return responses;}
+
         try {
             DirectRequest taskStatsRequest = new DirectRequest("GET", "_cat/tasks?v&detailed&format=json");
             DirectResponse directResponse = esClient.direct(taskStatsRequest).actionGet(30, TimeUnit.SECONDS);
@@ -445,7 +458,7 @@ public class ESClusterDAO extends BaseESDAO {
 
     private ESClusterStatsResponse initESClusterStatsResponse() {
         ESClusterStatsResponse responses = new ESClusterStatsResponse();
-        responses.setStatus(RED.getDesc());
+        responses.setStatus(ClusterHealthEnum.UNKNOWN.getDesc());
         responses.setMemUsed(new ByteSizeValue(0));
         responses.setMemFree(new ByteSizeValue(0));
         responses.setMemTotal(new ByteSizeValue(0));
@@ -478,6 +491,45 @@ public class ESClusterDAO extends BaseESDAO {
             LOGGER.error("class=ESClusterDAO||method=syncGetAllNodesAttributes||cluster={}||errMsg=attributes is null", clusterName, e);
         }
 
+        return null;
+    }
+
+    /**
+     * 获取物理集群线程池相关统计信息
+     * @param cluster 物理集群的名称
+     * @return 集群线程池ESClusterThreadStats 属性
+     */
+    public List<ESClusterThreadPO> syncGetThreadStatsByCluster(String cluster) {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (Objects.isNull(client)) {
+            LOGGER.error("class=ESClusterDAO||method=syncGetThreadStatsByCluster||clusterName={}||errMsg=esClient is null", cluster);
+            return null;
+        }
+
+        try {
+            ESCatRequest esCatRequest = new ESCatRequest();
+            esCatRequest.setUri("thread_pool");
+
+            ESCatResponse esCatResponse = client.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            if (esCatResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(esCatResponse.getResponse().toString())) {
+                return ConvertUtil.str2ObjArrayByJson(esCatResponse.getResponse().toString(), ESClusterThreadPO.class);
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterDAO||method=syncGetThreadStatsByCluster||cluster={}||errMsg=attributes is null", cluster, e);
+        }
+        return null;
+    }
+
+    public ESClusterHealthResponse getClusterHealthAtIndicesLevel(String physicalClusterName) {
+        try {
+            ESClient esClient = esOpClient.getESClient(physicalClusterName);
+            ESClusterHealthRequest request = new ESClusterHealthRequest();
+            return esClient.admin().cluster().health(request.setLevel(IndicesStatsLevel.INDICES)).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterClientPool||method=getClusterHealthAtIndicesLevel||clusterName={}||errMsg=query error. ", physicalClusterName, e);
+        }
         return null;
     }
 }

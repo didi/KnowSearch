@@ -13,15 +13,14 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 
 @Component
@@ -46,7 +45,7 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     public List<VariousLineChartMetrics> getAggFieldByRange(Long startTime, Long endTime, List<String> metricsTypes, Integer topNu) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD, startTime, endTime, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD, startTime, endTime, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldAggMetrics(response, metricsTypes, topNu, interval), 3);
     }
 
@@ -56,7 +55,7 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     public List<VariousLineChartMetrics> getAggFieldByRange(Long startTime, Long endTime, List<String> metricsTypes, String appId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_BY_APPID, appId, startTime, endTime, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_BY_APPID, appId, startTime, endTime, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByAppIdAggMetrics(response, metricsTypes, appId, interval), 3);
     }
 
@@ -66,7 +65,7 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     public VariousLineChartMetrics getAggAppCountByRange(Long startTime, Long endTime, Integer topNu) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT, startTime, endTime, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT, startTime, endTime, interval, startTime, endTime);
         List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) ->
                 fetchFieldAggMetrics(response, Lists.newArrayList(GatewayMetricsTypeEnum.QUERY_APP_COUNT.getType()), topNu, interval), 3);
         return variousLineChartMetrics.get(0);
@@ -78,14 +77,11 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     public VariousLineChartMetrics getAggAppCountByRange(Long startTime, Long endTime, String appId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT_BY_APPID, appId, startTime, endTime, interval);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT_BY_APPID, appId, startTime, endTime, interval, startTime, endTime);
         List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) ->
                 fetchFieldByAppIdAggMetrics(response, Lists.newArrayList(GatewayMetricsTypeEnum.QUERY_APP_COUNT.getType()), appId, interval), 3);
         return variousLineChartMetrics.get(0);
     }
-
-
-
     private List<VariousLineChartMetrics> fetchFieldAggMetrics(ESQueryResponse response, List<String> metricsTypes, Integer topNu, String interval) {
         List<VariousLineChartMetrics> list = Lists.newArrayList();
         for (String metricsType : metricsTypes) {
@@ -122,7 +118,7 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
                     Long timeStamp = Long.valueOf(bucket.getUnusedMap().get(KEY).toString());
                     String aggKey = GatewayMetricsTypeEnum.type2AggKey(metricsType);
                     Double value;
-                    if (aggKey.endsWith("_count")) {
+                    if (MetricsUtils.needConvertUnit(aggKey)) {
                         value = MetricsUtils.getDoubleValuePerMin(interval, bucket.getUnusedMap().get(aggKey).toString());
                     } else {
                         value = MetricsUtils.getAggMapDoubleValue(bucket, aggKey);
@@ -152,7 +148,7 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
                     Long timeStamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
                     Double value;
                     String aggKey = GatewayMetricsTypeEnum.type2AggKey(metricsType);
-                    if (aggKey.endsWith("_count")) {
+                    if (MetricsUtils.needConvertUnit(aggKey)) {
                         value = MetricsUtils.getDoubleValuePerMin(interval, esBucket.getUnusedMap().get(aggKey).toString());
                     } else {
                         value = MetricsUtils.getAggMapDoubleValue(esBucket, aggKey);
@@ -164,5 +160,6 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
 
         return vos;
     }
-
+    
+   
 }

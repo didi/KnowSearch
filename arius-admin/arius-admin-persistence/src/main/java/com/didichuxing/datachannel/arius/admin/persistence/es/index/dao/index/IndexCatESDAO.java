@@ -78,7 +78,7 @@ public class IndexCatESDAO extends BaseESDAO {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
         String queryTermDsl =  buildQueryTermDsl(clusters, index, health);
         String sortType     =  buildSortType(orderByDesc);
-        String dsl = dslLoaderUtil.getFormatDslForCatIndexByCondition(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
             queryTermDsl, sortTerm, sortType, from, size);
         int retryTime = 3;
         do {

@@ -60,7 +60,7 @@ export const getOverviewData = (metricsTypes: string[], clusterPhyName: string, 
 }
 
 // 获取节点视图数据
-export const getNodeViewData = async (metricsTypes: string[], clusterPhyName: string, startTime: number, endTime: number, topNu: number, nodeIp: string) => {
+export const getNodeViewData = async (metricsTypes: string[], clusterPhyName: string, startTime: number, endTime: number, topNu: number, nodeIp: string[]) => {
   if (!clusterPhyName) {
     return;
   }
@@ -89,12 +89,12 @@ export const getNodeViewData = async (metricsTypes: string[], clusterPhyName: st
         startTime,
         endTime,
         topNu,
-        nodeName: nodeIp
+        nodeNames: nodeIp
       }
     });
   }
   if (metricsTypes && metricsTypes.length) {
-    data = await fetch("/v3/op/phy/cluster/metrics/node", {
+    data = await fetch("/v3/op/phy/cluster/metrics/nodes", {
       prefix: Prefix,
       method: POST,
       body: {
@@ -104,7 +104,7 @@ export const getNodeViewData = async (metricsTypes: string[], clusterPhyName: st
         startTime,
         endTime,
         topNu,
-        nodeName: nodeIp
+        nodeNames: nodeIp
       }
     });
   }

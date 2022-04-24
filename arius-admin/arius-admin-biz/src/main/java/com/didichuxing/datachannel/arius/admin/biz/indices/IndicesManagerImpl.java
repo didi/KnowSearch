@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.client.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.INDEX_OP;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -344,9 +345,9 @@ public class IndicesManagerImpl implements IndicesManager {
     private IndicesConditionDTO buildOneIndicesConditionDTO(String clusterPhyName, String indexName) {
         IndicesConditionDTO indicesConditionDTO = new IndicesConditionDTO();
         indicesConditionDTO.setIndex(indexName);
-        indicesConditionDTO.setClusterPhyName(clusterPhyName);
+        indicesConditionDTO.setClusterPhyName(Arrays.asList(clusterPhyName));
         indicesConditionDTO.setSortTerm(DEFAULT_SORT_TERM);
-        indicesConditionDTO.setFrom(0L);
+        indicesConditionDTO.setPage(1L);
         indicesConditionDTO.setSize(1L);
         return indicesConditionDTO;
     }

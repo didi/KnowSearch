@@ -15,6 +15,8 @@ interface INavRouterLinkProps {
   needToolTip?: boolean;
   onClick?: any;
   removeCacheKey?: any;
+  maxShowLength?: number
+  style?: any;
 }
 
 const hiddenTooltipElement = (className: string) => {
@@ -27,7 +29,17 @@ const hiddenTooltipElement = (className: string) => {
 export const NavRouterLink = withRouter<any, any>(
   (props: INavRouterLinkProps) => {
     const overlayClassName = 'nav-link-tooltip';
-
+    // 限制展示固定字符
+    const renderElement = () => {
+      if (props.maxShowLength && typeof props.element === 'string') {
+        if (props.element.length <= props.maxShowLength) {
+          return props.element
+        }
+        return props.element.slice(0, props.maxShowLength) + '...'
+      } else {
+        return props.element
+      }
+    }
     return (
       <Link
         onClick={() => {
@@ -36,14 +48,13 @@ export const NavRouterLink = withRouter<any, any>(
           props.removeCacheKey && refreshByCacheKey(props.removeCacheKey);
         }}
         to={props.href}
+        style={props?.style}
       >
         {props.needToolTip ? (
           <Tooltip overlayClassName={overlayClassName} placement="bottomLeft" title={props.element}>
-            {props.element}
+            {renderElement()}
           </Tooltip>
-        ) : (
-          props.element
-        )}
+        ) : renderElement()}
       </Link>
     );
   }

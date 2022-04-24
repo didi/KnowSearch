@@ -35,9 +35,9 @@ export const getPieOption = ({
         return (
           name +
           ":\n" +
-          legendVal[name].value +
+          legendVal[name]?.value +
           "  |  " +
-          legendVal[name].percent +
+          legendVal[name]?.percent +
           "%"
         );
       },
@@ -45,7 +45,10 @@ export const getPieOption = ({
     tooltip: {
       show: true,
       trigger: "item",
-      formatter: `{b} : {c} ${unit ? unit : ""} ({d}%)`,
+      // formatter: `{b} : {c} ${unit ? unit : ""} ({d}%)`,
+      formatter: ({name, value}) => {
+        return `${name} : ${value} ${unit ? unit : ""} (${legendVal[name]?.percent}%)`
+      },
       position: (pos, params, dom, rect, size) => {
         const [x, y] = pos;
 

@@ -64,14 +64,6 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
         if (pageDTO instanceof IndicesConditionDTO) {
             IndicesConditionDTO indicesConditionDTO = (IndicesConditionDTO) pageDTO;
 
-            if(StringUtils.isBlank(indicesConditionDTO.getClusterPhyName())) {
-                return Result.buildParamIllegal("物理集群查询条件不可为空");
-            }
-
-            if (!clusterPhyManager.isClusterExists(indicesConditionDTO.getClusterPhyName())) {
-                return Result.buildParamIllegal("物理集群不存在");
-            }
-
             if (StringUtils.isNotBlank(indicesConditionDTO.getHealth()) && !IndexStatusEnum.isStatusExit(indicesConditionDTO.getHealth())) {
                 return Result.buildParamIllegal(String.format("健康状态%s非法", indicesConditionDTO.getHealth()));
             }
@@ -93,8 +85,8 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
     protected void init(PageDTO pageDTO) {
         if (pageDTO instanceof IndicesConditionDTO) {
             IndicesConditionDTO condition = (IndicesConditionDTO) pageDTO;
-            if (null == condition.getFrom()) {
-                condition.setFrom(0L);
+            if (null == condition.getPage()) {
+                condition.setPage(1L);
             }
 
             if (null == condition.getSize() || 0 == condition.getSize()) {
@@ -130,12 +122,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
             return PaginationResult.buildFail("获取索引查询信息失败");
         }
 
-        if(StringUtils.isBlank(condition.getClusterPhyName())){
-            return PaginationResult.buildFail("集群信息为空，必须选择一个集群");
-        }
-
-        List<String> clusterPhyNameList = new ArrayList<>();
-        clusterPhyNameList.add(condition.getClusterPhyName());
+        List<String> clusterPhyNameList = condition.getClusterPhyName();
         return getIndexCatCellsFromES(clusterPhyNameList, condition);
     }
 
@@ -149,7 +136,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
         try {
             //获取Cat/Index信息
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                phyNameList, condition.getIndex(), condition.getHealth(), condition.getFrom(), condition.getSize(),
+                    phyNameList, condition.getIndex(), condition.getHealth(), (condition.getPage() - 1) * condition.getSize(), condition.getSize(),
                 condition.getSortTerm(), condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
                 LOGGER.warn("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||"
@@ -162,7 +149,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
             List<IndexCatCell> finalIndexCatCellList = batchFetchIndexBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
             List<IndexCatCellVO> indexCatCellVOList  = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
 
-            return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(), condition.getFrom(), condition.getSize());
+            return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(), condition.getPage(), condition.getSize());
         } catch (Exception e) {
             LOGGER.error("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
                 ListUtils.strList2String(phyNameList), condition.getIndex(), e.getMessage(), e);

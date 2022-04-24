@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
@@ -17,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author d06679
@@ -94,7 +96,7 @@ public interface TemplateLogicService {
      * @param param 索引逻辑模板参数
      * @return result
      */
-    Result<Void> addTemplateWithoutCheck(IndexTemplateLogicDTO param);
+    Result<Void> addTemplateWithoutCheck(IndexTemplateLogicDTO param) throws AdminOperateException;
 
     /**
      * 获取模板配置信息
@@ -147,6 +149,7 @@ public interface TemplateLogicService {
      * @return list
      */
     List<IndexTemplateLogic> getAllLogicTemplates();
+    List<IndexTemplateLogic> getAllLogicTemplatesWithCache();
 
     /**
      * 获取全部逻辑模板
@@ -361,4 +364,7 @@ public interface TemplateLogicService {
      */
     Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
 
+    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) throws ESOperateException;
+
+    Result<Void> preCheckTemplateName(String templateName);
 }

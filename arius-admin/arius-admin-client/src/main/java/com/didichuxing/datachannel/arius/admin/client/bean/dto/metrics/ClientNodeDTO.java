@@ -20,4 +20,9 @@ public class ClientNodeDTO extends GatewayNodeDTO {
 
     @ApiModelProperty("clientNodeIp")
     private String clientNodeIp;
+
+    @Override
+    public String getGroup() {
+        return "clientNode";
+    }
 }

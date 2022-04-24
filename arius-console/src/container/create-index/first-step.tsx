@@ -6,7 +6,7 @@ import { TEMP_FORM_MAP_KEY } from './constant';
 import Url from 'lib/url-parser';
 import { CancelActionModal } from 'container/custom-component';
 import { Button, notification, Spin, Modal } from 'antd';
-import { getIndexBaseInfo, queryQuotaCost, updateIndexInfo, checkHotTimeState } from 'api/cluster-index-api';
+import { getIndexBaseInfo, queryQuotaCost, updateIndexInfo, getClusterTemplateSrv } from 'api/cluster-index-api';
 import { connect } from "react-redux";
 import * as actions from 'actions';
 import { urlPrefix } from 'constants/menu';
@@ -19,20 +19,18 @@ const mapStateToProps = state => ({
 const connects: Function = connect;
 @connects(mapStateToProps)
 export class FirstStep extends React.Component<any> {
-
   public state = {
     clusterType: 1,
     cyclicalRoll: '',
     currentRegion: REGION_LIST[0].value,
     formData: null as any,
     loading: false,
-    hotTimeState: true,
   };
   private $formRef: any = null;
   private isModifyPage: boolean = false;
   private id: number = null;
   private clusterId: number = null;
-  
+
   constructor(props: any) {
     super(props);
     const url = Url();
@@ -65,24 +63,24 @@ export class FirstStep extends React.Component<any> {
   }
 
   public onHandleValuesChange = (value: any, allValues: object) => {
-    const checkHotTime = () => {
+
+    const checkIndexConfigByCluster = () => {
       if (value?.clusterInfo && value?.clusterInfo?.cluster) {
-        checkHotTimeState(value?.clusterInfo?.cluster).then((res) => {
-          let flag = true;
+        getClusterTemplateSrv(value?.clusterInfo?.cluster).then((res) => {
+          let disableHotTimeState = true;
+        
           if (res && res.length) {
             res.forEach((item) => {
               if (item.serviceId === 8) {
-                flag = false;
+                disableHotTimeState = false;
               }
             })
           }
-          this.setState({
-            hotTimeState: flag,
-          });
+          this.props.dispatch(actions.setCreateIndex({ disableHotTimeState }));
         })
       }
-      
     }
+
     Object.keys(value).forEach(key => {
       switch (key) {
         case 'region':
@@ -101,17 +99,18 @@ export class FirstStep extends React.Component<any> {
           }
           break;
         case 'type':
-          this.$formRef.setFieldsValue({ clusterName: null }); 
+          this.$formRef.setFieldsValue({ clusterName: null });
           break;
         case 'expireTime':
         case 'cluster':
         case 'quota':
           this.getCostData(allValues);
           break;
-        case 'clusterInfo': 
-          this.$formRef.setFieldsValue({ level: value?.clusterInfo?.level }); // 选择集群后给level初始值
-          checkHotTime();
-          this.setState({...this.state});
+        case 'clusterInfo':
+          this.$formRef.setFieldsValue({ level: value?.clusterInfo?.level, hotTime: '' }); // 选择集群后给level初始值
+          checkIndexConfigByCluster();
+          this.props.dispatch(actions.setCreateIndex({dataCenter: value?.clusterInfo?.dataCenter}));
+          this.setState({ ...this.state });
           break;
       }
     });
@@ -146,7 +145,7 @@ export class FirstStep extends React.Component<any> {
       updateIndexInfo(formData).then(() => {
         notification.success({ message: '更新成功' });
         window.setTimeout(() => {
-          if(this.props?.history) {
+          if (this.props?.history) {
             dropByCacheKey('index-tpl-management')
             this.props.history.push('/index-tpl-management');
           } else {
@@ -195,7 +194,7 @@ export class FirstStep extends React.Component<any> {
       cyclicalRoll,
       this.isModifyPage,
       this.$formRef,
-      this.state.hotTimeState
+      this.props.createIndex.disableHotTimeState
     );
   }
 
@@ -208,11 +207,12 @@ export class FirstStep extends React.Component<any> {
 
   public render() {
     const formData = this.state.formData || this.props.createIndex.temporaryFormMap.get(TEMP_FORM_MAP_KEY.firstStepFormData) || {};
+
     if (this.isModifyPage && !formData.clusterInfo) {
       formData.clusterInfo = {
-          cluster: formData.cluster,
-          clusterName: formData.cluster,
-          clusterType: formData.clusterType
+        cluster: formData.cluster,
+        clusterName: formData.cluster,
+        clusterType: formData.clusterType
       }
     }
 
@@ -229,7 +229,7 @@ export class FirstStep extends React.Component<any> {
             <div className="op-btn-group">
               {this.isModifyPage && <Button type="primary" onClick={this.onSave}>保存</Button>}
               {!this.isModifyPage && <Button type="primary" onClick={this.onSubmit}>下一步</Button>}
-              <CancelActionModal routeHref={'/index-tpl-management'} history={this.props?.history} cb={this.clearStore}/>
+              <CancelActionModal routeHref={'/index-tpl-management'} history={this.props?.history} cb={this.clearStore} />
             </div>
           </div>
         </Spin>

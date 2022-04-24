@@ -16,8 +16,8 @@ public class ESClusterTaskStatsResponse {
     private String taskId;
     private String parentTaskId;
     private String type;
-    private long startTime;
-    private long runningTime;
+    private long   startTime;
+    private long   runningTime;
     private String runningTimeString;
     private String ip;
     private String node;

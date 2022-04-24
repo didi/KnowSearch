@@ -16,6 +16,7 @@ import FilterColumns from "component/filterColumns";
 import { getCheckedList, setCheckedList } from "api/search-query";
 import { isOpenUp } from "constants/common";
 import { getClusterNameList } from "api/cluster-kanban";
+import './index.less'
 
 const mapStateToProps = (state) => ({
   app: state.app,
@@ -31,8 +32,8 @@ export const IndexTplManagement = connect(
 )((props: { setModalId: Function; app: AppState; history: any }) => {
   const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject]: any = useState({
-    from: 0,
+  const [queryFormObject, setqueryFormObject]: any = useState({
+    page: 1,
     size: 10,
   });
   const [tableData, setTableData] = useState([]);
@@ -43,6 +44,8 @@ export const IndexTplManagement = connect(
     showSizeChanger: true,
     pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
     showTotal: (total) => `共 ${total} 条`,
+    current: 1,
+    pageSize: 10
   });
   const [selectedRows, setSelectedRows] = useState([]);
   const [columns, setColumns] = useState([]);
@@ -50,7 +53,7 @@ export const IndexTplManagement = connect(
 
   React.useEffect(() => {
     reloadData();
-  }, [department, queryFromObject]);
+  }, [department, queryFormObject]);
 
   React.useEffect(() => {
     getClusterNameList().then((res) => {
@@ -66,7 +69,7 @@ export const IndexTplManagement = connect(
       reloadData();
     }, 60 * 1000);
     return () => clearInterval(time);
-  }, [department, queryFromObject]);
+  }, [department, queryFormObject]);
 
   const handleSubmit = (result) => {
     for (var key in result) {
@@ -74,28 +77,29 @@ export const IndexTplManagement = connect(
         delete result[key];
       }
     }
-    setqueryFromObject({ ...result, from: 0, size: 10 });
+    setqueryFormObject({ ...result, page: 1, size: paginationProps.pageSize });
   };
 
   const reloadData = () => {
     setloading(true);
     const Params: IAllIndexList = {
-      from: queryFromObject.from,
-      size: queryFromObject.size,
-      authType: queryFromObject.authType,
-      dataType: queryFromObject.dataType,
-      name: queryFromObject.name,
-      sortTerm: queryFromObject.sortTerm,
-      orderByDesc: queryFromObject.orderByDesc,
-      hasDCDR: queryFromObject.hasDCDR,
+      page: queryFormObject.page,
+      size: queryFormObject.size,
+      authType: queryFormObject.authType,
+      dataType: queryFormObject.dataType,
+      name: queryFormObject.name,
+      sortTerm: queryFormObject.sortTerm,
+      orderByDesc: queryFormObject.orderByDesc,
+      hasDCDR: queryFormObject.hasDCDR,
     };
-    if (queryFromObject.clusterPhies) {
-      Params["clusterPhies"] = [queryFromObject.clusterPhies];
+    if (queryFormObject.clusterPhies) {
+      Params["clusterPhies"] = [queryFormObject.clusterPhies];
     }
     getAllIndexList(Params)
       .then((res) => {
         if (res) {
           setTableData(res?.bizData);
+          const { pageNo = 1, pageSize = 10 } = res.pagination
           setPaginationProps({
             position: "bottomRight",
             showQuickJumper: true,
@@ -103,6 +107,8 @@ export const IndexTplManagement = connect(
             showSizeChanger: true,
             pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
             showTotal: (total) => `共 ${total} 条`,
+            current: pageNo,
+            pageSize: pageSize
           });
         }
       })
@@ -246,7 +252,7 @@ export const IndexTplManagement = connect(
     if (filters.hasDCDR) {
       filters.hasDCDR?.length === 1 ? (sorterObject.hasDCDR = filters.hasDCDR[0]) : null;
     }
-    setqueryFromObject((state) => {
+    setqueryFormObject((state) => {
       if (!sorter.order) {
         delete state.sortTerm;
         delete state.orderByDesc;
@@ -257,7 +263,7 @@ export const IndexTplManagement = connect(
       return {
         ...state,
         ...sorterObject,
-        from: (pagination.current - 1) * pagination.pageSize,
+        page: pagination.current,
         size: pagination.pageSize,
       };
     });
@@ -296,9 +302,9 @@ export const IndexTplManagement = connect(
             rowKey="id"
             dataSource={tableData}
             key={JSON.stringify({
-              authType: queryFromObject.authType,
-              dataType: queryFromObject.dataType,
-              name: queryFromObject.name,
+              authType: queryFormObject.authType,
+              dataType: queryFormObject.dataType,
+              name: queryFormObject.name,
             })}
             attrs={{
               onChange: handleChange,

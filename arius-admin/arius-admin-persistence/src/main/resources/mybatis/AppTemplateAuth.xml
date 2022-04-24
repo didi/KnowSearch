@@ -65,6 +65,14 @@
         where template = #{templateId}
     </delete>
 
+    <delete id="batchDeleteByTemplateIds" parameterType="java.util.List">
+        delete from appid_template_info
+        where template in
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
     <select id="listWithRwAuthsByAppId" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

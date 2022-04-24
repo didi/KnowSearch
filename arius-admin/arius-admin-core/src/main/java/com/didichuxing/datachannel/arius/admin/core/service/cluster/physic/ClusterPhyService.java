@@ -67,6 +67,7 @@ public interface ClusterPhyService {
      * @return 集群列表,如果没有返回空列表
      */
     List<ClusterPhy> listAllClusters();
+    List<String>  listAllClusterNameList();
 
     /**
      * 根据names列出所有集群
@@ -200,6 +201,4 @@ public interface ClusterPhyService {
      * @return 指定rack的总的磁盘大小，单位是字节数目
      */
     Float getSurplusDiskSizeOfRacks(String clusterPhyName, String racks, Map</*rack信息*/String, /*rack对应的总磁盘大小*/Float> allocationInfoOfRack);
-
-
 }

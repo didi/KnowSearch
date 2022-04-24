@@ -1,7 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -49,16 +53,40 @@ public class BaseESDAO {
     protected ESOpClient      esOpClient;
 
     public DirectResponse getDirectResponse(String clusterName, String methodType, String url) {
-        ESClient esClient = esOpClient.getESClient(clusterName);
+        ESClient       esClient       = esOpClient.getESClient(clusterName);
+        DirectResponse directResponse = new DirectResponse();
         if (esClient == null) {
             LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
                 clusterName);
-            DirectResponse directResponse = new DirectResponse();
             directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
             return directResponse;
         }
 
         DirectRequest directRequest = new DirectRequest(methodType, url);
-        return esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+        try {
+            return esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
+                    clusterName, e.getMessage(), e);
+            directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
+            return directResponse;
+        }
+    }
+
+    public <T> List<T> commonGet(String clusterName, String directRequestContent, Class<T> clazz) {
+        DirectResponse directResponse = getDirectResponse(clusterName, "Get", directRequestContent);
+        List<T> list = Lists.newArrayList();
+        if (directResponse.getRestStatus() == RestStatus.OK
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            try {
+                List<T> resList = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(), clazz);
+                list.addAll(resList);
+            } catch (Exception e) {
+                LOGGER.error("class=BaseESDAO||method=commonGet||cluster={}||directRequestContent={}||"
+                             + "clazzName={}||errMst=str convert obj error:{}",
+                    clusterName, directRequestContent, clazz.getName(), e.getMessage(), e);
+            }
+        }
+        return list;
     }
 }

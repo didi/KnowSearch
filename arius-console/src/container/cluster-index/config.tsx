@@ -67,7 +67,7 @@ export const getBtnLogicIndexList = (
   setModalId,
   reloadData,
   appId: number,
-  history?: {[key: string]: any} 
+  history?: { [key: string]: any }
 ): ITableBtn[] => {
   // 是否为系统数据
   const isSystemData = record.dataType === 0;
@@ -189,7 +189,7 @@ export const getBtnLogicIndexList = (
                 content: res.message || '',
                 okText: "确认",
                 cancelText: "取消",
-                onOk: () => {},
+                onOk: () => { },
               });
             } else {
               Modal.confirm({
@@ -199,9 +199,8 @@ export const getBtnLogicIndexList = (
                 okText: "确认",
                 cancelText: "取消",
                 onOk: () => {
-                  const href = `/index/modify/mapping?id=${
-                    record.id
-                  }&history=${escape(window.location.pathname + window.location.search)}`;
+                  const href = `/index/modify/mapping?id=${record.id
+                    }&history=${escape(window.location.pathname + window.location.search)}`;
                   // window.location.href = href;
                   history && history.push(href);
                 },
@@ -223,7 +222,7 @@ export const getBtnLogicIndexList = (
                 content: res.message || "",
                 okText: "确认",
                 cancelText: "取消",
-                onOk: () => {},
+                onOk: () => { },
               });
             } else {
               setModalId("editSetting", record.id, reloadData);
@@ -236,24 +235,40 @@ export const getBtnLogicIndexList = (
       isOpenUp: currentIsOpenUp,
       tip: isSystemData ? '预置系统数据，不支持操作' : '',
       clickFunc: () => {
-        Modal.confirm({
-          title: "提示",
-          width: 550,
-          content: (
-            <>
-              <div>确定{record.disableIndexRollover ? '开启' : '关闭'}索引RollOver能力?</div>
-              <div>{record.disableIndexRollover ? '开启后会影响索引Update和Delete能力以及指定id 写入，更新，删除' : null}</div>
-            </>
-          ),
-          okText: "确认",
-          cancelText: "取消",
-          onOk: () => {
-            rolloverSwitch(record.id, record.disableIndexRollover ? '1' : '0').then(() => {
-              message.success('操作成功');
-              reloadData();
+        checkEditTemplateSrv(record.id, 12).then(res => {
+          if (res.code !== 0 && res.code !== 200) {
+            Modal.confirm({
+              title: '提示',
+              width: 550,
+              content: (
+                <>
+                  <div>{res?.message ?? '该模板归属集群未开启索引规划服务'}</div>
+                </>
+              ),
+              okText: "确认",
+              cancelText: "取消",
             })
-          },
-        });
+          } else {
+            Modal.confirm({
+              title: "提示",
+              width: 550,
+              content: (
+                <>
+                  <div>确定{record.disableIndexRollover ? '开启' : '关闭'}索引RollOver能力?</div>
+                  <div>{record.disableIndexRollover ? '开启后会影响索引Update和Delete能力以及指定id 写入，更新，删除' : null}</div>
+                </>
+              ),
+              okText: "确认",
+              cancelText: "取消",
+              onOk: () => {
+                rolloverSwitch(record.id, record.disableIndexRollover ? '1' : '0').then(() => {
+                  message.success('操作成功');
+                  reloadData();
+                })
+              },
+            });
+          }
+        })
       },
     },
     {
@@ -316,7 +331,7 @@ export const getLogicIndexColumns = (
   reloadData: any,
   clusterId?: number,
   appId?: number,
-  history?: {[key: string]: any} 
+  history?: { [key: string]: any }
 ) => {
   return [
     {

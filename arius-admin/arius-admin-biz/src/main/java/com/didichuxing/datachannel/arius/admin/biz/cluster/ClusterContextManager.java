@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
+import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
@@ -53,6 +54,11 @@ public interface ClusterContextManager {
     ClusterPhyContext getClusterPhyContext(String cluster);
 
     ClusterPhyContext getClusterPhyContextCache(String cluster);
+
+    /**
+     * @return key-> 物理集群名称, value 上下文信息
+     */
+    Map<String, ClusterPhyContext> listClusterPhyContextMap();
 
     /**
      * 从缓存中获取逻辑集群上下文

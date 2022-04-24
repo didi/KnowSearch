@@ -87,6 +87,24 @@ public class CommonUtils {
         return b.setScale(decimal, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
+    public static double divideIntAndFormatDouble(int v1, int v2, int scale, int multiply) {
+        BigDecimal v1Decimal = new BigDecimal(v1);
+        BigDecimal v2Decimal = new BigDecimal(v2);
+        BigDecimal bigDecimal = new BigDecimal(multiply);
+
+        BigDecimal greenDivide = v1Decimal.divide(v2Decimal, scale, 1);
+        return greenDivide.multiply(bigDecimal).doubleValue();
+    }
+
+    public static double divideDoubleAndFormatDouble(double v1, double v2, int scale, int multiply) {
+        BigDecimal v1Decimal = new BigDecimal(v1);
+        BigDecimal v2Decimal = new BigDecimal(v2);
+        BigDecimal bigDecimal = new BigDecimal(multiply);
+
+        BigDecimal greenDivide = v1Decimal.divide(v2Decimal, scale, 1);
+        return greenDivide.multiply(bigDecimal).doubleValue();
+    }
+
     public static String toHex(byte[] bytes) {
 
         final char[] hexDigits = "0123456789ABCDEF".toCharArray();
@@ -265,5 +283,14 @@ public class CommonUtils {
     public static char randomWritableChar() {
         Random random = new Random();
         return (char) (33 + random.nextInt(94));
+    }
+
+    public static String getUniqueKey(String... arg) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < arg.length; i++) {
+            if (i == (arg.length - 1)) { sb.append(arg[i]);}
+            else { sb.append(arg[i]).append("@");}
+        }
+        return sb.toString();
     }
 }

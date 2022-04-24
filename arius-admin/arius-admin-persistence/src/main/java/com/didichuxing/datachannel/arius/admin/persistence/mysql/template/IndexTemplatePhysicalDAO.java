@@ -2,10 +2,9 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.template;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 
 /**
  * @author d06679
@@ -55,4 +54,10 @@ public interface IndexTemplatePhysicalDAO {
     List<TemplatePhysicalPO> listByName(String template);
 
     TemplatePhysicalPO getNormalAndDeletingById(Long physicalId);
+
+    /**
+     * 用于聚合logicId计数，仅查询了logicId和id
+     * @return
+     */
+    List<TemplatePhysicalPO> countListByLogicId();
 }

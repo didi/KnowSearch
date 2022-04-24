@@ -42,6 +42,6 @@ public class ESClusterConfigControllerMethod {
 
     public static Result<Void> editEsClusterConfigDesc(ESConfigDTO param) throws IOException {
         String path = CLUSTER_CONFIG;
-        return JSON.parseObject(AriusClient.put(path), new TypeReference<Result<Void>>(){});
+        return JSON.parseObject(AriusClient.put(path, param), new TypeReference<Result<Void>>(){});
     }
 }

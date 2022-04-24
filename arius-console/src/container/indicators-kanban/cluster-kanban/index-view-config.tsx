@@ -89,6 +89,11 @@ export const indexConfigData = {
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
+  "merges_avg_time": {
+    name: "索引merge操作单次耗时",
+    unit: unitMap.ms,
+    classify: indexConfigClassifyList[1],
+  },
   "refresh-total_rate": {
     name: "Refresh速率",
     unit: unitMap.ss,
@@ -99,6 +104,11 @@ export const indexConfigData = {
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
+  "refresh_avg_time": {
+    name: "索引refresh操作单次耗时",
+    unit: unitMap.ms,
+    classify: indexConfigClassifyList[1],
+  },
   "flush-total_rate": {
     name: "Flush速率",
     unit: unitMap.ss,
@@ -106,6 +116,16 @@ export const indexConfigData = {
   },
   "flush-total_time_in_millis": {
     name: "Flush耗时",
+    unit: unitMap.ms,
+    classify: indexConfigClassifyList[1],
+  },
+  "flush_avg_time": {
+    name: "索引flush操作单次耗时",
+    unit: unitMap.ms,
+    classify: indexConfigClassifyList[1],
+  },
+  "indexing-time_per_doc": {
+    name: "单个索引操作耗时",
     unit: unitMap.ms,
     classify: indexConfigClassifyList[1],
   },
@@ -141,6 +161,11 @@ export const indexConfigData = {
   },
   "translog-size_in_bytes": {
     name: "translog大小",
+    unit: unitMap.MB,
+    classify: indexConfigClassifyList[2],
+  },
+  "segments-stored_fields_memory_in_bytes": {
+    name: "stored_fields_memory大小",
     unit: unitMap.MB,
     classify: indexConfigClassifyList[2],
   },

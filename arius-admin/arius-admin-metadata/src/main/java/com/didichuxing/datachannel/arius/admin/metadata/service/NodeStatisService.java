@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyNodeDTO;
@@ -11,22 +18,11 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 @Service
 public class NodeStatisService {
-
-    @Value("${es.metrics.nodes.max.num}")
-    private int                      esNodesMaxNum;
-
     @Autowired
-    private AriusStatsNodeInfoESDAO ariusStatsNodeInfoEsDao;
+    private AriusStatsNodeInfoESDAO        ariusStatsNodeInfoEsDao;
 
     @Autowired
     private AriusStatsClusterTaskInfoESDAO ariusStatsClusterTaskInfoESDAO;
@@ -53,7 +49,7 @@ public class NodeStatisService {
         }
 
         return ariusStatsNodeInfoEsDao.getTopNNodeAggMetrics(clusterPhyName, metricsTypes, topNu,
-            aggType, esNodesMaxNum, startTime, endTime);
+            aggType, startTime, endTime);
     }
 
     public List<ESClusterTaskDetail> getClusterTaskDetail(String cluster, String node, long startTime, long endTime) {
@@ -76,6 +72,6 @@ public class NodeStatisService {
         }
 
         return ariusStatsClusterTaskInfoESDAO.getTopNNodeAggMetrics(
-                    clusterPhyName, metricsTypes, topNu, aggTypes, esNodesMaxNum, startTime, endTime);
+                    clusterPhyName, metricsTypes, topNu, aggTypes, startTime, endTime);
     }
 }

@@ -15,8 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -30,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,7 +57,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     @Autowired
     private ClusterContextManager      clusterContextManager;
 
-    private static final FutureUtil<Void> futureUtilForClusterNum      = FutureUtil.initBySystemAvailableProcessors("futureUtilForClusterNum",100);
+    private static final FutureUtil<Void> futureUtilForClusterNum      = FutureUtil.init("futureUtilForClusterNum",10,10,100);
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer appId) {
@@ -116,7 +116,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         //1. 获取管理/访问/无权限的逻辑集群信息
         List<ClusterLogic> appAuthClusterLogicList = clusterLogicManager.getClusterLogicByAppIdAndAuthType(appId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthClusterLogicList)) {
-            return PaginationResult.buildSucc();
+            return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
 
         //2. 过滤出符合条件的列表
@@ -125,13 +125,11 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         //3. 设置命中数
         long hitTotal = meetConditionClusterLogicList.size();
 
-        //4. 根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
+        //4. 对条件匹配后的结果集进行排序
         sort(meetConditionClusterLogicList, condition.getSortTerm(), condition.getOrderByDesc());
 
-        //5. 最后页临界点处理
-        long size = getLastPageSize(condition, meetConditionClusterLogicList.size());
-
-        List<ClusterLogic> fuzzyAndLimitClusterPhyList  = meetConditionClusterLogicList.subList(condition.getFrom().intValue(), (int)size);
+        //5.内存分页
+        List<ClusterLogic> fuzzyAndLimitClusterPhyList  = filterFullDataByPage(meetConditionClusterLogicList, condition) ;
         List<ConsoleClusterVO> consoleClusterVOList     = ConvertUtil.list2List(fuzzyAndLimitClusterPhyList, ConsoleClusterVO.class);
 
         //6. 设置集群权限类型
@@ -143,7 +141,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         }
         futureUtilForClusterNum.waitExecute();
 
-        return PaginationResult.buildSucc(consoleClusterVOList, hitTotal, condition.getFrom(), condition.getSize());
+        return PaginationResult.buildSucc(consoleClusterVOList, hitTotal, condition.getPage(), condition.getSize());
     }
 
     @Override
@@ -155,7 +153,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
 
         long totalHit = clusterLogicService.fuzzyClusterLogicHitByCondition(condition);
 
-        return PaginationResult.buildSucc(consoleClusterPhyVOList, totalHit, pageDTO.getFrom(), pageDTO.getSize());
+        return PaginationResult.buildSucc(consoleClusterPhyVOList, totalHit, pageDTO.getPage(), pageDTO.getSize());
     }
 
     private List<ConsoleClusterVO> doBuildWithoutAuthType(List<ClusterLogic> clusterLogicList, Integer appId) {
@@ -276,7 +274,16 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     }
 
 
+    /**
+     * 对条件匹配后的结果集进行排序
+     * @param meetConditionClusterLogicList  条件匹配结果集
+     * @param sortTerm                       排序字段
+     * @see   SortTermEnum                   支持的排序字段枚举
+     * @param orderByDesc                    是否降序排序 true 是 false 否
+     */
     private void sort(List<ClusterLogic> meetConditionClusterLogicList, String sortTerm, Boolean orderByDesc) {
+        // TODO: 排序逻辑简化
+        // 使用默认排序
         if (null == sortTerm) {
             Collections.sort(meetConditionClusterLogicList);
             return;
@@ -284,9 +291,8 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
 
         meetConditionClusterLogicList.sort((o1, o2) -> {
             // 可在此添加需要排序的项
-            if (SortEnum.LEVEL.getType().equals(sortTerm)) {
-                return orderByDesc ? o2.getLevel().compareTo(o1.getLevel()) :
-                        o1.getLevel().compareTo(o2.getLevel());
+            if (SortTermEnum.LEVEL.getType().equals(sortTerm)) {
+                return orderByDesc ? o2.getLevel().compareTo(o1.getLevel()) : o1.getLevel().compareTo(o2.getLevel());
             }
 
             // 返回0 不排序

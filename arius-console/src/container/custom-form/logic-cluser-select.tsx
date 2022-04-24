@@ -28,6 +28,7 @@ export const LogicCluserSelect: React.FC<any> = (props: {
               value: item.id,
               type: item.type,
               level: item.level,
+              dataCenter: item.dataCenter,
             };
           });
           setLogicClusterList(res);
@@ -51,6 +52,7 @@ export const LogicCluserSelect: React.FC<any> = (props: {
       clusterType,
       clusterName: '',
       level: null,
+      dataCenter: 'cn',
     };
     if (type === "type") {
       obj.clusterType = valus;
@@ -64,6 +66,7 @@ export const LogicCluserSelect: React.FC<any> = (props: {
       obj.cluster = valus;
       obj.clusterName = logicClusterList.filter((item) => item.value === valus)[0]?.label;
       obj.level = logicClusterList.filter((item) => item.value === valus)[0]?.level;
+      obj.dataCenter = logicClusterList.filter((item) => item.value === valus)[0]?.dataCenter;
       setCluster(valus);
     }
     const { onChange } = props;

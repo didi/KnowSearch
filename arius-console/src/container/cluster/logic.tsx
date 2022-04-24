@@ -17,8 +17,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 const LogicClusterBox = (props) => {
   const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
-  const [queryFromObject, setqueryFromObject]: any = useState({
-    from: 0,
+  const [queryFormObject, setqueryFormObject]: any = useState({
+    current: 1,
     size: 10,
   });
   const [data, setData] = useState([]);
@@ -26,23 +26,23 @@ const LogicClusterBox = (props) => {
 
   React.useEffect(() => {
     reloadData();
-  }, [department, queryFromObject]);
+  }, [department, queryFormObject]);
 
   // const getData = () => {
   //   // 查询项的key 要与 数据源的key  对应
-  //   if (!queryFromObject) return data;
-  //   const keys = Object.keys(queryFromObject);
+  //   if (!queryFormObject) return data;
+  //   const keys = Object.keys(queryFormObject);
   //   const filterData = data.filter((d) => {
   //     let b = true;
   //     keys.forEach((k: string) => {
   //       if (k === "clusterStatus") {
-  //         (d[k].status + "")?.toLowerCase().includes(queryFromObject[k])
+  //         (d[k].status + "")?.toLowerCase().includes(queryFormObject[k])
   //           ? ""
   //           : (b = false);
   //       } else if (k === "authType") {
-  //         d[k] === queryFromObject[k] ? "" : (b = false);
+  //         d[k] === queryFormObject[k] ? "" : (b = false);
   //       } else {
-  //         (d[k] + "")?.toLowerCase().includes(queryFromObject[k])
+  //         (d[k] + "")?.toLowerCase().includes(queryFormObject[k])
   //           ? ""
   //           : (b = false);
   //       }
@@ -55,15 +55,15 @@ const LogicClusterBox = (props) => {
   const reloadData = () => {
     setloading(true);
     const Params: ILogicLike = {
-      from: queryFromObject.from,
-      size: queryFromObject.size,
-      authType: queryFromObject.authType,
-      name: queryFromObject.name,
-      health: queryFromObject.health,
-      appId: queryFromObject.appId,
-      type: queryFromObject.type,
-      sortTerm: queryFromObject.sortTerm,
-      orderByDesc: queryFromObject.orderByDesc,
+      page: queryFormObject.current,
+      size: queryFormObject.size,
+      authType: queryFormObject.authType,
+      name: queryFormObject.name,
+      health: queryFormObject.health,
+      appId: queryFormObject.appId,
+      type: queryFormObject.type,
+      sortTerm: queryFormObject.sortTerm,
+      orderByDesc: queryFormObject.orderByDesc,
     };
     getOpLogicClusterList(Params)
       .then((res) => {
@@ -94,7 +94,7 @@ const LogicClusterBox = (props) => {
         delete result[key];
       }
     }
-    setqueryFromObject({ ...result, from: 0, size: 10 });
+    setqueryFormObject({ ...result, size: queryFormObject.size, current: 1 });
   };
 
   const getOpBtns = (): ITableBtn[] => {
@@ -121,7 +121,7 @@ const LogicClusterBox = (props) => {
           break;
       }
     }
-    setqueryFromObject((state) => {
+    setqueryFormObject((state) => {
       if (!sorter.order) {
         delete state.sortTerm;
         delete state.orderByDesc;
@@ -130,7 +130,7 @@ const LogicClusterBox = (props) => {
       return {
         ...state,
         ...sorterObject,
-        from: (pagination.current - 1) * pagination.pageSize,
+        current: pagination.current,
         size: pagination.pageSize,
       };
     });
@@ -160,13 +160,16 @@ const LogicClusterBox = (props) => {
             dataSource={data}
             attrs={{
               onChange: handleChange,
+              scroll: {
+                x: true
+              }
             }}
             key={JSON.stringify({
-              authType: queryFromObject.authType,
-              name: queryFromObject.name,
-              health: queryFromObject.health,
-              appId: queryFromObject.appId,
-              type: queryFromObject.type,
+              authType: queryFormObject.authType,
+              name: queryFormObject.name,
+              health: queryFormObject.health,
+              appId: queryFormObject.appId,
+              type: queryFormObject.type,
             })}
             columns={getLogicColumns(data, props.setModalId, reloadData)}
             reloadData={reloadData}
@@ -178,6 +181,7 @@ const LogicClusterBox = (props) => {
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
               showTotal: (total) => `共 ${total} 条`,
+              current: queryFormObject.current
             }}
           />
         </div>

@@ -1,18 +1,22 @@
-.d-table{
+.d-table {
   background: white;
-  .d-table-box{
-    padding: 0!important;
-    &-header{
+
+  .d-table-box {
+    padding: 0 !important;
+
+    &-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0!important;
+      padding: 0 !important;
+
       .table-op-btn {
         padding-bottom: 10px;
+
         Button {
           margin-right: 10px;
         }
-      
+
         .reload {
           width: 30px;
           height: 30px;
@@ -21,11 +25,11 @@
           border-radius: 2px;
           margin-right: 10px;
         }
-        .reload:hover{
-          color: #2F81F9;
+
+        .reload:hover {
+          color: @primary-color;
         }
       }
     }
   }
 }
-

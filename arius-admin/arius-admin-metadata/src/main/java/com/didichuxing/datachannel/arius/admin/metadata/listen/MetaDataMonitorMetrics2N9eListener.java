@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.metadata.listen;
 
+import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.N9eData;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
@@ -28,12 +34,6 @@ import org.apache.lucene.util.NamedThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 public class MetaDataMonitorMetrics2N9eListener implements ApplicationListener<MetaDataMetricsEvent> {
@@ -222,11 +222,11 @@ public class MetaDataMonitorMetrics2N9eListener implements ApplicationListener<M
                 String.valueOf(esClusterService.syncGetClientAlivePercent(dataSource.getCluster(), dataSource.getPassword(), dataSource.getHttpAddress()))
                 , dataSource.getLevel(), timestamp));
 
-        long qps = ariusStatsIndexInfoEsDao.getClusterQps(dataSource.getCluster());
+        double qps = ariusStatsIndexInfoEsDao.getClusterQps(dataSource.getCluster());
         n9eDataList.add(getN9eDataFormat(dataSource.getCluster(), "es.cluster.qps.total", String.valueOf(qps),
                 dataSource.getLevel(), timestamp));
 
-        long tps = ariusStatsIndexInfoEsDao.getClusterTps(dataSource.getCluster());
+        double tps = ariusStatsIndexInfoEsDao.getClusterTps(dataSource.getCluster());
         n9eDataList.add(getN9eDataFormat(dataSource.getCluster(), "es.cluster.tps.total", String.valueOf(tps),
                 dataSource.getLevel(), timestamp));
 

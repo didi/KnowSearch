@@ -73,13 +73,10 @@ export default function index(props: Props) {
         <div className={`${cPrefixCls}-header-left`}>
           <a href="/" className={`${cPrefixCls}-logo`}>
             <img
-              src={require('../../assets/es-logo.png')}
+              src={require('../../assets/nav-logo.png')}
               alt="logo"
-              style={{
-                height: 24,
-              }}
             />
-            {_.get(feConf, 'header.subTitle')}
+            {/* {_.get(feConf, 'header.subTitle')} */}
           </a>
         </div>
         <div className={`${cPrefixCls}-header-right`}> 

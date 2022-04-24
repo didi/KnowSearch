@@ -23,6 +23,8 @@ const RenderModule = (props) => {
       status = "Green";
     } else if (props.state === "yellow") {
       status = "Yellow";
+    } else if (props.state === "unknown") {
+      status = "Unknown";
     } else [(status = "Red")];
   }
 

@@ -2,27 +2,16 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.RESOURCE;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.DELETE_INDEX;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.GREEN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.YELLOW;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
@@ -98,6 +87,21 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -173,7 +177,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private HandleFactory                 handleFactory;
     
-    private static final FutureUtil<Void> futureUtil = FutureUtil.initBySystemAvailableProcessors("ClusterLogicManager", 100);
+    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterLogicManager", 10,10,100);
 
     /**
      * 构建运维页面的逻辑集群VO
@@ -283,7 +287,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         operateRecordService.save(TEMPLATE, DELETE_INDEX, clearDTO.getLogicId(), JSON.toJSONString(clearDTO), operator);
 
-        if (!templateQuotaManager.controlAndPublish(clearDTO.getLogicId())) {
+        //加入判断templateQuotaManager 不为空的情况
+        if (Objects.nonNull(templateQuotaManager)&&!templateQuotaManager.controlAndPublish(clearDTO.getLogicId())) {
             LOGGER.warn(
                     "class=TemplateLogicServiceImpl||method=clearIndices||templateLogicId={}||msg=template quota publish failed!",
                     clearDTO.getLogicId());
@@ -363,11 +368,14 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      */
     @Override
     public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(Integer appId) {
-        if (appId == null) {
-            appId = AdminConstant.DEFAULT_APP_ID;
-        }
 
-        return Result.buildSucc(batchBuildOpClusterVOs(clusterLogicService.listAllClusterLogics(), appId));
+        List<ClusterLogic> logicClusters = clusterLogicService.listAllClusterLogics();
+        List<ConsoleClusterVO> consoleClusterVOS = ConvertUtil.list2List(logicClusters, ConsoleClusterVO.class);
+        if (appId != null && CollectionUtils.isNotEmpty(consoleClusterVOS)) {
+            consoleClusterVOS.forEach(consoleClusterVO -> buildOpLogicClusterPermission(consoleClusterVO, appId));
+        }
+        Collections.sort(consoleClusterVOS);
+        return Result.buildSucc(consoleClusterVOS);
     }
 
     /**
@@ -502,7 +510,12 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
 	@Override
 	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer appId) {
-		return clusterLogicService.editClusterLogic(param, operator);
+        Result<Void> result = clusterLogicService.editClusterLogic(param, operator);
+        if (result.success()) {
+            SpringTool.publish(new ClusterLogicEvent(param.getId(), appId));
+            operateRecordService.save(RESOURCE, EDIT, param.getId(), String.valueOf(param.getId()), operator);
+        }
+		return result;
 	}
 
     @Override
@@ -569,7 +582,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public List<ClusterLogic> getAppAccessClusterLogicList(Integer appId) {
         List<Long> clusterLogicIdList = appClusterLogicAuthService.getLogicClusterAccessAuths(appId)
                                         .stream()
-                                        .map(AppClusterLogicAuth::getId)
+                                        .map(AppClusterLogicAuth::getLogicClusterId)
                                         .collect(Collectors.toList());
 
         return clusterLogicService.getClusterLogicListByIds(clusterLogicIdList);
@@ -620,23 +633,20 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         //对于region按照物理集群名称进行分组
-        Map<String, List<ClusterRegion>> stringRegionListMap = ConvertUtil.list2MapOfList(clusterRegions,
-                ClusterRegion::getPhyClusterName, ClusterRegion -> ClusterRegion);
+        Map<String, List<ClusterRegion>> cluster2RegionListMap = ConvertUtil.list2MapOfList(clusterRegions,
+                ClusterRegion::getPhyClusterName, c -> c);
 
         //这里设置用户侧在模板中可以设置的最大的数据大小
         float canCreateTemplateDiskSize = 0F;
 
         //对于不同分组下的region的可使用磁盘大小进行计算
-        for (Map.Entry</*物理集群名称*/String, /*逻辑绑定的物理集群下的region列表*/List<ClusterRegion>> entry : stringRegionListMap.entrySet()) {
+        for (Map.Entry</*物理集群名称*/String, /*逻辑绑定的物理集群下的region列表*/List<ClusterRegion>> entry : cluster2RegionListMap.entrySet()) {
             //获取指定物理集群的r关于rack的磁盘总量分布情况
             Map</*rack*/String, /*rack上的磁盘总量*/Float> allocationInfoOfRackMap = esClusterService.getAllocationInfoOfRack(entry.getKey());
-            List<ClusterRegion> logicBindRegions = entry.getValue();
-            if (CollectionUtils.isEmpty(logicBindRegions)) {
-                continue;
-            }
+            if (MapUtils.isEmpty(allocationInfoOfRackMap)) { continue;}
 
             //统计region可以使用的最大磁盘容量
-            for (ClusterRegion clusterRegion : logicBindRegions) {
+            for (ClusterRegion clusterRegion : entry.getValue()) {
                 canCreateTemplateDiskSize = Float.max(canCreateTemplateDiskSize, esClusterPhyService.getSurplusDiskSizeOfRacks(clusterRegion.getPhyClusterName(),
                         clusterRegion.getRacks(), allocationInfoOfRackMap));
             }

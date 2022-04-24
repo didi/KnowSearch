@@ -1,18 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author d06679
@@ -197,10 +200,34 @@ public interface ESClusterService {
     Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password);
 
     /**
+     * 检测是否为同一个集群
+     * @param password
+     * @param addresses
+     * @return
+     */
+    Result<Void> checkSameCluster(String password, List<String> addresses);
+
+    /**
      * 获取运行的es版本号
      * @param addresses 地址
      * @param password 集群认证信息
      * @return
      */
     String synGetESVersionByHttpAddress(String addresses, String password);
+
+    /**
+     * 检测集群账户信息
+     * @param addresses
+     * @param password
+     * @return True 正确连接集群， False 无法连接集群
+     */
+    ClusterConnectionStatus checkClusterPassword(String addresses, String password);
+
+    /**
+     * 获取集群线程池相关信息
+     * @param cluster
+     */
+    ESClusterThreadStats syncGetThreadStatsByCluster(String cluster);
+
+    ESClusterHealthResponse syncGetClusterHealthAtIndicesLevel(String phyClusterName);
 }

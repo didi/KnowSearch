@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
@@ -23,8 +24,13 @@ import com.didichuxing.datachannel.arius.admin.client.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -60,7 +66,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.COPY;
+import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
@@ -286,10 +293,21 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (checkResult.failed()) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=upgradeTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
+        } else {
+            operateRecordService.save(TEMPLATE, EDIT, param.getLogicId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.UPGRADE.getCode(),
+                    "模板版本升级为：" + param.getVersion())), operator);
         }
 
         return upgradeTemplateWithCheck(param, operator, 0);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> rolloverUpgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException {
+        //rollover 生版本号不需要对参数进行校验
+        return upgradeTemplateWithCheck(param, operator, 0);
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -354,7 +372,16 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return checkResult;
         }
 
-        return editTemplateWithoutCheck(param, operator, 0);
+        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getId());
+        Result<Void> result = editTemplateWithoutCheck(param, operator, 0);
+        if (result.success()) {
+            String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
+            if (StringUtils.isNotBlank(editContent)) {
+                operateRecordService.save(TEMPLATE, EDIT, param.getLogicId(),
+                        JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.CONFIG.getCode(), editContent)), operator);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -424,7 +451,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> addTemplatesWithoutCheck(Integer logicId,
-                                           List<IndexTemplatePhysicalDTO> physicalInfos) throws ESOperateException {
+                                           List<IndexTemplatePhysicalDTO> physicalInfos) throws AdminOperateException {
         for (IndexTemplatePhysicalDTO param : physicalInfos) {
             param.setLogicId(logicId);
             param.setPhysicalInfos(physicalInfos);
@@ -439,7 +466,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalDTO param) throws ESOperateException {
+    public Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalDTO param) throws AdminOperateException {
         if (null != templatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName())) {
             return Result.buildParamIllegal("索引已经存在");
         }
@@ -584,12 +611,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())) {
                     tips = "模板部署rack变更!请注意模板APP是否可以使用修改后的rack";
                 }
-            }
-            // 记录操作记录
-            String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
-            if (StringUtils.isNotBlank(editContent)) {
-                operateRecordService.save(TEMPLATE, EDIT, oldIndexTemplatePhy.getLogicId(),
-                        String.format("修改【%s】物理模板：%s", oldIndexTemplatePhy.getCluster(), editContent), operator);
             }
 
             SpringTool.publish(new PhysicalTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldIndexTemplatePhy, IndexTemplatePhy.class),
@@ -763,6 +784,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildParamIllegal("shard个数非法");
         }
 
+        IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(oldIndexTemplatePhy.getLogicId());
+        if (TemplateUtils.isOnly1Index(logic.getExpression())) {
+            return Result.buildParamIllegal("不是分区创建的索引，不能升版本");
+        }
+
         return Result.buildSucc();
     }
 
@@ -774,11 +800,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         IndexTemplateLogic logic = templateLogicService.getLogicTemplateById(indexTemplatePhy.getLogicId());
-
-        if (TemplateUtils.isOnly1Index(logic.getExpression())) {
-            return Result.buildParamIllegal("不是分区创建的索引，不能升版本");
-        }
-
         LOGGER.info("class=TemplatePhyManagerImpl||method=upgradeTemplateWithCheck||name={}||rack={}||shard={}||version={}", logic.getName(), param.getRack(),
                 param.getShard(), param.getVersion());
 

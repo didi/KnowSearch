@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline;
 
+import java.util.List;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
@@ -24,8 +26,6 @@ import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE_CONFIG;
 import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
@@ -306,6 +306,12 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
         }
 
         return true;
+    }
+
+    @Override
+    public Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMaster) {
+        ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhysicalMaster.getCluster(), indexTemplatePhysicalMaster.getName());
+        return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
     }
 
     /**************************************** private method ****************************************************/

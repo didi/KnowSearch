@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class AriusScheduleThreadPool {
 
     private ScheduledExecutorService scheduleThreadPool;
-    private int                      scheduleThreadNum = 16;
+    private int                      scheduleThreadNum = 1 << 5;
 
     @PostConstruct
     public void init() {
@@ -22,8 +22,12 @@ public class AriusScheduleThreadPool {
             new DesmondThreadFactory("scheduleThreadPool"));
     }
 
-    public void submitScheduleAtFixTask(Runnable runnable, long initialDelay, long period) {
+    public void submitScheduleAtFixedRateTask(Runnable runnable, long initialDelay, long period) {
         scheduleThreadPool.scheduleAtFixedRate(runnable, initialDelay, period, TimeUnit.SECONDS);
+    }
+
+    public void submitScheduleAtFixedDelayTask(Runnable runnable, long initialDelay, long delay) {
+        scheduleThreadPool.scheduleWithFixedDelay(runnable, initialDelay, delay, TimeUnit.SECONDS);
     }
 
     static class DesmondThreadFactory implements ThreadFactory {

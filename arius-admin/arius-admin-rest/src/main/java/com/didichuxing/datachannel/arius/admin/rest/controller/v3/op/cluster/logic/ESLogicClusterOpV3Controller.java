@@ -72,7 +72,9 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "校验模板大小资源是否充足,主要是为了避免用户反复的进行模板创建操作，对于申请的权限做一定的限制")
     public Result<Void> checkTemplateValidForCreate(@PathVariable("logicClusterId") Long logicClusterId,
                                                     @PathVariable("templateSize") String templateSize) {
-        return clusterLogicManager.checkTemplateDataSizeValidForCreate(logicClusterId, templateSize);
+        //TODO: wpk 性能优化， 针对集群模板上万的场景
+        //return clusterLogicManager.checkTemplateDataSizeValidForCreate(logicClusterId, templateSize);
+        return Result.buildSucc();
     }
 
 }

@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
 public interface ClusterMonitorTaskDAO {
 
     /**

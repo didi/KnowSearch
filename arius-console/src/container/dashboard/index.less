@@ -1,0 +1,271 @@
+.dashboard {
+  position: relative;
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 8px;
+
+  // min-width: 1440px;
+  &-changepage {
+    position: absolute;
+    top: 24px;
+    right: 20px;
+    height: 27px;
+    width: 82px;
+    border-radius: 4px;
+    padding: 4px 0px 4px 8px;
+    user-select: none;
+    cursor: pointer;
+
+    &-text {
+      font-family: PingFangSC-Regular;
+      font-size: 13px;
+      color: #ffffff;
+      text-align: left;
+      line-height: 20px;
+    }
+
+    &-icon {
+      font-size: 12px;
+      color: #ffffff;
+    }
+  }
+
+  .ant-spin-blur {
+    opacity: 1;
+  }
+}
+
+.dashboard-config {
+  height: 27px;
+  position: relative;
+  margin-bottom: 12px;
+
+  &-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+    color: #74788d;
+    margin: 2px 18px 6px 2px;
+  }
+
+  &-line {
+    width: 1px;
+    height: 20px;
+    border: 1px solid #ced4da;
+    display: inline-block;
+    position: absolute;
+    /* margin-top: -16px; */
+    top: 3px;
+    left: 26px;
+  }
+
+  &-setting {
+    position: absolute;
+    /* margin-top: -16px; */
+    top: 6px;
+    right: 12px;
+    font-size: 17px;
+  }
+
+  #d-range-time .d-range-time-input input {
+    font-family: PingFangSC-Regular;
+    font-size: 13px;
+    color: #495057;
+    text-align: left;
+    line-height: 20px;
+  }
+}
+
+.dashboard-table-content {
+  background: none;
+  padding: 0px;
+
+  ul {
+    color: #212529;
+    background: none;
+    line-height: 36px;
+    font-size: 14px;
+    font-family: PingFangSC-Medium;
+
+    .ant-menu-item {
+      margin: -1px 24px 0px 0px !important;
+      font-family: PingFangSC-Regular;
+      color: #303A51;
+
+      &.ant-menu-item-selected {
+        font-family: PingFangSC-Medium;
+      }
+    }
+  }
+}
+
+.dashboard-detail-wrapper {
+  background: none;
+  padding: 8px 0px 0px 0px !important;
+}
+
+.dashboard-overview-content {
+  &-line {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+
+    &-container {
+      height: 262px;
+      background: #ffffff;
+      // box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+      border-radius: 8px;
+      background: #F8F9FA;
+    }
+
+    &-item {
+      width: 100%;
+      height: 262px;
+
+      // 覆盖 echarts tooltip 的 z-index
+      div {
+        // z-index: 100!important;
+      }
+
+      &-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        &-title {
+          font-family: PingFangSC-Medium;
+          font-size: 16px;
+          color: #101724;
+          line-height: 24px;
+        }
+
+        &-time {
+          font-family: PingFangSC-Medium;
+          font-size: 12px;
+          color: #303a51;
+          line-height: 20px;
+        }
+      }
+    }
+
+    &-enlarge {
+      position: absolute;
+      cursor: pointer;
+      top: 16px;
+      right: 16px;
+      width: 60px;
+      height: 15px;
+      z-index: 100;
+
+      ::selection {
+        color: none;
+        background: none;
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    &-legend {
+      position: absolute;
+      cursor: pointer;
+      top: 16.5px;
+      right: 45px;
+      width: 20px;
+      height: 20px;
+      z-index: 100;
+      font-size: 18px;
+      color: rgb(180, 180, 180);
+    }
+  }
+}
+
+// 索引
+.dashboard-index-view {
+  .index-content-item {
+    padding: 12px 16px;
+    height: 282px;
+    background: #ffffff;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+}
+
+.dashboard-line-container-empty {
+  text-align: center;
+
+  img {
+    width: 60px;
+    height: 40px;
+    margin-bottom: 8px;
+
+  }
+
+  span {
+    font-family: PingFangSC-Regular;
+    font-size: 12px;
+    color: #919aac;
+    text-align: center;
+    line-height: 20px;
+    margin-left: -10px;
+  }
+}
+
+.dashborad-popover {
+  background: #FFFFFF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+  padding-top: 4px;
+
+  .ant-popover-arrow {
+    opacity: 0;
+  }
+
+  .ant-popover-inner-content {
+    padding: 16px 24px;
+  }
+
+  .ant-picker-range {
+    background: rgba(33, 37, 41, 0.04);
+    border-radius: 8px;
+
+    .ant-picker-input>input {
+      font-family: PingFangSC-Regular;
+      font-size: 13px;
+      color: #74788D;
+    }
+  }
+
+  .ant-radio-button-wrapper {
+    border: none !important;
+    height: 18px;
+    line-height: 18px;
+    padding: 0px;
+    font-family: PingFangSC-Medium;
+    font-size: 13px;
+    color: #495057;
+    letter-spacing: 0;
+    transition: none;
+
+    &.ant-radio-button-wrapper-checked {
+      color: #556EE6;
+    }
+  }
+
+  .dd-time-range-module .flx_con .time_title {
+    font-family: PingFangSC-Medium;
+    font-size: 14px;
+    color: #212529;
+    letter-spacing: 0;
+  }
+
+  .dd-time-range-module .flx_con .flx_l {
+    width: 144px;
+  }
+}

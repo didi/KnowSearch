@@ -1,6 +1,8 @@
 @import "../../../styles/base.less";
+
 .hash-menu-container {
   position: relative;
+
   .refresh-time {
     position: absolute;
     top: 27px;
@@ -12,6 +14,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   &-reload {
     .reload {
       width: 30px;
@@ -21,10 +24,12 @@
       border-radius: 2px;
       margin-right: 10px;
     }
+
     .reload:hover {
-      color: #2f81f9;
+      color: @primary-color;
     }
   }
+
   &-filter {
     &-item {
       padding-right: 8px;
@@ -33,46 +38,55 @@
 }
 
 .rf-monitor-overview-content {
+
   // margin-bottom: 58px;
-  .ant-collapse-content > .ant-collapse-content-box {
-    padding: 0 20px!important;
+  .ant-collapse-content>.ant-collapse-content-box {
+    padding: 0 20px !important;
   }
+
   &-config {
     width: 100%;
     overflow-x: auto;
     margin: 20px 0 20px 0;
+
     &-box {
       min-width: 1170px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       height: 437px;
+
       &-view {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         width: 67%;
         min-width: 777px;
+
         &-state-config {
           border: 1px solid #dcdfe6;
           margin-bottom: 20px;
         }
+
         &-memory-map {
           display: flex;
           justify-content: space-between;
           align-items: center;
           height: 268px;
           border: 1px solid #dcdfe6;
+
           .vertical-line {
             width: 1px;
             height: 228px;
             background: #d8d8d8;
           }
+
           &-view {
             flex: 1;
           }
         }
       }
+
       &-node-distribution {
         display: flex;
         flex-direction: column;
@@ -80,6 +94,7 @@
         min-width: 365px;
         height: 437px;
         border: 1px solid #dcdfe6;
+
         .cross-line {
           width: 100%;
           height: 1px;
@@ -90,12 +105,14 @@
       }
     }
   }
+
   &-line {
     width: 100%;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     margin-top: 20px;
+
     &-container {
       // width: calc(50% - 10px);
       margin: 0 0 20px 0;
@@ -103,30 +120,37 @@
       border: 1px solid #dcdfe6;
       border-radius: 2px;
     }
+
     &-item {
       width: 100%;
       height: 305px;
+
       // 覆盖 echarts tooltip 的 z-index
       div {
         // z-index: 100!important;
       }
+
       &-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 20px;
+
         &-title {
           .max-title();
         }
+
         &-time {
           .min-title();
         }
       }
     }
+
     &-bigPicture {
       width: 100%;
       height: 50vh;
     }
+
     &-enlarge {
       position: absolute;
       cursor: pointer;
@@ -135,21 +159,39 @@
       width: 15px;
       height: 15px;
       z-index: 100;
+      ::selection {
+        color: none;
+        background: none;
+    }
       img {
         width: 100%;
         height: 100%;
       }
     }
+    &-legend {
+      position: absolute;
+      cursor: pointer;
+      top: 16.5px;
+      right: 45px;
+      width: 20px;
+      height: 20px;
+      z-index: 100;
+      font-size: 18px;
+      color: rgb(180, 180, 180);
+    }
   }
+
   &-shard {
-    .ant-table-thead > tr > th,
-    .ant-table-tbody > tr > td,
-    .ant-table tfoot > tr > th,
-    .ant-table tfoot > tr > td {
+
+    .ant-table-thead>tr>th,
+    .ant-table-tbody>tr>td,
+    .ant-table tfoot>tr>th,
+    .ant-table tfoot>tr>td {
       padding: 0;
     }
-    .ant-table-thead > tr > th,
-    .ant-table-tbody > tr > td {
+
+    .ant-table-thead>tr>th,
+    .ant-table-tbody>tr>td {
       padding: 6px;
     }
   }
@@ -171,6 +213,7 @@
 
 .common-loading-container {
   position: relative;
+
   .center-center-loading {
     position: absolute;
     top: 50%;
@@ -187,6 +230,7 @@
     color: #303a51;
     line-height: 24px;
   }
+
   .center-center-empty-box-content {
     position: absolute;
     top: 50%;
@@ -204,6 +248,7 @@
 .shard-container {
   overflow-x: auto;
   overflow-y: hidden;
+
   .rf-monitor-overview-content-shard {
     min-width: 518px;
     padding: 20px;

@@ -58,7 +58,7 @@ public enum ModuleEnum {
 
                         LOGIC_CLUSTER_PERMISSIONS(30, "逻辑集群权限"),
 
-                        LOGIC_TEMPLATE_PERMISSIONS(31, "逻辑集群权限"),
+                        LOGIC_TEMPLATE_PERMISSIONS(31, "逻辑模板权限"),
 
                         ES_CLUSTER_CONFIG(21, "ES集群配置"),
 
@@ -126,6 +126,7 @@ public enum ModuleEnum {
 
     public static List<Map<String, Object>> getAllAriusConfigs() {
         List<Map<String, Object>> objects = Lists.newArrayList();
+
         for (ModuleEnum moduleEnum : ModuleEnum.values()) {
             if (moduleEnum.getCode() == -1) {
                 continue;

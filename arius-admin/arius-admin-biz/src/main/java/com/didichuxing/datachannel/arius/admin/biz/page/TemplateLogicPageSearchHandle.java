@@ -21,11 +21,10 @@ import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -64,9 +63,9 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     private ClusterLogicService          clusterLogicService;
 
 
-    private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil.initBySystemAvailableProcessors("BUILD_BELONG_CLUSTER_FUTURE_UTIL",100);
+    private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil.init("BUILD_BELONG_CLUSTER_FUTURE_UTIL",10,10,100);
 
-    private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL = FutureUtil.initBySystemAvailableProcessors("RESOURCE_BUILD_FUTURE_UTIL",100);
+    private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL = FutureUtil.init("RESOURCE_BUILD_FUTURE_UTIL",10,10,100);
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer appId) {
@@ -94,7 +93,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
                 return Result.buildParamIllegal("模板名称不允许带类似*, ?等通配符查询");
             }
 
-            if (null != templateConditionDTO.getSortTerm() && !SortEnum.isExit(templateConditionDTO.getSortTerm())) {
+            if (null != templateConditionDTO.getSortTerm() && !SortTermEnum.isExit(templateConditionDTO.getSortTerm())) {
                 return Result.buildParamIllegal(String.format("暂不支持排序类型[%s]", templateConditionDTO.getSortTerm()));
             }
 
@@ -118,7 +117,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         //1. 获取管理/读写/读/无权限的模板信息
         List<IndexTemplateLogic> appAuthTemplatesList = templateLogicManager.getTemplatesByAppIdAndAuthType(appId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthTemplatesList)) {
-            return PaginationResult.buildSucc();
+            return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
 
         //2. 根据无模板名称、有模板名称、有数量类型、有模板名称与数据类型等进行模糊匹配, 得出总结果
@@ -130,22 +129,20 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         //4. 根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
         sort(meetConditionTemplateList, condition.getSortTerm(), condition.getOrderByDesc());
 
-        //5. 最后页临界点处理
-        long size = getLastPageSize(condition, meetConditionTemplateList.size());
-
-        List<IndexTemplateLogic> fuzzyAndLimitTemplateList = meetConditionTemplateList.subList(condition.getFrom().intValue(), (int) size);
+        // 5.内存分页
+        List<IndexTemplateLogic> fuzzyAndLimitTemplateList = filterFullDataByPage(meetConditionTemplateList, condition);
         List<ConsoleTemplateVO>  consoleTemplateVOList     = ConvertUtil.list2List(fuzzyAndLimitTemplateList, ConsoleTemplateVO.class);
 
         //6. 设置权限
         //7. 设置所属物理集群名称列表
-        //9. 设置是否开启了indexRollover能力
+        //8. 设置是否开启了indexRollover能力
         RESOURCE_BUILD_FUTURE_UTIL
                 .runnableTask(() -> consoleTemplateVOList.forEach(consoleTemplateVO -> consoleTemplateVO.setAuthType(condition.getAuthType())))
                 .runnableTask(() -> setTemplateBelongClusterPhyNames(consoleTemplateVOList))
                 .runnableTask(() -> setTemplateIndexRolloverStatus(consoleTemplateVOList))
                 .waitExecute();
 
-        return PaginationResult.buildSucc(consoleTemplateVOList, hitTotal, condition.getFrom(), condition.getSize());
+        return PaginationResult.buildSucc(consoleTemplateVOList, hitTotal, condition.getPage(), condition.getSize());
     }
 
     @Override
@@ -166,15 +163,14 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
             //根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
             sort(meetConditionTemplateList, condition.getSortTerm(), condition.getOrderByDesc());
             //最后页临界点处理
-            long size               = getLastPageSize(condition, meetConditionTemplateList.size());
-            matchIndexTemplateLogic = meetConditionTemplateList.subList(condition.getFrom().intValue(), (int) size);
+            matchIndexTemplateLogic = filterFullDataByPage(meetConditionTemplateList, condition);
         } else {
             matchIndexTemplateLogic = templateLogicService.pagingGetLogicTemplatesByCondition(condition);
             totalHit                = templateLogicService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
         }
 
         List<ConsoleTemplateVO> consoleTemplateVOList = doBuildWithoutAuthType(matchIndexTemplateLogic, appId);
-        return PaginationResult.buildSucc(consoleTemplateVOList, totalHit, condition.getFrom(), condition.getSize());
+        return PaginationResult.buildSucc(consoleTemplateVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
     /******************************************private***********************************************/
@@ -266,9 +262,8 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     }
 
     private void setTemplateIndexRolloverStatus(List<ConsoleTemplateVO> consoleTemplateVOList) {
-        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
-            return;
-        }
+        if (CollectionUtils.isEmpty(consoleTemplateVOList)) { return;}
+
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
             IndexTemplateConfig templateConfig = templateLogicService.getTemplateConfig(consoleTemplateVO.getId());
             consoleTemplateVO.setDisableIndexRollover(templateConfig.getDisableIndexRollover());
@@ -276,24 +271,27 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     }
 
     /**
-     * 根据条件排序
-     * @param meetConditionTemplateList
-     * @param sortTerm
-     * @param orderByDesc
+     * 对条件匹配后的结果集进行排序
+     * @param meetConditionTemplateList              条件匹配结果集
+     * @param sortTerm                               排序字段
+     * @see   SortTermEnum                           支持的排序字段枚举
+     * @param orderByDesc                            是否降序排序 true 是 false 否
      */
     private void sort(List<IndexTemplateLogic> meetConditionTemplateList, String sortTerm, Boolean orderByDesc) {
+        // 使用默认排序
         if (null == sortTerm) {
             Collections.sort(meetConditionTemplateList);
             return;
         }
 
         meetConditionTemplateList.sort((o1, o2) -> {
-            if (SortEnum.CHECK_POINT_DIFF.getType().equals(sortTerm)) {
+            // 可在此添加需要排序的项
+            if (SortTermEnum.CHECK_POINT_DIFF.getType().equals(sortTerm)) {
                 return orderByDesc ? o2.getCheckPointDiff().compareTo(o1.getCheckPointDiff()) :
                         o1.getCheckPointDiff().compareTo(o2.getCheckPointDiff());
             }
-            // 可在此添加需要排序的项
-            if (SortEnum.LEVEL.getType().equals(sortTerm)) {
+
+            if (SortTermEnum.LEVEL.getType().equals(sortTerm)) {
                 return orderByDesc ? o2.getLevel().compareTo(o1.getLevel()) :
                         o1.getLevel().compareTo(o2.getLevel());
             }
@@ -301,16 +299,5 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
             // 不排序
             return 0;
         });
-    }
-
-    private void setLevel(List<ConsoleTemplateVO> consoleTemplateVOList) {
-        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
-            return;
-        }
-
-        for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
-            ClusterLogic logicCluster = clusterLogicService.getClusterLogicById(consoleTemplateVO.getResourceId());
-            consoleTemplateVO.setLevel(logicCluster == null ? 1 : logicCluster.getLevel());
-        }
     }
 }

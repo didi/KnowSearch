@@ -75,10 +75,10 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
 
         Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(appId, condition);
         if (tuple == null) {
-            return PaginationResult.buildSucc( new ArrayList<>(), 0L, condition.getFrom(), condition.getSize());
+            return PaginationResult.buildSucc( new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
         }
         List<DslTemplateVO> dslTemplateVOList = ConvertUtil.list2List(tuple.v2(), DslTemplateVO.class);
-        return PaginationResult.buildSucc(dslTemplateVOList, tuple.v1(), condition.getFrom(), condition.getSize());
+        return PaginationResult.buildSucc(dslTemplateVOList, tuple.v1(), condition.getPage(), condition.getSize());
     }
 
     private DslTemplateConditionDTO buildInitDslTemplateConditionDTO(PageDTO pageDTO) {
