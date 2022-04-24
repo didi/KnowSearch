@@ -1,0 +1,28 @@
+{
+  "header": {
+    "mode": "complicated",
+    "logo": "../../assets/nav-logo.png",
+    "userIconSrc": "../../assets/avatars.png",
+    "subTitle": "KnowSearch",
+    "theme": "light",
+    "rightEle": [
+      {
+        "type": "dropdown",
+        "scene": "doc",
+        "options": []
+      },
+      {
+        "type": "dropdown",
+        "scene": "project"
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "dropdown",
+        "scene": "user",
+        "showUserDrawer": true
+      }
+    ]
+  }
+}

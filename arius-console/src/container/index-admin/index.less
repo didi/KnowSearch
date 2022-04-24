@@ -1,0 +1,28 @@
+.dsl-overflow-auto {
+  overflow: auto;
+  max-height: 300px;
+}
+
+.two-row-ellipsis {
+  text-overflow: -o-ellipsis-lastline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.row-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.pointer {
+  cursor: pointer;
+}
+.index-name-cell {
+  color: @primary-color;
+  word-break: break-all;
+  width: 165px;
+}
