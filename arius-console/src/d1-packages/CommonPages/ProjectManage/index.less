@@ -1,0 +1,35 @@
+.project-tpl-form {
+  padding: 20px;
+  &-readonlyText {
+    display: flex;
+    margin-top: 12px;
+    .read-lable {
+      flex-shrink: 0;
+    }
+    .read-content {
+      overflow: auto;
+      &.user-list {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: -7px;
+      }
+      .bind-user-item {
+        height: 24px;
+        margin-right: 7px;
+        margin-bottom: 7px;
+        padding: 0 3px;
+        background: #f8fafd;
+        color: #303a51;
+        border: 1px solid #eaeef5;
+        border-radius: 1px;
+      }
+    }
+  }
+  &-formitem {
+    margin-top: 20px !important;
+    margin-bottom: 0px !important;
+  }
+  &-first-formitem {
+    margin-bottom: 0px !important;
+  }
+}

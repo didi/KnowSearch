@@ -1,0 +1,124 @@
+.piedashboardbox {
+  width: 100%;
+  display: flex;
+  width: 100%;
+  border: 1px solid #DAE0E4;
+  border-radius: 8px;
+}
+
+.dashboard-piechart {
+  height: 262px;
+  padding: 13px 0px 0px 16px;
+  background: #fff;
+  border-radius: 8px;
+  // box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+  width: 100%;
+  cursor: default;
+
+  &-header {
+    width: 100%;
+
+    &-title {
+      font-size: 14px;
+      line-height: 20px;
+      font-family: PingFangSC-Regular;
+      color: #303A51;
+    }
+  }
+
+  &-faulttask {
+    margin: 17px 15px 0 0px;
+    float: left;
+    width: 163px;
+    height: 190px;
+    background: #F8F9FA;
+    border-radius: 8px;
+    padding: 12px 10px 10px 10px;
+    overflow: hidden;
+
+    &-icon {
+      width: 100%;
+
+      &-item {
+        width: 20px;
+        height: 20px;
+        margin-right: 4px;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      &-title {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.85);
+        letter-spacing: 0;
+        text-align: justify;
+        line-height: 22px;
+        vertical-align: middle;
+      }
+    }
+
+    &-content {
+      height: 90%;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      margin-top: 4px;
+      margin-left: 19px;
+
+      &-empty {
+        margin-top: 48px;
+        text-align: center;
+        margin-left: -19px;
+
+        img {
+          margin-left: 8px;
+          width: 60px;
+          height: 40px;
+          margin-bottom: 8px;
+        }
+
+        span {
+          font-family: PingFangSC-Regular;
+          font-size: 12px;
+          color: #919AAC;
+          text-align: center;
+          line-height: 20px;
+          margin-left: -1px;
+        }
+      }
+
+      &-li {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.65);
+        letter-spacing: 0;
+        text-align: justify;
+        line-height: 20px;
+        margin-bottom: 4px;
+      }
+    }
+  }
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  transition: all 1s;
+  background-color: #c7c7c7;
+  border: 1px solid transparent;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-corner {
+  display: none;
+}

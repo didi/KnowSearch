@@ -1,0 +1,102 @@
+.mapping-diff {
+  &-mapping {
+    height: 345px;
+    padding: 24px;
+    &-header {
+      height: 36px;
+      width: 100%;
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: #303a51;
+      &-before {
+        float: left;
+        width: 504px;
+        height: 36px;
+        background: #f9f9fa;
+        border: 1px solid #ebedef;
+        border-bottom: 0px;
+        border-radius: 4px 4px 0 0;
+        padding: 7px 0px 7px 20px;
+      }
+      &-after {
+        float: right;
+        width: 504px;
+        height: 36px;
+        background: #ffffff;
+        border: 1px solid #ebedef;
+        border-bottom: 0px;
+        border-radius: 4px 4px 0 0;
+        padding: 7px 0px 7px 20px;
+      }
+    }
+  }
+  &-header {
+    width: 1080px;
+    height: 40px;
+    background: #f9f9fa;
+    font-family: PingFangSC-Medium;
+    font-size: 12px;
+    color: #1d2330;
+    text-align: left;
+    line-height: 40px;
+    padding-left: 24px;
+  }
+  .react-diff-code-view {
+    height: 516px;
+    overflow: hidden;
+    .CodeMirror {
+      height: 512px;
+    }
+    .CodeMirror-merge {
+      // height: 256px;
+      border: none;
+    }
+    .CodeMirror-merge-editor {
+      position: absolute;
+      right: 0px;
+      border: 1px solid #ebedef;
+      width: 504px;
+    }
+    .CodeMirror-merge-pane-rightmost {
+      position: absolute;
+      left: 0px;
+      border: 1px solid #ebedef;
+      width: 504px;
+    }
+    .CodeMirror-merge-r-deleted {
+      background-image: none;
+    }
+    .CodeMirror-merge-r-inserted {
+      background-image: none;
+    }
+  }
+  .react-diff-dynamic-code-view {
+    height: 258px;
+    overflow: hidden;
+    .CodeMirror {
+      height: 256px;
+    }
+    .CodeMirror-merge {
+      // height: 256px;
+      border: none;
+    }
+    .CodeMirror-merge-editor {
+      position: absolute;
+      right: 0px;
+      border: 1px solid #ebedef;
+      width: 504px;
+    }
+    .CodeMirror-merge-pane-rightmost {
+      position: absolute;
+      left: 0px;
+      border: 1px solid #ebedef;
+      width: 504px;
+    }
+    .CodeMirror-merge-r-deleted {
+      background-image: none;
+    }
+    .CodeMirror-merge-r-inserted {
+      background-image: none;
+    }
+  }
+}
