@@ -49,7 +49,7 @@ public class AriusStatsClusterTaskInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, RUNNING_TIME, RUNNING_TIME);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
                 this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
@@ -58,7 +58,7 @@ public class AriusStatsClusterTaskInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
                 response -> Long.parseLong(response.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString()), 3);
     }
 
