@@ -9,7 +9,7 @@ import com.didiglobal.logi.job.core.job.JobContext;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
-@Task(name = "DcdrInfoTaskDriver", description = "采集dcdr相关数据", cron = "0 0/3 * * * ? *", autoRegister = true)
+@Task(name = "DcdrInfoTaskDriver", description = "采集dcdr相关数据", cron = "0 0/5 * * * ? *", autoRegister = true)
 public class DcdrInfoTaskDriver implements Job {
 
     private static final ILog    LOGGER = LogFactory.getLog(DcdrInfoTaskDriver.class);

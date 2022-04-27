@@ -8,11 +8,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateCreateContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateCreateNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
@@ -51,7 +49,6 @@ import org.springframework.stereotype.Service;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_CREATE;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl.NOT_CHECK;
 
 /**
@@ -278,10 +275,6 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
                     .updateMappingForNew(result.getData(), genTypeProperty(content.getMapping())).failed()) {
                 throw new AdminOperateException("设置mapping失败");
             }*/
-
-            sendNotify(WORK_ORDER_TEMPLATE_CREATE,
-                    new TemplateCreateNotify(workOrder.getSubmitorAppid(), content.getName()),
-                    Arrays.asList(workOrder.getSubmitor()));
         }
 
         return Result.buildFrom(result);

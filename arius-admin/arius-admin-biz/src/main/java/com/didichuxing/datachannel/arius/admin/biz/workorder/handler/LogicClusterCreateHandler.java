@@ -1,10 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_LOGIC_CLUSTER_CREATE;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 
-import java.util.Arrays;
 import java.util.List;
 
 import java.util.Random;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterCreateContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.LogicClusterCreateNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterWithRegionDTO;
@@ -135,9 +132,6 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         }
 
         if (result.success()) {
-            sendNotify(WORK_ORDER_LOGIC_CLUSTER_CREATE, new LogicClusterCreateNotify(workOrder.getSubmitorAppid(),
-                esLogicClusterWithRegionDTO.getName(), approver), Arrays.asList(workOrder.getSubmitor()));
-
             List<String> administrators = getOPList().stream().map(AriusUserInfo::getName).collect(Collectors.toList());
             return Result.buildSuccWithMsg(
                 String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));

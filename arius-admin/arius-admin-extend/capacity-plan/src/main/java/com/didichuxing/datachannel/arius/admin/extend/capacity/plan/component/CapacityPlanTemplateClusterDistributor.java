@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component;
 
 import com.didichuxing.datachannel.arius.admin.biz.component.DistributorUtils;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateDistributedRack;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;

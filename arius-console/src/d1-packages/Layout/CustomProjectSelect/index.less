@@ -1,0 +1,45 @@
+@primary-color: #526ecc;
+
+.dropdown-text {
+  color: white;
+
+  &:hover {
+    color: white;
+  }
+}
+
+.app-wrapper {
+  overflow: scroll;
+  border-radius: 5px;
+  width: 230px;
+  height: 240px;
+  background: #FFFFFF;
+  box-shadow: 0 -2px 4px 0 rgb(0 0 0 / 2%), 0 2px 6px 6px rgb(0 0 0 / 2%), 0 2px 6px 0 rgb(0 0 0 / 6%);
+  padding: 8px 8px 0px 8px !important;
+
+  .right-text {
+    float: right;
+  }
+
+  ul {
+    margin-top: 4px;
+
+    li {
+      text-align: left;
+      height: 32px;
+      line-height: 32px;
+      margin-left: 8px;
+      font-family: PingFangSC-Regular;
+      font-size: 12px;
+      letter-spacing: 0;
+
+      a {
+        color: #212529;
+
+        &.active {
+          color: @primary-color;
+        }
+      }
+    }
+  }
+}

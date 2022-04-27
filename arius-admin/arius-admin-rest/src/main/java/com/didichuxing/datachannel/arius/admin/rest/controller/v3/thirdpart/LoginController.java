@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.thirdpart;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART_SSO;
 
-import com.didichuxing.datachannel.arius.admin.biz.extend.account.LoginManager;
+import com.didichuxing.datachannel.arius.admin.biz.extend.login.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

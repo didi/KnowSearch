@@ -1,0 +1,98 @@
+.state-config-box {
+  padding: 20px;
+
+  p {
+    margin-bottom: 0;
+  }
+
+  &-title {
+    font-family: PingFangSC-Medium;
+    font-size: 16px;
+    color: #303a51;
+  }
+
+  &-content {
+    display: flex;
+
+    &-module {
+      flex: 1;
+    }
+  }
+
+  &-config-info {
+    margin-top: 15px;
+    padding-bottom: 5px;
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: #505568;
+    letter-spacing: 0;
+    text-align: justify;
+    line-height: 22px;
+  }
+
+  &-config-state {
+    width: 73px;
+    height: 28px;
+    border-radius: 4px;
+    text-align: center;
+
+    &-Green {
+      background: rgba(70, 214, 119, 0.1);
+      border: 1px solid #46d677;
+
+      span {
+        color: #46d677;
+      }
+    }
+
+    &-Yellow {
+      background: rgba(244, 168, 56, 0.1);
+      border: 1px solid #f4a838;
+
+      span {
+        color: #f4a838;
+      }
+    }
+
+    &-Unknown {
+      background: #f5f5f5;
+      border: 1px solid #d9d9d9;
+      width: 93px;
+
+      span {
+        color: rgba(0, 0, 0, 0.25);
+      }
+    }
+
+    &-Red {
+      background: rgba(239, 100, 92, 0.1);
+      border: 1px solid #ef645c;
+
+      span {
+        color: #ef645c;
+      }
+    }
+
+    span {
+      font-family: PingFangSC-Medium;
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  &-config-content {
+    font-family: PingFangSC-Medium;
+    font-size: 24px;
+    color: #303a51;
+    line-height: 32px;
+    cursor: pointer;
+
+    &-sub {
+      font-family: PingFangSC-Regular;
+      font-size: 12px;
+      color: #a8adbd;
+      line-height: 20px;
+      padding-left: 5px;
+    }
+  }
+}
