@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.extend.intfc;
+package com.didichuxing.datachannel.arius.admin.biz.extend.foctory;
 
 import java.util.List;
 import java.util.Map;
