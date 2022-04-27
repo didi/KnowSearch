@@ -1,13 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.employee.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.remote.employee.EmployeeHandle;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author linyunan
@@ -31,10 +32,5 @@ public class DefaultEmployeeHandle implements EmployeeHandle {
             return Result.buildFail();
         }
         return Result.buildSucc();
-    }
-
-    @Override
-    public Result searchOnJobStaffByKeyWord(String keyWord) {
-        return Result.buildSucc(ariusUserInfoService.getByDomainAccount(keyWord));
     }
 }

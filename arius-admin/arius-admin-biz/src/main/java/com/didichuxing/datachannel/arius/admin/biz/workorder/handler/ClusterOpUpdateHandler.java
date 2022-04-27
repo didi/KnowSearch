@@ -29,16 +29,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.ClusterOpUpdateNotify;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
 import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_HOST;
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_OP_UPDATE;
 
 @Service("clusterOpUpdateHandler")
 public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
@@ -156,10 +152,6 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
-
-        sendNotify(WORK_ORDER_CLUSTER_OP_UPDATE,
-            new ClusterOpUpdateNotify(workOrder.getSubmitorAppid(), content.getPhyClusterName(), approver),
-            Arrays.asList(workOrder.getSubmitor()));
 
         return Result.buildSucc();
     }

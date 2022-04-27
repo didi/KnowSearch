@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_LOGIC_TRANSFER;
-
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterLogicTransferContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.ClusterLogicTransferNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
@@ -141,19 +136,6 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         
         Result<Void> result = clusterLogicService.transferClusterLogic(content.getClusterLogicId(),
             content.getTargetAppId(), content.getTargetResponsible(), workOrder.getSubmitor());
-
-        if (result.success()){
-            ClusterLogicTransferNotify build = ClusterLogicTransferNotify
-                                                .builder()
-                                                .clusterLogicName(content.getClusterLogicName())
-                                                .sourceAppId(content.getSourceAppId())
-                                                .targetAppId(content.getTargetAppId())
-                                                .currentAppId(workOrder.getSubmitorAppid())
-                                                .targetResponsible(content.getTargetResponsible())
-                                                .build();
-
-            sendNotify(WORK_ORDER_CLUSTER_LOGIC_TRANSFER, build, Collections.singletonList(workOrder.getSubmitor()));
-        }
 
         return Result.buildFrom(result);
     }

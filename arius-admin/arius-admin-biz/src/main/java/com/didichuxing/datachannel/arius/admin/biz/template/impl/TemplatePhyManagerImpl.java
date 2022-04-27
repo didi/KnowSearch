@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
@@ -36,10 +36,6 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTem
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.cluster.ClusterTemplatePhysicalMetaErrorNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplatePhysicalMetaErrorNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -120,9 +116,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private TemplatePhyService          templatePhyService;
 
     @Autowired
-    private NotifyService               notifyService;
-
-    @Autowired
     private AriusConfigInfoService      ariusConfigInfoService;
 
     @Autowired
@@ -159,9 +152,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                     } else {
                         LOGGER.warn("class=TemplatePhyManagerImpl||method=metaCheck||msg=fail||physicalId={}||failMsg={}", templatePhysical.getId(),
                                 result.getMessage());
-                        notifyService.send( NotifyTaskTypeEnum.TEMPLATE_PHYSICAL_META_ERROR,
-                                new TemplatePhysicalMetaErrorNotifyInfo(templatePhysical, result.getMessage()),
-                                Arrays.asList());
                     }
                     int indexOpResult = checkIndexCreateAndExpire(templatePhysical, logicId2IndexTemplateLogicMap);
                     if (indexOpResult == TOMORROW_INDEX_NOT_CREATE || indexOpResult == INDEX_ALL_ERR) {
@@ -176,21 +166,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                             e.getMessage(), templatePhysical.getId(), e);
                 }
             }
-
-            List<String> errMsgs = Lists.newArrayList();
-            if (tomorrowIndexNotCreateCount * 1.0 / clusterTemplates.size() > 0.7) {
-                errMsgs.add("有" + tomorrowIndexNotCreateCount + "个索引模板创建明天索引失败");
-            }
-            if (expireIndexNotDeleteCount * 1.0 / clusterTemplates.size() > 0.7) {
-                errMsgs.add("有" + expireIndexNotDeleteCount + "个索引模板删除过期索引失败");
-            }
-
-            if (CollectionUtils.isNotEmpty(errMsgs)) {
-                notifyService.send(NotifyTaskTypeEnum.CLUSTER_TEMPLATE_PHYSICAL_META_ERROR,
-                        new ClusterTemplatePhysicalMetaErrorNotifyInfo(cluster, String.join(",", errMsgs)),
-                        Arrays.asList());
-            }
-
         }
 
         return true;

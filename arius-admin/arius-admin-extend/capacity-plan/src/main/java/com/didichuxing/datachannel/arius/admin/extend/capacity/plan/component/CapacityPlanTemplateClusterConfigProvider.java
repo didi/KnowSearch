@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterConfigProvider;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterConfigProvider;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateResourceConfig;
 import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;

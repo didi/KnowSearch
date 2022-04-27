@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.remote.employee.content;
+package com.didichuxing.datachannel.arius.admin.remote.employee;
 
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 
@@ -12,10 +12,7 @@ public enum EmployeeTypeEnum {
                                */
                               DEFAULT(1, "defaultEmployee"),
 
-                              DIDI(2, "didi"),
-
                               UNKNOWN(-1, "unknown");
-
     private Integer code;
 
     private String  type;

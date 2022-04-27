@@ -30,7 +30,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandl
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.LogicClusterPluginNotify;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +37,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_LOGIC_CLUSTER_PLUGIN;
 
 @Service("logicClusterPlugOperationHandler")
 public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
@@ -137,10 +134,6 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
                 return Result.buildFrom(result);
             }
         }
-
-        sendNotify(WORK_ORDER_LOGIC_CLUSTER_PLUGIN,
-            new LogicClusterPluginNotify(workOrder.getSubmitorAppid(), content.getLogicClusterName(), approver),
-            Arrays.asList(workOrder.getSubmitor()));
         return Result.buildSucc();
     }
 

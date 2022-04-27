@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.extend.account;
+package com.didichuxing.datachannel.arius.admin.biz.extend.login;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;

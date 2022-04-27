@@ -113,7 +113,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_USAGE_PERCENT.getType(), CPU_USAGE_PERCENT.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster,realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
                 this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
@@ -128,7 +128,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_1M.getType(), CPU_LOAD_AVERAGE_1M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
@@ -143,7 +143,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_5M.getType(), CPU_LOAD_AVERAGE_5M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
@@ -158,7 +158,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_15M.getType(), CPU_LOAD_AVERAGE_15M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
 
     }
@@ -205,7 +205,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 NOW_2M, NOW_1M, INDICES_QUERY_CONSUME.getType(), INDICES_QUERY_CONSUME.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
@@ -217,7 +217,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
             DslsConstant.AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT, cluster, NOW_2M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 

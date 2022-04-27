@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.extend.intfc;
+package com.didichuxing.datachannel.arius.admin.biz.extend.foctory;
 
 import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateResourceConfig;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;

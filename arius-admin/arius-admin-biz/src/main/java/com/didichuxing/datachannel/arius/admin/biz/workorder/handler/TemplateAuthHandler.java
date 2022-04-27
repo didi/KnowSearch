@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateAuthContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateAuthNotify;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
@@ -19,24 +18,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.auth.ImportantTemplateAuthNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
-import com.google.common.collect.Lists;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_AUTH;
 
 /**
  * @author d06679
@@ -59,13 +51,10 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
     private TemplateLabelService                        templateLabelService;
 
     @Autowired
-    private NotifyService                               notifyService;
-
-    @Autowired
     private AppLogicTemplateAuthService                 logicTemplateAuthService;
 
     @Autowired
-    private AppClusterLogicAuthService logicClusterAuthService;
+    private AppClusterLogicAuthService                  logicClusterAuthService;
 
     /**
      * 工单是否自动审批
@@ -205,32 +194,16 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
             AppClusterLogicAuthEnum logicClusterAuthEnum = logicClusterAuthService
                 .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), clusterLogic.getId());
 
-            boolean addClusterAuth = false;
             // 没有集群权限则添加访问权限
             if (logicClusterAuthEnum == AppClusterLogicAuthEnum.NO_PERMISSIONS) {
                 logicClusterAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorAppid(), clusterLogic
 								.getId(),
                     AppClusterLogicAuthEnum.ACCESS, workOrder.getSubmitor(), workOrder.getSubmitor());
-                addClusterAuth = true;
             }
 
             // 逻辑模板权限设置
             Result<Void> result = logicTemplateAuthService.ensureSetLogicTemplateAuth(workOrder.getSubmitorAppid(),
                 logicTemplateId, authEnum, workOrder.getSubmitor(), workOrder.getSubmitor());
-
-            // 发送通知
-            if (result.success()) {
-                sendNotify(WORK_ORDER_TEMPLATE_AUTH, new TemplateAuthNotify(workOrder.getSubmitorAppid(),
-                    content.getName(), addClusterAuth, clusterLogic.getName()),
-                    Arrays.asList(workOrder.getSubmitor()));
-
-                // 如果是重要索引，通知索引负责人
-                if (templateLabelService.isImportantIndex(content.getId())) {
-                    notifyService.send(NotifyTaskTypeEnum.IMPORTANT_TEMPLATE_AUTH,
-                        new ImportantTemplateAuthNotifyInfo(logicTemplateId, content.getName(), adminUrlConsole),
-                        Lists.newArrayList(workOrder.getSubmitor()));
-                }
-            }
 
             return Result.buildFrom(result);
         }

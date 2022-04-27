@@ -22,14 +22,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfo
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateTransferContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateTransferNotify;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_TRANSFER;
 
 /**
  * @author d06679
@@ -193,10 +189,6 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), JSON.toJSONString(
                     new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), "模板从 appId:" + content.getSourceAppId() + "转移到 appId:" + content.getTgtAppId())), approver);
         }
-
-        sendNotify(WORK_ORDER_TEMPLATE_TRANSFER,
-            new TemplateTransferNotify(workOrder.getSubmitorAppid(), content.getTgtAppId(), content.getName()),
-            Arrays.asList(workOrder.getSubmitor()));
 
         return Result.buildFrom(result);
     }

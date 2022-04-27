@@ -18,17 +18,13 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Templ
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateIndecreaseContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateIndecencyNotify;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_INDECREASE;
 
 /**
  * 逻辑集群的编辑
@@ -182,10 +178,6 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
                 "class=TemplateIndecreaseHandler||method=doProcessAgree||templateLogicId={}||msg=template quota publish failed!",
                 content.getId());
         }
-
-        sendNotify(WORK_ORDER_TEMPLATE_INDECREASE,
-            new TemplateIndecencyNotify(workOrder.getSubmitorAppid(), content.getName()),
-            Arrays.asList(workOrder.getSubmitor()));
 
         return result;
     }
