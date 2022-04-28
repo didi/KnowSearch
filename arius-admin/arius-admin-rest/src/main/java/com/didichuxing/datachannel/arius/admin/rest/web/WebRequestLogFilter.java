@@ -122,7 +122,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
             requestBody = getRequestBody(request);
         }
         LOGGER.info("class=WebRequestLogFilter||method=logRequest||request||url={}||method={}||remoteAddr={}||headers={}||urlParams={}||body={}",
-                request.getRequestURI(), request.getMethod(), URLHelper.getIpAddr(request), headers,
+                request.getRequestURI(), request.getMethod(), UrlHelper.getIpAddr(request), headers,
                 request.getQueryString(), requestBody, StandardCharsets.UTF_8);
     }
 
