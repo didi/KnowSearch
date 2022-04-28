@@ -41,9 +41,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplateLogicMetaErrorNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -114,9 +111,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private TemplatePhyManager          templatePhyManager;
 
     @Autowired
-    private NotifyService               notifyService;
-
-    @Autowired
     private HandleFactory               handleFactory;
 
     @Autowired
@@ -139,8 +133,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 } else {
                     LOGGER.warn("class=TemplateLogicManagerImpl||method=metaCheck||msg=fail||logicId={}||failMsg={}", templateLogic.getId(),
                             result.getMessage());
-                    notifyService.send( NotifyTaskTypeEnum.TEMPLATE_LOGICAL_META_ERROR,
-                            new TemplateLogicMetaErrorNotifyInfo(templateLogic, result.getMessage()), Arrays.asList());
                 }
             } catch (Exception e) {
                 LOGGER.error("class=TemplateLogicServiceImpl||method=metaCheck||errMsg={}||logicId={}||",

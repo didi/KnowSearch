@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Task(name = "esClusterMonitorJob", description = "clustermonitor调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
+@Task(name = "esClusterMonitorJob", description = "集群指标采集调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
 public class ESClusterMonitorJobTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger( ESClusterMonitorJobTask.class);
 

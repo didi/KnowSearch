@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterIndecreaseContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.LogicClusterIndecencyNotify;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -21,14 +20,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicA
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_LOGIC_CLUSTER_INDECREASE;
 
 /**
  * @author d06679
@@ -164,10 +159,6 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
                                                                                            + JSON.toJSONString(content),
             approver);
-
-        sendNotify(WORK_ORDER_LOGIC_CLUSTER_INDECREASE,
-            new LogicClusterIndecencyNotify(workOrder.getSubmitorAppid(), content.getLogicClusterName(), approver),
-            Arrays.asList(workOrder.getSubmitor()));
 
         List<String> administrators = getOPList().stream().map(AriusUserInfo::getName).collect(
                 Collectors.toList());

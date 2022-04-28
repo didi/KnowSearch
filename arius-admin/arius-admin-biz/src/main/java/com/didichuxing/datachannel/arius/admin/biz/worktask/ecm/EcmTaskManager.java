@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskD
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
-import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 
 /**
  * ES工单任务 服务类

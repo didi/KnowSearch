@@ -9,6 +9,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.settin
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
@@ -219,7 +221,7 @@ public interface ESClusterService {
      * @param password
      * @return True 正确连接集群， False 无法连接集群
      */
-    Boolean checkClusterPassword(String addresses, String password);
+    ClusterConnectionStatus checkClusterPassword(String addresses, String password);
 
     /**
      * 获取集群线程池相关信息

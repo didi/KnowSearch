@@ -30,9 +30,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.ExtendServiceFactory;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterConfigProvider;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterConfigProvider;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didiglobal.logi.log.ILog;

@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.component.DistributorUtils;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateDistributedRack;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;

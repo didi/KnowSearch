@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReS
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.ClusterOpRestartNotify;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
@@ -22,10 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_CLUSTER_OP_RESTART;
 
 /**
  * @author lyn
@@ -104,10 +100,6 @@ public class ClusterOpNormalRestartHandler extends ClusterOpRestartHandler {
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
-
-        sendNotify(WORK_ORDER_CLUSTER_OP_RESTART,
-            new ClusterOpRestartNotify(workOrder.getSubmitorAppid(), content.getPhyClusterName(), approver),
-            Arrays.asList(workOrder.getSubmitor()));
 
         return Result.buildSucc();
     }

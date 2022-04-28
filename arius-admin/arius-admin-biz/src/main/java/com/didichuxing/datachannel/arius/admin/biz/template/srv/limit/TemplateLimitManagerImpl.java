@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.ExtendServiceFactory;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStrategyEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateLimitStrategyProvider;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;

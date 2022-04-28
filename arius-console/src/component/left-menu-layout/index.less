@@ -1,0 +1,21 @@
+.layout-wrapper {
+  padding: 0px;
+  background-color: #fff;
+  position: relative;
+  > .menu-wrapper {
+    position: absolute;
+    padding: 16px 0;
+    .ant-menu-item-selected {
+      background-color: #fff;
+      border-right: 2px solid @primary-color;
+      transform: scaleY(1);
+      opacity: 1;
+    }
+  }
+  > .menu-content-wrapper {
+    padding-left: 15px;
+    height: 800px;
+    position: relative;
+    overflow: scroll;
+  }
+}

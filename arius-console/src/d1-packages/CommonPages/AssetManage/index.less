@@ -1,0 +1,56 @@
+.resources-management {
+  background-color: #fff;
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    height: 64px;
+    align-items: center;
+    border-bottom: 1px solid #dbe0e4;
+    padding: 20px;
+    &-title {
+      font-size: 16px;
+      color: #101724;
+      line-height: 24px;
+    }
+    &-control {
+      font-size: 12px;
+      color: #505568;
+      line-height: 20px;
+    }
+  }
+  &-content {
+    .table-content {
+      padding-bottom: 0;
+      padding-top: 0;
+    }
+  }
+}
+.resources-tab {
+  display: flex;
+  &-tree {
+    // max-width: 240px;
+    min-width: 180px;
+    background: #f8fafd;
+    padding: 20px;
+    .ant-tree {
+      background: #f8fafd;
+      font-size: 12px;
+    }
+  }
+  &-table {
+    flex: 1;
+    padding: 20px;
+    &-breadcrumb {
+      margin-bottom: 20px;
+    }
+    &-query {
+      .dantd-query-form {
+        padding: 0;
+        .ant-form-item-control-input-content {
+          display: flex;
+          justify-content: flex-end;
+        }
+      }
+    }
+  }
+}

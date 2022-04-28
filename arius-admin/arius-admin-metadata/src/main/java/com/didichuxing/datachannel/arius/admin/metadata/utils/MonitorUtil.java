@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.metadata.utils;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.N9eData;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -54,35 +52,6 @@ public class MonitorUtil {
                 return object;
             }
         }
-    }
-
-    public static N9eData fillDataformat(ESDataTempBean esDataTempBean) {
-        N9eData dataFormat = new N9eData();
-        dataFormat.setMetric(esDataTempBean.getValueName());
-        dataFormat.setValue(String.valueOf(esDataTempBean.getComputeValue()));
-        dataFormat.setTime(esDataTempBean.getTimestamp() / 1000);
-        dataFormat.putTag("host", esDataTempBean.getHost());
-
-        if (StringUtils.isNotEmpty(esDataTempBean.getCluster())) {
-            dataFormat.putTag("cluster", esDataTempBean.getCluster());
-        }
-        if (StringUtils.isNotEmpty(esDataTempBean.getNode())) {
-            dataFormat.putTag("node", esDataTempBean.getNode());
-        }
-        if (esDataTempBean.getPort() != null) {
-            dataFormat.putTag("port", esDataTempBean.getPort());
-        }
-        if (StringUtils.isNotEmpty(esDataTempBean.getTemplate())) {
-            dataFormat.putTag("template", esDataTempBean.getTemplate());
-        }
-        if (StringUtils.isNotEmpty(esDataTempBean.getIndex())) {
-            dataFormat.putTag("index", esDataTempBean.getIndex());
-        }
-        if (StringUtils.isNotEmpty(esDataTempBean.getType())) {
-            dataFormat.putTag("type", esDataTempBean.getType());
-        }
-
-        return dataFormat;
     }
 
     public static Double obj2Double(Object obj){

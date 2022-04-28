@@ -1,0 +1,83 @@
+// @import '../style/index.less';
+#d-range-time {
+  position: relative;
+  display: inline-block;
+  .input-span {
+    cursor: pointer;
+  }
+  .d-range-time-input {
+    height: 27px;
+    background: #fff;
+    border: 1px solid #CED4DA;
+    border-radius: 4px;
+    &.relativeTime {
+      width: 160px;
+    }
+    &.absoluteTime {
+      width: 300px;
+    }
+    input {
+      cursor: pointer;
+    }
+    .dcloud-input {
+      background: transparent;
+    }
+    .dcloud-input-suffix {
+      font-size: 18px;
+      color: #74788D;
+    }
+  }
+  
+}
+.d-range-time-popover {
+  border-radius: 12px;
+  .dcloud-popover-inner-content {
+    padding: 16px 24px;
+    width: 479px;
+    box-sizing: border-box;
+  }
+  &.dcloud-popover-placement-bottomRight {
+    padding-top: 0;
+  }
+  
+}
+.dd-time-range-module {
+  .flx_con {
+    display: flex;
+    .time_title {
+      font-size: 14px;
+      color: #212529;
+      margin-bottom: 16px;
+    }
+    .flx_l {
+      width: 184px;
+      .dcloud-radio {
+        display: none;
+        & + * {
+          padding: 0;
+        }
+      }
+      .dcloud-radio-wrapper-checked {
+        color: #556EE6;
+      }
+    }
+    .flx_r {
+      flex: 1;
+    }
+  }
+  .time-radio-group {
+    .dcloud-radio-wrapper {
+      line-height: 18px;
+    }
+  }
+  .dcloud-picker {
+    border: 0;
+    background: rgba(33,37,41,0.04);
+  }
+  .dcloud-picker-range {
+    width: 300px;
+    .dcloud-picker-clear {
+      font-size: 14px;
+    }
+  }
+}

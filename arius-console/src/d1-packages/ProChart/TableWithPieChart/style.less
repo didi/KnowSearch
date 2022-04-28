@@ -1,0 +1,42 @@
+.pie-table-box {
+  display: flex;
+  &.verticalLayout {
+    height: 100%;
+    flex-direction: column;
+    .table-box {
+      margin-right: 0!important;
+      flex: 1!important;
+    }
+    .pie-chart-box {
+      width: auto;
+    }
+  }
+  .table-box {
+    flex: 1;
+    margin-right: 60px;
+    .d-table-box {
+      padding: 0;
+      &-header {
+        display: none;
+      }
+      .ant-table-thead {
+        tr {
+          th {
+            padding: 4px !important;
+          }
+        }
+        font-size: 12px !important;
+      }
+      .ant-table-tbody {
+        font-size: 12px !important;
+        tr {
+          td {
+            padding: 8px !important;
+          }
+        }
+      }
+    }
+  }
+  .pie-chart-box {
+  }
+}

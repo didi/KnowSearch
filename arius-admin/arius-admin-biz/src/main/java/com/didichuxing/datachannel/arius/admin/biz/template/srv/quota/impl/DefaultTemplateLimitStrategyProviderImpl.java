@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitS
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStrategyEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateLimitStrategyProvider;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;

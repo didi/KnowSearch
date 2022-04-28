@@ -30,7 +30,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPlugin
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
-import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum;
 import org.apache.commons.collections4.CollectionUtils;

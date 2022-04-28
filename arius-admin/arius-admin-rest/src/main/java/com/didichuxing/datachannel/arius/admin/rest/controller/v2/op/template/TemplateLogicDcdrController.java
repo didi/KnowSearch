@@ -2,28 +2,16 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
-import java.util.Arrays;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.dcdr.DcdrSwitchMasterNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -41,9 +29,6 @@ public class TemplateLogicDcdrController {
     @Autowired
     private TemplateDcdrManager templateDcdrManager;
 
-    @Autowired
-    private NotifyService        notifyService;
-
     @PostMapping("/switchMasterSlave")
     @ResponseBody
     @ApiOperation(value = "DCDR主从切换接口", notes = "")
@@ -53,12 +38,6 @@ public class TemplateLogicDcdrController {
                                         @RequestParam(value = "expectMasterPhysicalId") Long expectMasterPhysicalId) {
         String operator = HttpRequestUtils.getOperator(request);
         Result<Void> result = templateDcdrManager.dcdrSwitchMasterSlave(logicId, expectMasterPhysicalId, 1, operator);
-
-        notifyService.send(
-                NotifyTaskTypeEnum.OP_DCDR_SWITCH_MASTER,
-                new DcdrSwitchMasterNotifyInfo(templateLogicService.getLogicTemplateById(logicId), expectMasterPhysicalId, result, operator),
-                Arrays.asList()
-        );
         return result;
     }
 
@@ -74,12 +53,6 @@ public class TemplateLogicDcdrController {
                                             @RequestParam(value = "operator") String operator,
                                             @RequestParam(value = "step") int step) {
         Result<Void> result = templateDcdrManager.dcdrSwitchMasterSlave(logicId, expectMasterPhysicalId, step, operator);
-
-        notifyService.send(
-                NotifyTaskTypeEnum.OP_DCDR_SWITCH_MASTER,
-                new DcdrSwitchMasterNotifyInfo(templateLogicService.getLogicTemplateById(logicId), expectMasterPhysicalId, result, operator),
-                Arrays.asList()
-        );
         return result;
     }
 

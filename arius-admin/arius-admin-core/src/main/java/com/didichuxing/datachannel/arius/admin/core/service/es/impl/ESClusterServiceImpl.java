@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.compress.utils.Sets;
@@ -497,7 +498,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Boolean checkClusterPassword(String addresses, String password) {
+    public ClusterConnectionStatus checkClusterPassword(String addresses, String password) {
         ESClient client = new ESClient();
         client.addTransportAddresses(addresses);
         if (StringUtils.isNotBlank(password)) {
@@ -508,14 +509,14 @@ public class ESClusterServiceImpl implements ESClusterService {
             client.start();
             DirectRequest directRequest = new DirectRequest("GET", "");
             DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
-            if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                return Boolean.TRUE;
-            } else {
-                return Boolean.FALSE;
-            }
+            return ClusterConnectionStatus.NORMAL;
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterServiceImpl||method=checkClusterWithoutPassword||address={}||mg=get es segments fail", addresses, e);
-            return Boolean.FALSE;
+            if (e.getCause().getMessage().contains("Unauthorized")) {
+                return ClusterConnectionStatus.UNAUTHORIZED;
+            } else {
+                return ClusterConnectionStatus.DISCONNECTED;
+            }
         } finally {
             client.close();
         }

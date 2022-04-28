@@ -46,7 +46,6 @@ server:
 extend:
   service:
   fileStorage: s3
-  department: defaultDep
   employee: defaultEmployee
   loginProtocol: defaultLogin
 #extend.service: capacityPlan,dynamicLimit

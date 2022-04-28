@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterPluginContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.LogicClusterPluginNotify;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -21,10 +20,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_LOGIC_CLUSTER_PLUGIN;
 
 @Service("logicClusterPluginHandler")
 public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
@@ -89,11 +85,6 @@ public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         LogicClusterPluginContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPluginContent.class);
-
-        sendNotify(WORK_ORDER_LOGIC_CLUSTER_PLUGIN,
-            new LogicClusterPluginNotify(workOrder.getSubmitorAppid(), content.getLogicClusterName(), approver),
-            Arrays.asList(workOrder.getSubmitor()));
-
         return Result.buildSucc();
     }
 

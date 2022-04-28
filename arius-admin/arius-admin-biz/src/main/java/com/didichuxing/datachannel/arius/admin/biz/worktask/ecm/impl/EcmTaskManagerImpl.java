@@ -56,7 +56,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleC
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
-import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

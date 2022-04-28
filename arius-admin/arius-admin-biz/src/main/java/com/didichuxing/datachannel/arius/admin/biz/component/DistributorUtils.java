@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.component;
 
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.ExtendServiceFactory;
-import com.didichuxing.datachannel.arius.admin.biz.extend.intfc.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateDistributedRack;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;

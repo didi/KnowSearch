@@ -41,6 +41,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
@@ -1433,16 +1434,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * 检测「未设置密码的集群」接入时是否携带账户信息
      */
     private Result<Void> checkClusterWithoutPasswd(ClusterJoinDTO param, String esClientHttpAddressesStr) {
+        ClusterConnectionStatus status = esClusterService.checkClusterPassword(esClientHttpAddressesStr, null);
+        if (ClusterConnectionStatus.DISCONNECTED == status) {
+            return Result.buildParamIllegal("集群离线未能连通");
+        }
+
         if (!Strings.isNullOrEmpty(param.getPassword())) {
-            if (esClusterService.checkClusterPassword(esClientHttpAddressesStr, null)) {
+            if (ClusterConnectionStatus.NORMAL == status) {
                 return Result.buildParamIllegal("未设置密码的集群，请勿输入账户信息");
             }
-
-            if (!esClusterService.checkClusterPassword(esClientHttpAddressesStr, param.getPassword())) {
+            status = esClusterService.checkClusterPassword(esClientHttpAddressesStr, param.getPassword());
+            if (ClusterConnectionStatus.UNAUTHORIZED == status) {
                 return Result.buildParamIllegal("集群的账户信息错误");
             }
         } else {
-            if (!esClusterService.checkClusterPassword(esClientHttpAddressesStr, null)) {
+            if (ClusterConnectionStatus.UNAUTHORIZED == status) {
                 return Result.buildParamIllegal("集群设置有密码，请输入账户信息");
             }
         }

@@ -1,0 +1,111 @@
+.user-manage-detail {
+  .user-tpl-form {
+    padding: 20px;
+    &-readonlyText {
+      display: flex;
+      margin-top: 12px;
+      .read-lable {
+        flex-shrink: 0;
+      }
+    }
+    &-formitem {
+      margin-top: 20px !important;
+      margin-bottom: 0px !important;
+    }
+    &-first-formitem {
+      margin-bottom: 0px !important;
+    }
+  }
+  .ant-transfer {
+    height: 100%;
+  }
+  .ant-transfer-list {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+  }
+  .ant-transfer-list-header-title {
+    font-weight: bolder;
+  }
+  .bind-row-item {
+    height: 24px;
+    margin-right: 7px;
+    padding: 0 3px;
+    background: #f8fafd;
+    color: #303a51;
+    border: 1px solid #eaeef5;
+    border-radius: 1px;
+  }
+  .bind-role-title {
+    margin-top: 26px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: bolder;
+    color: #303a51;
+  }
+  .bind-role-table {
+    width: 100%;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    border-collapse: collapse;
+    display: table;
+    border-style: hidden;
+    box-shadow: 0 0 0 1px #dcdfe6;
+    .tr {
+      display: table-row;
+      .td {
+        display: table-cell;
+        line-height: 40px;
+        padding: 0 20px;
+        vertical-align: top;
+        border: 1px solid #dcdfe6;
+        position: relative;
+        text-align: left;
+      }
+    }
+    .tHead {
+      font-weight: bold;
+      height: 40px;
+      line-height: 40px;
+      color: #303a51;
+      background: #f5f7fa;
+      > div:first-child {
+        width: 157px;
+        border-top-left-radius: 4px;
+      }
+      > div:last-child {
+        // width: 482px;
+        border-top-right-radius: 4px;
+      }
+    }
+    .tBody {
+      .col-permission {
+        display: flex;
+        .permission-all {
+        }
+        .permission-content {
+          flex: 1;
+          display: flex;
+          flex-wrap: wrap;
+          padding-top: 10px;
+          .content-item {
+            margin-top: -10px;
+            padding-left: 16px;
+          }
+        }
+      }
+    }
+    .empty-item {
+      position: relative;
+      display: table-row;
+      height: 80px;
+      line-height: 80px;
+      span {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
+}

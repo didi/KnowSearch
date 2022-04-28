@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.AppCreateContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.AppCreateNotify;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -20,11 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_APP_CREATE;
 
 /**
  * @author d06679
@@ -112,14 +107,6 @@ public class AppCreateHandler extends BaseWorkOrderHandler {
         appDTO.setResponsible(appCreateContent.getResponsible());
 
         Result<Integer> result = appService.registerApp(appDTO, workOrder.getSubmitor());
-
-        if (result.success()) {
-            Integer appId = result.getData();
-            App app = appService.getAppById(appId);
-            sendNotify(WORK_ORDER_APP_CREATE, new AppCreateNotify(result.getData(), app.getName(), app.getVerifyCode()),
-                Arrays.asList(workOrder.getSubmitor()));
-        }
-
         return Result.buildFrom(result);
     }
 
