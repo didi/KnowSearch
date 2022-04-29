@@ -5,7 +5,7 @@ import com.didiglobal.logi.elasticsearch.client.request.security.SecurityUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;

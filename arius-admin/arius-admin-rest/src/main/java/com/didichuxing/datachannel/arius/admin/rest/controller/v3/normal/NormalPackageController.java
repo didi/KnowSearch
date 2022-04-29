@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.didichuxing.datachannel.arius.admin.biz.espackage.ESPackageManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPackageDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.espackage.ESPackageVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.espackage.ESPackageVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;

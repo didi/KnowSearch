@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 
 import lombok.Data;
 

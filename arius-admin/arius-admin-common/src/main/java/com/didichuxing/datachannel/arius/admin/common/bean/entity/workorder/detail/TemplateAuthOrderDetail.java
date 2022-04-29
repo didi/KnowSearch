@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Label;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateLabelDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplateLogicWithLabelVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateLabelDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplateLogicWithLabelVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 

@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Plugin;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;

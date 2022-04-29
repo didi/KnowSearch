@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.method.v3.normal;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
 import java.io.IOException;
 

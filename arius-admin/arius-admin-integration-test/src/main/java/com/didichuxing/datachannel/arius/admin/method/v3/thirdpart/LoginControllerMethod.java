@@ -3,17 +3,12 @@ package com.didichuxing.datachannel.arius.admin.method.v3.thirdpart;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.account.LoginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexCatCellVO;
-import com.didichuxing.datachannel.arius.admin.source.CustomDataSource;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.account.LoginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 
-import java.beans.Customizer;
 import java.io.IOException;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART_SSO;
 
 /**

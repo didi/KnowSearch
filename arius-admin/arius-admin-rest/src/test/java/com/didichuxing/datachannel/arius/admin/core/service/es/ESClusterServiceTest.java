@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAttrInfo;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;

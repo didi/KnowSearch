@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
 
 import lombok.Data;
 import lombok.ToString;

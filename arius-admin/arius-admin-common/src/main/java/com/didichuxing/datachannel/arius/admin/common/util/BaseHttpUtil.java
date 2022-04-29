@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;

@@ -2,12 +2,12 @@ package com.didichuxing.datachannel.arius.admin.v3.op.cluster.phy;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterRegionInfoTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PhyClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterRegionControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.LogicClusterInfoSource;

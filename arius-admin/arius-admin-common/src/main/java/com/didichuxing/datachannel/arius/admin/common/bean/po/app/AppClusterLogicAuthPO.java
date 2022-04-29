@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.app;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 import lombok.AllArgsConstructor;

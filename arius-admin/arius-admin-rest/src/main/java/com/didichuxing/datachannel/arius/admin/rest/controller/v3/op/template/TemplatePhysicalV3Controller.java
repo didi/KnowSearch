@@ -6,15 +6,15 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplatePhysicalUpgradeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;

@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppConfigDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
@@ -13,7 +13,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
 
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.junit.jupiter.api.Assertions;

@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.pl
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPluginsManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

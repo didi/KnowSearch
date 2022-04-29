@@ -5,16 +5,16 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.operaterecord.OperateRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;

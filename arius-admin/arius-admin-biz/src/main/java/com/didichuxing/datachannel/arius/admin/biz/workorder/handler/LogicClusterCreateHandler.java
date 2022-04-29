@@ -1,27 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-
 import java.util.List;
-
 import java.util.Random;
 import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterCreateContent;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;

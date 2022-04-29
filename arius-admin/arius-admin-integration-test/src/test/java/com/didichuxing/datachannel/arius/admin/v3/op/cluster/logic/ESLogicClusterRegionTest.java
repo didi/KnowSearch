@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.cluster.logic;
 
 import com.didichuxing.datachannel.arius.admin.base.BaseLogicClusterInfoTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterRegionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterRegionControllerMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

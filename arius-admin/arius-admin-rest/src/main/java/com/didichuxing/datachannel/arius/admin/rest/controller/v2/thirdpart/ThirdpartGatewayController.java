@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.thirdpart;
 
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.GatewayAppVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.gateway.GatewayNodeVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplateDeployInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import io.swagger.annotations.*;

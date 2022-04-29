@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 
 public interface ClusterPluginsManager {
 

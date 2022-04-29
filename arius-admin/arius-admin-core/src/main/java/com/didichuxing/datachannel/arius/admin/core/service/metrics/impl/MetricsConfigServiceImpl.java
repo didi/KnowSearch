@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.config.MetricsConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.MetricsConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsTypeEnum;

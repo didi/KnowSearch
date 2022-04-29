@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmOperateAppBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.google.common.collect.Multimap;
 

@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.cluster.plugins;
 
 import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterInfoTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.plugins.PhyClusterPluginsControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.CustomDataSource;

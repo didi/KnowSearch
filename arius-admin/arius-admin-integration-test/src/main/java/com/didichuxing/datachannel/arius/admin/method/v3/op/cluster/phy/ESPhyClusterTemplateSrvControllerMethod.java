@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.template;
 
 import com.didichuxing.datachannel.arius.admin.base.BaseTemplateInfoTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.BaseTemplateVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateDetailVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.BaseTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterTemplateSrvControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.template.TemplateLogicV3ControllerMethod;

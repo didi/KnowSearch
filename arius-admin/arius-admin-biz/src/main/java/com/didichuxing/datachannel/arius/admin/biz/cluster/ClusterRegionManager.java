@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.LogicClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PhyClusterRackVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 

@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterHostDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;

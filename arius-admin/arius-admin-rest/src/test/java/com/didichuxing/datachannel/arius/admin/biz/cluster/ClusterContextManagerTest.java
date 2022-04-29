@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum.PUBLIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum.PUBLIC;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
 public class ClusterContextManagerTest extends AriusAdminApplicationTest {
 

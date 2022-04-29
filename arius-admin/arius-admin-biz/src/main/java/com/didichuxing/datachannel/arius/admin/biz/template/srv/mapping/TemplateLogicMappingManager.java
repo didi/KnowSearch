@@ -1,16 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.MappingOptimize;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSchemaDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateSchemaVO;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
-import com.didichuxing.datachannel.arius.admin.client.mapping.Field;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 

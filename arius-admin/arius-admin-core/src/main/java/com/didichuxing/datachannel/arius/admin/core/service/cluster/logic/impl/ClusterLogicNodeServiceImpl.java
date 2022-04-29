@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.impl;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;

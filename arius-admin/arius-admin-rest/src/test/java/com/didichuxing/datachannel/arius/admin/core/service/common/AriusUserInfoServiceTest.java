@@ -1,15 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.arius.AriusUserInfoDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +16,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.ariusUserInfoDTOFactory;

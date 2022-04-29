@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
 public interface GatewayService {
 

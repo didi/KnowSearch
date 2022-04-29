@@ -6,11 +6,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.PageDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.dsl.template.DslTemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DslTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;

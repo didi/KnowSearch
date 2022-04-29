@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import org.apache.commons.collections4.CollectionUtils;
 
 /**

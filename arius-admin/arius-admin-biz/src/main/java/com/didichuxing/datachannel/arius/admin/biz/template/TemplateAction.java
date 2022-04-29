@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateResourceConfig;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
 /**

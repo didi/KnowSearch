@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.gateway;
 
 import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterInfoTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.gateway.GatewaySqlControllerMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

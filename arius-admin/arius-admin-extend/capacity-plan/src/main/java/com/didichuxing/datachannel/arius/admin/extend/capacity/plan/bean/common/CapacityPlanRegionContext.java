@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RegionMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RegionMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
 
 import lombok.Data;

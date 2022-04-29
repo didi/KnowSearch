@@ -2,17 +2,16 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpUpdateContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
@@ -33,8 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum.ES_HOST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
 @Service("clusterOpUpdateHandler")
 public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {

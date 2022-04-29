@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 import java.util.Collection;
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 
 /**

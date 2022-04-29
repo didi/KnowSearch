@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.cluster;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 
 import lombok.AllArgsConstructor;

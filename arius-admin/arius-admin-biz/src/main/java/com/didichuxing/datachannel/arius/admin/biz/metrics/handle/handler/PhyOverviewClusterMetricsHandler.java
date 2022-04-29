@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.biz.metrics.handle.handler;
 
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.ClusterOverviewMetricsHandle;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.MetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.AggMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
 import org.apache.commons.collections4.CollectionUtils;

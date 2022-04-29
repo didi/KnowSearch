@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.CAPACITY_PLAN_REGION;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CAPACITY_PLAN_REGION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_CAPA_PLAN;
 import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.belong;
@@ -10,29 +10,26 @@ import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.const
 import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskEnum.PLAN;
 import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskStatusEnum.*;
 import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskTypeEnum.*;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RegionMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RegionMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;

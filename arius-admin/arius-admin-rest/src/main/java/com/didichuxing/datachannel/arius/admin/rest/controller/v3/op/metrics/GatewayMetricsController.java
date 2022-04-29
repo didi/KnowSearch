@@ -17,17 +17,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayAppDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayDslDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayIndexDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayMetricsDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayNodeDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayOverviewDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MultiGatewayNodesDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayAppDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayOverviewDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiGatewayNodesDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 

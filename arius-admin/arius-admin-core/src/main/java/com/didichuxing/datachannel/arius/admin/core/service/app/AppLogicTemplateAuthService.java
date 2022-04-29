@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 

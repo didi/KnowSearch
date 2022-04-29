@@ -8,12 +8,12 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.Template
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_SETTING;
-import static com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting.*;
+import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.*;
 
 /**
  * 索引setting服务实现

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType.FAIL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.google.common.collect.Sets;
@@ -21,12 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterRegionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.LogicClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.PhyClusterRackVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;

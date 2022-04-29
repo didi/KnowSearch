@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.PageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 
 import java.util.List;

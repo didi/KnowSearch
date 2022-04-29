@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;

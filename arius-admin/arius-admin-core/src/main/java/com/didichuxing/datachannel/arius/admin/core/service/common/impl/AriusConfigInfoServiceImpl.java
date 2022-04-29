@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.config.AriusConfigDimensionEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.config.AriusConfigStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigDimensionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.CONFIG;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CONFIG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 
 /**
  *

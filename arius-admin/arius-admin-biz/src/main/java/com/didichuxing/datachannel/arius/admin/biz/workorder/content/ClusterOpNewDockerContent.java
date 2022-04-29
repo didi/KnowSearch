@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.ESClusterRoleDocker;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicLevelEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

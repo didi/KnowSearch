@@ -7,9 +7,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -17,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;

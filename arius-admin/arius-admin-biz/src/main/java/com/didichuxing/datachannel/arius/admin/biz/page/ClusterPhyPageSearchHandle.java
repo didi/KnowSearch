@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.PageDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;

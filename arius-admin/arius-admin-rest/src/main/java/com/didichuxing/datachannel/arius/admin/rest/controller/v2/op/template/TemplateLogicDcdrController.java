@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;

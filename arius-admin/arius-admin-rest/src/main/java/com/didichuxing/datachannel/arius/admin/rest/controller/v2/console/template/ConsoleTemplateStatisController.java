@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateStatsInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

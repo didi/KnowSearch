@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 

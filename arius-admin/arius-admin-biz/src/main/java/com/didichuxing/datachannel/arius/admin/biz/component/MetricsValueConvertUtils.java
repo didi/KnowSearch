@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.percentiles.ESPercentilesMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentilesMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;

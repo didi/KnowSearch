@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.security;
 
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**

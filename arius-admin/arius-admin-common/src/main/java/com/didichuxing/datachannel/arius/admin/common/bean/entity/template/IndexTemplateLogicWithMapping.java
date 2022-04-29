@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.mapping.Field;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

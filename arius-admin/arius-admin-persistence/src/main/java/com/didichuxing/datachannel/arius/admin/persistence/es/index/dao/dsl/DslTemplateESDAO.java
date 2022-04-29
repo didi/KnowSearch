@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.dsl.template.DslTemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 
