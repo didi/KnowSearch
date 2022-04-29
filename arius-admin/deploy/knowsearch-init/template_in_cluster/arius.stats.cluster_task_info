@@ -1,77 +1,95 @@
 {
-    "order" : 10,
-    "index_patterns" : [
-      "arius_stats_cluster_task_info*"
+    "order":10,
+    "index_patterns":[
+        "arius.stats.cluster_task_info*"
     ],
-    "settings" : {
-      "index" : {
-        "routing" : {
-          "allocation" : {
-            "include" : {
-              "rack" : ""
-            }
-          }
-        },
-        "mapping" : {
-          "single_type" : "true"
-        },
-        "number_of_shards" : "4",
-        "number_of_replicas" : "0",
-        "sort.field" : "timestamp",
-        "sort.order" : "desc"
-      }
-    },
-    "mappings" : {
-      "properties" : {
-        "cluster" : {
-          "ignore_above" : 512,
-          "type" : "keyword"
-        },
-        "physicCluster" : {
-          "type" : "long"
-        },
-        "metrics" : {
-          "properties" : {
-            "action" : {
-              "type" : "keyword"
+    "settings":{
+        "index":{
+            "routing":{
+                "allocation":{
+                    "include":{
+                        "rack":""
+                    }
+                }
             },
-            "taskId" : {
-              "type" : "keyword"
+            "mapping":{
+                "single_type":"true"
             },
-            "parentTaskId" : {
-              "type" : "keyword"
-            },
-            "type" : {
-              "type" : "keyword"
-            },
-            "startTime" : {
-              "type" : "long"
-            },
-            "runningTime" : {
-              "type" : "long"
-            },
-            "runningTimeString" : {
-              "type" : "keyword"
-            },
-            "ip" : {
-              "type" : "keyword"
-            },
-            "node" : {
-              "type" : "keyword"
-            },
-            "description" : {
-              "type" : "keyword"
-            }
-          }
-        },
-        "timestamp" : {
-          "format" : "epoch_millis",
-          "type" : "date"
-        },
-        "dataCenter" : {
-          "type" : "keyword"
+            "number_of_shards":"4",
+            "number_of_replicas":"0"
         }
-      }
     },
-    "aliases" : { }
-  }
+    "mappings":{
+        "properties":{
+            "cluster":{
+                "ignore_above":512,
+                "type":"keyword"
+            },
+            "physicCluster":{
+                "type":"long"
+            },
+            "dataCenter":{
+                "type":"keyword"
+            },
+            "routingValue":{
+                "type":"text",
+                "fields":{
+                    "keyword":{
+                        "ignore_above":256,
+                        "type":"keyword"
+                    }
+                }
+            },
+            "metrics":{
+                "properties":{
+                    "node":{
+                        "type":"keyword"
+                    },
+                    "parentTaskId":{
+                        "type":"keyword"
+                    },
+                    "ip":{
+                        "type":"keyword"
+                    },
+                    "action":{
+                        "type":"keyword"
+                    },
+                    "runningTimeString":{
+                        "type":"keyword"
+                    },
+                    "description":{
+                        "type":"keyword"
+                    },
+                    "startTime":{
+                        "type":"long"
+                    },
+                    "runningTime":{
+                        "type":"long"
+                    },
+                    "type":{
+                        "type":"keyword"
+                    },
+                    "taskId":{
+                        "type":"keyword"
+                    }
+                }
+            },
+            "key":{
+                "type":"text",
+                "fields":{
+                    "keyword":{
+                        "ignore_above":256,
+                        "type":"keyword"
+                    }
+                }
+            },
+            "timestamp":{
+                "format":"epoch_millis",
+                "type":"date"
+            }
+        }
+    },
+    "aliases":{
+
+    }
+}
