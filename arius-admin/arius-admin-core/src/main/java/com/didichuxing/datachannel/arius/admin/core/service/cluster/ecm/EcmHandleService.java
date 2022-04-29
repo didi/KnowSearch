@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.remote.elasticcloud.bean.bizenum.EcmActionEnum;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.google.common.collect.Multimap;
 
 /**
@@ -69,7 +69,7 @@ public interface EcmHandleService {
      * @return Result
      */
     Result<EcmOperateAppBase> actionUnfinishedESCluster(EcmActionEnum ecmActionEnum, EcmParamBase actionParamBase, String hostname,
-                                     String operator);
+                                                        String operator);
 
     /**
      * 获取集群节点信息
