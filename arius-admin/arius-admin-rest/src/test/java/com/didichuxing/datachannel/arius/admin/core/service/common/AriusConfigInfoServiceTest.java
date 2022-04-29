@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.common;
 import java.util.ArrayList;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.config.AriusConfigStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.config.AriusConfigInfoDAO;
 

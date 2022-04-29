@@ -1,17 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.impl;
 
-import static com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
-import static com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig.QUOTA_CTL_DISK;
-import static com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MIN;
+import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
+import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_DISK;
+import static com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MIN;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GetTemplateLimitStrategyContext;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateLimitStrategy;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.QuotaCtlStrategyEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GetTemplateLimitStrategyContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStrategyEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;

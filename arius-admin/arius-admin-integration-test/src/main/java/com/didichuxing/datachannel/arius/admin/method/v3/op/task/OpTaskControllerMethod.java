@@ -3,13 +3,10 @@ package com.didichuxing.datachannel.arius.admin.method.v3.op.task;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexCatCellVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.TaskTypeVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.WorkTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 
 import java.io.IOException;
 import java.util.List;

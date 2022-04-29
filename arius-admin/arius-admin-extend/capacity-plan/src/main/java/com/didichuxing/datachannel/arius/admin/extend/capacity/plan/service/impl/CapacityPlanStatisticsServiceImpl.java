@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RegionMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RegionMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.po.CapacityPlanRegionStatisESPO;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum.DOCKER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum.DOCKER;
 
 /**
  * @author d06679

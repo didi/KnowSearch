@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.order;
 
 import java.util.Date;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 
 import lombok.AllArgsConstructor;

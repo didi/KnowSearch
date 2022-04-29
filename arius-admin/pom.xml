@@ -10,7 +10,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>arius-admin-client</module>
         <module>arius-admin-persistence</module>
         <module>arius-admin-common</module>
         <module>arius-admin-core</module>
@@ -47,11 +46,6 @@
         <dependencies>
 
             <!-- self -->
-            <dependency>
-                <groupId>com.didichuxing.datachannel</groupId>
-                <artifactId>arius-admin-client</artifactId>
-                <version>${arius.admin.client.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-persistence</artifactId>
@@ -800,7 +794,6 @@
             </dependency>
 
         </dependencies>
-
 
     </dependencyManagement>
 

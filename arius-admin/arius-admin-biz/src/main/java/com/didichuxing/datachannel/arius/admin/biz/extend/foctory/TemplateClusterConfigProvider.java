@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.extend.foctory;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateResourceConfig;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
 /**
  * @author d06679

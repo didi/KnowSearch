@@ -2,11 +2,9 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
-import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.MapUtils;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.Map;
 
 /**
  * @author liuchengxiang

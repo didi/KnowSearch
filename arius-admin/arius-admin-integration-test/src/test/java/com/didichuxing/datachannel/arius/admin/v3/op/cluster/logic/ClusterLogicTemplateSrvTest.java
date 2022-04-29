@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.cluster.logic;
 
 import com.didichuxing.datachannel.arius.admin.base.BaseLogicClusterInfoTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ESClusterTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ClusterLogicTemplateSrvControllerMethod;
 import org.junit.jupiter.api.Assertions;

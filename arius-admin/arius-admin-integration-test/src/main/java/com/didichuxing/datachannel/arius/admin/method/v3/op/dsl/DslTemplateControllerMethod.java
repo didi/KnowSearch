@@ -3,12 +3,12 @@ package com.didichuxing.datachannel.arius.admin.method.v3.op.dsl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.dsl.template.DslTemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayJoinQueryDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DslTemplateVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayJoinVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 
 import java.io.IOException;
 import java.util.HashMap;

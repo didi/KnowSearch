@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.metadata.utils;
 
-
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;

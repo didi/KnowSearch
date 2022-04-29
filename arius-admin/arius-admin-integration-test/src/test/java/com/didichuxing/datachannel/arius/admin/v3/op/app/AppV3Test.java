@@ -6,8 +6,8 @@ import com.didichuxing.datachannel.arius.admin.AriusClient;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ConsoleAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

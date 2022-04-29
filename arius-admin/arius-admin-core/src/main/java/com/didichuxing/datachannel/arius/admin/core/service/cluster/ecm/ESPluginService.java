@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Plugin;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 
 import java.util.List;

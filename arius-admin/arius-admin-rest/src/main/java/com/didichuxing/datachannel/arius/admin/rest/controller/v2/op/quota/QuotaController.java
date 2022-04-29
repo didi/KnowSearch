@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.quota;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateCostVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.quota.ESTemplateQuotaUsageRecordVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.quota.ESTemplateQuotaUsageRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;

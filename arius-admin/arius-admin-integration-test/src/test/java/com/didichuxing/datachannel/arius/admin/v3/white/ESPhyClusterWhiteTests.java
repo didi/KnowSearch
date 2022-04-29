@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.v3.white;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESZeusHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.method.v3.white.ESPhyClusterWhiteControllerMethodTest;
 import com.didichuxing.datachannel.arius.admin.source.PhyClusterInfoSource;
 import org.junit.Assert;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
 /**
  * @author wuxuan

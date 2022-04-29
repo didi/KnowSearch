@@ -2,10 +2,10 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.im
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplatePhysicalUpgradeDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -168,7 +168,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
     private String getIndexNameByDateFormat(IndexTemplateLogic logiTemplate, IndexTemplatePhy phyTemplate) {
         if(TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {
             // 按天分区则获取模版对应当天索引拼接版本信息
-            return IndexNameUtils.genDailyIndexName(phyTemplate.getName(), 0);
+            return IndexNameUtils.genDailyIndexNameWithVersion(phyTemplate.getName(), 0, phyTemplate.getVersion());
         } else if(TemplateUtils.isSaveByMonth(logiTemplate.getDateFormat())) {
             // 按月分区则获取模版对应当月索引拼接版本信息
             return IndexNameUtils.genCurrentMonthlyIndexNameWithVersion(phyTemplate.getName(), phyTemplate.getVersion());

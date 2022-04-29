@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.remote.zeus.bean;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.client.constant.ecm.EcmHostStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

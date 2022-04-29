@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord
 
 import java.util.Date;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 
 import lombok.AllArgsConstructor;

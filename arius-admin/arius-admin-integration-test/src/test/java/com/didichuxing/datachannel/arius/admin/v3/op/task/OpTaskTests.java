@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.task;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.task.WorkTaskDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.TaskTypeVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.task.WorkTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.task.OpTaskControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.CustomDataSource;
 import org.junit.Assert;

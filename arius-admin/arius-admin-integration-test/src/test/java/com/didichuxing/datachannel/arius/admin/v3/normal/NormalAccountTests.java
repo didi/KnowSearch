@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.v3.normal;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.user.AriusUserInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
 import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalAccountControllerMethod;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;

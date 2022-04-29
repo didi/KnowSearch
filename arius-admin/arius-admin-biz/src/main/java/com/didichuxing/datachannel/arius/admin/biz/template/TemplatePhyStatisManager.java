@@ -3,14 +3,14 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PhysicalTemplateTpsMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateResourceConfig;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.AppIdTemplateAccessCountVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateHealthDegreeRecordVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateStatsInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateValueRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PhysicalTemplateTpsMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateValueRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 
 /**

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.converter;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.monitor.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.monitor.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.monitor.*;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;

@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.dsl;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DslMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.DslTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.SearchDslTemplateResponseVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SearchDslTemplateResponseVO;
 import java.util.List;
 
 public interface DslMetricsManager {

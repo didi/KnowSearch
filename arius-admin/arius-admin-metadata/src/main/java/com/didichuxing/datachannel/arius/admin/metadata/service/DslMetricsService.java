@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.DslMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.DslTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Label;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

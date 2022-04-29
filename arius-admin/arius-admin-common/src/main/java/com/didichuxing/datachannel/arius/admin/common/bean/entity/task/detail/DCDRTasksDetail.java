@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.dcdr.DcdrStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DcdrStatusEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

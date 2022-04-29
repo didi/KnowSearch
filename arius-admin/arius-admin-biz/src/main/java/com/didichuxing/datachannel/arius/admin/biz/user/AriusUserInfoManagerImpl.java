@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.user;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.EditUserPasswordDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.EditUserPasswordDTO;
 import com.didichuxing.datachannel.arius.admin.common.component.RSATool;
 import java.util.List;
 
@@ -8,9 +8,9 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.user.AriusUserInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
