@@ -1,11 +1,11 @@
 {
   "level":1,
-  "expression": "arius_meta_server_log*",
+  "expression": "arius.stats.index_info*",
   "dateFormat": "_yyyy-MM-dd",
   "dataCenter": "cn",
   "dataType": 0,
-  "dateField": "logTime",
-  "expireTime": "6",
+  "dateField": "timestamp",
+  "expireTime": "180",
   "physicalInfos": [
     {
       "cluster": "logi-elasticsearch-7.6.0",
@@ -18,6 +18,6 @@
   "quota": 30,
   "appId": 1,
   "responsible": "admin",
-  "name": "arius_meta_server_log",
-  "desc": "AMS对外服务日志"
+  "name": "arius.stats.index_info",
+  "desc": ""
 }
