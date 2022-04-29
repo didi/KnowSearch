@@ -10,16 +10,16 @@ import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
 
-@Task(name = "IndexCatInfoCollectorTask", description = "采集索引Cat/Index基本信息", cron = "0 0/3 * * * ? *", autoRegister = true)
-public class IndexCatInfoCollectorTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndexCatInfoCollectorTask.class);
+@Task(name = "IndicesCatInfoCollectorRandomTask", description = "采集索引Cat/Index基本信息", cron = "0 0/3 * * * ? *", autoRegister = true)
+public class IndicesCatInfoCollectorRandomTask implements Job {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndicesCatInfoCollectorRandomTask.class);
 
     @Autowired
     private IndexCatInfoCollector indexCatInfoCollector;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=IndexCatInfoCollectorTask||method=execute||msg=start");
+        LOGGER.info("class=IndicesCatInfoCollectorRandomTask||method=execute||msg=start");
         indexCatInfoCollector.handleJobTask("");
         return TaskResult.SUCCESS;
     }

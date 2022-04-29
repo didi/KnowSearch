@@ -2,13 +2,11 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard;
 
 import java.util.List;
 import java.util.Map;
-
 import com.didichuxing.datachannel.arius.admin.task.component.TaskResultBuilder;
 import com.didichuxing.datachannel.arius.admin.task.dashboard.collector.BaseDashboardCollector;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -22,10 +20,10 @@ import com.didiglobal.logi.log.LogFactory;
 /**
  * Created by linyunan on 3/11/22
  */
-@Task(name = "DashboardAllClusterCollectorTask", description = "采集DashBoard平台全集群汇总数据信息", cron = "0 0/5 * * * ? *", autoRegister = true)
+@Task(name = "DashboardAllClusterCollectorRandomTask", description = "采集DashBoard平台全集群汇总数据信息", cron = "0 0/5 * * * ? *", autoRegister = true)
 @Component
-public class DashboardAllClusterCollectorTask implements Job {
-    private static final ILog        LOGGER     = LogFactory.getLog(DashboardAllClusterCollectorTask.class);
+public class DashboardAllClusterCollectorRandomTask implements Job {
+    private static final ILog        LOGGER     = LogFactory.getLog(DashboardAllClusterCollectorRandomTask.class);
 
     @Autowired
     private ClusterPhyService                                clusterPhyService;
@@ -35,13 +33,13 @@ public class DashboardAllClusterCollectorTask implements Job {
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=DashboardAllClusterCollectorTask||method=execute||msg=BaseDashboardCollectorTask start.");
+        LOGGER.info("class=DashboardAllClusterCollectorRandomTask||method=execute||msg=DashboardAllClusterCollectorRandomTask start.");
         long currentTimeMillis = System.currentTimeMillis();
         long currentTime       = CommonUtils.monitorTimestamp2min(currentTimeMillis);
         TaskResultBuilder taskResultBuilder = new TaskResultBuilder();
         List<String> clusterNameList = clusterPhyService.listAllClusterNameList();
         if (CollectionUtils.isEmpty(clusterNameList)) {
-            LOGGER.warn("class=DashboardAllClusterCollectorTask||method=execute||msg=clusterNameList is empty");
+            LOGGER.warn("class=DashboardAllClusterCollectorRandomTask||method=execute||msg=clusterNameList is empty");
             return TaskResult.SUCCESS;
         }
 
@@ -54,14 +52,14 @@ public class DashboardAllClusterCollectorTask implements Job {
                 Thread.sleep(2000);
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
-                String errLog = "class=DashboardAllClusterCollectorTask||collectorName=" + collector.getName()
+                String errLog = "class=DashboardAllClusterCollectorRandomTask||collectorName=" + collector.getName()
                         + "||method=execute||errMsg=" + e.getMessage();
                 LOGGER.error(errLog, e);
                 taskResultBuilder.append(errLog);
             }
         }
 
-        LOGGER.info("class=BaseDashboardCollectorTask||method=execute||msg=BaseDashboardCollectorTask finish, cost:{}ms",
+        LOGGER.info("class=DashboardAllClusterCollectorRandomTask||method=execute||msg=DashboardAllClusterCollectorRandomTask finish, cost:{}ms",
                 System.currentTimeMillis() - currentTimeMillis);
         return taskResultBuilder.build();
     }

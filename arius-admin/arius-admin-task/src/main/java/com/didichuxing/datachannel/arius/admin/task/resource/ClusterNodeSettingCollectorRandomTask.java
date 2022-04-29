@@ -3,19 +3,30 @@ package com.didichuxing.datachannel.arius.admin.task.resource;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.job.annotation.Task;
+import com.didiglobal.logi.job.common.TaskResult;
+import com.didiglobal.logi.job.core.job.Job;
+import com.didiglobal.logi.job.core.job.JobContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-/**
- * 从es集群同步节点信息
- * @author d06679
- * @date 2019/3/21
- */
-@Component
-public class CollectClusterNodeSettingFromEsTask extends BaseConcurrentClusterTask {
+@Task(name = "ClusterNodeSettingCollectorRandomTask", description = "同步节点配置任务", cron = "0 0/3 * * * ?", autoRegister = true)
+public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentClusterTask implements Job {
+
+    private static final ILog LOGGER = LogFactory.getLog(ClusterNodeSettingCollectorRandomTask.class);
 
     @Autowired
     private RoleClusterHostService roleClusterHostService;
+
+    @Override
+    public TaskResult execute(JobContext jobContext) throws Exception {
+        LOGGER.info("class=ClusterNodeSettingCollectorRandomTask||method=execute||msg=ClusterNodeSettingCollectorRandomTask start.");
+        if (execute()) {
+            return TaskResult.SUCCESS;
+        }
+        return TaskResult.FAIL;
+    }
 
     /**
      * 获取任务名称
@@ -24,7 +35,7 @@ public class CollectClusterNodeSettingFromEsTask extends BaseConcurrentClusterTa
      */
     @Override
     public String getTaskName() {
-        return "采集集群节点信息";
+        return "ClusterNodeSettingCollectorRandomTask";
     }
 
     /**

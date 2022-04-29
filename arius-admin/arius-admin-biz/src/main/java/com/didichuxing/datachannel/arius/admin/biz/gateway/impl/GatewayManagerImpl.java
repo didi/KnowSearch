@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.APP_DEFAULT_READ_AUTH_INDICES;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 
 @Component
@@ -140,7 +141,7 @@ public class GatewayManagerImpl implements GatewayManager {
         Map<Integer, AppConfig> appId2AppConfigMap = ConvertUtil.list2Map(appConfigs, AppConfig::getAppId);
 
         String defaultRIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
-                "app.default.read.auth.indices", "");
+                APP_DEFAULT_READ_AUTH_INDICES, "");
 
         Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap = templateLogicService
                 .getAllLogicTemplatesMap();

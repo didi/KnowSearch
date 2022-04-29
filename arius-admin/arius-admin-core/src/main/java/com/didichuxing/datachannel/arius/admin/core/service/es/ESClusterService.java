@@ -62,19 +62,6 @@ public interface ESClusterService {
     boolean hasSettingExist(String cluster, String settingFlatName);
 
     /**
-     * 配置集群的冷存搬迁配置
-     * @param cluster       集群
-     * @param inGoing
-     * @param outGoing
-     * @param moveSpeed
-     * @param retryCount    重试次数
-     * @return  true/false
-     * @throws ESOperateException
-     */
-    boolean syncConfigColdDateMove(String cluster, int inGoing, int outGoing, String moveSpeed,
-                                   int retryCount) throws ESOperateException;
-
-    /**
      * 获取物理集群下各个节点的插件名称列表
      * @param cluster
      * @return map

@@ -128,12 +128,6 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void syncConfigColdDateMoveTest() throws ESOperateException {
-        Mockito.when(esClusterDAO.putPersistentConfig(Mockito.any(), Mockito.anyMap())).thenReturn(true);
-        Assertions.assertTrue(esClusterService.syncConfigColdDateMove(CustomDataSource.PHY_CLUSTER_NAME, 1, 1, "1", 1));
-    }
-
-    @Test
     public void syncGetClusterStatusTest() {
         Mockito.when(esClusterDAO.getClusterStats(Mockito.any())).thenReturn(new ESClusterStatsResponse());
         Assertions.assertNotNull(esClusterService.syncGetClusterStats(CustomDataSource.PHY_CLUSTER_NAME));

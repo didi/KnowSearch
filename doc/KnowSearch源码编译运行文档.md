@@ -1,6 +1,6 @@
 # 工程介绍
 
-LogiEM采用前后端分离架构，前端工程包括arius-console，后端工程包括arius-admin(管控服务)、arius-gateway(网关服务)
+KnowSearch采用前后端分离架构，前端工程包括arius-console，后端工程包括arius-admin(管控服务)、arius-gateway(网关服务)
 
 # 前端工程编译和运行
 clone 项目到本地，使用idea单独打开arius-console工程后，具体详细操作查看 [前端工程README.md](../arius-console/readme.md)

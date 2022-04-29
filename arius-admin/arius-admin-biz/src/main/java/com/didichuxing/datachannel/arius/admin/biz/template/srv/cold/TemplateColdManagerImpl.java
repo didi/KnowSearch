@@ -33,8 +33,7 @@ import java.util.Set;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.BATCH_CHANGE_TEMPLATE_HOT_DAYS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
@@ -86,12 +85,6 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         if (hotTime <= 0) {
             LOGGER.info("class=TemplateColdManagerImpl||method=getColdIndex||template={}||msg=hotTime illegal", templatePhysicalWithLogic.getName());
             return new Tuple<>();
-        }
-
-        // 供运维人员人工调整入冷存的天数
-        int adminHotTime = ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP, "platform.govern.admin.hot.days", -1);
-        if (adminHotTime > 0) {
-            hotTime = adminHotTime;
         }
 
         if (hotTime >= templatePhysicalWithLogic.getLogicTemplate().getExpireTime()) {
@@ -173,8 +166,9 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         coldRackList.sort(RackUtils::compareByName);
         String coldRack = String.join(",", coldRackList);
 
-        //配置分片级别重分配的参数（分片迁移并发度和单节点迁移速率最大值）
-        tryConfigCluster(phyCluster);
+        /**
+         * 配置分片级别重分配的参数由集群控制
+         */
 
         List<IndexTemplatePhy> templatePhysicals = templatePhyService.getNormalTemplateByCluster(phyCluster);
 
@@ -345,29 +339,13 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         }
     }
 
-    private void tryConfigCluster(String cluster) {
-        try {
-            if (esClusterService.syncConfigColdDateMove(cluster,
-                    ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP, CLUSTER_ROUTING_ALLOCATION_INGOING, 2),
-                    ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP, CLUSTER_ROUTING_ALLOCATION_OUTGOING, 2),
-                    ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP, COLD_MAX_BYTES_PER_SEC_KEY, "10MB"),
-                    3)) {
-                LOGGER.info("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||msg=config cluster succ", cluster);
-            } else {
-                LOGGER.warn("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||msg=config cluster fail", cluster);
-            }
-        } catch (Exception e) {
-            LOGGER.info("class=TemplateColdManagerImpl||method=tryConfigCluster||cluster={}||errMsg={}", cluster, e.getMessage(), e);
-        }
-    }
-
     /**
      * 获取配置默认hotDay值
      *
      * @return
      */
     private int getDefaultHotDay() {
-        String defaultDay = ariusConfigInfoService.stringSetting(ARIUS_TEMPLATE_COLD, "defaultDay", "");
+        String defaultDay = ariusConfigInfoService.stringSetting(ARIUS_TEMPLATE_COLD, INDEX_TEMPLATE_COLD_DAY_DEFAULT, "");
         LOGGER.info("class=TemplateColdManagerImpl||method=getDefaultHotDay||msg=defaultDay: {}", defaultDay);
         if (StringUtils.isNotBlank(defaultDay)) {
             try {

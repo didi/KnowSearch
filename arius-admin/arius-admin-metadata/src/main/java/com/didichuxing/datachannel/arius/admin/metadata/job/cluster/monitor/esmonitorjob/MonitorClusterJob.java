@@ -59,6 +59,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.BeanUtils;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_STAT_COLLECT_CONCURRENT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_STAT_COLLECT_CONCURRENT;
 import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesStatsRequest.HTTP;
 
 /**
@@ -80,6 +82,9 @@ public class MonitorClusterJob {
     private static final String ES_NODE       = "es.node.";
     private static final String TIME_OUT      = "collect task already timeout";
     private static final String ES_INDICES    = "es.indices.";
+
+    private static final int    NODE_COLLECT_BATCH_SIZE     = 5;
+    private static final int    INDICES_COLLECT_BATCH_SIZE  = 30;
 
     //key: cluster@templateName
     private Cache<String, IndexTemplatePhyWithLogic> indexTemplateCache = CacheBuilder.newBuilder()
@@ -128,12 +133,6 @@ public class MonitorClusterJob {
 
     // 配置组
     private static final String CONFIG_VALUE_GROUP = "arius.meta.monitor";
-
-    // 节点数据是否并行获取
-    private static final String CONFIG_NAME_NODESTAT_COLLECT_CONCURRENT = "nodestat.collect.concurrent";
-
-    // 索引数据是否并行获取
-    private static final String CONFIG_NAME_INDEXSTAT_COLLECT_CONCURRENT = "indexstat.collect.concurrent";
 
     public MonitorClusterJob(ESClient esClient,
                              String ariusClusterName,
@@ -210,7 +209,6 @@ public class MonitorClusterJob {
      */
     private Map<String, ClusterNodeStats> getClusterNodeStatsConcurrently(ESClient esClient) throws ESRunTimeException{
         try {
-            int batchSize = 5;
             long startTime = System.currentTimeMillis();
             long expectEndTime = startTime + CLIENT_TO_WITH_MILLS;
 
@@ -218,7 +216,7 @@ public class MonitorClusterJob {
             List<String> clusterNodeIds = getClusterNodeIds(esClient, CLIENT_TO_WITH_MILLS);
 
             // 2.划分批次
-            List<List<String>> nodeIdBatches = Lists.partition(clusterNodeIds, batchSize);
+            List<List<String>> nodeIdBatches = Lists.partition(clusterNodeIds, NODE_COLLECT_BATCH_SIZE);
 
             // 3.分批次并行获取节点指标
             for (List<String> nodeIdBatch : nodeIdBatches) {
@@ -266,7 +264,7 @@ public class MonitorClusterJob {
 
     private Map<String, ClusterNodeStats> getClusterNodeStats(ESClient esClient) {
         boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(CONFIG_VALUE_GROUP,
-                CONFIG_NAME_NODESTAT_COLLECT_CONCURRENT, false);
+                NODE_STAT_COLLECT_CONCURRENT, false);
 
         Map<String, ClusterNodeStats> clusterNodeStatsMap;
         if (!isConcurrentCollect) {
@@ -375,14 +373,13 @@ public class MonitorClusterJob {
      */
     private Map<String, IndexNodes> getIndexStatsConcurrently(ESClient esClient){
         try {
-            int  batchSize = 30;
             long startTime = System.currentTimeMillis();
             long expectEndTime = startTime + CLIENT_TO_WITH_MILLS;
 
             // 获取集群下的所有索引名称
             List<String> indexNames = getClusterOpenIndexNames(esClient);
             // 划分批次
-            List<List<String>> indexNameBatches = Lists.partition(indexNames, batchSize);
+            List<List<String>> indexNameBatches = Lists.partition(indexNames, INDICES_COLLECT_BATCH_SIZE);
 
             // 分批次并行获取节点指标
             for (List<String> indexNameBatch : indexNameBatches) {
@@ -435,7 +432,7 @@ public class MonitorClusterJob {
 
     private Map<String, IndexNodes> getIndexStats(ESClient esClient){
         boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(CONFIG_VALUE_GROUP,
-                CONFIG_NAME_INDEXSTAT_COLLECT_CONCURRENT, false);
+                INDEX_STAT_COLLECT_CONCURRENT, false);
 
         // key-索引名，value-索引stats
         Map<String, IndexNodes> indexStatsMap;

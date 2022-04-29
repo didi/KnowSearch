@@ -66,7 +66,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
@@ -834,7 +834,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     private boolean needOperateAhead(IndexTemplatePhyWithLogic physicalWithLogic) {
         Set<String> clusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-                "delete.expire.index.ahead.clusters", "", ",");
+                CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD, "", ",");
         return clusterSet.contains(physicalWithLogic.getCluster());
     }
 
@@ -1056,7 +1056,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
             if (needOperateAhead(physicalWithLogic)) {
                 int aheadSeconds = ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP,
-                        "operate.index.ahead.seconds", 2 * 60 * 60);
+                        INDEX_OPERATE_AHEAD_SECONDS, 2 * 60 * 60);
                 indexTime = AriusDateUtils.getBeforeSeconds(indexTime, aheadSeconds);
             }
 

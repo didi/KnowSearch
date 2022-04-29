@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
 import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_DISK;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_QUOTA;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.QUOTA_DISK_WARN_THRESHOLD;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
@@ -230,7 +231,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
 
         // appid黑名单控制
         Set<String> disableAppIdSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-            "quota.dynamic.limit.black.appIds", "none", ",");
+            QUOTA_DYNAMIC_LIMIT_BLACK_APP_IDS, "none", ",");
         if (disableAppIdSet.contains(String.valueOf(templateLogicWithPhysical.getAppId()))
             || disableAppIdSet.contains("all")) {
             LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=black.appIds", logicId);
@@ -259,7 +260,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
 
         // cluster控制
         Set<String> disableClusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-            "quota.dynamic.limit.black.cluster", "none", ",");
+            QUOTA_DYNAMIC_LIMIT_BLACK_CLUSTER, "none", ",");
         if (disableClusterSet.contains(templatePhysicalMaster.getCluster()) || disableClusterSet.contains("all")) {
             LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=black.cluster", logicId);
             return false;
@@ -267,7 +268,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
 
         // 模板控制
         Set<String> disableLogicIdSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-            "quota.dynamic.limit.black.logicId", "none", ",");
+            QUOTA_DYNAMIC_LIMIT_BLACK_LOGIC_ID, "none", ",");
         if (disableLogicIdSet.contains(String.valueOf(logicId)) || disableLogicIdSet.contains("all")) {
             LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=black.logicId", logicId);
             return false;
