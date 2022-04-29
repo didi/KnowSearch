@@ -1,5 +1,5 @@
 #!/bin/bash
-workspace=$(cd $(dirname $0) && pwd -P)
+workspace=$(cd $(dirname $0) && pwd -P)/arius-gateway-rest
 cd $workspace
 
 ## TODO const
@@ -69,6 +69,8 @@ function make_output() {
             cp -rf ./APP_META/DockerfileOffline $output/Dockerfile
         fi
         ) || { echo -e "make offline output error"; exit 2; } # 填充output目录失败后, 退出码为 非0
+
+		mv output ../
 }
 
 ## internals
@@ -95,3 +97,4 @@ make_output
 # 编译成功
 echo -e "build done"
 exit 0
+
