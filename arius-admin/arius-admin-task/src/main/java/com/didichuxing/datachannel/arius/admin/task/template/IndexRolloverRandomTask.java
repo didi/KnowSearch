@@ -1,5 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
+import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
@@ -25,20 +29,43 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * xxxx-2021-10-22 -> xxxx-2021-10-22_v1
  */
-@Task(name = "indexRolloverTaskDriver", description = "索引Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
-public class IndexRolloverTaskDriver implements Job {
+@Task(name = "IndexRolloverRandomTask", description = "索引Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
+public class IndexRolloverRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTaskDriver.class);
+    private static final ILog LOGGER = LogFactory.getLog(IndexRolloverRandomTask.class);
 
     @Autowired
-    private IndexRolloverTask indexRolloverTask;
+    private IndexPlanManager indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=IndexRolloverTaskDriver||method=execute||msg=IndexRolloverTask start.");
-        if (indexRolloverTask.execute()) {
+        if (execute()) {
             return TaskResult.SUCCESS;
         }
         return TaskResult.FAIL;
+    }
+
+    @Override
+    protected boolean executeByCluster(String clusterPhyName) throws AdminOperateException {
+        // cluster 物理集群
+        return indexPlanManager.indexRollover(clusterPhyName);
+    }
+
+    @Override
+    public String getTaskName() {
+        return "IndexRolloverRandomTask";
+    }
+
+    @Override
+    public int poolSize() {
+        // 任务线程个数
+        return 10;
+    }
+
+    @Override
+    public int current() {
+        // 并发度
+        return TaskConcurrentConstants.INDEX_ROLLOVER_TASK_CONCURRENT;
     }
 }

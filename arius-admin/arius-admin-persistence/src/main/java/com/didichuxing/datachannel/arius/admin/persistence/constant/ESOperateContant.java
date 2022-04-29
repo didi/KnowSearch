@@ -80,19 +80,6 @@ public class ESOperateContant {
     public static final String ES_ROLE_MASTER_DATA                  = "master_data";
 
     /**
-     * 一个节点上允许多少并发的传出分片还原。传出还原（outgoing recoveries）是在节点上分配源（source）分片（很可能是主分片，除非分片正在重新定位）的还原，默认值为2
-     */
-    public static final String  CLUSTER_ROUTING_ALLOCATION_OUTGOING = "cluster.routing.allocation.node_concurrent_outgoing_recoveries";
-    /**
-     * 一个节点上允许多少并发的传入分片还原,传入还原（incoming recoveries）是在节点上分配目标分片（很可能是副本，除非分片正在重新定位）的还原，默认值为2
-     */
-    public static final String  CLUSTER_ROUTING_ALLOCATION_INGOING  = "cluster.routing.allocation.node_concurrent_incoming_recoveries";
-    /**
-     * 单节点分片恢复的速率
-     */
-    public static final String  COLD_MAX_BYTES_PER_SEC_KEY          = "indices.recovery.ceph_max_bytes_per_sec";
-
-    /**
      * 单type配置项
      */
     public static final String  SINGLE_TYPE                         = "index.mapping.single_type";

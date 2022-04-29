@@ -132,33 +132,6 @@ public class ESClusterServiceImpl implements ESClusterService {
         return clusterSettingMap.containsKey(settingFlatName);
     }
 
-    /**
-     * 配置集群的冷存搬迁配置
-     *
-     * @param cluster    集群
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws ESOperateException
-     */
-    @Override
-    public boolean syncConfigColdDateMove(String cluster, int inGoing, int outGoing, String moveSpeed,
-                                          int retryCount) throws ESOperateException {
-
-        Map<String, Object> configMap = Maps.newHashMap();
-
-        if (inGoing > 0) {
-            configMap.put(CLUSTER_ROUTING_ALLOCATION_OUTGOING, outGoing);
-        }
-
-        if (outGoing > 0) {
-            configMap.put(CLUSTER_ROUTING_ALLOCATION_INGOING, inGoing);
-        }
-
-        configMap.put(COLD_MAX_BYTES_PER_SEC_KEY, moveSpeed);
-
-        return ESOpTimeoutRetry.esRetryExecute("syncConfigColdDateMove", retryCount,
-            () -> esClusterDAO.putPersistentConfig(cluster, configMap));
-    }
 
     @Override
     public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) {

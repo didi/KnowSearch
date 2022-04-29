@@ -9,16 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Task(name = "deleteExpiredDslTemplateJobHandler", description = "删除过期查询模板", cron = "0 0 5 */1 * ?", autoRegister = true)
-public class DslTemplateDelExpiredTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DslTemplateDelExpiredTask.class);
+@Task(name = "DslTemplateDelExpiredRandomTask", description = "删除过期查询模板", cron = "0 0 5 */1 * ?", autoRegister = true)
+public class DslTemplateDelExpiredRandomTask implements Job {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DslTemplateDelExpiredRandomTask.class);
 
     @Autowired
     private DslTemplateDelExpiredJob dslTemplateDelExpiredJob;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=DslTemplateDelExpiredTask||method=execute||msg=start");
+        LOGGER.info("class=DslTemplateDelExpiredRandomTask||method=execute||msg=start");
 
         dslTemplateDelExpiredJob.handleJobTask("");
 

@@ -1,5 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
+import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
@@ -24,20 +29,41 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 按月滚动的模版：
  *    不动态调整shard
  */
-@Task(name = "shardNumGovernForkTaskDriver", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
-public class ShardNumGovernTaskDriver implements Job {
+@Task(name = "ShardNumAdjustRandomTask", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
+public class ShardNumAdjustRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog LOGGER = LogFactory.getLog(ShardNumGovernTaskDriver.class);
+    private static final ILog LOGGER = LogFactory.getLog(ShardNumAdjustRandomTask.class);
 
     @Autowired
-    private ShardNumGovernTask shardNumGovernTask;
+    private IndexPlanManager indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=shardNumGovernForkTaskDriver||method=execute||msg=start");
-        if (shardNumGovernTask.execute()) {
+        LOGGER.info("class=ShardNumAdjustRandomTask||method=execute||msg=start");
+        if (execute()) {
             return TaskResult.SUCCESS;
         }
         return TaskResult.FAIL;
+    }
+
+    @Override
+    protected boolean executeByCluster(String cluster) throws AdminOperateException {
+        Result<Void> result = indexPlanManager.adjustShardCountByPhyClusterName(cluster);
+        return !result.failed();
+    }
+
+    @Override
+    public String getTaskName() {
+        return "ShardNumAdjustRandomTask";
+    }
+
+    @Override
+    public int poolSize() {
+        return 10;
+    }
+
+    @Override
+    public int current() {
+        return TaskConcurrentConstants.INDEX_ROLLOVER_TASK_CONCURRENT;
     }
 }

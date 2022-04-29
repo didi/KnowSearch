@@ -48,6 +48,7 @@ import org.springframework.stereotype.Service;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_WO_AUTO_PROCESS_CREATE_TEMPLATE_DISK_MAXG;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl.NOT_CHECK;
 
@@ -105,7 +106,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         }
 
         Double autoProcessDiskMaxG = ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,
-                "arius.wo.auto.process.create.template.disk.maxG", 10.0);
+                ARIUS_WO_AUTO_PROCESS_CREATE_TEMPLATE_DISK_MAXG, 10.0);
 
         return content.getDiskQuota() < autoProcessDiskMaxG;
     }

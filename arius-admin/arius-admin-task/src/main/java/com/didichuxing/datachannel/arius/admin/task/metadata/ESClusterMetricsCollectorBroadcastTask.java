@@ -10,16 +10,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Task(name = "esClusterMonitorJob", description = "集群指标采集调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
-public class ESClusterMonitorJobTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger( ESClusterMonitorJobTask.class);
+@Task(name = "ESClusterMetricsCollectorBroadcastTask", description = "集群指标采集调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
+public class ESClusterMetricsCollectorBroadcastTask implements Job {
+    private static final Logger LOGGER = LoggerFactory.getLogger( ESClusterMetricsCollectorBroadcastTask.class);
 
     @Autowired
     private ClusterMonitorJobHandler clusterMonitorJobHandler;
     
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=ESClusterMonitorJobTask||method=execute||msg=start");
+        LOGGER.info("class=ESClusterMetricsCollectorBroadcastTask||method=execute||msg=start");
         clusterMonitorJobHandler.handleJobTask("");
         return TaskResult.SUCCESS;
     }

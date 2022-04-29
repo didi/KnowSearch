@@ -1,27 +1,36 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
-import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
+import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
+import com.didiglobal.logi.job.annotation.Task;
+import com.didiglobal.logi.job.common.TaskResult;
+import com.didiglobal.logi.job.core.job.Job;
+import com.didiglobal.logi.job.core.job.JobContext;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 关闭集群rebalance任务
- * @author d06679
- * @date 2019/3/21
+ * Created by d06679 on 2018/3/14.
  */
-@Component
-public class ColdDataMoveTask extends BaseConcurrentClusterTask {
+@Task(name = "ColdDataMoveRandomTask", description = "admin冷数据搬迁服务", cron = "0 30 22 * * ?", autoRegister = true)
+public class ColdDataMoveRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog   LOGGER = LogFactory.getLog(ColdDataMoveTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(ColdDataMoveRandomTask.class);
 
     @Autowired
     private TemplateColdManager templateColdManager;
+
+    @Override
+    public TaskResult execute(JobContext jobContext) throws Exception {
+        LOGGER.info("class=ColdDataMoveRandomTask||method=execute||msg=ColdDataMoveRandomTask start.");
+        if (execute()) {
+            return TaskResult.SUCCESS;
+        }
+        return TaskResult.FAIL;
+    }
 
     /**
      * 获取任务名称
@@ -30,7 +39,7 @@ public class ColdDataMoveTask extends BaseConcurrentClusterTask {
      */
     @Override
     public String getTaskName() {
-        return "冷数据搬迁任务";
+        return "ColdDataMoveRandomTask";
     }
 
     /**
@@ -61,7 +70,7 @@ public class ColdDataMoveTask extends BaseConcurrentClusterTask {
     public boolean executeByCluster(String cluster) {
         Result<Boolean> result = templateColdManager.move2ColdNode(cluster);
         if (result.failed()) {
-            LOGGER.warn("class=ColdDataMoveTask||method=executeByCluster||cluster={}||failMsg={}", cluster, result.getMessage());
+            LOGGER.warn("class=ColdDataMoveRandomTask||method=executeByCluster||cluster={}||failMsg={}", cluster, result.getMessage());
             return false;
         }
         return true;

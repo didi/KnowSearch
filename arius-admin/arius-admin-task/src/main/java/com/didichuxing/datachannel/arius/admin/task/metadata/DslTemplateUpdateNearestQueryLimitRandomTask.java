@@ -14,17 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 更新最近的DSL模版限流值任务
  * 每分钟执行一次
  */
-@Task(name = "dslTemplateUpdateNearestQueryLimitTask", description = "更新最近的DSL模版限流值任务", cron = "0 */1 * * * ?", autoRegister = true)
-public class DslTemplateUpdateNearestQueryLimitTask implements Job {
+@Task(name = "DslTemplateUpdateNearestQueryLimitRandomTask", description = "更新最近的DSL模版限流值任务", cron = "0 */5 * * * ?", autoRegister = true)
+public class DslTemplateUpdateNearestQueryLimitRandomTask implements Job {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DslTemplateUpdateNearestQueryLimitTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DslTemplateUpdateNearestQueryLimitRandomTask.class);
 
     @Autowired
     private DslTemplateUpdateNearestQueryLimitJob dslTemplateUpdateNearestQueryLimitJob;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=DslTemplateUpdateNearestQueryLimitTask||method=execute||msg=start");
+        LOGGER.info("class=DslTemplateUpdateNearestQueryLimitRandomTask||method=execute||msg=start");
         // 更新最近的DSL模版限流值任务
         dslTemplateUpdateNearestQueryLimitJob.handleJobTask("");
         return TaskResult.SUCCESS;
