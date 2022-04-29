@@ -142,10 +142,12 @@ public class IndicesManagerImpl implements IndicesManager {
 
         cluster2IndexNameListMap.forEach((cluster, indexNameList) -> {
             try {
-                if (esIndexService.syncBatchCloseIndices(cluster, indexNameList, 2)) {
-                    Result<Boolean> result = batchSetIndexStatus(cluster, indexNameList, indexNewStatus);
-                    if(result.success()) {
-                        if(indexNewStatus) {
+                boolean syncOpenOrCloseResult = indexNewStatus ? esIndexService.syncBatchOpenIndices(cluster, indexNameList, 3) :
+                        esIndexService.syncBatchCloseIndices(cluster, indexNameList, 3);
+                if (syncOpenOrCloseResult) {
+                    Result<Boolean> setCatIndexResult = batchSetIndexStatus(cluster, indexNameList, indexNewStatus);
+                    if (setCatIndexResult.success()) {
+                        if (indexNewStatus) {
                             operateRecordService.save(INDEX_OP, OperationEnum.OPEN_INDEX, null,
                                     String.format("批量开启%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)),
                                     operator);
