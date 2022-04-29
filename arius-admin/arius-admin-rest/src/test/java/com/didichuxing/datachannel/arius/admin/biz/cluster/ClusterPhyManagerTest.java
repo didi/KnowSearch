@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
-
+    private  final  static  int APP_ID = 1;
     @Autowired
     private ClusterPhyManager clusterPhyManager;
 
@@ -47,4 +47,11 @@ public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
         Assertions.assertFalse(dataRegion.isEmpty());
         Assertions.assertEquals(dataRegion.get(0), clusterName);
     }
+
+    @Test
+     public void getTemplateSameVersionClusterNamesByTemplateIdTest() {
+         Result<List<String>> rest = clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(APP_ID, 37529);
+         Assertions.assertTrue(rest.success());
+         Assertions.assertTrue(null != rest.getData() && !rest.getData().isEmpty());
+     }
 }

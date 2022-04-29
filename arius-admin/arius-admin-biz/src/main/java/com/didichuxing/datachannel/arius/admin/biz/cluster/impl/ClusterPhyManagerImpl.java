@@ -33,6 +33,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.settin
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -545,6 +546,38 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         List<String> appClusterPhyNames = Lists.newArrayList(names);
         appClusterPhyNames.sort(Comparator.naturalOrder());
         return appClusterPhyNames;
+    }
+
+    @Override
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId) {
+        List<String> clusterPhyNameList = getAppClusterPhyNames(appId);
+        // No permission, cut branches and return
+        if (CollectionUtils.isEmpty(clusterPhyNameList)) { return Result.buildSucc();}
+
+        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+        if (null == logicTemplateWithPhysicals) { return  Result.buildFail(String.format("templateId[%s] is not exist", templateId));}
+
+        IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
+        if (null == masterPhyTemplate) {
+            return  Result.buildFail(String.format("the physicals of templateId[%s] is empty", templateId));
+        }
+
+        String cluster = masterPhyTemplate.getCluster();
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
+        if (null == clusterPhy) { return  Result.buildFail(String.format("the cluster[%s] from templateId[%s] is empty", cluster, templateId));}
+
+        String esVersion = clusterPhy.getEsVersion();
+
+        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
+        List<String> sameVersionClusterNameList = clusterPhies.stream()
+                .filter(Objects::nonNull)
+                .filter(r -> clusterPhyNameList.contains(r.getCluster())
+                        && esVersion.equals(r.getEsVersion()))
+                .map(ClusterPhy::getCluster)
+                .distinct()
+                .collect(Collectors.toList());
+
+        return Result.buildSucc(sameVersionClusterNameList);
     }
 
     @Override

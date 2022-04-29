@@ -145,6 +145,11 @@ public interface ClusterPhyManager {
 	List<String> getAppClusterPhyNames(Integer appId);
 
     /**
+     * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
+     */
+    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId);
+
+    /**
      * 获取物理集群节点名称列表
      */
     List<String> getAppClusterPhyNodeNames(String clusterPhyName);

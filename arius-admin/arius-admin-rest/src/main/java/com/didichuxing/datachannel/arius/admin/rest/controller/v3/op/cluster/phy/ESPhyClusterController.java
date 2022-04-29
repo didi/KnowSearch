@@ -131,6 +131,13 @@ public class ESPhyClusterController {
         return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getAppId(request)));
     }
 
+    @GetMapping("/{templateId}/sameversion/clusternames")
+    @ResponseBody
+    @ApiOperation(value = "根据模板所在集群，获取与该集群相同版本号的集群名称列表")
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(HttpServletRequest request, @PathVariable Integer templateId) {
+        return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(HttpRequestUtils.getAppId(request), templateId);
+    }
+
     @GetMapping("/{clusterPhyName}/nodes")
     @ResponseBody
     @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
