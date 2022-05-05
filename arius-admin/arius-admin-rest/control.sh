@@ -66,7 +66,7 @@ function start() {
     echo "start application with env:$env"
 
     if [[ $cluster == "test" ]]; then
-        nohup java -Xmx8g -Xms8g -Xmn3g -Dlog4j2.AsyncQueueFullPolicy=Discard -Dlog4j2.DiscardThreshold=ERROR -XX:MaxDirectMemorySize=2G -XX:MaxMetaspaceSize=256M -Djdk.nio.maxCachedBufferSize=262144 -jar $module.jar --spring.profiles.active=$env &
+        nohup java -Xmx8g -Xms8g -Xmn3g -Dlog4j2.AsyncQueueFullPolicy=Discard -Dlog4j2.DiscardThreshold=ERROR -XX:MaxDirectMemorySize=2G -XX:MaxMetaspaceSize=256M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=./logs/heapdump.hprof -Djdk.nio.maxCachedBufferSize=262144 -jar $module.jar --spring.profiles.active=$env &
     else
         nohup java -Xmx8g -Xms8g -Xmn3g -Dlog4j2.AsyncQueueFullPolicy=Discard -Dlog4j2.DiscardThreshold=ERROR -XX:MaxDirectMemorySize=2G -XX:MaxMetaspaceSize=256M -Djdk.nio.maxCachedBufferSize=262144 -jar $module.jar --spring.profiles.active=$env &
     fi
