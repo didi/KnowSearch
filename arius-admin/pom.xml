@@ -20,6 +20,7 @@
         <module>arius-admin-metadata</module>
         <module>arius-admin-extend/capacity-plan</module>
         <module>arius-admin-integration-test</module>
+        <module>arius-admin-extend/arius-admin-rest-v2</module>
     </modules>
 
     <properties>
@@ -91,6 +92,14 @@
                 <artifactId>capacity-plan</artifactId>
                 <version>${revision}${sha1}${changelist}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.didichuxing.datachannel</groupId>
+                <artifactId>arius-admin-rest-v2</artifactId>
+                <version>${revision}${sha1}${changelist}</version>
+            </dependency>
+
+
 
             <dependency>
                 <groupId>javax.servlet</groupId>
