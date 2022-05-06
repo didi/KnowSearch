@@ -47,7 +47,7 @@ public class ESLogicClusterController {
     @PostMapping("/resource/list")
     @ResponseBody
     @ApiOperation(value = "获取所有逻辑集群列表接口" )
-    @Deprecated
+
     public Result<List<ConsoleClusterVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
                                                                 HttpServletRequest request) {
         return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtils.getAppId(request)));
@@ -57,7 +57,7 @@ public class ESLogicClusterController {
     @ResponseBody
     @ApiOperation(value = "获取指定逻辑集群接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
-    @Deprecated
+
     public Result<ConsoleClusterVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
                                                         HttpServletRequest request) {
         return Result.buildSucc(
@@ -68,7 +68,7 @@ public class ESLogicClusterController {
     @ResponseBody
     @ApiOperation(value = "删除逻辑集群接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
-    @Deprecated
+
     public Result<Void> deleteLogicClusterById(HttpServletRequest request,
                                          @RequestParam(value = "resourceId") Long resourceId) throws AdminOperateException {
         return clusterLogicManager.deleteLogicCluster(resourceId, HttpRequestUtils.getOperator(request),
@@ -78,7 +78,7 @@ public class ESLogicClusterController {
     @PutMapping("/resource/add")
     @ResponseBody
     @ApiOperation(value = "新建带有region信息的逻辑集群接口" )
-    @Deprecated
+
     public Result<Long> createLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.addLogicCluster(param, HttpRequestUtils.getOperator(request),
             HttpRequestUtils.getAppId(request));
@@ -87,7 +87,7 @@ public class ESLogicClusterController {
     @PostMapping("/resource/edit")
     @ResponseBody
     @ApiOperation(value = "编辑逻辑集群接口" )
-    @Deprecated
+
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
     }
@@ -96,7 +96,7 @@ public class ESLogicClusterController {
     @ResponseBody
     @ApiOperation(value = "获取指定逻辑集群列表接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
-    @Deprecated
+
     public Result<List<ESRoleClusterHostVO>> getLogicClusterNodes(@RequestParam(value = "clusterId") Long clusterId) {
         return Result.buildSucc(clusterNodeManager
             .convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));

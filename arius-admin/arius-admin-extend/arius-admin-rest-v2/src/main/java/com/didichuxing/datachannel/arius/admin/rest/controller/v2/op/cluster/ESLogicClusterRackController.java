@@ -46,7 +46,7 @@ public class ESLogicClusterRackController {
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取逻辑资源Rack列表接口")
-    @Deprecated
+
     public Result<List<LogicClusterRackVO>> listLogicClusterRacks(@RequestBody ESLogicClusterRackInfoDTO param) {
         if (null != param.getResourceId()) {
             param.setLogicClusterId(param.getResourceId());
@@ -61,7 +61,7 @@ public class ESLogicClusterRackController {
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群所有Rack信息" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
-    @Deprecated
+
     public Result<List<LogicClusterRackVO>> listLogicClusterRacks(@RequestParam(value = "resourceId") Long resourceId) {
         List<ClusterLogicRackInfo> logicClusterRackInfos = regionRackService.listLogicClusterRacks(resourceId);
         return Result.buildSucc( clusterRegionManager.buildLogicClusterRackVOs(logicClusterRackInfos));
@@ -70,7 +70,7 @@ public class ESLogicClusterRackController {
     @PutMapping("/add")
     @ResponseBody
     @ApiOperation(value = "创建逻辑集群Rack信息" )
-    @Deprecated
+
     public Result<Void> createLogicClusterRack(HttpServletRequest request,
                                          @RequestBody ESLogicClusterRackInfoDTO param) {
         return regionRackService.addRackToLogicCluster(param, HttpRequestUtils.getOperator(request));
@@ -80,7 +80,7 @@ public class ESLogicClusterRackController {
     @ResponseBody
     @ApiOperation(value = "删除逻辑集群Rack信息" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "itemId", value = "映射ID", required = true) })
-    @Deprecated
+
     public Result<Boolean> deleteLogicClusterRack(@RequestParam(value = "itemId") Long itemId) {
         return Result.buildSucc(regionRackService.deleteRackById(itemId));
     }

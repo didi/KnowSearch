@@ -35,7 +35,7 @@ public class CapacityPlanController {
     @ResponseBody
     @ApiOperation(value = "查询规划集群region的任务接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    @Deprecated
+
     public Result<List<CapacityPlanRegionTaskVO>> listClusterRegionTask(@RequestParam("regionId") Long regionId) {
         return Result.buildSucc(ConvertUtil.list2List(capacityPlanRegionTaskService.getTaskByRegionId(regionId),
             CapacityPlanRegionTaskVO.class));

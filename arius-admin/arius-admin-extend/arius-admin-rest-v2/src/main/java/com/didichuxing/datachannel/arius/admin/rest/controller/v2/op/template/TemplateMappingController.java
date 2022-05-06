@@ -33,7 +33,7 @@ public class TemplateMappingController {
 
     @PostMapping("/check")
     @ApiOperation(value = "检查索引mapping" )
-    @Deprecated
+
     public Result<Void> checkMapping(@RequestBody JSONObject param) {
         String cluster = param.getString(CLUSTER_STR);
         String template = param.getString(TEMPLATE_STR);

@@ -53,7 +53,7 @@ public class ESPhyClusterController {
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取集群列表接口")
-    @Deprecated
+
     public Result<List<ConsoleClusterPhyVO>> list(@RequestBody ESClusterDTO param, HttpServletRequest request) {
         return Result.buildSucc(clusterPhyManager.getConsoleClusterPhyVOS(param));
     }
@@ -61,7 +61,7 @@ public class ESPhyClusterController {
     @PutMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建集群接口" )
-    @Deprecated
+
     public Result<Boolean> add(HttpServletRequest request, @RequestBody ESClusterDTO param) {
         return clusterPhyManager.addCluster(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
     }
@@ -69,7 +69,7 @@ public class ESPhyClusterController {
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑集群接口" )
-    @Deprecated
+
     public Result<Boolean> edit(HttpServletRequest request, @RequestBody ESClusterDTO param) {
         return clusterPhyManager.editCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
     }
@@ -77,7 +77,7 @@ public class ESPhyClusterController {
     @PostMapping("/collectClusterNodeSettings")
     @ResponseBody
     @ApiOperation(value = "采集集群节点配置信息接口" )
-    @Deprecated
+
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) {
         return Result.build(roleClusterHostService.collectClusterNodeSettings(cluster));
@@ -86,7 +86,7 @@ public class ESPhyClusterController {
     @PostMapping("/node/list")
     @ResponseBody
     @ApiOperation(value = "获取集群节点列表接口" )
-    @Deprecated
+
     public Result<List<ESRoleClusterHostVO>> nodeList(@RequestBody ESRoleClusterHostDTO param) {
         return Result
             .buildSucc(clusterNodeManager.convertClusterLogicNodes(roleClusterHostService.queryNodeByCondt(param)));
@@ -96,7 +96,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "根据集群获取集群节点列表接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
-    @Deprecated
+
     public Result<List<ESRoleClusterHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
         return Result
             .buildSucc(clusterNodeManager.convertClusterLogicNodes(roleClusterHostService.getNodesByCluster(cluster)));
@@ -106,7 +106,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "删除过期索引接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
-    @Deprecated
+
     public Result<Void> deleteExpireIndex(@RequestParam(value = "cluster") String cluster) {
         ariusOpThreadPool.execute(() -> templateExpireManager.deleteExpireIndex(cluster));
         return Result.buildSucc();
@@ -116,7 +116,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "索引预先创建接口", notes = "创建明天索引")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
-    @Deprecated
+
     public Result<Void> preCreateIndex(@RequestParam(value = "cluster") String cluster) {
         ariusOpThreadPool.execute(() -> templatePreCreateManager.preCreateIndex(cluster, 0));
         return Result.buildSucc();

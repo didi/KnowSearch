@@ -28,7 +28,7 @@ public class OperateRecordController {
     @GetMapping("/listModules")
     @ResponseBody
     @ApiOperation(value = "获取所有模块" )
-    @Deprecated
+
     public Result<List<Map<String, Object>>> listModules() {
         return Result.buildSucc(ModuleEnum.getAllAriusConfigs());
     }

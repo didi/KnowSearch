@@ -1,32 +1,22 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.app;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.app;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppLogicClusterAuthVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppLogicClusterAuthVO;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 
 import io.swagger.annotations.Api;
@@ -41,10 +31,9 @@ import io.swagger.annotations.ApiOperation;
  * @date 2020/09/20
  */
 @RestController
-@RequestMapping({ V3_OP + "/app/auth/cluster" })
-@Api(tags = "OP-运维侧App逻辑集群权限接口(REST)")
-@Deprecated
-public class AppLogicClusterAuthController {
+@RequestMapping({ V3 + "/app/auth/cluster" })
+@Api(tags = "App逻辑集群权限接口(REST)")
+public class AppLogicClusterAuthV3Controller {
 
     @Autowired
     private AppClusterLogicAuthService authService;
@@ -52,7 +41,7 @@ public class AppLogicClusterAuthController {
     @Autowired
     private TemplateLogicService       templateLogicService;
 
-    @GetMapping("/appAuths")
+    @GetMapping("/app-auths")
     @ResponseBody
     @ApiOperation(value = "获取APP的所有逻辑集群权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
@@ -60,13 +49,13 @@ public class AppLogicClusterAuthController {
         return Result.buildSucc(ConvertUtil.list2List(authService.getAllLogicClusterAuths(appId), AppLogicClusterAuthVO.class));
     }
 
-    @GetMapping("/clusterAuths")
+    @GetMapping("/cluster-auths")
     @ResponseBody
     @ApiOperation(value = "获取APP权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicClusterId", value = "逻辑集群ID", required = true) })
-    public Result<List<AppLogicClusterAuthVO>> getClusterAuths(@RequestParam("logicClusterId") Long logicClusterId) {
+    public Result<List<AppLogicClusterAuthVO>> getAuthsByLogicClusterId(@RequestParam("logicClusterId") Long logicClusterId) {
         return Result.buildSucc(
-            ConvertUtil.list2List(authService.getLogicClusterAuths(logicClusterId, null), AppLogicClusterAuthVO.class));
+                ConvertUtil.list2List(authService.getLogicClusterAuths(logicClusterId, null), AppLogicClusterAuthVO.class));
     }
 
     @PostMapping("")
@@ -87,20 +76,19 @@ public class AppLogicClusterAuthController {
 
     @DeleteMapping("/{authId}")
     @ResponseBody
-    @ApiOperation(value = "删除APP逻辑集群权限接口" )
-    public Result<Void> deleteLogicClusterAuth(HttpServletRequest request, @PathVariable(value = "authId") Long authId) {
+    @ApiOperation(value = "删除APP逻辑集群权限接口")
+    public Result<Void> deleteLogicClusterAuth(HttpServletRequest request,
+                                               @PathVariable(value = "authId") Long authId) {
 
         AppClusterLogicAuth appClusterLogicAuth = authService.getLogicClusterAuthById(authId);
         if (appClusterLogicAuth == null) {
             return Result.buildNotExist("权限不存在");
         }
 
-        if (appClusterLogicAuth.getLogicClusterId() != null) {
-            List<IndexTemplateLogic> templatesInLogicCluster = templateLogicService.getHasAuthTemplatesInLogicCluster(
-                    appClusterLogicAuth.getAppId(), appClusterLogicAuth.getLogicClusterId());
-            if (!templatesInLogicCluster.isEmpty()) {
-                return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");
-            }
+        List<IndexTemplateLogic> templatesInLogicCluster = templateLogicService
+            .getHasAuthTemplatesInLogicCluster(appClusterLogicAuth.getAppId(), appClusterLogicAuth.getLogicClusterId());
+        if (!templatesInLogicCluster.isEmpty()) {
+            return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");
         }
 
         return authService.deleteLogicClusterAuthById(authId, HttpRequestUtils.getOperator(request));

@@ -1,9 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.app;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.app;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.AppLogicTemplateAuthManager;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,37 +9,33 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.didichuxing.datachannel.arius.admin.biz.app.AppLogicTemplateAuthManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppTemplateAuthVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppTemplateAuthVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * @author ohushenglin_v
+ */
 @RestController
-@RequestMapping({V3_OP + "/app/auth/template" })
-@Api(tags = "OP-运维侧App模板权限接口(REST)")
-@Deprecated
-public class AppTemplateAuthController {
+@RequestMapping({V3 + "/app/auth/template" })
+@Api(tags = "App模板权限接口(REST)")
+public class AppTemplateAuthV3Controller {
 
     @Autowired
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
@@ -52,11 +46,11 @@ public class AppTemplateAuthController {
     @Autowired
     private AppLogicTemplateAuthManager appLogicTemplateAuthManager;
 
-    @GetMapping("/get")
+    @GetMapping("/{appId}")
     @ResponseBody
     @ApiOperation(value = "获取APP权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<List<AppTemplateAuthVO>> getAppTemplateAuths(@RequestParam("appId") Integer appId) {
+    public Result<List<AppTemplateAuthVO>> getAppTemplateAuths(@PathVariable("appId") Integer appId) {
         List<AppTemplateAuthVO> templateAuths = ConvertUtil
             .list2List(appLogicTemplateAuthService.getAppActiveTemplateRWAndRAuths(appId), AppTemplateAuthVO.class);
 
@@ -65,37 +59,35 @@ public class AppTemplateAuthController {
         return Result.buildSucc(templateAuths);
     }
 
-    @PostMapping("/add")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "增加APP权限接口" )
     public Result<Void> addTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
         return appLogicTemplateAuthService.addTemplateAuth(authDTO, HttpRequestUtils.getOperator(request));
     }
 
-    @PutMapping("/update")
+    @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "更新APP权限接口" )
     public Result<Void> updateTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
         return appLogicTemplateAuthManager.updateTemplateAuth(authDTO, HttpRequestUtils.getOperator(request));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/{authId}")
     @ResponseBody
     @ApiOperation(value = "删除APP权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "authId", value = "权限ID", required = true) })
-    public Result<Void> deleteTemplateAuth(HttpServletRequest request, @RequestParam("authId") Long authId) {
+    public Result<Void> deleteTemplateAuth(HttpServletRequest request, @PathVariable("authId") Long authId) {
         return appLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtils.getOperator(request));
     }
 
-    @PutMapping("/checkMeta")
+    @DeleteMapping("/excess")
     @ResponseBody
-    @ApiOperation(value = "权限元数据校验接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "boolean", name = "delete", value = "是否删除脏数据", required = true) })
-    public Result<Void> deleteExcessTemplateAuthsIfNeed(@RequestParam("delete") boolean delete) {
-        return Result.build(appLogicTemplateAuthService.deleteExcessTemplateAuthsIfNeed(delete));
+    @ApiOperation(value = "删除多余的模板权限数据" )
+    public Result<Void> deleteExcessTemplateAuthsIfNeed() {
+        return Result.build(appLogicTemplateAuthService.deleteExcessTemplateAuthsIfNeed(true));
     }
 
-    /********************************************private********************************************/
     /**
      * 给AppTemplateAuthVO设置所属逻辑集群ID、name，逻辑模板name
      * @param templateAuths 模板权限列表

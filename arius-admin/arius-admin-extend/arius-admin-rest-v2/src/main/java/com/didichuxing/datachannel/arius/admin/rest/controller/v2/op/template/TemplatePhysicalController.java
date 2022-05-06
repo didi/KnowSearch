@@ -39,7 +39,7 @@ public class TemplatePhysicalController {
      * @param param
      * @param request
      * @return
-     * @deprecated
+     *
      */
     @PostMapping("/list")
     @ResponseBody
