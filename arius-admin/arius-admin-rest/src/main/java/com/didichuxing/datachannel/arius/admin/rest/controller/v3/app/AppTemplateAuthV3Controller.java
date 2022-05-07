@@ -81,11 +81,11 @@ public class AppTemplateAuthV3Controller {
         return appLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtils.getOperator(request));
     }
 
-    @DeleteMapping("/excess")
+    @DeleteMapping("/redundancy")
     @ResponseBody
     @ApiOperation(value = "删除多余的模板权限数据" )
-    public Result<Void> deleteExcessTemplateAuthsIfNeed() {
-        return Result.build(appLogicTemplateAuthService.deleteExcessTemplateAuthsIfNeed(true));
+    public Result<Void> deleteRedundancyTemplateAuths() {
+        return Result.build(appLogicTemplateAuthService.deleteRedundancyTemplateAuths(true));
     }
 
     /**

@@ -41,7 +41,7 @@ import io.swagger.annotations.ApiOperation;
  * @date 2020/09/20
  */
 @RestController
-@RequestMapping({ V3_OP + "/app/auth/cluster" })
+@RequestMapping({ V2_OP + "/app/auth", V3_OP + "/app/auth/cluster" })
 @Api(tags = "OP-运维侧App逻辑集群权限接口(REST)")
 @Deprecated
 public class AppLogicClusterAuthController {

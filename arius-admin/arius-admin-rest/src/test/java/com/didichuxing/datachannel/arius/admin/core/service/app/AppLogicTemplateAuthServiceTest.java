@@ -46,7 +46,7 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
         AppTemplateAuthPO byAppIdAndTemplateId = appTemplateAuthDAO.getByAppIdAndTemplateId(appTemplateAuthDTO.getAppId(), appTemplateAuthDTO.getTemplateId().toString());
         Long authId = byAppIdAndTemplateId.getId();
         //删除冗余数据
-        Assertions.assertTrue(appLogicTemplateAuthService.deleteExcessTemplateAuthsIfNeed(true));
+        Assertions.assertTrue(appLogicTemplateAuthService.deleteRedundancyTemplateAuths(true));
         //检测冗余的数据是否被清除掉
         Assertions.assertNull(appTemplateAuthDAO.getById(authId));
     }

@@ -38,7 +38,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping({V3_OP + "/app/auth/template" })
+@RequestMapping({ V2_OP + "/app/auth",V3_OP + "/app/auth/template" })
 @Api(tags = "OP-运维侧App模板权限接口(REST)")
 @Deprecated
 public class AppTemplateAuthController {
@@ -92,7 +92,7 @@ public class AppTemplateAuthController {
     @ApiOperation(value = "权限元数据校验接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "boolean", name = "delete", value = "是否删除脏数据", required = true) })
     public Result<Void> deleteExcessTemplateAuthsIfNeed(@RequestParam("delete") boolean delete) {
-        return Result.build(appLogicTemplateAuthService.deleteExcessTemplateAuthsIfNeed(delete));
+        return Result.build(appLogicTemplateAuthService.deleteRedundancyTemplateAuths(delete));
     }
 
     /********************************************private********************************************/
