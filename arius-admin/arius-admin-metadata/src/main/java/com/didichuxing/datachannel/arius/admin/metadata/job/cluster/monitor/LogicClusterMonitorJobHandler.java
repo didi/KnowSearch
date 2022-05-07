@@ -40,7 +40,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 @Component
 public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
 
-    @Value("${monitorJob.thread.maxsize:30}")
+    @Value("${monitorJob.threadPool.maxsize:30}")
     private int maxPoolSize;
     @Autowired
     private ClusterLogicService clusterLogicService;
