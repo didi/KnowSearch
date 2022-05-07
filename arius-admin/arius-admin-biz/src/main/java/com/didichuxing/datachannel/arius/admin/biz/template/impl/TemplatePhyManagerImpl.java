@@ -87,6 +87,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     private static final String CHECK_FAIL_MSG = "check fail||msg={}";
 
+    public static final int MIN_SHARD_NUM = 1;
+
     @Autowired
     private OperateRecordService        operateRecordService;
 
@@ -751,10 +753,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (param.getRack() != null && !clusterPhyService.isRacksExists(oldIndexTemplatePhy.getCluster(), param.getRack())) {
             return Result.buildParamIllegal("物理模板rack非法");
         }
-        if (param.getShard() != null) {
-            if (param.getShard() >= 1) {
-                return Result.buildSucc();
-            }
+        if (param.getShard() != null && param.getShard() < MIN_SHARD_NUM) {
             return Result.buildParamIllegal("shard个数非法");
         }
 
