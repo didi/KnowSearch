@@ -1,11 +1,11 @@
 {
   "level":1,
-  "expression": "arius_gateway_metrics*",
+  "expression": "arius.stats.node_info*",
   "dateFormat": "_yyyy-MM-dd",
   "dataCenter": "cn",
   "dataType": 0,
   "dateField": "timestamp",
-  "expireTime": "30",
+  "expireTime": "180",
   "physicalInfos": [
     {
       "cluster": "logi-elasticsearch-7.6.0",
@@ -18,6 +18,6 @@
   "quota": 30,
   "appId": 1,
   "responsible": "admin",
-  "name": "arius_gateway_metrics",
-  "desc": "gateway指标数据"
+  "name": "arius.stats.node_info",
+  "desc": ""
 }

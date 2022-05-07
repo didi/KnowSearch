@@ -1,11 +1,11 @@
 {
   "level":1,
-  "expression": "arius.template.hit",
-  "dateFormat": "",
+  "expression": "arius.cat.index_info*",
+  "dateFormat": "_yyyy-MM-dd",
   "dataCenter": "cn",
   "dataType": 0,
-  "dateField": "logTime",
-  "expireTime": "-1",
+  "dateField": "timestamp",
+  "expireTime": "3",
   "physicalInfos": [
     {
       "cluster": "logi-elasticsearch-7.6.0",
@@ -18,6 +18,6 @@
   "quota": 30,
   "appId": 1,
   "responsible": "admin",
-  "name": "arius.template.hit",
-  "desc": "查询索引命中"
+  "name": "arius.cat.index_info",
+  "desc": "索引列表"
 }
