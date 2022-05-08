@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.WorkTaskDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.AriusWorkTaskDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -33,7 +33,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
     private static final ILog LOGGER = LogFactory.getLog(WorkTaskManagerImpl.class);
 
     @Autowired
-    private WorkTaskDAO          workTaskDao;
+    private AriusWorkTaskDAO ariusWorkTaskDao;
 
     @Autowired
     private HandleFactory        handleFactory;
@@ -75,7 +75,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
     public void insert(WorkTask task) {
         try {
             AriusWorkTaskPO ariusWorkTaskPO = ConvertUtil.obj2Obj(task, AriusWorkTaskPO.class);
-            boolean succ = workTaskDao.insert(ariusWorkTaskPO) > 0;
+            boolean succ = ariusWorkTaskDao.insert(ariusWorkTaskPO) > 0;
             if (succ) {
                 task.setId(ariusWorkTaskPO.getId());
             }
@@ -87,12 +87,12 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
 
     @Override
     public void updateTask(WorkTask task) {
-        workTaskDao.update(ConvertUtil.obj2Obj(task, AriusWorkTaskPO.class));
+        ariusWorkTaskDao.update(ConvertUtil.obj2Obj(task, AriusWorkTaskPO.class));
     }
 
     @Override
     public Result<WorkTask> getById(Integer id) {
-        AriusWorkTaskPO ariusWorkTaskPO = workTaskDao.getById(id);
+        AriusWorkTaskPO ariusWorkTaskPO = ariusWorkTaskDao.getById(id);
         if (ariusWorkTaskPO == null) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
@@ -101,7 +101,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
 
     @Override
     public Result<List<WorkTask>> list() {
-        List<AriusWorkTaskPO> ariusWorkTaskPOS = workTaskDao.listAll();
+        List<AriusWorkTaskPO> ariusWorkTaskPOS = ariusWorkTaskDao.listAll();
         if (ariusWorkTaskPOS == null) {
             return Result.buildSucc(Lists.newArrayList());
         }
@@ -113,7 +113,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
         if (AriusObjUtils.isNull(processDTO.getTaskId())) {
             return Result.buildParamIllegal("任务id为空");
         }
-        AriusWorkTaskPO taskPO = workTaskDao.getById(processDTO.getTaskId());
+        AriusWorkTaskPO taskPO = ariusWorkTaskDao.getById(processDTO.getTaskId());
 
         WorkTaskTypeEnum typeEnum = WorkTaskTypeEnum.valueOfType(taskPO.getTaskType());
         if (WorkTaskTypeEnum.UNKNOWN.equals(typeEnum)) {
@@ -130,7 +130,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
 
     @Override
     public Result<WorkTask> getLatestTask(String businessKey, Integer taskType) {
-        AriusWorkTaskPO ariusWorkTaskPO = workTaskDao.getLatestTask(businessKey, taskType);
+        AriusWorkTaskPO ariusWorkTaskPO = ariusWorkTaskDao.getLatestTask(businessKey, taskType);
         if (ariusWorkTaskPO == null) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
@@ -139,16 +139,16 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
 
     @Override
     public WorkTask getPengingTask(String businessKey, Integer taskType) {
-        return ConvertUtil.obj2Obj(workTaskDao.getPengingTask(businessKey, taskType), WorkTask.class);
+        return ConvertUtil.obj2Obj(ariusWorkTaskDao.getPengingTask(businessKey, taskType), WorkTask.class);
     }
 
     @Override
     public List<WorkTask> getPengingTaskByType(Integer taskType) {
-        return ConvertUtil.list2List(workTaskDao.getPengingTaskByType(taskType), WorkTask.class);
+        return ConvertUtil.list2List(ariusWorkTaskDao.getPengingTaskByType(taskType), WorkTask.class);
     }
 
     @Override
     public List<WorkTask> getSuccessTaskByType(Integer taskType) {
-        return ConvertUtil.list2List(workTaskDao.getSuccessTaskByType(taskType), WorkTask.class);
+        return ConvertUtil.list2List(ariusWorkTaskDao.getSuccessTaskByType(taskType), WorkTask.class);
     }
 }

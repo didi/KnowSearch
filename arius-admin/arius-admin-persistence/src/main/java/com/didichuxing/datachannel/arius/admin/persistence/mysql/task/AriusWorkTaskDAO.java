@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2020-12-21
  */
 @Repository
-public interface WorkTaskDAO {
+public interface AriusWorkTaskDAO {
 
     int insert(AriusWorkTaskPO param);
 
