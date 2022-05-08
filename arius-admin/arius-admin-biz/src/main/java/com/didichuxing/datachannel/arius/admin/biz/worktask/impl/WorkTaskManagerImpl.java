@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskHandleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.task.WorkTaskPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.AriusWorkTaskPO;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -74,10 +74,10 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
     @Override
     public void insert(WorkTask task) {
         try {
-            WorkTaskPO workTaskPO = ConvertUtil.obj2Obj(task, WorkTaskPO.class);
-            boolean succ = workTaskDao.insert(workTaskPO) > 0;
+            AriusWorkTaskPO ariusWorkTaskPO = ConvertUtil.obj2Obj(task, AriusWorkTaskPO.class);
+            boolean succ = workTaskDao.insert(ariusWorkTaskPO) > 0;
             if (succ) {
-                task.setId(workTaskPO.getId());
+                task.setId(ariusWorkTaskPO.getId());
             }
         } catch (Exception e) {
             LOGGER.error("class=DcdrWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg={}",
@@ -87,25 +87,25 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
 
     @Override
     public void updateTask(WorkTask task) {
-        workTaskDao.update(ConvertUtil.obj2Obj(task, WorkTaskPO.class));
+        workTaskDao.update(ConvertUtil.obj2Obj(task, AriusWorkTaskPO.class));
     }
 
     @Override
     public Result<WorkTask> getById(Integer id) {
-        WorkTaskPO workTaskPO = workTaskDao.getById(id);
-        if (workTaskPO == null) {
+        AriusWorkTaskPO ariusWorkTaskPO = workTaskDao.getById(id);
+        if (ariusWorkTaskPO == null) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(workTaskPO, WorkTask.class));
+        return Result.buildSucc(ConvertUtil.obj2Obj(ariusWorkTaskPO, WorkTask.class));
     }
 
     @Override
     public Result<List<WorkTask>> list() {
-        List<WorkTaskPO> workTaskPOS = workTaskDao.listAll();
-        if (workTaskPOS == null) {
+        List<AriusWorkTaskPO> ariusWorkTaskPOS = workTaskDao.listAll();
+        if (ariusWorkTaskPOS == null) {
             return Result.buildSucc(Lists.newArrayList());
         }
-        return Result.buildSucc(ConvertUtil.list2List(workTaskPOS, WorkTask.class));
+        return Result.buildSucc(ConvertUtil.list2List(ariusWorkTaskPOS, WorkTask.class));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
         if (AriusObjUtils.isNull(processDTO.getTaskId())) {
             return Result.buildParamIllegal("任务id为空");
         }
-        WorkTaskPO taskPO = workTaskDao.getById(processDTO.getTaskId());
+        AriusWorkTaskPO taskPO = workTaskDao.getById(processDTO.getTaskId());
 
         WorkTaskTypeEnum typeEnum = WorkTaskTypeEnum.valueOfType(taskPO.getTaskType());
         if (WorkTaskTypeEnum.UNKNOWN.equals(typeEnum)) {
@@ -130,11 +130,11 @@ public class WorkTaskManagerImpl implements WorkTaskManager {
 
     @Override
     public Result<WorkTask> getLatestTask(String businessKey, Integer taskType) {
-        WorkTaskPO workTaskPO = workTaskDao.getLatestTask(businessKey, taskType);
-        if (workTaskPO == null) {
+        AriusWorkTaskPO ariusWorkTaskPO = workTaskDao.getLatestTask(businessKey, taskType);
+        if (ariusWorkTaskPO == null) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(workTaskPO, WorkTask.class));
+        return Result.buildSucc(ConvertUtil.obj2Obj(ariusWorkTaskPO, WorkTask.class));
     }
 
     @Override

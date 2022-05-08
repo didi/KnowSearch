@@ -3,7 +3,7 @@
 
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.WorkTaskDAO">
 
-    <resultMap id="WorkTaskMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.WorkTaskPO">
+    <resultMap id="WorkTaskMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.AriusWorkTaskPO">
         <result property="title" column="title"/>
         <result property="taskType" column="task_type"/>
         <result property="businessKey" column="business_key"/>
@@ -175,4 +175,3 @@
     </update>
 
 </mapper>
-

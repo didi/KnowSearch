@@ -3,7 +3,7 @@
  */
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.task;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.task.WorkTaskPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.AriusWorkTaskPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -18,23 +18,23 @@ import java.util.List;
 @Repository
 public interface WorkTaskDAO {
 
-    int insert(WorkTaskPO param);
+    int insert(AriusWorkTaskPO param);
 
-    WorkTaskPO getById(@Param("id") Integer id);
+    AriusWorkTaskPO getById(@Param("id") Integer id);
 
-    List<WorkTaskPO> listAll();
+    List<AriusWorkTaskPO> listAll();
 
-    List<WorkTaskPO> listByCondition(WorkTaskPO param);
+    List<AriusWorkTaskPO> listByCondition(AriusWorkTaskPO param);
 
-    int update(WorkTaskPO param);
+    int update(AriusWorkTaskPO param);
 
-    WorkTaskPO getLatestTask(@Param("businessKey") String businessKey,
-                             @Param("taskType") Integer taskType);
+    AriusWorkTaskPO getLatestTask(@Param("businessKey") String businessKey,
+                                  @Param("taskType") Integer taskType);
 
-    WorkTaskPO getPengingTask(@Param("businessKey") String businessKey,
-                              @Param("taskType") Integer taskType);
+    AriusWorkTaskPO getPengingTask(@Param("businessKey") String businessKey,
+                                   @Param("taskType") Integer taskType);
 
-    List<WorkTaskPO> getPengingTaskByType(@Param("taskType") Integer taskType);
+    List<AriusWorkTaskPO> getPengingTaskByType(@Param("taskType") Integer taskType);
 
-    List<WorkTaskPO> getSuccessTaskByType(@Param("taskType") Integer taskType);
+    List<AriusWorkTaskPO> getSuccessTaskByType(@Param("taskType") Integer taskType);
 }
