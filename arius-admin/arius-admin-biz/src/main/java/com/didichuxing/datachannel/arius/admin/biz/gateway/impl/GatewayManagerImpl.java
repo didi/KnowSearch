@@ -24,8 +24,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslT
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
@@ -37,7 +37,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
 import com.didiglobal.logi.log.ILog;
@@ -74,7 +74,7 @@ public class GatewayManagerImpl implements GatewayManager {
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplatePhyService templatePhyService;
@@ -143,7 +143,7 @@ public class GatewayManagerImpl implements GatewayManager {
         String defaultRIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
                 APP_DEFAULT_READ_AUTH_INDICES, "");
 
-        Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap = templateLogicService
+        Map<Integer, IndexTemplateInfo> templateId2IndexTemplateLogicMap = indexTemplateInfoService
                 .getAllLogicTemplatesMap();
 
         Map<Integer, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
@@ -169,7 +169,7 @@ public class GatewayManagerImpl implements GatewayManager {
             return Result.buildSucc( Maps.newHashMap());
         }
 
-        Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap = templateLogicService
+        Map<Integer, IndexTemplateInfo> templateId2IndexTemplateLogicMap = indexTemplateInfoService
                 .getAllLogicTemplatesMap();
 
         List<IndexTemplateAlias> aliases = templateLogicAliasesManager.listAlias();
@@ -205,7 +205,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter) {
-        List<IndexTemplateLogicWithPhyTemplates> logicWithPhysicals = templateLogicService
+        List<IndexTemplateInfoWithPhyTemplates> logicWithPhysicals = indexTemplateInfoService
                 .getTemplateWithPhysicalByDataCenter(dataCenter);
 
         List<IndexTemplateAlias> logicWithAliases = templateLogicAliasesManager.listAlias(logicWithPhysicals);
@@ -215,7 +215,7 @@ public class GatewayManagerImpl implements GatewayManager {
         List<String> pipelineClusterSet = templateSrvManager.getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
 
         Map<String, GatewayTemplateDeployInfoVO> result = Maps.newHashMap();
-        for (IndexTemplateLogicWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
+        for (IndexTemplateInfoWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
             if (logicWithPhysical.hasPhysicals()) {
                 try {
                     GatewayTemplateDeployInfoVO gatewayTemplateDeployInfoVO = buildGatewayTemplateDeployInfoVO(logicWithPhysical,
@@ -288,7 +288,7 @@ public class GatewayManagerImpl implements GatewayManager {
     private GatewayAppVO buildAppVO(
             App app, Map<Integer, Collection<AppTemplateAuth>> appId2AppTemplateAuthsMap,
             Map<Integer, AppConfig> appId2AppConfigMap,
-            Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap,
+            Map<Integer, IndexTemplateInfo> templateId2IndexTemplateLogicMap,
             String defaultReadPermissionIndexes, Map<Integer, List<String>> aliasMap) {
 
         GatewayAppVO gatewayAppVO = ConvertUtil.obj2Obj(app, GatewayAppVO.class);
@@ -350,7 +350,7 @@ public class GatewayManagerImpl implements GatewayManager {
      * @param writeExpressions  当前app写权限列表
      */
     private void fetchPermissionIndexExpressions(Integer appId, Collection<AppTemplateAuth> appTemplateAuthCollection,
-                                                 Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap,
+                                                 Map<Integer, IndexTemplateInfo> templateId2IndexTemplateLogicMap,
                                                  Map<Integer, List<String>> aliasMap,
                                                  List<String> indexExpressions, List<String> writeExpressions) {
         if (CollectionUtils.isNotEmpty(appTemplateAuthCollection)) {
@@ -373,7 +373,7 @@ public class GatewayManagerImpl implements GatewayManager {
         }
     }
 
-    private GatewayTemplateDeployInfoVO buildGatewayTemplateDeployInfoVO(IndexTemplateLogicWithPhyTemplates logicWithPhysical,
+    private GatewayTemplateDeployInfoVO buildGatewayTemplateDeployInfoVO(IndexTemplateInfoWithPhyTemplates logicWithPhysical,
                                                                          Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap,
                                                                          List<String> pipelineClusterSet) {
         if(null == logicWithPhysical || null ==logicWithPhysical.getMasterPhyTemplate()){
@@ -401,11 +401,11 @@ public class GatewayManagerImpl implements GatewayManager {
         return deployInfoVO;
     }
 
-    private GatewayTemplatePhysicalDeployVO genMasterInfo(IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+    private GatewayTemplatePhysicalDeployVO genMasterInfo(IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
         return buildPhysicalDeployVO(logicWithPhysical.getMasterPhyTemplate());
     }
 
-    private List<GatewayTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+    private List<GatewayTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
         List<GatewayTemplatePhysicalDeployVO> slavesInfos = Lists.newArrayList();
         for (IndexTemplatePhy physical : logicWithPhysical.getPhysicals()) {
             if (physical.getRole().equals( TemplateDeployRoleEnum.MASTER.getCode())) {

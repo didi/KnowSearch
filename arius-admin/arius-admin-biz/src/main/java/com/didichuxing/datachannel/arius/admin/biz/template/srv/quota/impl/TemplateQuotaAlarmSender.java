@@ -14,13 +14,13 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateNotifyESPO;
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateQuotaEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateNotifyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -39,7 +39,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
         .getLog(TemplateQuotaAlarmSender.class);
 
     @Autowired
-    private TemplateLogicService               templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private AppService                         appService;
@@ -83,7 +83,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
         }
 
         LogicTemplateQuotaUsage templateQuotaUsage = event.getTemplateQuotaUsage();
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(templateQuotaUsage.getLogicId());
+        IndexTemplateInfo templateLogic = indexTemplateInfoService.getLogicTemplateById(templateQuotaUsage.getLogicId());
         App app = appService.getAppById(templateLogic.getAppId());
 
         if (!templateQuotaManager.enableClt(templateLogic.getId())) {
@@ -105,7 +105,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
     /**************************************** private method ****************************************************/
     //提醒的疲劳度控制
     //控制规则：一个模板一天之内超过80%最多提醒一次，超过85%最多提醒两次，超过90%最多提醒三次，超过95%最多提醒四次
-    private boolean canNotify(TemplateQuotaEvent event, IndexTemplateLogic templateLogic, App app) {
+    private boolean canNotify(TemplateQuotaEvent event, IndexTemplateInfo templateLogic, App app) {
         LogicTemplateQuotaUsage templateQuotaUsage = event.getTemplateQuotaUsage();
 
         Integer logicTemplateId = templateLogic.getId();
@@ -159,7 +159,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
         return false;
     }
 
-    private String genSmsContent(IndexTemplateLogic templateLogic, App app) {
+    private String genSmsContent(IndexTemplateInfo templateLogic, App app) {
         return "【Arius服务中心通知】你的appId[" + app.getId() + "]所负责的索引[" + templateLogic.getName() + "]资源利用率已经超过配额的" + RATIO_95
                + "%，请及时处理";
     }

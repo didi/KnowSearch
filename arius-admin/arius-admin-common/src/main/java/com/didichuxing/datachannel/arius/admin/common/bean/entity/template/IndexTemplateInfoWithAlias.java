@@ -2,8 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplateLogicWithLabels extends IndexTemplateLogic {
+public class IndexTemplateInfoWithAlias extends IndexTemplateInfo {
 
-    private List<Label> labels;
+    private List<IndexTemplateAlias> aliases;
 
 }

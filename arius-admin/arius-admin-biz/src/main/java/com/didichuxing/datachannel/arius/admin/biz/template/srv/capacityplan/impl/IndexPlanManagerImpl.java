@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -63,7 +63,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
 
         for(IndexTemplatePhy phyTemplate : templatePhyList) {
             // 判断该索引模版是否开启当前索引服务
-            IndexTemplateConfig config = templateLogicService.getTemplateConfig(phyTemplate.getLogicId());
+            IndexTemplateConfig config = indexTemplateInfoService.getTemplateConfig(phyTemplate.getLogicId());
             if (config == null || config.getDisableIndexRollover()) {
                 LOGGER.info(
                         "class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||template={}||msg=skip indexRollover",
@@ -72,7 +72,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
             }
 
             // 获取逻辑模版信息
-            IndexTemplateLogic logiTemplate = templateLogicService.getLogicTemplateById(phyTemplate.getLogicId());
+            IndexTemplateInfo logiTemplate = indexTemplateInfoService.getLogicTemplateById(phyTemplate.getLogicId());
 
             // 根据索引分区规则，获取当天或当月或不分区带有版本信息的索引的名字
             String indexName = getIndexNameByDateFormat(logiTemplate, phyTemplate);
@@ -165,7 +165,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
         return (shard / shardRouting + 1) * shardRouting;
     }
 
-    private String getIndexNameByDateFormat(IndexTemplateLogic logiTemplate, IndexTemplatePhy phyTemplate) {
+    private String getIndexNameByDateFormat(IndexTemplateInfo logiTemplate, IndexTemplatePhy phyTemplate) {
         if(TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {
             // 按天分区则获取模版对应当天索引拼接版本信息
             return IndexNameUtils.genDailyIndexNameWithVersion(phyTemplate.getName(), 0, phyTemplate.getVersion());
@@ -231,7 +231,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
      * @throws ESOperateException e
      */
     private Result<String> adjustShardCount(IndexTemplatePhy templatePhy) throws ESOperateException {
-        IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(templatePhy.getLogicId());
+        IndexTemplateInfo logicTemplate = indexTemplateInfoService.getLogicTemplateById(templatePhy.getLogicId());
         if (!TemplateUtils.isSaveByDay(logicTemplate.getDateFormat())) {
             // 非按天滚动，无需调整主shard个数
             return Result.buildSucc();

@@ -2,6 +2,8 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,8 +15,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplateLogicWithAlias extends IndexTemplateLogic {
-
-    private List<IndexTemplateAlias> aliases;
-
+public class IndexTemplateInfoWithCluster extends IndexTemplateInfo {
+    /**
+     * 逻辑集群信息
+     */
+    private List<ClusterLogic> logicClusters;
 }

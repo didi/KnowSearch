@@ -7,9 +7,9 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -18,12 +18,12 @@ import com.didiglobal.logi.log.LogFactory;
  * @author d06679
  * @date 2019/3/21
  */
-public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<TemplateLogicPO> {
+public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<IndexTemplateInfoPO> {
 
     private static final ILog     LOGGER = LogFactory.getLog(BaseConcurrentClusterTask.class);
 
     @Autowired
-    private IndexTemplateLogicDAO templateLogicDAO;
+    private IndexTemplateInfoDAO templateLogicDAO;
 
     @Autowired
     protected TemplateLogicManager templateLogicManager;
@@ -34,7 +34,7 @@ public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<Temp
      * @return
      */
     @Override
-    protected List<TemplateLogicPO> getAllItems() {
+    protected List<IndexTemplateInfoPO> getAllItems() {
         return templateLogicDAO.listAll();
     }
 
@@ -44,16 +44,16 @@ public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<Temp
      * @param taskBatch
      */
     @Override
-    protected boolean executeByBatch(TaskBatch<TemplateLogicPO> taskBatch) throws AdminOperateException {
-        List<TemplateLogicPO> items = taskBatch.getItems();
+    protected boolean executeByBatch(TaskBatch<IndexTemplateInfoPO> taskBatch) throws AdminOperateException {
+        List<IndexTemplateInfoPO> items = taskBatch.getItems();
         if (CollectionUtils.isEmpty(items)) {
             return true;
         }
 
         boolean succeed = true;
 
-        for (TemplateLogicPO item : items) {
-            TemplateLogicPO logicPO = item;
+        for (IndexTemplateInfoPO item : items) {
+            IndexTemplateInfoPO logicPO = item;
             try {
                 LOGGER.info("class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate begin||template={}||task={}", logicPO.getName(), getTaskName());
                 if (executeByLogicTemplate(logicPO.getId())) {

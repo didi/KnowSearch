@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO">
     <resultMap id="BaseResultMap"
-               type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO">
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO">
         <result column="id" jdbcType="INTEGER" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="data_type" jdbcType="TINYINT" property="dataType"/>
@@ -40,11 +40,11 @@
     </sql>
 
     <select id="listByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where is_active = 1
         <if test="id != null">and id = #{id}</if>
         <if test="name != null">and `name` = #{name}</if>
@@ -54,11 +54,11 @@
     </select>
 
     <select id="likeByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where is_active = 1
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
@@ -68,7 +68,7 @@
     <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where is_active = 1
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
@@ -78,10 +78,10 @@
     </select>
 
     <select id="getTotalHitByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO" resultType="long">
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO" resultType="long">
         select
         count(1)
-        from index_template
+        from index_template_info
         where is_active = 1
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
@@ -90,20 +90,20 @@
     </select>
 
     <select id="listAll"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where is_active = 1
         order by id desc
     </select>
 
     <insert id="insert"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into index_template
+        insert into index_template_info
         (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
          `desc`, quota, write_rate_limit, app_id, ingest_pipeline, resource_id, `level`)
@@ -116,34 +116,34 @@
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where id = #{logicId}
     </select>
 
     <select id="listByAppId" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where app_id = #{appId} and is_active = 1
     </select>
 
     <select id="listByDataCenter" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where data_center = #{dataCenter} and is_active = 1
     </select>
 
     <select id="listByName" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where `name` = #{name} and is_active = 1
     </select>
 
     <update id="update"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO">
-        update index_template
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO">
+        update index_template_info
         <trim prefix="set" prefixOverrides=",">
             <if test="appId != null">,app_id = #{appId}</if>
             <if test="name != null">,`name` = #{name}</if>
@@ -174,21 +174,21 @@
     </update>
 
     <update id="batchChangeHotDay"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO">
-        update index_template
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO">
+        update index_template_info
         set hot_time = hot_time + #{days}
         where hot_time > 0 and is_active = 1
     </update>
 
     <delete id="delete" parameterType="int">
-        update index_template set  is_active = 0
+        update index_template_info set  is_active = 0
         where id = #{logicId}
     </delete>
 
     <select id="listByIds" parameterType="list" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where is_active = 1 and
         id in
         <foreach collection="list" item="id" open="(" separator="," close=")">#{id}</foreach>
@@ -197,7 +197,7 @@
     <select id="likeByResponsible" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template
+        from index_template_info
         where is_active = 1 and (responsible = #{responsible}
         or responsible like CONCAT(#{responsible},',%')
         or responsible like CONCAT('%,', #{responsible})
@@ -205,20 +205,20 @@
     </select>
 
     <update id="updateBlockReadState">
-        update index_template
+        update index_template_info
         set block_read = #{blockRead}
         where id = #{logicId} and is_active = 1
     </update>
 
     <update id="updateBlockWriteState">
-        update index_template
+        update index_template_info
         set block_write = #{blockWrite}
         where id = #{logicId} and is_active = 1
     </update>
 
     <select id="listAllNames" resultType="java.lang.String">
         select `name`
-        from index_template
+        from index_template_info
         where is_active = 1
         order by id desc
     </select>

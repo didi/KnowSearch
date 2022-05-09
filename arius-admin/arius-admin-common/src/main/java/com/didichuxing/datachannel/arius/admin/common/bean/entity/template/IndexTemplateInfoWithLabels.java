@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,9 +15,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplateLogicWithCluster extends IndexTemplateLogic {
-    /**
-     * 逻辑集群信息
-     */
-    private List<ClusterLogic> logicClusters;
+public class IndexTemplateInfoWithLabels extends IndexTemplateInfo {
+
+    private List<Label> labels;
+
 }

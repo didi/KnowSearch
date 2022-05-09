@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplateLogicWithMapping extends IndexTemplateLogic {
+public class IndexTemplateInfoWithMapping extends IndexTemplateInfo {
 
     private List<Field>        fields;
 

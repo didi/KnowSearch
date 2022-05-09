@@ -9,17 +9,17 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -60,7 +60,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
     private TemplateAction              templateAction;
 
     @Autowired
-    private IndexTemplateLogicDAO       indexTemplateLogicDAO;
+    private IndexTemplateInfoDAO indexTemplateInfoDAO;
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -69,7 +69,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
 
     @Override
     public Result<Void> repairPipeline(Integer logicId) throws ESOperateException {
-        IndexTemplateLogicWithPhyTemplates logicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates logicWithPhysical = indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (logicWithPhysical == null) {
@@ -88,10 +88,10 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
             }
         }
 
-        TemplateLogicPO editTemplate = indexTemplateLogicDAO.getById(logicId);
+        IndexTemplateInfoPO editTemplate = indexTemplateInfoDAO.getById(logicId);
         editTemplate.setIngestPipeline(logicWithPhysical.getName());
 
-        int row = indexTemplateLogicDAO.update(editTemplate);
+        int row = indexTemplateInfoDAO.update(editTemplate);
         if (row != 1) {
             return Result.buildFail(String.format("更新模板pipeline字段失败，row=%d", row));
         }
@@ -107,7 +107,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
      */
     @Override
     public void syncPipeline(IndexTemplatePhy indexTemplatePhysical,
-                             IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+                             IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
         if (!isTemplateSrvOpen(indexTemplatePhysical.getCluster())) {
             return;
         }
@@ -145,7 +145,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
      */
     @Override
     public boolean createPipeline(IndexTemplatePhy indexTemplatePhysical,
-                                  IndexTemplateLogicWithPhyTemplates logicWithPhysical) throws ESOperateException {
+                                  IndexTemplateInfoWithPhyTemplates logicWithPhysical) throws ESOperateException {
         if (!isTemplateSrvOpen(indexTemplatePhysical.getCluster())) {
             return false;
         }
@@ -179,7 +179,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
      * @return true/false
      */
     @Override
-    public boolean editFromTemplateLogic(IndexTemplateLogic oldTemplate, IndexTemplateLogic newTemplate) {
+    public boolean editFromTemplateLogic(IndexTemplateInfo oldTemplate, IndexTemplateInfo newTemplate) {
 
         boolean changed = AriusObjUtils.isChanged(newTemplate.getDateField(), oldTemplate.getDateField())
                           || AriusObjUtils.isChanged(newTemplate.getDateFieldFormat(), oldTemplate.getDateFieldFormat())
@@ -237,7 +237,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
      */
     @Override
     public boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
-                                            IndexTemplateLogicWithPhyTemplates logicWithPhysical) throws ESOperateException {
+                                            IndexTemplateInfoWithPhyTemplates logicWithPhysical) throws ESOperateException {
         boolean changed = AriusObjUtils.isChanged(newTemplate.getVersion(), oldTemplate.getVersion());
 
         if (!changed) {
@@ -270,7 +270,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
             return true;
         }
 
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(templatePhysical.getLogicId());
 
         Integer manualRateLimit = getManualRateLimit(templatePhysical);
@@ -375,7 +375,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
     }
 
     private boolean doCreatePipeline(IndexTemplatePhy indexTemplatePhysical,
-                                     IndexTemplateLogicWithPhyTemplates logicWithPhysical,
+                                     IndexTemplateInfoWithPhyTemplates logicWithPhysical,
                                      Integer rateLimit) throws ESOperateException {
         String cluster = indexTemplatePhysical.getCluster();
         String pipelineId = indexTemplatePhysical.getName();
@@ -401,7 +401,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
     }
 
     private boolean notConsistent(IndexTemplatePhy indexTemplatePhysical,
-                                  IndexTemplateLogicWithPhyTemplates logicWithPhysical,
+                                  IndexTemplateInfoWithPhyTemplates logicWithPhysical,
                                   ESPipelineProcessor esPipelineProcessor) {
 
         if (StringUtils.isNotEmpty(logicWithPhysical.getDateField()) &&
@@ -520,7 +520,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
         return false;
     }
 
-    private boolean handleTemplatePhysicals(IndexTemplateLogic newTemplate, String dateField,
+    private boolean handleTemplatePhysicals(IndexTemplateInfo newTemplate, String dateField,
                                             String dateFieldFormat, String dateFormat,
                                             Integer expireDay, List<IndexTemplatePhy> templatePhysicals) {
         boolean succ = true;

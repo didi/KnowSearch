@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateInfoServiceImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
@@ -31,7 +31,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 @Service
 public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManager {
 
-    private static final ILog sLogger = LogFactory.getLog(TemplateLogicServiceImpl.class);
+    private static final ILog sLogger = LogFactory.getLog(IndexTemplateInfoServiceImpl.class);
 
     @Autowired
     private ESTemplateService esTemplateService;

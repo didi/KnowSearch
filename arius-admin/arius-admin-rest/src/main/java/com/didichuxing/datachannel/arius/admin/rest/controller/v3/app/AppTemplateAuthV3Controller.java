@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppTemplateAut
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -41,7 +41,7 @@ public class AppTemplateAuthV3Controller {
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private AppLogicTemplateAuthManager appLogicTemplateAuthManager;
@@ -101,7 +101,7 @@ public class AppTemplateAuthV3Controller {
         List<Integer> templateIds = templateAuths.stream().map(AppTemplateAuthVO::getTemplateId)
             .collect(Collectors.toList());
 
-        Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> logicTemplateMap = templateLogicService
+        Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> logicTemplateMap = indexTemplateInfoService
             .getLogicTemplatesWithClusterAndMasterTemplateMap(new HashSet<>(templateIds));
 
         for (AppTemplateAuthVO authVO : templateAuths) {

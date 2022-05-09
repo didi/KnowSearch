@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
@@ -48,7 +48,7 @@ public class RegionResourceMover {
     private static final String     CAPACITY_PLAN_HAS_PLUGIN_CLUSTER = "capacity.plan.has.plugin.cluster";
 
     @Autowired
-    private TemplateLogicService    templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplatePhyService templatePhyService;
@@ -120,7 +120,7 @@ public class RegionResourceMover {
                 // 更新模板factor到数据库
                 IndexTemplatePhy templatePhysical = templatePhyService
                     .getTemplateById(templateMetaMetric.getPhysicalId());
-                templateLogicService.upsertTemplateShardFactor(templatePhysical.getLogicId(), factor,
+                indexTemplateInfoService.upsertTemplateShardFactor(templatePhysical.getLogicId(), factor,
                     AriusUser.CAPACITY_PLAN.getDesc());
 
                 Map<String, String> setting = Maps.newHashMap();
@@ -157,7 +157,7 @@ public class RegionResourceMover {
         for (TemplateMetaMetric templateMetaMetric : context.getTemplateMetaMetrics()) {
             IndexTemplatePhy templatePhysical = templatePhyService
                 .getTemplateById(templateMetaMetric.getPhysicalId());
-            templateLogicService.updateTemplateShardFactorIfGreater(templatePhysical.getLogicId(),
+            indexTemplateInfoService.updateTemplateShardFactorIfGreater(templatePhysical.getLogicId(),
                 computeTemplateFactor(templateMetaMetric, context.getRegion().getConfig()),
                 AriusUser.CAPACITY_PLAN.getDesc());
         }

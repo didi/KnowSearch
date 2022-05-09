@@ -56,8 +56,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRSingleTemplateMasterSlaveSwitchDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTasksDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -70,7 +70,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESDCDRDAO;
@@ -160,7 +160,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
     private WorkTaskManager       workTaskManager;
 
     @Autowired
-    private TemplateLogicService  templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -199,7 +199,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> copyAndCreateDcdr(Integer templateId, String targetCluster, String rack, String operator) throws AdminOperateException {
         //1. 判断目标集群是否存在模板, 存在则需要删除, 避免copy失败，确保copy流程的执行来保证主从模板setting mapping等信息的一致性。
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId);
         if (null == templateLogicWithPhysical) {return Result.buildParamIllegal(TEMPLATE_NO_EXIST);}
 
         IndexTemplatePhy slavePhyTemplate = templateLogicWithPhysical.getSlavePhyTemplate();
@@ -754,7 +754,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
         masterAndSlaveCheckPointTuple.setV1(0L);
         masterAndSlaveCheckPointTuple.setV2(0L);
 
-        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+        IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId);
         IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
         IndexTemplatePhy slavePhyTemplate  = logicTemplateWithPhysicals.getSlavePhyTemplate();
         if(null == masterPhyTemplate) {
@@ -792,7 +792,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
     @Override
     public Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId) {
         TemplateDCDRInfoVO templateDCDRInfoVO = new TemplateDCDRInfoVO();
-        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+        IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId);
         IndexTemplatePhy slavePhyTemplate  = logicTemplateWithPhysicals.getSlavePhyTemplate();
         IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
         if (null == masterPhyTemplate) {
@@ -828,7 +828,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
 
     /**************************************** private method ****************************************************/
     private Result<Void> checkDCDRParam(Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
             return Result.buildNotExist(TEMPLATE_NO_EXIST);
@@ -900,7 +900,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
         dcdrMeta.setPhysicalIds(new ArrayList<>());
         dcdrMeta.setReplicaClusters(new ArrayList<>());
 
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         List<IndexTemplatePhy> masterPhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
@@ -1267,7 +1267,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
      * @return
      */
     private boolean hasFinishSwitchMasterSlave(DCDRSingleTemplateMasterSlaveSwitchDetail switchDetail) {
-        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(
+        IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(
                 switchDetail.getTemplateId().intValue());
         IndexTemplatePhy masterTemplate    =  logicTemplateWithPhysicals.getMasterPhyTemplate();
         IndexTemplatePhy slaveTemplate     =  logicTemplateWithPhysicals.getSlavePhyTemplate();
@@ -1386,7 +1386,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
     }
 
     private TemplatePhysicalCopyDTO buildTemplatePhysicalCopyDTO(Integer templateId, String targetCluster, String rack) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId);
 
         TemplatePhysicalCopyDTO templatePhysicalCopyDTO = new TemplatePhysicalCopyDTO();
         IndexTemplatePhy masterPhyTemplate = templateLogicWithPhysical.getMasterPhyTemplate();
@@ -1471,7 +1471,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
             return Result.buildParamIllegal("模板id为空");
         }
         for (Long templateId : templateIdList) {
-            IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(
+            IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(
                     templateId.intValue());
 
             IndexTemplatePhy slaveTemplate   =  logicTemplateWithPhysicals.getSlavePhyTemplate();
@@ -1496,7 +1496,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
         for (Long templateId : templateIdList) {
             DCDRSingleTemplateMasterSlaveSwitchDetail singleSwitchDetail = new DCDRSingleTemplateMasterSlaveSwitchDetail();
 
-            IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(templateId.intValue());
+            IndexTemplateInfo logicTemplate = indexTemplateInfoService.getLogicTemplateById(templateId.intValue());
             singleSwitchDetail.editTaskTitle(logicTemplate.getName());
 
             //1.1 设置切换类型 强切、平滑
@@ -1505,7 +1505,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
             //1.2 构建dcdr主从切换基础信息
             singleSwitchDetail.setTemplateId(templateId);
 
-            IndexTemplateLogicWithPhyTemplates  logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(templateId.intValue());
+            IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId.intValue());
             IndexTemplatePhy masterTemplate  =  logicTemplateWithPhysicals.getMasterPhyTemplate();
             IndexTemplatePhy slaveTemplate   =  logicTemplateWithPhysicals.getSlavePhyTemplate();
             singleSwitchDetail.setMasterCluster(slaveTemplate.getCluster());
@@ -1572,7 +1572,7 @@ public class TemplateDcdrManagerImpl extends BaseTemplateSrv implements Template
             //并发去刷新多个模板状态
             BATCH_DCDR_FUTURE_UTIL.runnableTask(() -> {
                 try {
-                    IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(
+                    IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(
                             switchDetail.getTemplateId().intValue());
                     IndexTemplatePhy masterTemplate    =  logicTemplateWithPhysicals.getMasterPhyTemplate();
                     IndexTemplatePhy slaveTemplate     =  logicTemplateWithPhysicals.getSlavePhyTemplate();

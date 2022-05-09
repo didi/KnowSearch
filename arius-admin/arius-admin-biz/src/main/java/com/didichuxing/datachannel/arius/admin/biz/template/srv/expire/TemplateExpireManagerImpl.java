@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
@@ -201,7 +201,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
             return Sets.newHashSet();
         }
 
-        IndexTemplateLogic logicTemplate = templatePhysicalWithLogic.getLogicTemplate();
+        IndexTemplateInfo logicTemplate = templatePhysicalWithLogic.getLogicTemplate();
 
         int expireTime = logicTemplate.getExpireTime();
 
@@ -285,7 +285,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
         boolean succ = true;
         for (IndexTemplatePhy physical : templatePhysicals) {
             try {
-                IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateWithPhysicalsById(physical.getLogicId());
+                IndexTemplateInfo templateLogic = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(physical.getLogicId());
                 if (templateLogic != null) {
                     succ = deleteExpireIndices(physical.getId(), retryCount) && succ;
                 } else {

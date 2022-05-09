@@ -7,15 +7,15 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
@@ -31,9 +31,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Regio
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
@@ -70,7 +70,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
     private IndexTemplatePhysicalDAO                       indexTemplatePhysicalDAO;
 
     @Autowired
-    private IndexTemplateLogicDAO                          indexTemplateLogicDAO;
+    private IndexTemplateInfoDAO indexTemplateInfoDAO;
 
     @Autowired
     private OperateRecordService                           operateRecordService;
@@ -85,7 +85,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
     private ResponsibleConvertTool                         responsibleConvertTool;
 
     @Autowired
-    private TemplateLogicService                           templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private RegionRackService regionRackService;
@@ -209,7 +209,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
                 String.format("下线物理集群[%s]中模板[%s]", oldPO.getCluster(), oldPO.getName()), operator);
 
             SpringTool.publish(new PhysicalTemplateDeleteEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplatePhy.class),
-                templateLogicService.getLogicTemplateWithPhysicalsById(oldPO.getLogicId())));
+                indexTemplateInfoService.getLogicTemplateWithPhysicalsById(oldPO.getLogicId())));
         }
 
         return Result.build(succ);
@@ -256,7 +256,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> editTemplateFromLogic(IndexTemplateLogicDTO param, String operator) throws ESOperateException {
+    public Result<Void> editTemplateFromLogic(IndexTemplateInfoDTO param, String operator) throws ESOperateException {
         if (param == null) {
             return Result.buildFail("参数为空！");
         }
@@ -632,12 +632,12 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
         IndexTemplatePhyWithLogic indexTemplatePhyWithLogic = ConvertUtil.obj2Obj(physicalPO,
             IndexTemplatePhyWithLogic.class);
 
-        TemplateLogicPO logicPO = indexTemplateLogicDAO.getById(physicalPO.getLogicId());
+        IndexTemplateInfoPO logicPO = indexTemplateInfoDAO.getById(physicalPO.getLogicId());
         if (logicPO == null) {
             LOGGER.warn("class=TemplatePhyServiceImpl||method=buildIndexTemplatePhysicalWithLogic||logic template not exist||logicId={}", physicalPO.getLogicId());
             return indexTemplatePhyWithLogic;
         }
-        indexTemplatePhyWithLogic.setLogicTemplate(ConvertUtil.obj2Obj(logicPO, IndexTemplateLogic.class));
+        indexTemplatePhyWithLogic.setLogicTemplate(ConvertUtil.obj2Obj(logicPO, IndexTemplateInfo.class));
         return indexTemplatePhyWithLogic;
     }
 
@@ -670,16 +670,16 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
 
         List<Integer> logicIds = templatePhysicalPOS.stream().map(TemplatePhysicalPO::getLogicId)
             .collect(Collectors.toList());
-        List<TemplateLogicPO> templateLogicPOS = indexTemplateLogicDAO.listByIds(logicIds);
-        Map<Integer, TemplateLogicPO> id2IndexTemplateLogicPOMap = ConvertUtil.list2Map(templateLogicPOS,
-            TemplateLogicPO::getId);
+        List<IndexTemplateInfoPO> indexTemplateInfoPOS = indexTemplateInfoDAO.listByIds(logicIds);
+        Map<Integer, IndexTemplateInfoPO> id2IndexTemplateLogicPOMap = ConvertUtil.list2Map(indexTemplateInfoPOS,
+            IndexTemplateInfoPO::getId);
 
         List<IndexTemplatePhyWithLogic> physicalWithLogics = Lists.newArrayList();
         for (TemplatePhysicalPO templatePhysicalPO : templatePhysicalPOS) {
             IndexTemplatePhyWithLogic physicalWithLogic = ConvertUtil.obj2Obj(templatePhysicalPO,
                 IndexTemplatePhyWithLogic.class);
             physicalWithLogic.setLogicTemplate(ConvertUtil
-                .obj2Obj(id2IndexTemplateLogicPOMap.get(templatePhysicalPO.getLogicId()), IndexTemplateLogic.class));
+                .obj2Obj(id2IndexTemplateLogicPOMap.get(templatePhysicalPO.getLogicId()), IndexTemplateInfo.class));
 
             physicalWithLogics.add(physicalWithLogic);
         }
@@ -726,7 +726,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
         return Result.buildSucc();
     }
 
-    private Result<Void> updateShardNumTemplatePhy(IndexTemplateLogicDTO param, TemplatePhysicalPO updateParam, TemplatePhysicalPO physicalPO) throws ESOperateException {
+    private Result<Void> updateShardNumTemplatePhy(IndexTemplateInfoDTO param, TemplatePhysicalPO updateParam, TemplatePhysicalPO physicalPO) throws ESOperateException {
         if (isValidShardNum(param.getShardNum())
                 && AriusObjUtils.isChanged(param.getShardNum(), physicalPO.getShard())) {
             updateParam.setId(physicalPO.getId());
@@ -747,7 +747,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
         return Result.buildSucc();
     }
 
-    private Result<Void> updateExpressionTemplatePhysical(IndexTemplateLogicDTO param, TemplatePhysicalPO updateParam, TemplatePhysicalPO physicalPO) throws ESOperateException {
+    private Result<Void> updateExpressionTemplatePhysical(IndexTemplateInfoDTO param, TemplatePhysicalPO updateParam, TemplatePhysicalPO physicalPO) throws ESOperateException {
         if (AriusObjUtils.isChanged(param.getExpression(), physicalPO.getExpression())) {
             updateParam.setId(physicalPO.getId());
             updateParam.setExpression(param.getExpression());

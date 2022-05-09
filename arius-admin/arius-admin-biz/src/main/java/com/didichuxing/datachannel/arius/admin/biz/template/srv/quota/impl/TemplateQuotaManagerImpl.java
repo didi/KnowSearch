@@ -11,8 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTempla
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsagePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsageRecordPO;
@@ -108,7 +108,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
             return null;
         }
 
-        IndexTemplateConfig templateConfig = templateLogicService.getTemplateConfig(templatePhysical.getLogicId());
+        IndexTemplateConfig templateConfig = indexTemplateInfoService.getTemplateConfig(templatePhysical.getLogicId());
         if (templateConfig != null && Objects.equals(templateConfig.getDynamicLimitEnable(), AdminConstant.NO)) {
             LOGGER.warn(
                 "class=TemplateQuotaManagerImpl||method=getWithUsage||cluster={}||template={}||msg=template config not limit!",
@@ -128,7 +128,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
      */
     @Override
     public LogicTemplateQuotaUsage getLogicTemplateQuotaUsage(Integer logicId, Long interval) {
-        IndexTemplateLogicWithPhyTemplates logicWithPhysical = this.templateLogicService
+        IndexTemplateInfoWithPhyTemplates logicWithPhysical = this.indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (logicWithPhysical == null) {
@@ -221,7 +221,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
 
     @Override
     public boolean enableClt(Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null || templateLogicWithPhysical.getMasterPhyTemplate() == null) {
@@ -294,7 +294,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
 
     @Override
     public String getCtlRange(Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates logicWithPhysical = this.templateLogicService
+        IndexTemplateInfoWithPhyTemplates logicWithPhysical = this.indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         return getCtlRange(logicWithPhysical.getMasterPhyTemplate().getCluster(),
@@ -309,7 +309,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
      */
     @Override
     public boolean save(ESTemplateQuotaUsage usage) {
-        IndexTemplateLogicWithCluster templateLogicWithResource = templateLogicService
+        IndexTemplateInfoWithCluster templateLogicWithResource = indexTemplateInfoService
             .getLogicTemplateWithCluster(usage.getLogicId());
 
         ESTemplateQuotaUsagePO usagePO = ConvertUtil.obj2Obj(usage, ESTemplateQuotaUsagePO.class);

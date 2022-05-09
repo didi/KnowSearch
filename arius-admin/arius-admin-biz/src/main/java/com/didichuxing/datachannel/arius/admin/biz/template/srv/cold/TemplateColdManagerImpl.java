@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,7 +36,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * 索引冷存服务
@@ -56,7 +55,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     private ESIndexService         esIndexService;
 
     @Autowired
-    private IndexTemplateLogicDAO  indexTemplateLogicDAO;
+    private IndexTemplateInfoDAO indexTemplateInfoDAO;
 
     @Autowired
     private ClusterPhyService      clusterPhyService;
@@ -234,7 +233,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
             return Result.buildParamIllegal("days参数非法, [-2, 2]");
         }
 
-        int count = indexTemplateLogicDAO.batchChangeHotDay(days);
+        int count = indexTemplateInfoDAO.batchChangeHotDay(days);
 
         LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
 

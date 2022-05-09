@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateIndecreaseOrderDetail;
@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateIndecreaseContent;
@@ -40,7 +40,7 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
     private TemplateLabelService        templateLabelService;
 
     @Autowired
-    private TemplateLogicService       templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplateAction             templateAction;
@@ -138,7 +138,7 @@ public class TemplateIndecreaseHandler extends BaseWorkOrderHandler {
             return Result.buildOpForBidden("禁止操作重要索引，请联系Arius服务号处理");
         }
 
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(content.getId());
+        IndexTemplateInfo templateLogic = indexTemplateInfoService.getLogicTemplateById(content.getId());
         if (!templateLogic.getAppId().equals(workOrder.getSubmitorAppid())) {
             return Result.buildOpForBidden("您无权对该索引进行扩缩容操作");
         }

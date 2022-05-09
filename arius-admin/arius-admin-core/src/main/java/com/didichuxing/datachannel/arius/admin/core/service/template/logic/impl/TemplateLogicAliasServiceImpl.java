@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.Co
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -18,7 +18,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateAliasDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
@@ -42,7 +42,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
     @Autowired
     private IndexTemplateAliasDAO indexTemplateAliasDAO;
     @Autowired
-    private IndexTemplateLogicDAO indexTemplateLogicDAO;
+    private IndexTemplateInfoDAO indexTemplateInfoDAO;
     @Autowired
     private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
     @Autowired
@@ -173,12 +173,12 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
         List<Integer> deleteAliasList = new ArrayList<>();
         Set<Integer> logicIdList = new HashSet<>();
         List<PutAliasNode> nodes;
-        List<TemplateLogicPO> indexTemplateLogicPOS = indexTemplateLogicDAO.listByAppId(aliasSwitchDTO.getAppId());
+        List<IndexTemplateInfoPO> indexIndexTemplateInfoPOS = indexTemplateInfoDAO.listByAppId(aliasSwitchDTO.getAppId());
         //检查索引
         if (CollectionUtils.isEmpty(aliasSwitchDTO.getAddAliasIndices()) && CollectionUtils.isEmpty(aliasSwitchDTO.getDelAliasIndices())) {
             return Result.buildFail("操作的索引名称不能为空！");
         }
-        Result<List<PutAliasNode>> nodesResult = buildAliasNodes(aliasSwitchDTO, indexTemplateLogicPOS, insertAliasList, deleteAliasList, logicIdList);
+        Result<List<PutAliasNode>> nodesResult = buildAliasNodes(aliasSwitchDTO, indexIndexTemplateInfoPOS, insertAliasList, deleteAliasList, logicIdList);
         if (nodesResult.success()) {
             nodes = new ArrayList<>(nodesResult.getData());
         } else {
@@ -219,15 +219,15 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
         return Result.buildSucc();
     }
 
-    private Result<List<PutAliasNode>> buildAliasNodes(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO, List<TemplateLogicPO> indexTemplateLogicPOS, List<TemplateAliasPO> insertAliasList, List<Integer> deleteAliasList, Set<Integer> logicIdList) {
+    private Result<List<PutAliasNode>> buildAliasNodes(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO, List<IndexTemplateInfoPO> indexIndexTemplateInfoPOS, List<TemplateAliasPO> insertAliasList, List<Integer> deleteAliasList, Set<Integer> logicIdList) {
         List<PutAliasNode> nodes = new ArrayList<>();
-        List<PutAliasNode> addNodes = buildAliasNodes(aliasSwitchDTO, PutAliasType.ADD, indexTemplateLogicPOS, insertAliasList, deleteAliasList, logicIdList);
+        List<PutAliasNode> addNodes = buildAliasNodes(aliasSwitchDTO, PutAliasType.ADD, indexIndexTemplateInfoPOS, insertAliasList, deleteAliasList, logicIdList);
         if (null == addNodes) {
             Result.buildFail("索引模板不存在！");
         } else if (CollectionUtils.isNotEmpty(addNodes)) {
             nodes.addAll(addNodes);
         }
-        List<PutAliasNode> removeNodes = buildAliasNodes(aliasSwitchDTO, PutAliasType.REMOVE, indexTemplateLogicPOS, insertAliasList, deleteAliasList, logicIdList);
+        List<PutAliasNode> removeNodes = buildAliasNodes(aliasSwitchDTO, PutAliasType.REMOVE, indexIndexTemplateInfoPOS, insertAliasList, deleteAliasList, logicIdList);
         if (removeNodes == null) {
             Result.buildFail("索引模板不存在！");
         } else if (CollectionUtils.isNotEmpty(removeNodes)) {
@@ -236,7 +236,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
         return Result.buildSucc(nodes);
     }
 
-    private List<PutAliasNode> buildAliasNodes(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO, PutAliasType aliasType, List<TemplateLogicPO> indexTemplateLogicPOS, List<TemplateAliasPO> insertAliasList, List<Integer> deleteAliasList, Set<Integer> logicIdList) {
+    private List<PutAliasNode> buildAliasNodes(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO, PutAliasType aliasType, List<IndexTemplateInfoPO> indexIndexTemplateInfoPOS, List<TemplateAliasPO> insertAliasList, List<Integer> deleteAliasList, Set<Integer> logicIdList) {
         List<PutAliasNode> nodes = new ArrayList<>();
         List<String> indexList = null;
         String aliasName = aliasSwitchDTO.getAliasName();
@@ -250,7 +250,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
             return nodes;
         }
         for (String indexName : indexList) {
-            Integer logicId = getLogicIdByIndexName(indexTemplateLogicPOS, indexName);
+            Integer logicId = getLogicIdByIndexName(indexIndexTemplateInfoPOS, indexName);
             if (null == logicId) {
                 return null;
             }
@@ -302,7 +302,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
 
         // 这里进行别名检查
         List<IndexTemplateAlias> aliasList = ConvertUtil.list2List(indexTemplateAliasDAO.listAll(), IndexTemplateAlias.class);
-        List<TemplateLogicPO> poList = indexTemplateLogicDAO.listAll();
+        List<IndexTemplateInfoPO> poList = indexTemplateInfoDAO.listAll();
         Set<Integer> logicIds = new HashSet<>();
         if (null != logicId) {
             logicIds.add(logicId);
@@ -323,14 +323,14 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
             if (poList.stream().anyMatch(IndexTemplateLogic -> IndexTemplateLogic.getName().startsWith(name) || name.startsWith(IndexTemplateLogic.getName()))) {
                 return Result.buildFail("别名不能和索引模板互为前缀！");
             }
-            List<TemplateLogicPO> templateLogicPOS = poList.stream().filter(po -> logicIds.contains(po.getId())).collect(Collectors.toList());
+            List<IndexTemplateInfoPO> indexTemplateInfoPOS = poList.stream().filter(po -> logicIds.contains(po.getId())).collect(Collectors.toList());
             Set<Integer> appIds = new HashSet<>();
             if (null != appId) {
                 appIds.add(appId);
             }
-            if (CollectionUtils.isNotEmpty(templateLogicPOS)) {
-                appIds.addAll(templateLogicPOS.stream().map(TemplateLogicPO::getAppId).collect(Collectors.toSet()));
-            } else if (CollectionUtils.isEmpty(templateLogicPOS) && CollectionUtils.isNotEmpty(logicIds)) {
+            if (CollectionUtils.isNotEmpty(indexTemplateInfoPOS)) {
+                appIds.addAll(indexTemplateInfoPOS.stream().map(IndexTemplateInfoPO::getAppId).collect(Collectors.toSet()));
+            } else if (CollectionUtils.isEmpty(indexTemplateInfoPOS) && CollectionUtils.isNotEmpty(logicIds)) {
                 return Result.buildFail("索引模板不存在！");
             }
             if (appIds.size() > 1) {
@@ -342,8 +342,8 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
     }
 
 
-    private Integer getLogicIdByIndexName(List<TemplateLogicPO> indexTemplateLogicPOS, String indexName) {
-        for (TemplateLogicPO template : indexTemplateLogicPOS) {
+    private Integer getLogicIdByIndexName(List<IndexTemplateInfoPO> indexIndexTemplateInfoPOS, String indexName) {
+        for (IndexTemplateInfoPO template : indexIndexTemplateInfoPOS) {
             String expression = template.getExpression();
             //判断索引名称是否满足索引模板
             if ((!expression.endsWith("*") && template.getName().equals(indexName)) || (expression.endsWith("*") && indexName.startsWith(expression.substring(0, expression.length() - 1)))) {

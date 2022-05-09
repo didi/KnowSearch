@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "逻辑模板信息")
-public class IndexTemplateLogicDTO extends PageDTO {
+public class IndexTemplateInfoDTO extends PageDTO {
 
     @ApiModelProperty("模板ID")
     private Integer                        id;

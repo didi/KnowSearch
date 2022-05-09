@@ -2,15 +2,11 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import org.elasticsearch.rest.RestStatus;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Transactional
 @Rollback
@@ -136,7 +131,7 @@ public class ESTemplateServiceImplTest extends AriusAdminApplicationTest {
         Mockito.when(esTemplateDAO.getTemplate(Mockito.anyString(), Mockito.any())).thenReturn(new TemplateConfig());
         DirectResponse directResponse = new DirectResponse();
         directResponse.setRestStatus(RestStatus.OK);
-        List<TemplateLogicPO> list = CustomDataSource.getTemplateLogicPOList();
+        List<IndexTemplateInfoPO> list = CustomDataSource.getTemplateLogicPOList();
         directResponse.setResponseContent(JSON.toJSONString(list));
         Mockito.when(esTemplateDAO.getDirectResponse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(directResponse);
         Assertions.assertEquals(esTemplateService.syncGetTemplateNum(CustomDataSource.PHY_CLUSTER_NAME), CustomDataSource.SIZE);

@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -29,7 +29,7 @@ public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
     protected TemplatePhyService   templatePhyService;
 
     @Autowired
-    protected TemplateLogicService templateLogicService;
+    protected IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     protected OperateRecordService operateRecordService;

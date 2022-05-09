@@ -14,8 +14,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithMapping;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithMapping;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -154,7 +154,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      */
     @Override
     public Result<Void> updateSettings(Integer logicId, String operator, AriusIndexTemplateSetting settings) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -190,7 +190,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      */
     @Override
     public Result<IndexTemplatePhySettings> getTemplateSettings(Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -221,7 +221,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @return
      */
     private JSONArray getDynamicTemplatesByLogicTemplate(Integer logicId) {
-        Result<IndexTemplateLogicWithMapping> templateWithMapping = templateLogicMappingManager.getTemplateWithMapping(logicId);
+        Result<IndexTemplateInfoWithMapping> templateWithMapping = templateLogicMappingManager.getTemplateWithMapping(logicId);
         if (templateWithMapping.failed()) {
             LOGGER.warn("class=TemplateLogicServiceImpl||method=getDynamicTemplatesByLogicTemplate||logicTemplateId={}||msg={}",
                     logicId, templateWithMapping.getMessage());

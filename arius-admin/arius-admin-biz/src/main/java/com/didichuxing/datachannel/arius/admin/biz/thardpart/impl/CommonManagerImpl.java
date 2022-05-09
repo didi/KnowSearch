@@ -42,7 +42,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -70,7 +70,7 @@ public class CommonManagerImpl implements CommonManager {
     private AriusConfigInfoService ariusConfigInfoService;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplatePhyService templatePhyService;
@@ -170,12 +170,12 @@ public class CommonManagerImpl implements CommonManager {
     @Override
     public Result<List<ThirdpartTemplateLogicVO>> listLogicTemplate() {
         return Result
-                .buildSucc(ConvertUtil.list2List(templateLogicService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
+                .buildSucc(ConvertUtil.list2List(indexTemplateInfoService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
     }
 
     @Override
     public Result<List<ThirdPartTemplateLogicWithMasterTemplateResourceVO>> listLogicWithMasterTemplateAndResource() {
-        List<IndexTemplateLogicWithClusterAndMasterTemplate> logicWithMasterTemplateAndResource = templateLogicService
+        List<IndexTemplateLogicWithClusterAndMasterTemplate> logicWithMasterTemplateAndResource = indexTemplateInfoService
                 .getLogicTemplatesWithClusterAndMasterTemplate();
 
         List<ThirdPartTemplateLogicWithMasterTemplateResourceVO> vos = logicWithMasterTemplateAndResource.stream()
@@ -192,9 +192,9 @@ public class CommonManagerImpl implements CommonManager {
 
     @Override
     public Result<List<ThirdpartTemplateLogicVO>> listLogicByName(String template) {
-        List<IndexTemplateLogic> indexTemplateLogics = templateLogicService.getLogicTemplateByName(template);
+        List<IndexTemplateInfo> indexTemplateInfos = indexTemplateInfoService.getLogicTemplateByName(template);
 
-        List<ThirdpartTemplateLogicVO> templateLogicVOList = ConvertUtil.list2List(indexTemplateLogics,
+        List<ThirdpartTemplateLogicVO> templateLogicVOList = ConvertUtil.list2List(indexTemplateInfos,
                 ThirdpartTemplateLogicVO.class);
 
         List<ESTemplateQuotaUsage> templateQuotaUsages = templateQuotaManager.listAll();
@@ -250,7 +250,7 @@ public class CommonManagerImpl implements CommonManager {
     @Override
     public Result<ThirdpartTemplateVO> getMasterByLogicId(Integer logicId) {
 
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService.getLogicTemplateWithPhysicalsById(logicId);
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null || templateLogicWithPhysical.getMasterPhyTemplate() == null) {
             return Result.buildNotExist("模板不存在： " + logicId);
@@ -279,7 +279,7 @@ public class CommonManagerImpl implements CommonManager {
 
         if (app.getIsRoot().equals( AdminConstant.YES)) {
             return Result
-                    .buildSucc(ConvertUtil.list2List(templateLogicService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
+                    .buildSucc(ConvertUtil.list2List(indexTemplateInfoService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
         }
 
         List<AppTemplateAuth> templateAuths = appLogicTemplateAuthService.getTemplateAuthsByAppId(appId);
@@ -301,13 +301,13 @@ public class CommonManagerImpl implements CommonManager {
         Set<Integer> logicIds = templateAuths.stream()
                 .map(AppTemplateAuth::getTemplateId).collect(Collectors.toSet());
 
-        List<IndexTemplateLogic> templateLogics = Lists.newArrayList();
+        List<IndexTemplateInfo> templateLogics = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(logicIds)) {
             if (logicIds.size() > 200) {
-                templateLogics = templateLogicService.getAllLogicTemplates().stream()
+                templateLogics = indexTemplateInfoService.getAllLogicTemplates().stream()
                         .filter(temp -> logicIds.contains(temp.getId())).collect(Collectors.toList());
             } else {
-                templateLogics = templateLogicService.getLogicTemplatesByIds(Lists.newArrayList(logicIds));
+                templateLogics = indexTemplateInfoService.getLogicTemplatesByIds(Lists.newArrayList(logicIds));
             }
         }
 

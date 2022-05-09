@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.Co
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -67,7 +67,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
      */
     @Override
     public List<IndexTemplateAlias> listAlias() {
-        return listAlias(templateLogicService.getAllLogicTemplateWithPhysicals());
+        return listAlias(indexTemplateInfoService.getAllLogicTemplateWithPhysicals());
     }
 
     /**
@@ -76,10 +76,10 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
      * @return list
      */
     @Override
-    public List<IndexTemplateAlias> listAlias(List<IndexTemplateLogicWithPhyTemplates> templateLogicList) {
+    public List<IndexTemplateAlias> listAlias(List<IndexTemplateInfoWithPhyTemplates> templateLogicList) {
         List<IndexTemplateAlias> aliases = new ArrayList<>();
         Set<String> clusters = new HashSet<>();
-        for (IndexTemplateLogicWithPhyTemplates templateLogicWithPhyTemplates : templateLogicList) {
+        for (IndexTemplateInfoWithPhyTemplates templateLogicWithPhyTemplates : templateLogicList) {
             if (null != templateLogicWithPhyTemplates && null != templateLogicWithPhyTemplates.getMasterPhyTemplate()
                     && StringUtils.isNotBlank(templateLogicWithPhyTemplates.getMasterPhyTemplate().getCluster())) {
                 clusters.add(templateLogicWithPhyTemplates.getMasterPhyTemplate().getCluster());
@@ -88,7 +88,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
         try {
             Map<String, List<IndexTemplatePhyAlias>> map =  templatePhyAliasesManager.fetchAllTemplateAliases(new ArrayList<>(clusters));
-            for (IndexTemplateLogicWithPhyTemplates templateLogic : templateLogicList) {
+            for (IndexTemplateInfoWithPhyTemplates templateLogic : templateLogicList) {
                 for (IndexTemplatePhyAlias physicalAlias : map.get(templateLogic.getName())) {
                     aliases.add(fetchAlias(templateLogic.getId(), physicalAlias));
                 }
@@ -295,7 +295,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
         }
 
         appTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
-            IndexTemplateLogicWithPhyTemplates logicWithPhysical = this.templateLogicService
+            IndexTemplateInfoWithPhyTemplates logicWithPhysical = this.indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(appTemplateAuth.getTemplateId());
 
             if (null != logicWithPhysical && logicWithPhysical.hasPhysicals()) {
@@ -324,7 +324,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
             return Result.buildNotExist("非法的逻辑ID： " + logicId);
         }
 
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {

@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfi
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.AppMonitorRuleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
@@ -254,8 +254,8 @@ public class CustomDataSource {
         return po;
     }
 
-    public static TemplateLogicPO templateLogicSource() {
-        TemplateLogicPO po = new TemplateLogicPO();
+    public static IndexTemplateInfoPO templateLogicSource() {
+        IndexTemplateInfoPO po = new IndexTemplateInfoPO();
         po.setId(1);
         po.setAppId(1);
         po.setName("test");
@@ -345,19 +345,19 @@ public class CustomDataSource {
         return appTemplateAuthDTO;
     }
 
-    public static IndexTemplateLogicDTO indexTemplateLogicDTOFactory() {
-        IndexTemplateLogicDTO indexTemplateLogicDTO = new IndexTemplateLogicDTO();
-        indexTemplateLogicDTO.setName("wpkTest-1");
-        indexTemplateLogicDTO.setAppId(1);
-        indexTemplateLogicDTO.setDataType(1);
-        indexTemplateLogicDTO.setDateFormat("_yyyy-MM-dd");
-        indexTemplateLogicDTO.setExpression("wpkTest-1*");
-        indexTemplateLogicDTO.setDateField("timeStamp");
-        indexTemplateLogicDTO.setResponsible("admin");
-        indexTemplateLogicDTO.setDataCenter("cn");
-        indexTemplateLogicDTO.setQuota(30D);
+    public static IndexTemplateInfoDTO indexTemplateLogicDTOFactory() {
+        IndexTemplateInfoDTO indexTemplateInfoDTO = new IndexTemplateInfoDTO();
+        indexTemplateInfoDTO.setName("wpkTest-1");
+        indexTemplateInfoDTO.setAppId(1);
+        indexTemplateInfoDTO.setDataType(1);
+        indexTemplateInfoDTO.setDateFormat("_yyyy-MM-dd");
+        indexTemplateInfoDTO.setExpression("wpkTest-1*");
+        indexTemplateInfoDTO.setDateField("timeStamp");
+        indexTemplateInfoDTO.setResponsible("admin");
+        indexTemplateInfoDTO.setDataCenter("cn");
+        indexTemplateInfoDTO.setQuota(30D);
 
-        return indexTemplateLogicDTO;
+        return indexTemplateInfoDTO;
     }
 
     public static TemplateTypePO templateTypeSource() {
@@ -407,10 +407,10 @@ public class CustomDataSource {
     }
 
 
-    public static List<TemplateLogicPO> getTemplateLogicPOList() {
-        List<TemplateLogicPO> list = new ArrayList<>();
+    public static List<IndexTemplateInfoPO> getTemplateLogicPOList() {
+        List<IndexTemplateInfoPO> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++) {
-            TemplateLogicPO po = CustomDataSource.templateLogicSource();
+            IndexTemplateInfoPO po = CustomDataSource.templateLogicSource();
             po.setId(i);
             po.setName(po.getName() + "i");
             list.add(po);

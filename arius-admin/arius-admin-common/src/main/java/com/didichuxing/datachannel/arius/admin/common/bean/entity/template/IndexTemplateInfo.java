@@ -1,21 +1,21 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
+package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author d06679
- * @date 2019/3/29
+ * @author chengxiang
+ * @date 2022/5/9
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TemplateLogicPO extends BasePO implements DigitResponsible {
+public class IndexTemplateInfo extends BaseEntity implements StringResponsible, Comparable<IndexTemplateInfo> {
 
     private Integer id;
 
@@ -56,6 +56,11 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
     private Integer hotTime;
 
     /**
+     * 副本保存时长 单位天
+     */
+    private Integer replicaTime;
+
+    /**
      * 成本部门
      */
     private String  libraDepartmentId;
@@ -66,7 +71,7 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
     private String  libraDepartment;
 
     /**
-     * 责任人，id列表，英文逗号分隔
+     * 责任人
      */
     private String  responsible;
 
@@ -81,7 +86,7 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
     private String  dateFieldFormat;
 
     /**
-     * id地钻
+     * id字段
      */
     private String  idField;
 
@@ -96,12 +101,17 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
     private String  expression;
 
     /**
+     * 逻辑集群id
+     */
+    private Long resourceId;
+
+    /**
      * 备注
      */
     private String  desc;
 
     /**
-     * 规格 单位台
+     * 规格 单位台 每台的资源量就是DOCKER类型的规格的资源；与物理部署的模板无关
      */
     private Double  quota;
 
@@ -114,6 +124,11 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
     private Integer writeRateLimit;
 
     /**
+     * pipeline
+     */
+    private String  ingestPipeline;
+
+    /**
      * 是否禁止读
      */
     private Boolean blockRead;
@@ -124,27 +139,20 @@ public class TemplateLogicPO extends BasePO implements DigitResponsible {
     private Boolean blockWrite;
 
     /**
-     * pipeline
-     */
-    private String  ingestPipeline;
-
-    /**
-     * 逻辑集群id
-     */
-    private Long    resourceId;
-
-    /**
      * 服务等级
      */
     private Integer level;
 
-    /*
-     * dcdr位点差
-     */
+    private Boolean hasDCDR;
+
     private Long    checkPointDiff;
 
-    /**
-     * 是否有创建dcdr链路
-     */
-    private Boolean hasDCDR;
+    @Override
+    public int compareTo(IndexTemplateInfo o) {
+        if (null == o) {
+            return 0;
+        }
+
+        return o.getId().intValue() - this.getId().intValue();
+    }
 }

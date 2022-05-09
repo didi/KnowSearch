@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -33,7 +33,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
@@ -78,7 +78,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private TemplatePhyService       templatePhyService;
 
     @Autowired
-    private TemplateLogicService     templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private ClusterRoleInfoService clusterRoleInfoService;
@@ -494,7 +494,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             }
 
             //根据物理模板获取对应的逻辑模板中的quota参数
-            IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+            IndexTemplateInfo logicTemplate = indexTemplateInfoService.getLogicTemplateById(indexTemplatePhy.getLogicId());
             if (AriusObjUtils.isNull(logicTemplate)) {
                 continue;
             }

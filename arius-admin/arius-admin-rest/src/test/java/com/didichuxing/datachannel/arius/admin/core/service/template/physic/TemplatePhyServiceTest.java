@@ -2,20 +2,20 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.physic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
@@ -41,10 +41,10 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
     private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
 
     @Autowired
-    private IndexTemplateLogicDAO indexTemplateLogicDAO;
+    private IndexTemplateInfoDAO indexTemplateInfoDAO;
 
     @Autowired
-    private IndexTemplateLogicDAO logicDAO;
+    private IndexTemplateInfoDAO logicDAO;
 
     @MockBean
     private ESTemplateService esTemplateService;
@@ -138,13 +138,13 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getValidTemplatesByLogicIdTest() {
-        TemplateLogicPO templateLogicPO = CustomDataSource.templateLogicSource();
-        indexTemplateLogicDAO.insert(templateLogicPO);
+        IndexTemplateInfoPO indexTemplateInfoPO = CustomDataSource.templateLogicSource();
+        indexTemplateInfoDAO.insert(indexTemplateInfoPO);
         TemplatePhysicalPO templatePhysicalPO = CustomDataSource.templatePhysicalSource();
         templatePhysicalPO.setCluster(CustomDataSource.PHY_CLUSTER_NAME);
-        templatePhysicalPO.setLogicId(templateLogicPO.getId());
+        templatePhysicalPO.setLogicId(indexTemplateInfoPO.getId());
         indexTemplatePhysicalDAO.insert(templatePhysicalPO);
-        List<IndexTemplatePhy> ret = service.getValidTemplatesByLogicId(templateLogicPO.getId());
+        List<IndexTemplatePhy> ret = service.getValidTemplatesByLogicId(indexTemplateInfoPO.getId());
         Assertions.assertFalse(ret.isEmpty());
         ret = service.getValidTemplatesByLogicId(-1);
         Assertions.assertTrue(ret.isEmpty());
@@ -158,16 +158,16 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getTemplateByLogicIdsTest() {
-        TemplateLogicPO templateLogicPO = CustomDataSource.templateLogicSource();
-        indexTemplateLogicDAO.insert(templateLogicPO);
+        IndexTemplateInfoPO indexTemplateInfoPO = CustomDataSource.templateLogicSource();
+        indexTemplateInfoDAO.insert(indexTemplateInfoPO);
 
 
         TemplatePhysicalPO templatePhysicalPO = CustomDataSource.templatePhysicalSource();
-        templatePhysicalPO.setLogicId(templateLogicPO.getId());
+        templatePhysicalPO.setLogicId(indexTemplateInfoPO.getId());
         indexTemplatePhysicalDAO.insert(templatePhysicalPO);
 
         List<Integer> logicIds = new ArrayList<>();
-        logicIds.add(templateLogicPO.getId());
+        logicIds.add(indexTemplateInfoPO.getId());
         List<IndexTemplatePhy> ret = service.getTemplateByLogicIds(logicIds);
         Assertions.assertFalse(ret.isEmpty());
         logicIds.add(-1);
@@ -233,7 +233,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
         TemplatePhysicalPO po = CustomDataSource.templatePhysicalSource();
         po.setCluster(CustomDataSource.PHY_CLUSTER_NAME);
         indexTemplatePhysicalDAO.insert(po);
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         po.setLogicId(0);
         IndexTemplatePhyWithLogic empty = service.buildIndexTemplatePhysicalWithLogic(po);
         Assertions.assertNull(empty.getLogicTemplate());
@@ -246,7 +246,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getWithLogicByIdTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         TemplatePhysicalPO po = CustomDataSource.templatePhysicalSource();
         po.setCluster(CustomDataSource.PHY_CLUSTER_NAME);
@@ -259,7 +259,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getWithLogicByIdsTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> templates = batchInsert1(logicId);
@@ -276,7 +276,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getWithLogicByNameTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         String name = "test3";
@@ -303,7 +303,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void deleteByLogicTest() throws ESOperateException {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> list = batchInsert1(logicId);
@@ -315,7 +315,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void deleteByLogicTest0() throws ESOperateException {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         TemplatePhysicalPO templatePhysicalPO = CustomDataSource.templatePhysicalSource();
         templatePhysicalPO.setLogicId(logicPO.getId());
@@ -335,11 +335,11 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
     @Test
     public void updateByLogicWithoutExpressionTest() throws ESOperateException {
         String expression = "test1";
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> list = batchInsertWithExpression(logicId, expression);
-        IndexTemplateLogicDTO param = new IndexTemplateLogicDTO();
+        IndexTemplateInfoDTO param = new IndexTemplateInfoDTO();
         param.setExpression(expression);
         param.setShardNum(0);
         Result result = service.editTemplateFromLogic(param, operator);
@@ -356,11 +356,11 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
         Mockito.when(esTemplateService.syncUpdateExpression(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyInt())).thenReturn(true);
         Mockito.when(esTemplateService.syncUpdateRackAndShard(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(true);
         String expression = "test1";
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> list = batchInsertWithExpression(logicId, expression);
-        IndexTemplateLogicDTO param = new IndexTemplateLogicDTO();
+        IndexTemplateInfoDTO param = new IndexTemplateInfoDTO();
         String expression1 = "test2";
         param.setExpression(expression1);
         param.setId(logicId);
@@ -382,13 +382,13 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
      */
     @Test
     public void updateByLogicTest0() throws ESOperateException {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> list = batchInsert();
         Result result = service.editTemplateFromLogic(null, operator);
         Assertions.assertFalse(result.success());
-        IndexTemplateLogicDTO dto = new IndexTemplateLogicDTO();
+        IndexTemplateInfoDTO dto = new IndexTemplateInfoDTO();
         dto.setId(-1);
         Result result1 = service.editTemplateFromLogic(dto, operator);
         Assertions.assertTrue(result1.success());
@@ -396,7 +396,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getByClusterAndNameTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> list = batchInsert1(logicId);
@@ -410,7 +410,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getWithLogicByClusterAndNameTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> list = batchInsert1(logicId);
@@ -425,7 +425,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getByClusterAndStatusTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         List<TemplatePhysicalPO> list = batchInsert1(logicId);
@@ -447,7 +447,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getByClusterAndRackTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         String cluster = "c1";
@@ -473,7 +473,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getByRegionIdTest() {
-        TemplateLogicPO logicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO logicPO = CustomDataSource.templateLogicSource();
         logicDAO.insert(logicPO);
         Integer logicId = logicPO.getId();
         String cluster = "c1";
@@ -498,7 +498,7 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getMatchNoVersionIndexNamesTest() {
         TemplatePhysicalPO templatePhysicalPO = CustomDataSource.templatePhysicalSource();
-        TemplateLogicPO templateLogicPO = CustomDataSource.templateLogicSource();
+        IndexTemplateInfoPO indexTemplateInfoPO = CustomDataSource.templateLogicSource();
         String cluster = "c1";
         String expression = "i1";
         String index = "i1";
@@ -506,10 +506,10 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
         templatePhysicalPO.setExpression(expression);
         TemplatePhysicalPO templatePhysicalPO1 = CustomDataSource.templatePhysicalSource();
 
-        templateLogicPO.setId(null);
-        indexTemplateLogicDAO.insert(templateLogicPO);
-        templatePhysicalPO.setLogicId(templateLogicPO.getId());
-        templatePhysicalPO1.setLogicId(templateLogicPO.getId());
+        indexTemplateInfoPO.setId(null);
+        indexTemplateInfoDAO.insert(indexTemplateInfoPO);
+        templatePhysicalPO.setLogicId(indexTemplateInfoPO.getId());
+        templatePhysicalPO1.setLogicId(indexTemplateInfoPO.getId());
         indexTemplatePhysicalDAO.insert(templatePhysicalPO);
         indexTemplatePhysicalDAO.insert(templatePhysicalPO1);
 
@@ -531,18 +531,18 @@ public class TemplatePhyServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getMatchIndexNamesTest() throws ESOperateException {
         TemplatePhysicalPO templatePhysicalPO = CustomDataSource.templatePhysicalSource();
-        TemplateLogicPO templateLogicPO = CustomDataSource.templateLogicSource();
-        indexTemplateLogicDAO.insert(templateLogicPO);
+        IndexTemplateInfoPO indexTemplateInfoPO = CustomDataSource.templateLogicSource();
+        indexTemplateInfoDAO.insert(indexTemplateInfoPO);
 
         String cluster = CustomDataSource.PHY_CLUSTER_NAME;
         String expression = "e1";
         templatePhysicalPO.setCluster(cluster);
         templatePhysicalPO.setExpression(expression);
-        templatePhysicalPO.setLogicId(templateLogicPO.getId());
+        templatePhysicalPO.setLogicId(indexTemplateInfoPO.getId());
         indexTemplatePhysicalDAO.insert(templatePhysicalPO);
 
         TemplatePhysicalPO templatePhysicalPO1 = CustomDataSource.templatePhysicalSource();
-        templatePhysicalPO1.setLogicId(templateLogicPO.getId());
+        templatePhysicalPO1.setLogicId(indexTemplateInfoPO.getId());
         indexTemplatePhysicalDAO.insert(templatePhysicalPO1);
 
         Long id = templatePhysicalPO.getId();

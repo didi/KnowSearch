@@ -51,7 +51,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -79,7 +79,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Regio
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterStaticsService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
@@ -136,7 +136,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private TemplateSrvManager            templateSrvManager;
 
     @Autowired
-    private TemplateLogicService          templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplateLogicManager          templateLogicManager;
@@ -268,7 +268,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                         + "operator={}||logicId={}||delIndices={}||delQueryDsl={}",
                 operator, clearDTO.getLogicId(), JSON.toJSONString(clearDTO.getDelIndices()), clearDTO.getDelQueryDsl());
 
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(clearDTO.getLogicId());
 
         if (StringUtils.isNotBlank(clearDTO.getDelQueryDsl())) {
@@ -922,7 +922,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             }
         }
 
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(logicId);
         IndexTemplatePhy templatePhysical = templateLogicWithPhysical.getAnyOne();
 

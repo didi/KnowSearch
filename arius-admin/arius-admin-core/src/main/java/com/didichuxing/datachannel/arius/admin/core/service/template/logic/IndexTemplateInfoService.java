@@ -7,15 +7,15 @@ import java.util.Set;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -24,46 +24,46 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
  * @author d06679
  * @date 2019/3/29
  */
-public interface TemplateLogicService {
+public interface IndexTemplateInfoService {
     /**
      * 条件查询
      * @param param 条件
      * @return 逻辑模板列表
      */
-    List<IndexTemplateLogic> getLogicTemplates(IndexTemplateLogicDTO param);
+    List<IndexTemplateInfo> getLogicTemplates(IndexTemplateInfoDTO param);
 
     /**
      * 模糊查询
      * @param param 模糊查询条件
      * @return      List<IndexTemplateLogic>
      */
-    List<IndexTemplateLogic> fuzzyLogicTemplatesByCondition(IndexTemplateLogicDTO param);
+    List<IndexTemplateInfo> fuzzyLogicTemplatesByCondition(IndexTemplateInfoDTO param);
 
     /**
      * 模糊分页查询模板列表信息
      */
-    List<IndexTemplateLogic> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param);
+    List<IndexTemplateInfo> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param);
 
     /**
      * 模糊查询统计总命中数, 用于前端分页
      * @param param 模糊查询条件
      * @return      查询总命中数
      */
-    Long fuzzyLogicTemplatesHitByCondition(IndexTemplateLogicDTO param);
+    Long fuzzyLogicTemplatesHitByCondition(IndexTemplateInfoDTO param);
 
     /**
      * 根据名字查询
      * @param templateName 模板名字
      * @return list
      */
-    List<IndexTemplateLogic> getLogicTemplateByName(String templateName);
+    List<IndexTemplateInfo> getLogicTemplateByName(String templateName);
 
     /**
      * 查询指定的逻辑模板
      * @param logicTemplateId 模板id
      * @return 模板信息  不存在返回null
      */
-    IndexTemplateLogic getLogicTemplateById(Integer logicTemplateId);
+    IndexTemplateInfo getLogicTemplateById(Integer logicTemplateId);
 
     /**
      * 删除逻辑模板
@@ -80,7 +80,7 @@ public interface TemplateLogicService {
      * @param operation 操作
      * @return result
      */
-    Result<Void> validateTemplate(IndexTemplateLogicDTO param, OperationEnum operation);
+    Result<Void> validateTemplate(IndexTemplateInfoDTO param, OperationEnum operation);
 
     /**
      * 编辑逻辑模板
@@ -89,14 +89,14 @@ public interface TemplateLogicService {
      * @return result
      * @throws AdminOperateException 操作es失败
      */
-    Result<Void> editTemplate(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+    Result<Void> editTemplate(IndexTemplateInfoDTO param, String operator) throws AdminOperateException;
 
     /**
      * 添加逻辑模板而不需要参数校验
      * @param param 索引逻辑模板参数
      * @return result
      */
-    Result<Void> addTemplateWithoutCheck(IndexTemplateLogicDTO param) throws AdminOperateException;
+    Result<Void> addTemplateWithoutCheck(IndexTemplateInfoDTO param) throws AdminOperateException;
 
     /**
      * 获取模板配置信息
@@ -148,40 +148,40 @@ public interface TemplateLogicService {
      * 获取全部逻辑模板
      * @return list
      */
-    List<IndexTemplateLogic> getAllLogicTemplates();
-    List<IndexTemplateLogic> getAllLogicTemplatesWithCache();
+    List<IndexTemplateInfo> getAllLogicTemplates();
+    List<IndexTemplateInfo> getAllLogicTemplatesWithCache();
 
     /**
      * 获取全部逻辑模板
      * @return map，key-逻辑模板ID，value-逻辑模板
      */
-    Map<Integer, IndexTemplateLogic> getAllLogicTemplatesMap();
+    Map<Integer, IndexTemplateInfo> getAllLogicTemplatesMap();
 
     /**
      * 根据列表获取逻辑模板
      * @return list
      */
-    List<IndexTemplateLogic> getLogicTemplatesByIds(List<Integer> logicTemplateIds);
+    List<IndexTemplateInfo> getLogicTemplatesByIds(List<Integer> logicTemplateIds);
 
     /**
      * 根据列表获取逻辑模板
      * @return map，key-逻辑模板ID，value-逻辑模板
      */
-    Map<Integer, IndexTemplateLogic> getLogicTemplatesMapByIds(List<Integer> logicTemplateIds);
+    Map<Integer, IndexTemplateInfo> getLogicTemplatesMapByIds(List<Integer> logicTemplateIds);
 
     /**
      * 根据appId查询模板
      * @param appId appId
      * @return list
      */
-    List<IndexTemplateLogic> getAppLogicTemplatesByAppId(Integer appId);
+    List<IndexTemplateInfo> getAppLogicTemplatesByAppId(Integer appId);
 
     /**
      * 获取所有逻辑集群对应逻辑模板
      * @param logicClusterId 逻辑集群ID
      * @return
      */
-    List<IndexTemplateLogic> getLogicClusterTemplates(Long logicClusterId);
+    List<IndexTemplateInfo> getLogicClusterTemplates(Long logicClusterId);
 
     /**
      * 获取模板具体的物理索引
@@ -220,7 +220,7 @@ public interface TemplateLogicService {
      * @param responsibleId 责任人id
      * @return list
      */
-    List<IndexTemplateLogic> getTemplateByResponsibleId(Long responsibleId);
+    List<IndexTemplateInfo> getTemplateByResponsibleId(Long responsibleId);
 
     /**
      * 修改模板名称
@@ -229,7 +229,7 @@ public interface TemplateLogicService {
      * @return result
      * @throws AdminOperateException
      */
-    Result<Void> editTemplateName(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+    Result<Void> editTemplateName(IndexTemplateInfoDTO param, String operator) throws AdminOperateException;
 
     /**
      * 只更新本地db 不同步更新es
@@ -237,14 +237,14 @@ public interface TemplateLogicService {
      * @return
      * @throws AdminOperateException
      */
-    Result<Void> editTemplateInfoTODB(IndexTemplateLogicDTO param) throws AdminOperateException;
+    Result<Void> editTemplateInfoTODB(IndexTemplateInfoDTO param) throws AdminOperateException;
 
     /**
      * 获取APP有权限的集群下的所有逻辑模板.
      * @param appId APP的id
      * @return list
      */
-    List<IndexTemplateLogic> getTemplatesByHasAuthCluster(Integer appId);
+    List<IndexTemplateInfo> getTemplatesByHasAuthCluster(Integer appId);
 
     /**
      * 获取APP在指定逻辑集群下有权限的逻辑模板.
@@ -252,7 +252,7 @@ public interface TemplateLogicService {
      * @param logicClusterId 逻辑集群ID
      * @return list
      */
-    List<IndexTemplateLogic> getHasAuthTemplatesInLogicCluster(Integer appId, Long logicClusterId);
+    List<IndexTemplateInfo> getHasAuthTemplatesInLogicCluster(Integer appId, Long logicClusterId);
 
     /**
      * 获取所有的逻辑模板列表信息（带有逻辑集群和物理模板）
@@ -297,53 +297,53 @@ public interface TemplateLogicService {
      * @param logicTemplateId 逻辑模板ID
      * @return
      */
-    IndexTemplateLogicWithCluster getLogicTemplateWithCluster(Integer logicTemplateId);
+    IndexTemplateInfoWithCluster getLogicTemplateWithCluster(Integer logicTemplateId);
 
     /**
      * 查询模板资源信息
      * @param logicTemplateIds 逻辑模板ID列表
      * @return
      */
-    List<IndexTemplateLogicWithCluster> getLogicTemplateWithClusters(Set<Integer> logicTemplateIds);
+    List<IndexTemplateInfoWithCluster> getLogicTemplateWithClusters(Set<Integer> logicTemplateIds);
 
     /**
      * 查询模板资源信息
      * @return 带有逻辑集群的所有逻辑模板列表
      */
-    List<IndexTemplateLogicWithCluster> getAllLogicTemplateWithClusters();
+    List<IndexTemplateInfoWithCluster> getAllLogicTemplateWithClusters();
 
     /**
      * 查询模板资源信息
      * @param logicClusterId 逻辑集群ID
      * @return List<IndexTegetAllLogicClustersmplateLogicClusterMeta> 逻辑模板列表
      */
-    List<IndexTemplateLogicWithCluster> getLogicTemplateWithClustersByClusterId(Long logicClusterId);
+    List<IndexTemplateInfoWithCluster> getLogicTemplateWithClustersByClusterId(Long logicClusterId);
 
     /**
      * 获取所有带有物理模板详情的逻辑模板列表
      * @return
      */
-    List<IndexTemplateLogicWithPhyTemplates> getAllLogicTemplateWithPhysicals();
+    List<IndexTemplateInfoWithPhyTemplates> getAllLogicTemplateWithPhysicals();
 
     /**
      * 获取指定的带有物理模板详情的逻辑模板列表
      * @return
      */
-    List<IndexTemplateLogicWithPhyTemplates> getLogicTemplateWithPhysicalsByIds(Set<Integer> logicTemplateIds);
+    List<IndexTemplateInfoWithPhyTemplates> getLogicTemplateWithPhysicalsByIds(Set<Integer> logicTemplateIds);
 
     /**
      * 根据逻辑模板ID获取对应的物理模板详情
      * @param logicTemplateId 逻辑模板ID
      * @return
      */
-    IndexTemplateLogicWithPhyTemplates getLogicTemplateWithPhysicalsById(Integer logicTemplateId);
+    IndexTemplateInfoWithPhyTemplates getLogicTemplateWithPhysicalsById(Integer logicTemplateId);
 
     /**
      * 获取指定数据中的模板信息
      * @param dataCenter 数据中心
      * @return list
      */
-    List<IndexTemplateLogicWithPhyTemplates> getTemplateWithPhysicalByDataCenter(String dataCenter);
+    List<IndexTemplateInfoWithPhyTemplates> getTemplateWithPhysicalByDataCenter(String dataCenter);
 
 
     /**

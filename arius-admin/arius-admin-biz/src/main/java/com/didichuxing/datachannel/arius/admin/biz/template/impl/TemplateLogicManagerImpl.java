@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcd
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
@@ -45,7 +45,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplate
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
@@ -90,7 +90,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private TemplateColdManager         templateColdManager;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplatePhyService          templatePhyService;
@@ -124,8 +124,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Override
     public boolean checkAllLogicTemplatesMeta() {
         Map<Integer, App> appId2AppMap = ConvertUtil.list2Map(appService.listApps(), App::getId);
-        List<IndexTemplateLogic> logicTemplates = templateLogicService.getAllLogicTemplates();
-        for (IndexTemplateLogic templateLogic : logicTemplates) {
+        List<IndexTemplateInfo> logicTemplates = indexTemplateInfoService.getAllLogicTemplates();
+        for (IndexTemplateInfo templateLogic : logicTemplates) {
             try {
                 Result<Void> result = checkLogicTemplateMeta(templateLogic, appId2AppMap);
                 if (result.success()) {
@@ -150,19 +150,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @return list
      */
     @Override
-    public List<IndexTemplateLogicWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds) {
+    public List<IndexTemplateInfoWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds) {
 
-        List<IndexTemplateLogicWithLabels> indexTemplateLogicWithLabels = Lists.newArrayList();
+        List<IndexTemplateInfoWithLabels> indexTemplateLogicWithLabels = Lists.newArrayList();
 
-        Map<Integer, IndexTemplateLogic> logicTemplatesMappings = templateLogicService.getAllLogicTemplatesMap();
+        Map<Integer, IndexTemplateInfo> logicTemplatesMappings = indexTemplateInfoService.getAllLogicTemplatesMap();
 
         List<TemplateLabel> templateLabels = fetchLabels(includeLabelIds, excludeLabelIds);
         templateLabels.stream().forEach(templateLabel -> {
             Integer templateId = templateLabel.getIndexTemplateId();
 
-            IndexTemplateLogic indexTemplateLogic = logicTemplatesMappings.get(templateId);
-            IndexTemplateLogicWithLabels logicWithLabel = responsibleConvertTool.obj2Obj(indexTemplateLogic,
-                    IndexTemplateLogicWithLabels.class);
+            IndexTemplateInfo indexTemplateInfo = logicTemplatesMappings.get(templateId);
+            IndexTemplateInfoWithLabels logicWithLabel = responsibleConvertTool.obj2Obj(indexTemplateInfo,
+                    IndexTemplateInfoWithLabels.class);
             if (logicWithLabel != null) {
                 logicWithLabel.setLabels(templateLabel.getLabels());
                 indexTemplateLogicWithLabels.add(logicWithLabel);
@@ -202,9 +202,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @return label
      */
     @Override
-    public IndexTemplateLogicWithLabels getLabelByLogicId(Integer logicId) {
-        IndexTemplateLogicWithLabels indexTemplateLogicWithLabels = ConvertUtil
-                .obj2Obj(templateLogicService.getLogicTemplateById(logicId), IndexTemplateLogicWithLabels.class);
+    public IndexTemplateInfoWithLabels getLabelByLogicId(Integer logicId) {
+        IndexTemplateInfoWithLabels indexTemplateLogicWithLabels = ConvertUtil
+                .obj2Obj(indexTemplateInfoService.getLogicTemplateById(logicId), IndexTemplateInfoWithLabels.class);
 
         if (indexTemplateLogicWithLabels != null) {
             indexTemplateLogicWithLabels.setLabels(templateLabelService.listTemplateLabel(logicId));
@@ -222,7 +222,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Integer> addTemplateWithoutCheck(IndexTemplateLogicDTO param,
+    public Result<Integer> addTemplateWithoutCheck(IndexTemplateInfoDTO param,
                                                    String operator) throws AdminOperateException {
         initLogicParam(param);
 
@@ -230,7 +230,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         param.setIngestPipeline(param.getName());
 
         // 保存数据库
-        Result<Void> result = templateLogicService.addTemplateWithoutCheck(param);
+        Result<Void> result = indexTemplateInfoService.addTemplateWithoutCheck(param);
         if (result.success()) {
             Result<Void> addPhysicalResult = templatePhyManager.addTemplatesWithoutCheck(param.getId(),
                     param.getPhysicalInfos());
@@ -262,7 +262,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             // 记录操作记录
             operateRecordService.save(TEMPLATE, ADD, param.getId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")), operator);
 
-            SpringTool.publish(new LogicTemplateAddEvent(this, templateLogicService.getLogicTemplateById(param.getId())));
+            SpringTool.publish(new LogicTemplateAddEvent(this, indexTemplateInfoService.getLogicTemplateById(param.getId())));
         }
 
         return Result.build(result.success(), param.getId());
@@ -277,9 +277,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    public Result<Integer> createLogicTemplate(IndexTemplateLogicDTO param,
+    public Result<Integer> createLogicTemplate(IndexTemplateInfoDTO param,
                                                String operator) throws AdminOperateException {
-        Result<Void> checkResult = templateLogicService.validateTemplate(param, ADD);
+        Result<Void> checkResult = indexTemplateInfoService.validateTemplate(param, ADD);
         if (checkResult.failed()) {
             LOGGER.warn("class=TemplateLogicServiceImpl||method=addTemplate||msg={}", checkResult.getMessage());
             return Result.buildFrom(checkResult);
@@ -311,7 +311,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return addTemplateWithoutCheck(param, operator);
     }
 
-    private void setIndexTemplateLogicHotTime(IndexTemplateLogicDTO param) {
+    private void setIndexTemplateLogicHotTime(IndexTemplateInfoDTO param) {
         for (IndexTemplatePhysicalDTO physicalDTO : param.getPhysicalInfos()) {
             physicalDTO.setLogicId(NOT_CHECK);
             physicalDTO.setName(param.getName());
@@ -336,7 +336,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Override
     public List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer appId) {
         List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
-        List<IndexTemplateLogicWithCluster> logicTemplates = templateLogicService
+        List<IndexTemplateInfoWithCluster> logicTemplates = indexTemplateInfoService
                 .getAllLogicTemplateWithClusters();
 
         if (CollectionUtils.isNotEmpty(logicTemplates)) {
@@ -360,7 +360,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return new ArrayList<>();
         }
 
-        List<IndexTemplateLogicWithCluster> logicTemplates = templateLogicService
+        List<IndexTemplateInfoWithCluster> logicTemplates = indexTemplateInfoService
                 .getLogicTemplateWithClustersByClusterId(logicClusterId);
 
         if (CollectionUtils.isEmpty(logicTemplates)) {
@@ -472,9 +472,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Lists.newArrayList();
         }
 
-        List<IndexTemplateLogic> logicClusterTemplates = templateLogicService.getLogicClusterTemplates(clusterLogicId);
+        List<IndexTemplateInfo> logicClusterTemplates = indexTemplateInfoService.getLogicClusterTemplates(clusterLogicId);
 
-        Set<Integer> templateLogicIds = logicClusterTemplates.stream().map(IndexTemplateLogic::getId)
+        Set<Integer> templateLogicIds = logicClusterTemplates.stream().map(IndexTemplateInfo::getId)
                 .collect(Collectors.toSet());
 
         return getConsoleTemplatesVOS(appId)
@@ -489,7 +489,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public List<IndexTemplateLogic> getTemplatesByAppIdAndAuthType(Integer appId, Integer authType) {
+    public List<IndexTemplateInfo> getTemplatesByAppIdAndAuthType(Integer appId, Integer authType) {
         if (!appService.isAppExists(appId)) {
             return Lists.newArrayList();
         }
@@ -506,9 +506,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         switch (AppTemplateAuthEnum.valueOf(authType)) {
             case OWN:
                 if (appService.isSuperApp(appId)) {
-                    return templateLogicService.getAllLogicTemplates();
+                    return indexTemplateInfoService.getAllLogicTemplates();
                 }else {
-                    return templateLogicService.getAppLogicTemplatesByAppId(appId);
+                    return indexTemplateInfoService.getAppLogicTemplatesByAppId(appId);
                 }
 
             case RW:
@@ -516,7 +516,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     .getAppActiveTemplateRWAuths(appId);
                 return appActiveTemplateRWAuths
                         .stream()
-                        .map(r -> templateLogicService.getLogicTemplateById(r.getTemplateId()))
+                        .map(r -> indexTemplateInfoService.getLogicTemplateById(r.getTemplateId()))
                         .collect(Collectors.toList());
 
             case R:
@@ -524,22 +524,22 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     .getAppActiveTemplateRAuths(appId);
                 return appActiveTemplateRAuths
                         .stream()
-                        .map(r -> templateLogicService.getLogicTemplateById(r.getTemplateId()))
+                        .map(r -> indexTemplateInfoService.getLogicTemplateById(r.getTemplateId()))
                         .collect(Collectors.toList());
 
             case NO_PERMISSION:
-                List<IndexTemplateLogic> allLogicTemplates = templateLogicService.getAllLogicTemplates();
+                List<IndexTemplateInfo> allLogicTemplates = indexTemplateInfoService.getAllLogicTemplates();
                 List<Integer> appRAndRwAuthTemplateIdList = appLogicTemplateAuthService
                         .getAppTemplateRWAndRAuthsWithoutCodecResponsible(appId)
                         .stream()
                         .map(AppTemplateAuth::getTemplateId)
                         .collect(Collectors.toList());
 
-                List<IndexTemplateLogic> notAuthIndexTemplateLogicList = allLogicTemplates
+                List<IndexTemplateInfo> notAuthIndexTemplateInfoList = allLogicTemplates
                         .stream()
                         .filter(r -> !appId.equals(r.getAppId()) && !appRAndRwAuthTemplateIdList.contains(r.getId()))
                         .collect(Collectors.toList());
-                return notAuthIndexTemplateLogicList;
+                return notAuthIndexTemplateInfoList;
 
             default:
                 return Lists.newArrayList();
@@ -549,21 +549,21 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public List<String> getTemplateLogicNames(Integer appId) {
-        List<IndexTemplateLogic> templateLogics = templateLogicService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplateInfo> templateLogics = indexTemplateInfoService.getAppLogicTemplatesByAppId(appId);
 
-        return templateLogics.stream().map(IndexTemplateLogic::getName).collect(Collectors.toList());
+        return templateLogics.stream().map(IndexTemplateInfo::getName).collect(Collectors.toList());
     }
 
     @Override
-    public Result<Void> editTemplate(IndexTemplateLogicDTO param, String operator)
+    public Result<Void> editTemplate(IndexTemplateInfoDTO param, String operator)
             throws AdminOperateException {
-        return templateLogicService.editTemplate(param, operator);
+        return indexTemplateInfoService.editTemplate(param, operator);
     }
 
     @Override
     public Result<Void> delTemplate(Integer logicTemplateId, String operator)
             throws AdminOperateException {
-        return templateLogicService.delTemplate(logicTemplateId, operator);
+        return indexTemplateInfoService.delTemplate(logicTemplateId, operator);
     }
 
     @Override
@@ -595,20 +595,20 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
         }
 
-        return templateLogicService.preCheckTemplateName(templateName);
+        return indexTemplateInfoService.preCheckTemplateName(templateName);
     }
 
     @Override
     public Result<Boolean> checkTemplateEditMapping(Integer templateId) {
-        IndexTemplateLogic indexTemplateLogic = templateLogicService.getLogicTemplateById(templateId);
-        if (null == indexTemplateLogic) {
+        IndexTemplateInfo indexTemplateInfo = indexTemplateInfoService.getLogicTemplateById(templateId);
+        if (null == indexTemplateInfo) {
             LOGGER.error(
                 "class=TemplateLogicManagerImpl||method=checkTemplateEditMapping||templateId={}||msg=indexTemplateLogic is empty",
                 templateId);
             return Result.buildFail("模板不存在");
         }
 
-        List<IndexTemplatePhy> templatePhyList = templatePhyService.getTemplateByLogicId(indexTemplateLogic.getId());
+        List<IndexTemplatePhy> templatePhyList = templatePhyService.getTemplateByLogicId(indexTemplateInfo.getId());
         if (CollectionUtils.isEmpty(templatePhyList)) {
             return Result.buildSucc(false);
         }
@@ -635,7 +635,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildSucc();
         }
         Boolean newDisable = status == 0;
-        IndexTemplateConfig templateConfig = templateLogicService.getTemplateConfig(templateLogicId);
+        IndexTemplateConfig templateConfig = indexTemplateInfoService.getTemplateConfig(templateLogicId);
         if(templateConfig == null) {
             return Result.buildFail("模版不存在");
         }
@@ -644,7 +644,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             // 如果状态不同则更新状态
             IndexTemplateConfigDTO indexTemplateConfigDTO = ConvertUtil.obj2Obj(templateConfig, IndexTemplateConfigDTO.class);
             indexTemplateConfigDTO.setDisableIndexRollover(newDisable);
-            Result<Void> updateStatusResult = templateLogicService.updateTemplateConfig(indexTemplateConfigDTO, operator);
+            Result<Void> updateStatusResult = indexTemplateInfoService.updateTemplateConfig(indexTemplateConfigDTO, operator);
             if (updateStatusResult.success()) {
                 // rollover状态修改记录(兼容开启或者关闭)
                 operateRecordService.save(TEMPLATE, OperationEnum.EDIT, templateLogicId, JSON.toJSONString(
@@ -667,7 +667,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Override
     public Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId) {
         // 根据逻辑模板id获取对应的逻辑物理模板信息
-        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+        IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId);
 
         if (AriusObjUtils.isNull(logicTemplateWithPhysicals)
                 || CollectionUtils.isEmpty(logicTemplateWithPhysicals.getPhysicals())) {
@@ -705,7 +705,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildParamIllegal("应用Id为空");
         }
 
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
+        IndexTemplateInfo templateLogic = indexTemplateInfoService.getLogicTemplateById(logicId);
         if (templateLogic == null) {
             return Result.buildNotExist("索引不存在");
         }
@@ -727,13 +727,13 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public boolean updateDCDRInfo(Integer logicId) {
-        if (!templateLogicService.exist(logicId)) { return true; }
+        if (!indexTemplateInfoService.exist(logicId)) { return true; }
 
         // 1. 获取dcdr标识位
         boolean dcdrFlag = false;
         long totalIndexCheckPointDiff = 0;
         try {
-            IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(logicId);
+            IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(logicId);
             IndexTemplatePhy slavePhyTemplate  = logicTemplateWithPhysicals.getSlavePhyTemplate();
             IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
             if (null != masterPhyTemplate && null != slavePhyTemplate) {
@@ -756,11 +756,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         try {
-            IndexTemplateLogicDTO indexTemplateLogicDTO = new IndexTemplateLogicDTO();
-            indexTemplateLogicDTO.setId(logicId);
-            indexTemplateLogicDTO.setHasDCDR(dcdrFlag);
-            indexTemplateLogicDTO.setCheckPointDiff(totalIndexCheckPointDiff);
-            templateLogicService.editTemplateInfoTODB(indexTemplateLogicDTO);
+            IndexTemplateInfoDTO indexTemplateInfoDTO = new IndexTemplateInfoDTO();
+            indexTemplateInfoDTO.setId(logicId);
+            indexTemplateInfoDTO.setHasDCDR(dcdrFlag);
+            indexTemplateInfoDTO.setCheckPointDiff(totalIndexCheckPointDiff);
+            indexTemplateInfoService.editTemplateInfoTODB(indexTemplateInfoDTO);
         } catch (AdminOperateException e) {
             LOGGER.error(
                 "class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg=failed to edit template",
@@ -789,7 +789,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @param appId2AppMap APP映射
      * @return
      */
-    private Result<Void> checkLogicTemplateMeta(IndexTemplateLogic templateLogic, Map<Integer, App> appId2AppMap) {
+    private Result<Void> checkLogicTemplateMeta(IndexTemplateInfo templateLogic, Map<Integer, App> appId2AppMap) {
         List<String> errMsg = Lists.newArrayList();
 
         if (!appId2AppMap.containsKey(templateLogic.getAppId())) {
@@ -852,7 +852,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @param templateQuotaUsages              逻辑模板Quota使用率
      * @param logicTemplateValues              逻辑模板健康分
      */
-    private IndexTemplateLogicAggregate fetchTemplateAggregate(IndexTemplateLogicWithCluster indexTemplateLogicWithCluster,
+    private IndexTemplateLogicAggregate fetchTemplateAggregate(IndexTemplateInfoWithCluster indexTemplateLogicWithCluster,
                                                                Map<Integer, AppTemplateAuth> appTemplateAuths,
                                                                Map<Integer, ESTemplateQuotaUsage> templateQuotaUsages,
                                                                Map<Integer, IndexTemplateValue> logicTemplateValues,
@@ -890,7 +890,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @param appId App Id
      * @return
      */
-    private List<IndexTemplateLogicAggregate> fetchLogicTemplatesAggregates(List<IndexTemplateLogicWithCluster> logicTemplates,
+    private List<IndexTemplateLogicAggregate> fetchLogicTemplatesAggregates(List<IndexTemplateInfoWithCluster> logicTemplates,
                                                                             Integer appId) {
         List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
 
@@ -911,7 +911,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             // 具备DCDR的模版id
             List<Integer> hasDCDRLogicIds = getHaveDCDRLogicIds();
 
-            for (IndexTemplateLogicWithCluster combineLogicCluster : logicTemplates) {
+            for (IndexTemplateInfoWithCluster combineLogicCluster : logicTemplates) {
                 try {
                     indexTemplateLogicAggregates.add(fetchTemplateAggregate(combineLogicCluster, appTemplateAuths,
                             templateQuotaUsages, logicTemplateValues, hasDCDRLogicIds));
@@ -952,7 +952,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc();
     }
 
-    private void initLogicParam(IndexTemplateLogicDTO param) {
+    private void initLogicParam(IndexTemplateInfoDTO param) {
         if (param.getDateFormat() == null) {
             param.setDateFormat("");
         } else {
@@ -1025,7 +1025,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @param indexTemplateConfig 索引模板配置
      */
     private boolean insertTemplateConfig(IndexTemplateConfig indexTemplateConfig) {
-        return templateLogicService.insertTemplateConfig(indexTemplateConfig).success();
+        return indexTemplateInfoService.insertTemplateConfig(indexTemplateConfig).success();
     }
 
     /**
@@ -1039,11 +1039,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 获取全部的正在使用的逻辑模板
-        List<IndexTemplateLogic> allLogicTemplates = templateLogicService.getAllLogicTemplates();
+        List<IndexTemplateInfo> allLogicTemplates = indexTemplateInfoService.getAllLogicTemplates();
 
         if (!CollectionUtils.isEmpty(allLogicTemplates)) {
-            for (IndexTemplateLogic indexTemplateLogic : allLogicTemplates) {
-                String logicTemplateName = indexTemplateLogic.getName();
+            for (IndexTemplateInfo indexTemplateInfo : allLogicTemplates) {
+                String logicTemplateName = indexTemplateInfo.getName();
 
                 // 为了隔离索引创建匹配的模板，新建模板的名称和其他模板名称不能互相存在前缀匹配
                 if (logicTemplateName.startsWith(templateName)

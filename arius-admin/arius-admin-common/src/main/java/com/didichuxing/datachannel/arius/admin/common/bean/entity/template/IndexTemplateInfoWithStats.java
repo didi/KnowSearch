@@ -13,7 +13,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplateLogicWithStats extends IndexTemplateLogic {
+public class IndexTemplateInfoWithStats extends IndexTemplateInfo {
 
     /**
      * 平均tps

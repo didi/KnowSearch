@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segments;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
@@ -51,13 +51,13 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
         for (IndexTemplatePhyWithLogic indexTemplatePhyWithLogic : logicTemplates) {
             DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
-            IndexTemplateLogic indexTemplateLogic = indexTemplatePhyWithLogic.getLogicTemplate();
+            IndexTemplateInfo indexTemplateInfo = indexTemplatePhyWithLogic.getLogicTemplate();
 
             TemplateMetrics templateMetrics = new TemplateMetrics();
             templateMetrics.setTimestamp(currentTime);
             templateMetrics.setCluster(cluster);
-            templateMetrics.setTemplate(indexTemplateLogic.getName());
-            templateMetrics.setTemplateId((long) indexTemplateLogic.getId());
+            templateMetrics.setTemplate(indexTemplateInfo.getName());
+            templateMetrics.setTemplateId((long) indexTemplateInfo.getId());
 
             //1 template segments 数量以及占用内存大小
             buildTemplateStats(templateMetrics, segments, indexTemplatePhyWithLogic.getExpression());

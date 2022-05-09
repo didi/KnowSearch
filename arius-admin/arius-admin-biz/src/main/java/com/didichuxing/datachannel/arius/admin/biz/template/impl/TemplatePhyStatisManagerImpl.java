@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateHealthDegreeService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
@@ -52,7 +52,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     private TemplatePhyService          templatePhyService;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplateSattisService       templateSattisService;
@@ -83,7 +83,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
         List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics = templatePhyService
             .getTemplateWithLogicByIds(physicalIds);
 
-        Map<Integer, Integer> templateLogicId2DeployCountMap = templateLogicService.getAllLogicTemplatesPhysicalCount();
+        Map<Integer, Integer> templateLogicId2DeployCountMap = indexTemplateInfoService.getAllLogicTemplatesPhysicalCount();
 
         Map<Long, LogicResourceConfig> physicalId2ResourceLogicMap = genPhysicalId2ResourceConfigMap(
             templatePhysicalWithLogics);

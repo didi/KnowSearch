@@ -1,21 +1,21 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
+package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author d06679
- * @date 2019/3/29
+ * @author chengxiang
+ * @date 2022/5/9
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplateLogic extends BaseEntity implements StringResponsible, Comparable<IndexTemplateLogic> {
+public class IndexTemplateInfoPO extends BasePO implements DigitResponsible {
 
     private Integer id;
 
@@ -56,11 +56,6 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private Integer hotTime;
 
     /**
-     * 副本保存时长 单位天
-     */
-    private Integer replicaTime;
-
-    /**
      * 成本部门
      */
     private String  libraDepartmentId;
@@ -71,7 +66,7 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private String  libraDepartment;
 
     /**
-     * 责任人
+     * 责任人，id列表，英文逗号分隔
      */
     private String  responsible;
 
@@ -86,7 +81,7 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private String  dateFieldFormat;
 
     /**
-     * id字段
+     * id地钻
      */
     private String  idField;
 
@@ -101,17 +96,12 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private String  expression;
 
     /**
-     * 逻辑集群id
-     */
-    private Long resourceId;
-
-    /**
      * 备注
      */
     private String  desc;
 
     /**
-     * 规格 单位台 每台的资源量就是DOCKER类型的规格的资源；与物理部署的模板无关
+     * 规格 单位台
      */
     private Double  quota;
 
@@ -124,11 +114,6 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private Integer writeRateLimit;
 
     /**
-     * pipeline
-     */
-    private String  ingestPipeline;
-
-    /**
      * 是否禁止读
      */
     private Boolean blockRead;
@@ -139,20 +124,27 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private Boolean blockWrite;
 
     /**
+     * pipeline
+     */
+    private String  ingestPipeline;
+
+    /**
+     * 逻辑集群id
+     */
+    private Long    resourceId;
+
+    /**
      * 服务等级
      */
     private Integer level;
 
-    private Boolean hasDCDR;
-
+    /*
+     * dcdr位点差
+     */
     private Long    checkPointDiff;
 
-    @Override
-    public int compareTo(IndexTemplateLogic o) {
-        if (null == o) {
-            return 0;
-        }
-
-        return o.getId().intValue() - this.getId().intValue();
-    }
+    /**
+     * 是否有创建dcdr链路
+     */
+    private Boolean hasDCDR;
 }

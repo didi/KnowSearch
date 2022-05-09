@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthAddEvent;
@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplate
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppTemplateAuthDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -56,7 +56,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     private AppService                 appService;
 
     @Autowired
-    private TemplateLogicService       templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private AriusUserInfoService       ariusUserInfoService;
@@ -72,8 +72,8 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
 
     @Override
     public boolean deleteRedundancyTemplateAuths(boolean shouldDeleteFlags) {
-        Map<Integer, IndexTemplateLogic> logicTemplateId2LogicTemplateMappings = ConvertUtil
-            .list2Map(templateLogicService.getAllLogicTemplates(), IndexTemplateLogic::getId);
+        Map<Integer, IndexTemplateInfo> logicTemplateId2LogicTemplateMappings = ConvertUtil
+            .list2Map(indexTemplateInfoService.getAllLogicTemplates(), IndexTemplateInfo::getId);
 
         Multimap<Integer, AppTemplateAuthPO> appId2TemplateAuthsMappings = ConvertUtil
             .list2MulMap(templateAuthDAO.listWithRwAuths(), AppTemplateAuthPO::getAppId);
@@ -180,7 +180,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
 
         //超级项目拥有所有模板own权限
         if (appService.isSuperApp(appId)) {
-            List<IndexTemplateLogic> allLogicTemplates = templateLogicService.getAllLogicTemplates();
+            List<IndexTemplateInfo> allLogicTemplates = indexTemplateInfoService.getAllLogicTemplates();
             return allLogicTemplates.stream().map(r -> buildTemplateAuth(r, AppTemplateAuthEnum.OWN))
                 .collect(Collectors.toList());
         }
@@ -327,7 +327,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     }
 
     @Override
-    public AppTemplateAuth buildTemplateAuth(IndexTemplateLogic logicTemplate, AppTemplateAuthEnum appTemplateAuthEnum) {
+    public AppTemplateAuth buildTemplateAuth(IndexTemplateInfo logicTemplate, AppTemplateAuthEnum appTemplateAuthEnum) {
         AppTemplateAuth auth = new AppTemplateAuth();
         auth.setAppId(logicTemplate.getAppId());
         auth.setTemplateId(logicTemplate.getId());
@@ -457,7 +457,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
             return Result.buildParamIllegal("模板ID为空");
         }
 
-        IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(logicTemplateId);
+        IndexTemplateInfo logicTemplate = indexTemplateInfoService.getLogicTemplateById(logicTemplateId);
         if (AriusObjUtils.isNull(logicTemplate)) {
             return Result.buildParamIllegal(String.format("逻辑模板[%d]不存在", logicTemplateId));
         }
@@ -481,7 +481,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
         }
 
         // 有集群权限才能新增索引权限
-        ClusterLogic clusterLogic = templateLogicService
+        ClusterLogic clusterLogic = indexTemplateInfoService
             .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId).getLogicCluster();
         if (AriusObjUtils.isNull(clusterLogic) || logicClusterAuthService.getLogicClusterAuthEnum(appId,
                 clusterLogic.getId()) == AppClusterLogicAuthEnum.NO_PERMISSIONS) {
@@ -495,7 +495,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
      * @return
      */
     private List<AppTemplateAuth> getAllAppsActiveTemplateOwnerAuths() {
-        List<IndexTemplateLogic> logicTemplates = templateLogicService.getAllLogicTemplates();
+        List<IndexTemplateInfo> logicTemplates = indexTemplateInfoService.getAllLogicTemplates();
         Map<Integer, App> appsMap = appService.getAppsMap();
 
         return logicTemplates
@@ -514,14 +514,14 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
             AppTemplateAuth.class);
 
         // 过滤出active的逻辑模板的权限点
-        Set<Integer> logicTemplateIds = templateLogicService.getAllLogicTemplates().stream().map(IndexTemplateLogic::getId)
+        Set<Integer> logicTemplateIds = indexTemplateInfoService.getAllLogicTemplates().stream().map(IndexTemplateInfo::getId)
                 .collect(Collectors.toSet());
         return rwTemplateAuths.stream().filter(authTemplate -> logicTemplateIds.contains(authTemplate.getTemplateId()))
             .collect(Collectors.toList());
     }
 
     private List<AppTemplateAuth> getAppTemplateOwnerAuths(Integer appId) {
-        List<IndexTemplateLogic> ownAuthTemplates = templateLogicService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplateInfo> ownAuthTemplates = indexTemplateInfoService.getAppLogicTemplatesByAppId(appId);
         return ownAuthTemplates.stream().map(r -> buildTemplateAuth(r, AppTemplateAuthEnum.OWN))
             .collect(Collectors.toList());
     }

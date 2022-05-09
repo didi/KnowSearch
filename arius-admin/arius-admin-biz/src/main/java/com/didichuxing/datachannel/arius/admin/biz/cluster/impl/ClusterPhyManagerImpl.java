@@ -32,8 +32,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -62,7 +62,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
@@ -134,7 +134,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private TemplatePipelineManager                          templatePipelineManager;
 
     @Autowired
-    private TemplateLogicService                             templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private TemplatePhyManager                               templatePhyManager;
@@ -200,7 +200,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         for (IndexTemplatePhy physical : physicals) {
             try {
                 // 获取物理模板对应的逻辑模板
-                IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(physical.getLogicId());
+                IndexTemplateInfo templateLogic = indexTemplateInfoService.getLogicTemplateById(physical.getLogicId());
                 // 同步索引的mapping到模板
                 Result<MappingConfig> result = templatePhyMappingManager.syncMappingConfig(cluster, physical.getName(),
                     physical.getExpression(), templateLogic.getDateFormat());
@@ -244,7 +244,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 templatePhyManager.syncMeta(physical.getId(), retryCount);
                 // 同步最新元数据到ES集群pipeline
                 templatePipelineManager.syncPipeline(physical,
-                    templateLogicService.getLogicTemplateWithPhysicalsById(physical.getLogicId()));
+                    indexTemplateInfoService.getLogicTemplateWithPhysicalsById(physical.getLogicId()));
             } catch (Exception e) {
                 LOGGER.error(
                     "class=ESClusterPhyServiceImpl||method=syncTemplateMetaData||errMsg={}||cluster={}||template={}",
@@ -554,7 +554,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         // No permission, cut branches and return
         if (CollectionUtils.isEmpty(clusterPhyNameList)) { return Result.buildSucc();}
 
-        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicals = templateLogicService.getLogicTemplateWithPhysicalsById(templateId);
+        IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId);
         if (null == logicTemplateWithPhysicals) { return  Result.buildFail(String.format("templateId[%s] is not exist", templateId));}
 
         IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();

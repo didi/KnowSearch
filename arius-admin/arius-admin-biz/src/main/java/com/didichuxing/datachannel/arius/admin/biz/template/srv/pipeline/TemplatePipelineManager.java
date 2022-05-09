@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
@@ -24,7 +24,7 @@ public interface TemplatePipelineManager {
      * @param indexTemplatePhysical  物理模板
      * @param logicWithPhysical 逻辑模板
      */
-    void syncPipeline(IndexTemplatePhy indexTemplatePhysical, IndexTemplateLogicWithPhyTemplates logicWithPhysical);
+    void syncPipeline(IndexTemplatePhy indexTemplatePhysical, IndexTemplateInfoWithPhyTemplates logicWithPhysical);
 
     /**
      * 创建
@@ -33,7 +33,7 @@ public interface TemplatePipelineManager {
      * @return true/false
      */
     boolean createPipeline(IndexTemplatePhy indexTemplatePhysical,
-                           IndexTemplateLogicWithPhyTemplates logicWithPhysical) throws ESOperateException;
+                           IndexTemplateInfoWithPhyTemplates logicWithPhysical) throws ESOperateException;
 
     /**
      * 删除
@@ -48,7 +48,7 @@ public interface TemplatePipelineManager {
      * @param newTemplate 逻辑模板
      * @return true/false
      */
-    boolean editFromTemplateLogic(IndexTemplateLogic oldTemplate, IndexTemplateLogic newTemplate);
+    boolean editFromTemplateLogic(IndexTemplateInfo oldTemplate, IndexTemplateInfo newTemplate);
 
     /**
      * 修改物理字段
@@ -56,7 +56,7 @@ public interface TemplatePipelineManager {
      * @return true/false
      */
     boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
-                                     IndexTemplateLogicWithPhyTemplates logicWithPhysical) throws ESOperateException;
+                                     IndexTemplateInfoWithPhyTemplates logicWithPhysical) throws ESOperateException;
 
     /**
      * 调整限流值

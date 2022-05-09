@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.SecurityRoleAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -318,7 +318,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
 
     /**************************************** private method ****************************************************/
     private void doCheckMeta(IndexTemplatePhy templatePhysical) {
-        IndexTemplateLogic templateLogic = templateLogicService
+        IndexTemplateInfo templateLogic = indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(templatePhysical.getLogicId());
         checkTemplateOwnApp(templatePhysical, templateLogic.getAppId());
 

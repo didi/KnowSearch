@@ -57,7 +57,7 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
 
         int succeedCount = 0;
         for (IndexTemplatePhy physical : physicals) {
-            IndexTemplateConfig config = templateLogicService.getTemplateConfig(physical.getLogicId());
+            IndexTemplateConfig config = indexTemplateInfoService.getTemplateConfig(physical.getLogicId());
             if (config == null || !config.getPreCreateFlags()) {
                 LOGGER.warn(
                     "class=ESClusterPhyServiceImpl||method=preCreateIndex||cluster={}||template={}||msg=skip preCreateIndex",

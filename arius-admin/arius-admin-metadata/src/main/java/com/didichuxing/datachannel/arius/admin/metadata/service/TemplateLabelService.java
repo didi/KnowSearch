@@ -14,9 +14,9 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -61,7 +61,7 @@ public class TemplateLabelService {
     private TemplateLabelESDAO indexTemplateLabelDAO;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateInfoService indexTemplateInfoService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -283,7 +283,7 @@ public class TemplateLabelService {
     public Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> listAllIndexTemplateLabelByLabelIds(String includeLabelIds, String excludeLabelIds) {
         Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> retMap = new ConcurrentHashMap<>();
 
-        List<IndexTemplateLogic> templateLogics = templateLogicService.getAllLogicTemplates();
+        List<IndexTemplateInfo> templateLogics = indexTemplateInfoService.getAllLogicTemplates();
 
         templateLogics.parallelStream().forEach(indexTemplate -> {
             Integer templateId = indexTemplate.getId();

@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithMapping;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
 /**
@@ -25,7 +25,7 @@ public interface TemplateLogicMappingManager {
      * @throws Exception
      * @return 模板信息  不存在返回null
      */
-    Result<IndexTemplateLogicWithMapping> getTemplateWithMapping(Integer logicId);
+    Result<IndexTemplateInfoWithMapping> getTemplateWithMapping(Integer logicId);
 
     /**
      * 更新

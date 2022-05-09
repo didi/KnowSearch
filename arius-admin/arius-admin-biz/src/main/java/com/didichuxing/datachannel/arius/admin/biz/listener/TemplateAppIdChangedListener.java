@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -36,7 +36,7 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
     }
 
     /**************************************** private method ****************************************************/
-    private void handleTemplateAppid(IndexTemplateLogic oldIndexTemplate, IndexTemplateLogic newIndexTemplate) {
+    private void handleTemplateAppid(IndexTemplateInfo oldIndexTemplate, IndexTemplateInfo newIndexTemplate) {
         Integer logicTemplateId = oldIndexTemplate.getId();
 
         if (!EnvUtil.isOnline()) {
