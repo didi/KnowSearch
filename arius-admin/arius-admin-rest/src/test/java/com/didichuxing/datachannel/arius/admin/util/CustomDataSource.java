@@ -294,18 +294,18 @@ public class CustomDataSource {
         return esRoleClusterDTO;
     }
 
-    public static ESRoleClusterHostDTO esRoleClusterHostDTOFactory() {
-        ESRoleClusterHostDTO esRoleClusterHostDTO = new ESRoleClusterHostDTO();
-        esRoleClusterHostDTO.setCluster("test_cluster");
-        esRoleClusterHostDTO.setIp("127.0.0.0");
-        esRoleClusterHostDTO.setRack("r1");
-        esRoleClusterHostDTO.setHostname("wpk");
-        esRoleClusterHostDTO.setPort("8080");
-        esRoleClusterHostDTO.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
-        esRoleClusterHostDTO.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
-        esRoleClusterHostDTO.setRoleClusterId(1234L);
-        esRoleClusterHostDTO.setNodeSet("");
-        return esRoleClusterHostDTO;
+    public static ESRoleClusterHostInfoDTO esRoleClusterHostDTOFactory() {
+        ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = new ESRoleClusterHostInfoDTO();
+        esRoleClusterHostInfoDTO.setCluster("test_cluster");
+        esRoleClusterHostInfoDTO.setIp("127.0.0.0");
+        esRoleClusterHostInfoDTO.setRack("r1");
+        esRoleClusterHostInfoDTO.setHostname("wpk");
+        esRoleClusterHostInfoDTO.setPort("8080");
+        esRoleClusterHostInfoDTO.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
+        esRoleClusterHostInfoDTO.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
+        esRoleClusterHostInfoDTO.setRoleClusterId(1234L);
+        esRoleClusterHostInfoDTO.setNodeSet("");
+        return esRoleClusterHostInfoDTO;
     }
 
     public static ESLogicClusterDTO esLogicClusterDTOFactory() {

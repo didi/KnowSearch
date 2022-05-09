@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleClusterHost extends BaseEntity {
+public class RoleClusterHostInfo extends BaseEntity {
 
     private Long id;
 
@@ -76,7 +76,7 @@ public class RoleClusterHost extends BaseEntity {
             return false;
         }
 
-        RoleClusterHost node = (RoleClusterHost) o;
+        RoleClusterHostInfo node = (RoleClusterHostInfo) o;
 
         if (!hostname.equals(node.hostname)) {
             return false;

@@ -10,13 +10,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.Hosts
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
-import com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -27,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.han
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler.EcmDockerHandler;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler.EcmHostHandler;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -43,7 +41,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
@@ -51,8 +48,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant.ODIN_CATEGORY_LEVEL_1;
-import static com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant.ODIN_CATEGORY_LEVEL_2;
 import static java.util.Objects.nonNull;
 
 /**
@@ -74,7 +69,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     private RoleClusterService                  roleClusterService;
 
     @Autowired
-    private RoleClusterHostService              roleClusterHostService;
+    private RoleClusterHostInfoService roleClusterHostInfoService;
 
     @Autowired
     private EcmDockerHandler                    ecmDockerHandler;
@@ -261,7 +256,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
             return Result.buildFail(String.format(CLUSTER_NOT_EXIST, phyClusterId));
         }
 
-        List<String> masterHostList = roleClusterHostService
+        List<String> masterHostList = roleClusterHostInfoService
             .getHostNamesByRoleAndClusterId(clusterPhy.getId().longValue(), MASTER_NODE.getDesc());
 
         List<EcmParamBase> ecmParamBaseList = new ArrayList<>();
@@ -335,7 +330,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         hostsParamBase.setEsVersion(roleCluster.getEsVersion());
         hostsParamBase.setImageName(esPackage.getUrl());
 
-        List<String> hostList = roleClusterHostService
+        List<String> hostList = roleClusterHostInfoService
                 .getHostNamesByRoleAndClusterId(clusterPhy.getId().longValue(), roleName);
         hostsParamBase.setHostList(hostList);
         if (!CollectionUtils.isEmpty(hostList)) {
@@ -423,11 +418,11 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     }
 
     private Result<String> getPortFromHost(Long clusterId, String roleName) {
-        List<RoleClusterHost> roleClusterHosts = roleClusterHostService.getByRoleAndClusterId(clusterId, roleName);
-        if (CollectionUtils.isEmpty(roleClusterHosts)) {
+        List<RoleClusterHostInfo> roleClusterHostInfos = roleClusterHostInfoService.getByRoleAndClusterId(clusterId, roleName);
+        if (CollectionUtils.isEmpty(roleClusterHostInfos)) {
             return Result.buildSucc(ClusterConstant.DEFAULT_PORT, "获取默认配置端口");
         }
-        return Result.buildSucc(roleClusterHosts.get(0).getPort(), "角色端口获取成功");
+        return Result.buildSucc(roleClusterHostInfos.get(0).getPort(), "角色端口获取成功");
     }
 
     private Result<EcmParamBase> buildActionParamBase(Long clusterId, String roleName) {
@@ -518,7 +513,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         }
 
         //逻辑删除
-        Result<Void> deleteRoleClusterHostResult = roleClusterHostService.deleteByCluster(clusterPhy.getCluster());
+        Result<Void> deleteRoleClusterHostResult = roleClusterHostInfoService.deleteByCluster(clusterPhy.getCluster());
         if (deleteRoleClusterHostResult.failed()) {
             LOGGER.error(
                 "class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||roleClusterName=={}||roleClusterName={}||"

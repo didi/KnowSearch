@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterInfoTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
@@ -80,7 +80,7 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
         if(result1.success()) {
             // 获取接入物理集群时候设置的节点ip信息
             Set<String> ipSet = phyClusterInfo.getClusterJoinDTO()
-                    .getRoleClusterHosts().stream().map(ESRoleClusterHostDTO::getIp).collect(Collectors.toSet());
+                    .getRoleClusterHosts().stream().map(ESRoleClusterHostInfoDTO::getIp).collect(Collectors.toSet());
             // 节点数目一致
             Assertions.assertEquals(result1.getData().size(), ipSet.size());
         }

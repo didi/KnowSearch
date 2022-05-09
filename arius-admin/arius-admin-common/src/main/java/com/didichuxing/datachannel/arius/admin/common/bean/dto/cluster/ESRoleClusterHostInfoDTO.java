@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESRoleClusterHostDTO extends BaseDTO {
+public class ESRoleClusterHostInfoDTO extends BaseDTO {
 
     private static final long serialVersionUID = 1L;
 
@@ -64,7 +64,7 @@ public class ESRoleClusterHostDTO extends BaseDTO {
             return false;
         }
 
-        ESRoleClusterHostDTO nodeDTO = (ESRoleClusterHostDTO) o;
+        ESRoleClusterHostInfoDTO nodeDTO = (ESRoleClusterHostInfoDTO) o;
 
         if (!hostname.equals(nodeDTO.hostname)) {
             return false;

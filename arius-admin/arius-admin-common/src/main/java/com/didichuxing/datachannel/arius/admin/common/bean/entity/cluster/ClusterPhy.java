@@ -5,7 +5,7 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 
 import lombok.AllArgsConstructor;
@@ -141,7 +141,7 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
     /**
      * ES的角色的机器节点
      */
-    private List<RoleClusterHost> roleClusterHosts;
+    private List<RoleClusterHostInfo> roleClusterHostInfos;
 
     /**
      * client运行模式，读写共享还是读写分离

@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
@@ -265,10 +265,10 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         Mockito.when(esClusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(null);
         Assertions.assertTrue(clusterLogicService.getClusterLogicRole(id).isEmpty());
         ClusterPhy clusterPhy = CustomDataSource.esClusterPhyFactory();
-        RoleClusterHost roleClusterHost = ConvertUtil.obj2Obj(CustomDataSource.esRoleClusterHostDTOFactory(), RoleClusterHost.class);
+        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(CustomDataSource.esRoleClusterHostDTOFactory(), RoleClusterHostInfo.class);
         RoleCluster roleCluster = ConvertUtil.obj2Obj(CustomDataSource.esRoleClusterDTOFactory(), RoleCluster.class);
-        roleClusterHost.setId(id);
-        clusterPhy.setRoleClusterHosts(Arrays.asList(roleClusterHost));
+        roleClusterHostInfo.setId(id);
+        clusterPhy.setRoleClusterHostInfos(Arrays.asList(roleClusterHostInfo));
         roleCluster.setId(id);
         clusterPhy.setRoleClusters(Arrays.asList(roleCluster));
         Mockito.when(esClusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(

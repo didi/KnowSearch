@@ -6,38 +6,38 @@ import java.util.Map;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
 /**
  * ES集群节点 服务类
  *
- * @author didi
- * @since 2020-08-24
+ * @author chengxiang
+ * @date 2022/5/9
  */
-public interface RoleClusterHostService {
+public interface RoleClusterHostInfoService {
 
     /**
      * 条件查询
      * @param condt 条件
      * @return 节点列表
      */
-    List<RoleClusterHost> queryNodeByCondt(ESRoleClusterHostDTO condt);
+    List<RoleClusterHostInfo> queryNodeByCondt(ESRoleClusterHostInfoDTO condt);
 
     /**
      * 查询集群节点列表
      * @param cluster 集群
      * @return 节点列表 集群不存在返回空列表
      */
-    List<RoleClusterHost> getNodesByCluster(String cluster);
+    List<RoleClusterHostInfo> getNodesByCluster(String cluster);
 
     /**
      * 查询集群节点列表
      * @param cluster 集群
      * @return 节点列表 集群不存在返回空列表
      */
-    List<RoleClusterHost> getOnlineNodesByCluster(String cluster);
+    List<RoleClusterHostInfo> getOnlineNodesByCluster(String cluster);
 
     /**
      * 修改节点状态
@@ -45,14 +45,14 @@ public interface RoleClusterHostService {
      * @param operator 操作人
      * @return 成功 true  失败  false
      */
-    Result<Void> editNodeStatus(ESRoleClusterHostDTO param, String operator);
+    Result<Void> editNodeStatus(ESRoleClusterHostInfoDTO param, String operator);
 
     /**
      * 修改节点参数
      * @param param 参数
      * @return 成功 true  失败  false
      */
-    Result<Void> editNode(ESRoleClusterHostDTO param);
+    Result<Void> editNode(ESRoleClusterHostInfoDTO param);
 
     /**
      * 采集集群节点配置信息到MySQL, 包括节点状态
@@ -91,35 +91,35 @@ public interface RoleClusterHostService {
      * 获取所有在线的节点
      * @return list
      */
-    List<RoleClusterHost> listOnlineNode();
+    List<RoleClusterHostInfo> listOnlineNode();
 
     /**
      * 保存节点信息
-     * @param roleClusterHost
+     * @param roleClusterHostInfo
      * @return
      */
-    Result<Long> save(RoleClusterHost roleClusterHost);
+    Result<Long> save(RoleClusterHostInfo roleClusterHostInfo);
 
     /**
      * 获取节点信息
      * @param id 主键
      * @return 节点对象
      */
-    RoleClusterHost getById(Long id);
+    RoleClusterHostInfo getById(Long id);
 
     /**
      * 获取节点信息
      * @param roleClusterId 角色集群id
      * @return 节点对象
      */
-    List<RoleClusterHost> getByRoleClusterId(Long roleClusterId);
+    List<RoleClusterHostInfo> getByRoleClusterId(Long roleClusterId);
 
     /**
      * 获取节点信息
      * @param roleClusterIds 多个角色集群id
      * @return  Map<角色集群id,List<节点对象>>
      */
-    Map<Long,List<RoleClusterHost>> getByRoleClusterIds(List<Long> roleClusterIds);
+    Map<Long,List<RoleClusterHostInfo>> getByRoleClusterIds(List<Long> roleClusterIds);
     /**
      * 获取节点名
      * @param clusterId 集群id
@@ -134,7 +134,7 @@ public interface RoleClusterHostService {
      * @param role      角色
      * @return
      */
-    List<RoleClusterHost> getByRoleAndClusterId(Long clusterId, String role);
+    List<RoleClusterHostInfo> getByRoleAndClusterId(Long clusterId, String role);
 
     /**
      * 逻辑删除节点
@@ -147,7 +147,7 @@ public interface RoleClusterHostService {
      * 获取所有节点(包括不在线)
      * @return
      */
-    List<RoleClusterHost> listAllNode();
+    List<RoleClusterHostInfo> listAllNode();
 
     /**
      * 获取指定集群指定racks包含的节点
@@ -155,7 +155,7 @@ public interface RoleClusterHostService {
      * @param racks racks
      * @return
      */
-    List<RoleClusterHost> listRacksNodes(String clusterName, String racks);
+    List<RoleClusterHostInfo> listRacksNodes(String clusterName, String racks);
 
     /**
      * 删除
@@ -178,37 +178,37 @@ public interface RoleClusterHostService {
      * @param hostName
      * @return
      */
-    RoleClusterHost getByHostName(String hostName);
+    RoleClusterHostInfo getByHostName(String hostName);
 
     /**
      * 获取已删除节点
      * @param hostname
      */
-    RoleClusterHost getDeleteHostByHostNameAnRoleId(String hostname, Long roleId);
+    RoleClusterHostInfo getDeleteHostByHostNameAnRoleId(String hostname, Long roleId);
 
     /**恢复节点状态
      * @param deleteHost
      * @return
      */
-    Result<Void> setHostValid(RoleClusterHost deleteHost);
+    Result<Void> setHostValid(RoleClusterHostInfo deleteHost);
 
     /**
      * 构建集群client角色的HttpAddresses地址
      * @return ip:port,ip:port
      */
-    String buildESClientHttpAddressesStr(List<ESRoleClusterHostDTO> roleClusterHosts);
+    String buildESClientHttpAddressesStr(List<ESRoleClusterHostInfoDTO> roleClusterHosts);
 
     /**
      * 构建集群client, master角色的HttpAddresses地址
      * @return List<ip:port>
      */
-    List<String> buildESClientMasterHttpAddressesList(List<ESRoleClusterHostDTO> roleClusterHosts);
+    List<String> buildESClientMasterHttpAddressesList(List<ESRoleClusterHostInfoDTO> roleClusterHosts);
 
     /**
      * 构建集群master,client,data角色的HttpAddresses地址
      * @return List<ip:port>
      */
-    List<String> buildESAllRoleHttpAddressesList(List<ESRoleClusterHostDTO> roleClusterHosts);
+    List<String> buildESAllRoleHttpAddressesList(List<ESRoleClusterHostInfoDTO> roleClusterHosts);
 
     /**
      * 获取角色id对应的机器数（ip数目）

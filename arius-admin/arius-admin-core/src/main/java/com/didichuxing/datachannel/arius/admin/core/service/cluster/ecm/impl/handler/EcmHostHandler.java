@@ -15,10 +15,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
@@ -54,7 +54,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
     private ESPackageService         esPackageService;
 
     @Autowired
-    private RoleClusterHostService roleClusterHostService;
+    private RoleClusterHostInfoService roleClusterHostInfoService;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -261,21 +261,21 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
         if (zeusClusterActionEnum.equals(ZeusClusterActionEnum.EXPAND)
                 || zeusClusterActionEnum.equals(ZeusClusterActionEnum.NEW)) {
             // 根据物理集群id和数据节点的角色名称获取所有的当前集群绑定的主机列表
-            List<RoleClusterHost> roleClusterHosts = roleClusterHostService.getByRoleAndClusterId(hostParamBase.getPhyClusterId(),
+            List<RoleClusterHostInfo> roleClusterHostInfos = roleClusterHostInfoService.getByRoleAndClusterId(hostParamBase.getPhyClusterId(),
                     ESClusterNodeRoleEnum.DATA_NODE.getDesc());
 
             float initialRackValue = 0;
-            if (CollectionUtils.isEmpty(roleClusterHosts)) {
+            if (CollectionUtils.isEmpty(roleClusterHostInfos)) {
                 // 当新建或者扩容前data角色列表为空时，设置基准值
                 initialRackValue += 0.5;
             } else {
                 // 根据rack的大小进行排序并且获取新的data节点类型的rack起始值
-                for (RoleClusterHost roleClusterHost : roleClusterHosts) {
-                    if (!Pattern.matches("r.*", roleClusterHost.getRack())) {
+                for (RoleClusterHostInfo roleClusterHostInfo : roleClusterHostInfos) {
+                    if (!Pattern.matches("r.*", roleClusterHostInfo.getRack())) {
                         // 如果rack 不是r* 形式，则跳过不进行计算, 这里为了与前人逻辑保持一致，hold住特殊case 如cold rack
                         continue;
                     }
-                    int roleHostRackValue = Integer.parseInt(roleClusterHost.getRack().replaceFirst("r", ""));
+                    int roleHostRackValue = Integer.parseInt(roleClusterHostInfo.getRack().replaceFirst("r", ""));
                     if (roleHostRackValue > initialRackValue) {
                         initialRackValue = roleHostRackValue;
                     } else if (roleHostRackValue == initialRackValue) {

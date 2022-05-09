@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,12 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSTotal;
@@ -54,7 +54,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
     protected ESClusterNodeService                                          esClusterNodeService;
 
     @Autowired
-    protected RoleClusterHostService                                        roleClusterHostService;
+    protected RoleClusterHostInfoService roleClusterHostInfoService;
 
     @Autowired
     protected AriusStatsClusterTaskInfoESDAO                                ariusStatsClusterTaskInfoESDAO;
@@ -63,8 +63,8 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
 
     @Override
     public void collectSingleCluster(String cluster, long currentTime) {
-        List<RoleClusterHost> roleClusterHostList = roleClusterHostService.getNodesByCluster(cluster);
-        if (CollectionUtils.isEmpty(roleClusterHostList)) { return;}
+        List<RoleClusterHostInfo> roleClusterHostInfoList = roleClusterHostInfoService.getNodesByCluster(cluster);
+        if (CollectionUtils.isEmpty(roleClusterHostInfoList)) { return;}
 
         AtomicReference<Map<String, ClusterNodeStats>> clusterNodeStatsMapAtomic       = new AtomicReference<>(Maps.newHashMap());
         AtomicReference<Map<String, Long>>             node2ShardNumMapAtomic          = new AtomicReference<>(Maps.newHashMap());
@@ -93,9 +93,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         }
 
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
-        for (RoleClusterHost roleClusterHost : roleClusterHostList) {
+        for (RoleClusterHostInfo roleClusterHostInfo : roleClusterHostInfoList) {
             DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
-            String nodeName = roleClusterHost.getNodeSet();
+            String nodeName = roleClusterHostInfo.getNodeSet();
 
             String uniqueNodeKey    = CommonUtils.getUniqueKey(cluster, nodeName);
             NodeMetrics nodeMetrics = nodeName2NodeMetricsMap.getOrDefault(uniqueNodeKey, new NodeMetrics());

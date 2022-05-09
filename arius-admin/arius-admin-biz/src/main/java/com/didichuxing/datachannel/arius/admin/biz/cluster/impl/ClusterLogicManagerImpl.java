@@ -46,7 +46,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -802,7 +802,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 }
 
                 List<RoleCluster> esRolePhyClusters = clusterPhy.getRoleClusters();
-                List<RoleClusterHost> esRolePhyClusterHosts = clusterPhy.getRoleClusterHosts();
+                List<RoleClusterHostInfo> esRolePhyClusterHosts = clusterPhy.getRoleClusterHostInfos();
 
                 logicCluster.setEsRoleClusterVOS(buildESRoleClusterVOS(clusterLogic, logicClusterId, esRolePhyClusters, esRolePhyClusterHosts));
             } catch (Exception e) {
@@ -812,7 +812,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
     }
 
-    private List<ESRoleClusterVO> buildESRoleClusterVOS(ClusterLogic clusterLogic, Long logicClusterId, List<RoleCluster> esRolePhyClusters, List<RoleClusterHost> esRolePhyClusterHosts) {
+    private List<ESRoleClusterVO> buildESRoleClusterVOS(ClusterLogic clusterLogic, Long logicClusterId, List<RoleCluster> esRolePhyClusters, List<RoleClusterHostInfo> esRolePhyClusterHosts) {
         List<ESRoleClusterVO> esRoleClusterVOS = new ArrayList<>();
         for (RoleCluster roleCluster : esRolePhyClusters) {
             ESRoleClusterVO esRoleClusterVO = ConvertUtil.obj2Obj(roleCluster, ESRoleClusterVO.class);
@@ -824,21 +824,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 esRoleClusterVO.setPodNumber(clusterLogic.getDataNodeNu());
                 esRoleClusterVO.setMachineSpec(clusterLogic.getDataNodeSpec());
 
-                List<RoleClusterHost> roleClusterHosts = clusterLogicNodeService
+                List<RoleClusterHostInfo> roleClusterHostInfos = clusterLogicNodeService
                         .getLogicClusterNodes(logicClusterId);
 
-                for (RoleClusterHost roleClusterHost : roleClusterHosts) {
+                for (RoleClusterHostInfo roleClusterHostInfo : roleClusterHostInfos) {
                     ESRoleClusterHostVO esRoleClusterHostVO = new ESRoleClusterHostVO();
-                    esRoleClusterHostVO.setHostname(roleClusterHost.getIp());
+                    esRoleClusterHostVO.setHostname(roleClusterHostInfo.getIp());
                     esRoleClusterHostVO.setRole(DATA_NODE.getCode());
 
                     esRoleClusterHostVOS.add(esRoleClusterHostVO);
                 }
             } else {
-                for (RoleClusterHost roleClusterHost : esRolePhyClusterHosts) {
-                    if (roleClusterHost.getRoleClusterId().longValue() == roleCluster.getId().longValue()) {
+                for (RoleClusterHostInfo roleClusterHostInfo : esRolePhyClusterHosts) {
+                    if (roleClusterHostInfo.getRoleClusterId().longValue() == roleCluster.getId().longValue()) {
                         esRoleClusterHostVOS
-                                .add(ConvertUtil.obj2Obj(roleClusterHost, ESRoleClusterHostVO.class));
+                                .add(ConvertUtil.obj2Obj(roleClusterHostInfo, ESRoleClusterHostVO.class));
                     }
                 }
             }

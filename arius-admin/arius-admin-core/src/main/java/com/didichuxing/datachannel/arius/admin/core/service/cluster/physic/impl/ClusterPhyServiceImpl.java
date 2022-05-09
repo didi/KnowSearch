@@ -10,11 +10,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
@@ -30,7 +30,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
@@ -84,7 +84,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private RoleClusterService       roleClusterService;
 
     @Autowired
-    private RoleClusterHostService   roleClusterHostService;
+    private RoleClusterHostInfoService roleClusterHostInfoService;
 
     private static final String DEFAULT_WRITE_ACTION = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
 
@@ -201,13 +201,13 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             clusterPhy.setRoleClusters(roleClusters);
 
             // 机器信息
-            List<RoleClusterHost> roleClusterHosts = new ArrayList<>();
-            Map<Long, List<RoleClusterHost>> map = roleClusterHostService.getByRoleClusterIds(roleClusters.stream().map(RoleCluster::getId).collect(Collectors.toList()));
+            List<RoleClusterHostInfo> roleClusterHostInfos = new ArrayList<>();
+            Map<Long, List<RoleClusterHostInfo>> map = roleClusterHostInfoService.getByRoleClusterIds(roleClusters.stream().map(RoleCluster::getId).collect(Collectors.toList()));
             for (RoleCluster roleCluster : roleClusters) {
-                List<RoleClusterHost> esRoleClusterHosts = map.getOrDefault(roleCluster.getId(), new ArrayList<>());
-                roleClusterHosts.addAll(esRoleClusterHosts);
+                List<RoleClusterHostInfo> esRoleClusterHostInfos = map.getOrDefault(roleCluster.getId(), new ArrayList<>());
+                roleClusterHostInfos.addAll(esRoleClusterHostInfos);
             }
-            clusterPhy.setRoleClusterHosts(roleClusterHosts);
+            clusterPhy.setRoleClusterHostInfos(roleClusterHostInfos);
         }
 
         return clusterPhy;
@@ -296,16 +296,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public Set<String> getClusterRacks(String cluster) {
-        List<RoleClusterHost> nodes = roleClusterHostService.getNodesByCluster(cluster);
+        List<RoleClusterHostInfo> nodes = roleClusterHostInfoService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(nodes)) {
             return Sets.newHashSet();
         }
 
         Set<String> rackSet = new HashSet<>();
         // 只有datanode才有rack
-        for (RoleClusterHost roleClusterHost : nodes) {
-            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == roleClusterHost.getRole()) {
-                rackSet.add(roleClusterHost.getRack());
+        for (RoleClusterHostInfo roleClusterHostInfo : nodes) {
+            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == roleClusterHostInfo.getRole()) {
+                rackSet.add(roleClusterHostInfo.getRack());
             }
         }
 

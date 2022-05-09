@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostInfoPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -157,7 +157,7 @@ public interface ESRoleClusterHostInfoDAO {
      * @param param
      * @return
      */
-    int updateHostValid(RoleClusterHost param);
+    int updateHostValid(RoleClusterHostInfo param);
 
     /**
      *  根据主机名和roleId 获取主机数量
