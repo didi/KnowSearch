@@ -192,10 +192,10 @@ public class ClusterOverviewMetricsHandle {
                 case DISK_INFO:
                     aggDiskInfoMetrics(metrics, aggType, startTime, endTime);
                     return;
-                case SHARD_NU:
+                case SHARD_NUM:
                     aggShardNuMetrics(metrics, aggType, startTime, endTime);
                     return;
-                case READ_TPS:
+                case READ_QPS:
                     aggReadTpsMetrics(metrics, aggType, startTime, endTime);
                     return;
                 case WRITE_TPS:
@@ -210,7 +210,7 @@ public class ClusterOverviewMetricsHandle {
                 case NODES_FOR_DISK_USAGE_GTE_75PERCENT:
                     aggNodesForDiskUsageGte75PercentMetrics(metrics);
                     return;
-                case TASK_COUNT:
+                case TASK_NUM:
                     aggTaskCount(metrics, aggType, startTime, endTime);
                     return;
                 default:
