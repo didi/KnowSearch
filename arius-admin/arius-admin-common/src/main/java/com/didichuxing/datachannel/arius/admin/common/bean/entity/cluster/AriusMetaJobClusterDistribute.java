@@ -1,15 +1,18 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.po.monitor;
+package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
+
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
+/**
+ * @author ohushenglin_v
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClusterMonitorTaskPO {
+public class AriusMetaJobClusterDistribute {
     /**
      * 主键id
      */

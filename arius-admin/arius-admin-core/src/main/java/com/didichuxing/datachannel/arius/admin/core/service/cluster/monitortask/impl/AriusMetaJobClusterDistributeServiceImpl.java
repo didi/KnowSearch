@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.core.service.cluster.monitorTask.impl;
+package com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -10,25 +10,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterMonitorTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.AriusMetaJobClusterDistribute;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitorTask.ClusterMonitorTaskService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.ClusterMonitorTaskDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.AriusMetaJobClusterDistributeDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
- * Created by linyunan on 3/21/22
+ * @date    3/21/22
+ * @author linyunan
  */
 @Service
-public class ClusterMonitorTaskServiceImpl implements ClusterMonitorTaskService {
-    private static final ILog LOGGER = LogFactory.getLog(ClusterMonitorTaskServiceImpl.class);
+public class AriusMetaJobClusterDistributeServiceImpl implements AriusMetaJobClusterDistributeService {
+    private static final ILog LOGGER = LogFactory.getLog(AriusMetaJobClusterDistributeServiceImpl.class);
 
     /**
-     * maxPoolSize，当前monitorjob能支持的最大集群采集个数，
+     * maxPoolSize，当前monitor-job能支持的最大集群采集个数，
      * 超过maxPoolSize的集群不会被采集，保证maxPoolSize个集群采集的稳定性
      */
     @Value("${dashboard.threadPool.maxsize:30}")
@@ -38,7 +39,7 @@ public class ClusterMonitorTaskServiceImpl implements ClusterMonitorTaskService 
     private ClusterPhyService     clusterPhyService;
 
     @Autowired
-    private ClusterMonitorTaskDAO clusterMonitorTaskDAO;
+    private AriusMetaJobClusterDistributeDAO ariusMetaJobClusterDistributeDAO;
 
     @Override
     public List<ClusterPhy> getSingleMachineMonitorCluster(String monitorHost) {
@@ -50,13 +51,13 @@ public class ClusterMonitorTaskServiceImpl implements ClusterMonitorTaskService 
             return monitorCluster;
         }
 
-        List<ClusterMonitorTask> clusterMonitorTasks = getTaskByHost(monitorHost, maxPoolSize);
-        if(CollectionUtils.isEmpty(clusterMonitorTasks)){
+        List<AriusMetaJobClusterDistribute> ariusMetaJobClusterDistributes = getTaskByHost(monitorHost, maxPoolSize);
+        if(CollectionUtils.isEmpty(ariusMetaJobClusterDistributes)){
             LOGGER.warn("class=ClusterMonitorTaskServiceImpl||method=getSingleMachineMonitorCluster||" +
                     "msg=clusterMonitorTaskPOS is empty");
         }else {
-            Map<String, ClusterMonitorTask> taskMap = clusterMonitorTasks.stream()
-                    .collect(Collectors.toMap(ClusterMonitorTask::getCluster, c -> c));
+            Map<String, AriusMetaJobClusterDistribute> taskMap = ariusMetaJobClusterDistributes.stream()
+                    .collect(Collectors.toMap(AriusMetaJobClusterDistribute::getCluster, c -> c));
 
             for(ClusterPhy clusterPhy : clusterPhyList){
                 if(null != taskMap.get(clusterPhy.getCluster())){
@@ -71,7 +72,7 @@ public class ClusterMonitorTaskServiceImpl implements ClusterMonitorTaskService 
     }
 
     @Override
-    public List<ClusterMonitorTask> getTaskByHost(String monitorHost, int size) {
-        return ConvertUtil.list2List(clusterMonitorTaskDAO.getTaskByHost(monitorHost, size), ClusterMonitorTask.class);
+    public List<AriusMetaJobClusterDistribute> getTaskByHost(String monitorHost, int size) {
+        return ConvertUtil.list2List(ariusMetaJobClusterDistributeDAO.getTaskByHost(monitorHost, size), AriusMetaJobClusterDistribute.class);
     }
 }
