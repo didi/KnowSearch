@@ -70,13 +70,8 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     @Autowired
     private OperateRecordService       operateRecordService;
 
-    /**
-     * Check是否删除多余的模板权限记录。
-     * @param shouldDeleteFlags 是否删除
-     * @return
-     */
     @Override
-    public boolean deleteExcessTemplateAuthsIfNeed(boolean shouldDeleteFlags) {
+    public boolean deleteRedundancyTemplateAuths(boolean shouldDeleteFlags) {
         Map<Integer, IndexTemplateLogic> logicTemplateId2LogicTemplateMappings = ConvertUtil
             .list2Map(templateLogicService.getAllLogicTemplates(), IndexTemplateLogic::getId);
 
