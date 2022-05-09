@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
@@ -155,7 +155,7 @@ public interface ClusterLogicService {
      * @param logicClusterId 逻辑集群ID
      * @return
      */
-    List<RoleCluster> getClusterLogicRole(Long logicClusterId);
+    List<ClusterRoleInfo> getClusterLogicRole(Long logicClusterId);
 
     /**
      * 获取逻辑集群datanode的规格信息

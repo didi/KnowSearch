@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 
 public interface ClusterPhyManager {
@@ -215,7 +215,7 @@ public interface ClusterPhyManager {
      */
     void buildClusterRole(ConsoleClusterPhyVO cluster);
 
-    void buildClusterRole(ConsoleClusterPhyVO cluster, List<RoleCluster> roleClusters);
+    void buildClusterRole(ConsoleClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos);
 
     /**
      * 更新物理集群状态

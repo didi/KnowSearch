@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTags;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -56,7 +56,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
@@ -116,7 +116,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ClusterLogicManager                              clusterLogicManager;
 
     @Autowired
-    private RoleClusterService                               roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @Autowired
     private ClusterRoleHostInfoService clusterRoleHostInfoService;
@@ -370,7 +370,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 System.currentTimeMillis() - timeForBuildClusterAppInfo);
 
         List<Integer> clusterIds = consoleClusterPhyVOList.stream().map(ConsoleClusterPhyVO::getId).collect(Collectors.toList());
-        Map<Long, List<RoleCluster>> roleListMap = roleClusterService.getAllRoleClusterByClusterIds(clusterIds);
+        Map<Long, List<ClusterRoleInfo>> roleListMap = clusterRoleInfoService.getAllRoleClusterByClusterIds(clusterIds);
 
         //3. 设置集群基本统计信息：磁盘使用信息
         long timeForBuildClusterDiskInfo = System.currentTimeMillis();
@@ -619,7 +619,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 }
             }
 
-            Result<Void> deleteRoleResult = roleClusterService.deleteRoleClusterByClusterId(clusterPhy.getId());
+            Result<Void> deleteRoleResult = clusterRoleInfoService.deleteRoleClusterByClusterId(clusterPhy.getId());
             if (deleteRoleResult.failed()) {
                 throw new AdminOperateException(String.format("删除集群[%s]角色信息失败", clusterPhy.getCluster()));
             }
@@ -781,29 +781,29 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public void buildClusterRole(ConsoleClusterPhyVO cluster) {
         try {
-            List<RoleCluster> roleClusters = roleClusterService.getAllRoleClusterByClusterId(cluster.getId());
+            List<ClusterRoleInfo> clusterRoleInfos = clusterRoleInfoService.getAllRoleClusterByClusterId(cluster.getId());
 
-            buildClusterRole(cluster, roleClusters);
+            buildClusterRole(cluster, clusterRoleInfos);
         } catch (Exception e) {
             LOGGER.warn("class=ClusterPhyManagerImpl||method=buildClusterRole||logicClusterId={}", cluster.getId(), e);
         }
     }
 
     @Override
-    public void buildClusterRole(ConsoleClusterPhyVO cluster, List<RoleCluster> roleClusters) {
+    public void buildClusterRole(ConsoleClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos) {
         try {
-            List<ESRoleClusterVO> roleClusterVOS = ConvertUtil.list2List(roleClusters, ESRoleClusterVO.class);
+            List<ESClusterRoleInfoVO> roleClusterVOS = ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleInfoVO.class);
 
-            List<Long> roleClusterIds = roleClusterVOS.stream().map(ESRoleClusterVO::getId).collect( Collectors.toList());
+            List<Long> roleClusterIds = roleClusterVOS.stream().map(ESClusterRoleInfoVO::getId).collect( Collectors.toList());
             Map<Long, List<ClusterRoleHostInfo>> roleIdsMap = clusterRoleHostInfoService.getByRoleClusterIds(roleClusterIds);
 
-            for (ESRoleClusterVO esRoleClusterVO : roleClusterVOS) {
-                List<ClusterRoleHostInfo> clusterRoleHostInfos = roleIdsMap.get(esRoleClusterVO.getId());
+            for (ESClusterRoleInfoVO esClusterRoleInfoVO : roleClusterVOS) {
+                List<ClusterRoleHostInfo> clusterRoleHostInfos = roleIdsMap.get(esClusterRoleInfoVO.getId());
                 List<ESClusterRoleHostInfoVO> esClusterRoleHostInfoVOS = ConvertUtil.list2List(clusterRoleHostInfos, ESClusterRoleHostInfoVO.class);
-                esRoleClusterVO.setEsClusterRoleHostInfoVO(esClusterRoleHostInfoVOS);
+                esClusterRoleInfoVO.setEsClusterRoleHostInfoVO(esClusterRoleHostInfoVOS);
             }
 
-            cluster.setEsRoleClusterVOS(roleClusterVOS);
+            cluster.setEsClusterRoleInfoVOS(roleClusterVOS);
         } catch (Exception e) {
             LOGGER.warn("class=ClusterPhyManagerImpl||method=buildClusterRole||logicClusterId={}", cluster.getId(), e);
         }
@@ -1046,7 +1046,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private String buildClusterReadAndWriteAddressWhenJoin(ClusterJoinDTO clusterJoinDTO) {
         // 获取集群原有的client-node和master-node的地址和端口号
-        List<ESClusterRoleHostInfoDTO> clusterRoleHosts = clusterJoinDTO.getEsClusterRoleHosts();
+        List<ESClusterRoleHostInfoDTO> clusterRoleHosts = clusterJoinDTO.getRoleClusterHosts();
         if (CollectionUtils.isEmpty(clusterRoleHosts)) {
             return null;
         }
@@ -1319,7 +1319,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ESClusterDTO buildClusterPhy(ClusterJoinDTO param, String operator) {
         ESClusterDTO clusterDTO = ConvertUtil.obj2Obj(param, ESClusterDTO.class);
 
-        String clientAddress = clusterRoleHostInfoService.buildESClientHttpAddressesStr(param.getEsClusterRoleHosts());
+        String clientAddress = clusterRoleHostInfoService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
 
         clusterDTO.setDesc(param.getPhyClusterDesc());
         clusterDTO.setDataCenter(CN.getCode());
@@ -1346,7 +1346,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         esLogicClusterDTO.setType(PRIVATE.getCode());
         esLogicClusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
 
-        Long dataNodeNumber = param.getEsClusterRoleHosts().stream().filter(hosts -> DATA_NODE.getCode() == hosts.getRole()).count();
+        Long dataNodeNumber = param.getRoleClusterHosts().stream().filter(hosts -> DATA_NODE.getCode() == hosts.getRole()).count();
 
         esLogicClusterDTO.setDataNodeNu(dataNodeNumber.intValue());
         esLogicClusterDTO.setLibraDepartmentId("");
@@ -1387,7 +1387,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal("非支持的接入规则");
         }
 
-        List<ESClusterRoleHostInfoDTO> roleClusterHosts = param.getEsClusterRoleHosts();
+        List<ESClusterRoleHostInfoDTO> roleClusterHosts = param.getRoleClusterHosts();
         if (CollectionUtils.isEmpty(roleClusterHosts)) {
             return Result.buildParamIllegal("集群节点信息为空");
         }
@@ -1559,7 +1559,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             throw new AdminOperateException(String.format("删除物理集群(%s)失败", clusterPhy.getCluster()));
         }
 
-        Result<Void> deleteRoleClusterResult = roleClusterService.deleteRoleClusterByClusterId(clusterPhy.getId());
+        Result<Void> deleteRoleClusterResult = clusterRoleInfoService.deleteRoleClusterByClusterId(clusterPhy.getId());
         if (deleteRoleClusterResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群角色(%s)失败", clusterPhy.getCluster()));
         }

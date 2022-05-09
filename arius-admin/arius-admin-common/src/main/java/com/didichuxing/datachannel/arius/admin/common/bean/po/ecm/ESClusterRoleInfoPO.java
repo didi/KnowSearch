@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * ES集群对应角色集群
- * @author didi
- * @since 2020-08-24
+ * @author chengxiang
+ * @date 2022/5/9
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESRoleClusterPO extends BasePO {
+public class ESClusterRoleInfoPO extends BasePO {
     private static final long serialVersionUID = 1L;
 
     private Long              id;

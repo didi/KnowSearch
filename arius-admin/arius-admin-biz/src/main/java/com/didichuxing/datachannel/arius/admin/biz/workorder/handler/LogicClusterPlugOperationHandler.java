@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterPlugOperationOrderDetail;
@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
@@ -60,7 +60,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     private EcmTaskManager             ecmTaskManager;
 
     @Autowired
-    private RoleClusterService roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @Autowired
     private EcmHandleService ecmHandleService;
@@ -169,15 +169,15 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(clusterId);
         esEcmTaskDTO.setPhysicClusterId(clusterPhy.getId().longValue());
 
-        List<RoleCluster> roleClusterList = roleClusterService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleInfoService.getAllRoleClusterByClusterId(
                 clusterPhy.getId());
-        if (CollectionUtils.isEmpty(roleClusterList)) {
+        if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");
         }
 
         List<String> roleNameList = new ArrayList<>();
-        for (RoleCluster roleCluster : roleClusterList) {
-            roleNameList.add(roleCluster.getRole());
+        for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfoList) {
+            roleNameList.add(clusterRoleInfo.getRole());
         }
 
         esEcmTaskDTO.setWorkOrderId(workOrder.getId());

@@ -1,15 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleInfoDAO;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,33 +26,33 @@ import java.util.stream.Collectors;
  * @since 2020-08-24
  */
 @Service
-public class RoleClusterServiceImpl implements RoleClusterService {
+public class ClusterRoleInfoServiceImpl implements ClusterRoleInfoService {
 
     @Autowired
-    private ESRoleClusterDAO  roleClusterDAO;
+    private ESClusterRoleInfoDAO roleClusterDAO;
 
     @Autowired
     private ClusterPhyService clusterPhyService;
 
     @Override
-    public Result<Void> save(ESRoleClusterDTO esRoleClusterDTO) {
-        ESRoleClusterPO esRoleClusterPO = ConvertUtil.obj2Obj(esRoleClusterDTO, ESRoleClusterPO.class);
-        boolean succ = (1 == roleClusterDAO.insert(esRoleClusterPO));
+    public Result<Void> save(ESClusterRoleInfoDTO esClusterRoleInfoDTO) {
+        ESClusterRoleInfoPO esClusterRoleInfoPO = ConvertUtil.obj2Obj(esClusterRoleInfoDTO, ESClusterRoleInfoPO.class);
+        boolean succ = (1 == roleClusterDAO.insert(esClusterRoleInfoPO));
         if(succ) {
-            esRoleClusterDTO.setId(esRoleClusterPO.getId());
+            esClusterRoleInfoDTO.setId(esClusterRoleInfoPO.getId());
         }
 
         return Result.build(succ);
     }
 
     @Override
-    public RoleCluster createRoleClusterIfNotExist(String clusterName, String role) {
+    public ClusterRoleInfo createRoleClusterIfNotExist(String clusterName, String role) {
 
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterName);
 
-        ESRoleClusterPO roleClusterPO = roleClusterDAO.getByClusterIdAndRole(clusterPhy.getId().longValue(), role);
+        ESClusterRoleInfoPO roleClusterPO = roleClusterDAO.getByClusterIdAndRole(clusterPhy.getId().longValue(), role);
         if (roleClusterPO == null) {
-            roleClusterPO = new ESRoleClusterPO();
+            roleClusterPO = new ESClusterRoleInfoPO();
             roleClusterPO.setElasticClusterId(clusterPhy.getId().longValue());
             roleClusterPO.setRoleClusterName(clusterName + "-" + role);
             roleClusterPO.setRole(role);
@@ -64,57 +64,57 @@ public class RoleClusterServiceImpl implements RoleClusterService {
             roleClusterDAO.insert(roleClusterPO);
         }
 
-        return ConvertUtil.obj2Obj(roleClusterPO, RoleCluster.class);
+        return ConvertUtil.obj2Obj(roleClusterPO, ClusterRoleInfo.class);
     }
 
     @Override
-    public RoleCluster getById(Long id) {
-        return ConvertUtil.obj2Obj(roleClusterDAO.getById(id), RoleCluster.class);
+    public ClusterRoleInfo getById(Long id) {
+        return ConvertUtil.obj2Obj(roleClusterDAO.getById(id), ClusterRoleInfo.class);
     }
 
     @Override
-    public List<RoleCluster> getAllRoleClusterByClusterId(Integer clusterId) {
-        List<ESRoleClusterPO> roleClusterPos = roleClusterDAO.listByClusterId(clusterId.toString());
-        return ConvertUtil.list2List(roleClusterPos, RoleCluster.class);
+    public List<ClusterRoleInfo> getAllRoleClusterByClusterId(Integer clusterId) {
+        List<ESClusterRoleInfoPO> roleClusterPos = roleClusterDAO.listByClusterId(clusterId.toString());
+        return ConvertUtil.list2List(roleClusterPos, ClusterRoleInfo.class);
     }
 
     @Override
-    public Map<Long, List<RoleCluster>> getAllRoleClusterByClusterIds(List<Integer> clusterIds) {
+    public Map<Long, List<ClusterRoleInfo>> getAllRoleClusterByClusterIds(List<Integer> clusterIds) {
         List<String> clusterStrIds = clusterIds.stream().map(i -> String.valueOf(i)).collect( Collectors.toList());
-        List<ESRoleClusterPO> roleClusterPos = roleClusterDAO.listByClusterIds(clusterStrIds);
+        List<ESClusterRoleInfoPO> roleClusterPos = roleClusterDAO.listByClusterIds(clusterStrIds);
 
-        Map<Long, List<RoleCluster>> ret = new HashMap<>();
+        Map<Long, List<ClusterRoleInfo>> ret = new HashMap<>();
 
         if (CollectionUtils.isNotEmpty(roleClusterPos)) {
-            List<RoleCluster> list = ConvertUtil.list2List(roleClusterPos, RoleCluster.class);
-            ret = list.stream().collect(Collectors.groupingBy(RoleCluster::getElasticClusterId));
+            List<ClusterRoleInfo> list = ConvertUtil.list2List(roleClusterPos, ClusterRoleInfo.class);
+            ret = list.stream().collect(Collectors.groupingBy(ClusterRoleInfo::getElasticClusterId));
         }
 
         return ret;
     }
 
     @Override
-    public RoleCluster getByClusterIdAndClusterRole(Long clusterId, String roleClusterName) {
+    public ClusterRoleInfo getByClusterIdAndClusterRole(Long clusterId, String roleClusterName) {
         return ConvertUtil.obj2Obj(roleClusterDAO.getByClusterIdAndClusterRole(clusterId, roleClusterName),
-            RoleCluster.class);
+            ClusterRoleInfo.class);
     }
 
     @Override
-    public RoleCluster getByClusterIdAndRole(Long clusterId, String role) {
-        return ConvertUtil.obj2Obj(roleClusterDAO.getByClusterIdAndRole(clusterId, role), RoleCluster.class);
+    public ClusterRoleInfo getByClusterIdAndRole(Long clusterId, String role) {
+        return ConvertUtil.obj2Obj(roleClusterDAO.getByClusterIdAndRole(clusterId, role), ClusterRoleInfo.class);
     }
 
     @Override
-    public RoleCluster getByClusterNameAndRole(String clusterName, String role) {
+    public ClusterRoleInfo getByClusterNameAndRole(String clusterName, String role) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterName);
 
         return clusterPhy == null ? null : getByClusterIdAndRole(clusterPhy.getId().longValue(), role);
     }
 
     @Override
-    public Result<Void> updatePodByClusterIdAndRole(RoleCluster roleCluster) {
-        ESRoleClusterPO esRoleClusterPo = ConvertUtil.obj2Obj(roleCluster, ESRoleClusterPO.class);
-        boolean succ = (1 == roleClusterDAO.update(esRoleClusterPo));
+    public Result<Void> updatePodByClusterIdAndRole(ClusterRoleInfo clusterRoleInfo) {
+        ESClusterRoleInfoPO esClusterRoleInfoPo = ConvertUtil.obj2Obj(clusterRoleInfo, ESClusterRoleInfoPO.class);
+        boolean succ = (1 == roleClusterDAO.update(esClusterRoleInfoPo));
 
         return Result.build(succ);
     }

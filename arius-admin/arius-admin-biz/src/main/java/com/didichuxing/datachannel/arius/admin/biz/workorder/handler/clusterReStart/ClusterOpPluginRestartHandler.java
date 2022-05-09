@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
@@ -27,7 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
     private ESPluginService esPluginService;
 
     @Autowired
-    private RoleClusterService roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @Autowired
     private WorkTaskManager workTaskService;
@@ -129,15 +129,15 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         PluginPO pluginPO = esPluginService.getESPluginById(content.getPluginId());
 
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(Integer.parseInt(pluginPO.getPhysicClusterId()));
-        List<RoleCluster> roleClusterList = roleClusterService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleInfoService.getAllRoleClusterByClusterId(
 				clusterPhy.getId());
-        if (CollectionUtils.isEmpty(roleClusterList)) {
+        if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");
         }
 
         List<String> roleNameList = new ArrayList<>();
-        for (RoleCluster roleCluster : roleClusterList) {
-            roleNameList.add(roleCluster.getRole());
+        for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfoList) {
+            roleNameList.add(clusterRoleInfo.getRole());
         }
         List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseListWithEsPluginAction(clusterPhy.getId(),
                 roleNameList, content.getPluginId(), content.getOperationType()).getData();

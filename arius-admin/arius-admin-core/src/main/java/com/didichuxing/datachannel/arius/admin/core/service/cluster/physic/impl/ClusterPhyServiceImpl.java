@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
@@ -31,7 +31,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
@@ -81,7 +81,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private TemplateLogicService     templateLogicService;
 
     @Autowired
-    private RoleClusterService       roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @Autowired
     private ClusterRoleHostInfoService clusterRoleHostInfoService;
@@ -194,17 +194,17 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
 
         // 添加角色、机器信息
-        List<RoleCluster> roleClusters = roleClusterService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleInfoService.getAllRoleClusterByClusterId(
                 clusterPhy.getId());
-        if (CollectionUtils.isNotEmpty(roleClusters)) {
+        if (CollectionUtils.isNotEmpty(clusterRoleInfos)) {
             // 角色信息
-            clusterPhy.setRoleClusters(roleClusters);
+            clusterPhy.setClusterRoleInfos(clusterRoleInfos);
 
             // 机器信息
             List<ClusterRoleHostInfo> clusterRoleHostInfos = new ArrayList<>();
-            Map<Long, List<ClusterRoleHostInfo>> map = clusterRoleHostInfoService.getByRoleClusterIds(roleClusters.stream().map(RoleCluster::getId).collect(Collectors.toList()));
-            for (RoleCluster roleCluster : roleClusters) {
-                List<ClusterRoleHostInfo> esClusterRoleHostInfos = map.getOrDefault(roleCluster.getId(), new ArrayList<>());
+            Map<Long, List<ClusterRoleHostInfo>> map = clusterRoleHostInfoService.getByRoleClusterIds(clusterRoleInfos.stream().map(ClusterRoleInfo::getId).collect(Collectors.toList()));
+            for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfos) {
+                List<ClusterRoleHostInfo> esClusterRoleHostInfos = map.getOrDefault(clusterRoleInfo.getId(), new ArrayList<>());
                 clusterRoleHostInfos.addAll(esClusterRoleHostInfos);
             }
             clusterPhy.setClusterRoleHostInfos(clusterRoleHostInfos);
@@ -417,8 +417,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<RoleCluster> listPhysicClusterRoles(Integer clusterId) {
-        return roleClusterService.getAllRoleClusterByClusterId(clusterId);
+    public List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId) {
+        return clusterRoleInfoService.getAllRoleClusterByClusterId(clusterId);
     }
 
     @Override

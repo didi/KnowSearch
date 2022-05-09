@@ -1,6 +1,8 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
+package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
+import java.util.List;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESRoleClusterDTO extends BaseDTO {
+public class ClusterRoleInfo extends BaseEntity {
+
     private static final long serialVersionUID = 1L;
 
     private Long id;
@@ -25,7 +28,7 @@ public class ESRoleClusterDTO extends BaseDTO {
     private String roleClusterName;
 
     /**
-     * 集群角色(masternode/datanode/clientnode)
+     * 集群角色(master-node/data-node/client-node)
      */
     private String role;
 
@@ -56,7 +59,6 @@ public class ESRoleClusterDTO extends BaseDTO {
 
     /**
      * 插件包ID列表
-     *
      */
     private String plugIds;
 
@@ -65,6 +67,8 @@ public class ESRoleClusterDTO extends BaseDTO {
      */
     private Boolean deleteFlag;
 
-
+    /**
+     * role所拥有的节点
+     */
+    private List<ClusterRoleHostInfo> clusterRoleHostInfos;
 }
-

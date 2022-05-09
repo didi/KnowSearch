@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 
 /**
  * ES集群表对应各角色主机列表
- * @author didi
- * @since 2020-08-24
+ * @author chengxiang
+ * @date 2022/5/9
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "ES角色集群信息")
-public class ESRoleClusterVO extends BaseVO {
+public class ESClusterRoleInfoVO extends BaseVO {
     private static final long serialVersionUID = 1L;
 
     private Long id;

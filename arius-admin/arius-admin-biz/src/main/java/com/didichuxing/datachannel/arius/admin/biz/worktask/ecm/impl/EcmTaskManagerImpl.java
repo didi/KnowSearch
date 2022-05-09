@@ -34,7 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.BaseClusterHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
@@ -52,7 +52,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
@@ -109,7 +109,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     private ClusterPhyManager      clusterPhyManager;
 
     @Autowired
-    private RoleClusterService     roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @Autowired
     private ClusterRoleHostInfoService clusterRoleHostInfoService;
@@ -746,19 +746,19 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         // 保存全量节点信息到DB
         clusterRoleHostInfoService.createClusterNodeSettings(baseClusterHostOrderDetail.getRoleClusterHosts(), baseClusterHostOrderDetail.getPhyClusterName());
 
-        // 更新es_role_cluster中的podNumber
+        // 更新es_cluster_role_info中的podNumber
         for (EcmParamBase ecmParamBase : WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask)) {
             HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
             if (CollectionUtils.isEmpty(hostsParamBase.getHostList())) {
                 continue;
             }
 
-            RoleCluster roleCluster = roleClusterService.getByClusterNameAndRole(baseClusterHostOrderDetail.getPhyClusterName(), hostsParamBase.getRoleName());
-            if (roleCluster == null) {
+            ClusterRoleInfo clusterRoleInfo = clusterRoleInfoService.getByClusterNameAndRole(baseClusterHostOrderDetail.getPhyClusterName(), hostsParamBase.getRoleName());
+            if (clusterRoleInfo == null) {
                 continue;
             }
 
-            updatePodNumbers(ecmTask, roleCluster);
+            updatePodNumbers(ecmTask, clusterRoleInfo);
         }
     }
 
@@ -969,35 +969,35 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
                 continue;
             }
 
-            RoleCluster roleCluster = roleClusterService.getByClusterNameAndRole(hostsParamBase.getPhyClusterName(), hostsParamBase.getRoleName());
-            if (null == roleCluster) {
+            ClusterRoleInfo clusterRoleInfo = clusterRoleInfoService.getByClusterNameAndRole(hostsParamBase.getPhyClusterName(), hostsParamBase.getRoleName());
+            if (null == clusterRoleInfo) {
                 continue;
             }
 
             // 删除es_cluster_role_host_info数据
-            clusterRoleHostInfoService.deleteByHostNameAndRoleId(hostsParamBase.getHostList(), roleCluster.getId());
+            clusterRoleHostInfoService.deleteByHostNameAndRoleId(hostsParamBase.getHostList(), clusterRoleInfo.getId());
 
-            // 更新es_role_cluster数据中pod的数量 角色节点数目小于角色缩容数目相同，则返回
-            if (roleCluster.getPodNumber() < hostsParamBase.getHostList().size()) {
+            // 更新es_cluster_role_info数据中pod的数量 角色节点数目小于角色缩容数目相同，则返回
+            if (clusterRoleInfo.getPodNumber() < hostsParamBase.getHostList().size()) {
                 return;
             }
 
-            // 更新es_role_cluster数据中pod的数量 角色节点数目大于角色缩容数目，则做数目的更新
-            updatePodNumbers(ecmTask, roleCluster);
+            // 更新es_cluster_role_info数据中pod的数量 角色节点数目大于角色缩容数目，则做数目的更新
+            updatePodNumbers(ecmTask, clusterRoleInfo);
         }
     }
 
-    private void updatePodNumbers(EcmTask ecmTask, RoleCluster roleCluster) {
-        RoleCluster updateRoleCluster = new RoleCluster();
-        updateRoleCluster.setElasticClusterId(ecmTask.getPhysicClusterId());
-        updateRoleCluster.setRole(roleCluster.getRole());
-        updateRoleCluster.setPodNumber(clusterRoleHostInfoService.getPodNumberByRoleId(roleCluster.getId()));
-        Result<Void> result = roleClusterService.updatePodByClusterIdAndRole(updateRoleCluster);
+    private void updatePodNumbers(EcmTask ecmTask, ClusterRoleInfo clusterRoleInfo) {
+        ClusterRoleInfo updateClusterRoleInfo = new ClusterRoleInfo();
+        updateClusterRoleInfo.setElasticClusterId(ecmTask.getPhysicClusterId());
+        updateClusterRoleInfo.setRole(clusterRoleInfo.getRole());
+        updateClusterRoleInfo.setPodNumber(clusterRoleHostInfoService.getPodNumberByRoleId(clusterRoleInfo.getId()));
+        Result<Void> result = clusterRoleInfoService.updatePodByClusterIdAndRole(updateClusterRoleInfo);
         if (result.failed()) {
             LOGGER.error(
                     "class=EcmTaskManagerImpl||method=deleteRoleCluster||clusterId={}||role={}"
                             + "msg=failed to update roleCluster",
-                    ecmTask.getPhysicClusterId(), roleCluster.getRole());
+                    ecmTask.getPhysicClusterId(), clusterRoleInfo.getRole());
         }
     }
 
@@ -1038,7 +1038,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
         //1、更新集群角色的版本
         for (String role : ecmTask.getClusterNodeRole().split(",")) {
-            Result<Void> result = roleClusterService.updateVersionByClusterIdAndRole(ecmTask.getPhysicClusterId(), role,
+            Result<Void> result = clusterRoleInfoService.updateVersionByClusterIdAndRole(ecmTask.getPhysicClusterId(), role,
                 tuple.getV2());
             if (null != result && result.failed()) {
                 LOGGER.error(
@@ -1105,11 +1105,11 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     private void updateRoleClusterNumber(EcmTask ecmTask, EcmParamBase ecmParamBase) {
         if (hasCallBackRoleNumber(ecmTask)) {
-            RoleCluster roleCluster = ConvertUtil.obj2Obj(ecmParamBase, RoleCluster.class);
-            roleCluster.setElasticClusterId(ecmParamBase.getPhyClusterId());
-            roleCluster.setPodNumber(ecmParamBase.getNodeNumber());
-            roleCluster.setRole(ecmParamBase.getRoleName());
-            Result<Void> updateResult = roleClusterService.updatePodByClusterIdAndRole(roleCluster);
+            ClusterRoleInfo clusterRoleInfo = ConvertUtil.obj2Obj(ecmParamBase, ClusterRoleInfo.class);
+            clusterRoleInfo.setElasticClusterId(ecmParamBase.getPhyClusterId());
+            clusterRoleInfo.setPodNumber(ecmParamBase.getNodeNumber());
+            clusterRoleInfo.setRole(ecmParamBase.getRoleName());
+            Result<Void> updateResult = clusterRoleInfoService.updatePodByClusterIdAndRole(clusterRoleInfo);
             if (updateResult.failed()) {
                 LOGGER.error("class=EcmTaskManagerImpl||method=updateRoleClusterNumber||clusterId={}"
                              + "||msg=failed to update es role number",

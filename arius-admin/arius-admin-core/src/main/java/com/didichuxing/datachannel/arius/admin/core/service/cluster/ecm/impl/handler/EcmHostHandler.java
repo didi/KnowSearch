@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
@@ -29,7 +29,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackag
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum;
@@ -45,7 +45,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 @Service("ecmHostHandler")
 public class EcmHostHandler extends AbstractEcmBaseHandle {
     @Autowired
-    private RoleClusterService roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @Autowired
     private ESPluginService          esPluginService;
@@ -93,25 +93,25 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
             hostCreateActionParam.setImageName(hostCreateActionParamResult.getData().getImageName());
         }
 
-        // 保存集群角色信息 es_role_cluster
+        // 保存集群角色信息 es_cluster_role_info
         for (HostsCreateActionParam hostCreateActionParam : hostCreateActionParamList) {
             // 角色集群 信息入库
-            ESRoleClusterDTO esRoleClusterDTO = new ESRoleClusterDTO();
-            esRoleClusterDTO.setElasticClusterId(hostCreateActionParam.getPhyClusterId());
+            ESClusterRoleInfoDTO esClusterRoleInfoDTO = new ESClusterRoleInfoDTO();
+            esClusterRoleInfoDTO.setElasticClusterId(hostCreateActionParam.getPhyClusterId());
             if (hostCreateActionParam.getRoleName().startsWith(hostCreateActionParam.getPhyClusterName())) {
-                esRoleClusterDTO.setRoleClusterName(hostCreateActionParam.getRoleName());
+                esClusterRoleInfoDTO.setRoleClusterName(hostCreateActionParam.getRoleName());
             } else {
-                esRoleClusterDTO.setRoleClusterName(
+                esClusterRoleInfoDTO.setRoleClusterName(
                     hostCreateActionParam.getPhyClusterName() + "-" + hostCreateActionParam.getRoleName());
             }
-            esRoleClusterDTO.setRole(hostCreateActionParam.getRoleName());
-            esRoleClusterDTO.setPodNumber(0);
-            esRoleClusterDTO.setPidCount(hostCreateActionParam.getPidCount());
-            esRoleClusterDTO.setMachineSpec(hostCreateActionParam.getMachineSpec());
-            esRoleClusterDTO.setCfgId(INVALID_VALUE.intValue());
-            esRoleClusterDTO.setEsVersion(hostCreateActionParam.getEsVersion());
+            esClusterRoleInfoDTO.setRole(hostCreateActionParam.getRoleName());
+            esClusterRoleInfoDTO.setPodNumber(0);
+            esClusterRoleInfoDTO.setPidCount(hostCreateActionParam.getPidCount());
+            esClusterRoleInfoDTO.setMachineSpec(hostCreateActionParam.getMachineSpec());
+            esClusterRoleInfoDTO.setCfgId(INVALID_VALUE.intValue());
+            esClusterRoleInfoDTO.setEsVersion(hostCreateActionParam.getEsVersion());
 
-            roleClusterService.save(esRoleClusterDTO);
+            clusterRoleInfoService.save(esClusterRoleInfoDTO);
         }
         return Result.buildSucc(hostCreateActionParamResult.getData().getPhyClusterId());
     }

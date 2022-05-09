@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.LogicClusterInfoSource;
@@ -33,8 +33,8 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
 
     @Test
     public void roleListTest() throws IOException {
-        Result<List<ESRoleClusterVO>> result = ESPhyClusterControllerMethod.roleList(phyClusterInfo.getPhyClusterId());
-        Assertions.assertEquals(result.getData().size(), phyClusterInfo.getConsoleClusterPhyVO().getEsRoleClusterVOS().size());
+        Result<List<ESClusterRoleInfoVO>> result = ESPhyClusterControllerMethod.roleList(phyClusterInfo.getPhyClusterId());
+        Assertions.assertEquals(result.getData().size(), phyClusterInfo.getConsoleClusterPhyVO().getEsClusterRoleInfoVOS().size());
     }
 
     @Test

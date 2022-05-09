@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,7 +44,7 @@ public class ESClusterConfigController {
     private ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private RoleClusterService roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @GetMapping("/{clusterId}/list")
     @ResponseBody
@@ -65,9 +65,9 @@ public class ESClusterConfigController {
     @ResponseBody
     @ApiOperation(value = "获取可操作配置文件的ES集群角色")
     public Result<Set<String>> gainEsClusterRoles(@PathVariable Long clusterId) {
-        List<RoleCluster> roleClusters = roleClusterService.getAllRoleClusterByClusterId(clusterId.intValue());
+        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleInfoService.getAllRoleClusterByClusterId(clusterId.intValue());
         return Result.buildSucc(
-				roleClusters.stream().filter(Objects::nonNull).map(RoleCluster::getRole).collect(Collectors.toSet()));
+				clusterRoleInfos.stream().filter(Objects::nonNull).map(ClusterRoleInfo::getRole).collect(Collectors.toSet()));
     }
 
     @GetMapping("/{type}/template")

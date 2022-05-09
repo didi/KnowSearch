@@ -47,7 +47,7 @@ public class TemplateSrvManagerTest extends AriusAdminApplicationTest {
         esClusterRoleHostInfoDTO1.setRole(ESClusterNodeRoleEnum.MASTER_NODE.getCode());
         esClusterRoleHostInfoDTO1.setIp("10.96.65.63");
         esClusterRoleHostInfoDTO1.setPort("8060");
-        clusterJoinDTO1.setEsClusterRoleHosts(Collections.singletonList(esClusterRoleHostInfoDTO1));
+        clusterJoinDTO1.setRoleClusterHosts(Collections.singletonList(esClusterRoleHostInfoDTO1));
 
         //不具有冷节点的集群
         ClusterJoinDTO clusterJoinDTO2 = new ClusterJoinDTO();
@@ -55,7 +55,7 @@ public class TemplateSrvManagerTest extends AriusAdminApplicationTest {
         esClusterRoleHostInfoDTO2.setRole(ESClusterNodeRoleEnum.CLIENT_NODE.getCode());
         esClusterRoleHostInfoDTO2.setIp("10.168.56.135");
         esClusterRoleHostInfoDTO2.setPort("8060");
-        clusterJoinDTO2.setEsClusterRoleHosts(Collections.singletonList(esClusterRoleHostInfoDTO2));
+        clusterJoinDTO2.setRoleClusterHosts(Collections.singletonList(esClusterRoleHostInfoDTO2));
 //        Assertions.assertTrue(templateSrvManager.CheckTemplateSrv(clusterJoinDTO2,
 //                TemplateServiceEnum.TEMPLATE_COLD.getCode().toString(), "wpk").failed());
     }

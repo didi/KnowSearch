@@ -2,15 +2,15 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostInfoDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +31,7 @@ public class ClusterRoleHostInfoInfoServiceTest extends AriusAdminApplicationTes
     private ESClusterRoleHostInfoDAO esClusterRoleHostInfoDAO;
 
     @Autowired
-    private ESRoleClusterDAO esRoleClusterDAO;
+    private ESClusterRoleInfoDAO esClusterRoleInfoDAO;
 
     @MockBean
     private ESClusterNodeDAO esClusterNodeDAO;
@@ -156,32 +156,32 @@ public class ClusterRoleHostInfoInfoServiceTest extends AriusAdminApplicationTes
 
     @Test
     public void getHostNamesByRoleAndClusterIdTest() {
-        ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
-        ESRoleClusterPO esRoleClusterPO = ConvertUtil.obj2Obj(esRoleClusterDTO, ESRoleClusterPO.class);
+        ESClusterRoleInfoDTO esClusterRoleInfoDTO = CustomDataSource.esRoleClusterDTOFactory();
+        ESClusterRoleInfoPO esClusterRoleInfoPO = ConvertUtil.obj2Obj(esClusterRoleInfoDTO, ESClusterRoleInfoPO.class);
         ESClusterRoleHostInfoDTO esClusterRoleHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        esRoleClusterDAO.insert(esRoleClusterPO);
-        esClusterRoleHostInfoDTO.setRoleClusterId(esRoleClusterPO.getId());
+        esClusterRoleInfoDAO.insert(esClusterRoleInfoPO);
+        esClusterRoleHostInfoDTO.setRoleClusterId(esClusterRoleInfoPO.getId());
         ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esClusterRoleHostInfoDTO, ClusterRoleHostInfo.class);
         clusterRoleHostInfoService.save(clusterRoleHostInfo);
         Assertions.assertTrue(clusterRoleHostInfoService
-                .getHostNamesByRoleAndClusterId(esRoleClusterPO.getElasticClusterId(), esRoleClusterPO.getRole())
+                .getHostNamesByRoleAndClusterId(esClusterRoleInfoPO.getElasticClusterId(), esClusterRoleInfoPO.getRole())
                 .stream()
                 .anyMatch(s -> s.equals(esClusterRoleHostInfoDTO.getHostname())));
     }
 
     @Test
     public void getByRoleAndClusterIdTest() {
-        ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
-        ESRoleClusterPO esRoleClusterPO = ConvertUtil.obj2Obj(esRoleClusterDTO, ESRoleClusterPO.class);
+        ESClusterRoleInfoDTO esClusterRoleInfoDTO = CustomDataSource.esRoleClusterDTOFactory();
+        ESClusterRoleInfoPO esClusterRoleInfoPO = ConvertUtil.obj2Obj(esClusterRoleInfoDTO, ESClusterRoleInfoPO.class);
         ESClusterRoleHostInfoDTO esClusterRoleHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        esRoleClusterDAO.insert(esRoleClusterPO);
-        esClusterRoleHostInfoDTO.setRoleClusterId(esRoleClusterPO.getId());
+        esClusterRoleInfoDAO.insert(esClusterRoleInfoPO);
+        esClusterRoleHostInfoDTO.setRoleClusterId(esClusterRoleInfoPO.getId());
         ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esClusterRoleHostInfoDTO, ClusterRoleHostInfo.class);
         Result<Long> saveResult = clusterRoleHostInfoService.save(clusterRoleHostInfo);
         Assertions.assertTrue(saveResult.success());
         Long roleId = saveResult.getData();
         Assertions.assertTrue(clusterRoleHostInfoService
-                .getByRoleAndClusterId(esRoleClusterPO.getElasticClusterId(), esRoleClusterPO.getRole())
+                .getByRoleAndClusterId(esClusterRoleInfoPO.getElasticClusterId(), esClusterRoleInfoPO.getRole())
                 .stream()
                 .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(roleId)));
     }

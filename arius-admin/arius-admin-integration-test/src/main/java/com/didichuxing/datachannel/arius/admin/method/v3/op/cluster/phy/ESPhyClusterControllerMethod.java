@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 
 import java.io.IOException;
@@ -24,9 +24,9 @@ public class ESPhyClusterControllerMethod {
 
     public static final String PHY_CLUSTER = V3_OP + "/phy/cluster";
 
-    public static Result<List<ESRoleClusterVO>> roleList(Long clusterId) throws IOException {
+    public static Result<List<ESClusterRoleInfoVO>> roleList(Long clusterId) throws IOException {
         String path = String.format("%s/%d/roles", PHY_CLUSTER, clusterId);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESRoleClusterVO>>>(){});
+        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESClusterRoleInfoVO>>>(){});
     }
 
     public static Result<Long> pluginDelete(Long pluginId) throws IOException {

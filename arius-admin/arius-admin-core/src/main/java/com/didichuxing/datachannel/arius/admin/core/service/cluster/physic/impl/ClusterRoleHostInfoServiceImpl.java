@@ -34,11 +34,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESCluster
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostInfoPO;
 
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostInfoDAO;
@@ -61,7 +61,7 @@ public class ClusterRoleHostInfoServiceImpl implements ClusterRoleHostInfoServic
     private ESClusterRoleHostInfoDAO clusterRoleHostInfoDAO;
 
     @Autowired
-    private RoleClusterService   roleClusterService;
+    private ClusterRoleInfoService clusterRoleInfoService;
 
     @Autowired
     private ESClusterNodeService esClusterNodeService;
@@ -169,11 +169,11 @@ public class ClusterRoleHostInfoServiceImpl implements ClusterRoleHostInfoServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveClusterNodeSettings(ClusterJoinDTO param) throws AdminTaskException {
-        if (null == param.getEsClusterRoleHosts()) {
+        if (null == param.getRoleClusterHosts()) {
             return false;
         }
         List<ESClusterRoleHostInfoPO> nodePOList = new ArrayList<>();
-        for (ESClusterRoleHostInfoDTO node: param.getEsClusterRoleHosts()) {
+        for (ESClusterRoleHostInfoDTO node: param.getRoleClusterHosts()) {
             ESClusterRoleHostInfoPO roleClusterHostPO = buildEsClusterHostPO(node);
             setRoleClusterId(roleClusterHostPO, param.getCluster());
             roleClusterHostPO.setStatus(OFFLINE.getCode());
@@ -265,11 +265,11 @@ public class ClusterRoleHostInfoServiceImpl implements ClusterRoleHostInfoServic
 
     @Override
     public List<ClusterRoleHostInfo> getByRoleAndClusterId(Long clusterId, String role) {
-        RoleCluster roleCluster = roleClusterService.getByClusterIdAndRole(clusterId, role);
-        if(null == roleCluster) {
+        ClusterRoleInfo clusterRoleInfo = clusterRoleInfoService.getByClusterIdAndRole(clusterId, role);
+        if(null == clusterRoleInfo) {
             return Arrays.asList();
         }
-        return ConvertUtil.list2List(clusterRoleHostInfoDAO.listByRoleClusterId(roleCluster.getId()),
+        return ConvertUtil.list2List(clusterRoleHostInfoDAO.listByRoleClusterId(clusterRoleInfo.getId()),
                 ClusterRoleHostInfo.class);
     }
 
@@ -626,8 +626,8 @@ public class ClusterRoleHostInfoServiceImpl implements ClusterRoleHostInfoServic
      */
     private void setRoleClusterId(ESClusterRoleHostInfoPO roleClusterHostPO, String cluster) {
             ESClusterNodeRoleEnum role = ESClusterNodeRoleEnum.valueOf(roleClusterHostPO.getRole());
-            RoleCluster roleCluster = roleClusterService.createRoleClusterIfNotExist(cluster, role.getDesc());
-            roleClusterHostPO.setRoleClusterId(roleCluster.getId());
+            ClusterRoleInfo clusterRoleInfo = clusterRoleInfoService.createRoleClusterIfNotExist(cluster, role.getDesc());
+            roleClusterHostPO.setRoleClusterId(clusterRoleInfo.getId());
     }
 
     /**
@@ -690,9 +690,9 @@ public class ClusterRoleHostInfoServiceImpl implements ClusterRoleHostInfoServic
 
         AtomicBoolean flag = new AtomicBoolean(true);
         role2ESRoleClusterHostPOListMap.forEach((role, roleClusterHostPOList) -> {
-            RoleCluster roleCluster = roleClusterService.getByClusterNameAndRole(cluster, valueOf(role).getDesc());
-            roleCluster.setPodNumber(clusterRoleHostInfoDAO.getPodNumberByRoleId(roleCluster.getId()));
-            Result<Void> result = roleClusterService.updatePodByClusterIdAndRole(roleCluster);
+            ClusterRoleInfo clusterRoleInfo = clusterRoleInfoService.getByClusterNameAndRole(cluster, valueOf(role).getDesc());
+            clusterRoleInfo.setPodNumber(clusterRoleHostInfoDAO.getPodNumberByRoleId(clusterRoleInfo.getId()));
+            Result<Void> result = clusterRoleInfoService.updatePodByClusterIdAndRole(clusterRoleInfo);
             if (result.failed()) {
                 flag.set(false);
             }
