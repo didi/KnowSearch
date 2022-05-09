@@ -22,7 +22,7 @@ public interface AppLogicTemplateAuthService {
      * @param delete 是否执行删除操作
      * @return
      */
-    boolean deleteExcessTemplateAuthsIfNeed(boolean delete);
+    boolean deleteRedundancyTemplateAuths(boolean delete);
 
     /**
      * 在逻辑模板权限表中设置APP对某逻辑模板的权限

@@ -140,29 +140,34 @@ public class IndicesManagerImpl implements IndicesManager {
         Map<String, List<String>> cluster2IndexNameListMap = ConvertUtil.list2MapOfList(params,
                 IndicesOpenOrCloseDTO::getClusterPhyName, IndicesOpenOrCloseDTO::getIndex);
 
-        cluster2IndexNameListMap.forEach((cluster, indexNameList) -> {
+        for (Map.Entry<String, List<String>> entry : cluster2IndexNameListMap.entrySet()) {
+            String cluster = entry.getKey();
+            List<String> indexNameList = entry.getValue();
             try {
-                if (esIndexService.syncBatchCloseIndices(cluster, indexNameList, 2)) {
-                    Result<Boolean> result = batchSetIndexStatus(cluster, indexNameList, indexNewStatus);
-                    if(result.success()) {
-                        if(indexNewStatus) {
-                            operateRecordService.save(INDEX_OP, OperationEnum.OPEN_INDEX, null,
-                                    String.format("批量开启%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)),
-                                    operator);
-                        } else {
-                            operateRecordService.save(INDEX_OP, OperationEnum.CLOSE_INDEX, null,
-                                    String.format("批量关闭%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)),
-                                    operator);
-                        }
-                    }
+                boolean syncOpenOrCloseResult = indexNewStatus ? esIndexService.syncBatchOpenIndices(cluster, indexNameList, 3) :
+                        esIndexService.syncBatchCloseIndices(cluster, indexNameList, 3);
+                if (!syncOpenOrCloseResult) {
+                    return Result.buildFail("批量开启或关闭索引失败");
+                }
+
+                Result<Boolean> setCatIndexResult = batchSetIndexStatus(cluster, indexNameList, indexNewStatus);
+                if (!setCatIndexResult.success()) {
+                    return Result.buildFail("批量更新索引状态失败");
+                }
+
+                if (indexNewStatus) {
+                    operateRecordService.save(INDEX_OP, OperationEnum.OPEN_INDEX, null,
+                            String.format("批量开启%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
+                } else {
+                    operateRecordService.save(INDEX_OP, OperationEnum.CLOSE_INDEX, null,
+                            String.format("批量关闭%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
                 }
             } catch (Exception e) {
                 LOGGER.error(
                         "class=IndicesManagerImpl||method=batchUpdateIndexStatus||cluster={}||indexNameList={}||errMsg={}",
                         cluster, ListUtils.strList2String(indexNameList), e.getMessage(), e);
             }
-        });
-        // 防止refresh操作没及时生成segment, 就立马触发查询
+        }
         sleep(1000L);
         return Result.buildSucc(true);
     }
