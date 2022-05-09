@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.SinkManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.SinkSdkAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkIDCTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateDeployInfoVO;
@@ -14,7 +15,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -120,13 +120,13 @@ public class SinkManagerImpl implements SinkManager {
         deployInfoVO.setBaseInfo(baseInfo);
 
         Map<String, SinkSdkIDCTemplateDeployInfoVO.SinkSdkIDCTemplateMasterSlaveMeta> idcTemplateMetas = new HashMap<>();
-        for (IndexTemplatePhy master : templateLogicWithPhysical.fetchMasterPhysicalTemplates()) {
+        for (IndexTemplatePhyInfo master : templateLogicWithPhysical.fetchMasterPhysicalTemplates()) {
             SinkSdkIDCTemplateDeployInfoVO.SinkSdkIDCTemplateMasterSlaveMeta meta =
                     new SinkSdkIDCTemplateDeployInfoVO.SinkSdkIDCTemplateMasterSlaveMeta();
             meta.setMasterInfo(buildPhysicalDeployVO(master));
             meta.setSlaveInfos(new ArrayList<>());
 
-            for (IndexTemplatePhy slave : templateLogicWithPhysical.fetchMasterSlaves(master.getGroupId())) {
+            for (IndexTemplatePhyInfo slave : templateLogicWithPhysical.fetchMasterSlaves(master.getGroupId())) {
                 meta.getSlaveInfos().add(buildPhysicalDeployVO(slave));
             }
 
@@ -157,7 +157,7 @@ public class SinkManagerImpl implements SinkManager {
 
         IndexTemplateInfo templateLogic = templateLogicList.get(templateLogicList.size() - 1);
 
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService
                 .getTemplateByLogicId(templateLogic.getId());
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
@@ -186,7 +186,7 @@ public class SinkManagerImpl implements SinkManager {
 
         IndexTemplateInfo templateLogic = templateLogicList.get(templateLogicList.size() - 1);
 
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService
                 .getTemplateByLogicId(templateLogic.getId());
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
@@ -270,7 +270,7 @@ public class SinkManagerImpl implements SinkManager {
 
     private List<SinkSdkTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
         List<SinkSdkTemplatePhysicalDeployVO> slavesInfos = Lists.newArrayList();
-        for (IndexTemplatePhy physical : logicWithPhysical.getPhysicals()) {
+        for (IndexTemplatePhyInfo physical : logicWithPhysical.getPhysicals()) {
             if (physical.getRole().equals( TemplateDeployRoleEnum.MASTER.getCode())) {
                 continue;
             }
@@ -283,7 +283,7 @@ public class SinkManagerImpl implements SinkManager {
         return buildPhysicalDeployVO(logicWithPhysical.getMasterPhyTemplate());
     }
 
-    private SinkSdkTemplatePhysicalDeployVO buildPhysicalDeployVO(IndexTemplatePhy physical) {
+    private SinkSdkTemplatePhysicalDeployVO buildPhysicalDeployVO(IndexTemplatePhyInfo physical) {
         if (physical == null) {
             return null;
         }

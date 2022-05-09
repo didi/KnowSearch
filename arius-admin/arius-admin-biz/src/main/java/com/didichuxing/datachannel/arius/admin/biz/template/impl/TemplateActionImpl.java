@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -25,10 +26,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateDistributedRack;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterConfigProvider;
@@ -128,11 +128,11 @@ public class TemplateActionImpl implements TemplateAction {
             logicDTO.setHotTime(expectHotTime);
         }
 
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getTemplateByLogicId(logicId);
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.getTemplateByLogicId(logicId);
         if (!CollectionUtils.isEmpty(templatePhysicals) && (expectQuota > templateLogic.getQuota())) {
             double deltaQuota = (expectQuota - templateLogic.getQuota()) / templatePhysicals.size();
             if (deltaQuota > 0) {
-                for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+                for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
                     ClusterLogic clusterLogic = clusterLogicService
                         .getClusterLogicByRack(templatePhysical.getCluster(), templatePhysical.getRack());
                     Result<TemplateDistributedRack> distributorResult = increaseTemplateDistributedRack(
@@ -234,7 +234,7 @@ public class TemplateActionImpl implements TemplateAction {
 
     private Result<Integer> handleCreateWithAutoDistributeResource(IndexTemplateInfoDTO logicDTO, String operator) throws AdminOperateException {
         int indexDefaultWriterSetFlags = -1;
-        for (IndexTemplatePhysicalDTO physicalDTO : logicDTO.getPhysicalInfos()) {
+        for (IndexTemplatePhysicalInfoDTO physicalDTO : logicDTO.getPhysicalInfos()) {
             if (StringUtils.isNotBlank(physicalDTO.getCluster()) && physicalDTO.getRack() != null) {
                 handleIndexTemplatePhysical(physicalDTO);
                 continue;
@@ -265,7 +265,7 @@ public class TemplateActionImpl implements TemplateAction {
         return templateLogicManager.createLogicTemplate(logicDTO, operator);
     }
 
-    private void handleIndexTemplatePhysical(IndexTemplatePhysicalDTO physicalDTO) {
+    private void handleIndexTemplatePhysical(IndexTemplatePhysicalInfoDTO physicalDTO) {
         if (physicalDTO.getDefaultWriterFlags() == null) {
             physicalDTO.setDefaultWriterFlags(true);
         }
@@ -290,13 +290,13 @@ public class TemplateActionImpl implements TemplateAction {
         }
 
         //获取逻辑模板对应的一个物理模板
-        IndexTemplatePhy indexTemplatePhy = logicTemplateWithPhysicalsById.getPhysicals().get(0);
-        if (AriusObjUtils.isNull(indexTemplatePhy)) {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = logicTemplateWithPhysicalsById.getPhysicals().get(0);
+        if (AriusObjUtils.isNull(indexTemplatePhyInfo)) {
             return Result.buildFail("物理集群信息为空");
         }
 
         //获取对应的物理集群的信息
-        ClusterPhy clusterPhyByName = clusterPhyService.getClusterByName(indexTemplatePhy.getCluster());
+        ClusterPhy clusterPhyByName = clusterPhyService.getClusterByName(indexTemplatePhyInfo.getCluster());
         if (AriusObjUtils.isNull(clusterPhyByName)) {
             return Result.buildFail("物理集群信息为空");
         }

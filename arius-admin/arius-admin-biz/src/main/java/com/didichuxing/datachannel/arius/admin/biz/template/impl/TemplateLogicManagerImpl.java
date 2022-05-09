@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
@@ -299,7 +299,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 校验资源与模板的数据中心是否匹配
-        List<String> clusters = param.getPhysicalInfos().stream().map(IndexTemplatePhysicalDTO::getCluster)
+        List<String> clusters = param.getPhysicalInfos().stream().map(IndexTemplatePhysicalInfoDTO::getCluster)
                 .collect(Collectors.toList());
         for (String cluster : clusters) {
             ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
@@ -312,7 +312,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     private void setIndexTemplateLogicHotTime(IndexTemplateInfoDTO param) {
-        for (IndexTemplatePhysicalDTO physicalDTO : param.getPhysicalInfos()) {
+        for (IndexTemplatePhysicalInfoDTO physicalDTO : param.getPhysicalInfos()) {
             physicalDTO.setLogicId(NOT_CHECK);
             physicalDTO.setName(param.getName());
             physicalDTO.setExpression(param.getExpression());
@@ -450,10 +450,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 templateLogic.setHasDCDR(templateLogic.getHasDCDR());
                 
                 //设置模板关联物理集群
-                List<IndexTemplatePhy> templatePhyList = templatePhyService.getTemplateByLogicId(templateLogic.getId());
+                List<IndexTemplatePhyInfo> templatePhyList = templatePhyService.getTemplateByLogicId(templateLogic.getId());
                 if (CollectionUtils.isNotEmpty(templatePhyList)) {
                     templateLogic.setClusterPhies(
-                            templatePhyList.stream().map(IndexTemplatePhy::getCluster).collect(Collectors.toList()));
+                            templatePhyList.stream().map(IndexTemplatePhyInfo::getCluster).collect(Collectors.toList()));
                 }
             } catch (Exception e) {
                 LOGGER.warn("class=TemplateLogicManager||method=fetchConsoleTemplate||aggregate={}",
@@ -608,12 +608,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildFail("模板不存在");
         }
 
-        List<IndexTemplatePhy> templatePhyList = templatePhyService.getTemplateByLogicId(indexTemplateInfo.getId());
+        List<IndexTemplatePhyInfo> templatePhyList = templatePhyService.getTemplateByLogicId(indexTemplateInfo.getId());
         if (CollectionUtils.isEmpty(templatePhyList)) {
             return Result.buildSucc(false);
         }
 
-        List<String> clusterPhyNameList = templatePhyList.stream().map(IndexTemplatePhy::getCluster).distinct().collect(Collectors.toList());
+        List<String> clusterPhyNameList = templatePhyList.stream().map(IndexTemplatePhyInfo::getCluster).distinct().collect(Collectors.toList());
         for (String clusterPhyName : clusterPhyNameList) {
             ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
             if (null == clusterPhy) {
@@ -680,7 +680,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         // 获取逻辑集群对应的物理模板的物理集群名称列表
         List<String> clusterPhyNameList = logicTemplateWithPhysicals.getPhysicals()
                 .stream()
-                .map(IndexTemplatePhy::getCluster)
+                .map(IndexTemplatePhyInfo::getCluster)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -734,8 +734,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         long totalIndexCheckPointDiff = 0;
         try {
             IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(logicId);
-            IndexTemplatePhy slavePhyTemplate  = logicTemplateWithPhysicals.getSlavePhyTemplate();
-            IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
+            IndexTemplatePhyInfo slavePhyTemplate  = logicTemplateWithPhysicals.getSlavePhyTemplate();
+            IndexTemplatePhyInfo masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
             if (null != masterPhyTemplate && null != slavePhyTemplate) {
                 dcdrFlag = templateDcdrManager.syncExistTemplateDCDR(masterPhyTemplate.getId(), slavePhyTemplate.getCluster());
             }
@@ -773,7 +773,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Override
     public Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId) {
         // 根据物理集群名称获取全量逻辑模板列表
-        List<IndexTemplatePhyWithLogic> templateByPhyCluster = templatePhyService.getTemplateByPhyCluster(phyCluster);
+        List<IndexTemplatePhyInfoWithLogic> templateByPhyCluster = templatePhyService.getTemplateByPhyCluster(phyCluster);
 
         // 转化为视图列表展示
         List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
@@ -796,10 +796,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             errMsg.add("所属APP ID不存在：" + templateLogic.getAppId());
         }
 
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getTemplateByLogicId(templateLogic.getId());
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.getTemplateByLogicId(templateLogic.getId());
 
         if (CollectionUtils.isNotEmpty(templatePhysicals)) {
-            List<IndexTemplatePhy> templatePhysicalsMaster = templatePhysicals.stream()
+            List<IndexTemplatePhyInfo> templatePhysicalsMaster = templatePhysicals.stream()
                     .filter(templatePhysical -> templatePhysical.getRole().equals( TemplateDeployRoleEnum.MASTER.getCode()))
                     .collect(Collectors.toList());
 
@@ -818,7 +818,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     /**
      * 构建逻辑模板视图
      */
-    private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyWithLogic param, Integer appId) {
+    private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyInfoWithLogic param, Integer appId) {
         if (param == null) {
             return null;
         }

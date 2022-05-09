@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.In
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhysicalInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Templ
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateAliasDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalInfoDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
 import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasType;
@@ -44,7 +44,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
     @Autowired
     private IndexTemplateInfoDAO indexTemplateInfoDAO;
     @Autowired
-    private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
+    private IndexTemplatePhysicalInfoDAO indexTemplatePhysicalInfoDAO;
     @Autowired
     private ESOpClient esOpClient;
     @Autowired
@@ -185,10 +185,10 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
             return nodesResult;
         }
         //这里需要在同一个物理集群中，否则别名没有意义
-        List<TemplatePhysicalPO> physicalPOList = indexTemplatePhysicalDAO.listByLogicIds(new ArrayList<>(logicIdList));
+        List<IndexTemplatePhysicalInfoPO> physicalPOList = indexTemplatePhysicalInfoDAO.listByLogicIds(new ArrayList<>(logicIdList));
         String cluster = "";
         if (CollectionUtils.isNotEmpty(physicalPOList)) {
-            Set<String> set = physicalPOList.stream().map(TemplatePhysicalPO::getCluster).collect(Collectors.toSet());
+            Set<String> set = physicalPOList.stream().map(IndexTemplatePhysicalInfoPO::getCluster).collect(Collectors.toSet());
             if (set.size() != 1) {
                 return Result.buildFail("索引所在集群不一致！");
             }

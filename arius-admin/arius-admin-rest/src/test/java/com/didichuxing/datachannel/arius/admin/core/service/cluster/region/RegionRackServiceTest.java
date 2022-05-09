@@ -4,10 +4,10 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -57,7 +57,7 @@ public class RegionRackServiceTest extends AriusAdminApplicationTest {
     public void mockRules() {
         Mockito.when(esClusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(new ClusterPhy());
         Mockito.when(esClusterPhyService.getClusterRacks(Mockito.anyString())).thenReturn(RackUtils.racks2Set(racks));
-        Mockito.when(templatePhyService.getTemplateByRegionId(Mockito.anyLong())).thenReturn(Collections.singletonList(new IndexTemplatePhy()));
+        Mockito.when(templatePhyService.getTemplateByRegionId(Mockito.anyLong())).thenReturn(Collections.singletonList(new IndexTemplatePhyInfo()));
     }
 
     @Test

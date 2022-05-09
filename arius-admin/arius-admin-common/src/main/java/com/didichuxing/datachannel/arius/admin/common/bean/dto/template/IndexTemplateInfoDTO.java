@@ -123,5 +123,5 @@ public class IndexTemplateInfoDTO extends PageDTO {
     private Integer                         level;
 
     @ApiModelProperty("物理模板信息")
-    private List<IndexTemplatePhysicalDTO> physicalInfos;
+    private List<IndexTemplatePhysicalInfoDTO> physicalInfos;
 }

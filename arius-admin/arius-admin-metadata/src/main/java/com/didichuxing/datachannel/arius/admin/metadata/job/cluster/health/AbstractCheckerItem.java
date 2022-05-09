@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health;
 
 import com.alibaba.fastjson.JSON;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.ResultLevel;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckRecordPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckWhiteListPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.cluster.HealthCheckESDAO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didiglobal.logi.log.ILog;
@@ -117,10 +117,10 @@ public abstract class AbstractCheckerItem implements ICheckerItem{
         return false;
     }
 
-    protected IndexTemplatePhyWithLogic getIndexTemplateByIndex(String index){
-        Map<String, IndexTemplatePhyWithLogic> indexTemplateMap = clusterHealthCheckJobConfig.getIndexTemplateMap();
-        IndexTemplatePhyWithLogic indexTemplate = null;
-        for(Map.Entry<String, IndexTemplatePhyWithLogic> entry : indexTemplateMap.entrySet()){
+    protected IndexTemplatePhyInfoWithLogic getIndexTemplateByIndex(String index){
+        Map<String, IndexTemplatePhyInfoWithLogic> indexTemplateMap = clusterHealthCheckJobConfig.getIndexTemplateMap();
+        IndexTemplatePhyInfoWithLogic indexTemplate = null;
+        for(Map.Entry<String, IndexTemplatePhyInfoWithLogic> entry : indexTemplateMap.entrySet()){
             String template = entry.getKey();
             if (index.startsWith(template)) {
                 indexTemplate = indexTemplateMap.get(template);

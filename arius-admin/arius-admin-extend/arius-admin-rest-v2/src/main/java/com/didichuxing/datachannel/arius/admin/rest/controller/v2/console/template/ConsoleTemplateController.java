@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
@@ -32,7 +33,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTem
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -273,8 +273,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
         List<CatIndexResult> catIndexResults = Lists.newArrayList();
 
-        List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhy physicalMaster : physicalMasters) {
+        List<IndexTemplatePhyInfo> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhyInfo physicalMaster : physicalMasters) {
             try {
                 catIndexResults.addAll(esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
                     physicalMaster.getExpression()));
@@ -294,15 +294,15 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "获取模板当前限流值接口" )
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
     public Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(@RequestParam("logicId") Integer logicId) throws Exception {    // 一个逻辑模板可能有master slave两种，限流查看时，默认查看master即可
-        List<IndexTemplatePhy> indexTemplatePhysical = templatePhyService.getTemplateByLogicId(logicId);
+        List<IndexTemplatePhyInfo> indexTemplatePhysicalInfo = templatePhyService.getTemplateByLogicId(logicId);
         ConsoleTemplateRateLimitVO consoleTemplateRateLimitVO = new ConsoleTemplateRateLimitVO();
-        IndexTemplatePhy indexTemplatePhysicalMaster = new IndexTemplatePhy();
-        for (IndexTemplatePhy item : indexTemplatePhysical) {
+        IndexTemplatePhyInfo indexTemplatePhysicalMasterInfo = new IndexTemplatePhyInfo();
+        for (IndexTemplatePhyInfo item : indexTemplatePhysicalInfo) {
             if (TemplateDeployRoleEnum.MASTER.getCode().equals(item.getRole())) {
-                indexTemplatePhysicalMaster = item;
+                indexTemplatePhysicalMasterInfo = item;
             }
         }
-        consoleTemplateRateLimitVO.setRateLimit(templatePipelineManager.getRateLimit(indexTemplatePhysicalMaster));
+        consoleTemplateRateLimitVO.setRateLimit(templatePipelineManager.getRateLimit(indexTemplatePhysicalMasterInfo));
         return Result.buildSucc(consoleTemplateRateLimitVO);
     }
 

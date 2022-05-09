@@ -214,10 +214,10 @@ public class CommonManagerImpl implements CommonManager {
 
     @Override
     public Result<List<ThirdpartTemplatePhysicalVO>> listPhysicalTemplate() {
-        List<IndexTemplatePhy> physicals = templatePhyService.listTemplate();
+        List<IndexTemplatePhyInfo> physicals = templatePhyService.listTemplate();
 
         List<ThirdpartTemplatePhysicalVO> result = Lists.newArrayList();
-        for (IndexTemplatePhy physical : physicals) {
+        for (IndexTemplatePhyInfo physical : physicals) {
             ThirdpartTemplatePhysicalVO physicalVO = ConvertUtil.obj2Obj(physical, ThirdpartTemplatePhysicalVO.class);
             physicalVO.setConfigObj( JSON.parseObject(physical.getConfig(), IndexTemplatePhysicalConfig.class));
             result.add(physicalVO);
@@ -228,11 +228,11 @@ public class CommonManagerImpl implements CommonManager {
 
     @Override
     public Result<List<ThirdpartTemplateVO>> listPhysicalWithLogic() {
-        List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics = templatePhyService
+        List<IndexTemplatePhyInfoWithLogic> templatePhysicalWithLogics = templatePhyService
                 .listTemplateWithLogic();
 
         List<ThirdpartTemplateVO> templateVOS = Lists.newArrayList();
-        for (IndexTemplatePhyWithLogic physicalWithLogic : templatePhysicalWithLogics) {
+        for (IndexTemplatePhyInfoWithLogic physicalWithLogic : templatePhysicalWithLogics) {
             ThirdpartTemplateVO templateVO = ConvertUtil.obj2Obj(physicalWithLogic.getLogicTemplate(),
                     ThirdpartTemplateVO.class);
             try {

@@ -7,13 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author d06679
- * @date 2019/3/29
+ * @author chengxiang
+ * @date 2022/5/9
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TemplatePhysicalPO extends BasePO {
+public class IndexTemplatePhysicalInfoPO extends BasePO {
 
     private Long    id;
 

@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
@@ -191,7 +191,7 @@ public class RegionResourceManager {
                                                              CapacityPlanConfig capacityPlanConfig) {
         List<Long> templatePhysicalIds = templatePhyService.getNormalTemplateByCluster(region.getClusterName())
             .stream().filter(indexTemplatePhysical -> belong(indexTemplatePhysical.getRack(), region.getRacks()))
-            .map( IndexTemplatePhy::getId).collect(Collectors.toList());
+            .map( IndexTemplatePhyInfo::getId).collect(Collectors.toList());
         return getTemplateMetrics(templatePhysicalIds, interval, capacityPlanConfig);
     }
 

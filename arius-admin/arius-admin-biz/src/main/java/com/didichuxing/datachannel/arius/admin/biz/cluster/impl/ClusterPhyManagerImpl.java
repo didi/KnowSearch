@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.Templat
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
@@ -34,7 +35,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -188,7 +188,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public boolean copyMapping(String cluster, int retryCount) {
         // 获取物理集群下的所有物理模板
-        List<IndexTemplatePhy> physicals = templatePhyService.getNormalTemplateByCluster(cluster);
+        List<IndexTemplatePhyInfo> physicals = templatePhyService.getNormalTemplateByCluster(cluster);
         if (CollectionUtils.isEmpty(physicals)) {
             LOGGER.info("class=ESClusterPhyServiceImpl||method=copyMapping||cluster={}||msg=copyMapping no template",
                 cluster);
@@ -197,7 +197,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         int succeedCount = 0;
         // 遍历物理模板，copy mapping
-        for (IndexTemplatePhy physical : physicals) {
+        for (IndexTemplatePhyInfo physical : physicals) {
             try {
                 // 获取物理模板对应的逻辑模板
                 IndexTemplateInfo templateLogic = indexTemplateInfoService.getLogicTemplateById(physical.getLogicId());
@@ -229,7 +229,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public void syncTemplateMetaData(String cluster, int retryCount) {
         // 获取物理集群下的所有物理模板
-        List<IndexTemplatePhy> physicals = templatePhyService.getNormalTemplateByCluster(cluster);
+        List<IndexTemplatePhyInfo> physicals = templatePhyService.getNormalTemplateByCluster(cluster);
         if (CollectionUtils.isEmpty(physicals)) {
             LOGGER.info(
                 "class=ESClusterPhyServiceImpl||method=syncTemplateMetaData||cluster={}||msg=syncTemplateMetaData no template",
@@ -238,7 +238,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         // 遍历物理模板
-        for (IndexTemplatePhy physical : physicals) {
+        for (IndexTemplatePhyInfo physical : physicals) {
             try {
                 // 同步模板元数据到ES集群（修改ES集群中的模板）
                 templatePhyManager.syncMeta(physical.getId(), retryCount);
@@ -267,7 +267,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         Set<String> racksToRelease = Sets.newHashSet(racks.split(AdminConstant.RACK_COMMA));
 
         // 获取分配到要释放的rack上的物理模板
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getNormalTemplateByClusterAndRack(cluster,
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.getNormalTemplateByClusterAndRack(cluster,
             racksToRelease);
 
         // 没有模板被分配在要释放的rack上
@@ -277,7 +277,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<String> errMsgList = Lists.newArrayList();
         // 遍历模板，修改模板的rack设置
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             // 去掉要释放的rack后的剩余racks
             String tgtRack = RackUtils.removeRacks(templatePhysical.getRack(), racksToRelease);
 
@@ -557,7 +557,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         IndexTemplateInfoWithPhyTemplates logicTemplateWithPhysicals = indexTemplateInfoService.getLogicTemplateWithPhysicalsById(templateId);
         if (null == logicTemplateWithPhysicals) { return  Result.buildFail(String.format("templateId[%s] is not exist", templateId));}
 
-        IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
+        IndexTemplatePhyInfo masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
         if (null == masterPhyTemplate) {
             return  Result.buildFail(String.format("the physicals of templateId[%s] is empty", templateId));
         }

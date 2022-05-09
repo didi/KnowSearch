@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.security.listener;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateEvent;
@@ -31,7 +31,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
         try {
             if (event instanceof PhysicalTemplateAddEvent) {
                 PhysicalTemplateAddEvent addEvent = (PhysicalTemplateAddEvent) event;
-                IndexTemplatePhy templatePhysical = addEvent.getNewTemplate();
+                IndexTemplatePhyInfo templatePhysical = addEvent.getNewTemplate();
 
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateAddEvent||appid={}||template={}",
                     addEvent.getLogicWithPhysical().getAppId(), templatePhysical.getName());
@@ -43,7 +43,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
 
             if (event instanceof PhysicalTemplateDeleteEvent) {
                 PhysicalTemplateDeleteEvent deleteEvent = (PhysicalTemplateDeleteEvent) event;
-                IndexTemplatePhy templatePhysical = deleteEvent.getDelTemplate();
+                IndexTemplatePhyInfo templatePhysical = deleteEvent.getDelTemplate();
 
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateDeleteEvent||appid={}||template={}",
                     deleteEvent.getLogicWithPhysical().getAppId(), templatePhysical.getName());

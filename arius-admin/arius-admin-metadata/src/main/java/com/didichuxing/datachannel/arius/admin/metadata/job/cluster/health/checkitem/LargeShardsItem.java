@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
@@ -85,7 +85,7 @@ public class LargeShardsItem extends AbstractCheckerItem {
         inf.append(",DocNumber:").append(priShardDoc);
         inf.append(",ShardSize:").append((double) priShardSize / (1024 * 1024 * 1024));
 
-        IndexTemplatePhyWithLogic template = getIndexTemplateByIndex(index);
+        IndexTemplatePhyInfoWithLogic template = getIndexTemplateByIndex(index);
         if(null == template){
             return;
         }

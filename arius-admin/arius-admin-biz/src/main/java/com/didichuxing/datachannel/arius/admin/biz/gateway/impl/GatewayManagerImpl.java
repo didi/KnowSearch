@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbe
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
@@ -26,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.Gatewa
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -162,10 +162,10 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<Map<String, GatewayTemplatePhysicalVO>> getTemplateMap(String cluster) {
-        List<IndexTemplatePhy> indexTemplatePhysicals = templatePhyService
+        List<IndexTemplatePhyInfo> indexTemplatePhysicalInfos = templatePhyService
                 .getNormalTemplateByCluster(cluster);
 
-        if (CollectionUtils.isEmpty(indexTemplatePhysicals)) {
+        if (CollectionUtils.isEmpty(indexTemplatePhysicalInfos)) {
             return Result.buildSucc( Maps.newHashMap());
         }
 
@@ -177,7 +177,7 @@ public class GatewayManagerImpl implements GatewayManager {
                 IndexTemplateAlias::getLogicId);
 
         Map<String, GatewayTemplatePhysicalVO> result = Maps.newHashMap();
-        for (IndexTemplatePhy templatePhysical : indexTemplatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : indexTemplatePhysicalInfos) {
             try {
                 GatewayTemplatePhysicalVO templatePhysicalVO = ConvertUtil.obj2Obj(templatePhysical,
                         GatewayTemplatePhysicalVO.class);
@@ -260,7 +260,7 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     /**************************************** private method *************************************************/
-    private GatewayTemplatePhysicalDeployVO buildPhysicalDeployVO(IndexTemplatePhy physical) {
+    private GatewayTemplatePhysicalDeployVO buildPhysicalDeployVO(IndexTemplatePhyInfo physical) {
         if (physical == null) {
             return null;
         }
@@ -407,7 +407,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     private List<GatewayTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
         List<GatewayTemplatePhysicalDeployVO> slavesInfos = Lists.newArrayList();
-        for (IndexTemplatePhy physical : logicWithPhysical.getPhysicals()) {
+        for (IndexTemplatePhyInfo physical : logicWithPhysical.getPhysicals()) {
             if (physical.getRole().equals( TemplateDeployRoleEnum.MASTER.getCode())) {
                 continue;
             }

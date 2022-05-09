@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterDeleteOrderDetail;
@@ -61,7 +61,7 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
         }
 
         List<String> templatePhyNameList = templatePhyService.getNormalTemplateByCluster(content.getPhyClusterName())
-            .stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
+            .stream().map(IndexTemplatePhyInfo::getName).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(templatePhyNameList)) {
             return Result.buildFail(String.format("物理集群[%s]中已经存在模板[%s]", content.getPhyClusterName(),
                 ListUtils.strList2String(templatePhyNameList)));

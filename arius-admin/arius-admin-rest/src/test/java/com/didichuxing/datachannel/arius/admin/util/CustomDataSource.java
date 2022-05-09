@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
@@ -22,7 +23,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
@@ -238,8 +238,8 @@ public class CustomDataSource {
         return po;
     }
 
-    public static TemplatePhysicalPO templatePhysicalSource() {
-        TemplatePhysicalPO po = new TemplatePhysicalPO();
+    public static IndexTemplatePhysicalInfoPO templatePhysicalSource() {
+        IndexTemplatePhysicalInfoPO po = new IndexTemplatePhysicalInfoPO();
         po.setLogicId(1);
         po.setName("test");
         po.setExpression("1");
@@ -418,10 +418,10 @@ public class CustomDataSource {
         return list;
     }
 
-    public static List<TemplatePhysicalPO> getTemplatePhysicalPOList() {
-        List<TemplatePhysicalPO> list = new ArrayList<>();
+    public static List<IndexTemplatePhysicalInfoPO> getTemplatePhysicalPOList() {
+        List<IndexTemplatePhysicalInfoPO> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++) {
-            TemplatePhysicalPO po = CustomDataSource.templatePhysicalSource();
+            IndexTemplatePhysicalInfoPO po = CustomDataSource.templatePhysicalSource();
             list.add(po);
         }
         return list;
@@ -447,17 +447,17 @@ public class CustomDataSource {
         return list;
     }
 
-    public static IndexTemplatePhy getIndexTemplatePhy() {
-        IndexTemplatePhy indexTemplatePhy = new IndexTemplatePhy();
-        indexTemplatePhy.setId(1L);
-        indexTemplatePhy.setLogicId(1);
-        return indexTemplatePhy;
+    public static IndexTemplatePhyInfo getIndexTemplatePhy() {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = new IndexTemplatePhyInfo();
+        indexTemplatePhyInfo.setId(1L);
+        indexTemplatePhyInfo.setLogicId(1);
+        return indexTemplatePhyInfo;
     }
 
-    public static List<IndexTemplatePhy> getIndexTemplatePhyList() {
-        List<IndexTemplatePhy> list = new ArrayList<>();
+    public static List<IndexTemplatePhyInfo> getIndexTemplatePhyList() {
+        List<IndexTemplatePhyInfo> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++ ) {
-            IndexTemplatePhy po = CustomDataSource.getIndexTemplatePhy();
+            IndexTemplatePhyInfo po = CustomDataSource.getIndexTemplatePhy();
             po.setId((long) i);
             po.setLogicId(i);
             po.setCluster(PHY_CLUSTER_NAME);

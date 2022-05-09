@@ -10,9 +10,10 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.Templa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
@@ -24,10 +25,8 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplate
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
@@ -127,14 +126,14 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     public boolean checkMeta() {
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.listTemplate();
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.listTemplate();
 
         List<IndexTemplateInfo> templateLogics = indexTemplateInfoService.getAllLogicTemplates();
         Map<Integer, IndexTemplateInfo> logicId2IndexTemplateLogicMap = ConvertUtil.list2Map(templateLogics,
                 IndexTemplateInfo::getId);
 
-        Multimap<String, IndexTemplatePhy> cluster2IndexTemplatePhysicalMultiMap = ConvertUtil
-                .list2MulMap(templatePhysicals, IndexTemplatePhy::getCluster);
+        Multimap<String, IndexTemplatePhyInfo> cluster2IndexTemplatePhysicalMultiMap = ConvertUtil
+                .list2MulMap(templatePhysicals, IndexTemplatePhyInfo::getCluster);
 
         Set<String> esClusters = clusterPhyService.listAllClusters().stream().map( ClusterPhy::getCluster)
                 .collect( Collectors.toSet());
@@ -143,9 +142,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             int tomorrowIndexNotCreateCount = 0;
             int expireIndexNotDeleteCount = 0;
 
-            Collection<IndexTemplatePhy> clusterTemplates = cluster2IndexTemplatePhysicalMultiMap.get(cluster);
+            Collection<IndexTemplatePhyInfo> clusterTemplates = cluster2IndexTemplatePhysicalMultiMap.get(cluster);
 
-            for (IndexTemplatePhy templatePhysical : clusterTemplates) {
+            for (IndexTemplatePhyInfo templatePhysical : clusterTemplates) {
                 try {
                     Result<Void> result = checkMetaInner(templatePhysical, logicId2IndexTemplateLogicMap, esClusters);
                     if (result.success()) {
@@ -176,30 +175,30 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     public void syncMeta(Long physicalId, int retryCount) throws ESOperateException {
 
         // 从数据库获取物理模板
-        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(physicalId);
-        if (indexTemplatePhy == null) {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templatePhyService.getTemplateById(physicalId);
+        if (indexTemplatePhyInfo == null) {
             return;
         }
 
         // 从ES集群获取模板配置
-        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(indexTemplatePhy.getCluster(),
-                indexTemplatePhy.getName());
+        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(indexTemplatePhyInfo.getCluster(),
+                indexTemplatePhyInfo.getName());
 
         if (templateConfig == null) {
             // es集群中还没有模板，创建
-            esTemplateService.syncCreate(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), indexTemplatePhy.getExpression(),
-                    indexTemplatePhy.getRack(), indexTemplatePhy.getShard(), indexTemplatePhy.getShardRouting(), retryCount);
+            esTemplateService.syncCreate(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName(), indexTemplatePhyInfo.getExpression(),
+                    indexTemplatePhyInfo.getRack(), indexTemplatePhyInfo.getShard(), indexTemplatePhyInfo.getShardRouting(), retryCount);
 
         } else {
             // 校验表达式
             if (
-                    !indexTemplatePhy.getExpression().equals(templateConfig.getTemplate()) &&
-                            esTemplateService.syncUpdateExpression(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
-                                    indexTemplatePhy.getExpression(), retryCount)
+                    !indexTemplatePhyInfo.getExpression().equals(templateConfig.getTemplate()) &&
+                            esTemplateService.syncUpdateExpression(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName(),
+                                    indexTemplatePhyInfo.getExpression(), retryCount)
             ) {
                 // 表达式不同（表达式发生变化），同步到ES集群
                 LOGGER.info("class=TemplatePhyManagerImpl||method=syncMeta||msg=syncUpdateExpression succ||template={}||srcExp={}||tgtExp={}",
-                        indexTemplatePhy.getName(), templateConfig.getTemplate(), indexTemplatePhy.getExpression());
+                        indexTemplatePhyInfo.getName(), templateConfig.getTemplate(), indexTemplatePhyInfo.getExpression());
             }
 
             // 标志shard或rack是否需要修改
@@ -209,27 +208,27 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             String shardNum = settings.get(INDEX_SHARD_NUM);
 
             // 校验shard个数
-            if (!String.valueOf(indexTemplatePhy.getShard()).equals(shardNum)) {
+            if (!String.valueOf(indexTemplatePhyInfo.getShard()).equals(shardNum)) {
                 editShardOrRack = true;
-                shardNum = String.valueOf(indexTemplatePhy.getShard());
+                shardNum = String.valueOf(indexTemplatePhyInfo.getShard());
             }
 
             // 校验rack
             if (
-                    StringUtils.isNotBlank(indexTemplatePhy.getRack()) &&
+                    StringUtils.isNotBlank(indexTemplatePhyInfo.getRack()) &&
                             (!settings.containsKey(TEMPLATE_INDEX_INCLUDE_RACK)
-                                    || !indexTemplatePhy.getRack().equals(settings.get(TEMPLATE_INDEX_INCLUDE_RACK)))
+                                    || !indexTemplatePhyInfo.getRack().equals(settings.get(TEMPLATE_INDEX_INCLUDE_RACK)))
             ) {
                 editShardOrRack = true;
-                rack = indexTemplatePhy.getRack();
+                rack = indexTemplatePhyInfo.getRack();
             }
 
-            if (editShardOrRack && esTemplateService.syncUpdateRackAndShard(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), rack,
-                    Integer.valueOf(shardNum), indexTemplatePhy.getShardRouting(), retryCount)) {
+            if (editShardOrRack && esTemplateService.syncUpdateRackAndShard(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName(), rack,
+                    Integer.valueOf(shardNum), indexTemplatePhyInfo.getShardRouting(), retryCount)) {
                 // 同步变化到ES集群
                     LOGGER.info(
                             "class=TemplatePhyManagerImpl||method=syncMeta||msg=syncUpdateRackAndShard succ||template={}||srcRack={}||srcShard={}||tgtRack={}||tgtShard={}",
-                            indexTemplatePhy.getName(), settings.get(TEMPLATE_INDEX_INCLUDE_RACK), settings.get(INDEX_SHARD_NUM),
+                            indexTemplatePhyInfo.getName(), settings.get(TEMPLATE_INDEX_INCLUDE_RACK), settings.get(INDEX_SHARD_NUM),
                             rack, shardNum);
             }
         }
@@ -243,16 +242,16 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> delTemplateByLogicId(Integer logicId, String operator) throws ESOperateException {
-        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(logicId);
+        List<IndexTemplatePhyInfo> indexTemplatePhyInfos = templatePhyService.getTemplateByLogicId(logicId);
 
         boolean succ = true;
-        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
+        if (CollectionUtils.isEmpty(indexTemplatePhyInfos)) {
             LOGGER.info("class=TemplatePhyManagerImpl||method=delTemplateByLogicId||logicId={}||msg=template no physical info!", logicId);
         } else {
             LOGGER.info("class=TemplatePhyManagerImpl||method=delTemplateByLogicId||logicId={}||physicalSize={}||msg=template has physical info!",
-                    logicId, indexTemplatePhys.size());
-            for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
-                if (delTemplate(indexTemplatePhy.getId(), operator).failed()) {
+                    logicId, indexTemplatePhyInfos.size());
+            for (IndexTemplatePhyInfo indexTemplatePhyInfo : indexTemplatePhyInfos) {
+                if (delTemplate(indexTemplatePhyInfo.getId(), operator).failed()) {
                     succ = false;
                 }
 
@@ -311,13 +310,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return checkResult;
         }
 
-        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
-        IndexTemplatePhysicalDTO tgtTemplateParam = ConvertUtil.obj2Obj(indexTemplatePhy, IndexTemplatePhysicalDTO.class);
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templatePhyService.getTemplateById(param.getPhysicalId());
+        IndexTemplatePhysicalInfoDTO tgtTemplateParam = ConvertUtil.obj2Obj(indexTemplatePhyInfo, IndexTemplatePhysicalInfoDTO.class);
         tgtTemplateParam.setCluster(param.getCluster());
         tgtTemplateParam.setRack(param.getRack());
         tgtTemplateParam.setRole(SLAVE.getCode());
         tgtTemplateParam.setShard(param.getShard());
-        tgtTemplateParam.setVersion(indexTemplatePhy.getVersion());
+        tgtTemplateParam.setVersion(indexTemplatePhyInfo.getVersion());
 
         Result<Long> addResult = addTemplateWithoutCheck(tgtTemplateParam);
         if (addResult.failed()) {
@@ -325,10 +324,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         // 记录操作记录
-        operateRecordService.save(TEMPLATE, COPY, indexTemplatePhy.getLogicId(),
-                String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()), operator);
+        operateRecordService.save(TEMPLATE, COPY, indexTemplatePhyInfo.getLogicId(),
+                String.format("复制【%s】物理模板至【%s】", indexTemplatePhyInfo.getCluster(), param.getCluster()), operator);
 
-        if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
+        if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName(),
                 tgtTemplateParam.getCluster(), tgtTemplateParam.getName(), 0)) {
             LOGGER.info("class=TemplatePhyManagerImpl||methood=copyTemplate||TemplatePhysicalCopyDTO={}||msg=syncCopyMappingAndAlias succ", param);
         } else {
@@ -341,17 +340,17 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> editTemplate(IndexTemplatePhysicalDTO param, String operator) throws ESOperateException {
+    public Result<Void> editTemplate(IndexTemplatePhysicalInfoDTO param, String operator) throws ESOperateException {
         Result<Void> checkResult = validateTemplate(param, EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=editTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
         }
 
-        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getId());
+        IndexTemplatePhyInfo oldIndexTemplatePhyInfo = templatePhyService.getTemplateById(param.getId());
         Result<Void> result = editTemplateWithoutCheck(param, operator, 0);
         if (result.success()) {
-            String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
+            String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhyInfo, param);
             if (StringUtils.isNotBlank(editContent)) {
                 operateRecordService.save(TEMPLATE, EDIT, param.getLogicId(),
                         JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.CONFIG.getCode(), editContent)), operator);
@@ -362,13 +361,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> editMultipleTemplate(List<IndexTemplatePhysicalDTO> params,
+    public Result<Boolean> editMultipleTemplate(List<IndexTemplatePhysicalInfoDTO> params,
                                                 String operator) throws ESOperateException {
         if (CollectionUtils.isEmpty(params)) {
             Result.buildFail("参数为空");
         }
 
-        for (IndexTemplatePhysicalDTO param : params) {
+        for (IndexTemplatePhysicalInfoDTO param : params) {
             Result<Void> ret = editTemplate(param, operator);
             if (ret.failed()) {
                 throw new ESOperateException(String.format("编辑模板:%s失败", param.getName()));
@@ -379,7 +378,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public Result<Void> validateTemplate(IndexTemplatePhysicalDTO param, OperationEnum operation) {
+    public Result<Void> validateTemplate(IndexTemplatePhysicalInfoDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("物理模板参数为空");
         }
@@ -398,13 +397,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public Result<Void> validateTemplates(List<IndexTemplatePhysicalDTO> params, OperationEnum operation) {
+    public Result<Void> validateTemplates(List<IndexTemplatePhysicalInfoDTO> params, OperationEnum operation) {
         if (AriusObjUtils.isNull(params)) {
             return Result.buildParamIllegal("物理模板信息为空");
         }
 
         Set<String> deployClusterSet = Sets.newTreeSet();
-        for (IndexTemplatePhysicalDTO param : params) {
+        for (IndexTemplatePhysicalInfoDTO param : params) {
             Result<Void> checkResult = validateTemplate(param, operation);
             if (checkResult.failed()) {
                 LOGGER.warn("class=TemplatePhyManagerImpl||method=validateTemplates||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
@@ -427,8 +426,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> addTemplatesWithoutCheck(Integer logicId,
-                                           List<IndexTemplatePhysicalDTO> physicalInfos) throws AdminOperateException {
-        for (IndexTemplatePhysicalDTO param : physicalInfos) {
+                                           List<IndexTemplatePhysicalInfoDTO> physicalInfos) throws AdminOperateException {
+        for (IndexTemplatePhysicalInfoDTO param : physicalInfos) {
             param.setLogicId(logicId);
             param.setPhysicalInfos(physicalInfos);
             Result<Long> result = addTemplateWithoutCheck(param);
@@ -442,7 +441,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalDTO param) throws AdminOperateException {
+    public Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalInfoDTO param) throws AdminOperateException {
         if (null != templatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName())) {
             return Result.buildParamIllegal("索引已经存在");
         }
@@ -470,22 +469,22 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> editTemplateFromLogic(IndexTemplateInfoDTO param, String operator) throws ESOperateException {
-        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(param.getId());
-        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
+        List<IndexTemplatePhyInfo> indexTemplatePhyInfos = templatePhyService.getTemplateByLogicId(param.getId());
+        if (CollectionUtils.isEmpty(indexTemplatePhyInfos)) {
             return Result.buildSucc();
         }
 
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
-            if (AriusObjUtils.isChanged(param.getExpression(), indexTemplatePhy.getExpression())) {
-                Result<Void> result = templatePhyService.updateTemplateExpression(indexTemplatePhy, param.getExpression(), operator);
+        for (IndexTemplatePhyInfo indexTemplatePhyInfo : indexTemplatePhyInfos) {
+            if (AriusObjUtils.isChanged(param.getExpression(), indexTemplatePhyInfo.getExpression())) {
+                Result<Void> result = templatePhyService.updateTemplateExpression(indexTemplatePhyInfo, param.getExpression(), operator);
                 if (result.failed()) {
                     return result;
                 }
             }
 
             if (isValidShardNum(param.getShardNum())
-                    && AriusObjUtils.isChanged(param.getShardNum(), indexTemplatePhy.getShard())) {
-                Result<Void> result = templatePhyService.updateTemplateShardNum(indexTemplatePhy, param.getShardNum(), operator);
+                    && AriusObjUtils.isChanged(param.getShardNum(), indexTemplatePhyInfo.getShard())) {
+                Result<Void> result = templatePhyService.updateTemplateShardNum(indexTemplatePhyInfo, param.getShardNum(), operator);
                 if (result.failed()) {
                     return result;
                 }
@@ -498,27 +497,27 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> switchMasterSlave(Integer logicId, Long expectMasterPhysicalId, String operator) {
-        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(logicId);
-        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
+        List<IndexTemplatePhyInfo> indexTemplatePhyInfos = templatePhyService.getTemplateByLogicId(logicId);
+        if (CollectionUtils.isEmpty(indexTemplatePhyInfos)) {
             return Result.buildNotExist("模板不存在");
         }
 
-        IndexTemplatePhy oldMaster = null;
-        IndexTemplatePhy newMaster = null;
+        IndexTemplatePhyInfo oldMaster = null;
+        IndexTemplatePhyInfo newMaster = null;
 
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
-            if (indexTemplatePhy.getRole().equals(MASTER.getCode())) {
+        for (IndexTemplatePhyInfo indexTemplatePhyInfo : indexTemplatePhyInfos) {
+            if (indexTemplatePhyInfo.getRole().equals(MASTER.getCode())) {
                 if (oldMaster != null) {
                     LOGGER.error("class=TemplatePhyServiceImpl||method=switchMasterSlave||errMsg=no master||logicId={}", logicId);
                 }
-                oldMaster = indexTemplatePhy;
+                oldMaster = indexTemplatePhyInfo;
             } else {
                 if (expectMasterPhysicalId == null && newMaster == null) {
-                    newMaster = indexTemplatePhy;
+                    newMaster = indexTemplatePhyInfo;
                 }
 
-                if (indexTemplatePhy.getId().equals(expectMasterPhysicalId)) {
-                    newMaster = indexTemplatePhy;
+                if (indexTemplatePhyInfo.getId().equals(expectMasterPhysicalId)) {
+                    newMaster = indexTemplatePhyInfo;
                 }
             }
         }
@@ -544,7 +543,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     public Result<Void> editTemplateRackWithoutCheck(Long physicalId, String tgtRack, String operator,
                                                int retryCount) throws ESOperateException {
-        IndexTemplatePhysicalDTO updateParam = new IndexTemplatePhysicalDTO();
+        IndexTemplatePhysicalInfoDTO updateParam = new IndexTemplatePhysicalInfoDTO();
         updateParam.setId(physicalId);
         updateParam.setRack(tgtRack);
         return editTemplateWithoutCheck(updateParam, operator, retryCount);
@@ -552,53 +551,53 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     public Result<Void> upgradeTemplateVersion(Long physicalId, String operator, int retryCount) throws ESOperateException {
-        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(physicalId);
-        if (indexTemplatePhy == null) {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templatePhyService.getTemplateById(physicalId);
+        if (indexTemplatePhyInfo == null) {
             return Result.buildNotExist("模板不存在");
         }
 
-        int version = indexTemplatePhy.getVersion() + 1;
+        int version = indexTemplatePhyInfo.getVersion() + 1;
         if (version > 9) {
             version = 0;
         }
 
-        IndexTemplatePhysicalDTO updateParam = new IndexTemplatePhysicalDTO();
-        updateParam.setId(indexTemplatePhy.getId());
+        IndexTemplatePhysicalInfoDTO updateParam = new IndexTemplatePhysicalInfoDTO();
+        updateParam.setId(indexTemplatePhyInfo.getId());
         updateParam.setVersion(version);
         return editTemplateWithoutCheck(updateParam, operator, retryCount);
     }
 
     @Override
-    public Result<Void> editTemplateWithoutCheck(IndexTemplatePhysicalDTO param, String operator,
-                                           int retryCount) throws ESOperateException {
-        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getId());
+    public Result<Void> editTemplateWithoutCheck(IndexTemplatePhysicalInfoDTO param, String operator,
+                                                 int retryCount) throws ESOperateException {
+        IndexTemplatePhyInfo oldIndexTemplatePhyInfo = templatePhyService.getTemplateById(param.getId());
 
-        if (param.getShard() != null && !oldIndexTemplatePhy.getShard().equals(param.getShard())) {
+        if (param.getShard() != null && !oldIndexTemplatePhyInfo.getShard().equals(param.getShard())) {
             indexPlanManager.initShardRoutingAndAdjustShard(param);
         }
 
         boolean succ = templatePhyService.update(param).success();
         String tips = "";
         if (succ) {
-            if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())
-                    || AriusObjUtils.isChanged(param.getShard(), oldIndexTemplatePhy.getShard())) {
-                esTemplateService.syncUpdateRackAndShard(oldIndexTemplatePhy.getCluster(), oldIndexTemplatePhy.getName(), param.getRack(),
+            if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhyInfo.getRack())
+                    || AriusObjUtils.isChanged(param.getShard(), oldIndexTemplatePhyInfo.getShard())) {
+                esTemplateService.syncUpdateRackAndShard(oldIndexTemplatePhyInfo.getCluster(), oldIndexTemplatePhyInfo.getName(), param.getRack(),
                         param.getShard(), param.getShardRouting(), retryCount);
-                if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())) {
+                if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhyInfo.getRack())) {
                     tips = "模板部署rack变更!请注意模板APP是否可以使用修改后的rack";
                 }
             }
 
-            SpringTool.publish(new PhysicalTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldIndexTemplatePhy, IndexTemplatePhy.class),
-                    templatePhyService.getTemplateById(oldIndexTemplatePhy.getId()),
-                    indexTemplateInfoService.getLogicTemplateWithPhysicalsById(oldIndexTemplatePhy.getLogicId())));
+            SpringTool.publish(new PhysicalTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldIndexTemplatePhyInfo, IndexTemplatePhyInfo.class),
+                    templatePhyService.getTemplateById(oldIndexTemplatePhyInfo.getId()),
+                    indexTemplateInfoService.getLogicTemplateWithPhysicalsById(oldIndexTemplatePhyInfo.getLogicId())));
         }
 
         return Result.buildWithTips(succ, tips);
     }
 
     @Override
-    public Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days) {
+    public Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexByBeforeDay(IndexTemplatePhyInfoWithLogic physicalWithLogic, int days) {
         try {
             IndexTemplateInfo logicTemplate = physicalWithLogic.getLogicTemplate();
 
@@ -627,7 +626,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public Set<String> getIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days) {
+    public Set<String> getIndexByBeforeDay(IndexTemplatePhyInfoWithLogic physicalWithLogic, int days) {
         try {
             IndexTemplateInfo logicTemplate = physicalWithLogic.getLogicTemplate();
 
@@ -656,7 +655,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhysicalDTO param, Integer appId) {
+    public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhysicalInfoDTO param, Integer appId) {
         List<ConsoleTemplatePhyVO> consoleTemplatePhyVOS = ConvertUtil.list2List(templatePhyService.getByCondt(param),
             ConsoleTemplatePhyVO.class);
 
@@ -674,7 +673,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     public List<String> getCanCopyTemplatePhyClusterPhyNames(Long templatePhyId) {
         List<String> canCopyClusterPhyNames = Lists.newArrayList();
-        IndexTemplatePhy templatePhy = templatePhyService.getTemplateById(templatePhyId);
+        IndexTemplatePhyInfo templatePhy = templatePhyService.getTemplateById(templatePhyId);
         if (null != templatePhy && null != templatePhy.getCluster()) {
             clusterPhyService.listAllClusters()
                     .stream()
@@ -695,7 +694,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     /**************************************** private method ****************************************************/
-    private void initParamWhenAdd(IndexTemplatePhysicalDTO param) {
+    private void initParamWhenAdd(IndexTemplatePhysicalInfoDTO param) {
         IndexTemplateInfo logic = indexTemplateInfoService.getLogicTemplateById(param.getLogicId());
 
         if (param.getName() == null) {
@@ -742,22 +741,22 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildParamIllegal("物理模板版本为空");
         }
 
-        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
-        if (oldIndexTemplatePhy == null) {
+        IndexTemplatePhyInfo oldIndexTemplatePhyInfo = templatePhyService.getTemplateById(param.getPhysicalId());
+        if (oldIndexTemplatePhyInfo == null) {
             return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
         }
-        if (Objects.equals(param.getVersion(), oldIndexTemplatePhy.getVersion())
-                || (param.getVersion() > 0 && param.getVersion() < oldIndexTemplatePhy.getVersion())) {
+        if (Objects.equals(param.getVersion(), oldIndexTemplatePhyInfo.getVersion())
+                || (param.getVersion() > 0 && param.getVersion() < oldIndexTemplatePhyInfo.getVersion())) {
             return Result.buildParamIllegal("物理模板版本非法");
         }
-        if (param.getRack() != null && !clusterPhyService.isRacksExists(oldIndexTemplatePhy.getCluster(), param.getRack())) {
+        if (param.getRack() != null && !clusterPhyService.isRacksExists(oldIndexTemplatePhyInfo.getCluster(), param.getRack())) {
             return Result.buildParamIllegal("物理模板rack非法");
         }
         if (param.getShard() != null && param.getShard() < MIN_SHARD_NUM) {
             return Result.buildParamIllegal("shard个数非法");
         }
 
-        IndexTemplateInfo logic = indexTemplateInfoService.getLogicTemplateById(oldIndexTemplatePhy.getLogicId());
+        IndexTemplateInfo logic = indexTemplateInfoService.getLogicTemplateById(oldIndexTemplatePhyInfo.getLogicId());
         if (TemplateUtils.isOnly1Index(logic.getExpression())) {
             return Result.buildParamIllegal("不是分区创建的索引，不能升版本");
         }
@@ -767,17 +766,17 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     private Result<Void> upgradeTemplateWithCheck(TemplatePhysicalUpgradeDTO param, String operator,
                                             int retryCount) throws ESOperateException {
-        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
-        if (templateLabelService.hasDeleteDoc(indexTemplatePhy.getLogicId())) {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templatePhyService.getTemplateById(param.getPhysicalId());
+        if (templateLabelService.hasDeleteDoc(indexTemplatePhyInfo.getLogicId())) {
             return Result.buildParamIllegal("模板有删除操作,禁止升版本");
         }
 
-        IndexTemplateInfo logic = indexTemplateInfoService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+        IndexTemplateInfo logic = indexTemplateInfoService.getLogicTemplateById(indexTemplatePhyInfo.getLogicId());
         LOGGER.info("class=TemplatePhyManagerImpl||method=upgradeTemplateWithCheck||name={}||rack={}||shard={}||version={}", logic.getName(), param.getRack(),
                 param.getShard(), param.getVersion());
 
-        IndexTemplatePhysicalDTO updateParam = new IndexTemplatePhysicalDTO();
-        updateParam.setId(indexTemplatePhy.getId());
+        IndexTemplatePhysicalInfoDTO updateParam = new IndexTemplatePhysicalInfoDTO();
+        updateParam.setId(indexTemplatePhyInfo.getId());
         updateParam.setRack(param.getRack());
         updateParam.setShard(param.getShard());
         updateParam.setVersion(param.getVersion());
@@ -787,7 +786,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return editResult;
         }
 
-        templatePreCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), 3);
+        templatePreCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(indexTemplatePhyInfo.getId(), 3);
 
         return Result.buildSucc();
     }
@@ -806,8 +805,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildParamIllegal("shard为空");
         }
 
-        IndexTemplatePhy oldIndexTemplatePhy = templatePhyService.getTemplateById(param.getPhysicalId());
-        if (oldIndexTemplatePhy == null) {
+        IndexTemplatePhyInfo oldIndexTemplatePhyInfo = templatePhyService.getTemplateById(param.getPhysicalId());
+        if (oldIndexTemplatePhyInfo == null) {
             return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
         }
 
@@ -815,7 +814,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildNotExist("目标集群不存在");
         }
 
-        if (oldIndexTemplatePhy.getCluster().equals(param.getCluster())) {
+        if (oldIndexTemplatePhyInfo.getCluster().equals(param.getCluster())) {
             return Result.buildParamIllegal("目标集群不能与源集群相同");
         }
 
@@ -831,15 +830,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.buildSucc();
     }
 
-    private boolean needOperateAhead(IndexTemplatePhyWithLogic physicalWithLogic) {
+    private boolean needOperateAhead(IndexTemplatePhyInfoWithLogic physicalWithLogic) {
         Set<String> clusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
                 CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD, "", ",");
         return clusterSet.contains(physicalWithLogic.getCluster());
     }
 
-    private Result<Void> checkMetaInner(IndexTemplatePhy templatePhysical,
-                                  Map<Integer, IndexTemplateInfo> logicId2IndexTemplateLogicMap,
-                                  Set<String> esClusters) {
+    private Result<Void> checkMetaInner(IndexTemplatePhyInfo templatePhysical,
+                                        Map<Integer, IndexTemplateInfo> logicId2IndexTemplateLogicMap,
+                                        Set<String> esClusters) {
         List<String> errMsgs = Lists.newArrayList();
 
         if (!esClusters.contains(templatePhysical.getCluster())) {
@@ -865,7 +864,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     }
 
-    private int checkIndexCreateAndExpire(IndexTemplatePhy templatePhysical,
+    private int checkIndexCreateAndExpire(IndexTemplatePhyInfo templatePhysical,
                                           Map<Integer, IndexTemplateInfo> logicId2IndexTemplateLogicMap) {
         int result = INDEX_OP_OK;
         if (templatePhysical.getCreateTime().before(AriusDateUtils.getZeroDate())) {
@@ -892,11 +891,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return result;
     }
 
-    private IndexTemplateInfoWithPhyTemplates buildIndexTemplateLogicWithPhysicalForNew(IndexTemplatePhysicalDTO param) {
+    private IndexTemplateInfoWithPhyTemplates buildIndexTemplateLogicWithPhysicalForNew(IndexTemplatePhysicalInfoDTO param) {
         IndexTemplateInfoWithPhyTemplates logicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(param.getLogicId());
         if (CollectionUtils.isNotEmpty(param.getPhysicalInfos())) {
-            List<IndexTemplatePhy> physicals = ConvertUtil.list2List(param.getPhysicalInfos(), IndexTemplatePhy.class);
+            List<IndexTemplatePhyInfo> physicals = ConvertUtil.list2List(param.getPhysicalInfos(), IndexTemplatePhyInfo.class);
             logicWithPhysical.setPhysicals(physicals);
         }
         return logicWithPhysical;
@@ -968,7 +967,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
     }
 
-    private Result<Void> handleValidateTemplate(IndexTemplatePhysicalDTO param) {
+    private Result<Void> handleValidateTemplate(IndexTemplatePhysicalInfoDTO param) {
         if (param.getCluster() != null && !clusterPhyService.isClusterExists(param.getCluster())) {
             return Result.buildParamIllegal("集群不存在");
         }
@@ -997,18 +996,18 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.buildSucc();
     }
 
-    private Result<Void> handleValidateTemplateEdit(IndexTemplatePhysicalDTO param) {
+    private Result<Void> handleValidateTemplateEdit(IndexTemplatePhysicalInfoDTO param) {
         if (AriusObjUtils.isNull(param.getId())) {
             return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
         }
-        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateById(param.getId());
-        if (indexTemplatePhy == null) {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templatePhyService.getTemplateById(param.getId());
+        if (indexTemplatePhyInfo == null) {
             return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
         }
         return Result.buildSucc();
     }
 
-    private Result<Void> handleValidateTemplateAdd(IndexTemplatePhysicalDTO param) {
+    private Result<Void> handleValidateTemplateAdd(IndexTemplatePhysicalInfoDTO param) {
         if (AriusObjUtils.isNull(param.getLogicId())) {
             return Result.buildParamIllegal("逻辑模板id为空");
         }
@@ -1023,14 +1022,14 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildParamIllegal("模板角色为空");
         }
 
-        IndexTemplatePhy indexTemplatePhy = templatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName());
-        if (indexTemplatePhy != null) {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName());
+        if (indexTemplatePhyInfo != null) {
             return Result.buildDuplicate("物理模板已经存在");
         }
         return Result.buildSucc();
     }
 
-    private Set<String> getFinalIndexSet(IndexTemplatePhyWithLogic physicalWithLogic, int days, IndexTemplateInfo logicTemplate, List<String> indices) {
+    private Set<String> getFinalIndexSet(IndexTemplatePhyInfoWithLogic physicalWithLogic, int days, IndexTemplateInfo logicTemplate, List<String> indices) {
         Set<String> finalIndexSet = Sets.newHashSet();
         for (String indexName : indices) {
             if (StringUtils.isBlank(indexName)) {
@@ -1075,7 +1074,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return finalIndexSet;
     }
 
-    private void syncCreateIndexTemplateWithEs(IndexTemplatePhysicalDTO param) throws ESOperateException {
+    private void syncCreateIndexTemplateWithEs(IndexTemplatePhysicalInfoDTO param) throws ESOperateException {
         IndexTemplateInfo logic = indexTemplateInfoService.getLogicTemplateById(param.getLogicId());
         MappingConfig mappings = null;
         Result result = AriusIndexMappingConfigUtils.parseMappingConfig(param.getMappings());
@@ -1114,7 +1113,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return settingsMap;
     }
 
-    private Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(IndexTemplatePhyWithLogic physicalWithLogic,
+    private Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(IndexTemplatePhyInfoWithLogic physicalWithLogic,
                                                                                          int days, IndexTemplateInfo logicTemplate, List<String> indices) {
         Set<String> finalColdIndexSet = Sets.newHashSet();
         Set<String> finalHotIndexSet = Sets.newHashSet();

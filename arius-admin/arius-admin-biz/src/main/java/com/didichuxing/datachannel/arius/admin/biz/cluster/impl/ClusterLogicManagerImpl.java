@@ -29,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
@@ -52,7 +53,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -924,7 +924,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(logicId);
-        IndexTemplatePhy templatePhysical = templateLogicWithPhysical.getAnyOne();
+        IndexTemplatePhyInfo templatePhysical = templateLogicWithPhysical.getAnyOne();
 
         List<String> matchIndices = templatePhyService.getMatchNoVersionIndexNames(templatePhysical.getId());
         for (String index : delIndices) {
@@ -941,8 +941,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @param delIndices 待删除分区索引列表
      * @return
      */
-    private Result<Void> batchDeletePhysicalTemplateIndices(List<IndexTemplatePhy> physicals, List<String> delIndices) {
-        for (IndexTemplatePhy templatePhysical : physicals) {
+    private Result<Void> batchDeletePhysicalTemplateIndices(List<IndexTemplatePhyInfo> physicals, List<String> delIndices) {
+        for (IndexTemplatePhyInfo templatePhysical : physicals) {
             if (templatePhysical.getVersion() > 0) {
                 List<String> delIndicesWithVersion = genDeleteIndicesWithVersion(delIndices);
 
@@ -971,10 +971,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @param delIndices 删除索引列表
      * @return
      */
-    private Result<Void> batchDeletePhysicalTemplateIndicesByQuery(List<IndexTemplatePhy> physicals, String delQueryDsl,
-                                                             List<String> delIndices) throws ESOperateException {
+    private Result<Void> batchDeletePhysicalTemplateIndicesByQuery(List<IndexTemplatePhyInfo> physicals, String delQueryDsl,
+                                                                   List<String> delIndices) throws ESOperateException {
         if (StringUtils.isNotBlank(delQueryDsl)) {
-            for (IndexTemplatePhy templatePhysical : physicals) {
+            for (IndexTemplatePhyInfo templatePhysical : physicals) {
                 if (!esIndexService.syncDeleteByQuery(templatePhysical.getCluster(), delIndices, delQueryDsl)) {
                     return Result.buildFail("删除索引失败，请重试");
                 }

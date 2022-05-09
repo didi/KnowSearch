@@ -5,11 +5,11 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.Securit
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityUserService;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.SecurityRoleAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -73,7 +73,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      */
     @Override
     public Result<Void> saveAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount) {
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getTemplateByLogicId(logicTemplateId);
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.getTemplateByLogicId(logicTemplateId);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||logicTemplateId={}||msg=no physical template",
@@ -93,7 +93,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         }
 
         List<String> failMsgs = Lists.newArrayList();
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             try {
                 Result<Void> result = doSaveAppPhysicalTemplateAuth(templatePhysical, appId, authType, retryCount);
                 if (result.failed()) {
@@ -124,7 +124,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      */
     @Override
     public Result<Void> deleteAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount) {
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getTemplateByLogicId(logicTemplateId);
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.getTemplateByLogicId(logicTemplateId);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             LOGGER.warn("class=SecurityServiceImpl||method=deleteAppLogicTemplateAuth||logicTemplateId={}||msg=no physical template",
@@ -144,7 +144,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         }
 
         List<String> failMsgs = Lists.newArrayList();
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             try {
                 Result<Void> result = doDeleteAppPhysicalTemplateAuth(templatePhysical, appId, authType, retryCount);
                 if (result.failed()) {
@@ -198,8 +198,8 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      * @return result
      */
     @Override
-    public Result<Void> saveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                              int retryCount) throws ESOperateException {
+    public Result<Void> saveAppPhysicalTemplateAuth(IndexTemplatePhyInfo templatePhysical, Integer appId, Integer authType,
+                                                    int retryCount) throws ESOperateException {
         if (!appService.isAppExists(appId)) {
             LOGGER.warn("class=SecurityServiceImpl||method=saveAppPhysicalTemplateAuth||appId={}||msg=appId not exist", appId);
             return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
@@ -229,8 +229,8 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      * @return result
      */
     @Override
-    public Result<Void> deleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                                int retryCount) throws ESOperateException {
+    public Result<Void> deleteAppPhysicalTemplateAuth(IndexTemplatePhyInfo templatePhysical, Integer appId, Integer authType,
+                                                      int retryCount) throws ESOperateException {
 
         if (!appService.isAppExists(appId)) {
             LOGGER.warn("class=SecurityServiceImpl||method=deleteAppPhysicalTemplateAuth||appId={}||msg=appId not exist", appId);
@@ -301,12 +301,12 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             return;
         }
 
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getNormalTemplateByCluster(cluster);
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.getNormalTemplateByCluster(cluster);
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return;
         }
 
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             try {
                 doCheckMeta(templatePhysical);
             } catch (Exception e) {
@@ -317,7 +317,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     }
 
     /**************************************** private method ****************************************************/
-    private void doCheckMeta(IndexTemplatePhy templatePhysical) {
+    private void doCheckMeta(IndexTemplatePhyInfo templatePhysical) {
         IndexTemplateInfo templateLogic = indexTemplateInfoService
             .getLogicTemplateWithPhysicalsById(templatePhysical.getLogicId());
         checkTemplateOwnApp(templatePhysical, templateLogic.getAppId());
@@ -327,7 +327,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         checkTemplateRWAuth(templatePhysical, templateAuths);
     }
 
-    private void checkTemplateRWAuth(IndexTemplatePhy templatePhysical, List<AppTemplateAuth> templateAuths) {
+    private void checkTemplateRWAuth(IndexTemplatePhyInfo templatePhysical, List<AppTemplateAuth> templateAuths) {
         if (CollectionUtils.isEmpty(templateAuths)) {
             return;
         }
@@ -341,15 +341,15 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         }
     }
 
-    private void checkTemplateOwnApp(IndexTemplatePhy templatePhysical, Integer appId) {
+    private void checkTemplateOwnApp(IndexTemplatePhyInfo templatePhysical, Integer appId) {
         String roleName = getRoleName(templatePhysical, AppTemplateAuthEnum.OWN.getCode());
         securityRoleService.ensureRoleExist(templatePhysical.getCluster(), roleName, templatePhysical.getExpression(),
             getRolePrivilegeSet(AppTemplateAuthEnum.OWN.getCode()));
         securityUserService.ensureUserHasAuth(templatePhysical.getCluster(), getUserName(appId), roleName, appId);
     }
 
-    private Result<Void> doSaveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                                 int retryCount) throws ESOperateException {
+    private Result<Void> doSaveAppPhysicalTemplateAuth(IndexTemplatePhyInfo templatePhysical, Integer appId, Integer authType,
+                                                       int retryCount) throws ESOperateException {
 
         if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
             return Result.buildFail("[" + templatePhysical.getCluster() + "]不支持安全特性");
@@ -377,8 +377,8 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
 
     }
 
-    private Result<Void> doDeleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                                   int retryCount) throws ESOperateException {
+    private Result<Void> doDeleteAppPhysicalTemplateAuth(IndexTemplatePhyInfo templatePhysical, Integer appId, Integer authType,
+                                                         int retryCount) throws ESOperateException {
         if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
             return Result.buildFail("[" + templatePhysical.getCluster() + "]不支持安全特性");
         }
@@ -401,7 +401,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         return "user_" + appId;
     }
 
-    private String getRoleName(IndexTemplatePhy template, Integer authType) {
+    private String getRoleName(IndexTemplatePhyInfo template, Integer authType) {
         SecurityRoleAuthEnum securityRoleAuthEnum = SecurityRoleAuthEnum
             .valueByAuth(AppTemplateAuthEnum.valueOf(authType));
         if (securityRoleAuthEnum == null) {

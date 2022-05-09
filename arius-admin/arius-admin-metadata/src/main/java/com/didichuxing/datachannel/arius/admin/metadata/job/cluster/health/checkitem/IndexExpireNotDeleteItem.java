@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
@@ -42,14 +42,14 @@ public class IndexExpireNotDeleteItem extends AbstractCheckerItem {
         ESClient esClient  = getClusterHealthCheckJobConfig().getEsClient();
         List<HealthCheckErrInfoPO> checkErrInfoPos = new ArrayList<>();
 
-        Map<String, IndexTemplatePhyWithLogic> indexTemplateMap = getClusterHealthCheckJobConfig().getIndexTemplateMap();
+        Map<String, IndexTemplatePhyInfoWithLogic> indexTemplateMap = getClusterHealthCheckJobConfig().getIndexTemplateMap();
 
-        for(Map.Entry<String, IndexTemplatePhyWithLogic> entry : indexTemplateMap.entrySet()){
+        for(Map.Entry<String, IndexTemplatePhyInfoWithLogic> entry : indexTemplateMap.entrySet()){
             String template = entry.getKey();
 
             if(isWhiteIndex(template) || iskibanaIndex(template)){continue;}
 
-            IndexTemplatePhyWithLogic indexTemplate = indexTemplateMap.get(template);
+            IndexTemplatePhyInfoWithLogic indexTemplate = indexTemplateMap.get(template);
 
             if(null == indexTemplate || null == indexTemplate.getLogicTemplate()){continue;}
 

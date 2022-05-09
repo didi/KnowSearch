@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateCre
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
@@ -286,10 +286,10 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @param physicals 物理模板列表
      * @return
      */
-    private int fetchMaxShardNum(List<IndexTemplatePhysicalDTO> physicals) {
+    private int fetchMaxShardNum(List<IndexTemplatePhysicalInfoDTO> physicals) {
         int maxShardNum = -1;
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhysicalDTO physical : physicals) {
+            for (IndexTemplatePhysicalInfoDTO physical : physicals) {
                 if (physical.getShard() != null && physical.getShard() > maxShardNum) {
                     maxShardNum = physical.getShard();
                 }
@@ -367,9 +367,9 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @param logicDTO 逻辑模板DTO
      * @return dto
      */
-    private IndexTemplatePhysicalDTO buildTemplatePhysicalDTO(TemplateCreateContent content,
-                                                              IndexTemplateInfoDTO logicDTO) {
-        IndexTemplatePhysicalDTO physicalDTO = new IndexTemplatePhysicalDTO();
+    private IndexTemplatePhysicalInfoDTO buildTemplatePhysicalDTO(TemplateCreateContent content,
+                                                                  IndexTemplateInfoDTO logicDTO) {
+        IndexTemplatePhysicalInfoDTO physicalDTO = new IndexTemplatePhysicalInfoDTO();
 
         physicalDTO.setLogicId(NOT_CHECK);
         physicalDTO.setName(logicDTO.getName());
@@ -431,7 +431,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         return typeProperty;
     }
 
-    private void setTemplateShard(IndexTemplatePhysicalDTO physicalDTO, TemplateCreateContent content,
+    private void setTemplateShard(IndexTemplatePhysicalInfoDTO physicalDTO, TemplateCreateContent content,
                                   IndexTemplateInfoDTO logicDTO) {
         if (content.getCyclicalRoll()) {
             int expireTime = content.getExpireTime();

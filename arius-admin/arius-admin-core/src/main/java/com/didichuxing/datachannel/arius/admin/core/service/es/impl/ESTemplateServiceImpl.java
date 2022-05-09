@@ -4,9 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentsPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhysicalInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -24,8 +22,6 @@ import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PATH_SEGMENTS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
@@ -293,10 +289,10 @@ public class ESTemplateServiceImpl implements ESTemplateService {
             DirectResponse directResponse = esTemplateDAO.getDirectResponse(cluster, "Get", templateNameRequestContent);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                List<TemplatePhysicalPO> indexBelongNodes = ConvertUtil
-                    .str2ObjArrayByJson(directResponse.getResponseContent(), TemplatePhysicalPO.class);
+                List<IndexTemplatePhysicalInfoPO> indexBelongNodes = ConvertUtil
+                    .str2ObjArrayByJson(directResponse.getResponseContent(), IndexTemplatePhysicalInfoPO.class);
 
-                return indexBelongNodes.stream().map(TemplatePhysicalPO::getName).filter(r -> !r.startsWith(".")).count();
+                return indexBelongNodes.stream().map(IndexTemplatePhysicalInfoPO::getName).filter(r -> !r.startsWith(".")).count();
             }
         } catch (Exception e) {
             LOGGER.error("class=ESTemplateServiceImpl||method=syncGetTemplateNum||clusterName={}||errMsg=exception",

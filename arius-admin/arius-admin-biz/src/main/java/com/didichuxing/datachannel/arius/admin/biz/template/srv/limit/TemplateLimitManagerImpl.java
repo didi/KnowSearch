@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplat
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStrategyEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
@@ -79,7 +79,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
      */
     @Override
     public Result<Void> stopIndexWrite(Long physicalId) throws ESOperateException {
-        IndexTemplatePhy templatePhysical = templatePhyService.getTemplateById(physicalId);
+        IndexTemplatePhyInfo templatePhysical = templatePhyService.getTemplateById(physicalId);
         if (templatePhysical == null) {
             return Result.buildNotExist("模板不存在");
         }
@@ -100,7 +100,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
      */
     @Override
     public Result<Void> startIndexWrite(Long physicalId) throws ESOperateException {
-        IndexTemplatePhy templatePhysical = templatePhyService.getTemplateById(physicalId);
+        IndexTemplatePhyInfo templatePhysical = templatePhyService.getTemplateById(physicalId);
         if (templatePhysical == null) {
             return Result.buildNotExist("模板不存在");
         }
@@ -168,7 +168,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
 
     @Override
     public boolean adjustPipelineRateLimit(Integer logicId) {
-        List<IndexTemplatePhy> physicals = templatePhyService.getTemplateByLogicId(logicId);
+        List<IndexTemplatePhyInfo> physicals = templatePhyService.getTemplateByLogicId(logicId);
         if (CollectionUtils.isEmpty(physicals)) {
             LOGGER.info("method=adjustPipelineRateLimit||logicId={}||msg=adjustPipeLineRateLimit no template", logicId);
             return true;
@@ -177,7 +177,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
         long interval = 10 * 60 * 1000L;
 
         int succCount = 0;
-        for (IndexTemplatePhy physical : physicals) {
+        for (IndexTemplatePhyInfo physical : physicals) {
             try {
                 GetTemplateLimitStrategyContext getTemplateLimitStrategyContext = new GetTemplateLimitStrategyContext();
                 TemplateLimitStrategy strategy;
@@ -236,7 +236,7 @@ public class TemplateLimitManagerImpl extends BaseTemplateSrv
     public TemplateLimitStrategy provide(String cluster, String template, long interval,
                                          GetTemplateLimitStrategyContext context) {
 
-        IndexTemplatePhy templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
+        IndexTemplatePhyInfo templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
 
         if (templatePhysical == null || !templateQuotaManager.enableClt(templatePhysical.getLogicId())) {
             return TemplateLimitStrategy.buildDefault();

@@ -11,12 +11,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
@@ -482,19 +482,19 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         //获取存储在region上的物理模板列表
         Float templateOnRegionDiskSize = 0F;
-        List<IndexTemplatePhy> normalTemplateOnPhyCluster = templatePhyService.getNormalTemplateByCluster(clusterPhyName);
+        List<IndexTemplatePhyInfo> normalTemplateOnPhyCluster = templatePhyService.getNormalTemplateByCluster(clusterPhyName);
         if (CollectionUtils.isEmpty(normalTemplateOnPhyCluster)) {
             return regionDiskSize;
         }
 
         //获取在region上创建的模板的总的设置空间
-        for (IndexTemplatePhy indexTemplatePhy : normalTemplateOnPhyCluster) {
-            if (!rackList.containsAll(ListUtils.string2StrList(indexTemplatePhy.getRack()))) {
+        for (IndexTemplatePhyInfo indexTemplatePhyInfo : normalTemplateOnPhyCluster) {
+            if (!rackList.containsAll(ListUtils.string2StrList(indexTemplatePhyInfo.getRack()))) {
                 continue;
             }
 
             //根据物理模板获取对应的逻辑模板中的quota参数
-            IndexTemplateInfo logicTemplate = indexTemplateInfoService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+            IndexTemplateInfo logicTemplate = indexTemplateInfoService.getLogicTemplateById(indexTemplatePhyInfo.getLogicId());
             if (AriusObjUtils.isNull(logicTemplate)) {
                 continue;
             }

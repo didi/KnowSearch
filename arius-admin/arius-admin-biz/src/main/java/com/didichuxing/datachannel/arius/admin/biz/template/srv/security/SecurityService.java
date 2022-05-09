@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.security;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
@@ -47,8 +47,8 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result<Void> saveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                       int retryCount) throws ESOperateException;
+    Result<Void> saveAppPhysicalTemplateAuth(IndexTemplatePhyInfo templatePhysical, Integer appId, Integer authType,
+                                             int retryCount) throws ESOperateException;
 
     /**
      * 删除物理模板的APP管理权限
@@ -58,8 +58,8 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result<Void> deleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                         int retryCount) throws ESOperateException;
+    Result<Void> deleteAppPhysicalTemplateAuth(IndexTemplatePhyInfo templatePhysical, Integer appId, Integer authType,
+                                               int retryCount) throws ESOperateException;
 
     /**
      * APP密码修改

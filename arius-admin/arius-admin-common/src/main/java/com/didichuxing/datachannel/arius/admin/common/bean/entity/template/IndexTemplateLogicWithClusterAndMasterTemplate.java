@@ -18,7 +18,7 @@ public class IndexTemplateLogicWithClusterAndMasterTemplate extends IndexTemplat
     /**
      * Master物理模板
      */
-    private IndexTemplatePhy masterTemplate;
+    private IndexTemplatePhyInfo masterTemplate;
 
     /**
      * 逻辑集群

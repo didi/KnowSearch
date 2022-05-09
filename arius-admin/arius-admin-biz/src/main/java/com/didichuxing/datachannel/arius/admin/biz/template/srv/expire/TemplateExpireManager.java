@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.expire;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
@@ -40,5 +40,5 @@ public interface TemplateExpireManager {
      * @throws ESOperateException e
      * @return true/false
      */
-    boolean deleteTemplateDeletedIndices(IndexTemplatePhy physical, int retryCount) throws ESOperateException;
+    boolean deleteTemplateDeletedIndices(IndexTemplatePhyInfo physical, int retryCount) throws ESOperateException;
 }

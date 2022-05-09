@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -13,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.Physical
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsagePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsageRecordPO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -99,7 +99,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
     @Override
     public PhysicalTemplateQuotaUsage getPhyTemplateQuotaUsage(String cluster, String template, Long interval,
                                                                GetTemplateQuotaUsageContext context) {
-        IndexTemplatePhy templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
+        IndexTemplatePhyInfo templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
 
         if (templatePhysical == null) {
             LOGGER.warn(
@@ -143,7 +143,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         quotaUsage.setQuotaCpuCount(0.0);
         quotaUsage.setQuotaDiskG(0.0);
 
-        for (IndexTemplatePhy physical : logicWithPhysical.getPhysicals()) {
+        for (IndexTemplatePhyInfo physical : logicWithPhysical.getPhysicals()) {
             PhysicalTemplateQuotaUsage usage = getPhyTemplateQuotaUsageInner(physical, interval,
                 new GetTemplateQuotaUsageContext());
 
@@ -238,7 +238,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
             return false;
         }
 
-        IndexTemplatePhy templatePhysicalMaster = templateLogicWithPhysical.getMasterPhyTemplate();
+        IndexTemplatePhyInfo templatePhysicalMaster = templateLogicWithPhysical.getMasterPhyTemplate();
 
         if (!isTemplateSrvOpen(templatePhysicalMaster.getCluster())) {
             LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||cluster={}||msg=没有开启容量管控的索引服务", logicId,
@@ -402,7 +402,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         return true;
     }
 
-    private PhysicalTemplateQuotaUsage getPhyTemplateQuotaUsageInner(IndexTemplatePhy templatePhysical, Long interval,
+    private PhysicalTemplateQuotaUsage getPhyTemplateQuotaUsageInner(IndexTemplatePhyInfo templatePhysical, Long interval,
                                                                      GetTemplateQuotaUsageContext context) {
         if (interval == null) {
             interval = 15 * 60 * 1000L;

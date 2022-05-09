@@ -7,11 +7,11 @@ import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhysicalInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
@@ -25,42 +25,42 @@ public interface TemplatePhyService {
      * @param param 参数
      * @return 物理模板列表
      */
-    List<IndexTemplatePhy> getByCondt(IndexTemplatePhysicalDTO param);
+    List<IndexTemplatePhyInfo> getByCondt(IndexTemplatePhysicalInfoDTO param);
 
     /**
      * 查询指定逻辑模板对应的物理模板
      * @param logicId 逻辑模板
      * @return list
      */
-    List<IndexTemplatePhy> getTemplateByLogicId(Integer logicId);
+    List<IndexTemplatePhyInfo> getTemplateByLogicId(Integer logicId);
 
     /**
      * 从缓存中查询指定逻辑模板对应的物理模板
      * @param logicId 逻辑模板
      * @return list
      */
-    List<IndexTemplatePhy> getValidTemplatesByLogicId(Integer logicId);
+    List<IndexTemplatePhyInfo> getValidTemplatesByLogicId(Integer logicId);
 
     /**
      * 查询指定id的模板
      * @param templatePhyId 物理模板id
      * @return result
      */
-    IndexTemplatePhy getTemplateById(Long templatePhyId);
+    IndexTemplatePhyInfo getTemplateById(Long templatePhyId);
 
     /**
      * 查询指定id的模板 包含逻辑模板信息
      * @param physicalId 物理模板id
      * @return result
      */
-    IndexTemplatePhyWithLogic getTemplateWithLogicById(Long physicalId);
+    IndexTemplatePhyInfoWithLogic getTemplateWithLogicById(Long physicalId);
 
     /**
      * 插入
      * @param param 物理索引模板
      * @return result
      */
-    Result<Long> insert(IndexTemplatePhysicalDTO param) throws AdminOperateException;
+    Result<Long> insert(IndexTemplatePhysicalInfoDTO param) throws AdminOperateException;
 
     /**
      * 删除
@@ -101,7 +101,7 @@ public interface TemplatePhyService {
      * @param templateName 名字
      * @return result 不存在返回null
      */
-    IndexTemplatePhy getTemplateByClusterAndName(String cluster, String templateName);
+    IndexTemplatePhyInfo getTemplateByClusterAndName(String cluster, String templateName);
 
     /**
      * 通过集群和名字查询
@@ -109,7 +109,7 @@ public interface TemplatePhyService {
      * @param templateName 名字
      * @return result 不存在返回null
      */
-    IndexTemplatePhyWithLogic getTemplateWithLogicByClusterAndName(String cluster, String templateName);
+    IndexTemplatePhyInfoWithLogic getTemplateWithLogicByClusterAndName(String cluster, String templateName);
 
     /**
      * 根据物理模板状态获取模板列表
@@ -117,14 +117,14 @@ public interface TemplatePhyService {
      * @param status 状态 1 常规    -1 删除中     -2 已删除
      * @return list
      */
-    List<IndexTemplatePhy> getTemplateByClusterAndStatus(String cluster, int status);
+    List<IndexTemplatePhyInfo> getTemplateByClusterAndStatus(String cluster, int status);
 
     /**
      * 根据物理模板状态获取模板列表
      * @param cluster 集群
      * @return list
      */
-    List<IndexTemplatePhy> getNormalTemplateByCluster(String cluster);
+    List<IndexTemplatePhyInfo> getNormalTemplateByCluster(String cluster);
 
     /**
      * 根据物理模板状态和模糊匹配获取模板列表
@@ -139,7 +139,7 @@ public interface TemplatePhyService {
      * @param racks racks
      * @return list
      */
-    List<IndexTemplatePhy> getNormalTemplateByClusterAndRack(String cluster, Collection<String> racks);
+    List<IndexTemplatePhyInfo> getNormalTemplateByClusterAndRack(String cluster, Collection<String> racks);
 
     /**
      * 获取模板匹配的索引列表，按着时间排序
@@ -160,35 +160,35 @@ public interface TemplatePhyService {
      * @param physicalIds 物理模板id
      * @return list
      */
-    List<IndexTemplatePhyWithLogic> getTemplateWithLogicByIds(List<Long> physicalIds);
+    List<IndexTemplatePhyInfoWithLogic> getTemplateWithLogicByIds(List<Long> physicalIds);
 
     /**
      * 全量获取指定物理集群所关联的逻辑模板信息列表
      * @param phyCluster 物理集群名称
      * @return 物理集群下的全量模板信息列表
      */
-    List<IndexTemplatePhyWithLogic> getTemplateByPhyCluster(String phyCluster);
+    List<IndexTemplatePhyInfoWithLogic> getTemplateByPhyCluster(String phyCluster);
 
     /**
      * 根据名字查询
      * @param template 名字
      * @return list
      */
-    List<IndexTemplatePhyWithLogic> getTemplateWithLogicByName(String template);
+    List<IndexTemplatePhyInfoWithLogic> getTemplateWithLogicByName(String template);
 
     /**
      * 获取全量
      * @return list
      */
-    List<IndexTemplatePhy> listTemplate();
-    List<IndexTemplatePhy> listTemplateWithCache();
+    List<IndexTemplatePhyInfo> listTemplate();
+    List<IndexTemplatePhyInfo> listTemplateWithCache();
 
     /**
      * 获取IndexTemplatePhysicalWithLogic
      * @return list
      */
-    List<IndexTemplatePhyWithLogic> listTemplateWithLogic();
-    List<IndexTemplatePhyWithLogic> listTemplateWithLogicWithCache();
+    List<IndexTemplatePhyInfoWithLogic> listTemplateWithLogic();
+    List<IndexTemplatePhyInfoWithLogic> listTemplateWithLogicWithCache();
 
     /**
      * 获取集群模板量统计映射
@@ -200,7 +200,7 @@ public interface TemplatePhyService {
      * @param logicIds 列表
      * @return list
      */
-    List<IndexTemplatePhy> getTemplateByLogicIds(List<Integer> logicIds);
+    List<IndexTemplatePhyInfo> getTemplateByLogicIds(List<Integer> logicIds);
 
     /**
      * 修改物理模板，名称
@@ -208,57 +208,57 @@ public interface TemplatePhyService {
      * @param operator 操作人
      * @return
      */
-    Result<Void> updateTemplateName(IndexTemplatePhy physical, String operator) throws ESOperateException;
+    Result<Void> updateTemplateName(IndexTemplatePhyInfo physical, String operator) throws ESOperateException;
 
     /**
      * 修改物理模板，表达
-     * @param indexTemplatePhy 模板
+     * @param indexTemplatePhyInfo 模板
      * @param expression 新的表达
      * @param operator 操作人
      * @throws ESOperateException
      * @return result
      */
-    Result<Void> updateTemplateExpression(IndexTemplatePhy indexTemplatePhy, String expression,
-                                    String operator) throws ESOperateException;
+    Result<Void> updateTemplateExpression(IndexTemplatePhyInfo indexTemplatePhyInfo, String expression,
+                                          String operator) throws ESOperateException;
 
     /**
      * 修改物理模板，表达
-     * @param indexTemplatePhy 模板
+     * @param indexTemplatePhyInfo 模板
      * @param shardNum 分片数量
      * @param operator 操作人
      * @throws ESOperateException
      * @return result
      */
-    Result<Void> updateTemplateShardNum(IndexTemplatePhy indexTemplatePhy, Integer shardNum,
-                                  String operator) throws ESOperateException;
+    Result<Void> updateTemplateShardNum(IndexTemplatePhyInfo indexTemplatePhyInfo, Integer shardNum,
+                                        String operator) throws ESOperateException;
 
     /**
      * 修改物理模板，角色
-     * @param indexTemplatePhy 模板
+     * @param indexTemplatePhyInfo 模板
      * @param templateDeployRoleEnum 角色
      * @param operator 操作人
      * @return
      */
-    Result<Void> updateTemplateRole(IndexTemplatePhy indexTemplatePhy, TemplateDeployRoleEnum templateDeployRoleEnum,
-                              String operator);
+    Result<Void> updateTemplateRole(IndexTemplatePhyInfo indexTemplatePhyInfo, TemplateDeployRoleEnum templateDeployRoleEnum,
+                                    String operator);
 
     /**
      * 更新物理模板
      *
      */
-    Result<Void> update(IndexTemplatePhysicalDTO indexTemplatePhysicalDTO);
+    Result<Void> update(IndexTemplatePhysicalInfoDTO indexTemplatePhysicalInfoDTO);
 
     /**
      *
      * @param physicalPO
      * @return
      */
-    IndexTemplatePhyWithLogic buildIndexTemplatePhysicalWithLogic(TemplatePhysicalPO physicalPO);
+    IndexTemplatePhyInfoWithLogic buildIndexTemplatePhysicalWithLogic(IndexTemplatePhysicalInfoPO physicalPO);
 
     /**
      * 获取regionId下的物理模板
      */
-    List<IndexTemplatePhy> getTemplateByRegionId(Long regionId);
+    List<IndexTemplatePhyInfo> getTemplateByRegionId(Long regionId);
 
 
     Map<Integer, Integer> getAllLogicTemplatesPhysicalCount();

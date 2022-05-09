@@ -11,12 +11,12 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -165,13 +165,13 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
             return Result.buildNotExist("物理模板不存在，ID:" + logicId);
         }
 
-        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        List<IndexTemplatePhyInfo> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
 
         if (!isTemplateSrvOpen(templatePhysicals)) {
             return Result.buildFail("集群没有开启" + templateServiceName());
         }
 
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             try {
                 templatePhySettingsManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
                     templatePhysical.getName(), operator, settings.toJSON());
@@ -201,11 +201,11 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
             return Result.buildNotExist("物理模板不存在，ID:" + logicId);
         }
 
-        IndexTemplatePhy indexTemplatePhy = templateLogicWithPhysical.getMasterPhyTemplate();
-        if (indexTemplatePhy != null) {
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templateLogicWithPhysical.getMasterPhyTemplate();
+        if (indexTemplatePhyInfo != null) {
             try {
                 return Result.buildSucc( templatePhySettingsManager
-                    .fetchTemplateSettings(indexTemplatePhy.getCluster(), indexTemplatePhy.getName()));
+                    .fetchTemplateSettings(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName()));
             } catch (ESOperateException e) {
                 return Result.buildFail(e.getMessage());
             }

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segments;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
@@ -37,7 +37,7 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
 
     @Override
     public void collectSingleCluster(String cluster, long currentTime) {
-        List<IndexTemplatePhyWithLogic> logicTemplates = templatePhyService.getTemplateByPhyCluster(cluster);
+        List<IndexTemplatePhyInfoWithLogic> logicTemplates = templatePhyService.getTemplateByPhyCluster(cluster);
         if (logicTemplates.isEmpty()) {
             LOGGER.error("class=TemplateDashBoardCollector||method=collectSingleCluster||errMsg=clusterTemplateList is null");
             return;
@@ -49,7 +49,7 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
         }
 
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
-        for (IndexTemplatePhyWithLogic indexTemplatePhyWithLogic : logicTemplates) {
+        for (IndexTemplatePhyInfoWithLogic indexTemplatePhyWithLogic : logicTemplates) {
             DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
             IndexTemplateInfo indexTemplateInfo = indexTemplatePhyWithLogic.getLogicTemplate();
 

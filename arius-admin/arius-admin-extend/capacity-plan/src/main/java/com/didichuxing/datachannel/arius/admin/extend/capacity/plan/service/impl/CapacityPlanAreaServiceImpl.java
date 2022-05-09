@@ -7,10 +7,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RegionMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -304,7 +304,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
         }
 
         // 没有划分的rack上分布的模板
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService
+        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService
                 .getNormalTemplateByClusterAndRack(capacityPlanArea.getClusterName(), noRegionRackSet);
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildNotExist("集群中没有模板");
@@ -644,7 +644,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
         if(null == area){return;}
 
         // 物理集群下的物理模板
-        List<IndexTemplatePhy> clusterTemplates = templatePhyService.getNormalTemplateByCluster(area.getClusterName());
+        List<IndexTemplatePhyInfo> clusterTemplates = templatePhyService.getNormalTemplateByCluster(area.getClusterName());
 
         // 校验是否有模板rack不匹配
         for (CapacityPlanRegion region : clusterRegions) {
@@ -652,12 +652,12 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
             // region的rack（去掉将要被缩容的rack）
             String tgtRack = getRegionFinalRack(region);
 
-            List<IndexTemplatePhy> regionTemplates = clusterTemplates.stream()
+            List<IndexTemplatePhyInfo> regionTemplates = clusterTemplates.stream()
                     .filter(indexTemplatePhysical -> belong(indexTemplatePhysical.getRack(), tgtRack))
                     .collect(Collectors.toList());
 
             // 遍历物理模板，检查rack是否一致
-            for (IndexTemplatePhy templatePhysical : regionTemplates) {
+            for (IndexTemplatePhyInfo templatePhysical : regionTemplates) {
                 if (RackUtils.same(templatePhysical.getRack(), tgtRack)) {
                     continue;
                 }
@@ -896,16 +896,16 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
         return REGION_PLAN_SUCCEED;
     }
 
-    private List<Long> getNoRegionTemplateIds(List<IndexTemplatePhy> templatePhysicals,
+    private List<Long> getNoRegionTemplateIds(List<IndexTemplatePhyInfo> templatePhysicals,
                                               Set<String> noRegionRackSet) {
         return templatePhysicals.stream()
                 .filter(templatePhysical -> RackUtils.hasIntersect(templatePhysical.getRack(), noRegionRackSet))
-                .map(IndexTemplatePhy::getId).collect(Collectors.toList());
+                .map(IndexTemplatePhyInfo::getId).collect(Collectors.toList());
     }
 
-    private boolean checkTemplateAllocate(List<IndexTemplatePhy> templatePhysicals, Set<String> hasRegionRackSet,
+    private boolean checkTemplateAllocate(List<IndexTemplatePhyInfo> templatePhysicals, Set<String> hasRegionRackSet,
                                           Set<String> noRegionRackSet) {
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             if (RackUtils.hasIntersect(templatePhysical.getRack(), hasRegionRackSet)
                     && RackUtils.hasIntersect(templatePhysical.getRack(), noRegionRackSet)) {
                 LOGGER.warn("class=CapacityPlanAreaServiceImpl||method=checkTemplateAllocate||msg=template cross region||template={}||rack={}||hasRegionRackSet={}||noRegionRackSet={}",

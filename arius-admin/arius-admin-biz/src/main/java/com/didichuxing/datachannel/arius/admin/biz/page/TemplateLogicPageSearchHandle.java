@@ -23,7 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -251,7 +251,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
             BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
                 Set<String> clusterNameList = templatePhyService.getTemplateByLogicId(consoleTemplateVO.getId())
                         .stream()
-                        .map(IndexTemplatePhy::getCluster)
+                        .map(IndexTemplatePhyInfo::getCluster)
                         .collect(Collectors.toSet());
 
                 consoleTemplateVO.setClusterPhies(Lists.newArrayList(clusterNameList));

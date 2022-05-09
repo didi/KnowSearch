@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ClusterLogicStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.NodeRackStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -222,9 +222,9 @@ public class ESClusterLogicStaticsService {
     //根据逻辑集群id找到逻辑集群所有的模板
     private List<String> getLogicClusterIndexes(Map<String/*phyClusterName*/, List<String>> phyClusterRackMap) {
         List<String> logicClusterIndexes = new ArrayList<>();
-        List<IndexTemplatePhyWithLogic> indexTemplates = templatePhyService.listTemplateWithLogicWithCache();
+        List<IndexTemplatePhyInfoWithLogic> indexTemplates = templatePhyService.listTemplateWithLogicWithCache();
         if (CollectionUtils.isNotEmpty(indexTemplates) && MapUtils.isNotEmpty(phyClusterRackMap)) {
-            for (IndexTemplatePhyWithLogic indexTemplate : indexTemplates) {
+            for (IndexTemplatePhyInfoWithLogic indexTemplate : indexTemplates) {
                 String phyIndexCluster = indexTemplate.getCluster();
                 String[] indexRacks = StringUtils.split(indexTemplate.getRack(), ",");
                 List<String> phyClusterRacks = phyClusterRackMap.getOrDefault(phyIndexCluster, Lists.newArrayList());

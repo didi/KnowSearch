@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
@@ -118,7 +118,7 @@ public class RegionResourceMover {
                 Double factor = computeTemplateFactor(templateMetaMetric, context.getRegion().getConfig());
 
                 // 更新模板factor到数据库
-                IndexTemplatePhy templatePhysical = templatePhyService
+                IndexTemplatePhyInfo templatePhysical = templatePhyService
                     .getTemplateById(templateMetaMetric.getPhysicalId());
                 indexTemplateInfoService.upsertTemplateShardFactor(templatePhysical.getLogicId(), factor,
                     AriusUser.CAPACITY_PLAN.getDesc());
@@ -155,7 +155,7 @@ public class RegionResourceMover {
      */
     public void raiseTemplateFactor(CapacityPlanRegionContext context) {
         for (TemplateMetaMetric templateMetaMetric : context.getTemplateMetaMetrics()) {
-            IndexTemplatePhy templatePhysical = templatePhyService
+            IndexTemplatePhyInfo templatePhysical = templatePhyService
                 .getTemplateById(templateMetaMetric.getPhysicalId());
             indexTemplateInfoService.updateTemplateShardFactorIfGreater(templatePhysical.getLogicId(),
                 computeTemplateFactor(templateMetaMetric, context.getRegion().getConfig()),

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplatePhyWithLogic extends IndexTemplatePhy {
+public class IndexTemplatePhyInfoWithLogic extends IndexTemplatePhyInfo {
 
     /**
      * 逻辑模板信息

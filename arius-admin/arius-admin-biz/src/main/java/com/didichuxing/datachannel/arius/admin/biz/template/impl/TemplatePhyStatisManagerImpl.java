@@ -2,6 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
@@ -12,8 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -80,7 +80,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
      */
     @Override
     public List<TemplateMetaMetric> metaByPhysical(List<Long> physicalIds) {
-        List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics = templatePhyService
+        List<IndexTemplatePhyInfoWithLogic> templatePhysicalWithLogics = templatePhyService
             .getTemplateWithLogicByIds(physicalIds);
 
         Map<Integer, Integer> templateLogicId2DeployCountMap = indexTemplateInfoService.getAllLogicTemplatesPhysicalCount();
@@ -89,7 +89,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
             templatePhysicalWithLogics);
 
         List<TemplateMetaMetric> templateMetaMetrics = Lists.newArrayList();
-        for (IndexTemplatePhyWithLogic physicalWithLogic : templatePhysicalWithLogics) {
+        for (IndexTemplatePhyInfoWithLogic physicalWithLogic : templatePhysicalWithLogics) {
             TemplateMetaMetric templateMetaMetric = new TemplateMetaMetric();
             templateMetaMetric.setPhysicalId(physicalWithLogic.getId());
             templateMetaMetric.setCluster(physicalWithLogic.getCluster());
@@ -180,7 +180,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     public Result<PhysicalTemplateTpsMetric> getTemplateTpsMetric(String cluster, String template,
                                                                   long currentStartTime, long currentEndTime) {
 
-        IndexTemplatePhy templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
+        IndexTemplatePhyInfo templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
         if (templatePhysical == null) {
             return Result.buildNotExist("模板不存在");
         }
@@ -375,7 +375,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
         return Result.buildSucc();
     }
 
-    private Map<Long, LogicResourceConfig> genPhysicalId2ResourceConfigMap(List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics) {
+    private Map<Long, LogicResourceConfig> genPhysicalId2ResourceConfigMap(List<IndexTemplatePhyInfoWithLogic> templatePhysicalWithLogics) {
         List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listAllLogicClusterRacks();
         Map<String, ClusterLogicRackInfo> clusterRack2ResourceIdMap = ConvertUtil.list2Map(logicClusterRacks,
             item -> item.getPhyClusterName() + "@" + item.getRack());
@@ -386,7 +386,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
 
         Map<Long, LogicResourceConfig> result = Maps.newHashMap();
 
-        for (IndexTemplatePhyWithLogic physical : templatePhysicalWithLogics) {
+        for (IndexTemplatePhyInfoWithLogic physical : templatePhysicalWithLogics) {
             for (String rack : physical.getRack().split(AdminConstant.RACK_COMMA)) {
                 String key = physical.getCluster() + "@" + rack;
                 if (clusterRack2ResourceIdMap.containsKey(key)) {

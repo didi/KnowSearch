@@ -23,15 +23,15 @@ public class IndexTemplateInfoWithPhyTemplates extends IndexTemplateInfo {
     /**
      * 物理模板信息
      */
-    private List<IndexTemplatePhy> physicals;
+    private List<IndexTemplatePhyInfo> physicals;
 
     public boolean hasPhysicals() {
         return CollectionUtils.isNotEmpty(physicals);
     }
 
-    public IndexTemplatePhy getMasterPhyTemplate() {
+    public IndexTemplatePhyInfo getMasterPhyTemplate() {
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhy physical : physicals) {
+            for (IndexTemplatePhyInfo physical : physicals) {
                 if (physical.getRole().equals(TemplateDeployRoleEnum.MASTER.getCode())) {
                     return physical;
                 }
@@ -44,10 +44,10 @@ public class IndexTemplateInfoWithPhyTemplates extends IndexTemplateInfo {
      * 获取逻辑索引模板所有的master物理所有模板列表
      * @return
      */
-    public List<IndexTemplatePhy> fetchMasterPhysicalTemplates() {
-        List<IndexTemplatePhy> masterTemplates = new ArrayList<>();
+    public List<IndexTemplatePhyInfo> fetchMasterPhysicalTemplates() {
+        List<IndexTemplatePhyInfo> masterTemplates = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhy physical : physicals) {
+            for (IndexTemplatePhyInfo physical : physicals) {
                 if (TemplateDeployRoleEnum.MASTER.getCode().equals(physical.getRole())) {
                     masterTemplates.add(physical);
                 }
@@ -61,8 +61,8 @@ public class IndexTemplateInfoWithPhyTemplates extends IndexTemplateInfo {
      * @param groupId 组ID
      * @return
      */
-    public IndexTemplatePhy fetchMasterSlave(String groupId) {
-        List<IndexTemplatePhy> physicalsTemp = fetchMasterSlaves(groupId);
+    public IndexTemplatePhyInfo fetchMasterSlave(String groupId) {
+        List<IndexTemplatePhyInfo> physicalsTemp = fetchMasterSlaves(groupId);
         if (!physicalsTemp.isEmpty()) {
             return physicalsTemp.get(0);
         }
@@ -74,10 +74,10 @@ public class IndexTemplateInfoWithPhyTemplates extends IndexTemplateInfo {
      * @param groupId 组ID
      * @return
      */
-    public List<IndexTemplatePhy> fetchMasterSlaves(String groupId) {
-        List<IndexTemplatePhy> templatePhysicals = new ArrayList<>();
+    public List<IndexTemplatePhyInfo> fetchMasterSlaves(String groupId) {
+        List<IndexTemplatePhyInfo> templatePhysicals = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhy physical : physicals) {
+            for (IndexTemplatePhyInfo physical : physicals) {
                 if (TemplateDeployRoleEnum.SLAVE.getCode().equals(physical.getRole()) &&
                         physical.getGroupId().equals(groupId)) {
                     templatePhysicals.add(physical);
@@ -87,9 +87,9 @@ public class IndexTemplateInfoWithPhyTemplates extends IndexTemplateInfo {
         return templatePhysicals;
     }
 
-    public IndexTemplatePhy getSlavePhyTemplate() {
+    public IndexTemplatePhyInfo getSlavePhyTemplate() {
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhy physical : physicals) {
+            for (IndexTemplatePhyInfo physical : physicals) {
                 if (physical.getRole().equals(TemplateDeployRoleEnum.SLAVE.getCode())) {
                     return physical;
                 }
@@ -98,7 +98,7 @@ public class IndexTemplateInfoWithPhyTemplates extends IndexTemplateInfo {
         return null;
     }
 
-    public IndexTemplatePhy getAnyOne() {
+    public IndexTemplatePhyInfo getAnyOne() {
         if (CollectionUtils.isNotEmpty(physicals)) {
             return physicals.get(0);
         }

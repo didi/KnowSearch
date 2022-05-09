@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhysicalInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class IndexTemplateInfoServiceTest extends AriusAdminApplicationTest {
     private AppClusterLogicAuthService logicClusterAuthService;
 
     @MockBean
-    private IndexTemplatePhysicalDAO indexTemplatePhysicalDAO;
+    private IndexTemplatePhysicalInfoDAO indexTemplatePhysicalInfoDAO;
 
     @MockBean
     private IndexTemplateInfoDAO indexTemplateInfoDAO;
@@ -256,7 +256,7 @@ public class IndexTemplateInfoServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getAllLogicTemplatesPhysicalCountTest() {
-        Mockito.when(indexTemplatePhysicalDAO.listAll()).thenReturn(CustomDataSource.getTemplatePhysicalPOList());
+        Mockito.when(indexTemplatePhysicalInfoDAO.listAll()).thenReturn(CustomDataSource.getTemplatePhysicalPOList());
         Mockito.when(templatePhyService.listTemplate()).thenReturn(CustomDataSource.getIndexTemplatePhyList());
         Map<Integer, Integer> ret = indexTemplateInfoService.getAllLogicTemplatesPhysicalCount();
         Assertions.assertFalse(ret.isEmpty());

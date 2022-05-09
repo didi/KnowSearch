@@ -32,7 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecify
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -753,7 +753,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
      * @return result
      */
     @Override
-    public CapacityPlanRegion getRegionOfPhyTemplate(IndexTemplatePhy templatePhysical) {
+    public CapacityPlanRegion getRegionOfPhyTemplate(IndexTemplatePhyInfo templatePhysical) {
 
         if (templatePhysical == null) {
             return null;

@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplatePhy extends BaseEntity {
+public class IndexTemplatePhyInfo extends BaseEntity {
 
     /**
      * 主键

@@ -5,7 +5,7 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -52,9 +52,9 @@ public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
     }
 
     @Override
-    public boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies) {
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
-            if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
+    public boolean isTemplateSrvOpen(List<IndexTemplatePhyInfo> indexTemplatePhies) {
+        for (IndexTemplatePhyInfo indexTemplatePhyInfo : indexTemplatePhies) {
+            if (!isTemplateSrvOpen(indexTemplatePhyInfo.getCluster())) {
                 return false;
             }
         }

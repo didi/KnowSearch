@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.listener;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateEvent;
@@ -39,7 +39,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
     @Override
     public void onApplicationEvent(PhysicalTemplateEvent event) {
         Double deltaQuota = getDeltaQuota(event);
-        IndexTemplatePhy templatePhysical = getOpTemplate(event);
+        IndexTemplatePhyInfo templatePhysical = getOpTemplate(event);
         if (deltaQuota != 0.0 && templatePhysical != null) {
             LOGGER.info("class=PhysicalTemplateNewOrDelEventListener||method=onApplicationEvent||logicId={}||physicalCluster={}||templateName={}||deltaQuota={}",
                     templatePhysical.getLogicId(), templatePhysical.getCluster(), templatePhysical.getName(), deltaQuota);
@@ -71,7 +71,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
      * @param templatePhysical 物理模板
      * @param deltaQuota 增量Quota
      */
-    private void updateRegionQuota(IndexTemplatePhy templatePhysical, Double deltaQuota) {
+    private void updateRegionQuota(IndexTemplatePhyInfo templatePhysical, Double deltaQuota) {
         CapacityPlanRegion region = capacityPlanRegionService.getRegionOfPhyTemplate(templatePhysical);
         if (region != null) {
             LOGGER.info("class=PhysicalTemplateNewOrDelEventListener||method=onApplicationEvent||region={}||deltaQuota={}||msg=PhysicalTemplateAddEvent", region,
@@ -80,7 +80,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
         }
     }
 
-    private IndexTemplatePhy getOpTemplate(PhysicalTemplateEvent event) {
+    private IndexTemplatePhyInfo getOpTemplate(PhysicalTemplateEvent event) {
         if (event instanceof PhysicalTemplateAddEvent) {
             return ((PhysicalTemplateAddEvent) event).getNewTemplate();
         } else if (event instanceof PhysicalTemplateDeleteEvent) {

@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -181,20 +181,20 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
     @Override
     public Result<List<IndexTemplatePhyAlias>> fetchTemplateAliasesByLogicId(Integer logicId) {
-        Result<IndexTemplatePhy> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
+        Result<IndexTemplatePhyInfo> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        IndexTemplatePhy indexTemplatePhy = result.getData();
+        IndexTemplatePhyInfo indexTemplatePhyInfo = result.getData();
 
         try {
-            return Result.buildSucc( templatePhyAliasesManager.fetchTemplateAliases(indexTemplatePhy.getCluster(),
-                indexTemplatePhy.getName()));
+            return Result.buildSucc( templatePhyAliasesManager.fetchTemplateAliases(indexTemplatePhyInfo.getCluster(),
+                indexTemplatePhyInfo.getName()));
         } catch (ESOperateException e) {
             LOGGER.warn("class=TemplateLogicAliasesManagerImpl||method=fetchTemplateAliasesByLogicId||"
                         + "msg=failedFetchTemplateAliases||cluster={}||templateName={}",
-                indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), e);
+                indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName(), e);
 
             return Result.buildFail("操作失败，请稍后重试：" + e.getMessage());
         }
@@ -202,19 +202,19 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
     @Override
     public Result<Void> createTemplateAliases(Integer logicId, List<ConsoleAliasDTO> aliases) {
-        Result<IndexTemplatePhy> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
+        Result<IndexTemplatePhyInfo> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        IndexTemplatePhy indexTemplatePhy = result.getData();
-        if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
-            return Result.buildFail(indexTemplatePhy.getCluster() + "没有开启" + templateServiceName());
+        IndexTemplatePhyInfo indexTemplatePhyInfo = result.getData();
+        if (!isTemplateSrvOpen(indexTemplatePhyInfo.getCluster())) {
+            return Result.buildFail(indexTemplatePhyInfo.getCluster() + "没有开启" + templateServiceName());
         }
 
         try {
-            if (templatePhyAliasesManager.batchCreateTemplateAliases(indexTemplatePhy.getCluster(),
-                indexTemplatePhy.getName(), convertAliases(aliases))) {
+            if (templatePhyAliasesManager.batchCreateTemplateAliases(indexTemplatePhyInfo.getCluster(),
+                indexTemplatePhyInfo.getName(), convertAliases(aliases))) {
                 return Result.buildSucc();
             }
         } catch (ESOperateException e) {
@@ -226,19 +226,19 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
     @Override
     public Result<Void> modifyTemplateAliases(Integer logicId, List<ConsoleAliasDTO> aliases) {
-        Result<IndexTemplatePhy> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
+        Result<IndexTemplatePhyInfo> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        IndexTemplatePhy indexTemplatePhy = result.getData();
-        if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
-            return Result.buildFail(indexTemplatePhy.getCluster() + "没有开启" + templateServiceName());
+        IndexTemplatePhyInfo indexTemplatePhyInfo = result.getData();
+        if (!isTemplateSrvOpen(indexTemplatePhyInfo.getCluster())) {
+            return Result.buildFail(indexTemplatePhyInfo.getCluster() + "没有开启" + templateServiceName());
         }
 
         try {
-            if (templatePhyAliasesManager.modifyTemplateAliases(indexTemplatePhy.getCluster(),
-                indexTemplatePhy.getName(), convertAliases(aliases))) {
+            if (templatePhyAliasesManager.modifyTemplateAliases(indexTemplatePhyInfo.getCluster(),
+                indexTemplatePhyInfo.getName(), convertAliases(aliases))) {
                 return Result.buildSucc();
             }
         } catch (ESOperateException e) {
@@ -257,20 +257,20 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
      */
     @Override
     public Result<Void> deleteTemplateAliases(Integer logicId, List<String> aliases) {
-        Result<IndexTemplatePhy> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
+        Result<IndexTemplatePhyInfo> result = fetchAnyOneLogicTemplateMasterPhysicalTemplate(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        IndexTemplatePhy indexTemplatePhy = result.getData();
+        IndexTemplatePhyInfo indexTemplatePhyInfo = result.getData();
 
-        if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
-            return Result.buildFail(indexTemplatePhy.getCluster() + "没有开启" + templateServiceName());
+        if (!isTemplateSrvOpen(indexTemplatePhyInfo.getCluster())) {
+            return Result.buildFail(indexTemplatePhyInfo.getCluster() + "没有开启" + templateServiceName());
         }
 
         try {
-            if (templatePhyAliasesManager.deleteTemplateAliases(indexTemplatePhy.getCluster(),
-                indexTemplatePhy.getName(), aliases)) {
+            if (templatePhyAliasesManager.deleteTemplateAliases(indexTemplatePhyInfo.getCluster(),
+                indexTemplatePhyInfo.getName(), aliases)) {
                 return Result.buildSucc();
             }
         } catch (ESOperateException e) {
@@ -299,14 +299,14 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
                 .getLogicTemplateWithPhysicalsById(appTemplateAuth.getTemplateId());
 
             if (null != logicWithPhysical && logicWithPhysical.hasPhysicals()) {
-                IndexTemplatePhy indexTemplatePhysical = logicWithPhysical.getPhysicals().get(0);
+                IndexTemplatePhyInfo indexTemplatePhysicalInfo = logicWithPhysical.getPhysicals().get(0);
 
-                if (!isTemplateSrvOpen(indexTemplatePhysical.getCluster())) {
+                if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getCluster())) {
                     return;
                 }
 
-                aliases.addAll(esIndexService.syncGetIndexAliasesByExpression(indexTemplatePhysical.getCluster(),
-                    indexTemplatePhysical.getExpression()));
+                aliases.addAll(esIndexService.syncGetIndexAliasesByExpression(indexTemplatePhysicalInfo.getCluster(),
+                    indexTemplatePhysicalInfo.getExpression()));
             }
         });
 
@@ -319,7 +319,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
      * @param logicId 逻辑模板ID
      * @return
      */
-    private Result<IndexTemplatePhy> fetchAnyOneLogicTemplateMasterPhysicalTemplate(Integer logicId) {
+    private Result<IndexTemplatePhyInfo> fetchAnyOneLogicTemplateMasterPhysicalTemplate(Integer logicId) {
         if (logicId == null) {
             return Result.buildNotExist("非法的逻辑ID： " + logicId);
         }
@@ -335,9 +335,9 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
             return Result.buildNotExist("物理模板不存在，ID:" + logicId);
         }
 
-        IndexTemplatePhy indexTemplatePhy = templateLogicWithPhysical.getMasterPhyTemplate();
-        if (indexTemplatePhy != null) {
-            return Result.buildSucc(indexTemplatePhy);
+        IndexTemplatePhyInfo indexTemplatePhyInfo = templateLogicWithPhysical.getMasterPhyTemplate();
+        if (indexTemplatePhyInfo != null) {
+            return Result.buildSucc(indexTemplatePhyInfo);
         }
 
         return Result.buildNotExist("逻辑模板不存在Master角色物理模板，ID:" + logicId);

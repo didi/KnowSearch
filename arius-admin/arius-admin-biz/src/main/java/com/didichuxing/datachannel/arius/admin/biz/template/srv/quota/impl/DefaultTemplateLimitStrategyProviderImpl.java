@@ -5,7 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicRe
 import static com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MIN;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +47,7 @@ public class DefaultTemplateLimitStrategyProviderImpl implements TemplateLimitSt
     public TemplateLimitStrategy provide(String cluster, String template, long interval,
                                          GetTemplateLimitStrategyContext context) {
 
-        IndexTemplatePhyWithLogic templatePhysicalWithLogic = templatePhyService
+        IndexTemplatePhyInfoWithLogic templatePhysicalWithLogic = templatePhyService
             .getTemplateWithLogicByClusterAndName(cluster, template);
         if (templatePhysicalWithLogic == null) {
             return TemplateLimitStrategy.buildDefault();

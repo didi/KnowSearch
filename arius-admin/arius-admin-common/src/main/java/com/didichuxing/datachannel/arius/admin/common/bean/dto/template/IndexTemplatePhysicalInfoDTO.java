@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "物理模板信息")
-public class IndexTemplatePhysicalDTO extends BaseDTO {
+public class IndexTemplatePhysicalInfoDTO extends BaseDTO {
 
     @ApiModelProperty("模板ID")
     private Long                           id;
@@ -112,6 +112,6 @@ public class IndexTemplatePhysicalDTO extends BaseDTO {
     private Integer                        writeRateLimit;
 
     @ApiModelProperty("物理模板列表")
-    private List<IndexTemplatePhysicalDTO> physicalInfos;
+    private List<IndexTemplatePhysicalInfoDTO> physicalInfos;
 
 }

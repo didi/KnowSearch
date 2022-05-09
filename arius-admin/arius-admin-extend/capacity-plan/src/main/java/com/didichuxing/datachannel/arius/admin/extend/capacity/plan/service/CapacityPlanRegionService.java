@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RegionMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
@@ -130,7 +130,7 @@ public interface CapacityPlanRegionService {
      * @param templatePhysical 模板
      * @return result
      */
-    CapacityPlanRegion getRegionOfPhyTemplate(IndexTemplatePhy templatePhysical);
+    CapacityPlanRegion getRegionOfPhyTemplate(IndexTemplatePhyInfo templatePhysical);
 
     /**
      * 记录统计数据

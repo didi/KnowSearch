@@ -111,8 +111,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         if (templateLogicWithPhysical.hasPhysicals()) {
             MappingConfig mergeMappingConfig = null;
-            List<IndexTemplatePhy> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-            for (IndexTemplatePhy templatePhysical : masterPhysicalTemplates) {
+            List<IndexTemplatePhyInfo> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+            for (IndexTemplatePhyInfo templatePhysical : masterPhysicalTemplates) {
 
                 Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
                         templatePhysical.getName());
@@ -159,13 +159,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return result;
         }
 
-        List<IndexTemplatePhy> templatePhysicals = getMasterTemplatePhysicalByLogicId(logicId);
+        List<IndexTemplatePhyInfo> templatePhysicals = getMasterTemplatePhysicalByLogicId(logicId);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildFail("can not find template physical, logicId:" + logicId);
         }
 
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             Result<MappingConfig> getDiffMappingResult = getDiffMapping(templatePhysical.getCluster(), templatePhysical.getName(), fields);
             if (getDiffMappingResult.failed()) {
                 return getDiffMappingResult;
@@ -203,8 +203,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return checkFieldResult;
         }
 
-        List<IndexTemplatePhy> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhy masterTemplatePhysical : masterPhysicalTemplates) {
+        List<IndexTemplatePhyInfo> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhyInfo masterTemplatePhysical : masterPhysicalTemplates) {
             if (masterTemplatePhysical == null) {
                 return Result.buildFail("can not find template physical, logicId:" + logicId);
             }
@@ -260,10 +260,10 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return Result.buildNotExist("模板不存在");
         }
 
-        List<IndexTemplatePhy> templatePhysicals = logicWithPhysical.fetchMasterPhysicalTemplates();
+        List<IndexTemplatePhyInfo> templatePhysicals = logicWithPhysical.fetchMasterPhysicalTemplates();
 
         List<MappingOptimize> mappingOptimizes = new ArrayList<>();
-        for (IndexTemplatePhy master : templatePhysicals) {
+        for (IndexTemplatePhyInfo master : templatePhysicals) {
             Result<MappingOptimize> getMappingOptimizeResult = templateSattisService
                     .getMappingOptimize(master.getCluster(), master.getName());
 
@@ -317,8 +317,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
 
-        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        List<IndexTemplatePhyInfo> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
 
             Result<MappingConfig> mappingConfigResult = AriusIndexMappingConfigUtils
                     .parseMappingConfig(ariusTypeProperty.toMappingJSON().toJSONString());
@@ -361,11 +361,11 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
 
-        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        List<IndexTemplatePhyInfo> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         Result<ConsoleTemplateSchemaVO> oldSchemaVO = getSchema(logicId);
         boolean isSingleIndex = isSingleIndex(logicId);
 
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
             Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
                     templatePhysical.getName());
             if (result.failed()) {
@@ -513,7 +513,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return ariusTypePropertyList;
     }
 
-    private List<IndexTemplatePhy> getMasterTemplatePhysicalByLogicId(Integer logicId) {
+    private List<IndexTemplatePhyInfo> getMasterTemplatePhysicalByLogicId(Integer logicId) {
         IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
@@ -1212,14 +1212,14 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
-        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhy indexTemplatePhy : templatePhysicals) {
-            Result<MappingConfig> result = templatePhyMappingManager.getMapping(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
+        List<IndexTemplatePhyInfo> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhyInfo indexTemplatePhyInfo : templatePhysicals) {
+            Result<MappingConfig> result = templatePhyMappingManager.getMapping(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName());
             if (result.failed()) {
                 LOGGER.warn("class=TemplateLogicMappingManagerImpl||method=syncTemplateMapping2Index|||logicId={}", logicId);
             }
             MappingConfig templateMappingConfig = result.getData();
-            Result<Void> updateResult = templatePhyMappingManager.syncTemplateMapping2Index(indexTemplatePhy.getCluster(), indexTemplatePhy.getExpression(), templateMappingConfig);
+            Result<Void> updateResult = templatePhyMappingManager.syncTemplateMapping2Index(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getExpression(), templateMappingConfig);
             if (updateResult.failed()) {
                 LOGGER.warn("class=TemplateLogicMappingManagerImpl||method=syncTemplateMapping2Index||mapping={}", templateMappingConfig);
             }

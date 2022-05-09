@@ -500,11 +500,11 @@ public class IndexTemplateInfoServiceImpl implements IndexTemplateInfoService {
                 appTemplateAuth.getTemplateId());
 
             if (null != logicWithPhysical && logicWithPhysical.hasPhysicals()) {
-                IndexTemplatePhy indexTemplatePhysical = logicWithPhysical.getPhysicals().get(0);
+                IndexTemplatePhyInfo indexTemplatePhysicalInfo = logicWithPhysical.getPhysicals().get(0);
 
-                String cluster = indexTemplatePhysical.getCluster();
+                String cluster = indexTemplatePhysicalInfo.getCluster();
                 Set<String> indices = esIndexService.syncGetIndexNameByExpression(cluster,
-                    indexTemplatePhysical.getExpression());
+                    indexTemplatePhysicalInfo.getExpression());
                 if (CollectionUtils.isNotEmpty(indices) && StringUtils.isNotBlank(cluster)) {
                     indices.forEach(i -> indicesClusterTupleList.add(new Tuple<>(i, cluster)));
                 }
@@ -625,9 +625,9 @@ public class IndexTemplateInfoServiceImpl implements IndexTemplateInfoService {
             return Result.buildFail("修改逻辑模板名称失败");
         }
 
-        List<IndexTemplatePhy> physicals = templatePhyService.getTemplateByLogicId(param.getId());
+        List<IndexTemplatePhyInfo> physicals = templatePhyService.getTemplateByLogicId(param.getId());
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhy physical : physicals) {
+            for (IndexTemplatePhyInfo physical : physicals) {
                 physical.setName(param.getName());
                 Result<Void> result = templatePhyService.updateTemplateName(physical, operator);
                 if (result.failed()) {
@@ -901,9 +901,9 @@ public class IndexTemplateInfoServiceImpl implements IndexTemplateInfoService {
 
     @Override
     public Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO dto) throws ESOperateException {
-        List<IndexTemplatePhy> phyList = templatePhyService.getTemplateByLogicId(dto.getLogicId());
-        for (IndexTemplatePhy indexTemplatePhy : phyList) {
-            ClusterPhy clusterPhy = clusterPhyService.getClusterByName(indexTemplatePhy.getCluster());
+        List<IndexTemplatePhyInfo> phyList = templatePhyService.getTemplateByLogicId(dto.getLogicId());
+        for (IndexTemplatePhyInfo indexTemplatePhyInfo : phyList) {
+            ClusterPhy clusterPhy = clusterPhyService.getClusterByName(indexTemplatePhyInfo.getCluster());
             List<String> templateServices = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
             if (!templateServices.contains(TemplateServiceEnum.TEMPLATE_LIMIT_W.getCode().toString())) {
                 return Result.buildFail("指定物理集群没有开启写入限流服务");
@@ -960,10 +960,10 @@ public class IndexTemplateInfoServiceImpl implements IndexTemplateInfoService {
         }
 
         // 逻辑模板对应1到多个物理模板
-        Multimap<Integer, IndexTemplatePhy> logicId2PhysicalTemplatesMapping = ConvertUtil.list2MulMap(
+        Multimap<Integer, IndexTemplatePhyInfo> logicId2PhysicalTemplatesMapping = ConvertUtil.list2MulMap(
             templatePhyService.getTemplateByLogicIds(
                 logicTemplates.stream().map(IndexTemplateInfoPO::getId).collect(Collectors.toList())),
-            IndexTemplatePhy::getLogicId);
+            IndexTemplatePhyInfo::getLogicId);
 
         List<IndexTemplateInfoWithPhyTemplates> indexTemplateCombinePhysicalTemplates = Lists.newArrayListWithCapacity(logicTemplates.size());
 
@@ -1009,11 +1009,11 @@ public class IndexTemplateInfoServiceImpl implements IndexTemplateInfoService {
     private IndexTemplateInfoWithCluster buildLogicTemplateWithLogicClusterMeta(Map<Long, ClusterLogic> logicClusterId2ClusterMeta,
                                                                                 Multimap<String, Long> clusterRackMeta2LogicClusterId,
                                                                                 IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical) {
-        List<IndexTemplatePhy> physicals = templateLogicWithPhysical.getPhysicals();
+        List<IndexTemplatePhyInfo> physicals = templateLogicWithPhysical.getPhysicals();
 
         Map<Long, ClusterLogic> relatedLogicClusters = Maps.newHashMap();
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhy physical : physicals) {
+            for (IndexTemplatePhyInfo physical : physicals) {
 
                 List<ClusterLogic> logicClusters = getPhysicalTemplateLogicCluster(physical, clusterRackMeta2LogicClusterId,
                         logicClusterId2ClusterMeta);
@@ -1040,7 +1040,7 @@ public class IndexTemplateInfoServiceImpl implements IndexTemplateInfoService {
      * @param logicClusterId2LogicClusterMeta 逻辑集群ID与逻辑集群的映射关系
      * @return
      */
-    private List<ClusterLogic> getPhysicalTemplateLogicCluster(IndexTemplatePhy physicalTemplate,
+    private List<ClusterLogic> getPhysicalTemplateLogicCluster(IndexTemplatePhyInfo physicalTemplate,
                                                                Multimap<String, Long> clusterRack2LogicClusterId,
                                                                Map<Long, ClusterLogic> logicClusterId2LogicClusterMeta) {
 
@@ -1238,12 +1238,12 @@ public class IndexTemplateInfoServiceImpl implements IndexTemplateInfoService {
      * @param physicalTemplates 物理模板列表
      * @return
      */
-    private IndexTemplatePhy fetchMasterTemplate(List<IndexTemplatePhy> physicalTemplates) {
+    private IndexTemplatePhyInfo fetchMasterTemplate(List<IndexTemplatePhyInfo> physicalTemplates) {
         if (CollectionUtils.isEmpty(physicalTemplates)) {
             return null;
         }
 
-        for (IndexTemplatePhy physicalTemplate : physicalTemplates) {
+        for (IndexTemplatePhyInfo physicalTemplate : physicalTemplates) {
             if (TemplateDeployRoleEnum.MASTER.getCode().equals(physicalTemplate.getRole())) {
                 return physicalTemplate;
             }
