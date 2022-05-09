@@ -56,7 +56,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP_CONFIG;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-
+/**
+ * @author linyunan
+ * @date 2021-04-28
+ */
 @Service
 public class AppServiceImpl implements AppService {
 
@@ -95,7 +98,7 @@ public class AppServiceImpl implements AppService {
     @Autowired
     private AppClusterLogicAuthService logicClusterAuthService;
 
-    private Cache<String, List<?>>      appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
+    private final Cache<String, List<?>>   appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
 
 
     /**
@@ -471,8 +474,8 @@ public class AppServiceImpl implements AppService {
     /**
      * 根据责任人查询
      *
-     * @param responsible
-     * @return
+     * @param  responsible    责任人
+     * @return List<App>
      */
     @Override
     public List<App> getAppsByResponsibleId(Long responsible) {

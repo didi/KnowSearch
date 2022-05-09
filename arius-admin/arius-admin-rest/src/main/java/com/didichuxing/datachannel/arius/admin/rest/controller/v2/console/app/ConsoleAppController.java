@@ -18,6 +18,10 @@ import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
+/**
+ * @author linyunan
+ * @date 2021-04-28
+ */
 @RestController
 @RequestMapping(V2_CONSOLE + "/app")
 @Api(tags = "Console-用户侧APP相关接口(REST)")

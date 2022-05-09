@@ -21,7 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
-
+/**
+ * @author linyunan
+ * @date 2021-04-28
+ */
 @Component
 public class AppManagerImpl implements AppManager {
 
@@ -55,11 +58,6 @@ public class AppManagerImpl implements AppManager {
 
         return Result.buildSucc(
                 ConvertUtil.list2List(appService.getUserLoginWithoutCodeApps(user), ConsoleAppWithVerifyCodeVO.class));
-    }
-
-    @Override
-    public Result<List<String>> listNames() {
-        return Result.buildSucc(appService.listApps().parallelStream().map(App::getName).collect(Collectors.toList()));
     }
 
     @Override
