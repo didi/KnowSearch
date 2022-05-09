@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkTask extends BaseEntity {
+public class AriusOpTask extends BaseEntity {
     /**
      * 序列化版本号
      */

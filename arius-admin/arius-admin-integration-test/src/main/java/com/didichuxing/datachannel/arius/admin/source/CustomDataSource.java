@@ -5,8 +5,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
@@ -15,8 +19,13 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.google.common.collect.Lists;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class CustomDataSource {
 
@@ -162,20 +171,20 @@ public class CustomDataSource {
         return ariusUserInfoDTO;
     }
 
-    public static WorkTaskDTO getworkTaskDTO(){
-        WorkTaskDTO workTaskDTO=new WorkTaskDTO();
-        workTaskDTO.setTaskType(1);
-        workTaskDTO.setBusinessKey("1");
-        workTaskDTO.setDataCenter("1");
-        workTaskDTO.setCreator(operator);
-        workTaskDTO.setExpandData("1");
-        workTaskDTO.setStatus("success");
-        workTaskDTO.setCreateTime(new Date(System.currentTimeMillis()));
-        workTaskDTO.setDeleteFlag(Boolean.FALSE);
-        workTaskDTO.setId(2);
-        workTaskDTO.setTitle("1");
-        workTaskDTO.setUpdateTime(new Date(System.currentTimeMillis()));
-        return workTaskDTO;
+    public static AriusOpTaskDTO getworkTaskDTO(){
+        AriusOpTaskDTO ariusOpTaskDTO =new AriusOpTaskDTO();
+        ariusOpTaskDTO.setTaskType(1);
+        ariusOpTaskDTO.setBusinessKey("1");
+        ariusOpTaskDTO.setDataCenter("1");
+        ariusOpTaskDTO.setCreator(operator);
+        ariusOpTaskDTO.setExpandData("1");
+        ariusOpTaskDTO.setStatus("success");
+        ariusOpTaskDTO.setCreateTime(new Date(System.currentTimeMillis()));
+        ariusOpTaskDTO.setDeleteFlag(Boolean.FALSE);
+        ariusOpTaskDTO.setId(2);
+        ariusOpTaskDTO.setTitle("1");
+        ariusOpTaskDTO.setUpdateTime(new Date(System.currentTimeMillis()));
+        return ariusOpTaskDTO;
     }
 
     public static void setMetricsClusterPhyDTO(MetricsClusterPhyDTO param) {

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "任务处理信息")
-public class WorkTaskProcessDTO extends BaseDTO {
+public class AriusOpTaskProcessDTO extends BaseDTO {
 
     @ApiModelProperty("任务id")
     private Integer              taskId;

@@ -1,34 +1,33 @@
-package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReStart;
+package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterrestart;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpRestartOrderDetail;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * @author lyn
  * @date 2021-01-21
  */
 @Service("clusterOpRestartHandler")
-public class ClusterOpNormalRestartHandler extends ClusterOpRestartHandler {
+public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -48,7 +47,7 @@ public class ClusterOpNormalRestartHandler extends ClusterOpRestartHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (workTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), WorkTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (ariusOpTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -92,11 +91,11 @@ public class ClusterOpNormalRestartHandler extends ClusterOpRestartHandler {
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
-        WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setTaskType(WorkTaskTypeEnum.CLUSTER_RESTART.getType());
-        workTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        workTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
+        AriusOpTaskDTO ariusOpTaskDTO = new AriusOpTaskDTO();
+        ariusOpTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        ariusOpTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        ariusOpTaskDTO.setCreator(workOrder.getSubmitor());
+        Result<AriusOpTask> result = ariusOpTaskManager.addTask(ariusOpTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }

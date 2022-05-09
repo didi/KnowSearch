@@ -3,29 +3,28 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpOfflineContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpOfflineOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service("clusterOpOfflineHandler")
 public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
@@ -37,7 +36,7 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private WorkTaskManager workTaskManager;
+    private AriusOpTaskManager ariusOpTaskManager;
 
     /**
      * 工单是否自动审批
@@ -92,7 +91,7 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (workTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), WorkTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
+        if (ariusOpTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), AriusOpTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的任务");
         }
 
@@ -154,11 +153,11 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
         ecmTaskDTO.setOrderType(5);
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
 
-        WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setCreator(workOrder.getSubmitor());
-        workTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        workTaskDTO.setTaskType(WorkTaskTypeEnum.CLUSTER_OFFLINE.getType());
-        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
+        AriusOpTaskDTO ariusOpTaskDTO = new AriusOpTaskDTO();
+        ariusOpTaskDTO.setCreator(workOrder.getSubmitor());
+        ariusOpTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        ariusOpTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_OFFLINE.getType());
+        Result<AriusOpTask> result = ariusOpTaskManager.addTask(ariusOpTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }

@@ -1,32 +1,36 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author fengqiongfeng
@@ -39,14 +43,14 @@ public class OpTaskController {
     private static final ILog LOGGER = LogFactory.getLog(OpTaskController.class);
 
     @Autowired
-    private WorkTaskManager workTaskManager;
+    private AriusOpTaskManager ariusOpTaskManager;
 
     @ApiOperation(value = "任务类型", notes = "")
     @GetMapping(value = "/type-enums")
     @ResponseBody
     public Result<List<TaskTypeVO>> getOrderTypes() {
         List<TaskTypeVO> voList = new ArrayList<>();
-        for (WorkTaskTypeEnum elem : WorkTaskTypeEnum.values()) {
+        for (AriusOpTaskTypeEnum elem : AriusOpTaskTypeEnum.values()) {
             voList.add(new TaskTypeVO(elem.getType(), elem.getMessage()));
         }
         return Result.buildSucc(voList);
@@ -61,7 +65,7 @@ public class OpTaskController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
     public Result<WorkTaskVO> submit(HttpServletRequest request,
                                                @PathVariable(value = "type") Integer type,
-                                               @RequestBody WorkTaskDTO workTaskDTO) {
+                                               @RequestBody AriusOpTaskDTO workTaskDTO) {
         String dataCenter = workTaskDTO.getDataCenter();
         String user = HttpRequestUtils.getOperator(request);
 
@@ -73,7 +77,7 @@ public class OpTaskController {
         LOGGER.info("class=OpTaskController||method=OpTaskController.process||workTaskDTO={}||envInfo={}||dataCenter={}",
             JSON.toJSONString(workTaskDTO), EnvUtil.getStr(), dataCenter);
 
-        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
+        Result<AriusOpTask> result = ariusOpTaskManager.addTask(workTaskDTO);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
@@ -84,7 +88,7 @@ public class OpTaskController {
     @GetMapping(value = "/{taskId}")
     @ResponseBody
     public Result<WorkTaskVO> getOrderDetail(@PathVariable(value = "taskId") Integer taskId) {
-        Result<WorkTask> result = workTaskManager.getById(taskId);
+        Result<AriusOpTask> result = ariusOpTaskManager.getById(taskId);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
@@ -96,7 +100,7 @@ public class OpTaskController {
     @ResponseBody
     public Result<List<WorkTaskVO>> getTaskList() {
         return Result.buildSucc(ConvertUtil.list2List(
-                workTaskManager.list().getData(),WorkTaskVO.class)
+                ariusOpTaskManager.list().getData(),WorkTaskVO.class)
         );
     }
 

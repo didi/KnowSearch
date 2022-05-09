@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.task.template;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DcdrSwithTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRSingleTemplateMasterSlaveSwitchDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTasksDetail;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
@@ -24,12 +24,18 @@ import com.didiglobal.logi.job.core.job.JobContext;
 
 import java.util.List;
 
+/**
+ * 删除脏dcdrlinks随机任务
+ *
+ * @author shizeying
+ * @date 2022/05/09
+ */
 @Task(name = "DeleteDirtyDCDRLinksRandomTask", description = "删除成功任务中的dcdr脏链路", cron = "0 0 2 */1 * ?", autoRegister = true)
 public class DeleteDirtyDCDRLinksRandomTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteDirtyDCDRLinksRandomTask.class);
 
     @Autowired
-    private WorkTaskManager     workTaskManager;
+    private AriusOpTaskManager ariusOpTaskManager;
 
     @Autowired
     private TemplateDcdrManager templateDcdrManager;
@@ -39,10 +45,10 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
         LOGGER.info("class=DeleteDirtyDCDRLinksRandomTask||method=execute||msg=start");
 
         //获取失败的dcdr主从切换任务
-        List<WorkTask> successDcdrSwitchTaskList = workTaskManager.getSuccessTaskByType(WorkTaskTypeEnum.TEMPLATE_DCDR.getType());
+        List<AriusOpTask> successDcdrSwitchTaskList = ariusOpTaskManager.getSuccessTaskByType(AriusOpTaskTypeEnum.TEMPLATE_DCDR.getType());
         if (CollectionUtils.isEmpty(successDcdrSwitchTaskList)) { return TaskResult.SUCCESS; }
 
-        for (WorkTask successDcdrSwitchTask : successDcdrSwitchTaskList) {
+        for (AriusOpTask successDcdrSwitchTask : successDcdrSwitchTaskList) {
             DCDRTasksDetail dcdrTasksDetail = JSON.parseObject(successDcdrSwitchTask.getExpandData(),
                 DCDRTasksDetail.class);
 
@@ -54,8 +60,8 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
 
             for (DCDRSingleTemplateMasterSlaveSwitchDetail switchDetail : switchDetailList) {
                 //强切任务失败，删除脏链路
-                if (DcdrSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())
-                        && !switchDetail.getDeleteDcdrChannelFlag()) {
+                if (DCDRSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())
+                    && !switchDetail.getDeleteDcdrChannelFlag()) {
                     try {
                         Result<Void> deleteDcdrResult = templateDcdrManager.deleteDcdr(
                                 switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc());
@@ -76,7 +82,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
             }
 
             successDcdrSwitchTask.setExpandData(ConvertUtil.obj2Json(dcdrTasksDetail));
-            workTaskManager.updateTask(successDcdrSwitchTask);
+            ariusOpTaskManager.updateTask(successDcdrSwitchTask);
         }
 
         return TaskResult.SUCCESS;

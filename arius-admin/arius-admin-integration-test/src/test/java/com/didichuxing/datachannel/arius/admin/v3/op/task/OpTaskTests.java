@@ -2,16 +2,15 @@ package com.didichuxing.datachannel.arius.admin.v3.op.task;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.task.OpTaskControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.CustomDataSource;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author wuxuan
@@ -27,8 +26,8 @@ public class OpTaskTests extends BaseContextTest {
 
     @Test
     public void testSubmit() throws IOException{
-          WorkTaskDTO workTaskDTO= CustomDataSource.getworkTaskDTO();
-          Result<WorkTaskVO> result=OpTaskControllerMethod.submit(2,workTaskDTO);
+          AriusOpTaskDTO ariusOpTaskDTO = CustomDataSource.getworkTaskDTO();
+          Result<WorkTaskVO> result=OpTaskControllerMethod.submit(2, ariusOpTaskDTO);
           Assert.assertTrue(result.success());
     }
 

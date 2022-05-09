@@ -4,13 +4,12 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.task;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.AriusOpTaskPO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
- * WorkTask Dao
+ * AriusOpTask Dao
  * 
  * @author fengqiongfeng
  * @date 2020-12-21

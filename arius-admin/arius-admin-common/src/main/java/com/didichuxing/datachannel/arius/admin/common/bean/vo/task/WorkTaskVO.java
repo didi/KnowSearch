@@ -1,14 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.task;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 /**
- * WorkTask PO 对象
+ * AriusOpTask PO 对象
  * 
  * @author fengqiongfeng
  * @date 2020-12-21

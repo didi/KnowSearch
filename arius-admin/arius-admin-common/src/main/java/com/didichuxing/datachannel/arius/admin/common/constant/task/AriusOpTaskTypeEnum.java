@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
-public enum WorkTaskTypeEnum {
+public enum AriusOpTaskTypeEnum {
                               /**新增*/
                               CLUSTER_NEW(1, "集群新增"),
 
@@ -26,7 +26,7 @@ public enum WorkTaskTypeEnum {
 
                               UNKNOWN(-1, "unknown");
 
-    WorkTaskTypeEnum(Integer type, String message) {
+    AriusOpTaskTypeEnum(Integer type, String message) {
         this.type = type;
         this.message = message;
     }
@@ -43,17 +43,17 @@ public enum WorkTaskTypeEnum {
         return message;
     }
 
-    public static WorkTaskTypeEnum valueOfType(Integer type) {
+    public static AriusOpTaskTypeEnum valueOfType(Integer type) {
         if (type == null) {
-            return WorkTaskTypeEnum.UNKNOWN;
+            return AriusOpTaskTypeEnum.UNKNOWN;
         }
-        for (WorkTaskTypeEnum typeEnum : WorkTaskTypeEnum.values()) {
+        for (AriusOpTaskTypeEnum typeEnum : AriusOpTaskTypeEnum.values()) {
             if (type.equals(typeEnum.getType())) {
                 return typeEnum;
             }
         }
 
-        return WorkTaskTypeEnum.UNKNOWN;
+        return AriusOpTaskTypeEnum.UNKNOWN;
     }
 
 }

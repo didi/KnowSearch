@@ -1,8 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.AbstractTaskDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 
 /**
@@ -16,29 +15,30 @@ public interface WorkTaskHandler extends BaseHandle {
      *
      * 1、校验任务内容是否合法
      * 2、提交任务
-     * @param workTask 任务数据
+     * @param ariusOpTask 任务数据
      * @return result
      */
-    Result<WorkTask> addTask(WorkTask workTask);
-
-    /**
+    Result<AriusOpTask> addTask(AriusOpTask ariusOpTask);
+    
+    /**存在联合国关闭任务
      * 判断一个任务是否存在，参数待定
-     * @return
+     *
+     @param key key
+     @param type 类型
+     @return boolean
      */
     boolean existUnClosedTask(String key, Integer type);
-
-    /**
+    
+    /**过程
      * 处理任务
-     * @param workTask 任务
+     * @param ariusOpTask 任务
      * @return result
+     @param step 一步
+     @param status 状态
+     @param expandData 扩展数据
      */
-    Result<Void> process(WorkTask workTask, Integer step, String status, String expandData);
+    Result<Void> process(AriusOpTask ariusOpTask, Integer step, String status, String expandData);
 
-    /**
-     * 获取任务详细信息
-     * @param extensions 扩展信息
-     * @return AbstractTaskDetail
-     */
-    AbstractTaskDetail getTaskDetail(String extensions);
+
 
 }

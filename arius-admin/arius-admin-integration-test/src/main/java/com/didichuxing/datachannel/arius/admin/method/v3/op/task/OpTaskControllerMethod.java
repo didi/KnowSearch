@@ -1,17 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.method.v3.op.task;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
-
 import java.io.IOException;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 /**
  * @author wuxuan
@@ -25,7 +24,7 @@ public class OpTaskControllerMethod {
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<TaskTypeVO>>>(){});
     }
     //todo测试未成功
-    public static Result<WorkTaskVO> submit(Integer type, WorkTaskDTO workTaskDTO) throws IOException {
+    public static Result<WorkTaskVO> submit(Integer type, AriusOpTaskDTO workTaskDTO) throws IOException {
         String path=String.format("%s/%d/submit",OpTask,type);
         return JSON.parseObject(AriusClient.put(path,workTaskDTO),new TypeReference<Result<WorkTaskVO>>(){});
     }
