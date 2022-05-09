@@ -28,7 +28,7 @@ KnowSearch由两个后端应用，一个前端应用，一个kibana服务，一�
 ## 2.3.基础资源下载
 
 1. 下载后端资源服务包（包括admin服务、gateway服务），[下载跳转链接](https://logi-em.s3.didiyunapi.com/Logi-EM-Installation-package.tar.gz)
-2. 如需要二次开发，clone LogiEM到本地打开admin/gateway，进行打包，详见如下【服务打包】流程
+2. 如需要二次开发，clone KnowSearch到本地打开admin/gateway，进行打包，详见如下【服务打包】流程
 
 
 ## 2.4 Arius-admin服务部署
