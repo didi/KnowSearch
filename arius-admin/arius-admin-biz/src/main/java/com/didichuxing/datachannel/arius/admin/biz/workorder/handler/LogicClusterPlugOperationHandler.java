@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterPlugOperationOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -155,7 +155,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(AriusWorkOrderInfoPO orderPO, String userName) {
         if (isOP(userName)) {
             return Result.buildSucc();
         }

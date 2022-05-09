@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
@@ -62,7 +62,7 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(AriusWorkOrderInfoPO orderPO, String userName) {
         if (isOP(userName)) {
             return Result.buildSucc();
         }

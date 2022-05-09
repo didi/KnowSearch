@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.AriusWorkOrderInfoDAO">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO">
         <id column="id"                   jdbcType="BIGINT"       property="id" />
         <result column="type"             jdbcType="VARCHAR"      property="type" />
         <result column="title"            jdbcType="VARCHAR"      property="title" />
@@ -26,7 +26,7 @@
     </sql>
     
     
-  <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO" useGeneratedKeys="true" keyProperty="id">
+  <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO" useGeneratedKeys="true" keyProperty="id">
     insert into work_order (
     type,title, applicant, applicant_app_id, description, extensions,approver_app_id
     )
@@ -54,7 +54,7 @@
     where id = #{id}
   </update>
 
-  <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO">
+  <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO">
     update work_order
     set approver = #{approver}, finish_time=now(), opinion= #{opinion}, status = #{status}, update_time=now()
     where id = #{id}
@@ -91,7 +91,7 @@
     order by create_time desc
   </select>
 
-  <update id="updateExtensionsById" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO">
+  <update id="updateExtensionsById" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO">
     UPDATE work_order SET
       extensions=#{extensions},
       update_time=now()

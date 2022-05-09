@@ -5,8 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -31,7 +31,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     protected static final ILog    LOGGER = LogFactory.getLog(BaseWorkOrderHandler.class);
 
     @Autowired
-    private WorkOrderManager       workOrderManager;
+    private AriusWorkOrderInfoManager ariusWorkOrderInfoManager;
 
     @Autowired
     private AriusUserInfoService   ariusUserInfoService;
@@ -45,7 +45,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * 2、提交工单
      */
     @Override
-    public Result<WorkOrderPO> submit(WorkOrder workOrder) throws AdminOperateException {
+    public Result<AriusWorkOrderInfoPO> submit(WorkOrder workOrder) throws AdminOperateException {
 
         Result<Void> checkAuth = validateConsoleAuth(workOrder);
         if (checkAuth.failed()) {
@@ -71,10 +71,10 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
 
         workOrder.setTitle(getTitle(workOrder));
 
-        WorkOrderPO workOrderPO = buildOrderPO(workOrder);
-        workOrderManager.insert(workOrderPO);
+        AriusWorkOrderInfoPO ariusWorkOrderInfoPO = buildOrderPO(workOrder);
+        ariusWorkOrderInfoManager.insert(ariusWorkOrderInfoPO);
 
-        return Result.buildSuccWithTips(workOrderPO, "工单提交成功！");
+        return Result.buildSuccWithTips(ariusWorkOrderInfoPO, "工单提交成功！");
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> processDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
+    public Result<Void> processDisagree(AriusWorkOrderInfoPO orderPO, WorkOrderProcessDTO processDTO) {
         return doProcessDisagree(orderPO, processDTO);
     }
 
@@ -116,13 +116,13 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @param orderPO
      * @return
      */
-    protected Result<Void> doProcessDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
+    protected Result<Void> doProcessDisagree(AriusWorkOrderInfoPO orderPO, WorkOrderProcessDTO processDTO) {
         orderPO.setApprover(processDTO.getAssignee());
         orderPO.setApproverAppId(processDTO.getAssigneeAppid());
         orderPO.setOpinion(processDTO.getComment());
         orderPO.setStatus(OrderStatusEnum.REFUSED.getCode());
 
-        if (workOrderManager.updateOrderById(orderPO) > 0) {
+        if (ariusWorkOrderInfoManager.updateOrderById(orderPO) > 0) {
             return Result.buildSucc();
         }
         return Result.buildFail("审批不通过");
@@ -135,19 +135,19 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     protected Result<Void> validDuplicateOrder(WorkOrder workOrder) {
         // 获取当前提交人已经提交待审批的工单列表
-        Result<List<WorkOrderVO>> orderToApproveResult = workOrderManager.getOrderApplyList(workOrder.getSubmitor(), OrderStatusEnum.WAIT_DEAL.getCode());
+        Result<List<AriusWorkOrderInfoVO>> orderToApproveResult = ariusWorkOrderInfoManager.getOrderApplyList(workOrder.getSubmitor(), OrderStatusEnum.WAIT_DEAL.getCode());
         if (orderToApproveResult.failed()) {
             return Result.buildFrom(orderToApproveResult);
         }
 
-        List<WorkOrderVO> applyListResultData = orderToApproveResult.getData();
+        List<AriusWorkOrderInfoVO> applyListResultData = orderToApproveResult.getData();
         // 当前不存在待审批的工单时，无需做重复性校验
         if (CollectionUtils.isEmpty(applyListResultData)) {
             return Result.buildSucc();
         }
 
         // 遍历所有的工单，对于待审批的工单的内容和类型进行重复性的条件过滤
-        for (WorkOrderVO param : applyListResultData) {
+        for (AriusWorkOrderInfoVO param : applyListResultData) {
             if (workOrder.getType().equals(param.getType())
                     && JSON.toJSONString(workOrder.getContentObj()).equals(param.getExtensions())) {
                 return Result.buildFail("重复性工单的提交");
@@ -218,8 +218,8 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @param workOrder 工单
      * @return result
      */
-    private WorkOrderPO buildOrderPO(WorkOrder workOrder) {
-        WorkOrderPO orderPo = new WorkOrderPO();
+    private AriusWorkOrderInfoPO buildOrderPO(WorkOrder workOrder) {
+        AriusWorkOrderInfoPO orderPo = new AriusWorkOrderInfoPO();
         orderPo.setApplicant(workOrder.getSubmitor());
         orderPo.setDescription(workOrder.getDescription());
         orderPo.setExtensions(JSON.toJSONString(workOrder.getContentObj()));
@@ -245,12 +245,12 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     }
 
     private Result<Void> updateWorkOrderStatus(WorkOrder workOrder, String approver, String opinion) {
-        WorkOrderPO orderPO = new WorkOrderPO();
+        AriusWorkOrderInfoPO orderPO = new AriusWorkOrderInfoPO();
         orderPO.setId(workOrder.getId());
         orderPO.setApprover(approver);
         orderPO.setOpinion(opinion);
         orderPO.setStatus(OrderStatusEnum.PASSED.getCode());
-        Result<Void> processResult = workOrderManager.processOrder(orderPO);
+        Result<Void> processResult = ariusWorkOrderInfoManager.processOrder(orderPO);
         if (processResult.failed()) {
             return processResult;
         }

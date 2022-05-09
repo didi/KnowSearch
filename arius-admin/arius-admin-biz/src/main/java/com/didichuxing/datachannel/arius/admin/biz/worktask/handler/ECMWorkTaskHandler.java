@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.AriusWorkOrderInfoManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
@@ -70,7 +70,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     private ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private WorkOrderManager       workOrderManager;
+    private AriusWorkOrderInfoManager ariusWorkOrderInfoManager;
 
     @Autowired
     private ESPluginService        esPluginService;
@@ -289,7 +289,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
      * @param ecmTask 任务
      */
     private void handleSuccessEcmPluginRestartTask(EcmTask ecmTask) {
-        OrderDetailBaseVO orderDetailBaseVO = workOrderManager.getById(ecmTask.getWorkOrderId()).getData();
+        OrderDetailBaseVO orderDetailBaseVO = ariusWorkOrderInfoManager.getById(ecmTask.getWorkOrderId()).getData();
         PhyClusterPluginOperationContent content = JSON.parseObject(orderDetailBaseVO.getDetail(), PhyClusterPluginOperationContent.class);
 
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue());

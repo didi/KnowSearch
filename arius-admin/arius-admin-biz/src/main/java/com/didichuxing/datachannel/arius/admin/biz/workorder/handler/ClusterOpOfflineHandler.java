@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTa
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpOfflineOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -62,7 +62,7 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(AriusWorkOrderInfoPO orderPO, String userName) {
         if (isOP(userName)) {
             return Result.buildSucc();
         }

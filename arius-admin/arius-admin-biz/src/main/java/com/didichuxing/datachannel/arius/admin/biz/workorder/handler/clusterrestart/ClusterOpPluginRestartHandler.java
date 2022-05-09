@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
@@ -188,7 +188,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
     }
 
     @Override
-    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
+    public Result<Void> checkAuthority(AriusWorkOrderInfoPO orderPO, String userName) {
         if (isOP(userName)) {
             return Result.buildSucc();
         }

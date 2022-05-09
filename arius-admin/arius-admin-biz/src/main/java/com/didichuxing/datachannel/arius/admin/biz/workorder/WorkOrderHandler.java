@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import java.util.List;
@@ -27,7 +27,7 @@ public interface WorkOrderHandler extends BaseHandle {
      * @return result
      @throws AdminOperateException 管理操作Exception
      */
-    Result<WorkOrderPO> submit(WorkOrder workOrder) throws AdminOperateException;
+    Result<AriusWorkOrderInfoPO> submit(WorkOrder workOrder) throws AdminOperateException;
     
     /**过程一致
      * 处理工单
@@ -45,7 +45,7 @@ public interface WorkOrderHandler extends BaseHandle {
      * @return result
      @param orderPO 订单订单
      */
-    Result<Void> processDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO);
+    Result<Void> processDisagree(AriusWorkOrderInfoPO orderPO, WorkOrderProcessDTO processDTO);
 
     /**
      * 工单是否自动审批
@@ -74,6 +74,6 @@ public interface WorkOrderHandler extends BaseHandle {
      * @return Result
      @param userName 用户名
      */
-    Result<Void> checkAuthority(WorkOrderPO orderPO, String userName);
+    Result<Void> checkAuthority(AriusWorkOrderInfoPO orderPO, String userName);
 
 }

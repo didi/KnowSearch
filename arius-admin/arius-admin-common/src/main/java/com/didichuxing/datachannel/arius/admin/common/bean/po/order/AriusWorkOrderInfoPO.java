@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkOrderPO extends BasePO {
+public class AriusWorkOrderInfoPO extends BasePO {
 
     /**
      * ID
