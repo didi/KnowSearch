@@ -1,0 +1,142 @@
+.dashboard-table-container {
+  height: 262px;
+  background: #fff;
+  // box-shadow: 0 2px 4px 0 rgba(0,0,0,0.01), 0 3px 6px 3px rgba(0,0,0,0.01), 0 2px 6px 0 rgba(0,0,0,0.03);
+  background: #F8F9FA;
+  border-radius: 8px;
+  padding: 12px 16px 0px 16px;
+  position: relative;
+
+  .dashboard-table-title {
+    margin-bottom: 12px;
+    font-family: HelveticaNeue-Medium;
+    letter-spacing: 0.5px;
+    font-size: 14px;
+    color: #212529;
+    height: 22px;
+    line-height: 22px;
+
+    span {
+      font-size: 12px;
+      color: #495057;
+      letter-spacing: 0.43px;
+      margin: 0 3px;
+    }
+  }
+
+  .ant-table {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    height: 189px;
+
+    .ant-table-thead>tr>th,
+    .ant-table-tbody>tr>td {
+      padding: 0px;
+      padding-left: 20px;
+    }
+
+    .ant-table-thead>tr>th {
+      height: 27px;
+      line-height: 27px;
+      background: #EBEDEF;
+    }
+
+    td {
+      color: #495057;
+    }
+  }
+
+  .ant-table-empty {
+    .ant-table-thead {
+      display: none !important;
+    }
+
+    .ant-table-tbody>tr>td {
+      border: none !important;
+    }
+  }
+
+  .ant-table-pagination.ant-pagination {
+    margin: 5px 0 0;
+    position: absolute;
+    bottom: -22px;
+    right: -12px;
+
+    .ant-pagination-prev {
+      height: 16px;
+      line-height: 16px;
+      margin-right: 0px;
+
+      .ant-pagination-item-link {
+        height: 16px;
+
+        svg {
+          width: 7px
+        }
+      }
+    }
+
+    .ant-pagination-simple {
+
+      .ant-pagination-prev,
+      .ant-pagination-next,
+      .ant-pagination-jump-prev,
+      .ant-pagination-jump-next {
+        min-width: 24px
+      }
+    }
+
+    .ant-pagination-simple-pager {
+      display: inline-block;
+      height: 16px;
+      margin-top: -2px;
+      margin-right: 0px;
+      color: #495057;
+
+      input {
+        width: 22px;
+        height: 14px;
+        border: 1px solid #CED4DA;
+        margin-right: 7px;
+      }
+
+      .ant-pagination-slash {
+        margin: 0 7px 0 0;
+      }
+    }
+
+    .ant-pagination-next {
+      height: 16px;
+      line-height: 16px;
+      vertical-align: top;
+
+      .ant-pagination-item-link {
+        height: 16px;
+
+        svg {
+          width: 7px
+        }
+      }
+    }
+  }
+
+  &-empty {
+    margin-top: 100px;
+    text-align: center;
+
+    img {
+      width: 60px;
+      height: 40px;
+      margin-bottom: 8px;
+    }
+
+    span {
+      font-family: PingFangSC-Regular;
+      font-size: 12px;
+      color: #919AAC;
+      text-align: center;
+      line-height: 20px;
+      margin-left: -10px;
+    }
+  }
+}

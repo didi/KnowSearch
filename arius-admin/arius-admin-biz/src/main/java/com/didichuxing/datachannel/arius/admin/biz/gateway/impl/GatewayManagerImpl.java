@@ -4,19 +4,19 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Alias;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.GatewayAppVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.gateway.GatewayNodeVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplateDeployInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplatePhysicalDeployVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayTemplateVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Alias;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalDeployVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.APP_DEFAULT_READ_AUTH_INDICES;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 
 @Component
@@ -140,7 +141,7 @@ public class GatewayManagerImpl implements GatewayManager {
         Map<Integer, AppConfig> appId2AppConfigMap = ConvertUtil.list2Map(appConfigs, AppConfig::getAppId);
 
         String defaultRIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
-                "app.default.read.auth.indices", "");
+                APP_DEFAULT_READ_AUTH_INDICES, "");
 
         Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap = templateLogicService
                 .getAllLogicTemplatesMap();

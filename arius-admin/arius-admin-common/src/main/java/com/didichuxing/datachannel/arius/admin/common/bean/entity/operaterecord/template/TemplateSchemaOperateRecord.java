@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateSchemaVO;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
-import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;

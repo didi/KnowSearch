@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 
-import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.PHY_CLUSTER_NAME;
 import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.gatewayHeartbeatFactory;
 
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;

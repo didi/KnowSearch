@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.ConsoleTemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 

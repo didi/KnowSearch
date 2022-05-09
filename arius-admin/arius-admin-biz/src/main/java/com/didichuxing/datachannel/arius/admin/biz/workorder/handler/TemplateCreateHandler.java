@@ -8,23 +8,21 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateCreateContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.TemplateCreateNotify;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.LogicResourceConfig;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
@@ -50,8 +48,8 @@ import org.springframework.stereotype.Service;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_WO_AUTO_PROCESS_CREATE_TEMPLATE_DISK_MAXG;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_TEMPLATE_CREATE;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl.NOT_CHECK;
 
 /**
@@ -108,7 +106,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         }
 
         Double autoProcessDiskMaxG = ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,
-                "arius.wo.auto.process.create.template.disk.maxG", 10.0);
+                ARIUS_WO_AUTO_PROCESS_CREATE_TEMPLATE_DISK_MAXG, 10.0);
 
         return content.getDiskQuota() < autoProcessDiskMaxG;
     }
@@ -278,10 +276,6 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
                     .updateMappingForNew(result.getData(), genTypeProperty(content.getMapping())).failed()) {
                 throw new AdminOperateException("设置mapping失败");
             }*/
-
-            sendNotify(WORK_ORDER_TEMPLATE_CREATE,
-                    new TemplateCreateNotify(workOrder.getSubmitorAppid(), content.getName()),
-                    Arrays.asList(workOrder.getSubmitor()));
         }
 
         return Result.buildFrom(result);

@@ -1,14 +1,35 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CAPACITY_PLAN_REGION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_CAPA_PLAN;
+import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.belong;
+import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.hasIntersect;
+import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskEnum.CHECK;
+import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskEnum.PLAN;
+import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskStatusEnum.*;
+import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskTypeEnum.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.xcontent.XContentHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RackMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.RegionMetric;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.TemplateMetaMetric;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RegionMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -24,8 +45,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
@@ -37,34 +56,10 @@ import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component.Re
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.dao.mysql.CapacityPlanRegionInfoDAO;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.notify.mail.CapacityPlanTaskNotifyInfo;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanAreaService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
 import com.google.common.collect.*;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.xcontent.XContentHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.CAPACITY_PLAN_REGION;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_CAPA_PLAN;
-import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.belong;
-import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.hasIntersect;
-import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskEnum.CHECK;
-import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskEnum.PLAN;
-import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskStatusEnum.*;
-import static com.didichuxing.datachannel.arius.admin.extend.capacity.plan.constant.CapacityPlanRegionTaskTypeEnum.*;
 
 @Service
 public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements CapacityPlanRegionService, ApplicationListener<ResourceItemMissEvent> {
@@ -85,9 +80,6 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
 
     @Autowired
     private RegionResourceMover regionResourceMover;
-
-    @Autowired
-    private NotifyService notifyService;
 
     @Autowired
     private RegionRackService regionRackService;
@@ -962,12 +954,6 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             LOGGER.info("class=CapacityPlanRegionServiceImpl||method=regionIncrease||regionId={}||tgtRack={}", region.getRegionId(), tgtRack);
             modifyRegionRacks(region.getRegionId(), tgtRack);
 
-            notifyService.send(
-                NotifyTaskTypeEnum.CAPACITY_PLAN_TASK,
-                new CapacityPlanTaskNotifyInfo(regionPlanContext, INCREASE, RackUtils.list2Racks(increaseRacks), statusEnum),
-                Arrays.asList()
-            );
-
             deltaRack.addAll(increaseRacks);
 
             return statusEnum;
@@ -1025,11 +1011,6 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                 LOGGER.warn("class=CapacityPlanRegionServiceImpl||method=regionDecrease||regionId={}||msg=move2ColdNode shard fail when decrease", region.getRegionId());
             }
 
-            notifyService.send(
-                NotifyTaskTypeEnum.CAPACITY_PLAN_TASK,
-                new CapacityPlanTaskNotifyInfo(regionPlanContext, DECREASE, RackUtils.list2Racks(decreaseRacks), statusEnum),
-                Arrays.asList()
-            );
             deltaRack.addAll(decreaseRacks);
 
             return statusEnum;

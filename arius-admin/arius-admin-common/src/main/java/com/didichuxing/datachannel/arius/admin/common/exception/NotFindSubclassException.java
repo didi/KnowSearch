@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.exception;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 
 /**
  * @author linyunan

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.BaseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

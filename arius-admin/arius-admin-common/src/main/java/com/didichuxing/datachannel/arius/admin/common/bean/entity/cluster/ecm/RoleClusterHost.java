@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm;
 
 
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterNodeStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;

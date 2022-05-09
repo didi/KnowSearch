@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.didichuxing.datachannel</groupId>
         <artifactId>arius-admin</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>${revision}${sha1}${changelist}</version>
     </parent>
 
     <artifactId>arius-admin-rest</artifactId>
@@ -15,10 +15,6 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>arius-admin-client</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>
@@ -62,6 +58,12 @@
             <groupId>com.didichuxing.datachannel</groupId>
             <artifactId>arius-admin-remote</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.didichuxing.datachannel</groupId>
+            <artifactId>arius-admin-rest-v2</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>org.mockito</groupId>

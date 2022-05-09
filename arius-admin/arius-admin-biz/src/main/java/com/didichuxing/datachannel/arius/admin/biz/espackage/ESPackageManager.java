@@ -3,15 +3,15 @@ package com.didichuxing.datachannel.arius.admin.biz.espackage;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.espackage.AriusESPackageEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.espackage.AriusESPackageEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPackageDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.espackage.ESPackageVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.espackage.ESPackageVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;

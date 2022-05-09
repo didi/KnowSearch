@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 
 /**

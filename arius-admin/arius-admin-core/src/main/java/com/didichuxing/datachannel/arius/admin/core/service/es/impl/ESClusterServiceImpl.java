@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.compress.utils.Sets;
@@ -24,15 +25,14 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAllocationInfo;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAttrInfo;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAllocationInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -131,33 +131,6 @@ public class ESClusterServiceImpl implements ESClusterService {
         return clusterSettingMap.containsKey(settingFlatName);
     }
 
-    /**
-     * 配置集群的冷存搬迁配置
-     *
-     * @param cluster    集群
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws ESOperateException
-     */
-    @Override
-    public boolean syncConfigColdDateMove(String cluster, int inGoing, int outGoing, String moveSpeed,
-                                          int retryCount) throws ESOperateException {
-
-        Map<String, Object> configMap = Maps.newHashMap();
-
-        if (inGoing > 0) {
-            configMap.put(CLUSTER_ROUTING_ALLOCATION_OUTGOING, outGoing);
-        }
-
-        if (outGoing > 0) {
-            configMap.put(CLUSTER_ROUTING_ALLOCATION_INGOING, inGoing);
-        }
-
-        configMap.put(COLD_MAX_BYTES_PER_SEC_KEY, moveSpeed);
-
-        return ESOpTimeoutRetry.esRetryExecute("syncConfigColdDateMove", retryCount,
-            () -> esClusterDAO.putPersistentConfig(cluster, configMap));
-    }
 
     @Override
     public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) {
@@ -498,7 +471,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Boolean checkClusterPassword(String addresses, String password) {
+    public ClusterConnectionStatus checkClusterPassword(String addresses, String password) {
         ESClient client = new ESClient();
         client.addTransportAddresses(addresses);
         if (StringUtils.isNotBlank(password)) {
@@ -509,14 +482,14 @@ public class ESClusterServiceImpl implements ESClusterService {
             client.start();
             DirectRequest directRequest = new DirectRequest("GET", "");
             DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
-            if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                return Boolean.TRUE;
-            } else {
-                return Boolean.FALSE;
-            }
+            return ClusterConnectionStatus.NORMAL;
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterServiceImpl||method=checkClusterWithoutPassword||address={}||mg=get es segments fail", addresses, e);
-            return Boolean.FALSE;
+            if (e.getCause().getMessage().contains("Unauthorized")) {
+                return ClusterConnectionStatus.UNAUTHORIZED;
+            } else {
+                return ClusterConnectionStatus.DISCONNECTED;
+            }
         } finally {
             client.close();
         }

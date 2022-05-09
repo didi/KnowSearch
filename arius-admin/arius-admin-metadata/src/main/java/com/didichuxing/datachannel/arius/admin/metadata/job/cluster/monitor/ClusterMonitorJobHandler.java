@@ -8,11 +8,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
-import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
@@ -84,14 +84,14 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     private String  hostName     = HttpHostUtil.HOST_NAME;
 
-    @Value("${monitorJob.thread.initsize:20}")
+    @Value("${monitorJob.threadPool.initsize:20}")
     private int  poolSize;
 
     /**
      * maxPoolSize，当前monitorjob能支持的最大集群采集个数，
      * 超过maxPoolSize的集群不会被采集，保证maxPoolSize个集群采集的稳定性
      */
-    @Value("${monitorJob.thread.maxsize:30}")
+    @Value("${monitorJob.threadPool.maxsize:30}")
     private int  maxPoolSize;
 
     private ThreadPoolExecutor threadPool;

@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESPackageDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPackageDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

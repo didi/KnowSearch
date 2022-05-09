@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.NodeAttrInfo;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -125,12 +125,6 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
         map.put("test", "test");
         Mockito.when(esClusterDAO.getPersistentClusterSettings(Mockito.any())).thenReturn(map);
         Assertions.assertTrue(esClusterService.hasSettingExist(CustomDataSource.PHY_CLUSTER_NAME, "test"));
-    }
-
-    @Test
-    public void syncConfigColdDateMoveTest() throws ESOperateException {
-        Mockito.when(esClusterDAO.putPersistentConfig(Mockito.any(), Mockito.anyMap())).thenReturn(true);
-        Assertions.assertTrue(esClusterService.syncConfigColdDateMove(CustomDataSource.PHY_CLUSTER_NAME, 1, 1, "1", 1));
     }
 
     @Test

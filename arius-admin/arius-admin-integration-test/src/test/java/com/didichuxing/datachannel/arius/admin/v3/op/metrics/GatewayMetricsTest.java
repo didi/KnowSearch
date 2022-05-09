@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.metrics;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.metrics.GatewayMetricsControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.CustomDataSource;
 import com.google.common.collect.Lists;

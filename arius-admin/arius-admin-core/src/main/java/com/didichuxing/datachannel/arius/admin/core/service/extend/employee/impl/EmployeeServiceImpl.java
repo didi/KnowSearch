@@ -1,20 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.employee.impl;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
-import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
-import com.didichuxing.datachannel.arius.admin.remote.employee.EmployeeHandle;
-import com.didichuxing.datachannel.arius.admin.remote.employee.content.EmployeeTypeEnum;
-import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
+import com.didichuxing.datachannel.arius.admin.remote.employee.EmployeeHandle;
+import com.didichuxing.datachannel.arius.admin.remote.employee.EmployeeTypeEnum;
+import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author linyunan
@@ -40,18 +38,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public <T extends BaseEmInfo> Result<T> getByDomainAccount(String domainAccount) {
-        Result<String> getEmployeeTypeResult = getEmployeeType();
-        if (getEmployeeTypeResult.failed()) {
-            return Result.buildFrom(getEmployeeTypeResult);
-        }
-
-        LOGGER.info("class=EmployeeServiceImpl||method=getByDomainAccount||employeeType={}", employeeType);
-
-        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(employeeType)).getByDomainAccount(domainAccount);
-    }
-
-    @Override
     public Result<Void> checkUsers(String domainAccounts) {
         Result<String> getEmployeeTypeResult = getEmployeeType();
         if (getEmployeeTypeResult.failed()) {
@@ -61,19 +47,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         LOGGER.info("class=EmployeeServiceImpl||method=checkUsers||employeeType={}", employeeType);
 
         return ((EmployeeHandle) handleFactory.getByHandlerNamePer(employeeType)).checkUsers(domainAccounts);
-    }
-
-    @Override
-    public Result<Object> searchOnJobStaffByKeyWord(String keyWord) {
-
-        Result<String> getEmployeeTypeResult = getEmployeeType();
-        if (getEmployeeTypeResult.failed()) {
-            return Result.buildFrom(getEmployeeTypeResult);
-        }
-
-        LOGGER.info("class=EmployeeServiceImpl||method=searchOnJobStaffByKeyWord||employeeType={}", employeeType);
-
-        return ((EmployeeHandle) handleFactory.getByHandlerNamePer(employeeType)).searchOnJobStaffByKeyWord(keyWord);
     }
 
     /*************************************private****************************************************/

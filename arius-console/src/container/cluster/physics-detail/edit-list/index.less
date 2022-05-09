@@ -1,0 +1,126 @@
+.detail-edit-list {
+  padding: 20px 0 20px 0;
+  .edit-from {
+    position: absolute;
+    // display: none;
+    width: 0;
+    right: 70px;
+    top: 18px;
+    overflow: hidden;
+    transition: width 0.3s;
+    // transform: translateY(-50%);
+  }
+  .edit-from-transition {
+    display: block;
+    width: calc(100% - 90px);
+  }
+  .ant-form-item-control {
+    // height: 56px;
+  }
+  .ant-form-item-control-input,
+  .ant-select {
+    width: 110px;
+  }
+  .ant-form-item-explain {
+    position: absolute;
+    top: 33px;
+    right: 0;
+    min-width: 500px;
+    text-align: right;
+  }
+  .ant-list-bordered {
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  .ant-list-header {
+    display: flex;
+    align-items: center;
+    padding-right: 24px;
+    padding-left: 24px;
+    min-height: 40px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: aliceblue;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    box-sizing: border-box;
+  }
+  .detail-edit-list-row {
+    padding: 0;
+  }
+  .detail-edit-list-line {
+    height: 1px;
+    width: 100%;
+    background: rgb(219, 224, 228);
+  }
+  .detail-edit-list-row-col {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    min-height: 40px;
+  }
+  .detail-edit-content {
+    display: flex;
+    align-items: center;
+  }
+  .edit-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 140px;
+    padding: 0 10px 0 10px;
+    text-align: center;
+    overflow: hidden;
+    word-wrap: break-word;
+    // line-height: 0px;
+    .ant-form-horizontal {
+      margin-top: 15px;
+    }
+    .ant-form-item-explain-validating {
+      min-height: auto;
+    }
+  }
+  .popover-inner-content {
+    max-width: 300px;
+  }
+  &-btn {
+    width: 50px;
+    text-align: center;
+  }
+  &-row {
+    width: 100%;
+    padding: 0;
+    &-col {
+      justify-content: space-between;
+      cursor: pointer;
+      &-label {
+        width: 70%;
+        &-max {
+          overflow: hidden;
+        }
+      }
+      &-item {
+        display: flex;
+        align-items: center;
+        min-width: 80px;
+        .ant-form-item {
+          margin: 0;
+        }
+      }
+      &-icon {
+        padding-left: 20px;
+      }
+      &-btn {
+        margin-left: 20px;
+      }
+    }
+    // .anticon {
+    //   display: none;
+    // }
+    // &-col:hover {
+    //   .anticon {
+    //     display: inline-block;
+    //   }
+    // }
+  }
+}

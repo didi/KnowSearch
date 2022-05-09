@@ -1,0 +1,83 @@
+.remove-all-icon {
+  width: 40px;
+  height: 49px;
+  text-align: center;
+  line-height: 49px;
+  right: 0px;
+  top: 50px;
+  position: fixed;
+  background: white;
+  border-left: 1px solid #e6e9f1;
+  z-index: 999;
+}
+
+.remove-all-icon:hover {
+  color: #3e91f7;
+}
+
+.router-tabs {
+  position: fixed;
+  top: 50px;
+  width: calc(100% - 190px);
+  left: 190px;
+  z-index: 999;
+  transition: left 0.1s;
+  .router-tabs-icon {
+    position: absolute;
+    top: 0;
+    width: 25px;
+    height: 49px;
+    text-align: center;
+    line-height: 49px;
+    background: white;
+    z-index: 999;
+    border-left: 1px solid #e6e9f1;
+    cursor: pointer;
+    &-left {
+      left: 0;
+      border-right: 1px solid #e6e9f1;
+    }
+    &-right {
+      right: 40px;
+    }
+  }
+  .router-tabs-icon:hover {
+    color: #3e91f7;
+  }
+  &.collapsed {
+    left: 56px;
+    width: calc(100% - 56px);
+  }
+
+  .ant-tabs-nav {
+    background: white;
+    // padding: 10px;
+    padding: 10px 30px 10px 30px;
+    border-left: 1px solid #e6e9f1;
+    height: 50px;
+
+    .ant-tabs-tab {
+      padding: 5px!important;
+      background: white!important;
+      margin-right: 10px!important;
+      .anticon {
+        margin-right: 0px;
+      }
+    }
+
+    a {
+      color: #303a51;
+    }
+
+    a:hover {
+      color: #3e91f7;
+    }
+
+    .ant-tabs-tab-active {
+      a {
+        color: #3e91f7;
+      }
+      border-bottom-color: #f0f0f0 !important;
+    }
+  }
+}

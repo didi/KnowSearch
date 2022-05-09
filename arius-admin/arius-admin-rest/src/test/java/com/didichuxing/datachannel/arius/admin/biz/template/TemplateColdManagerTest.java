@@ -2,8 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import org.junit.jupiter.api.Test;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;

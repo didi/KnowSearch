@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.cluster.config;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.ecm.ESConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.config.ESClusterConfigControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.PhyClusterInfoSource;
 import org.junit.Assert;

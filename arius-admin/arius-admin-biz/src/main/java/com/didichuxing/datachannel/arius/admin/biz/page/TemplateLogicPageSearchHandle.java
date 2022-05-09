@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum.isTemplateAuthExitByCode;
+import static com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum.isTemplateAuthExitByCode;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.AppLogicTemplateAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.PageDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;

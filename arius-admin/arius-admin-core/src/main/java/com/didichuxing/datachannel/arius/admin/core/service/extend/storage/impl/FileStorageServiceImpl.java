@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
 import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;

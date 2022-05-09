@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterPhyAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
-
-import java.util.List;
 
 /**
  * Created by linyunan on 2021-10-15

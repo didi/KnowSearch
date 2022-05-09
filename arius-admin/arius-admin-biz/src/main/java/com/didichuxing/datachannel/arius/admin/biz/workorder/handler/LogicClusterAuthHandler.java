@@ -3,12 +3,11 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterAuthContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.notify.LogicClusterAuthNotify;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
@@ -22,12 +21,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicA
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum.WORK_ORDER_LOGIC_CLUSTER_AUTH;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
 
 @Service("logicClusterAuthHandler")
 public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
@@ -96,10 +91,6 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
                                                                                + AppClusterLogicAuthEnum
                                                                                    .valueOf(content.getAuthCode()),
                     approver);
-
-            sendNotify(WORK_ORDER_LOGIC_CLUSTER_AUTH,
-                new LogicClusterAuthNotify(workOrder.getSubmitorAppid(), content.getLogicClusterName(), approver),
-                Arrays.asList(workOrder.getSubmitor()));
         }
 
         return Result.buildFrom(result);

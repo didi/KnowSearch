@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.AbstractTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;

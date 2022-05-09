@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.app.AppTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 
@@ -22,7 +22,7 @@ public interface AppLogicTemplateAuthService {
      * @param delete 是否执行删除操作
      * @return
      */
-    boolean deleteExcessTemplateAuthsIfNeed(boolean delete);
+    boolean deleteRedundancyTemplateAuths(boolean delete);
 
     /**
      * 在逻辑模板权限表中设置APP对某逻辑模板的权限

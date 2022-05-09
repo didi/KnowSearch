@@ -4,24 +4,23 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.IndexTemplatePhysicalDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplatePhysicalCopyDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.template.TemplatePhysicalUpgradeDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ConsoleTemplatePhyVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.template.TemplatePhysicalStatusEnum;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
@@ -29,17 +28,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.constant.TemplateOperateRecordEnum;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didichuxing.datachannel.arius.admin.core.notify.NotifyTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.cluster.ClusterTemplatePhysicalMetaErrorNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.info.template.TemplatePhysicalMetaErrorNotifyInfo;
-import com.didichuxing.datachannel.arius.admin.core.notify.service.NotifyService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -65,13 +60,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.COPY;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.MASTER;
-import static com.didichuxing.datachannel.arius.admin.client.constant.template.TemplateDeployRoleEnum.SLAVE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.COPY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
@@ -91,6 +86,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private static final String TEMPLATE_PHYSICAL_NOT_EXISTS = "物理模板不存在";
 
     private static final String CHECK_FAIL_MSG = "check fail||msg={}";
+
+    public static final int MIN_SHARD_NUM = 1;
 
     @Autowired
     private OperateRecordService        operateRecordService;
@@ -118,9 +115,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Autowired
     private TemplatePhyService          templatePhyService;
-
-    @Autowired
-    private NotifyService               notifyService;
 
     @Autowired
     private AriusConfigInfoService      ariusConfigInfoService;
@@ -159,9 +153,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                     } else {
                         LOGGER.warn("class=TemplatePhyManagerImpl||method=metaCheck||msg=fail||physicalId={}||failMsg={}", templatePhysical.getId(),
                                 result.getMessage());
-                        notifyService.send( NotifyTaskTypeEnum.TEMPLATE_PHYSICAL_META_ERROR,
-                                new TemplatePhysicalMetaErrorNotifyInfo(templatePhysical, result.getMessage()),
-                                Arrays.asList());
                     }
                     int indexOpResult = checkIndexCreateAndExpire(templatePhysical, logicId2IndexTemplateLogicMap);
                     if (indexOpResult == TOMORROW_INDEX_NOT_CREATE || indexOpResult == INDEX_ALL_ERR) {
@@ -176,21 +167,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                             e.getMessage(), templatePhysical.getId(), e);
                 }
             }
-
-            List<String> errMsgs = Lists.newArrayList();
-            if (tomorrowIndexNotCreateCount * 1.0 / clusterTemplates.size() > 0.7) {
-                errMsgs.add("有" + tomorrowIndexNotCreateCount + "个索引模板创建明天索引失败");
-            }
-            if (expireIndexNotDeleteCount * 1.0 / clusterTemplates.size() > 0.7) {
-                errMsgs.add("有" + expireIndexNotDeleteCount + "个索引模板删除过期索引失败");
-            }
-
-            if (CollectionUtils.isNotEmpty(errMsgs)) {
-                notifyService.send(NotifyTaskTypeEnum.CLUSTER_TEMPLATE_PHYSICAL_META_ERROR,
-                        new ClusterTemplatePhysicalMetaErrorNotifyInfo(cluster, String.join(",", errMsgs)),
-                        Arrays.asList());
-            }
-
         }
 
         return true;
@@ -777,10 +753,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (param.getRack() != null && !clusterPhyService.isRacksExists(oldIndexTemplatePhy.getCluster(), param.getRack())) {
             return Result.buildParamIllegal("物理模板rack非法");
         }
-        if (param.getShard() != null) {
-            if (param.getShard() >= 1) {
-                return Result.buildSucc();
-            }
+        if (param.getShard() != null && param.getShard() < MIN_SHARD_NUM) {
             return Result.buildParamIllegal("shard个数非法");
         }
 
@@ -860,7 +833,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     private boolean needOperateAhead(IndexTemplatePhyWithLogic physicalWithLogic) {
         Set<String> clusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-                "delete.expire.index.ahead.clusters", "", ",");
+                CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD, "", ",");
         return clusterSet.contains(physicalWithLogic.getCluster());
     }
 
@@ -1082,7 +1055,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
             if (needOperateAhead(physicalWithLogic)) {
                 int aheadSeconds = ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP,
-                        "operate.index.ahead.seconds", 2 * 60 * 60);
+                        INDEX_OPERATE_AHEAD_SECONDS, 2 * 60 * 60);
                 indexTime = AriusDateUtils.getBeforeSeconds(indexTime, aheadSeconds);
             }
 

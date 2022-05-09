@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
@@ -59,19 +60,6 @@ public interface ESClusterService {
      * @return true/false
      */
     boolean hasSettingExist(String cluster, String settingFlatName);
-
-    /**
-     * 配置集群的冷存搬迁配置
-     * @param cluster       集群
-     * @param inGoing
-     * @param outGoing
-     * @param moveSpeed
-     * @param retryCount    重试次数
-     * @return  true/false
-     * @throws ESOperateException
-     */
-    boolean syncConfigColdDateMove(String cluster, int inGoing, int outGoing, String moveSpeed,
-                                   int retryCount) throws ESOperateException;
 
     /**
      * 获取物理集群下各个节点的插件名称列表
@@ -220,7 +208,7 @@ public interface ESClusterService {
      * @param password
      * @return True 正确连接集群， False 无法连接集群
      */
-    Boolean checkClusterPassword(String addresses, String password);
+    ClusterConnectionStatus checkClusterPassword(String addresses, String password);
 
     /**
      * 获取集群线程池相关信息

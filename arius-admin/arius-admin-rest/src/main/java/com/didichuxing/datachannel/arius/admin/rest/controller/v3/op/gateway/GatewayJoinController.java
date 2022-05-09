@@ -1,16 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.gateway;
 
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayJoinLogManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.metrics.GatewayJoinQueryDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.GatewayJoinVO;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 import io.swagger.annotations.*;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;

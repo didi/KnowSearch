@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.user;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.AriusUserInfoDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.user.EditUserPasswordDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.EditUserPasswordDTO;
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.user.AriusUserInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
 
 /**
  * Created by linyunan on 2021-06-22

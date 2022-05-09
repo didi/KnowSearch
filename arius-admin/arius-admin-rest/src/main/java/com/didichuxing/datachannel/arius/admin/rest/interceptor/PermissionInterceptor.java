@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
 
 /**
  * 登陆拦截 && 权限校验
@@ -100,7 +101,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
         }
 
         boolean interceptorSwitch = ariusConfigInfoService.booleanSetting(ARIUS_COMMON_GROUP,
-            "request.interceptor.switch.open", Boolean.TRUE);
+            REQUEST_INTERCEPTOR_SWITCH_OPEN, Boolean.TRUE);
         if (!interceptorSwitch) {
             return Boolean.TRUE;
         }

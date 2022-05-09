@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.remote.employee;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.employee.BaseEmInfo;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 
@@ -21,11 +21,4 @@ public interface EmployeeHandle extends BaseHandle {
      * @param domainAccounts 域账号列表
      */
     Result<Void> checkUsers(String domainAccounts);
-
-    /**
-     * 根据关键词查找用户信息
-     * @param keyWord
-     * @return
-     */
-    Result<Object> searchOnJobStaffByKeyWord(String keyWord);
 }

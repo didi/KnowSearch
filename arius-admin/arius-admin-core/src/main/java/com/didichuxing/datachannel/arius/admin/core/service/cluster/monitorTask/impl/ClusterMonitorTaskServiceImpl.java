@@ -31,7 +31,7 @@ public class ClusterMonitorTaskServiceImpl implements ClusterMonitorTaskService 
      * maxPoolSize，当前monitorjob能支持的最大集群采集个数，
      * 超过maxPoolSize的集群不会被采集，保证maxPoolSize个集群采集的稳定性
      */
-    @Value("${dashboard.thread.maxsize:30}")
+    @Value("${dashboard.threadPool.maxsize:30}")
     private int  maxPoolSize;
 
     @Autowired

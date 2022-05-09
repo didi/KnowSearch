@@ -1,16 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.thardpart;
 
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.app.ThirdpartAppVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ThirdPartClusterVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.cluster.ThirdPartLogicClusterVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.config.ThirdpartConfigVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ThirdPartTemplateLogicWithMasterTemplateResourceVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ThirdpartTemplateLogicVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ThirdpartTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.ThirdpartTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ThirdpartAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartLogicClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdPartTemplateLogicWithMasterTemplateResourceVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;

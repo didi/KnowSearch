@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.*;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.AppIdTemplateAccessCountVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateHealthDegreeRecordVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateStatsInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.template.TemplateValueRecordVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.client.constant.quota.Resource;
-import com.didichuxing.datachannel.arius.admin.client.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateValueRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;

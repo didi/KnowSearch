@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.INDEX_BLOCK_SETTING;
-import static com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.ModuleEnum.INDEX_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_BLOCK_SETTING;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
 
 import java.util.Arrays;
@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PagingData;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesOpenOrCloseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,20 +19,20 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndicesPageSearchHandle;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.client.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesBlockSettingDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.dto.indices.IndicesConditionDTO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexCatCellVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexMappingVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexSettingVO;
-import com.didichuxing.datachannel.arius.admin.client.bean.vo.indices.IndexShardInfoVO;
-import com.didichuxing.datachannel.arius.admin.client.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.client.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
-import com.didichuxing.datachannel.arius.admin.common.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -140,29 +140,34 @@ public class IndicesManagerImpl implements IndicesManager {
         Map<String, List<String>> cluster2IndexNameListMap = ConvertUtil.list2MapOfList(params,
                 IndicesOpenOrCloseDTO::getClusterPhyName, IndicesOpenOrCloseDTO::getIndex);
 
-        cluster2IndexNameListMap.forEach((cluster, indexNameList) -> {
+        for (Map.Entry<String, List<String>> entry : cluster2IndexNameListMap.entrySet()) {
+            String cluster = entry.getKey();
+            List<String> indexNameList = entry.getValue();
             try {
-                if (esIndexService.syncBatchCloseIndices(cluster, indexNameList, 2)) {
-                    Result<Boolean> result = batchSetIndexStatus(cluster, indexNameList, indexNewStatus);
-                    if(result.success()) {
-                        if(indexNewStatus) {
-                            operateRecordService.save(INDEX_OP, OperationEnum.OPEN_INDEX, null,
-                                    String.format("批量开启%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)),
-                                    operator);
-                        } else {
-                            operateRecordService.save(INDEX_OP, OperationEnum.CLOSE_INDEX, null,
-                                    String.format("批量关闭%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)),
-                                    operator);
-                        }
-                    }
+                boolean syncOpenOrCloseResult = indexNewStatus ? esIndexService.syncBatchOpenIndices(cluster, indexNameList, 3) :
+                        esIndexService.syncBatchCloseIndices(cluster, indexNameList, 3);
+                if (!syncOpenOrCloseResult) {
+                    return Result.buildFail("批量开启或关闭索引失败");
+                }
+
+                Result<Boolean> setCatIndexResult = batchSetIndexStatus(cluster, indexNameList, indexNewStatus);
+                if (!setCatIndexResult.success()) {
+                    return Result.buildFail("批量更新索引状态失败");
+                }
+
+                if (indexNewStatus) {
+                    operateRecordService.save(INDEX_OP, OperationEnum.OPEN_INDEX, null,
+                            String.format("批量开启%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
+                } else {
+                    operateRecordService.save(INDEX_OP, OperationEnum.CLOSE_INDEX, null,
+                            String.format("批量关闭%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
                 }
             } catch (Exception e) {
                 LOGGER.error(
                         "class=IndicesManagerImpl||method=batchUpdateIndexStatus||cluster={}||indexNameList={}||errMsg={}",
                         cluster, ListUtils.strList2String(indexNameList), e.getMessage(), e);
             }
-        });
-        // 防止refresh操作没及时生成segment, 就立马触发查询
+        }
         sleep(1000L);
         return Result.buildSucc(true);
     }
