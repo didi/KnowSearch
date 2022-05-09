@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterP
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterHostDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterHostInfoDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import java.util.List;
 public class RoleClusterHostServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
-    private ESRoleClusterHostDAO roleClusterHostDAO;
+    private ESRoleClusterHostInfoDAO roleClusterHostInfoDAO;
 
     @Autowired
     private ESRoleClusterDAO esRoleClusterDAO;
@@ -86,7 +86,7 @@ public class RoleClusterHostServiceTest extends AriusAdminApplicationTest {
         esRoleClusterHostDTO.setPort(port);
         esRoleClusterHostDTO.setId(id);
         Assertions.assertTrue(roleClusterHostService.editNode(esRoleClusterHostDTO).success());
-        Assertions.assertEquals(port, roleClusterHostDAO.getById(id).getPort());
+        Assertions.assertEquals(port, roleClusterHostInfoDAO.getById(id).getPort());
         esRoleClusterHostDTO.setStatus(ESClusterNodeStatusEnum.UNKNOWN.getCode());
         Assertions.assertEquals(Result.buildParamIllegal("节点状态非法").getMessage(),
                 roleClusterHostService.editNode(esRoleClusterHostDTO).getMessage());
@@ -131,7 +131,7 @@ public class RoleClusterHostServiceTest extends AriusAdminApplicationTest {
         ESRoleClusterHostDTO esRoleClusterHostDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Long id = roleClusterHostService
                 .save(ConvertUtil.obj2Obj(esRoleClusterHostDTO, RoleClusterHost.class)).getData();
-        Assertions.assertEquals(esRoleClusterHostDTO.getCluster(), roleClusterHostDAO.getById(id).getCluster());
+        Assertions.assertEquals(esRoleClusterHostDTO.getCluster(), roleClusterHostInfoDAO.getById(id).getCluster());
     }
 
     @Test
@@ -139,7 +139,7 @@ public class RoleClusterHostServiceTest extends AriusAdminApplicationTest {
         ESRoleClusterHostDTO esRoleClusterHostDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Long id = roleClusterHostService
                 .save(ConvertUtil.obj2Obj(esRoleClusterHostDTO, RoleClusterHost.class)).getData();
-        Assertions.assertEquals(roleClusterHostDAO.getById(id).getCluster(), roleClusterHostService.getById(id).getCluster());
+        Assertions.assertEquals(roleClusterHostInfoDAO.getById(id).getCluster(), roleClusterHostService.getById(id).getCluster());
     }
 
     @Test

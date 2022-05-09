@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * ES集群表对应各角色主机列表
- * @author didi
- * @since 2020-08-24
+ * @author chengxiang
+ * @date 2022/4/29
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESRoleClusterHostPO extends BasePO {
+public class ESRoleClusterHostInfoPO extends BasePO {
 
     private Long id;
 
@@ -81,7 +81,7 @@ public class ESRoleClusterHostPO extends BasePO {
             return false;
         }
 
-        ESRoleClusterHostPO nodePO = (ESRoleClusterHostPO) o;
+        ESRoleClusterHostInfoPO nodePO = (ESRoleClusterHostInfoPO) o;
 
         if (!hostname.equals(nodePO.hostname)) {
             return false;
