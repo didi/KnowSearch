@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostInfoPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -13,20 +13,20 @@ import org.springframework.stereotype.Repository;
  * @date 20222/4/22
  */
 @Repository
-public interface ESRoleClusterHostInfoDAO {
+public interface ESClusterRoleHostInfoDAO {
     /**
      * 插入一条主机记录
      * @param param
      * @return
      */
-    int insert(ESRoleClusterHostInfoPO param);
+    int insert(ESClusterRoleHostInfoPO param);
 
     /**
      * 根据id 获取一条主机记录
      * @param id
      * @return
      */
-    ESRoleClusterHostInfoPO getById(Long id);
+    ESClusterRoleHostInfoPO getById(Long id);
 
     /**
      * 根据roleId 获取主机名称列表
@@ -40,21 +40,21 @@ public interface ESRoleClusterHostInfoDAO {
      * @param roleClusterId
      * @return
      */
-    List<ESRoleClusterHostInfoPO> listByRoleClusterId(Long roleClusterId);
+    List<ESClusterRoleHostInfoPO> listByRoleClusterId(Long roleClusterId);
 
     /**
      * 根据多条roleClusterId 获取主机信息列表
      * @param roleClusterIds
      * @return
      */
-    List<ESRoleClusterHostInfoPO> listByRoleClusterIds(List<Long> roleClusterIds);
+    List<ESClusterRoleHostInfoPO> listByRoleClusterIds(List<Long> roleClusterIds);
 
     /**
      * 根据条件查询符合条件的主机信息列表
      * @param param
      * @return
      */
-    List<ESRoleClusterHostInfoPO> listByCondition(ESRoleClusterHostInfoPO param);
+    List<ESClusterRoleHostInfoPO> listByCondition(ESClusterRoleHostInfoPO param);
 
     /**
      * 根据集群和rack 信息查询符合条件的主机信息列表
@@ -62,7 +62,7 @@ public interface ESRoleClusterHostInfoDAO {
      * @param rack
      * @return
      */
-    List<ESRoleClusterHostInfoPO> listByClusterAndRack(@Param("cluster") String cluster,
+    List<ESClusterRoleHostInfoPO> listByClusterAndRack(@Param("cluster") String cluster,
                                                        @Param("rack") String rack);
 
     /**
@@ -70,21 +70,21 @@ public interface ESRoleClusterHostInfoDAO {
      * @param cluster
      * @return
      */
-    List<ESRoleClusterHostInfoPO> listByCluster(String cluster);
+    List<ESClusterRoleHostInfoPO> listByCluster(String cluster);
 
     /**
      * 更新主机信息
      * @param param
      * @return
      */
-    int update(ESRoleClusterHostInfoPO param);
+    int update(ESClusterRoleHostInfoPO param);
 
     /**
      * 根据主机信息批量插入记录
      * @param params
      * @return
      */
-    int insertBatch(List<ESRoleClusterHostInfoPO> params);
+    int insertBatch(List<ESClusterRoleHostInfoPO> params);
 
     /**
      * 将所有在线的节点置为离线,在同步集群节点时调用;需要在事务内调用,保证失败后回滚
@@ -97,7 +97,7 @@ public interface ESRoleClusterHostInfoDAO {
      * 查询在线节点信息列表
      * @return
      */
-    List<ESRoleClusterHostInfoPO> listOnlineNode();
+    List<ESClusterRoleHostInfoPO> listOnlineNode();
 
     /**
      * 根据集群删除主机信息
@@ -119,14 +119,14 @@ public interface ESRoleClusterHostInfoDAO {
      * 获取所有主机信息
      * @return
      */
-    List<ESRoleClusterHostInfoPO> listAll();
+    List<ESClusterRoleHostInfoPO> listAll();
 
     /**
      * 根据主机名获取主机信息
      * @param hostName
      * @return
      */
-    ESRoleClusterHostInfoPO getByHostName(String hostName);
+    ESClusterRoleHostInfoPO getByHostName(String hostName);
 
     /**
      * 根据id 删除主机信息
@@ -149,7 +149,7 @@ public interface ESRoleClusterHostInfoDAO {
      * @param roleId
      * @return
      */
-    ESRoleClusterHostInfoPO getDeleteHostByHostNameAnRoleId(@Param("hostname") String hostname,
+    ESClusterRoleHostInfoPO getDeleteHostByHostNameAnRoleId(@Param("hostname") String hostname,
                                                             @Param("roleId") Long roleId);
 
     /**
@@ -157,7 +157,7 @@ public interface ESRoleClusterHostInfoDAO {
      * @param param
      * @return
      */
-    int updateHostValid(RoleClusterHostInfo param);
+    int updateHostValid(ClusterRoleHostInfo param);
 
     /**
      *  根据主机名和roleId 获取主机数量

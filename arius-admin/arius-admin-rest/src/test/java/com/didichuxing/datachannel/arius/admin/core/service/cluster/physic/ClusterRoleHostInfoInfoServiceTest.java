@@ -4,14 +4,14 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterHostInfoDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostInfoDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,10 +25,10 @@ import java.util.List;
 
 @Transactional
 @Rollback
-public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTest {
+public class ClusterRoleHostInfoInfoServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
-    private ESRoleClusterHostInfoDAO roleClusterHostInfoDAO;
+    private ESClusterRoleHostInfoDAO roleClusterHostInfoDAO;
 
     @Autowired
     private ESRoleClusterDAO esRoleClusterDAO;
@@ -37,27 +37,27 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     private ESClusterNodeDAO esClusterNodeDAO;
 
     @Autowired
-    private RoleClusterHostInfoService roleClusterHostInfoService;
+    private ClusterRoleHostInfoService clusterRoleHostInfoService;
 
     @Test
     public void queryNodeByCondtTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        roleClusterHostInfo.setId(roleClusterHostInfoService.save(roleClusterHostInfo).getData());
-        List<RoleClusterHostInfo> roleClusterHostInfos = roleClusterHostInfoService.queryNodeByCondt(esRoleClusterHostInfoDTO);
-        Assertions.assertTrue(roleClusterHostInfos
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        clusterRoleHostInfo.setId(clusterRoleHostInfoService.save(clusterRoleHostInfo).getData());
+        List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.queryNodeByCondt(esRoleClusterHostInfoDTO);
+        Assertions.assertTrue(clusterRoleHostInfos
                 .stream()
-                .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(roleClusterHostInfo.getId())));
+                .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(clusterRoleHostInfo.getId())));
     }
 
     @Test
     public void getNodesByClusterTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        roleClusterHostInfoService.save(roleClusterHostInfo);
-        String clusterName = roleClusterHostInfo.getCluster();
-        List<RoleClusterHostInfo> roleClusterHostInfos = roleClusterHostInfoService.getNodesByCluster(clusterName);
-        Assertions.assertTrue(roleClusterHostInfos
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        clusterRoleHostInfoService.save(clusterRoleHostInfo);
+        String clusterName = clusterRoleHostInfo.getCluster();
+        List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.getNodesByCluster(clusterName);
+        Assertions.assertTrue(clusterRoleHostInfos
                 .stream()
                 .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getCluster().equals(clusterName)));
     }
@@ -65,34 +65,34 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     @Test
     public void getOnlineNodesByClusterTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Long id = roleClusterHostInfoService.save(roleClusterHostInfo).getData();
-        roleClusterHostInfo.setId(id);
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Long id = clusterRoleHostInfoService.save(clusterRoleHostInfo).getData();
+        clusterRoleHostInfo.setId(id);
         esRoleClusterHostInfoDTO.setStatus(ESClusterNodeStatusEnum.UNKNOWN.getCode());
-        List<RoleClusterHostInfo> onlineNodesByCluster = roleClusterHostInfoService.getOnlineNodesByCluster(
-                roleClusterHostInfo.getCluster());
+        List<ClusterRoleHostInfo> onlineNodesByCluster = clusterRoleHostInfoService.getOnlineNodesByCluster(
+                clusterRoleHostInfo.getCluster());
         Assertions.assertTrue(onlineNodesByCluster.stream().anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(
-                roleClusterHostInfo.getId())));
+                clusterRoleHostInfo.getId())));
     }
 
     @Test
     public void editNodeTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Assertions.assertEquals(Result.buildFail("节点不存在").getMessage(),
-                roleClusterHostInfoService.editNode(esRoleClusterHostInfoDTO).getMessage());
-        Long id = roleClusterHostInfoService
-                .save(ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class)).getData();
+                clusterRoleHostInfoService.editNode(esRoleClusterHostInfoDTO).getMessage());
+        Long id = clusterRoleHostInfoService
+                .save(ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class)).getData();
         String port = "8020";
         esRoleClusterHostInfoDTO.setPort(port);
         esRoleClusterHostInfoDTO.setId(id);
-        Assertions.assertTrue(roleClusterHostInfoService.editNode(esRoleClusterHostInfoDTO).success());
+        Assertions.assertTrue(clusterRoleHostInfoService.editNode(esRoleClusterHostInfoDTO).success());
         Assertions.assertEquals(port, roleClusterHostInfoDAO.getById(id).getPort());
         esRoleClusterHostInfoDTO.setStatus(ESClusterNodeStatusEnum.UNKNOWN.getCode());
         Assertions.assertEquals(Result.buildParamIllegal("节点状态非法").getMessage(),
-                roleClusterHostInfoService.editNode(esRoleClusterHostInfoDTO).getMessage());
+                clusterRoleHostInfoService.editNode(esRoleClusterHostInfoDTO).getMessage());
         esRoleClusterHostInfoDTO.setRole(ESClusterNodeRoleEnum.UNKNOWN.getCode());
         Assertions.assertEquals(Result.buildParamIllegal("节点角色非法").getMessage(),
-                roleClusterHostInfoService.editNode(esRoleClusterHostInfoDTO).getMessage());
+                clusterRoleHostInfoService.editNode(esRoleClusterHostInfoDTO).getMessage());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
         int count = 1;
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Mockito.when(esClusterNodeDAO.getIndicesCount(Mockito.anyString(), Mockito.anyString())).thenReturn(count);
-        Assertions.assertEquals(count, roleClusterHostInfoService
+        Assertions.assertEquals(count, clusterRoleHostInfoService
                 .getIndicesCount(esRoleClusterHostInfoDTO.getCluster(), esRoleClusterHostInfoDTO.getRack()));
     }
 
@@ -108,18 +108,18 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     public void listOnlineNodeTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO1 = CustomDataSource.esRoleClusterHostDTOFactory();
         esRoleClusterHostInfoDTO1.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
-        RoleClusterHostInfo roleClusterHostInfo1 = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO1, RoleClusterHostInfo.class);
+        ClusterRoleHostInfo clusterRoleHostInfo1 = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO1, ClusterRoleHostInfo.class);
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO2 = CustomDataSource.esRoleClusterHostDTOFactory();
         esRoleClusterHostInfoDTO2.setStatus(ESClusterNodeStatusEnum.OFFLINE.getCode());
-        RoleClusterHostInfo roleClusterHostInfo2 = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO2, RoleClusterHostInfo.class);
+        ClusterRoleHostInfo clusterRoleHostInfo2 = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO2, ClusterRoleHostInfo.class);
         // 由于唯一键uniq_elastic_cluster_id_role_node_set，这里做一些差异化的处理
-        roleClusterHostInfo2.setRoleClusterId(esRoleClusterHostInfoDTO1.getRoleClusterId() + 1);
-        Long id1 = roleClusterHostInfoService.save(roleClusterHostInfo1).getData();
-        Long id2 = roleClusterHostInfoService.save(roleClusterHostInfo2).getData();
+        clusterRoleHostInfo2.setRoleClusterId(esRoleClusterHostInfoDTO1.getRoleClusterId() + 1);
+        Long id1 = clusterRoleHostInfoService.save(clusterRoleHostInfo1).getData();
+        Long id2 = clusterRoleHostInfoService.save(clusterRoleHostInfo2).getData();
         // 分别mock在线和离线的节点进行数据的测试
-        Assertions.assertTrue(roleClusterHostInfoService
+        Assertions.assertTrue(clusterRoleHostInfoService
                 .listOnlineNode().stream().noneMatch(esRoleClusterHost -> esRoleClusterHost.getId().equals(id2)));
-        Assertions.assertTrue(roleClusterHostInfoService
+        Assertions.assertTrue(clusterRoleHostInfoService
                 .listOnlineNode().stream().anyMatch(esRoleClusterHost -> esRoleClusterHost.getId().equals(id1)));
     }
 
@@ -129,27 +129,27 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     @Test
     public void saveTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        Long id = roleClusterHostInfoService
-                .save(ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class)).getData();
+        Long id = clusterRoleHostInfoService
+                .save(ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class)).getData();
         Assertions.assertEquals(esRoleClusterHostInfoDTO.getCluster(), roleClusterHostInfoDAO.getById(id).getCluster());
     }
 
     @Test
     public void getByIdTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        Long id = roleClusterHostInfoService
-                .save(ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class)).getData();
-        Assertions.assertEquals(roleClusterHostInfoDAO.getById(id).getCluster(), roleClusterHostInfoService.getById(id).getCluster());
+        Long id = clusterRoleHostInfoService
+                .save(ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class)).getData();
+        Assertions.assertEquals(roleClusterHostInfoDAO.getById(id).getCluster(), clusterRoleHostInfoService.getById(id).getCluster());
     }
 
     @Test
     public void getByRoleClusterIdTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Assertions.assertTrue(
-                roleClusterHostInfoService.getByRoleClusterId(esRoleClusterHostInfoDTO.getRoleClusterId()).isEmpty());
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Long id = roleClusterHostInfoService.save(roleClusterHostInfo).getData();
-        Assertions.assertTrue(roleClusterHostInfoService.getByRoleClusterId(roleClusterHostInfo.getRoleClusterId())
+                clusterRoleHostInfoService.getByRoleClusterId(esRoleClusterHostInfoDTO.getRoleClusterId()).isEmpty());
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Long id = clusterRoleHostInfoService.save(clusterRoleHostInfo).getData();
+        Assertions.assertTrue(clusterRoleHostInfoService.getByRoleClusterId(clusterRoleHostInfo.getRoleClusterId())
                 .stream()
                 .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(id)));
     }
@@ -161,9 +161,9 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         esRoleClusterDAO.insert(esRoleClusterPO);
         esRoleClusterHostInfoDTO.setRoleClusterId(esRoleClusterPO.getId());
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        roleClusterHostInfoService.save(roleClusterHostInfo);
-        Assertions.assertTrue(roleClusterHostInfoService
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        clusterRoleHostInfoService.save(clusterRoleHostInfo);
+        Assertions.assertTrue(clusterRoleHostInfoService
                 .getHostNamesByRoleAndClusterId(esRoleClusterPO.getElasticClusterId(), esRoleClusterPO.getRole())
                 .stream()
                 .anyMatch(s -> s.equals(esRoleClusterHostInfoDTO.getHostname())));
@@ -176,11 +176,11 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         esRoleClusterDAO.insert(esRoleClusterPO);
         esRoleClusterHostInfoDTO.setRoleClusterId(esRoleClusterPO.getId());
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Result<Long> saveResult = roleClusterHostInfoService.save(roleClusterHostInfo);
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Result<Long> saveResult = clusterRoleHostInfoService.save(clusterRoleHostInfo);
         Assertions.assertTrue(saveResult.success());
         Long roleId = saveResult.getData();
-        Assertions.assertTrue(roleClusterHostInfoService
+        Assertions.assertTrue(clusterRoleHostInfoService
                 .getByRoleAndClusterId(esRoleClusterPO.getElasticClusterId(), esRoleClusterPO.getRole())
                 .stream()
                 .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(roleId)));
@@ -190,19 +190,19 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     public void deleteByClusterTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Assertions.assertEquals(Result.buildFail("failed to delete the clusterHost").getMessage(),
-                roleClusterHostInfoService.deleteByCluster(esRoleClusterHostInfoDTO.getCluster()).getMessage());
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        roleClusterHostInfoService.save(roleClusterHostInfo);
+                clusterRoleHostInfoService.deleteByCluster(esRoleClusterHostInfoDTO.getCluster()).getMessage());
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        clusterRoleHostInfoService.save(clusterRoleHostInfo);
         Assertions.assertEquals(Result.buildSuccWithMsg("success to delete the clusterHost").getMessage(),
-                roleClusterHostInfoService.deleteByCluster(roleClusterHostInfo.getCluster()).getMessage());
+                clusterRoleHostInfoService.deleteByCluster(clusterRoleHostInfo.getCluster()).getMessage());
     }
 
     @Test
     public void listAllNodeTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Long id = roleClusterHostInfoService.save(roleClusterHostInfo).getData();
-        Assertions.assertTrue(roleClusterHostInfoService
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Long id = clusterRoleHostInfoService.save(clusterRoleHostInfo).getData();
+        Assertions.assertTrue(clusterRoleHostInfoService
                 .listAllNode()
                 .stream()
                 .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(id)));
@@ -211,11 +211,11 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     @Test
     public void listRacksNodesTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        Assertions.assertTrue(roleClusterHostInfoService.listRacksNodes(null, null).isEmpty());
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Long id = roleClusterHostInfoService.save(roleClusterHostInfo).getData();
-        Assertions.assertTrue(roleClusterHostInfoService
-                .listRacksNodes(roleClusterHostInfo.getCluster(), roleClusterHostInfo.getRack())
+        Assertions.assertTrue(clusterRoleHostInfoService.listRacksNodes(null, null).isEmpty());
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Long id = clusterRoleHostInfoService.save(clusterRoleHostInfo).getData();
+        Assertions.assertTrue(clusterRoleHostInfoService
+                .listRacksNodes(clusterRoleHostInfo.getCluster(), clusterRoleHostInfo.getRack())
                 .stream()
                 .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(id)));
     }
@@ -223,26 +223,26 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     @Test
     public void setHostValidTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Assertions.assertTrue(roleClusterHostInfoService.setHostValid(roleClusterHostInfo).failed());
-        Long id = roleClusterHostInfoService.save(roleClusterHostInfo).getData();
-        Assertions.assertTrue(roleClusterHostInfoService.setHostValid(roleClusterHostInfo).failed());
-        roleClusterHostInfoService.deleteById(id);
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Assertions.assertTrue(clusterRoleHostInfoService.setHostValid(clusterRoleHostInfo).failed());
+        Long id = clusterRoleHostInfoService.save(clusterRoleHostInfo).getData();
+        Assertions.assertTrue(clusterRoleHostInfoService.setHostValid(clusterRoleHostInfo).failed());
+        clusterRoleHostInfoService.deleteById(id);
         // 设置mock插入的数据的id
-        roleClusterHostInfo.setId(id);
-        Assertions.assertTrue(roleClusterHostInfoService.setHostValid(roleClusterHostInfo).success());
+        clusterRoleHostInfo.setId(id);
+        Assertions.assertTrue(clusterRoleHostInfoService.setHostValid(clusterRoleHostInfo).success());
     }
 
     @Test
     public void getDeleteHostByHostNameAnRoleIdTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Long id = roleClusterHostInfoService.save(roleClusterHostInfo).getData();
-        Assertions.assertNull(roleClusterHostInfoService.getDeleteHostByHostNameAnRoleId(
-                roleClusterHostInfo.getHostname(), roleClusterHostInfo.getRoleClusterId()));
-        roleClusterHostInfoService.deleteById(id);
-        Assertions.assertEquals(id, roleClusterHostInfoService.getDeleteHostByHostNameAnRoleId(
-                roleClusterHostInfo.getHostname(), roleClusterHostInfo.getRoleClusterId()).getId());
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Long id = clusterRoleHostInfoService.save(clusterRoleHostInfo).getData();
+        Assertions.assertNull(clusterRoleHostInfoService.getDeleteHostByHostNameAnRoleId(
+                clusterRoleHostInfo.getHostname(), clusterRoleHostInfo.getRoleClusterId()));
+        clusterRoleHostInfoService.deleteById(id);
+        Assertions.assertEquals(id, clusterRoleHostInfoService.getDeleteHostByHostNameAnRoleId(
+                clusterRoleHostInfo.getHostname(), clusterRoleHostInfo.getRoleClusterId()).getId());
     }
 
     /**
@@ -251,22 +251,22 @@ public class RoleClusterHostInfoInfoServiceTest extends AriusAdminApplicationTes
     @Test
     public void getByHostNamesTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Assertions.assertNull(roleClusterHostInfoService.getByHostName(roleClusterHostInfo.getHostname()));
-        roleClusterHostInfoService.save(roleClusterHostInfo);
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Assertions.assertNull(clusterRoleHostInfoService.getByHostName(clusterRoleHostInfo.getHostname()));
+        clusterRoleHostInfoService.save(clusterRoleHostInfo);
         Assertions.assertEquals(esRoleClusterHostInfoDTO.getRoleClusterId(),
-                roleClusterHostInfoService.getByHostName(roleClusterHostInfo.getHostname()).getRoleClusterId());
+                clusterRoleHostInfoService.getByHostName(clusterRoleHostInfo.getHostname()).getRoleClusterId());
     }
 
     @Test
     public void deleteByIdTest() {
         ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, RoleClusterHostInfo.class);
-        Long id = roleClusterHostInfoService.save(roleClusterHostInfo).getData();
+        ClusterRoleHostInfo clusterRoleHostInfo = ConvertUtil.obj2Obj(esRoleClusterHostInfoDTO, ClusterRoleHostInfo.class);
+        Long id = clusterRoleHostInfoService.save(clusterRoleHostInfo).getData();
         Assertions.assertEquals(Result.buildFail("failed to delete the clusterHost").getMessage(),
-                roleClusterHostInfoService.deleteById(id + 1).getMessage());
+                clusterRoleHostInfoService.deleteById(id + 1).getMessage());
         Assertions.assertEquals(Result.buildSuccWithMsg("success to delete the clusterHost").getMessage(),
-                roleClusterHostInfoService.deleteById(id).getMessage());
-        Assertions.assertNull(roleClusterHostInfoService.getById(id));
+                clusterRoleHostInfoService.deleteById(id).getMessage());
+        Assertions.assertNull(clusterRoleHostInfoService.getById(id));
     }
 }

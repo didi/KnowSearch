@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -504,21 +504,21 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             }
 
             List<RoleCluster> esRolePhyClusters = clusterPhy.getRoleClusters();
-            List<RoleClusterHostInfo> esRolePhyClusterHosts = clusterPhy.getRoleClusterHostInfos();
+            List<ClusterRoleHostInfo> esRolePhyClusterHosts = clusterPhy.getClusterRoleHostInfos();
 
             for (RoleCluster roleCluster : esRolePhyClusters) {
 
-                List<RoleClusterHostInfo> roleClusterHostInfos = new ArrayList<>();
+                List<ClusterRoleHostInfo> clusterRoleHostInfos = new ArrayList<>();
 
                 //如果是datanode节点，那么使用逻辑集群申请的节点个数和阶段规格配置
                 if (DATA_NODE.getDesc().equals(roleCluster.getRoleClusterName())) {
-                    setLogicClusterService(logicClusterId, clusterLogicPO, roleCluster, roleClusterHostInfos);
+                    setLogicClusterService(logicClusterId, clusterLogicPO, roleCluster, clusterRoleHostInfos);
                 } else {
-                    setPhyClusterService(esRolePhyClusterHosts, roleCluster, roleClusterHostInfos);
+                    setPhyClusterService(esRolePhyClusterHosts, roleCluster, clusterRoleHostInfos);
                 }
 
-                roleCluster.setRoleClusterHostInfos(roleClusterHostInfos);
-                roleCluster.setPodNumber(roleClusterHostInfos.size());
+                roleCluster.setClusterRoleHostInfos(clusterRoleHostInfos);
+                roleCluster.setPodNumber(clusterRoleHostInfos.size());
                 roleClusters.add(roleCluster);
             }
         } catch (Exception e) {
@@ -747,28 +747,28 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         }
     }
 
-    private void setPhyClusterService(List<RoleClusterHostInfo> esRolePhyClusterHosts, RoleCluster roleCluster,
-                                      List<RoleClusterHostInfo> roleClusterHostInfos) {
-        for (RoleClusterHostInfo roleClusterHostInfo : esRolePhyClusterHosts) {
-            if (roleClusterHostInfo.getRoleClusterId().longValue() == roleCluster.getId().longValue()) {
-                roleClusterHostInfos.add(ConvertUtil.obj2Obj(roleClusterHostInfo, RoleClusterHostInfo.class));
+    private void setPhyClusterService(List<ClusterRoleHostInfo> esRolePhyClusterHosts, RoleCluster roleCluster,
+                                      List<ClusterRoleHostInfo> clusterRoleHostInfos) {
+        for (ClusterRoleHostInfo clusterRoleHostInfo : esRolePhyClusterHosts) {
+            if (clusterRoleHostInfo.getRoleClusterId().longValue() == roleCluster.getId().longValue()) {
+                clusterRoleHostInfos.add(ConvertUtil.obj2Obj(clusterRoleHostInfo, ClusterRoleHostInfo.class));
             }
         }
     }
 
     private void setLogicClusterService(Long logicClusterId, ClusterLogicPO clusterLogicPO, RoleCluster roleCluster,
-                                        List<RoleClusterHostInfo> roleClusterHostInfos) {
+                                        List<ClusterRoleHostInfo> clusterRoleHostInfos) {
         roleCluster.setPodNumber(clusterLogicPO.getDataNodeNu());
         roleCluster.setMachineSpec(clusterLogicPO.getDataNodeSpec());
 
-        List<RoleClusterHostInfo> roleClusterHostInfoList = clusterLogicNodeService.getLogicClusterNodes(logicClusterId);
+        List<ClusterRoleHostInfo> clusterRoleHostInfoList = clusterLogicNodeService.getLogicClusterNodes(logicClusterId);
 
-        for (RoleClusterHostInfo clusterHost : roleClusterHostInfoList) {
-            RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
-            roleClusterHostInfo.setHostname(clusterHost.getHostname());
-            roleClusterHostInfo.setRole(DATA_NODE.getCode());
+        for (ClusterRoleHostInfo clusterHost : clusterRoleHostInfoList) {
+            ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
+            clusterRoleHostInfo.setHostname(clusterHost.getHostname());
+            clusterRoleHostInfo.setRole(DATA_NODE.getCode());
 
-            roleClusterHostInfos.add(roleClusterHostInfo);
+            clusterRoleHostInfos.add(clusterRoleHostInfo);
         }
     }
 }

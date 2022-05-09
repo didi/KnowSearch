@@ -9,7 +9,7 @@
     "logicCluster": "logi-em-matedata-cluster",
     "phyClusterDesc": "",
     "regionRacks": [],
-    "roleClusterHostInfos": [
+    "clusterRoleHostInfos": [
         {
             "cluster": "logi-em-matedata-cluster",
             "id": 0,

@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.Template
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
@@ -55,7 +55,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicA
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -119,7 +119,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private RoleClusterService                               roleClusterService;
 
     @Autowired
-    private RoleClusterHostInfoService roleClusterHostInfoService;
+    private ClusterRoleHostInfoService clusterRoleHostInfoService;
 
     @Autowired
     private TemplatePhyService                               templatePhyService;
@@ -436,7 +436,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
 
-        List<RoleClusterHostInfo> nodesInfo = roleClusterHostInfoService.getNodesByCluster(clusterPhy.getCluster());
+        List<ClusterRoleHostInfo> nodesInfo = clusterRoleHostInfoService.getNodesByCluster(clusterPhy.getCluster());
         return Result.buildSucc(clusterNodeManager.convertClusterPhyNodes(nodesInfo, clusterPhy.getCluster()));
     }
 
@@ -610,10 +610,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         try {
-            List<RoleClusterHostInfo> roleClusterHostInfos = roleClusterHostInfoService.getNodesByCluster(clusterPhy.getCluster());
+            List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.getNodesByCluster(clusterPhy.getCluster());
             // 该物理集群有采集到host数据才执行删除操作
-            if (!CollectionUtils.isEmpty(roleClusterHostInfos)) {
-                Result<Void> deleteHostResult = roleClusterHostInfoService.deleteByCluster(clusterPhy.getCluster());
+            if (!CollectionUtils.isEmpty(clusterRoleHostInfos)) {
+                Result<Void> deleteHostResult = clusterRoleHostInfoService.deleteByCluster(clusterPhy.getCluster());
                 if (deleteHostResult.failed()) {
                     throw new AdminOperateException(String.format("删除集群[%s]节点信息失败", clusterPhy.getCluster()));
                 }
@@ -795,11 +795,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             List<ESRoleClusterVO> roleClusterVOS = ConvertUtil.list2List(roleClusters, ESRoleClusterVO.class);
 
             List<Long> roleClusterIds = roleClusterVOS.stream().map(ESRoleClusterVO::getId).collect( Collectors.toList());
-            Map<Long, List<RoleClusterHostInfo>> roleIdsMap = roleClusterHostInfoService.getByRoleClusterIds(roleClusterIds);
+            Map<Long, List<ClusterRoleHostInfo>> roleIdsMap = clusterRoleHostInfoService.getByRoleClusterIds(roleClusterIds);
 
             for (ESRoleClusterVO esRoleClusterVO : roleClusterVOS) {
-                List<RoleClusterHostInfo> roleClusterHostInfos = roleIdsMap.get(esRoleClusterVO.getId());
-                List<ESRoleClusterHostVO> esRoleClusterHostVOS = ConvertUtil.list2List(roleClusterHostInfos, ESRoleClusterHostVO.class);
+                List<ClusterRoleHostInfo> clusterRoleHostInfos = roleIdsMap.get(esRoleClusterVO.getId());
+                List<ESRoleClusterHostVO> esRoleClusterHostVOS = ConvertUtil.list2List(clusterRoleHostInfos, ESRoleClusterHostVO.class);
                 esRoleClusterVO.setEsRoleClusterHostVO(esRoleClusterHostVOS);
             }
 
@@ -1319,7 +1319,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ESClusterDTO buildClusterPhy(ClusterJoinDTO param, String operator) {
         ESClusterDTO clusterDTO = ConvertUtil.obj2Obj(param, ESClusterDTO.class);
 
-        String clientAddress = roleClusterHostInfoService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        String clientAddress = clusterRoleHostInfoService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
 
         clusterDTO.setDesc(param.getPhyClusterDesc());
         clusterDTO.setDataCenter(CN.getCode());
@@ -1440,14 +1440,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal(String.format("逻辑集群名称:%s已存在", param.getLogicCluster()));
         }
 
-        String esClientHttpAddressesStr = roleClusterHostInfoService.buildESClientHttpAddressesStr(roleClusterHosts);
+        String esClientHttpAddressesStr = clusterRoleHostInfoService.buildESClientHttpAddressesStr(roleClusterHosts);
 
         //密码验证
         Result<Void> passwdResult = checkClusterWithoutPasswd(param, esClientHttpAddressesStr);
         if (passwdResult.failed()) return passwdResult;
 
         //同集群验证
-        Result<Void> sameClusterResult = checkSameCluster(param.getPassword(), roleClusterHostInfoService.buildESAllRoleHttpAddressesList(roleClusterHosts));
+        Result<Void> sameClusterResult = checkSameCluster(param.getPassword(), clusterRoleHostInfoService.buildESAllRoleHttpAddressesList(roleClusterHosts));
         if (sameClusterResult.failed()) return Result.buildParamIllegal("禁止同时接入超过两个不同集群节点");
 
         //获取设置rack
@@ -1564,7 +1564,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             throw new AdminOperateException(String.format("删除物理集群角色(%s)失败", clusterPhy.getCluster()));
         }
 
-        Result<Void> deleteRoleClusterHostResult = roleClusterHostInfoService.deleteByCluster(clusterPhy.getCluster());
+        Result<Void> deleteRoleClusterHostResult = clusterRoleHostInfoService.deleteByCluster(clusterPhy.getCluster());
         if (deleteRoleClusterHostResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群节点(%s)失败", clusterPhy.getCluster()));
         }
@@ -1628,12 +1628,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         esOpClient.connect(param.getCluster());
 
         if (ESClusterImportRuleEnum.AUTO_IMPORT == ESClusterImportRuleEnum.valueOf(param.getImportRule())) {
-            roleClusterHostInfoService.collectClusterNodeSettings(param.getCluster());
+            clusterRoleHostInfoService.collectClusterNodeSettings(param.getCluster());
         } else if (ESClusterImportRuleEnum.FULL_IMPORT == ESClusterImportRuleEnum.valueOf(param.getImportRule())) {
             //1.先持久化用户输入的节点信息
-            roleClusterHostInfoService.saveClusterNodeSettings(param);
+            clusterRoleHostInfoService.saveClusterNodeSettings(param);
             //2.直接拉es 更新节点信息，去除因为定时任务触发导致的更新延时
-            roleClusterHostInfoService.collectClusterNodeSettings(param.getCluster());
+            clusterRoleHostInfoService.collectClusterNodeSettings(param.getCluster());
         }
 
         clusterPhyManager.updateClusterHealth(param.getCluster(), AriusUser.SYSTEM.getDesc());

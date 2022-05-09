@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
     private RegionRackService regionRackService;
 
     @MockBean
-    private RoleClusterHostInfoService roleClusterHostInfoService;
+    private ClusterRoleHostInfoService clusterRoleHostInfoService;
     
     @Autowired
     private ClusterLogicNodeService clusterLogicNodeService;
@@ -33,11 +33,11 @@ public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
         ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
         Mockito.when(regionRackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
 				clusterLogicRackInfo));
-        RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
+        ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
         String clusterName = "wpk";
-        roleClusterHostInfo.setCluster(clusterName);
-        Mockito.when(roleClusterHostInfoService.queryNodeByCondt(Mockito.any())).thenReturn(Arrays.asList(
-                roleClusterHostInfo));
+        clusterRoleHostInfo.setCluster(clusterName);
+        Mockito.when(clusterRoleHostInfoService.queryNodeByCondt(Mockito.any())).thenReturn(Arrays.asList(
+                clusterRoleHostInfo));
         Long clusterId = 123l;
         Assertions.assertTrue(clusterLogicNodeService
                 .getLogicClusterNodes(clusterId)
@@ -50,11 +50,11 @@ public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
         ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
         Mockito.when(regionRackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
 				clusterLogicRackInfo));
-        RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
+        ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
         String clusterName = "wpk";
-        roleClusterHostInfo.setCluster(clusterName);
-        Mockito.when(roleClusterHostInfoService.queryNodeByCondt(Mockito.any())).thenReturn(Arrays.asList(
-                roleClusterHostInfo));
+        clusterRoleHostInfo.setCluster(clusterName);
+        Mockito.when(clusterRoleHostInfoService.queryNodeByCondt(Mockito.any())).thenReturn(Arrays.asList(
+                clusterRoleHostInfo));
         Long clusterId = 123l;
         Assertions.assertTrue(clusterLogicNodeService
                 .getLogicClusterNodesIncludeNonDataNodes(clusterId)

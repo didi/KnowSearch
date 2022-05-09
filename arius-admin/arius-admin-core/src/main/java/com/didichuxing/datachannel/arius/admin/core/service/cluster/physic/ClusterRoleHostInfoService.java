@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
 /**
@@ -16,28 +16,28 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskExcepti
  * @author chengxiang
  * @date 2022/5/9
  */
-public interface RoleClusterHostInfoService {
+public interface ClusterRoleHostInfoService {
 
     /**
      * 条件查询
      * @param condt 条件
      * @return 节点列表
      */
-    List<RoleClusterHostInfo> queryNodeByCondt(ESRoleClusterHostInfoDTO condt);
+    List<ClusterRoleHostInfo> queryNodeByCondt(ESRoleClusterHostInfoDTO condt);
 
     /**
      * 查询集群节点列表
      * @param cluster 集群
      * @return 节点列表 集群不存在返回空列表
      */
-    List<RoleClusterHostInfo> getNodesByCluster(String cluster);
+    List<ClusterRoleHostInfo> getNodesByCluster(String cluster);
 
     /**
      * 查询集群节点列表
      * @param cluster 集群
      * @return 节点列表 集群不存在返回空列表
      */
-    List<RoleClusterHostInfo> getOnlineNodesByCluster(String cluster);
+    List<ClusterRoleHostInfo> getOnlineNodesByCluster(String cluster);
 
     /**
      * 修改节点状态
@@ -91,35 +91,35 @@ public interface RoleClusterHostInfoService {
      * 获取所有在线的节点
      * @return list
      */
-    List<RoleClusterHostInfo> listOnlineNode();
+    List<ClusterRoleHostInfo> listOnlineNode();
 
     /**
      * 保存节点信息
-     * @param roleClusterHostInfo
+     * @param clusterRoleHostInfo
      * @return
      */
-    Result<Long> save(RoleClusterHostInfo roleClusterHostInfo);
+    Result<Long> save(ClusterRoleHostInfo clusterRoleHostInfo);
 
     /**
      * 获取节点信息
      * @param id 主键
      * @return 节点对象
      */
-    RoleClusterHostInfo getById(Long id);
+    ClusterRoleHostInfo getById(Long id);
 
     /**
      * 获取节点信息
      * @param roleClusterId 角色集群id
      * @return 节点对象
      */
-    List<RoleClusterHostInfo> getByRoleClusterId(Long roleClusterId);
+    List<ClusterRoleHostInfo> getByRoleClusterId(Long roleClusterId);
 
     /**
      * 获取节点信息
      * @param roleClusterIds 多个角色集群id
      * @return  Map<角色集群id,List<节点对象>>
      */
-    Map<Long,List<RoleClusterHostInfo>> getByRoleClusterIds(List<Long> roleClusterIds);
+    Map<Long,List<ClusterRoleHostInfo>> getByRoleClusterIds(List<Long> roleClusterIds);
     /**
      * 获取节点名
      * @param clusterId 集群id
@@ -134,7 +134,7 @@ public interface RoleClusterHostInfoService {
      * @param role      角色
      * @return
      */
-    List<RoleClusterHostInfo> getByRoleAndClusterId(Long clusterId, String role);
+    List<ClusterRoleHostInfo> getByRoleAndClusterId(Long clusterId, String role);
 
     /**
      * 逻辑删除节点
@@ -147,7 +147,7 @@ public interface RoleClusterHostInfoService {
      * 获取所有节点(包括不在线)
      * @return
      */
-    List<RoleClusterHostInfo> listAllNode();
+    List<ClusterRoleHostInfo> listAllNode();
 
     /**
      * 获取指定集群指定racks包含的节点
@@ -155,7 +155,7 @@ public interface RoleClusterHostInfoService {
      * @param racks racks
      * @return
      */
-    List<RoleClusterHostInfo> listRacksNodes(String clusterName, String racks);
+    List<ClusterRoleHostInfo> listRacksNodes(String clusterName, String racks);
 
     /**
      * 删除
@@ -178,19 +178,19 @@ public interface RoleClusterHostInfoService {
      * @param hostName
      * @return
      */
-    RoleClusterHostInfo getByHostName(String hostName);
+    ClusterRoleHostInfo getByHostName(String hostName);
 
     /**
      * 获取已删除节点
      * @param hostname
      */
-    RoleClusterHostInfo getDeleteHostByHostNameAnRoleId(String hostname, Long roleId);
+    ClusterRoleHostInfo getDeleteHostByHostNameAnRoleId(String hostname, Long roleId);
 
     /**恢复节点状态
      * @param deleteHost
      * @return
      */
-    Result<Void> setHostValid(RoleClusterHostInfo deleteHost);
+    Result<Void> setHostValid(ClusterRoleHostInfo deleteHost);
 
     /**
      * 构建集群client角色的HttpAddresses地址

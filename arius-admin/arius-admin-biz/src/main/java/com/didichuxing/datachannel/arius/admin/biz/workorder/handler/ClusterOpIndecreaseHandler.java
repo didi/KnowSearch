@@ -6,9 +6,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,7 +69,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     private EcmHandleService ecmHandleService;
 
     @Autowired
-    private RoleClusterHostInfoService roleClusterHostInfoService;
+    private ClusterRoleHostInfoService clusterRoleHostInfoService;
 
     @Autowired
     private WorkTaskManager workTaskManager;
@@ -321,10 +321,10 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
         Map<String, String> rolePortMap = new HashMap<>();
         for (ESClusterNodeRoleEnum param : ESClusterNodeRoleEnum.values()) {
             if (param != ESClusterNodeRoleEnum.UNKNOWN) {
-                List<RoleClusterHostInfo> roleClusterHostInfos = roleClusterHostInfoService.getByRoleAndClusterId(phyClusterId, param.getDesc());
+                List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.getByRoleAndClusterId(phyClusterId, param.getDesc());
                 // 默认采用8060端口进行es集群的搭建
                 rolePortMap.put(param.getDesc(),
-                        CollectionUtils.isEmpty(roleClusterHostInfos) ? ClusterConstant.DEFAULT_PORT : roleClusterHostInfos.get(0).getPort());
+                        CollectionUtils.isEmpty(clusterRoleHostInfos) ? ClusterConstant.DEFAULT_PORT : clusterRoleHostInfos.get(0).getPort());
             }
         }
 

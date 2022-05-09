@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.Hosts
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.han
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler.EcmDockerHandler;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler.EcmHostHandler;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -69,7 +69,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     private RoleClusterService                  roleClusterService;
 
     @Autowired
-    private RoleClusterHostInfoService roleClusterHostInfoService;
+    private ClusterRoleHostInfoService clusterRoleHostInfoService;
 
     @Autowired
     private EcmDockerHandler                    ecmDockerHandler;
@@ -256,7 +256,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
             return Result.buildFail(String.format(CLUSTER_NOT_EXIST, phyClusterId));
         }
 
-        List<String> masterHostList = roleClusterHostInfoService
+        List<String> masterHostList = clusterRoleHostInfoService
             .getHostNamesByRoleAndClusterId(clusterPhy.getId().longValue(), MASTER_NODE.getDesc());
 
         List<EcmParamBase> ecmParamBaseList = new ArrayList<>();
@@ -330,7 +330,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         hostsParamBase.setEsVersion(roleCluster.getEsVersion());
         hostsParamBase.setImageName(esPackage.getUrl());
 
-        List<String> hostList = roleClusterHostInfoService
+        List<String> hostList = clusterRoleHostInfoService
                 .getHostNamesByRoleAndClusterId(clusterPhy.getId().longValue(), roleName);
         hostsParamBase.setHostList(hostList);
         if (!CollectionUtils.isEmpty(hostList)) {
@@ -418,11 +418,11 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     }
 
     private Result<String> getPortFromHost(Long clusterId, String roleName) {
-        List<RoleClusterHostInfo> roleClusterHostInfos = roleClusterHostInfoService.getByRoleAndClusterId(clusterId, roleName);
-        if (CollectionUtils.isEmpty(roleClusterHostInfos)) {
+        List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.getByRoleAndClusterId(clusterId, roleName);
+        if (CollectionUtils.isEmpty(clusterRoleHostInfos)) {
             return Result.buildSucc(ClusterConstant.DEFAULT_PORT, "获取默认配置端口");
         }
-        return Result.buildSucc(roleClusterHostInfos.get(0).getPort(), "角色端口获取成功");
+        return Result.buildSucc(clusterRoleHostInfos.get(0).getPort(), "角色端口获取成功");
     }
 
     private Result<EcmParamBase> buildActionParamBase(Long clusterId, String roleName) {
@@ -513,7 +513,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         }
 
         //逻辑删除
-        Result<Void> deleteRoleClusterHostResult = roleClusterHostInfoService.deleteByCluster(clusterPhy.getCluster());
+        Result<Void> deleteRoleClusterHostResult = clusterRoleHostInfoService.deleteByCluster(clusterPhy.getCluster());
         if (deleteRoleClusterHostResult.failed()) {
             LOGGER.error(
                 "class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||roleClusterName=={}||roleClusterName={}||"

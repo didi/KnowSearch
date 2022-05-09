@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClu
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -39,7 +39,7 @@ public class ESPhyClusterController {
     private TemplateExpireManager    templateExpireManager;
 
     @Autowired
-    private RoleClusterHostInfoService roleClusterHostInfoService;
+    private ClusterRoleHostInfoService clusterRoleHostInfoService;
 
     @Autowired
     private ClusterNodeManager       clusterNodeManager;
@@ -80,7 +80,7 @@ public class ESPhyClusterController {
 
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) {
-        return Result.build(roleClusterHostInfoService.collectClusterNodeSettings(cluster));
+        return Result.build(clusterRoleHostInfoService.collectClusterNodeSettings(cluster));
     }
 
     @PostMapping("/node/list")
@@ -89,7 +89,7 @@ public class ESPhyClusterController {
 
     public Result<List<ESRoleClusterHostVO>> nodeList(@RequestBody ESRoleClusterHostInfoDTO param) {
         return Result
-            .buildSucc(clusterNodeManager.convertClusterLogicNodes(roleClusterHostInfoService.queryNodeByCondt(param)));
+            .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostInfoService.queryNodeByCondt(param)));
     }
 
     @GetMapping("/node/getByCluster")
@@ -99,7 +99,7 @@ public class ESPhyClusterController {
 
     public Result<List<ESRoleClusterHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
         return Result
-            .buildSucc(clusterNodeManager.convertClusterLogicNodes(roleClusterHostInfoService.getNodesByCluster(cluster)));
+            .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostInfoService.getNodesByCluster(cluster)));
     }
 
     @PostMapping("/deleteExpireIndex")

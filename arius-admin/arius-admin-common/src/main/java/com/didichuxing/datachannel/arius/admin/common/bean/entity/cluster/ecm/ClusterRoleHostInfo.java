@@ -1,33 +1,28 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.po.ecm;
+package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm;
 
 
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * ES集群表对应各角色主机列表
- * @author chengxiang
- * @date 2022/4/29
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESRoleClusterHostInfoPO extends BasePO {
+public class ClusterRoleHostInfo extends BaseEntity {
 
     private Long id;
 
     /**
-     * elastic_cluster外键ID
-     */
+    * elastic_cluster外键ID
+    */
     private Long roleClusterId;
 
     /**
-     * 主机名或IP
-     */
+    * 主机名
+    */
     private String hostname;
 
     /**
@@ -81,12 +76,12 @@ public class ESRoleClusterHostInfoPO extends BasePO {
             return false;
         }
 
-        ESRoleClusterHostInfoPO nodePO = (ESRoleClusterHostInfoPO) o;
+        ClusterRoleHostInfo node = (ClusterRoleHostInfo) o;
 
-        if (!hostname.equals(nodePO.hostname)) {
+        if (!hostname.equals(node.hostname)) {
             return false;
         }
-        return cluster.equals(nodePO.cluster);
+        return cluster.equals(node.cluster);
 
     }
 
@@ -95,9 +90,5 @@ public class ESRoleClusterHostInfoPO extends BasePO {
         int result = hostname.hashCode();
         result = 31 * result + cluster.hashCode();
         return result;
-    }
-
-    public String getKey() {
-        return roleClusterId + "@" + ip + "@" + port;
     }
 }

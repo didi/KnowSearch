@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
@@ -35,13 +35,13 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESRoleClusterHostInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostInfoPO;
 
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterHostInfoDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostInfoDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -53,12 +53,12 @@ import com.google.common.collect.Lists;
  * @date 2022/5/9
  */
 @Service
-public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoService {
+public class ClusterRoleHostInfoServiceImpl implements ClusterRoleHostInfoService {
 
-    private static final ILog    LOGGER = LogFactory.getLog(RoleClusterHostInfoServiceImpl.class);
+    private static final ILog    LOGGER = LogFactory.getLog(ClusterRoleHostInfoServiceImpl.class);
 
     @Autowired
-    private ESRoleClusterHostInfoDAO roleClusterHostInfoDAO;
+    private ESClusterRoleHostInfoDAO clusterRoleHostInfoDAO;
 
     @Autowired
     private RoleClusterService   roleClusterService;
@@ -70,25 +70,25 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
     private ESClusterService     esClusterService;
 
     @Override
-    public List<RoleClusterHostInfo> queryNodeByCondt(ESRoleClusterHostInfoDTO condt) {
-        List<ESRoleClusterHostInfoPO> pos = roleClusterHostInfoDAO
-            .listByCondition(ConvertUtil.obj2Obj(condt, ESRoleClusterHostInfoPO.class));
-        return ConvertUtil.list2List(pos, RoleClusterHostInfo.class);
+    public List<ClusterRoleHostInfo> queryNodeByCondt(ESRoleClusterHostInfoDTO condt) {
+        List<ESClusterRoleHostInfoPO> pos = clusterRoleHostInfoDAO
+            .listByCondition(ConvertUtil.obj2Obj(condt, ESClusterRoleHostInfoPO.class));
+        return ConvertUtil.list2List(pos, ClusterRoleHostInfo.class);
     }
 
     @Override
-    public List<RoleClusterHostInfo> getNodesByCluster(String cluster) {
-        List<ESRoleClusterHostInfoPO> pos = roleClusterHostInfoDAO.listByCluster(cluster);
-        return ConvertUtil.list2List(pos, RoleClusterHostInfo.class);
+    public List<ClusterRoleHostInfo> getNodesByCluster(String cluster) {
+        List<ESClusterRoleHostInfoPO> pos = clusterRoleHostInfoDAO.listByCluster(cluster);
+        return ConvertUtil.list2List(pos, ClusterRoleHostInfo.class);
     }
 
     @Override
-    public List<RoleClusterHostInfo> getOnlineNodesByCluster(String cluster) {
-        List<RoleClusterHostInfo> roleClusterHostInfos = getNodesByCluster(cluster);
-        if (CollectionUtils.isEmpty(roleClusterHostInfos)) {
+    public List<ClusterRoleHostInfo> getOnlineNodesByCluster(String cluster) {
+        List<ClusterRoleHostInfo> clusterRoleHostInfos = getNodesByCluster(cluster);
+        if (CollectionUtils.isEmpty(clusterRoleHostInfos)) {
             return Lists.newArrayList();
         }
-        return roleClusterHostInfos.stream().filter(esClusterNode -> ONLINE.getCode() == esClusterNode.getStatus())
+        return clusterRoleHostInfos.stream().filter(esClusterNode -> ONLINE.getCode() == esClusterNode.getStatus())
             .collect(Collectors.toList());
     }
 
@@ -108,16 +108,16 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
             return Result.buildParamIllegal("节点状态非法");
         }
 
-        ESRoleClusterHostInfoPO hostPo = roleClusterHostInfoDAO.getById(param.getId());
+        ESClusterRoleHostInfoPO hostPo = clusterRoleHostInfoDAO.getById(param.getId());
         if (hostPo == null) {
             return Result.buildNotExist("节点不存在");
         }
 
-        ESRoleClusterHostInfoPO clusterHostPO = new ESRoleClusterHostInfoPO();
+        ESClusterRoleHostInfoPO clusterHostPO = new ESClusterRoleHostInfoPO();
         clusterHostPO.setId(param.getId());
         clusterHostPO.setStatus(param.getStatus());
 
-        return Result.build(1 == (roleClusterHostInfoDAO.update(clusterHostPO)));
+        return Result.build(1 == (clusterRoleHostInfoDAO.update(clusterHostPO)));
     }
 
     @Override
@@ -127,16 +127,16 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
             LOGGER.warn("class=RoleClusterHostServiceImpl||method=editNode|msg={}", checkResult.getMessage());
             return checkResult;
         }
-        return Result.build(1 == roleClusterHostInfoDAO.update(ConvertUtil.obj2Obj(param, ESRoleClusterHostInfoPO.class)));
+        return Result.build(1 == clusterRoleHostInfoDAO.update(ConvertUtil.obj2Obj(param, ESClusterRoleHostInfoPO.class)));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean collectClusterNodeSettings(String cluster) throws AdminTaskException{
         // get node information from ES engine
-        List<ESRoleClusterHostInfoPO> nodesFromEs = getClusterHostFromEsAndCreateRoleClusterIfNotExist(cluster);
+        List<ESClusterRoleHostInfoPO> nodesFromEs = getClusterHostFromEsAndCreateRoleClusterIfNotExist(cluster);
         if (CollectionUtils.isEmpty(nodesFromEs)) {
-            roleClusterHostInfoDAO.offlineByCluster(cluster);
+            clusterRoleHostInfoDAO.offlineByCluster(cluster);
             LOGGER.warn(
                 "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||errMag=fail to collect cluster node settings",
                 cluster);
@@ -144,11 +144,11 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         }
 
         // get node info from db
-        Map<String/*roleClusterId@esNodeName*/, ESRoleClusterHostInfoPO> nodePOFromDbMap = getNodeInfoFromDbMap(cluster);
-        List<ESRoleClusterHostInfoPO> shouldAdd                            = Lists.newArrayList();
-        List<ESRoleClusterHostInfoPO> shouldEdit                           = Lists.newArrayList();
+        Map<String/*roleClusterId@esNodeName*/, ESClusterRoleHostInfoPO> nodePOFromDbMap = getNodeInfoFromDbMap(cluster);
+        List<ESClusterRoleHostInfoPO> shouldAdd                            = Lists.newArrayList();
+        List<ESClusterRoleHostInfoPO> shouldEdit                           = Lists.newArrayList();
 
-        for (ESRoleClusterHostInfoPO nodePO : nodesFromEs) {
+        for (ESClusterRoleHostInfoPO nodePO : nodesFromEs) {
             if (nodePOFromDbMap.containsKey(nodePO.getKey())) {
                 nodePO.setId(nodePOFromDbMap.get(nodePO.getKey()).getId());
                 LOGGER.info(
@@ -172,9 +172,9 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         if (null == param.getRoleClusterHosts()) {
             return false;
         }
-        List<ESRoleClusterHostInfoPO> nodePOList = new ArrayList<>();
+        List<ESClusterRoleHostInfoPO> nodePOList = new ArrayList<>();
         for (ESRoleClusterHostInfoDTO node: param.getRoleClusterHosts()) {
-            ESRoleClusterHostInfoPO roleClusterHostPO = buildEsClusterHostPO(node);
+            ESClusterRoleHostInfoPO roleClusterHostPO = buildEsClusterHostPO(node);
             setRoleClusterId(roleClusterHostPO, param.getCluster());
             roleClusterHostPO.setStatus(OFFLINE.getCode());
             nodePOList.add(roleClusterHostPO);
@@ -189,15 +189,15 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
             return false;
         }
 
-        List<ESRoleClusterHostInfoPO> nodePOList = new ArrayList<>();
+        List<ESClusterRoleHostInfoPO> nodePOList = new ArrayList<>();
         param.stream().filter(esClusterRoleHost -> !AriusObjUtils.isNull(esClusterRoleHost.getHostname()))
                 .forEach(esClusterRoleHost -> nodePOList.add(buildEsClusterHostPOFromEcmTaskOrder(esClusterRoleHost, phyClusterName)));
 
         return addAndEditNodes(phyClusterName, nodePOList, null);
     }
 
-    private ESRoleClusterHostInfoPO buildEsClusterHostPOFromEcmTaskOrder(ESClusterRoleHost esClusterRoleHost, String phyClusterName) {
-        ESRoleClusterHostInfoPO roleClusterHostPO = ConvertUtil.obj2Obj(esClusterRoleHost, ESRoleClusterHostInfoPO.class);
+    private ESClusterRoleHostInfoPO buildEsClusterHostPOFromEcmTaskOrder(ESClusterRoleHost esClusterRoleHost, String phyClusterName) {
+        ESClusterRoleHostInfoPO roleClusterHostPO = ConvertUtil.obj2Obj(esClusterRoleHost, ESClusterRoleHostInfoPO.class);
         roleClusterHostPO.setHostname(roleClusterHostPO.getIp());
         roleClusterHostPO.setCluster(phyClusterName);
         roleClusterHostPO.setRole(ESClusterNodeRoleEnum.getByDesc(esClusterRoleHost.getRole()).getCode());
@@ -215,43 +215,43 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
     }
 
     @Override
-    public List<RoleClusterHostInfo> listOnlineNode() {
-        List<ESRoleClusterHostInfoPO> pos = roleClusterHostInfoDAO.listOnlineNode();
-        return ConvertUtil.list2List(pos, RoleClusterHostInfo.class);
+    public List<ClusterRoleHostInfo> listOnlineNode() {
+        List<ESClusterRoleHostInfoPO> pos = clusterRoleHostInfoDAO.listOnlineNode();
+        return ConvertUtil.list2List(pos, ClusterRoleHostInfo.class);
     }
 
     @Override
-    public Result<Long> save(RoleClusterHostInfo roleClusterHostInfo) {
-        ESRoleClusterHostInfoPO esRoleClusterHostInfoPO = ConvertUtil.obj2Obj(roleClusterHostInfo, ESRoleClusterHostInfoPO.class);
-        boolean succ = (1 == roleClusterHostInfoDAO.insert(esRoleClusterHostInfoPO));
-        return Result.build(succ, esRoleClusterHostInfoPO.getId());
+    public Result<Long> save(ClusterRoleHostInfo clusterRoleHostInfo) {
+        ESClusterRoleHostInfoPO esClusterRoleHostInfoPO = ConvertUtil.obj2Obj(clusterRoleHostInfo, ESClusterRoleHostInfoPO.class);
+        boolean succ = (1 == clusterRoleHostInfoDAO.insert(esClusterRoleHostInfoPO));
+        return Result.build(succ, esClusterRoleHostInfoPO.getId());
     }
 
     @Override
-    public RoleClusterHostInfo getById(Long id) {
-        return ConvertUtil.obj2Obj(roleClusterHostInfoDAO.getById(id), RoleClusterHostInfo.class);
+    public ClusterRoleHostInfo getById(Long id) {
+        return ConvertUtil.obj2Obj(clusterRoleHostInfoDAO.getById(id), ClusterRoleHostInfo.class);
     }
 
     @Override
-    public List<RoleClusterHostInfo> getByRoleClusterId(Long roleClusterId) {
-        List<ESRoleClusterHostInfoPO> roleClusterPOS = roleClusterHostInfoDAO.listByRoleClusterId(roleClusterId);
+    public List<ClusterRoleHostInfo> getByRoleClusterId(Long roleClusterId) {
+        List<ESClusterRoleHostInfoPO> roleClusterPOS = clusterRoleHostInfoDAO.listByRoleClusterId(roleClusterId);
 
         if (null == roleClusterPOS) {
             return Lists.newArrayList();
         }
-        return ConvertUtil.list2List(roleClusterPOS, RoleClusterHostInfo.class);
+        return ConvertUtil.list2List(roleClusterPOS, ClusterRoleHostInfo.class);
     }
 
     @Override
-    public Map<Long,List<RoleClusterHostInfo>> getByRoleClusterIds(List<Long> roleClusterIds) {
+    public Map<Long,List<ClusterRoleHostInfo>> getByRoleClusterIds(List<Long> roleClusterIds) {
         if(CollectionUtils.isEmpty(roleClusterIds)){
             return new HashMap<>();
         }
-        List<ESRoleClusterHostInfoPO> roleClusterPOS = roleClusterHostInfoDAO.listByRoleClusterIds(roleClusterIds);
-        Map<Long, List<RoleClusterHostInfo>> ret = new HashMap<>();
+        List<ESClusterRoleHostInfoPO> roleClusterPOS = clusterRoleHostInfoDAO.listByRoleClusterIds(roleClusterIds);
+        Map<Long, List<ClusterRoleHostInfo>> ret = new HashMap<>();
         if (CollectionUtils.isNotEmpty(roleClusterPOS)) {
-            List<RoleClusterHostInfo> list = ConvertUtil.list2List(roleClusterPOS, RoleClusterHostInfo.class);
-            ret = list.stream().collect(Collectors.groupingBy(RoleClusterHostInfo::getRoleClusterId));
+            List<ClusterRoleHostInfo> list = ConvertUtil.list2List(roleClusterPOS, ClusterRoleHostInfo.class);
+            ret = list.stream().collect(Collectors.groupingBy(ClusterRoleHostInfo::getRoleClusterId));
         }
         return ret;
     }
@@ -259,23 +259,23 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
 
     @Override
     public List<String> getHostNamesByRoleAndClusterId(Long clusterId, String role) {
-        List<RoleClusterHostInfo> roleClusterHostInfos = getByRoleAndClusterId(clusterId, role);
-        return roleClusterHostInfos.stream().map(RoleClusterHostInfo::getHostname).collect(Collectors.toList());
+        List<ClusterRoleHostInfo> clusterRoleHostInfos = getByRoleAndClusterId(clusterId, role);
+        return clusterRoleHostInfos.stream().map(ClusterRoleHostInfo::getHostname).collect(Collectors.toList());
     }
 
     @Override
-    public List<RoleClusterHostInfo> getByRoleAndClusterId(Long clusterId, String role) {
+    public List<ClusterRoleHostInfo> getByRoleAndClusterId(Long clusterId, String role) {
         RoleCluster roleCluster = roleClusterService.getByClusterIdAndRole(clusterId, role);
         if(null == roleCluster) {
             return Arrays.asList();
         }
-        return ConvertUtil.list2List(roleClusterHostInfoDAO.listByRoleClusterId(roleCluster.getId()),
-                RoleClusterHostInfo.class);
+        return ConvertUtil.list2List(clusterRoleHostInfoDAO.listByRoleClusterId(roleCluster.getId()),
+                ClusterRoleHostInfo.class);
     }
 
     @Override
     public Result<Void> deleteByCluster(String cluster) {
-        boolean success = (roleClusterHostInfoDAO.deleteByCluster(cluster) > 0);
+        boolean success = (clusterRoleHostInfoDAO.deleteByCluster(cluster) > 0);
         if (!success) {
             return Result.buildFail("failed to delete the clusterHost");
         }
@@ -283,14 +283,14 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
     }
 
     @Override
-    public List<RoleClusterHostInfo> listAllNode() {
-        List<ESRoleClusterHostInfoPO> pos = roleClusterHostInfoDAO.listAll();
-        return ConvertUtil.list2List(pos, RoleClusterHostInfo.class);
+    public List<ClusterRoleHostInfo> listAllNode() {
+        List<ESClusterRoleHostInfoPO> pos = clusterRoleHostInfoDAO.listAll();
+        return ConvertUtil.list2List(pos, ClusterRoleHostInfo.class);
     }
 
     @Override
-    public List<RoleClusterHostInfo> listRacksNodes(String clusterName, String racks) {
-        List<RoleClusterHostInfo> nodes = new ArrayList<>();
+    public List<ClusterRoleHostInfo> listRacksNodes(String clusterName, String racks) {
+        List<ClusterRoleHostInfo> nodes = new ArrayList<>();
         if (StringUtils.isAnyBlank(clusterName, racks)) {
             return nodes;
         }
@@ -306,8 +306,8 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
     }
 
     @Override
-    public Result<Void> setHostValid(RoleClusterHostInfo deleteHost) {
-        boolean success = 1 == roleClusterHostInfoDAO.updateHostValid(deleteHost);
+    public Result<Void> setHostValid(ClusterRoleHostInfo deleteHost) {
+        boolean success = 1 == clusterRoleHostInfoDAO.updateHostValid(deleteHost);
         if (success) {
             return Result.buildSucc();
         }
@@ -315,19 +315,19 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
     }
 
     @Override
-    public RoleClusterHostInfo getDeleteHostByHostNameAnRoleId(String hostname, Long roleId) {
-        return ConvertUtil.obj2Obj(roleClusterHostInfoDAO.getDeleteHostByHostNameAnRoleId(hostname, roleId),
-            RoleClusterHostInfo.class);
+    public ClusterRoleHostInfo getDeleteHostByHostNameAnRoleId(String hostname, Long roleId) {
+        return ConvertUtil.obj2Obj(clusterRoleHostInfoDAO.getDeleteHostByHostNameAnRoleId(hostname, roleId),
+            ClusterRoleHostInfo.class);
     }
 
     @Override
-    public RoleClusterHostInfo getByHostName(String hostName) {
-        return ConvertUtil.obj2Obj(roleClusterHostInfoDAO.getByHostName(hostName), RoleClusterHostInfo.class);
+    public ClusterRoleHostInfo getByHostName(String hostName) {
+        return ConvertUtil.obj2Obj(clusterRoleHostInfoDAO.getByHostName(hostName), ClusterRoleHostInfo.class);
     }
 
     @Override
     public Result<Void> deleteById(Long id) {
-        boolean success = (1 == roleClusterHostInfoDAO.delete(id));
+        boolean success = (1 == clusterRoleHostInfoDAO.delete(id));
         if (!success) {
             return Result.buildFail("failed to delete the clusterHost");
         }
@@ -336,7 +336,7 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
 
     @Override
     public Result deleteByHostNameAndRoleId(List<String> hostnames, Long roleId) {
-        boolean success = (hostnames.size() == roleClusterHostInfoDAO.deleteByHostNameAndRoleId(hostnames, roleId));
+        boolean success = (hostnames.size() == clusterRoleHostInfoDAO.deleteByHostNameAndRoleId(hostnames, roleId));
         if (!success) {
             LOGGER.error(
                     "class=RoleClusterHostServiceImpl||method=deleteByHostNameAndRoleId||hostname={}||roleId={}"
@@ -367,7 +367,7 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
 
     @Override
     public int getPodNumberByRoleId(Long roleId) {
-        return roleClusterHostInfoDAO.getPodNumberByRoleId(roleId);
+        return clusterRoleHostInfoDAO.getPodNumberByRoleId(roleId);
     }
 
     /***************************************** private method ****************************************************/
@@ -380,7 +380,7 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
             Result<Void> isNullResult = isNull(param);
             if (isNullResult.failed()){return isNullResult;}
         } else if (OperationEnum.EDIT.equals(operation)) {
-            ESRoleClusterHostInfoPO oldClusterHostPo = roleClusterHostInfoDAO.getById(param.getId());
+            ESClusterRoleHostInfoPO oldClusterHostPo = clusterRoleHostInfoDAO.getById(param.getId());
             if (oldClusterHostPo == null) {
                 return Result.buildNotExist("节点不存在");
             }
@@ -433,27 +433,27 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         return Result.buildSucc();
     }
 
-    private boolean addNodeBatch(List<ESRoleClusterHostInfoPO> nodePOs) {
+    private boolean addNodeBatch(List<ESClusterRoleHostInfoPO> nodePOs) {
         // 数据修改的行数成功数
         int count = 0;
-        for (ESRoleClusterHostInfoPO param : nodePOs) {
-            if (null != roleClusterHostInfoDAO.getDeleteHostByHostNameAnRoleId(param.getHostname(), param.getRoleClusterId())) {
-                count += roleClusterHostInfoDAO.restoreByHostNameAndRoleId(param.getHostname(), param.getRoleClusterId());
+        for (ESClusterRoleHostInfoPO param : nodePOs) {
+            if (null != clusterRoleHostInfoDAO.getDeleteHostByHostNameAnRoleId(param.getHostname(), param.getRoleClusterId())) {
+                count += clusterRoleHostInfoDAO.restoreByHostNameAndRoleId(param.getHostname(), param.getRoleClusterId());
                 continue;
             }
-            count += roleClusterHostInfoDAO.insert(param);
+            count += clusterRoleHostInfoDAO.insert(param);
         }
         return CollectionUtils.isEmpty(nodePOs) || nodePOs.size() == count;
     }
 
 
-    private boolean editNodeBatch(List<ESRoleClusterHostInfoPO> nodePOs) {
+    private boolean editNodeBatch(List<ESClusterRoleHostInfoPO> nodePOs) {
         if (CollectionUtils.isEmpty(nodePOs)) {
             return true;
         }
 
         boolean succ = true;
-        for (ESRoleClusterHostInfoPO nodePO : nodePOs) {
+        for (ESClusterRoleHostInfoPO nodePO : nodePOs) {
             succ &= editNode(ConvertUtil.obj2Obj(nodePO, ESRoleClusterHostInfoDTO.class)).success();
         }
 
@@ -461,12 +461,12 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
     }
 
     private String getHostNodeNames(String cluster, String racks) {
-        List<ESRoleClusterHostInfoPO> rackNodePOs = Lists.newArrayList();
+        List<ESClusterRoleHostInfoPO> rackNodePOs = Lists.newArrayList();
         for (String rack : racks.split(",")) {
-            List<ESRoleClusterHostInfoPO> nodePOS = roleClusterHostInfoDAO.listByClusterAndRack(cluster, rack);
+            List<ESClusterRoleHostInfoPO> nodePOS = clusterRoleHostInfoDAO.listByClusterAndRack(cluster, rack);
             rackNodePOs.addAll(nodePOS);
         }
-        return rackNodePOs.stream().map(ESRoleClusterHostInfoPO::getHostname).collect(Collectors.joining(","));
+        return rackNodePOs.stream().map(ESClusterRoleHostInfoPO::getHostname).collect(Collectors.joining(","));
     }
 
     /**
@@ -474,8 +474,8 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
      * @param cluster 集群名称
      * @return EsClusterNodePO列表
      */
-    private List<ESRoleClusterHostInfoPO> getClusterHostFromEsAndCreateRoleClusterIfNotExist(String cluster) {
-        List<ESRoleClusterHostInfoPO> nodePOList = Lists.newArrayList();
+    private List<ESClusterRoleHostInfoPO> getClusterHostFromEsAndCreateRoleClusterIfNotExist(String cluster) {
+        List<ESClusterRoleHostInfoPO> nodePOList = Lists.newArrayList();
 
         // 从ES集群中获取初始的节点信息列表
         List<ClusterNodeInfo> clusterNodeInfos = buildAllClusterNodeInfoFromES(cluster);
@@ -484,7 +484,7 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         // 根据集群节点角色信息构建入DB的host列表信息
         for (ClusterNodeInfo nodeInfoListFromArius : clusterNodeInfos) {
             // 构造节点记录数据
-            ESRoleClusterHostInfoPO roleClusterHostPO = buildEsClusterHostPO(nodeInfoListFromArius, cluster);
+            ESClusterRoleHostInfoPO roleClusterHostPO = buildEsClusterHostPO(nodeInfoListFromArius, cluster);
             // 节点所属的角色记录如果不存在，则去设置
             setRoleClusterId(roleClusterHostPO, cluster);
 
@@ -589,8 +589,8 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         return !roles.contains(ES_ROLE_DATA) && !roles.contains(ES_ROLE_MASTER);
     }
 
-    private ESRoleClusterHostInfoPO buildEsClusterHostPO(ClusterNodeInfo clusterNodeInfo, String cluster) {
-        ESRoleClusterHostInfoPO nodePO = new ESRoleClusterHostInfoPO();
+    private ESClusterRoleHostInfoPO buildEsClusterHostPO(ClusterNodeInfo clusterNodeInfo, String cluster) {
+        ESClusterRoleHostInfoPO nodePO = new ESClusterRoleHostInfoPO();
         nodePO.setCluster(cluster);
 
         nodePO.setIp(Getter.withDefault(clusterNodeInfo.getIp(), ""));
@@ -612,8 +612,8 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         return nodePO;
     }
 
-    private ESRoleClusterHostInfoPO buildEsClusterHostPO(ESRoleClusterHostInfoDTO nodeDTO) {
-        ESRoleClusterHostInfoPO nodePO = ConvertUtil.obj2Obj(nodeDTO, ESRoleClusterHostInfoPO.class);
+    private ESClusterRoleHostInfoPO buildEsClusterHostPO(ESRoleClusterHostInfoDTO nodeDTO) {
+        ESClusterRoleHostInfoPO nodePO = ConvertUtil.obj2Obj(nodeDTO, ESClusterRoleHostInfoPO.class);
         nodePO.setHostname(Getter.withDefault(nodeDTO.getIp(), ""));
         return nodePO;
     }
@@ -624,7 +624,7 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
      * @param cluster            物理集群名
      * @return
      */
-    private void setRoleClusterId(ESRoleClusterHostInfoPO roleClusterHostPO, String cluster) {
+    private void setRoleClusterId(ESClusterRoleHostInfoPO roleClusterHostPO, String cluster) {
             ESClusterNodeRoleEnum role = ESClusterNodeRoleEnum.valueOf(roleClusterHostPO.getRole());
             RoleCluster roleCluster = roleClusterService.createRoleClusterIfNotExist(cluster, role.getDesc());
             roleClusterHostPO.setRoleClusterId(roleCluster.getId());
@@ -651,13 +651,13 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         return defaultRackValue;
     }
 
-    private Map<String/*roleClusterId@esNodeName*/ , ESRoleClusterHostInfoPO> getNodeInfoFromDbMap(String cluster) {
-        List<ESRoleClusterHostInfoPO> nodesFromDB = roleClusterHostInfoDAO.listByCluster(cluster);
+    private Map<String/*roleClusterId@esNodeName*/ , ESClusterRoleHostInfoPO> getNodeInfoFromDbMap(String cluster) {
+        List<ESClusterRoleHostInfoPO> nodesFromDB = clusterRoleHostInfoDAO.listByCluster(cluster);
 
         LOGGER.info("class=RoleClusterHostServiceImpl||method=getNodeInfoFromDbMap||cluster={}||dbSize={}", cluster,
                 nodesFromDB.size());
 
-        return ConvertUtil.list2Map(nodesFromDB, ESRoleClusterHostInfoPO::getKey);
+        return ConvertUtil.list2Map(nodesFromDB, ESClusterRoleHostInfoPO::getKey);
     }
 
     /**
@@ -680,18 +680,18 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         return CLIENT_NODE.getCode();
     }
 
-    private boolean updateRolePod(List<ESRoleClusterHostInfoPO> shouldAdd, String cluster) {
+    private boolean updateRolePod(List<ESClusterRoleHostInfoPO> shouldAdd, String cluster) {
         if (CollectionUtils.isEmpty(shouldAdd)) {
             return true;
         }
 
-        Map<Integer, List<ESRoleClusterHostInfoPO>> role2ESRoleClusterHostPOListMap = ConvertUtil.list2MapOfList(shouldAdd,
-            ESRoleClusterHostInfoPO::getRole, esRoleClusterHostInfoPO -> esRoleClusterHostInfoPO);
+        Map<Integer, List<ESClusterRoleHostInfoPO>> role2ESRoleClusterHostPOListMap = ConvertUtil.list2MapOfList(shouldAdd,
+            ESClusterRoleHostInfoPO::getRole, esClusterRoleHostInfoPO -> esClusterRoleHostInfoPO);
 
         AtomicBoolean flag = new AtomicBoolean(true);
         role2ESRoleClusterHostPOListMap.forEach((role, roleClusterHostPOList) -> {
             RoleCluster roleCluster = roleClusterService.getByClusterNameAndRole(cluster, valueOf(role).getDesc());
-            roleCluster.setPodNumber(roleClusterHostInfoDAO.getPodNumberByRoleId(roleCluster.getId()));
+            roleCluster.setPodNumber(clusterRoleHostInfoDAO.getPodNumberByRoleId(roleCluster.getId()));
             Result<Void> result = roleClusterService.updatePodByClusterIdAndRole(roleCluster);
             if (result.failed()) {
                 flag.set(false);
@@ -701,8 +701,8 @@ public class RoleClusterHostInfoServiceImpl implements RoleClusterHostInfoServic
         return flag.get();
     }
 
-    private boolean addAndEditNodes(String cluster, List<ESRoleClusterHostInfoPO> shouldAdd, List<ESRoleClusterHostInfoPO> shouldEdit) {
-        roleClusterHostInfoDAO.offlineByCluster(cluster);
+    private boolean addAndEditNodes(String cluster, List<ESClusterRoleHostInfoPO> shouldAdd, List<ESClusterRoleHostInfoPO> shouldEdit) {
+        clusterRoleHostInfoDAO.offlineByCluster(cluster);
         boolean flag = addNodeBatch(shouldAdd);
         if (flag) {
             if (!updateRolePod(shouldAdd, cluster)) {

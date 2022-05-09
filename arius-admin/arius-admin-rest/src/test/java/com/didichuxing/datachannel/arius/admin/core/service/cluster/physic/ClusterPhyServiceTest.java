@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
@@ -59,7 +59,7 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
     private RoleClusterService roleClusterService;
 
     @MockBean
-    private RoleClusterHostInfoService roleClusterHostInfoService;
+    private ClusterRoleHostInfoService clusterRoleHostInfoService;
 
     @MockBean
     private ESPluginService esPluginService;
@@ -140,9 +140,9 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
         roleCluster.setRole("wpk");
         Mockito.when(roleClusterService.getAllRoleClusterByClusterId(Mockito.any()))
                 .thenReturn(Collections.singletonList(roleCluster));
-        RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
-        Mockito.when(roleClusterHostInfoService.getByRoleClusterId(Mockito.anyLong()))
-                .thenReturn(Collections.singletonList(roleClusterHostInfo));
+        ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
+        Mockito.when(clusterRoleHostInfoService.getByRoleClusterId(Mockito.anyLong()))
+                .thenReturn(Collections.singletonList(clusterRoleHostInfo));
         ClusterPhy clusterPhy = esClusterPhyService.getClusterByName(esClusterDTO.getCluster());
         Assertions.assertTrue(clusterPhy.getRoleClusters().stream()
                 .anyMatch(esRoleCluster1 -> esRoleCluster1.getRole().equals(roleCluster.getRole())));
@@ -168,12 +168,12 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
     @Test
     public void isRacksExistsTest() {
         ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
+        ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
         String rack = "ColdTest";
-        roleClusterHostInfo.setRack(rack);
-        roleClusterHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
-        Mockito.when(roleClusterHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
-                .thenReturn(Collections.singletonList(roleClusterHostInfo));
+        clusterRoleHostInfo.setRack(rack);
+        clusterRoleHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
+        Mockito.when(clusterRoleHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
+                .thenReturn(Collections.singletonList(clusterRoleHostInfo));
         Assertions.assertTrue(esClusterPhyService.isRacksExists(esClusterDTO.getCluster(), rack));
         Assertions.assertFalse(esClusterPhyService.isRacksExists(esClusterDTO.getCluster(), "test"));
     }
@@ -181,14 +181,14 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getClusterRacksTest() {
         ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        Mockito.when(roleClusterHostInfoService.getNodesByCluster(Mockito.anyString())).thenReturn(null);
+        Mockito.when(clusterRoleHostInfoService.getNodesByCluster(Mockito.anyString())).thenReturn(null);
         Assertions.assertTrue(esClusterPhyService.getClusterRacks(esClusterDTO.getCluster()).isEmpty());
-        RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
+        ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
         String rack = "wpk";
-        roleClusterHostInfo.setRack(rack);
-        Mockito.when(roleClusterHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
-                .thenReturn(Collections.singletonList(roleClusterHostInfo));
-        roleClusterHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
+        clusterRoleHostInfo.setRack(rack);
+        Mockito.when(clusterRoleHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
+                .thenReturn(Collections.singletonList(clusterRoleHostInfo));
+        clusterRoleHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
         Assertions.assertTrue(
                 esClusterPhyService.getClusterRacks(esClusterDTO.getCluster()).stream().anyMatch(s -> s.equals(rack)));
     }
@@ -196,24 +196,24 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
     @Test
     public void listHotRacksTest() {
         ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
+        ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
         String rack = "HotTest";
-        roleClusterHostInfo.setRack(rack);
-        roleClusterHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
-        Mockito.when(roleClusterHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
-                .thenReturn(Collections.singletonList(roleClusterHostInfo));
+        clusterRoleHostInfo.setRack(rack);
+        clusterRoleHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
+        Mockito.when(clusterRoleHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
+                .thenReturn(Collections.singletonList(clusterRoleHostInfo));
         Assertions.assertTrue(esClusterPhyService.listHotRacks(esClusterDTO.getCluster()).contains(rack));
     }
 
     @Test
     public void listColdRacksTest() {
         ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        RoleClusterHostInfo roleClusterHostInfo = new RoleClusterHostInfo();
+        ClusterRoleHostInfo clusterRoleHostInfo = new ClusterRoleHostInfo();
         String rack = "ColdTest";
-        roleClusterHostInfo.setRack(rack);
-        roleClusterHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
-        Mockito.when(roleClusterHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
-                .thenReturn(Collections.singletonList(roleClusterHostInfo));
+        clusterRoleHostInfo.setRack(rack);
+        clusterRoleHostInfo.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
+        Mockito.when(clusterRoleHostInfoService.getNodesByCluster(esClusterDTO.getCluster()))
+                .thenReturn(Collections.singletonList(clusterRoleHostInfo));
         Assertions.assertTrue(esClusterPhyService.listColdRacks(esClusterDTO.getCluster()).contains(rack));
 
     }
