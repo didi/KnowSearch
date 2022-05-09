@@ -15,9 +15,9 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.TemplateE
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
@@ -87,7 +87,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "获取集群节点列表接口" )
 
-    public Result<List<ESRoleClusterHostVO>> nodeList(@RequestBody ESRoleClusterHostInfoDTO param) {
+    public Result<List<ESClusterRoleHostInfoVO>> nodeList(@RequestBody ESClusterRoleHostInfoDTO param) {
         return Result
             .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostInfoService.queryNodeByCondt(param)));
     }
@@ -97,7 +97,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "根据集群获取集群节点列表接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
 
-    public Result<List<ESRoleClusterHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
+    public Result<List<ESClusterRoleHostInfoVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
         return Result
             .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostInfoService.getNodesByCluster(cluster)));
     }

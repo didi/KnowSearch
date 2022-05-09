@@ -122,7 +122,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             if (content.getOperationType() == EcmTaskTypeEnum.SHRINK.getCode()) {
                 Map<String, Integer> segmentsOfIpByCluster = esClusterService.synGetSegmentsOfIpByCluster(content.getPhyClusterName());
 
-                for (ESClusterRoleHost esClusterRoleHost : content.getRoleClusterHosts()) {
+                for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
                     if (esClusterRoleHost.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
                             && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
                             && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
@@ -192,7 +192,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             esEcmTaskDTO.setOrderType(content.getOperationType());
 
             List<EcmParamBase> hostScaleParamBaseList = getHostScaleParamBaseList(content.getPhyClusterId().intValue(),
-                content.getRoleClusterHosts(), content.getPidCount());
+                content.getClusterRoleHosts(), content.getPidCount());
 
             esEcmTaskDTO.setClusterNodeRole(ListUtils.strList2String(
                 hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
@@ -275,7 +275,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
             // 填充工单中的ip字段,port端口号填充
             Map<String, String> portOfRoleMapFromHost = getPortOfRoleMapFromHost(clusterOpIndecreaseHostContent.getPhyClusterId());
-            for (ESClusterRoleHost esClusterRoleHost : clusterOpIndecreaseHostContent.getRoleClusterHosts()) {
+            for (ESClusterRoleHost esClusterRoleHost : clusterOpIndecreaseHostContent.getClusterRoleHosts()) {
                 esClusterRoleHost.setIp(Getter.strWithDefault(esClusterRoleHost.getIp(), esClusterRoleHost.getHostname()));
                 esClusterRoleHost.setPort(portOfRoleMapFromHost.get(esClusterRoleHost.getRole()));
             }

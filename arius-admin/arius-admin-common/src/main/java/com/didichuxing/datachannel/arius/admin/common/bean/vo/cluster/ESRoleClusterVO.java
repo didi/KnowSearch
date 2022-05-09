@@ -49,7 +49,7 @@ public class ESRoleClusterVO extends BaseVO {
     private String machineSpec;
 
     @ApiModelProperty("角色名下角色列表")
-    private List<ESRoleClusterHostVO> esRoleClusterHostVO;
+    private List<ESClusterRoleHostInfoVO> esClusterRoleHostInfoVO;
 
 }
 

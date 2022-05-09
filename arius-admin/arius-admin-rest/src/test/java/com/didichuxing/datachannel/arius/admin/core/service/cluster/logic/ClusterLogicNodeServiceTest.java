@@ -42,7 +42,7 @@ public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(clusterLogicNodeService
                 .getLogicClusterNodes(clusterId)
                 .stream()
-                .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getCluster().equals(clusterName)));
+                .anyMatch(esClusterRoleHost -> esClusterRoleHost.getCluster().equals(clusterName)));
     }
 
     @Test
@@ -59,6 +59,6 @@ public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(clusterLogicNodeService
                 .getLogicClusterNodesIncludeNonDataNodes(clusterId)
                 .stream()
-                .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getCluster().equals(clusterName)));
+                .anyMatch(esClusterRoleHost -> esClusterRoleHost.getCluster().equals(clusterName)));
     }
 }

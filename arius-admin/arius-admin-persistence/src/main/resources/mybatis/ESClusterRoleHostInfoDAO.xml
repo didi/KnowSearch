@@ -46,14 +46,6 @@
         where role_cluster_id = #{roleId} and  delete_flag = '0'
     </select>
 
-    <!-- 根据role_cluster_i 和 hostname  修改ip -->
-    <update id="updateESRoleClusterHost"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostInfoPO">
-        update es_cluster_role_host_info
-        set ip = #{ip}
-        where role_cluster_id = #{roleClusterId} and hostname = #{hostname}
-    </update>
-
     <!-- 根据role_cluster_id  查询 -->
     <select id="listByRoleClusterId" parameterType="long" resultMap="BaseResultMap">
         select

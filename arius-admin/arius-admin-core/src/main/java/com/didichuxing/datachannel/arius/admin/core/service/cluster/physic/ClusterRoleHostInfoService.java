@@ -6,7 +6,7 @@ import java.util.Map;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
@@ -23,7 +23,7 @@ public interface ClusterRoleHostInfoService {
      * @param condt 条件
      * @return 节点列表
      */
-    List<ClusterRoleHostInfo> queryNodeByCondt(ESRoleClusterHostInfoDTO condt);
+    List<ClusterRoleHostInfo> queryNodeByCondt(ESClusterRoleHostInfoDTO condt);
 
     /**
      * 查询集群节点列表
@@ -45,14 +45,14 @@ public interface ClusterRoleHostInfoService {
      * @param operator 操作人
      * @return 成功 true  失败  false
      */
-    Result<Void> editNodeStatus(ESRoleClusterHostInfoDTO param, String operator);
+    Result<Void> editNodeStatus(ESClusterRoleHostInfoDTO param, String operator);
 
     /**
      * 修改节点参数
      * @param param 参数
      * @return 成功 true  失败  false
      */
-    Result<Void> editNode(ESRoleClusterHostInfoDTO param);
+    Result<Void> editNode(ESClusterRoleHostInfoDTO param);
 
     /**
      * 采集集群节点配置信息到MySQL, 包括节点状态
@@ -196,19 +196,19 @@ public interface ClusterRoleHostInfoService {
      * 构建集群client角色的HttpAddresses地址
      * @return ip:port,ip:port
      */
-    String buildESClientHttpAddressesStr(List<ESRoleClusterHostInfoDTO> roleClusterHosts);
+    String buildESClientHttpAddressesStr(List<ESClusterRoleHostInfoDTO> roleClusterHosts);
 
     /**
      * 构建集群client, master角色的HttpAddresses地址
      * @return List<ip:port>
      */
-    List<String> buildESClientMasterHttpAddressesList(List<ESRoleClusterHostInfoDTO> roleClusterHosts);
+    List<String> buildESClientMasterHttpAddressesList(List<ESClusterRoleHostInfoDTO> roleClusterHosts);
 
     /**
      * 构建集群master,client,data角色的HttpAddresses地址
      * @return List<ip:port>
      */
-    List<String> buildESAllRoleHttpAddressesList(List<ESRoleClusterHostInfoDTO> roleClusterHosts);
+    List<String> buildESAllRoleHttpAddressesList(List<ESClusterRoleHostInfoDTO> roleClusterHosts);
 
     /**
      * 获取角色id对应的机器数（ip数目）

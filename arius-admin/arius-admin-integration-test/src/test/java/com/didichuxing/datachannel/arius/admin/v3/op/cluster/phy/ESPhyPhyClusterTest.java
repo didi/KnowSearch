@@ -4,9 +4,9 @@ import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterInfoTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterControllerMethod;
@@ -39,7 +39,7 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
 
     @Test
     public void getClusterPhyRegionInfosTest() throws IOException {
-        Result<List<ESRoleClusterHostVO>> result = ESPhyClusterControllerMethod.getClusterPhyRegionInfos(phyClusterInfo.getPhyClusterId());
+        Result<List<ESClusterRoleHostInfoVO>> result = ESPhyClusterControllerMethod.getClusterPhyRegionInfos(phyClusterInfo.getPhyClusterId());
         Assertions.assertTrue(result.success());
     }
 
@@ -80,7 +80,7 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
         if(result1.success()) {
             // 获取接入物理集群时候设置的节点ip信息
             Set<String> ipSet = phyClusterInfo.getClusterJoinDTO()
-                    .getRoleClusterHosts().stream().map(ESRoleClusterHostInfoDTO::getIp).collect(Collectors.toSet());
+                    .getEsClusterRoleHosts().stream().map(ESClusterRoleHostInfoDTO::getIp).collect(Collectors.toSet());
             // 节点数目一致
             Assertions.assertEquals(result1.getData().size(), ipSet.size());
         }

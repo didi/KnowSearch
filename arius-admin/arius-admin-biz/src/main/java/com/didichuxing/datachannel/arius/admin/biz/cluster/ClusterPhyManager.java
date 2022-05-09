@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSe
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -87,7 +87,7 @@ public interface ClusterPhyManager {
     /**
      * 获取物理集群节点划分信息
      */
-    Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
+    Result<List<ESClusterRoleHostInfoVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
 
     /**
      * 获取逻辑集群可关联region的物理集群名称列表

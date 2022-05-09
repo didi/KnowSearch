@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "节点信息")
-public class ESRoleClusterHostVO extends BaseVO {
+public class ESClusterRoleHostInfoVO extends BaseVO {
 
     @ApiModelProperty("主键")
     private Long    id;

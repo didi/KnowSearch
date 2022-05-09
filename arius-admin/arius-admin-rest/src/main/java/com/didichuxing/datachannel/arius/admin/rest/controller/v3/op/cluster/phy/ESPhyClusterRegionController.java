@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
@@ -119,7 +119,7 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{regionId}/nodes")
     @ResponseBody
     @ApiOperation(value = "获取region下的节点列表", notes = "")
-    public Result<List<ESRoleClusterHostVO>> getRegionNodes(@PathVariable Long regionId) {
+    public Result<List<ESClusterRoleHostInfoVO>> getRegionNodes(@PathVariable Long regionId) {
 
         ClusterRegion region = regionRackService.getRegionById(regionId);
         if (region == null) {
@@ -129,7 +129,7 @@ public class ESPhyClusterRegionController {
         List<ClusterRoleHostInfo> hosts = clusterRoleHostInfoService.listRacksNodes(region.getPhyClusterName(),
             region.getRacks());
 
-        return Result.buildSucc(ConvertUtil.list2List(hosts, ESRoleClusterHostVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(hosts, ESClusterRoleHostInfoVO.class));
 
     }
 

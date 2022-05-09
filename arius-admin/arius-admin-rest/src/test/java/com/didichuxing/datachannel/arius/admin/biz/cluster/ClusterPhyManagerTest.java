@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -25,21 +25,21 @@ public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
     public void getClusterPhyRegionInfosTest() {
         String clusterName = "dc-test";
         ClusterPhy clusterphy = clusterPhyService.getClusterByName(clusterName);
-        Result<List<ESRoleClusterHostVO>> clusterPhyRegionInfos = clusterPhyManager.getClusterPhyRegionInfos(clusterphy.getId());
+        Result<List<ESClusterRoleHostInfoVO>> clusterPhyRegionInfos = clusterPhyManager.getClusterPhyRegionInfos(clusterphy.getId());
         Assertions.assertTrue(clusterPhyRegionInfos.success());
-        List<ESRoleClusterHostVO> esRoleClusterHostVOs = clusterPhyRegionInfos.getData();
+        List<ESClusterRoleHostInfoVO> esClusterRoleHostInfoVOS = clusterPhyRegionInfos.getData();
         List<String> masterRegion = Lists.newArrayList();
         List<String> clientRegion = Lists.newArrayList();
         List<String> dataRegion = Lists.newArrayList();
-        esRoleClusterHostVOs.forEach(esRoleClusterHostVO -> {
-            if(esRoleClusterHostVO.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getCode())) {
-                dataRegion.add(esRoleClusterHostVO.getClusterLogicNames());
+        esClusterRoleHostInfoVOS.forEach(esClusterRoleHostVO -> {
+            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getCode())) {
+                dataRegion.add(esClusterRoleHostVO.getClusterLogicNames());
             }
-            if(esRoleClusterHostVO.getRole().equals(ESClusterNodeRoleEnum.MASTER_NODE.getCode())) {
-                masterRegion.add(esRoleClusterHostVO.getClusterLogicNames());
+            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.MASTER_NODE.getCode())) {
+                masterRegion.add(esClusterRoleHostVO.getClusterLogicNames());
             }
-            if(esRoleClusterHostVO.getRole().equals(ESClusterNodeRoleEnum.CLIENT_NODE.getCode())) {
-                clientRegion.add(esRoleClusterHostVO.getClusterLogicNames());
+            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.CLIENT_NODE.getCode())) {
+                clientRegion.add(esClusterRoleHostVO.getClusterLogicNames());
             }
 
         });

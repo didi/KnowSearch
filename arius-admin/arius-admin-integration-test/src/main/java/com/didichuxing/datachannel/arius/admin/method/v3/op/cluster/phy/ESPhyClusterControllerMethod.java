@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 
@@ -49,9 +49,9 @@ public class ESPhyClusterControllerMethod {
         return JSON.parseObject(AriusClient.post(path, clusterJoinDTO), new TypeReference<Result<Boolean>>(){});
     }
 
-    public static Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Long clusterId) throws IOException {
+    public static Result<List<ESClusterRoleHostInfoVO>> getClusterPhyRegionInfos(Long clusterId) throws IOException {
         String path = String.format("%s/%d/regioninfo", PHY_CLUSTER, clusterId);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESRoleClusterHostVO>>>(){});
+        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESClusterRoleHostInfoVO>>>(){});
     }
 
     public static Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(Integer clusterLogicType, Long clusterLogicId) throws IOException {

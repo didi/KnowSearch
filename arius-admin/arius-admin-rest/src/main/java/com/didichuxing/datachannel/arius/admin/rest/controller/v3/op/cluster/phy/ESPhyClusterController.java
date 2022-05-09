@@ -23,7 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -105,7 +105,7 @@ public class ESPhyClusterController {
     @GetMapping("/{clusterId}/regioninfo")
     @ResponseBody
     @ApiOperation(value = "获取节点划分列表")
-    public Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
+    public Result<List<ESClusterRoleHostInfoVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
         return clusterPhyManager.getClusterPhyRegionInfos(clusterId);
     }
 

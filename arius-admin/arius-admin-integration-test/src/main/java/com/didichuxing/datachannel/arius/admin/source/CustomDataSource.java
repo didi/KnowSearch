@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.source;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
@@ -61,19 +61,19 @@ public class CustomDataSource {
         param.setTemplateSrvs(TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode() + "");
         param.setImportRule(ESClusterImportRuleEnum.AUTO_IMPORT.getCode());
         param.setTags("{\"resourceType\":3, \"createSource\":0}");
-        List<ESRoleClusterHostInfoDTO> list = new ArrayList<>();
+        List<ESClusterRoleHostInfoDTO> list = new ArrayList<>();
         for(int i = 1; i <= 3; i++) {
-            ESRoleClusterHostInfoDTO esRoleClusterHostInfoDTO = getESRoleClusterHostDTO();
-            esRoleClusterHostInfoDTO.setCluster(clusterName);
-            esRoleClusterHostInfoDTO.setRole(i);
-            list.add(esRoleClusterHostInfoDTO);
+            ESClusterRoleHostInfoDTO esClusterRoleHostInfoDTO = getESRoleClusterHostDTO();
+            esClusterRoleHostInfoDTO.setCluster(clusterName);
+            esClusterRoleHostInfoDTO.setRole(i);
+            list.add(esClusterRoleHostInfoDTO);
         }
-        param.setRoleClusterHosts(list);
+        param.setEsClusterRoleHosts(list);
         return param;
     }
 
-    public static ESRoleClusterHostInfoDTO getESRoleClusterHostDTO() {
-        ESRoleClusterHostInfoDTO hostDTO = new ESRoleClusterHostInfoDTO();
+    public static ESClusterRoleHostInfoDTO getESRoleClusterHostDTO() {
+        ESClusterRoleHostInfoDTO hostDTO = new ESClusterRoleHostInfoDTO();
         hostDTO.setCluster(getRandomClusterName());
         hostDTO.setIp(testPhyClusterIp);
         hostDTO.setNodeSet("");

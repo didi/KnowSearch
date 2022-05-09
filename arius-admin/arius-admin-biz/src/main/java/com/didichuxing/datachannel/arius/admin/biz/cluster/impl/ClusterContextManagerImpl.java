@@ -295,7 +295,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         // host信息按【cluster】分组
         List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.listAllNode();
         Map<String, List<ClusterRoleHostInfo>> cluster2RoleListMap = ConvertUtil.list2MapOfList(clusterRoleHostInfos,
-                ClusterRoleHostInfo::getCluster, RoleClusterHostInfo -> RoleClusterHostInfo);
+                ClusterRoleHostInfo::getCluster, ClusterRoleHostInfo -> ClusterRoleHostInfo);
 
         // app信息分组
         List<App> apps = appService.listApps();
@@ -471,7 +471,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     private Map<String, List<ClusterRoleHostInfo>> getPhyRack2HostListMap() {
         List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.listAllNode();
         return ConvertUtil.list2MapOfList(clusterRoleHostInfos,
-                host -> host.getCluster() + "@" + host.getRack(), RoleClusterHost -> RoleClusterHost);
+                host -> host.getCluster() + "@" + host.getRack(), ClusterRoleHostInfo -> ClusterRoleHostInfo);
     }
 
     /**

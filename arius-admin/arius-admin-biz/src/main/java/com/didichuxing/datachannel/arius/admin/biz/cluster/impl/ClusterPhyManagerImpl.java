@@ -430,7 +430,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Integer clusterId) {
+    public Result<List<ESClusterRoleHostInfoVO>> getClusterPhyRegionInfos(Integer clusterId) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterId);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
@@ -799,8 +799,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
             for (ESRoleClusterVO esRoleClusterVO : roleClusterVOS) {
                 List<ClusterRoleHostInfo> clusterRoleHostInfos = roleIdsMap.get(esRoleClusterVO.getId());
-                List<ESRoleClusterHostVO> esRoleClusterHostVOS = ConvertUtil.list2List(clusterRoleHostInfos, ESRoleClusterHostVO.class);
-                esRoleClusterVO.setEsRoleClusterHostVO(esRoleClusterHostVOS);
+                List<ESClusterRoleHostInfoVO> esClusterRoleHostInfoVOS = ConvertUtil.list2List(clusterRoleHostInfos, ESClusterRoleHostInfoVO.class);
+                esRoleClusterVO.setEsClusterRoleHostInfoVO(esClusterRoleHostInfoVOS);
             }
 
             cluster.setEsRoleClusterVOS(roleClusterVOS);
@@ -1046,15 +1046,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private String buildClusterReadAndWriteAddressWhenJoin(ClusterJoinDTO clusterJoinDTO) {
         // 获取集群原有的client-node和master-node的地址和端口号
-        List<ESRoleClusterHostInfoDTO> roleClusterHosts = clusterJoinDTO.getRoleClusterHosts();
-        if (CollectionUtils.isEmpty(roleClusterHosts)) {
+        List<ESClusterRoleHostInfoDTO> clusterRoleHosts = clusterJoinDTO.getEsClusterRoleHosts();
+        if (CollectionUtils.isEmpty(clusterRoleHosts)) {
             return null;
         }
 
         //设置接入集群中的master和client地址信息
         List<String> clientHttpAddresses = Lists.newArrayList();
         List<String> masterHttpAddresses = Lists.newArrayList();
-        for (ESRoleClusterHostInfoDTO roleClusterHost : roleClusterHosts) {
+        for (ESClusterRoleHostInfoDTO roleClusterHost : clusterRoleHosts) {
             if (roleClusterHost.getRole().equals(CLIENT_NODE.getCode())) {
                 clientHttpAddresses.add(roleClusterHost.getIp() + ":" + roleClusterHost.getPort());
             }
@@ -1319,7 +1319,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ESClusterDTO buildClusterPhy(ClusterJoinDTO param, String operator) {
         ESClusterDTO clusterDTO = ConvertUtil.obj2Obj(param, ESClusterDTO.class);
 
-        String clientAddress = clusterRoleHostInfoService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        String clientAddress = clusterRoleHostInfoService.buildESClientHttpAddressesStr(param.getEsClusterRoleHosts());
 
         clusterDTO.setDesc(param.getPhyClusterDesc());
         clusterDTO.setDataCenter(CN.getCode());
@@ -1346,7 +1346,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         esLogicClusterDTO.setType(PRIVATE.getCode());
         esLogicClusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
 
-        Long dataNodeNumber = param.getRoleClusterHosts().stream().filter(hosts -> DATA_NODE.getCode() == hosts.getRole()).count();
+        Long dataNodeNumber = param.getEsClusterRoleHosts().stream().filter(hosts -> DATA_NODE.getCode() == hosts.getRole()).count();
 
         esLogicClusterDTO.setDataNodeNu(dataNodeNumber.intValue());
         esLogicClusterDTO.setLibraDepartmentId("");
@@ -1387,21 +1387,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal("非支持的接入规则");
         }
 
-        List<ESRoleClusterHostInfoDTO> roleClusterHosts = param.getRoleClusterHosts();
+        List<ESClusterRoleHostInfoDTO> roleClusterHosts = param.getEsClusterRoleHosts();
         if (CollectionUtils.isEmpty(roleClusterHosts)) {
             return Result.buildParamIllegal("集群节点信息为空");
         }
 
         // 对于接入集群的节点端口进行校验
         Set<String> wrongPortSet = roleClusterHosts.stream()
-                .map(ESRoleClusterHostInfoDTO::getPort)
+                .map(ESClusterRoleHostInfoDTO::getPort)
                 .filter(this::wrongPortDetect)
                 .collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(wrongPortSet)) {
             return Result.buildParamIllegal("接入集群中端口号存在异常" + wrongPortSet);
         }
 
-        Set<Integer> roleForNode = roleClusterHosts.stream().map(ESRoleClusterHostInfoDTO::getRole)
+        Set<Integer> roleForNode = roleClusterHosts.stream().map(ESClusterRoleHostInfoDTO::getRole)
             .collect(Collectors.toSet());
 
         if (!roleForNode.contains(MASTER_NODE.getCode())) {
@@ -1409,7 +1409,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         Map<Integer, List<String>> role2IpsMap = ConvertUtil.list2MapOfList(roleClusterHosts,
-            ESRoleClusterHostInfoDTO::getRole, ESRoleClusterHostInfoDTO::getIp);
+            ESClusterRoleHostInfoDTO::getRole, ESClusterRoleHostInfoDTO::getIp);
 
         List<String> masterIps = role2IpsMap.get(MASTER_NODE.getCode());
         if (masterIps.size() < JOIN_MASTER_NODE_MIN_NUMBER) {

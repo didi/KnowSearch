@@ -377,7 +377,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
                 ClusterOpHostContent.class);
 
         //获取用户配置的冷节点的http地址信息
-        Set<String> coldHttpAddress = clusterOpHostContent.getRoleClusterHosts()
+        Set<String> coldHttpAddress = clusterOpHostContent.getClusterRoleHosts()
                 .stream()
                 .filter(ESClusterRoleHost::getBeCold)
                 .map(ESClusterRoleHost::getHostname)

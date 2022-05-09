@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.impl;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
@@ -76,7 +76,7 @@ public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
      */
     private List<ClusterRoleHostInfo> fetchNodesOfClusterRack(ClusterLogicRackInfo clusterRack) {
         if (clusterRack != null) {
-            ESRoleClusterHostInfoDTO query = new ESRoleClusterHostInfoDTO();
+            ESClusterRoleHostInfoDTO query = new ESClusterRoleHostInfoDTO();
             query.setCluster(clusterRack.getPhyClusterName());
             query.setRack(clusterRack.getRack());
 
