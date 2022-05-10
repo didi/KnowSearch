@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
@@ -55,7 +55,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     private ESIndexService         esIndexService;
 
     @Autowired
-    private IndexTemplateInfoDAO indexTemplateInfoDAO;
+    private IndexTemplateDAO indexTemplateDAO;
 
     @Autowired
     private ClusterPhyService      clusterPhyService;
@@ -73,7 +73,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Tuple</*冷节点索引列表*/Set<String>, /*热节点索引列表*/Set<String>> getColdAndHotIndex(Long physicalId) {
-        IndexTemplatePhyInfoWithLogic templatePhysicalWithLogic = templatePhyService
+        IndexTemplatePhyWithLogic templatePhysicalWithLogic = indexTemplatePhyService
             .getTemplateWithLogicById(physicalId);
         if (templatePhysicalWithLogic == null) {
             return new Tuple<>();
@@ -169,7 +169,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
          * 配置分片级别重分配的参数由集群控制
          */
 
-        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService.getNormalTemplateByCluster(phyCluster);
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildSucc(true);
@@ -178,7 +178,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         LOGGER.info("class=TemplateColdManagerImpl||method=move2ColdNode||cluster={}||coldRacks={}", phyCluster, coldRack);
 
         int succ = 0;
-        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
                 Result<Boolean> moveResult = movePerTemplate(templatePhysical, coldRack);
                 if (moveResult.success()) {
@@ -233,7 +233,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
             return Result.buildParamIllegal("days参数非法, [-2, 2]");
         }
 
-        int count = indexTemplateInfoDAO.batchChangeHotDay(days);
+        int count = indexTemplateDAO.batchChangeHotDay(days);
 
         LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
 
@@ -255,12 +255,12 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     @Override
     public boolean updateHotIndexRack(Long physicalId, String tgtRack, int retryCount) throws ESOperateException {
 
-        IndexTemplatePhyInfoWithLogic physicalWithLogic = templatePhyService.getTemplateWithLogicById(physicalId);
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
         if (physicalWithLogic == null) {
             return false;
         }
 
-        List<String> indices = templatePhyService.getMatchIndexNames(physicalWithLogic.getId());
+        List<String> indices = indexTemplatePhyService.getMatchIndexNames(physicalWithLogic.getId());
         if (CollectionUtils.isEmpty(indices)) {
             return true;
         }
@@ -279,7 +279,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     }
 
     /**************************************************** private method ****************************************************/
-    private List<String> getExpList(IndexTemplatePhyInfoWithLogic physicalWithLogic, List<String> indices, int hotDay) {
+    private List<String> getExpList(IndexTemplatePhyWithLogic physicalWithLogic, List<String> indices, int hotDay) {
         List<String> expList = Lists.newArrayList();
 
         if (hotDay < 0) {
@@ -316,7 +316,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         return expList;
     }
 
-    private Result<Boolean> movePerTemplate(IndexTemplatePhyInfo templatePhysical, String coldRacks) throws ESOperateException {
+    private Result<Boolean> movePerTemplate(IndexTemplatePhy templatePhysical, String coldRacks) throws ESOperateException {
         //获取冷存数据索引列表
         Set<String> coldIndexNames = getColdAndHotIndex(templatePhysical.getId()).getV1();
         //获取热存数据索引列表
@@ -327,7 +327,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
                 && movePerIndexTemplate(templatePhysical, templatePhysical.getRack(), hotIndexNames));
     }
 
-    private boolean movePerIndexTemplate(IndexTemplatePhyInfo templatePhysical,
+    private boolean movePerIndexTemplate(IndexTemplatePhy templatePhysical,
                                          String racks, Set<String> indexNames) throws ESOperateException {
         if (CollectionUtils.isEmpty(indexNames)) {
             LOGGER.info("class=TemplateColdManagerImpl||method=movePerIndexTemplate||template={}||msg=no need index", templatePhysical.getName());

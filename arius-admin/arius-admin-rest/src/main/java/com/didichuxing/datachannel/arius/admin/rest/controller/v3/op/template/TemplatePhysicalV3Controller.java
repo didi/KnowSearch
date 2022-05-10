@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class TemplatePhysicalV3Controller {
     @ResponseBody
     @ApiOperation(value = "编辑多个物理模板接口", notes = "")
     public Result<Boolean> multipleEdit(HttpServletRequest request,
-                                        @RequestBody List<IndexTemplatePhysicalInfoDTO> params) throws ESOperateException {
+                                        @RequestBody List<IndexTemplatePhyDTO> params) throws ESOperateException {
         return templatePhyManager.editMultipleTemplate(params, HttpRequestUtils.getOperator(request));
     }
 

@@ -38,7 +38,7 @@ public class ClusterJoinDTO extends BaseDTO {
     private String                     esVersion;
 
     @ApiModelProperty("集群角色 对应主机列表")
-    private List<ESClusterRoleHostInfoDTO> roleClusterHosts;
+    private List<ESClusterRoleHostDTO> roleClusterHosts;
 
     @ApiModelProperty("描述")
     private String                     phyClusterDesc;

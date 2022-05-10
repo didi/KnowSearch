@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
@@ -84,7 +84,7 @@ public class ShardIsAveragingItem extends AbstractCheckerItem {
                 inf.append(",node:").append(node);
                 inf.append(",nodeShard:").append(nodeShardNu);
 
-                IndexTemplatePhyInfoWithLogic template = getIndexTemplateByIndex(index);
+                IndexTemplatePhyWithLogic template = getIndexTemplateByIndex(index);
                 if(null == template){continue;}
 
                 String templateName = template.getName();

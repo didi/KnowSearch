@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.chec
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
@@ -38,7 +38,7 @@ public class InvalidIndicesInEsItem extends AbstractCheckerItem {
             if(isWhiteIndex(index) || iskibanaIndex(index)){continue;}
             indicesNum++;
 
-            IndexTemplatePhyInfoWithLogic indexTemplate = getIndexTemplateByIndex(index);
+            IndexTemplatePhyWithLogic indexTemplate = getIndexTemplateByIndex(index);
             if(null == indexTemplate){
                 StringBuilder inf = new StringBuilder();
                 inf.append("index:").append(index);

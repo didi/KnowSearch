@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
@@ -60,7 +60,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     private EcmTaskManager             ecmTaskManager;
 
     @Autowired
-    private ClusterRoleInfoService clusterRoleInfoService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
     private EcmHandleService ecmHandleService;
@@ -169,7 +169,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(clusterId);
         esEcmTaskDTO.setPhysicClusterId(clusterPhy.getId().longValue());
 
-        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleInfoService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(
                 clusterPhy.getId());
         if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");

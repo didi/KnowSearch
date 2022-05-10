@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterRegionInfoTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
@@ -85,10 +85,10 @@ public class ESPhyPhyClusterRegionTest extends BasePhyClusterRegionInfoTest {
      */
     @Test
     public void getRegionNodesTest() throws IOException {
-        Result<List<ESClusterRoleHostInfoVO>> result = ESPhyClusterRegionControllerMethod.getRegionNodes(phyClusterRegionInfo.getRegionId());
+        Result<List<ESClusterRoleHostVO>> result = ESPhyClusterRegionControllerMethod.getRegionNodes(phyClusterRegionInfo.getRegionId());
         Assertions.assertTrue(result.success());
         if(result.success()) {
-            Set<String> rack = result.getData().stream().map(ESClusterRoleHostInfoVO::getRack).collect(Collectors.toSet());
+            Set<String> rack = result.getData().stream().map(ESClusterRoleHostVO::getRack).collect(Collectors.toSet());
             Assertions.assertTrue(rack.contains("*"));
         }
     }

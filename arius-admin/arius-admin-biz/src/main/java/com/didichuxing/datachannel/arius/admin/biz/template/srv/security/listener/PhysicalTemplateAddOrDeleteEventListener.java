@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.security.listener;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
         try {
             if (event instanceof PhysicalTemplateAddEvent) {
                 PhysicalTemplateAddEvent addEvent = (PhysicalTemplateAddEvent) event;
-                IndexTemplatePhyInfo templatePhysical = addEvent.getNewTemplate();
+                IndexTemplatePhy templatePhysical = addEvent.getNewTemplate();
 
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateAddEvent||appid={}||template={}",
                     addEvent.getLogicWithPhysical().getAppId(), templatePhysical.getName());
@@ -43,7 +43,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
 
             if (event instanceof PhysicalTemplateDeleteEvent) {
                 PhysicalTemplateDeleteEvent deleteEvent = (PhysicalTemplateDeleteEvent) event;
-                IndexTemplatePhyInfo templatePhysical = deleteEvent.getDelTemplate();
+                IndexTemplatePhy templatePhysical = deleteEvent.getDelTemplate();
 
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateDeleteEvent||appid={}||template={}",
                     deleteEvent.getLogicWithPhysical().getAppId(), templatePhysical.getName());

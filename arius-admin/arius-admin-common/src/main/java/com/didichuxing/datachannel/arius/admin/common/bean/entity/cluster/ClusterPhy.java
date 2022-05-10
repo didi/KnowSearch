@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
@@ -141,7 +141,7 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
     /**
      * ES的角色的机器节点
      */
-    private List<ClusterRoleHostInfo> clusterRoleHostInfos;
+    private List<ClusterRoleHost> clusterRoleHosts;
 
     /**
      * client运行模式，读写共享还是读写分离

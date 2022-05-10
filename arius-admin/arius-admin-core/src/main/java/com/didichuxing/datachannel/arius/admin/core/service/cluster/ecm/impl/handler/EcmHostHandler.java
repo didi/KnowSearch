@@ -14,8 +14,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
@@ -28,8 +28,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum;
@@ -45,7 +45,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 @Service("ecmHostHandler")
 public class EcmHostHandler extends AbstractEcmBaseHandle {
     @Autowired
-    private ClusterRoleInfoService clusterRoleInfoService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
     private ESPluginService          esPluginService;
@@ -54,7 +54,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
     private ESPackageService         esPackageService;
 
     @Autowired
-    private ClusterRoleHostInfoService clusterRoleHostInfoService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -96,22 +96,22 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
         // 保存集群角色信息 es_cluster_role_info
         for (HostsCreateActionParam hostCreateActionParam : hostCreateActionParamList) {
             // 角色集群 信息入库
-            ESClusterRoleInfoDTO esClusterRoleInfoDTO = new ESClusterRoleInfoDTO();
-            esClusterRoleInfoDTO.setElasticClusterId(hostCreateActionParam.getPhyClusterId());
+            ESClusterRoleDTO esClusterRoleDTO = new ESClusterRoleDTO();
+            esClusterRoleDTO.setElasticClusterId(hostCreateActionParam.getPhyClusterId());
             if (hostCreateActionParam.getRoleName().startsWith(hostCreateActionParam.getPhyClusterName())) {
-                esClusterRoleInfoDTO.setRoleClusterName(hostCreateActionParam.getRoleName());
+                esClusterRoleDTO.setRoleClusterName(hostCreateActionParam.getRoleName());
             } else {
-                esClusterRoleInfoDTO.setRoleClusterName(
+                esClusterRoleDTO.setRoleClusterName(
                     hostCreateActionParam.getPhyClusterName() + "-" + hostCreateActionParam.getRoleName());
             }
-            esClusterRoleInfoDTO.setRole(hostCreateActionParam.getRoleName());
-            esClusterRoleInfoDTO.setPodNumber(0);
-            esClusterRoleInfoDTO.setPidCount(hostCreateActionParam.getPidCount());
-            esClusterRoleInfoDTO.setMachineSpec(hostCreateActionParam.getMachineSpec());
-            esClusterRoleInfoDTO.setCfgId(INVALID_VALUE.intValue());
-            esClusterRoleInfoDTO.setEsVersion(hostCreateActionParam.getEsVersion());
+            esClusterRoleDTO.setRole(hostCreateActionParam.getRoleName());
+            esClusterRoleDTO.setPodNumber(0);
+            esClusterRoleDTO.setPidCount(hostCreateActionParam.getPidCount());
+            esClusterRoleDTO.setMachineSpec(hostCreateActionParam.getMachineSpec());
+            esClusterRoleDTO.setCfgId(INVALID_VALUE.intValue());
+            esClusterRoleDTO.setEsVersion(hostCreateActionParam.getEsVersion());
 
-            clusterRoleInfoService.save(esClusterRoleInfoDTO);
+            clusterRoleService.save(esClusterRoleDTO);
         }
         return Result.buildSucc(hostCreateActionParamResult.getData().getPhyClusterId());
     }
@@ -261,21 +261,21 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
         if (zeusClusterActionEnum.equals(ZeusClusterActionEnum.EXPAND)
                 || zeusClusterActionEnum.equals(ZeusClusterActionEnum.NEW)) {
             // 根据物理集群id和数据节点的角色名称获取所有的当前集群绑定的主机列表
-            List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterRoleHostInfoService.getByRoleAndClusterId(hostParamBase.getPhyClusterId(),
+            List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(hostParamBase.getPhyClusterId(),
                     ESClusterNodeRoleEnum.DATA_NODE.getDesc());
 
             float initialRackValue = 0;
-            if (CollectionUtils.isEmpty(clusterRoleHostInfos)) {
+            if (CollectionUtils.isEmpty(clusterRoleHosts)) {
                 // 当新建或者扩容前data角色列表为空时，设置基准值
                 initialRackValue += 0.5;
             } else {
                 // 根据rack的大小进行排序并且获取新的data节点类型的rack起始值
-                for (ClusterRoleHostInfo clusterRoleHostInfo : clusterRoleHostInfos) {
-                    if (!Pattern.matches("r.*", clusterRoleHostInfo.getRack())) {
+                for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
+                    if (!Pattern.matches("r.*", clusterRoleHost.getRack())) {
                         // 如果rack 不是r* 形式，则跳过不进行计算, 这里为了与前人逻辑保持一致，hold住特殊case 如cold rack
                         continue;
                     }
-                    int roleHostRackValue = Integer.parseInt(clusterRoleHostInfo.getRack().replaceFirst("r", ""));
+                    int roleHostRackValue = Integer.parseInt(clusterRoleHost.getRack().replaceFirst("r", ""));
                     if (roleHostRackValue > initialRackValue) {
                         initialRackValue = roleHostRackValue;
                     } else if (roleHostRackValue == initialRackValue) {

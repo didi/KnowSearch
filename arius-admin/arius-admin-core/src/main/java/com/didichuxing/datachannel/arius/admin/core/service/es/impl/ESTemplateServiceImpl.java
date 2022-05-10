@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhysicalInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -289,10 +289,10 @@ public class ESTemplateServiceImpl implements ESTemplateService {
             DirectResponse directResponse = esTemplateDAO.getDirectResponse(cluster, "Get", templateNameRequestContent);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                List<IndexTemplatePhysicalInfoPO> indexBelongNodes = ConvertUtil
-                    .str2ObjArrayByJson(directResponse.getResponseContent(), IndexTemplatePhysicalInfoPO.class);
+                List<IndexTemplatePhyPO> indexBelongNodes = ConvertUtil
+                    .str2ObjArrayByJson(directResponse.getResponseContent(), IndexTemplatePhyPO.class);
 
-                return indexBelongNodes.stream().map(IndexTemplatePhysicalInfoPO::getName).filter(r -> !r.startsWith(".")).count();
+                return indexBelongNodes.stream().map(IndexTemplatePhyPO::getName).filter(r -> !r.startsWith(".")).count();
             }
         } catch (Exception e) {
             LOGGER.error("class=ESTemplateServiceImpl||method=syncGetTemplateNum||clusterName={}||errMsg=exception",

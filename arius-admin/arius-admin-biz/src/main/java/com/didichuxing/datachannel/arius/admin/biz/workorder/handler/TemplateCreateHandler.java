@@ -12,8 +12,8 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandle
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateCreateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
@@ -38,7 +38,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +49,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_WO_AUTO_PROCESS_CREATE_TEMPLATE_DISK_MAXG;
 import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
-import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.TemplatePhyServiceImpl.NOT_CHECK;
+import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 /**
  * @author d06679
@@ -59,7 +59,7 @@ import static com.didichuxing.datachannel.arius.admin.core.service.template.phys
 public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private QuotaTool                   quotaTool;
@@ -176,7 +176,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
                     String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", workOrder.getSubmitorAppid(), content.getResourceId()));
         }
 
-        Result<Void> checkBaseInfoResult = indexTemplateInfoService
+        Result<Void> checkBaseInfoResult = indexTemplateService
                 .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorAppid()), OperationEnum.ADD);
         if (checkBaseInfoResult.failed()) {
             return checkBaseInfoResult;
@@ -239,7 +239,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
                 TemplateCreateContent.class);
 
         //校验模板参数类型
-        Result<Void> checkBaseInfoResult = indexTemplateInfoService
+        Result<Void> checkBaseInfoResult = indexTemplateService
                 .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorAppid()), OperationEnum.ADD);
         if (checkBaseInfoResult.failed()) {
             return checkBaseInfoResult;
@@ -259,7 +259,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         TemplateCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
                 TemplateCreateContent.class);
 
-        IndexTemplateInfoDTO logicDTO = buildTemplateLogicDTO(content, workOrder.getSubmitorAppid());
+        IndexTemplateDTO logicDTO = buildTemplateLogicDTO(content, workOrder.getSubmitorAppid());
 
         logicDTO.setPhysicalInfos(Lists.newArrayList(buildTemplatePhysicalDTO(content, logicDTO)));
         logicDTO.setShardNum(fetchMaxShardNum(logicDTO.getPhysicalInfos()));
@@ -286,10 +286,10 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @param physicals 物理模板列表
      * @return
      */
-    private int fetchMaxShardNum(List<IndexTemplatePhysicalInfoDTO> physicals) {
+    private int fetchMaxShardNum(List<IndexTemplatePhyDTO> physicals) {
         int maxShardNum = -1;
         if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhysicalInfoDTO physical : physicals) {
+            for (IndexTemplatePhyDTO physical : physicals) {
                 if (physical.getShard() != null && physical.getShard() > maxShardNum) {
                     maxShardNum = physical.getShard();
                 }
@@ -304,8 +304,8 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @param submitorAppid appid
      * @return dto
      */
-    private IndexTemplateInfoDTO buildTemplateLogicDTO(TemplateCreateContent content, Integer submitorAppid) {
-        IndexTemplateInfoDTO logicDTO = ConvertUtil.obj2Obj(content, IndexTemplateInfoDTO.class);
+    private IndexTemplateDTO buildTemplateLogicDTO(TemplateCreateContent content, Integer submitorAppid) {
+        IndexTemplateDTO logicDTO = ConvertUtil.obj2Obj(content, IndexTemplateDTO.class);
 
         handleIndexTemplateLogic(content, logicDTO);
 
@@ -331,7 +331,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         return logicDTO;
     }
 
-    private void handleIndexTemplateLogic(TemplateCreateContent content, IndexTemplateInfoDTO logicDTO) {
+    private void handleIndexTemplateLogic(TemplateCreateContent content, IndexTemplateDTO logicDTO) {
         if (!content.getCyclicalRoll()) {
             // 不周期滚动
             logicDTO.setExpression(logicDTO.getName());
@@ -367,9 +367,9 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
      * @param logicDTO 逻辑模板DTO
      * @return dto
      */
-    private IndexTemplatePhysicalInfoDTO buildTemplatePhysicalDTO(TemplateCreateContent content,
-                                                                  IndexTemplateInfoDTO logicDTO) {
-        IndexTemplatePhysicalInfoDTO physicalDTO = new IndexTemplatePhysicalInfoDTO();
+    private IndexTemplatePhyDTO buildTemplatePhysicalDTO(TemplateCreateContent content,
+                                                         IndexTemplateDTO logicDTO) {
+        IndexTemplatePhyDTO physicalDTO = new IndexTemplatePhyDTO();
 
         physicalDTO.setLogicId(NOT_CHECK);
         physicalDTO.setName(logicDTO.getName());
@@ -431,8 +431,8 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         return typeProperty;
     }
 
-    private void setTemplateShard(IndexTemplatePhysicalInfoDTO physicalDTO, TemplateCreateContent content,
-                                  IndexTemplateInfoDTO logicDTO) {
+    private void setTemplateShard(IndexTemplatePhyDTO physicalDTO, TemplateCreateContent content,
+                                  IndexTemplateDTO logicDTO) {
         if (content.getCyclicalRoll()) {
             int expireTime = content.getExpireTime();
             if (expireTime < 0) {

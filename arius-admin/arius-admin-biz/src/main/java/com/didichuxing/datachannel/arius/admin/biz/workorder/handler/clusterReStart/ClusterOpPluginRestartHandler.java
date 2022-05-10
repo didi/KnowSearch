@@ -27,7 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
     private ESPluginService esPluginService;
 
     @Autowired
-    private ClusterRoleInfoService clusterRoleInfoService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
     private WorkTaskManager workTaskService;
@@ -129,7 +129,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         PluginPO pluginPO = esPluginService.getESPluginById(content.getPluginId());
 
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(Integer.parseInt(pluginPO.getPhysicClusterId()));
-        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleInfoService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(
 				clusterPhy.getId());
         if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");

@@ -10,13 +10,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
@@ -30,11 +30,11 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
@@ -75,16 +75,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private ESPluginService          esPluginService;
 
     @Autowired
-    private TemplatePhyService       templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private ClusterRoleInfoService clusterRoleInfoService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
-    private ClusterRoleHostInfoService clusterRoleHostInfoService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     private static final String DEFAULT_WRITE_ACTION = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
 
@@ -194,20 +194,20 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
 
         // 添加角色、机器信息
-        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleInfoService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(
                 clusterPhy.getId());
         if (CollectionUtils.isNotEmpty(clusterRoleInfos)) {
             // 角色信息
             clusterPhy.setClusterRoleInfos(clusterRoleInfos);
 
             // 机器信息
-            List<ClusterRoleHostInfo> clusterRoleHostInfos = new ArrayList<>();
-            Map<Long, List<ClusterRoleHostInfo>> map = clusterRoleHostInfoService.getByRoleClusterIds(clusterRoleInfos.stream().map(ClusterRoleInfo::getId).collect(Collectors.toList()));
+            List<ClusterRoleHost> clusterRoleHosts = new ArrayList<>();
+            Map<Long, List<ClusterRoleHost>> map = clusterRoleHostService.getByRoleClusterIds(clusterRoleInfos.stream().map(ClusterRoleInfo::getId).collect(Collectors.toList()));
             for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfos) {
-                List<ClusterRoleHostInfo> esClusterRoleHostInfos = map.getOrDefault(clusterRoleInfo.getId(), new ArrayList<>());
-                clusterRoleHostInfos.addAll(esClusterRoleHostInfos);
+                List<ClusterRoleHost> esClusterRoleHosts = map.getOrDefault(clusterRoleInfo.getId(), new ArrayList<>());
+                clusterRoleHosts.addAll(esClusterRoleHosts);
             }
-            clusterPhy.setClusterRoleHostInfos(clusterRoleHostInfos);
+            clusterPhy.setClusterRoleHosts(clusterRoleHosts);
         }
 
         return clusterPhy;
@@ -296,16 +296,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public Set<String> getClusterRacks(String cluster) {
-        List<ClusterRoleHostInfo> nodes = clusterRoleHostInfoService.getNodesByCluster(cluster);
+        List<ClusterRoleHost> nodes = clusterRoleHostService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(nodes)) {
             return Sets.newHashSet();
         }
 
         Set<String> rackSet = new HashSet<>();
         // 只有datanode才有rack
-        for (ClusterRoleHostInfo clusterRoleHostInfo : nodes) {
-            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == clusterRoleHostInfo.getRole()) {
-                rackSet.add(clusterRoleHostInfo.getRack());
+        for (ClusterRoleHost clusterRoleHost : nodes) {
+            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == clusterRoleHost.getRole()) {
+                rackSet.add(clusterRoleHost.getRack());
             }
         }
 
@@ -418,7 +418,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Override
     public List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId) {
-        return clusterRoleInfoService.getAllRoleClusterByClusterId(clusterId);
+        return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
     @Override
@@ -482,19 +482,19 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         //获取存储在region上的物理模板列表
         Float templateOnRegionDiskSize = 0F;
-        List<IndexTemplatePhyInfo> normalTemplateOnPhyCluster = templatePhyService.getNormalTemplateByCluster(clusterPhyName);
+        List<IndexTemplatePhy> normalTemplateOnPhyCluster = indexTemplatePhyService.getNormalTemplateByCluster(clusterPhyName);
         if (CollectionUtils.isEmpty(normalTemplateOnPhyCluster)) {
             return regionDiskSize;
         }
 
         //获取在region上创建的模板的总的设置空间
-        for (IndexTemplatePhyInfo indexTemplatePhyInfo : normalTemplateOnPhyCluster) {
-            if (!rackList.containsAll(ListUtils.string2StrList(indexTemplatePhyInfo.getRack()))) {
+        for (IndexTemplatePhy indexTemplatePhy : normalTemplateOnPhyCluster) {
+            if (!rackList.containsAll(ListUtils.string2StrList(indexTemplatePhy.getRack()))) {
                 continue;
             }
 
             //根据物理模板获取对应的逻辑模板中的quota参数
-            IndexTemplateInfo logicTemplate = indexTemplateInfoService.getLogicTemplateById(indexTemplatePhyInfo.getLogicId());
+            IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
             if (AriusObjUtils.isNull(logicTemplate)) {
                 continue;
             }

@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ClusterLogicStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.NodeRackStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.clusterindex.IndexStatusResult;
@@ -48,7 +48,7 @@ public class ESClusterLogicStaticsService {
     @Autowired
     private ESClusterService esClusterService;
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
     @Autowired
     private AriusStatsNodeInfoESDAO ariusStatsNodeInfoEsDao;
     @Autowired
@@ -222,9 +222,9 @@ public class ESClusterLogicStaticsService {
     //根据逻辑集群id找到逻辑集群所有的模板
     private List<String> getLogicClusterIndexes(Map<String/*phyClusterName*/, List<String>> phyClusterRackMap) {
         List<String> logicClusterIndexes = new ArrayList<>();
-        List<IndexTemplatePhyInfoWithLogic> indexTemplates = templatePhyService.listTemplateWithLogicWithCache();
+        List<IndexTemplatePhyWithLogic> indexTemplates = indexTemplatePhyService.listTemplateWithLogicWithCache();
         if (CollectionUtils.isNotEmpty(indexTemplates) && MapUtils.isNotEmpty(phyClusterRackMap)) {
-            for (IndexTemplatePhyInfoWithLogic indexTemplate : indexTemplates) {
+            for (IndexTemplatePhyWithLogic indexTemplate : indexTemplates) {
                 String phyIndexCluster = indexTemplate.getCluster();
                 String[] indexRacks = StringUtils.split(indexTemplate.getRack(), ",");
                 List<String> phyClusterRacks = phyClusterRackMap.getOrDefault(phyIndexCluster, Lists.newArrayList());

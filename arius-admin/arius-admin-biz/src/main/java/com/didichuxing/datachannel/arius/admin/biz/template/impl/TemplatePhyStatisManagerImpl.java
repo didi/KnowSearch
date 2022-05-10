@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
@@ -20,8 +20,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateHealthDegreeService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
@@ -49,10 +49,10 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     private static final ILog         LOGGER = LogFactory.getLog( TemplatePhyStatisManagerImpl.class);
 
     @Autowired
-    private TemplatePhyService          templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private TemplateSattisService       templateSattisService;
@@ -80,16 +80,16 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
      */
     @Override
     public List<TemplateMetaMetric> metaByPhysical(List<Long> physicalIds) {
-        List<IndexTemplatePhyInfoWithLogic> templatePhysicalWithLogics = templatePhyService
+        List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics = indexTemplatePhyService
             .getTemplateWithLogicByIds(physicalIds);
 
-        Map<Integer, Integer> templateLogicId2DeployCountMap = indexTemplateInfoService.getAllLogicTemplatesPhysicalCount();
+        Map<Integer, Integer> templateLogicId2DeployCountMap = indexTemplateService.getAllLogicTemplatesPhysicalCount();
 
         Map<Long, LogicResourceConfig> physicalId2ResourceLogicMap = genPhysicalId2ResourceConfigMap(
             templatePhysicalWithLogics);
 
         List<TemplateMetaMetric> templateMetaMetrics = Lists.newArrayList();
-        for (IndexTemplatePhyInfoWithLogic physicalWithLogic : templatePhysicalWithLogics) {
+        for (IndexTemplatePhyWithLogic physicalWithLogic : templatePhysicalWithLogics) {
             TemplateMetaMetric templateMetaMetric = new TemplateMetaMetric();
             templateMetaMetric.setPhysicalId(physicalWithLogic.getId());
             templateMetaMetric.setCluster(physicalWithLogic.getCluster());
@@ -180,7 +180,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     public Result<PhysicalTemplateTpsMetric> getTemplateTpsMetric(String cluster, String template,
                                                                   long currentStartTime, long currentEndTime) {
 
-        IndexTemplatePhyInfo templatePhysical = templatePhyService.getTemplateByClusterAndName(cluster, template);
+        IndexTemplatePhy templatePhysical = indexTemplatePhyService.getTemplateByClusterAndName(cluster, template);
         if (templatePhysical == null) {
             return Result.buildNotExist("模板不存在");
         }
@@ -375,7 +375,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
         return Result.buildSucc();
     }
 
-    private Map<Long, LogicResourceConfig> genPhysicalId2ResourceConfigMap(List<IndexTemplatePhyInfoWithLogic> templatePhysicalWithLogics) {
+    private Map<Long, LogicResourceConfig> genPhysicalId2ResourceConfigMap(List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics) {
         List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listAllLogicClusterRacks();
         Map<String, ClusterLogicRackInfo> clusterRack2ResourceIdMap = ConvertUtil.list2Map(logicClusterRacks,
             item -> item.getPhyClusterName() + "@" + item.getRack());
@@ -386,7 +386,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
 
         Map<Long, LogicResourceConfig> result = Maps.newHashMap();
 
-        for (IndexTemplatePhyInfoWithLogic physical : templatePhysicalWithLogics) {
+        for (IndexTemplatePhyWithLogic physical : templatePhysicalWithLogics) {
             for (String rack : physical.getRack().split(AdminConstant.RACK_COMMA)) {
                 String key = physical.getCluster() + "@" + rack;
                 if (clusterRack2ResourceIdMap.containsKey(key)) {

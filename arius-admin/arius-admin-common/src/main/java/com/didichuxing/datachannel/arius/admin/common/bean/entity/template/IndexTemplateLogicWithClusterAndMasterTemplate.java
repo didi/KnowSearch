@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplateLogicWithClusterAndMasterTemplate extends IndexTemplateInfo {
+public class IndexTemplateLogicWithClusterAndMasterTemplate extends IndexTemplate {
 
     /**
      * Master物理模板
      */
-    private IndexTemplatePhyInfo masterTemplate;
+    private IndexTemplatePhy masterTemplate;
 
     /**
      * 逻辑集群

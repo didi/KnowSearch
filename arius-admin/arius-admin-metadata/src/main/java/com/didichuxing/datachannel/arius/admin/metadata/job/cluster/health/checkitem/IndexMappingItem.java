@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
@@ -71,7 +71,7 @@ public class IndexMappingItem extends AbstractCheckerItem {
                 inf.append("index:").append(template);
                 inf.append(",fieldsSize:").append(fieldsSize);
 
-                IndexTemplatePhyInfoWithLogic indexTemplate = getIndexTemplateByIndex(template);
+                IndexTemplatePhyWithLogic indexTemplate = getIndexTemplateByIndex(template);
                 if(null == template){continue;}
 
                 String templateName = indexTemplate.getName();

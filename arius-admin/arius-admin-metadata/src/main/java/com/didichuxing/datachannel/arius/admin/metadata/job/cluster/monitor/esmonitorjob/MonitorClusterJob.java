@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorCollectTimeEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorIndexEvent;
@@ -87,7 +87,7 @@ public class MonitorClusterJob {
     private static final int    INDICES_COLLECT_BATCH_SIZE  = 30;
 
     //key: cluster@templateName
-    private Cache<String, IndexTemplatePhyInfoWithLogic> indexTemplateCache = CacheBuilder.newBuilder()
+    private Cache<String, IndexTemplatePhyWithLogic> indexTemplateCache = CacheBuilder.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(10000).build();
 
     //采集指标
@@ -104,7 +104,7 @@ public class MonitorClusterJob {
     //缓存nodeid 与 发送给es的指标数据映射关系
     private Map<String, ESNodeStats>    nodeIdEsNodeStatsMap  = new ConcurrentHashMap<>();
 
-    private List<IndexTemplatePhyInfoWithLogic>      indexTemplates        = new CopyOnWriteArrayList<>();
+    private List<IndexTemplatePhyWithLogic>      indexTemplates        = new CopyOnWriteArrayList<>();
 
     private ESClient                    esClient;
 
@@ -137,7 +137,7 @@ public class MonitorClusterJob {
     public MonitorClusterJob(ESClient esClient,
                              String ariusClusterName,
                              ClusterPhy clusterPhy,
-                             List<IndexTemplatePhyInfoWithLogic> indexTemplates,
+                             List<IndexTemplatePhyWithLogic> indexTemplates,
                              MetricsRegister metricsRegister,
                              MonitorMetricsSender monitorMetricsSender,
                              List<CollectMetrics> indexWorkOrders,
@@ -475,7 +475,7 @@ public class MonitorClusterJob {
                 String index = entry.getKey();
                 try {
 
-                    IndexTemplatePhyInfoWithLogic indexTemplate = getTemplateNameForCache(ariusClusterName, index);
+                    IndexTemplatePhyWithLogic indexTemplate = getTemplateNameForCache(ariusClusterName, index);
                     IndexNodes indexStats = entry.getValue();
 
                     ESDataTempBean base = new ESDataTempBean();
@@ -553,7 +553,7 @@ public class MonitorClusterJob {
         }
     }
 
-    private void buildForOriginalESIndicesInfo(ESDataTempBean base, IndexTemplatePhyInfoWithLogic indexTemplate) {
+    private void buildForOriginalESIndicesInfo(ESDataTempBean base, IndexTemplatePhyWithLogic indexTemplate) {
         if (null != indexTemplate && null != indexTemplate.getName()) {
             base.setTemplate(indexTemplate.getName());
         }
@@ -609,7 +609,7 @@ public class MonitorClusterJob {
             response.getIndicesStats().forEach((index, indexStats) -> {
                 try {
 
-                    IndexTemplatePhyInfoWithLogic indexTemplate = getTemplateNameForCache(cluster, index);
+                    IndexTemplatePhyWithLogic indexTemplate = getTemplateNameForCache(cluster, index);
                     if (null == indexTemplate) {
                         return;
                     }
@@ -828,7 +828,7 @@ public class MonitorClusterJob {
                 continue ;
             }
 
-            IndexTemplatePhyInfoWithLogic indexTemplate = getIndexTemplateByTemplateName(node.getCluster(), template);
+            IndexTemplatePhyWithLogic indexTemplate = getIndexTemplateByTemplateName(node.getCluster(), template);
             if (null == indexTemplate) {
                 continue ;
             }
@@ -861,7 +861,7 @@ public class MonitorClusterJob {
             Map.Entry indexStatEntry = (Map.Entry) entry;
             String indexName = (String) indexStatEntry.getKey();
 
-            IndexTemplatePhyInfoWithLogic indexTemplate = getTemplateNameForCache(node.getCluster(), indexName);
+            IndexTemplatePhyWithLogic indexTemplate = getTemplateNameForCache(node.getCluster(), indexName);
             if(null == indexTemplate){continue;}
 
             Map indexStat = (Map) indexStatEntry.getValue();
@@ -1084,7 +1084,7 @@ public class MonitorClusterJob {
      * @param indexName
      * @return
      */
-    private IndexTemplatePhyInfoWithLogic getTemplateNameForCache(String cluster, String indexName) {
+    private IndexTemplatePhyWithLogic getTemplateNameForCache(String cluster, String indexName) {
         try {
             return indexTemplateCache.get(cluster + "@" + indexName, () -> getTemplateName(cluster, indexName));
         } catch (Exception e) {
@@ -1103,8 +1103,8 @@ public class MonitorClusterJob {
      * @param templateName 模板名称
      * @return IndexTemplate对象
      */
-    private IndexTemplatePhyInfoWithLogic getIndexTemplateByTemplateName(String cluster, String templateName) {
-        for(IndexTemplatePhyInfoWithLogic indexTemplate : indexTemplates) {
+    private IndexTemplatePhyWithLogic getIndexTemplateByTemplateName(String cluster, String templateName) {
+        for(IndexTemplatePhyWithLogic indexTemplate : indexTemplates) {
             String indexTemplateCluster = indexTemplate.getCluster();
             String name = indexTemplate.getName();
 
@@ -1116,8 +1116,8 @@ public class MonitorClusterJob {
         return null;
     }
 
-    private IndexTemplatePhyInfoWithLogic getTemplateName(String cluster, String indexName) {
-        for(IndexTemplatePhyInfoWithLogic indexTemplate : indexTemplates){
+    private IndexTemplatePhyWithLogic getTemplateName(String cluster, String indexName) {
+        for(IndexTemplatePhyWithLogic indexTemplate : indexTemplates){
             String indexTemplateCluster      = indexTemplate.getCluster();
             String expression                = indexTemplate.getExpression();
             String expressionWhoutAsterisk  = "";
@@ -1129,7 +1129,7 @@ public class MonitorClusterJob {
             }
 
             if (indexName.startsWith(expressionWhoutAsterisk)) {
-                IndexTemplatePhyInfoWithLogic indexTemplate1 = getIndexTemplatePhyWithLogic(cluster, indexName, indexTemplate, indexTemplateCluster, expression);
+                IndexTemplatePhyWithLogic indexTemplate1 = getIndexTemplatePhyWithLogic(cluster, indexName, indexTemplate, indexTemplateCluster, expression);
                 if (indexTemplate1 != null) {
                     return indexTemplate1;
                 }
@@ -1139,9 +1139,9 @@ public class MonitorClusterJob {
         return null;
     }
 
-    private IndexTemplatePhyInfoWithLogic getIndexTemplatePhyWithLogic(String cluster, String indexName,
-                                                                       IndexTemplatePhyInfoWithLogic indexTemplate,
-                                                                       String clusterName, String expression) {
+    private IndexTemplatePhyWithLogic getIndexTemplatePhyWithLogic(String cluster, String indexName,
+                                                                   IndexTemplatePhyWithLogic indexTemplate,
+                                                                   String clusterName, String expression) {
         String dataFormat   = indexTemplate.getLogicTemplate().getDateFormat();
 
         if(!expression.endsWith("*") || StringUtils.isEmpty(dataFormat) || "null".equals(dataFormat)

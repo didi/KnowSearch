@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.event.template;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 
 /**
  * @author d06679
@@ -9,28 +9,28 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
  */
 public class PhysicalTemplateModifyEvent extends PhysicalTemplateEvent {
 
-    private IndexTemplatePhyInfo oldTemplate;
+    private IndexTemplatePhy oldTemplate;
 
-    private IndexTemplatePhyInfo newTemplate;
+    private IndexTemplatePhy newTemplate;
 
     /**
      * Create a new ApplicationEvent.
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public PhysicalTemplateModifyEvent(Object source, IndexTemplatePhyInfo oldTemplate,
-                                       IndexTemplatePhyInfo newTemplate,
-                                       IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
+    public PhysicalTemplateModifyEvent(Object source, IndexTemplatePhy oldTemplate,
+                                       IndexTemplatePhy newTemplate,
+                                       IndexTemplateWithPhyTemplates logicWithPhysical) {
         super(source, logicWithPhysical);
         this.oldTemplate = oldTemplate;
         this.newTemplate = newTemplate;
     }
 
-    public IndexTemplatePhyInfo getOldTemplate() {
+    public IndexTemplatePhy getOldTemplate() {
         return oldTemplate;
     }
 
-    public IndexTemplatePhyInfo getNewTemplate() {
+    public IndexTemplatePhy getNewTemplate() {
         return newTemplate;
     }
 }

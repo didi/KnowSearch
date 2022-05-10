@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
     private String                                      adminUrlConsole;
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private AppLogicTemplateAuthService                 appLogicTemplateAuthService;
@@ -179,12 +179,12 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
         if (authEnum.equals(AppTemplateAuthEnum.OWN)) {
             // 逻辑模板移交
-            return Result.buildFrom(indexTemplateInfoService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
+            return Result.buildFrom(indexTemplateService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
                     content.getResponsible(), workOrder.getSubmitor()));
         } else {
             // 对于索引的工单任务，若没有集群权限，则添加所在集群的访问权限
             // 获取所在集群
-            ClusterLogic clusterLogic = indexTemplateInfoService
+            ClusterLogic clusterLogic = indexTemplateService
                 .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId).getLogicCluster();
 
             if (clusterLogic == null) {

@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -25,13 +25,13 @@ public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
     public void getClusterPhyRegionInfosTest() {
         String clusterName = "dc-test";
         ClusterPhy clusterphy = clusterPhyService.getClusterByName(clusterName);
-        Result<List<ESClusterRoleHostInfoVO>> clusterPhyRegionInfos = clusterPhyManager.getClusterPhyRegionInfos(clusterphy.getId());
+        Result<List<ESClusterRoleHostVO>> clusterPhyRegionInfos = clusterPhyManager.getClusterPhyRegionInfos(clusterphy.getId());
         Assertions.assertTrue(clusterPhyRegionInfos.success());
-        List<ESClusterRoleHostInfoVO> esClusterRoleHostInfoVOS = clusterPhyRegionInfos.getData();
+        List<ESClusterRoleHostVO> esClusterRoleHostVOS = clusterPhyRegionInfos.getData();
         List<String> masterRegion = Lists.newArrayList();
         List<String> clientRegion = Lists.newArrayList();
         List<String> dataRegion = Lists.newArrayList();
-        esClusterRoleHostInfoVOS.forEach(esClusterRoleHostVO -> {
+        esClusterRoleHostVOS.forEach(esClusterRoleHostVO -> {
             if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getCode())) {
                 dataRegion.add(esClusterRoleHostVO.getClusterLogicNames());
             }

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public interface BaseTemplateSrvInterface {
      * @param indexTemplatePhies 物理模板
      * @return 校验结果
      */
-    boolean isTemplateSrvOpen(List<IndexTemplatePhyInfo> indexTemplatePhies);
+    boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies);
 
     /**
      * 获取当前模板服务在模板服务集合类中的标识

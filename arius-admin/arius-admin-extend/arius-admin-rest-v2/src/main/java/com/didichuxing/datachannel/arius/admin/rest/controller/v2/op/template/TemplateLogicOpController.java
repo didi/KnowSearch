@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.OpLogicTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,23 +25,23 @@ import io.swagger.annotations.ApiOperation;
 public class TemplateLogicOpController {
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板列表接口" )
 
-    public Result<List<OpLogicTemplateVO>> list(@RequestBody IndexTemplateInfoDTO param) {
+    public Result<List<OpLogicTemplateVO>> list(@RequestBody IndexTemplateDTO param) {
         return Result
-            .buildSucc(ConvertUtil.list2List(indexTemplateInfoService.getLogicTemplates(param), OpLogicTemplateVO.class));
+            .buildSucc(ConvertUtil.list2List(indexTemplateService.getLogicTemplates(param), OpLogicTemplateVO.class));
     }
 
     @RequestMapping(path = "/blockRead", method = RequestMethod.PUT)
     @ResponseBody
     @ApiOperation(value = "是否禁读" )
 
-    public Result updateBlockReadState(HttpServletRequest request, @RequestBody IndexTemplateInfoDTO param) {
-        return indexTemplateInfoService.updateBlockReadState(param.getId(), param.getBlockRead(),
+    public Result updateBlockReadState(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
+        return indexTemplateService.updateBlockReadState(param.getId(), param.getBlockRead(),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -49,8 +49,8 @@ public class TemplateLogicOpController {
     @ResponseBody
     @ApiOperation(value = "是否禁写" )
 
-    public Result updateBlockWriteState(HttpServletRequest request, @RequestBody IndexTemplateInfoDTO param) {
-        return indexTemplateInfoService.updateBlockWriteState(param.getId(), param.getBlockWrite(),
+    public Result updateBlockWriteState(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
+        return indexTemplateService.updateBlockWriteState(param.getId(), param.getBlockWrite(),
             HttpRequestUtils.getOperator(request));
     }
 

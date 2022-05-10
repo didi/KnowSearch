@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -50,7 +50,7 @@ public class AppLogicClusterAuthController {
     private AppClusterLogicAuthService authService;
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @GetMapping("/appAuths")
     @ResponseBody
@@ -96,7 +96,7 @@ public class AppLogicClusterAuthController {
         }
 
         if (appClusterLogicAuth.getLogicClusterId() != null) {
-            List<IndexTemplateInfo> templatesInLogicCluster = indexTemplateInfoService.getHasAuthTemplatesInLogicCluster(
+            List<IndexTemplate> templatesInLogicCluster = indexTemplateService.getHasAuthTemplatesInLogicCluster(
                     appClusterLogicAuth.getAppId(), appClusterLogicAuth.getLogicClusterId());
             if (!templatesInLogicCluster.isEmpty()) {
                 return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");

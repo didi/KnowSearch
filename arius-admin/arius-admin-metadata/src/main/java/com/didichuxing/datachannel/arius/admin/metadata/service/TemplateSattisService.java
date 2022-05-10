@@ -13,8 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.AppIdTemplateAccessCount;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateStatsInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.weekly.AppQuery;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslFieldUsePO;
@@ -27,7 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app.AppIdTemplateAccessESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslFieldUseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
@@ -83,7 +83,7 @@ public class TemplateSattisService {
     private TemplateValueService            templateValueService;
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private ESTemplateService               esTemplateService;
@@ -380,17 +380,17 @@ public class TemplateSattisService {
      * @return
      */
     
-    public Result<IndexTemplateInfoWithStats> getTemplateBaseStatsInfo(Long logicTemplateId, Long startDate, Long endDate) {
+    public Result<IndexTemplateWithStats> getTemplateBaseStatsInfo(Long logicTemplateId, Long startDate, Long endDate) {
         if (logicTemplateId == null) {
             return Result.build(ResultType.ILLEGAL_PARAMS);
         }
 
-        IndexTemplateInfo indexTemplate = indexTemplateInfoService.getLogicTemplateById(logicTemplateId.intValue());
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId.intValue());
         if (null == indexTemplate) {
             return Result.buildFail();
         }
 
-        IndexTemplateInfoWithStats indexTemplateLogicWithStats = (IndexTemplateInfoWithStats)indexTemplate;
+        IndexTemplateWithStats indexTemplateLogicWithStats = (IndexTemplateWithStats)indexTemplate;
         FutureUtil.DEAULT_FUTURE.runnableTask(() -> {
             double totalSizeInBytes = ariusStatsIndexInfoESDAO.getLogicTemplateTotalSize(logicTemplateId);
             indexTemplateLogicWithStats.setStore(formatDouble(totalSizeInBytes / ONE_GB, 2));
@@ -460,7 +460,7 @@ public class TemplateSattisService {
     public Result<TemplateStatsInfo> getTemplateBaseStatisticalInfoByLogicTemplateId(Long logicTemplateId) {
         long current = System.currentTimeMillis();
 
-        IndexTemplateInfo indexTemplate = indexTemplateInfoService.getLogicTemplateById(logicTemplateId.intValue());
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId.intValue());
 
         if (null == indexTemplate) {
             return Result.buildFail("无法找到对应的模板");

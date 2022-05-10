@@ -70,5 +70,5 @@ public class ClusterRoleInfo extends BaseEntity {
     /**
      * role所拥有的节点
      */
-    private List<ClusterRoleHostInfo> clusterRoleHostInfos;
+    private List<ClusterRoleHost> clusterRoleHosts;
 }

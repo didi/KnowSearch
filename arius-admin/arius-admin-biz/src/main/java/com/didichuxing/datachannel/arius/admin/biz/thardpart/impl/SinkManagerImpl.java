@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.SinkManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.SinkSdkAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkIDCTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateDeployInfoVO;
@@ -13,16 +13,16 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAu
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,10 +48,10 @@ public class SinkManagerImpl implements SinkManager {
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private TemplateSrvManager templateSrvManager;
@@ -68,7 +68,7 @@ public class SinkManagerImpl implements SinkManager {
             return Result.buildNotExist("应用不存在");
         }
 
-        Map<Integer, IndexTemplateInfo> templateId2IndexTemplateLogicMap = indexTemplateInfoService
+        Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
 
         return Result.buildSucc(buildAppAuthInfo(app, appLogicTemplateAuthService.getTemplateAuthsByAppId(appId),
@@ -78,24 +78,24 @@ public class SinkManagerImpl implements SinkManager {
     @Override
     public Result<SinkSdkTemplateDeployInfoVO> listDeployInfo(String templateName) {
         // 主键顺序存放
-        Result<IndexTemplateInfoWithPhyTemplates> result = getIndexTemplateMetaByName(templateName);
+        Result<IndexTemplateWithPhyTemplates> result = getIndexTemplateMetaByName(templateName);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
 
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = result.getData();
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = result.getData();
 
         return Result.buildSucc(buildTemplateDeployInfoVO(templateLogicWithPhysical, getPipelineClusters()));
     }
 
     @Override
     public Result<SinkSdkIDCTemplateDeployInfoVO> getIDCDeployInfo(@RequestParam(value = "templateName") String templateName) {
-        Result<IndexTemplateInfoWithPhyTemplates> result = fetchIndexTemplateMetaByName(templateName);
+        Result<IndexTemplateWithPhyTemplates> result = fetchIndexTemplateMetaByName(templateName);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = result.getData();
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = result.getData();
 
         return Result.buildSucc(buildIDCTemplateDeployInfo(templateLogicWithPhysical, getPipelineClusters()));
     }
@@ -109,7 +109,7 @@ public class SinkManagerImpl implements SinkManager {
      * @return
      */
     private SinkSdkIDCTemplateDeployInfoVO buildIDCTemplateDeployInfo(
-            IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical,
+            IndexTemplateWithPhyTemplates templateLogicWithPhysical,
             List<String> pipelineClusterSet) {
 
         SinkSdkIDCTemplateDeployInfoVO deployInfoVO = new SinkSdkIDCTemplateDeployInfoVO();
@@ -120,13 +120,13 @@ public class SinkManagerImpl implements SinkManager {
         deployInfoVO.setBaseInfo(baseInfo);
 
         Map<String, SinkSdkIDCTemplateDeployInfoVO.SinkSdkIDCTemplateMasterSlaveMeta> idcTemplateMetas = new HashMap<>();
-        for (IndexTemplatePhyInfo master : templateLogicWithPhysical.fetchMasterPhysicalTemplates()) {
+        for (IndexTemplatePhy master : templateLogicWithPhysical.fetchMasterPhysicalTemplates()) {
             SinkSdkIDCTemplateDeployInfoVO.SinkSdkIDCTemplateMasterSlaveMeta meta =
                     new SinkSdkIDCTemplateDeployInfoVO.SinkSdkIDCTemplateMasterSlaveMeta();
             meta.setMasterInfo(buildPhysicalDeployVO(master));
             meta.setSlaveInfos(new ArrayList<>());
 
-            for (IndexTemplatePhyInfo slave : templateLogicWithPhysical.fetchMasterSlaves(master.getGroupId())) {
+            for (IndexTemplatePhy slave : templateLogicWithPhysical.fetchMasterSlaves(master.getGroupId())) {
                 meta.getSlaveInfos().add(buildPhysicalDeployVO(slave));
             }
 
@@ -147,25 +147,25 @@ public class SinkManagerImpl implements SinkManager {
      * @param templateName 模板名称
      * @return
      */
-    private Result<IndexTemplateInfoWithPhyTemplates> fetchIndexTemplateMetaByName(String templateName) {
+    private Result<IndexTemplateWithPhyTemplates> fetchIndexTemplateMetaByName(String templateName) {
         // 主键顺序存放
-        List<IndexTemplateInfo> templateLogicList = indexTemplateInfoService.getLogicTemplateByName(templateName);
+        List<IndexTemplate> templateLogicList = indexTemplateService.getLogicTemplateByName(templateName);
 
         if (CollectionUtils.isEmpty(templateLogicList)) {
             return Result.buildFrom(Result.buildNotExist("模板不存在"));
         }
 
-        IndexTemplateInfo templateLogic = templateLogicList.get(templateLogicList.size() - 1);
+        IndexTemplate templateLogic = templateLogicList.get(templateLogicList.size() - 1);
 
-        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService
                 .getTemplateByLogicId(templateLogic.getId());
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildFrom(Result.buildNotExist("模板无部署信息"));
         }
 
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = ConvertUtil.obj2Obj(templateLogic,
-                IndexTemplateInfoWithPhyTemplates.class);
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = ConvertUtil.obj2Obj(templateLogic,
+                IndexTemplateWithPhyTemplates.class);
         templateLogicWithPhysical.setPhysicals(templatePhysicals);
 
         return Result.buildSucc(templateLogicWithPhysical);
@@ -176,25 +176,25 @@ public class SinkManagerImpl implements SinkManager {
      * @param templateName 模板名称
      * @return
      */
-    private Result<IndexTemplateInfoWithPhyTemplates> getIndexTemplateMetaByName(String templateName) {
+    private Result<IndexTemplateWithPhyTemplates> getIndexTemplateMetaByName(String templateName) {
         // 主键顺序存放
-        List<IndexTemplateInfo> templateLogicList = indexTemplateInfoService.getLogicTemplateByName(templateName);
+        List<IndexTemplate> templateLogicList = indexTemplateService.getLogicTemplateByName(templateName);
 
         if (CollectionUtils.isEmpty(templateLogicList)) {
             return Result.buildNotExist("模板不存在");
         }
 
-        IndexTemplateInfo templateLogic = templateLogicList.get(templateLogicList.size() - 1);
+        IndexTemplate templateLogic = templateLogicList.get(templateLogicList.size() - 1);
 
-        List<IndexTemplatePhyInfo> templatePhysicals = templatePhyService
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService
                 .getTemplateByLogicId(templateLogic.getId());
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildNotExist("模板无部署信息");
         }
 
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = ConvertUtil.obj2Obj(templateLogic,
-                IndexTemplateInfoWithPhyTemplates.class);
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = ConvertUtil.obj2Obj(templateLogic,
+                IndexTemplateWithPhyTemplates.class);
         templateLogicWithPhysical.setPhysicals(templatePhysicals);
 
         return Result.buildSucc(templateLogicWithPhysical);
@@ -209,7 +209,7 @@ public class SinkManagerImpl implements SinkManager {
     }
 
     private SinkSdkAppVO buildAppAuthInfo(App app, List<AppTemplateAuth> appTemplateAuths,
-                                          Map<Integer, IndexTemplateInfo> templateId2IndexTemplateLogicMap,
+                                          Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
                                           String defaultRIndices) {
         SinkSdkAppVO appVO = ConvertUtil.obj2Obj(app, SinkSdkAppVO.class);
 
@@ -246,7 +246,7 @@ public class SinkManagerImpl implements SinkManager {
     }
 
     private SinkSdkTemplateDeployInfoVO buildTemplateDeployInfoVO(
-            IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical,
+            IndexTemplateWithPhyTemplates templateLogicWithPhysical,
             List<String> pipelineClusterSet) {
 
         SinkSdkTemplateVO baseInfo = ConvertUtil.obj2Obj(templateLogicWithPhysical, SinkSdkTemplateVO.class);
@@ -268,9 +268,9 @@ public class SinkManagerImpl implements SinkManager {
         return deployInfoVO;
     }
 
-    private List<SinkSdkTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
+    private List<SinkSdkTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateWithPhyTemplates logicWithPhysical) {
         List<SinkSdkTemplatePhysicalDeployVO> slavesInfos = Lists.newArrayList();
-        for (IndexTemplatePhyInfo physical : logicWithPhysical.getPhysicals()) {
+        for (IndexTemplatePhy physical : logicWithPhysical.getPhysicals()) {
             if (physical.getRole().equals( TemplateDeployRoleEnum.MASTER.getCode())) {
                 continue;
             }
@@ -279,11 +279,11 @@ public class SinkManagerImpl implements SinkManager {
         return slavesInfos;
     }
 
-    private SinkSdkTemplatePhysicalDeployVO genMasterInfo(IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
+    private SinkSdkTemplatePhysicalDeployVO genMasterInfo(IndexTemplateWithPhyTemplates logicWithPhysical) {
         return buildPhysicalDeployVO(logicWithPhysical.getMasterPhyTemplate());
     }
 
-    private SinkSdkTemplatePhysicalDeployVO buildPhysicalDeployVO(IndexTemplatePhyInfo physical) {
+    private SinkSdkTemplatePhysicalDeployVO buildPhysicalDeployVO(IndexTemplatePhy physical) {
         if (physical == null) {
             return null;
         }

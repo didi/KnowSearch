@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -45,7 +45,7 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
     private ClusterPhyService      clusterPhyService;
 
     @Autowired
-    private TemplatePhyService     templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -60,8 +60,8 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
                 ListUtils.strList2String(clusterLogicIdList)));
         }
 
-        List<String> templatePhyNameList = templatePhyService.getNormalTemplateByCluster(content.getPhyClusterName())
-            .stream().map(IndexTemplatePhyInfo::getName).collect(Collectors.toList());
+        List<String> templatePhyNameList = indexTemplatePhyService.getNormalTemplateByCluster(content.getPhyClusterName())
+            .stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(templatePhyNameList)) {
             return Result.buildFail(String.format("物理集群[%s]中已经存在模板[%s]", content.getPhyClusterName(),
                 ListUtils.strList2String(templatePhyNameList)));

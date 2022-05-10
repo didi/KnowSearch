@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckWhiteListPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.cluster.HealthCheckESDAO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +22,7 @@ public class ClusterHealthCheckJobConfig {
     private HealthCheckESDAO healthCheckEsDao;
     private ESClient                        esClient;
 
-    private Map<String, IndexTemplatePhyInfoWithLogic>  indexTemplateMap        = new HashMap<>();
+    private Map<String, IndexTemplatePhyWithLogic>  indexTemplateMap        = new HashMap<>();
     private List<HealthCheckWhiteListPO> healthCheckWhiteListPOS = new ArrayList<>();
 
     private String             clusterName;

@@ -4,15 +4,15 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
@@ -48,10 +48,10 @@ public class RegionResourceMover {
     private static final String     CAPACITY_PLAN_HAS_PLUGIN_CLUSTER = "capacity.plan.has.plugin.cluster";
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private TemplatePhyManager      templatePhyManager;
@@ -118,9 +118,9 @@ public class RegionResourceMover {
                 Double factor = computeTemplateFactor(templateMetaMetric, context.getRegion().getConfig());
 
                 // 更新模板factor到数据库
-                IndexTemplatePhyInfo templatePhysical = templatePhyService
+                IndexTemplatePhy templatePhysical = indexTemplatePhyService
                     .getTemplateById(templateMetaMetric.getPhysicalId());
-                indexTemplateInfoService.upsertTemplateShardFactor(templatePhysical.getLogicId(), factor,
+                indexTemplateService.upsertTemplateShardFactor(templatePhysical.getLogicId(), factor,
                     AriusUser.CAPACITY_PLAN.getDesc());
 
                 Map<String, String> setting = Maps.newHashMap();
@@ -155,9 +155,9 @@ public class RegionResourceMover {
      */
     public void raiseTemplateFactor(CapacityPlanRegionContext context) {
         for (TemplateMetaMetric templateMetaMetric : context.getTemplateMetaMetrics()) {
-            IndexTemplatePhyInfo templatePhysical = templatePhyService
+            IndexTemplatePhy templatePhysical = indexTemplatePhyService
                 .getTemplateById(templateMetaMetric.getPhysicalId());
-            indexTemplateInfoService.updateTemplateShardFactorIfGreater(templatePhysical.getLogicId(),
+            indexTemplateService.updateTemplateShardFactorIfGreater(templatePhysical.getLogicId(),
                 computeTemplateFactor(templateMetaMetric, context.getRegion().getConfig()),
                 AriusUser.CAPACITY_PLAN.getDesc());
         }

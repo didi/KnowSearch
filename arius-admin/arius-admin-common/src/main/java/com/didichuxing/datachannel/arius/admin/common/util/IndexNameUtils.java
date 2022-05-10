@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -431,14 +431,14 @@ public class IndexNameUtils {
      * @param indexTemplateList
      * @return
      */
-    public static Set<String> matchIndexTemplateBySearchIndexName(String indexName, List<IndexTemplatePhyInfoWithLogic> indexTemplateList) {
+    public static Set<String> matchIndexTemplateBySearchIndexName(String indexName, List<IndexTemplatePhyWithLogic> indexTemplateList) {
         Set<String> matchIndexTemplateNameSet = Sets.newTreeSet();
         String tmpIndexName = indexName;
         if (tmpIndexName != null && tmpIndexName.endsWith("*")) {
             tmpIndexName = StringUtils.removeEnd(tmpIndexName, "*");
         }
 
-        for (IndexTemplatePhyInfoWithLogic indexTemplate : indexTemplateList) {
+        for (IndexTemplatePhyWithLogic indexTemplate : indexTemplateList) {
 
             // 匹配索引表达式
             if (IndexNameUtils.isIndexNameMatchTemplateExp(indexName, indexTemplate.getExpression())) {

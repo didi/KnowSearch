@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimiz
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSchemaOperateRecord;
@@ -24,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.*;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateInfoServiceImpl;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
@@ -59,7 +59,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
 @Service("templateLogicMappingManagerImpl")
 public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements TemplateLogicMappingManager {
 
-    private static final ILog              LOGGER = LogFactory.getLog(IndexTemplateInfoServiceImpl.class);
+    private static final ILog              LOGGER = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     private static final String PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS = "物理模板不存在，ID:%d";
     @Autowired
@@ -97,8 +97,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      * @return 模板信息  不存在返回null
      */
     @Override
-    public Result<IndexTemplateInfoWithMapping> getTemplateWithMapping(Integer logicId) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+    public Result<IndexTemplateWithMapping> getTemplateWithMapping(Integer logicId) {
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -106,13 +106,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return Result.buildNotExist("模板不存在");
         }
 
-        IndexTemplateInfoWithMapping templateLogicWithMapping = ConvertUtil.obj2Obj(templateLogicWithPhysical,
-                IndexTemplateInfoWithMapping.class);
+        IndexTemplateWithMapping templateLogicWithMapping = ConvertUtil.obj2Obj(templateLogicWithPhysical,
+                IndexTemplateWithMapping.class);
 
         if (templateLogicWithPhysical.hasPhysicals()) {
             MappingConfig mergeMappingConfig = null;
-            List<IndexTemplatePhyInfo> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-            for (IndexTemplatePhyInfo templatePhysical : masterPhysicalTemplates) {
+            List<IndexTemplatePhy> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+            for (IndexTemplatePhy templatePhysical : masterPhysicalTemplates) {
 
                 Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
                         templatePhysical.getName());
@@ -159,13 +159,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return result;
         }
 
-        List<IndexTemplatePhyInfo> templatePhysicals = getMasterTemplatePhysicalByLogicId(logicId);
+        List<IndexTemplatePhy> templatePhysicals = getMasterTemplatePhysicalByLogicId(logicId);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildFail("can not find template physical, logicId:" + logicId);
         }
 
-        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             Result<MappingConfig> getDiffMappingResult = getDiffMapping(templatePhysical.getCluster(), templatePhysical.getName(), fields);
             if (getDiffMappingResult.failed()) {
                 return getDiffMappingResult;
@@ -187,7 +187,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     @Override
     public Result<Void> updateFields(Integer logicId, List<Field> fields, Set<String> removeFields) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -203,8 +203,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return checkFieldResult;
         }
 
-        List<IndexTemplatePhyInfo> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhyInfo masterTemplatePhysical : masterPhysicalTemplates) {
+        List<IndexTemplatePhy> masterPhysicalTemplates = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhy masterTemplatePhysical : masterPhysicalTemplates) {
             if (masterTemplatePhysical == null) {
                 return Result.buildFail("can not find template physical, logicId:" + logicId);
             }
@@ -253,17 +253,17 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      */
     @Override
     public Result<List<MappingOptimize>> getTemplateMappingOptimize(Integer logicId) {
-        IndexTemplateInfoWithPhyTemplates logicWithPhysical = this.indexTemplateInfoService
+        IndexTemplateWithPhyTemplates logicWithPhysical = this.indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         if (logicWithPhysical == null) {
             return Result.buildNotExist("模板不存在");
         }
 
-        List<IndexTemplatePhyInfo> templatePhysicals = logicWithPhysical.fetchMasterPhysicalTemplates();
+        List<IndexTemplatePhy> templatePhysicals = logicWithPhysical.fetchMasterPhysicalTemplates();
 
         List<MappingOptimize> mappingOptimizes = new ArrayList<>();
-        for (IndexTemplatePhyInfo master : templatePhysicals) {
+        for (IndexTemplatePhy master : templatePhysicals) {
             Result<MappingOptimize> getMappingOptimizeResult = templateSattisService
                     .getMappingOptimize(master.getCluster(), master.getName());
 
@@ -304,7 +304,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     @Override
     public Result updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -317,8 +317,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
 
-        List<IndexTemplatePhyInfo> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
 
             Result<MappingConfig> mappingConfigResult = AriusIndexMappingConfigUtils
                     .parseMappingConfig(ariusTypeProperty.toMappingJSON().toJSONString());
@@ -348,7 +348,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     @Override
     public Result<Void> updateProperties(Integer logicId, List<AriusTypeProperty> ariusTypePropertyList, String operator) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -361,11 +361,11 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
 
-        List<IndexTemplatePhyInfo> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         Result<ConsoleTemplateSchemaVO> oldSchemaVO = getSchema(logicId);
         boolean isSingleIndex = isSingleIndex(logicId);
 
-        for (IndexTemplatePhyInfo templatePhysical : templatePhysicals) {
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             Result<MappingConfig> result = templatePhyMappingManager.getMapping(templatePhysical.getCluster(),
                     templatePhysical.getName());
             if (result.failed()) {
@@ -474,12 +474,12 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     public Result<ConsoleTemplateSchemaVO> getSchema(Integer logicId) {
-        Result<IndexTemplateInfoWithMapping> result = getTemplateWithMapping(logicId);
+        Result<IndexTemplateWithMapping> result = getTemplateWithMapping(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        IndexTemplateInfoWithMapping templateLogicWithMapping = result.getData();
+        IndexTemplateWithMapping templateLogicWithMapping = result.getData();
         if (templateLogicWithMapping == null) {
             return Result.buildParamIllegal("索引不存在");
         }
@@ -491,10 +491,10 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     /**************************************** private method ****************************************************/
-    private List<AriusTypeProperty> genAriusTypePropertyList(IndexTemplateInfo templateLogic,
+    private List<AriusTypeProperty> genAriusTypePropertyList(IndexTemplate templateLogic,
                                                              Map<String, TypeConfig> typeConfigMap) {
 
-        List<IndexTemplateType> templateTypes = indexTemplateInfoService.getLogicTemplateTypes(templateLogic.getId());
+        List<IndexTemplateType> templateTypes = indexTemplateService.getLogicTemplateTypes(templateLogic.getId());
         Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
                 IndexTemplateType::getName);
 
@@ -513,8 +513,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return ariusTypePropertyList;
     }
 
-    private List<IndexTemplatePhyInfo> getMasterTemplatePhysicalByLogicId(Integer logicId) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+    private List<IndexTemplatePhy> getMasterTemplatePhysicalByLogicId(Integer logicId) {
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -911,7 +911,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return ret;
     }
 
-    private AriusTypeProperty buildDefaultType(IndexTemplateInfo templateLogic) {
+    private AriusTypeProperty buildDefaultType(IndexTemplate templateLogic) {
         // 优先取模板中的id和routing
         String idField = templateLogic.getIdField();
         String routingField = templateLogic.getRoutingField();
@@ -929,7 +929,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return ariusTypeProperty;
     }
 
-    private AriusTypeProperty buildOneType(IndexTemplateInfo templateLogic, Map<String, TypeConfig> typeConfigMap,
+    private AriusTypeProperty buildOneType(IndexTemplate templateLogic, Map<String, TypeConfig> typeConfigMap,
                                            Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap) {
         String typeName = typeConfigMap.keySet().iterator().next();
 
@@ -975,7 +975,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return ariusTypeProperty;
     }
 
-    private List<AriusTypeProperty> buildMultiType(IndexTemplateInfo templateLogic,
+    private List<AriusTypeProperty> buildMultiType(IndexTemplate templateLogic,
                                                    Map<String, TypeConfig> typeConfigMap,
                                                    Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap) {
         List<AriusTypeProperty> typeProperties = Lists.newArrayList();
@@ -1046,13 +1046,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         if (typeProperties.size() == 1 && (StringUtils.isBlank(typeProperties.get(0).getTypeName())
                 || typeProperties.get(0).getTypeName().equals(DEFAULT_INDEX_MAPPING_TYPE))) {
             // 就一个type，修改模板的id和routing字段
-            IndexTemplateInfoDTO templateLogicDTO = new IndexTemplateInfoDTO();
+            IndexTemplateDTO templateLogicDTO = new IndexTemplateDTO();
             templateLogicDTO.setId(schemaDTO.getLogicId());
             templateLogicDTO.setIdField(typeProperties.get(0).getIdField());
             templateLogicDTO.setRoutingField(typeProperties.get(0).getRoutingField());
             templateLogicDTO.setDateField(typeProperties.get(0).getDateField());
             templateLogicDTO.setDateFieldFormat(typeProperties.get(0).getDateFieldFormat());
-            Result<Void>  editDateFieldResult = indexTemplateInfoService.editTemplate(templateLogicDTO, operator);
+            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator);
             if (editDateFieldResult.failed()) {
                 return editDateFieldResult;
             }
@@ -1066,7 +1066,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     private Result<Void> handleUpdateType(ConsoleTemplateSchemaDTO schemaDTO, String operator, List<AriusTypeProperty> typeProperties) throws AdminOperateException {
         // 修改type表
-        List<IndexTemplateType> templateTypes = indexTemplateInfoService.getLogicTemplateTypes(schemaDTO.getLogicId());
+        List<IndexTemplateType> templateTypes = indexTemplateService.getLogicTemplateTypes(schemaDTO.getLogicId());
         Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
                 IndexTemplateType::getName);
 
@@ -1078,11 +1078,11 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         // 修改模板的时间字段
         if (dateField != null || dateFieldFormat != null) {
-            IndexTemplateInfoDTO templateLogicDTO = new IndexTemplateInfoDTO();
+            IndexTemplateDTO templateLogicDTO = new IndexTemplateDTO();
             templateLogicDTO.setId(schemaDTO.getLogicId());
             templateLogicDTO.setDateField(dateField);
             templateLogicDTO.setDateFieldFormat(dateFieldFormat);
-            Result<Void>  editDateFieldResult = indexTemplateInfoService.editTemplate(templateLogicDTO, operator);
+            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator);
             if (editDateFieldResult.failed()) {
                 return editDateFieldResult;
             }
@@ -1126,17 +1126,17 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                                                  String operator) throws AdminOperateException {
         SpecialField specialField = SpecialField.analyzeFromFields(schemaDTO.getFields(),
                 schemaDTO.getRemoveFieldNames());
-        IndexTemplateInfoDTO templateLogicDTO = new IndexTemplateInfoDTO();
+        IndexTemplateDTO templateLogicDTO = new IndexTemplateDTO();
         templateLogicDTO.setId(schemaDTO.getLogicId());
         templateLogicDTO.setDateField(specialField.getDateField());
         templateLogicDTO.setDateFieldFormat(specialField.getDateFieldFormat());
         templateLogicDTO.setIdField(specialField.getIdField());
         templateLogicDTO.setRoutingField(specialField.getRoutingField());
-        return indexTemplateInfoService.editTemplate(templateLogicDTO, operator);
+        return indexTemplateService.editTemplate(templateLogicDTO, operator);
     }
 
     private boolean clusterIsHighVersion(Integer logicId) {
-        IndexTemplateInfoWithPhyTemplates logicWithPhysical = this.indexTemplateInfoService
+        IndexTemplateWithPhyTemplates logicWithPhysical = this.indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
         if(!logicWithPhysical.hasPhysicals()){return false;}
@@ -1147,7 +1147,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return ESVersionUtil.isHigher(clusterPhy.getEsVersion(), "6.5.1");
     }
 
-    protected void fillSpecialField(IndexTemplateInfoWithMapping templateLogicWithMapping) {
+    protected void fillSpecialField(IndexTemplateWithMapping templateLogicWithMapping) {
         if (CollectionUtils.isEmpty(templateLogicWithMapping.getFields())) {
             return;
         }
@@ -1167,7 +1167,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         }
     }
 
-    private void handleRoutingField(IndexTemplateInfoWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+    private void handleRoutingField(IndexTemplateWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
         for (String routingField : templateLogicWithMapping.getRoutingField().split(",")) {
             if (name2FieldMap.containsKey(routingField)) {
                 name2FieldMap.get(routingField).setRoutingField(true);
@@ -1175,7 +1175,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         }
     }
 
-    private void handleIdField(IndexTemplateInfoWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+    private void handleIdField(IndexTemplateWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
         for (String idField : templateLogicWithMapping.getIdField().split(",")) {
             if (name2FieldMap.containsKey(idField)) {
                 name2FieldMap.get(idField).setIdField(true);
@@ -1183,7 +1183,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         }
     }
 
-    private void handleDateField(IndexTemplateInfoWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
+    private void handleDateField(IndexTemplateWithMapping templateLogicWithMapping, Map<String, Field> name2FieldMap) {
         if (name2FieldMap.containsKey(templateLogicWithMapping.getDateField())) {
             name2FieldMap.get(templateLogicWithMapping.getDateField()).setDateField(true);
             name2FieldMap.get(templateLogicWithMapping.getDateField())
@@ -1197,7 +1197,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      * @return
      */
     private boolean isSingleIndex(Integer logicId){
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
         //滚动索引的expression 以* 结尾
         return !templateLogicWithPhysical.getExpression().endsWith("*");
@@ -1209,17 +1209,17 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      * @return
      */
     private void syncTemplateMapping2Index(Integer logicId){
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
-        List<IndexTemplatePhyInfo> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhyInfo indexTemplatePhyInfo : templatePhysicals) {
-            Result<MappingConfig> result = templatePhyMappingManager.getMapping(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getName());
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhy indexTemplatePhy : templatePhysicals) {
+            Result<MappingConfig> result = templatePhyMappingManager.getMapping(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
             if (result.failed()) {
                 LOGGER.warn("class=TemplateLogicMappingManagerImpl||method=syncTemplateMapping2Index|||logicId={}", logicId);
             }
             MappingConfig templateMappingConfig = result.getData();
-            Result<Void> updateResult = templatePhyMappingManager.syncTemplateMapping2Index(indexTemplatePhyInfo.getCluster(), indexTemplatePhyInfo.getExpression(), templateMappingConfig);
+            Result<Void> updateResult = templatePhyMappingManager.syncTemplateMapping2Index(indexTemplatePhy.getCluster(), indexTemplatePhy.getExpression(), templateMappingConfig);
             if (updateResult.failed()) {
                 LOGGER.warn("class=TemplateLogicMappingManagerImpl||method=syncTemplateMapping2Index||mapping={}", templateMappingConfig);
             }

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
@@ -48,14 +48,14 @@ public class SmallShardsItem extends AbstractCheckerItem {
         int    smallSize = getClusterHealthCheckJobConfig().getSmallShardSize();
         double maxSize   = smallSize * 1000000000d;
 
-        Map<String, IndexTemplatePhyInfoWithLogic> indexTemplateMap = getClusterHealthCheckJobConfig().getIndexTemplateMap();
+        Map<String, IndexTemplatePhyWithLogic> indexTemplateMap = getClusterHealthCheckJobConfig().getIndexTemplateMap();
 
-        for(Map.Entry<String, IndexTemplatePhyInfoWithLogic> entry : indexTemplateMap.entrySet()){
+        for(Map.Entry<String, IndexTemplatePhyWithLogic> entry : indexTemplateMap.entrySet()){
             String template = entry.getKey();
 
             if(isWhiteIndex(template) || iskibanaIndex(template)){continue;}
 
-            IndexTemplatePhyInfoWithLogic indexTemplate = indexTemplateMap.get(template);
+            IndexTemplatePhyWithLogic indexTemplate = indexTemplateMap.get(template);
             if(null == indexTemplate){continue;}
 
             String expression = indexTemplate.getExpression();

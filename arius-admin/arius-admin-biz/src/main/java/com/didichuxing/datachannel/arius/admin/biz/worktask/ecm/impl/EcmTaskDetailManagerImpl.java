@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskDetailProgress;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
@@ -17,8 +17,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDe
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDetailDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -46,7 +46,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
     private EcmTaskDetailDAO         ecmTaskDetailDAO;
 
     @Autowired
-    private ClusterRoleInfoService clusterRoleInfoService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
     private EcmTaskManager ecmTaskManager;
@@ -55,7 +55,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
     private EcmHandleService ecmHandleService;
 
     @Autowired
-    private ClusterRoleHostInfoService clusterRoleHostInfoService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Override
     public int replace(EcmTaskDetail ecmTaskDetail) {
@@ -242,14 +242,14 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
 
     /*****************************************************private*********************************************************/
     private Map</*角色属性*/String, /*角色对应的主机ip列表*/List<String>> getClusterHostNamesFromDbMap(int clusterId) {
-        List<ClusterRoleInfo> roles = clusterRoleInfoService.getAllRoleClusterByClusterId(clusterId);
+        List<ClusterRoleInfo> roles = clusterRoleService.getAllRoleClusterByClusterId(clusterId);
         if (CollectionUtils.isEmpty(roles)) {
             return Maps.newHashMap();
         }
 
         Map<String, List<String>> role2HostNamesMap = Maps.newHashMap();
         roles.stream().filter(Objects::nonNull).forEachOrdered(role -> {
-            List<ClusterRoleHostInfo> clusterHosts = clusterRoleHostInfoService.getByRoleClusterId(role.getId());
+            List<ClusterRoleHost> clusterHosts = clusterRoleHostService.getByRoleClusterId(role.getId());
             if (CollectionUtils.isEmpty(clusterHosts)) {
                 LOGGER.warn("class=||method=getEcmTaskDetailInfo||msg=the cluster hosts is empty");
                 return;
@@ -257,7 +257,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
 
             List<String> clusterHostNames = clusterHosts.stream()
                 .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isBlack(r.getIp()))
-                .map(ClusterRoleHostInfo::getHostname).collect(Collectors.toList());
+                .map(ClusterRoleHost::getHostname).collect(Collectors.toList());
             if (CollectionUtils.isEmpty(clusterHostNames)) {
                 LOGGER.warn("class=||method=getEcmTaskDetailInfo||msg=the cluster hosts name is empty");
                 return;

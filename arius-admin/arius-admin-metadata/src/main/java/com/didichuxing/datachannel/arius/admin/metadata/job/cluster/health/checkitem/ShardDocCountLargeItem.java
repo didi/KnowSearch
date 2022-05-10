@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
@@ -88,7 +88,7 @@ public class ShardDocCountLargeItem extends AbstractCheckerItem {
             inf.append(",currentNodeId:").append(noede);
             inf.append(",shardDocNu:").append(shardDocNu);
 
-            IndexTemplatePhyInfoWithLogic template = getIndexTemplateByIndex(index);
+            IndexTemplatePhyWithLogic template = getIndexTemplateByIndex(index);
             if(null == template){
                 return;
             }

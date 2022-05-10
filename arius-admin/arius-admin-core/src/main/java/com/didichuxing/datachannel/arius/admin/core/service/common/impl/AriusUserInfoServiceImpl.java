@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserStatusEnum;
@@ -37,7 +37,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfo
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.arius.AriusUserInfoDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateInfoDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.remote.protocol.LoginProtocolHandle;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -55,7 +55,7 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
     private AriusUserInfoDAO                              ariusUserInfoDAO;
 
     @Autowired
-    private IndexTemplateInfoDAO templateLogicDAO;
+    private IndexTemplateDAO templateLogicDAO;
 
     @Autowired
     private LogicClusterDAO                               logicClusterDAO;
@@ -380,10 +380,10 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
         String srcRespIdStr = String.valueOf(srcRespId);
         String tgtRespIdStr = String.valueOf(tgtRespId);
 
-        List<IndexTemplateInfoPO> indexTemplateInfoPOS = templateLogicDAO.likeByResponsible(srcRespIdStr);
+        List<IndexTemplatePO> indexTemplatePOS = templateLogicDAO.likeByResponsible(srcRespIdStr);
 
-        if (CollectionUtils.isNotEmpty(indexTemplateInfoPOS)) {
-            indexTemplateInfoPOS.forEach(po -> {
+        if (CollectionUtils.isNotEmpty(indexTemplatePOS)) {
+            indexTemplatePOS.forEach(po -> {
                 List<String> respList = Lists.newArrayList(po.getResponsible().split(","));
                 for (int i = 0; i < respList.size(); i++) {
                     if (srcRespIdStr.equals(respList.get(i))) {
@@ -391,7 +391,7 @@ public class AriusUserInfoServiceImpl implements AriusUserInfoService {
                     }
                 }
 
-                IndexTemplateInfoPO param = new IndexTemplateInfoPO();
+                IndexTemplatePO param = new IndexTemplatePO();
                 param.setId(po.getId());
                 param.setResponsible(String.join(",", respList));
                 templateLogicDAO.update(param);

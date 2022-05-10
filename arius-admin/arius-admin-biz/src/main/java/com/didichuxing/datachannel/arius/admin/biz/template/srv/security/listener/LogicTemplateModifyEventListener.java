@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -25,8 +25,8 @@ public class LogicTemplateModifyEventListener implements ApplicationListener<Log
      */
     @Override
     public void onApplicationEvent(LogicTemplateModifyEvent event) {
-        IndexTemplateInfo oldTemplate = event.getOldTemplate();
-        IndexTemplateInfo newTemplate = event.getNewTemplate();
+        IndexTemplate oldTemplate = event.getOldTemplate();
+        IndexTemplate newTemplate = event.getNewTemplate();
         if (oldTemplate.getAppId().equals(newTemplate.getAppId())) {
             return;
         }

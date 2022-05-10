@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
 import com.didiglobal.logi.log.ILog;
@@ -39,7 +39,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     private NodeStatisService      nodeStatisService;
 
     @Autowired
-    private ClusterRoleHostInfoService clusterRoleHostInfoService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private ClusterLogicService    clusterLogicService;
@@ -54,8 +54,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
      * @return
      */
     @Override
-    public List<ESClusterRoleHostInfoVO> convertClusterLogicNodes(List<ClusterRoleHostInfo> clusterNodes) {
-        List<ESClusterRoleHostInfoVO> result = Lists.newArrayList();
+    public List<ESClusterRoleHostVO> convertClusterLogicNodes(List<ClusterRoleHost> clusterNodes) {
+        List<ESClusterRoleHostVO> result = Lists.newArrayList();
 
         List<ClusterLogicRackInfo> clusterRacks = regionRackService.listAllLogicClusterRacks();
 
@@ -63,8 +63,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 clusterLogicService.listAllClusterLogics());
         Map<String, ClusterLogicRackInfo> rack2ClusterRacks = getRack2ClusterRacks(clusterRacks);
 
-        for (ClusterRoleHostInfo node : clusterNodes) {
-            ESClusterRoleHostInfoVO nodeVO = ConvertUtil.obj2Obj(node, ESClusterRoleHostInfoVO.class);
+        for (ClusterRoleHost node : clusterNodes) {
+            ESClusterRoleHostVO nodeVO = ConvertUtil.obj2Obj(node, ESClusterRoleHostVO.class);
 
             String clusterRack = createClusterRackKey(node.getCluster(), node.getRack());
             ClusterLogicRackInfo rackInfo = rack2ClusterRacks.get(clusterRack);
@@ -112,10 +112,10 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         Resource dataNodeSpecify = dataNodeSpecifyResult.getData();
 
         // 获取集群节点
-        List<ClusterRoleHostInfo> clusterNodes = clusterRoleHostInfoService.getOnlineNodesByCluster(clusterName);
+        List<ClusterRoleHost> clusterNodes = clusterRoleHostService.getOnlineNodesByCluster(clusterName);
         // rack到集群节点的map
-        Multimap<String, ClusterRoleHostInfo> rack2ESClusterNodeMultiMap = ConvertUtil.list2MulMap(clusterNodes,
-            ClusterRoleHostInfo::getRack);
+        Multimap<String, ClusterRoleHost> rack2ESClusterNodeMultiMap = ConvertUtil.list2MulMap(clusterNodes,
+            ClusterRoleHost::getRack);
         // rack到rack资源信息的map
         Map<String, RackMetaMetric> rack2RackMetaMetricMap = ConvertUtil.list2Map(rackMetaMetrics,
             RackMetaMetric::getName);
@@ -171,13 +171,13 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         Resource dataNodeSpecify = dataNodeSpecifyResult.getData();
 
         // 获取集群节点
-        List<ClusterRoleHostInfo> clusterNodes = clusterRoleHostInfoService.getOnlineNodesByCluster(clusterName);
+        List<ClusterRoleHost> clusterNodes = clusterRoleHostService.getOnlineNodesByCluster(clusterName);
         // rack到rack下节点的map
-        Multimap<String, ClusterRoleHostInfo> rack2ESClusterNodeMultiMap = ConvertUtil.list2MulMap(clusterNodes,
-            ClusterRoleHostInfo::getRack);
+        Multimap<String, ClusterRoleHost> rack2ESClusterNodeMultiMap = ConvertUtil.list2MulMap(clusterNodes,
+            ClusterRoleHost::getRack);
 
         // 遍历rack
-        for (Map.Entry<String, Collection<ClusterRoleHostInfo>> entry : rack2ESClusterNodeMultiMap.asMap().entrySet()) {
+        for (Map.Entry<String, Collection<ClusterRoleHost>> entry : rack2ESClusterNodeMultiMap.asMap().entrySet()) {
             if (!rackSet.contains(entry.getKey())) {
                 continue;
             }
@@ -203,18 +203,18 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     @Override
-    public List<ESClusterRoleHostInfoVO> convertClusterPhyNodes(List<ClusterRoleHostInfo> clusterRoleHostInfos,
-                                                                String clusterPhyName) {
-        List<ESClusterRoleHostInfoVO> esClusterRoleHostInfoVOS = ConvertUtil.list2List(clusterRoleHostInfos,
-            ESClusterRoleHostInfoVO.class);
+    public List<ESClusterRoleHostVO> convertClusterPhyNodes(List<ClusterRoleHost> clusterRoleHosts,
+                                                            String clusterPhyName) {
+        List<ESClusterRoleHostVO> esClusterRoleHostVOS = ConvertUtil.list2List(clusterRoleHosts,
+            ESClusterRoleHostVO.class);
 
         //获取host所在regionId
         List<ClusterRegion> regions = regionRackService.listPhyClusterRegions(clusterPhyName);
-        esClusterRoleHostInfoVOS.forEach(esRoleClusterHostVO->{
+        esClusterRoleHostVOS.forEach(esRoleClusterHostVO->{
             buildHostRegionIdAndLogicName(esRoleClusterHostVO, regions);
         });
 
-        return esClusterRoleHostInfoVOS;
+        return esClusterRoleHostVOS;
     }
 
     /**************************************** private method ***************************************************/
@@ -310,20 +310,20 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return builder.toString();
     }
 
-    private void buildHostRegionIdAndLogicName(ESClusterRoleHostInfoVO esClusterRoleHostInfoVO, List<ClusterRegion> regions) {
+    private void buildHostRegionIdAndLogicName(ESClusterRoleHostVO esClusterRoleHostVO, List<ClusterRegion> regions) {
         Map<Long/*regionId*/, List<String>/*racks*/> regionId2RacksMap = ConvertUtil.list2Map(regions,
                 ClusterRegion::getId, region -> ListUtils.string2StrList(region.getRacks()));
 
         regionId2RacksMap.forEach((key, value) -> {
-            if (value.contains(esClusterRoleHostInfoVO.getRack())) {
-                esClusterRoleHostInfoVO.setRegionId(key);
+            if (value.contains(esClusterRoleHostVO.getRack())) {
+                esClusterRoleHostVO.setRegionId(key);
                 // 根据region获取data节点被绑定的逻辑集群的信息并设置到host视图当中
-                buildHostLogicName(esClusterRoleHostInfoVO, key);
+                buildHostLogicName(esClusterRoleHostVO, key);
             }
         });
     }
 
-    private void buildHostLogicName(ESClusterRoleHostInfoVO esClusterRoleHostInfoVO, Long key) {
+    private void buildHostLogicName(ESClusterRoleHostVO esClusterRoleHostVO, Long key) {
         ClusterRegion clusterRegion = regionRackService.getRegionById(key);
         if (clusterRegion == null) {
             LOGGER.error("class=ClusterNodeManagerImpl||method=buildHostRegionIdAndLogicName||errMsg=clusterRegion doesn't exit!");
@@ -343,6 +343,6 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 .map(ClusterLogic::getName)
                 .collect(Collectors.toList());
 
-        esClusterRoleHostInfoVO.setClusterLogicNames(ListUtils.strList2String(clusterLogicNames));
+        esClusterRoleHostVO.setClusterLogicNames(ListUtils.strList2String(clusterLogicNames));
     }
 }

@@ -95,7 +95,7 @@ public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleCluste
     private List<ESClusterTemplateSrvVO> esClusterTemplateSrvVOS;
 
     @ApiModelProperty("集群角色信息")
-    private List<ESClusterRoleInfoVO> esClusterRoleInfoVOS;
+    private List<ESClusterRoleVO> esClusterRoleVOS;
 
     @ApiModelProperty("集群健康状态")
     private Integer                      health;

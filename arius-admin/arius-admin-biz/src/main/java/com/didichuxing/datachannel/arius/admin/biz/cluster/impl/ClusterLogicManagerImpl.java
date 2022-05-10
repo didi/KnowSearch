@@ -28,14 +28,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
@@ -52,7 +52,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -79,8 +79,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Regio
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterStaticsService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didiglobal.logi.log.ILog;
@@ -136,7 +136,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private TemplateSrvManager            templateSrvManager;
 
     @Autowired
-    private IndexTemplateInfoService indexTemplateInfoService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private TemplateLogicManager          templateLogicManager;
@@ -145,7 +145,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private TemplateQuotaManager          templateQuotaManager;
 
     @Autowired
-    private TemplatePhyService            templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private AppClusterLogicAuthService appClusterLogicAuthService;
@@ -268,7 +268,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                         + "operator={}||logicId={}||delIndices={}||delQueryDsl={}",
                 operator, clearDTO.getLogicId(), JSON.toJSONString(clearDTO.getDelIndices()), clearDTO.getDelQueryDsl());
 
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(clearDTO.getLogicId());
 
         if (StringUtils.isNotBlank(clearDTO.getDelQueryDsl())) {
@@ -433,7 +433,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<ESClusterRoleHostInfoVO>> getLogicClusterNodes(Long clusterId) {
+    public Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(Long clusterId) {
         return Result.buildSucc(clusterNodeManager
                 .convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
     }
@@ -802,9 +802,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 }
 
                 List<ClusterRoleInfo> esRolePhyClusters = clusterPhy.getClusterRoleInfos();
-                List<ClusterRoleHostInfo> esRolePhyClusterHosts = clusterPhy.getClusterRoleHostInfos();
+                List<ClusterRoleHost> esRolePhyClusterHosts = clusterPhy.getClusterRoleHosts();
 
-                logicCluster.setEsClusterRoleInfoVOS(buildESRoleClusterVOS(clusterLogic, logicClusterId, esRolePhyClusters, esRolePhyClusterHosts));
+                logicCluster.setEsClusterRoleVOS(buildESRoleClusterVOS(clusterLogic, logicClusterId, esRolePhyClusters, esRolePhyClusterHosts));
             } catch (Exception e) {
                 LOGGER.warn("class=LogicClusterManager||method=buildLogicRole||logicClusterId={}", logicCluster.getId(),
                         e);
@@ -812,42 +812,42 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
     }
 
-    private List<ESClusterRoleInfoVO> buildESRoleClusterVOS(ClusterLogic clusterLogic, Long logicClusterId, List<ClusterRoleInfo> esRolePhyClusters, List<ClusterRoleHostInfo> esRolePhyClusterHosts) {
-        List<ESClusterRoleInfoVO> esClusterRoleInfoVOS = new ArrayList<>();
+    private List<ESClusterRoleVO> buildESRoleClusterVOS(ClusterLogic clusterLogic, Long logicClusterId, List<ClusterRoleInfo> esRolePhyClusters, List<ClusterRoleHost> esRolePhyClusterHosts) {
+        List<ESClusterRoleVO> esClusterRoleVOS = new ArrayList<>();
         for (ClusterRoleInfo clusterRoleInfo : esRolePhyClusters) {
-            ESClusterRoleInfoVO esClusterRoleInfoVO = ConvertUtil.obj2Obj(clusterRoleInfo, ESClusterRoleInfoVO.class);
+            ESClusterRoleVO esClusterRoleVO = ConvertUtil.obj2Obj(clusterRoleInfo, ESClusterRoleVO.class);
 
-            List<ESClusterRoleHostInfoVO> esClusterRoleHostInfoVOS = new ArrayList<>();
+            List<ESClusterRoleHostVO> esClusterRoleHostVOS = new ArrayList<>();
 
             //如果是datanode节点，那么使用逻辑集群申请的节点个数和阶段规格配置
             if (DATA_NODE.getDesc().equals(clusterRoleInfo.getRoleClusterName())) {
-                esClusterRoleInfoVO.setPodNumber(clusterLogic.getDataNodeNu());
-                esClusterRoleInfoVO.setMachineSpec(clusterLogic.getDataNodeSpec());
+                esClusterRoleVO.setPodNumber(clusterLogic.getDataNodeNu());
+                esClusterRoleVO.setMachineSpec(clusterLogic.getDataNodeSpec());
 
-                List<ClusterRoleHostInfo> clusterRoleHostInfos = clusterLogicNodeService
+                List<ClusterRoleHost> clusterRoleHosts = clusterLogicNodeService
                         .getLogicClusterNodes(logicClusterId);
 
-                for (ClusterRoleHostInfo clusterRoleHostInfo : clusterRoleHostInfos) {
-                    ESClusterRoleHostInfoVO esClusterRoleHostInfoVO = new ESClusterRoleHostInfoVO();
-                    esClusterRoleHostInfoVO.setHostname(clusterRoleHostInfo.getIp());
-                    esClusterRoleHostInfoVO.setRole(DATA_NODE.getCode());
+                for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
+                    ESClusterRoleHostVO esClusterRoleHostVO = new ESClusterRoleHostVO();
+                    esClusterRoleHostVO.setHostname(clusterRoleHost.getIp());
+                    esClusterRoleHostVO.setRole(DATA_NODE.getCode());
 
-                    esClusterRoleHostInfoVOS.add(esClusterRoleHostInfoVO);
+                    esClusterRoleHostVOS.add(esClusterRoleHostVO);
                 }
             } else {
-                for (ClusterRoleHostInfo clusterRoleHostInfo : esRolePhyClusterHosts) {
-                    if (clusterRoleHostInfo.getRoleClusterId().longValue() == clusterRoleInfo.getId().longValue()) {
-                        esClusterRoleHostInfoVOS
-                                .add(ConvertUtil.obj2Obj(clusterRoleHostInfo, ESClusterRoleHostInfoVO.class));
+                for (ClusterRoleHost clusterRoleHost : esRolePhyClusterHosts) {
+                    if (clusterRoleHost.getRoleClusterId().longValue() == clusterRoleInfo.getId().longValue()) {
+                        esClusterRoleHostVOS
+                                .add(ConvertUtil.obj2Obj(clusterRoleHost, ESClusterRoleHostVO.class));
                     }
                 }
             }
 
-            esClusterRoleInfoVO.setEsClusterRoleHostInfoVO(esClusterRoleHostInfoVOS);
-            esClusterRoleInfoVO.setPodNumber(esClusterRoleHostInfoVOS.size());
-            esClusterRoleInfoVOS.add(esClusterRoleInfoVO);
+            esClusterRoleVO.setEsClusterRoleHostVO(esClusterRoleHostVOS);
+            esClusterRoleVO.setPodNumber(esClusterRoleHostVOS.size());
+            esClusterRoleVOS.add(esClusterRoleVO);
         }
-        return esClusterRoleInfoVOS;
+        return esClusterRoleVOS;
     }
 
     private void buildLogicClusterTemplateSrvs(ConsoleClusterVO logicCluster) {
@@ -922,11 +922,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             }
         }
 
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
-        IndexTemplatePhyInfo templatePhysical = templateLogicWithPhysical.getAnyOne();
+        IndexTemplatePhy templatePhysical = templateLogicWithPhysical.getAnyOne();
 
-        List<String> matchIndices = templatePhyService.getMatchNoVersionIndexNames(templatePhysical.getId());
+        List<String> matchIndices = indexTemplatePhyService.getMatchNoVersionIndexNames(templatePhysical.getId());
         for (String index : delIndices) {
             if (!matchIndices.contains(index)) {
                 return Result.buildParamIllegal(index + "不属于该索引模板");
@@ -941,8 +941,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @param delIndices 待删除分区索引列表
      * @return
      */
-    private Result<Void> batchDeletePhysicalTemplateIndices(List<IndexTemplatePhyInfo> physicals, List<String> delIndices) {
-        for (IndexTemplatePhyInfo templatePhysical : physicals) {
+    private Result<Void> batchDeletePhysicalTemplateIndices(List<IndexTemplatePhy> physicals, List<String> delIndices) {
+        for (IndexTemplatePhy templatePhysical : physicals) {
             if (templatePhysical.getVersion() > 0) {
                 List<String> delIndicesWithVersion = genDeleteIndicesWithVersion(delIndices);
 
@@ -971,10 +971,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @param delIndices 删除索引列表
      * @return
      */
-    private Result<Void> batchDeletePhysicalTemplateIndicesByQuery(List<IndexTemplatePhyInfo> physicals, String delQueryDsl,
+    private Result<Void> batchDeletePhysicalTemplateIndicesByQuery(List<IndexTemplatePhy> physicals, String delQueryDsl,
                                                                    List<String> delIndices) throws ESOperateException {
         if (StringUtils.isNotBlank(delQueryDsl)) {
-            for (IndexTemplatePhyInfo templatePhysical : physicals) {
+            for (IndexTemplatePhy templatePhysical : physicals) {
                 if (!esIndexService.syncDeleteByQuery(templatePhysical.getCluster(), delIndices, delQueryDsl)) {
                     return Result.buildFail("删除索引失败，请重试");
                 }

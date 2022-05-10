@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.chec
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
@@ -79,7 +79,7 @@ public class PriRepShardDocsCountItem extends AbstractCheckerItem {
         inf.append(",priShardDocNu:").append(priShardDocNu);
         inf.append(",repShardDocNu:").append(repShardDocNu);
 
-        IndexTemplatePhyInfoWithLogic template = getIndexTemplateByIndex(index);
+        IndexTemplatePhyWithLogic template = getIndexTemplateByIndex(index);
         if(null == template){
             return;
         }

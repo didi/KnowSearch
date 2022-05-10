@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "条件查询索引模板信息")
-public class TemplateConditionDTO extends IndexTemplateInfoDTO {
+public class TemplateConditionDTO extends IndexTemplateDTO {
     /**
      * @see AppTemplateAuthEnum
      */

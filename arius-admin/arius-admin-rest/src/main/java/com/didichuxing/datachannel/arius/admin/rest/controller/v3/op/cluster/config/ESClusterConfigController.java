@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESCon
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,7 +44,7 @@ public class ESClusterConfigController {
     private ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private ClusterRoleInfoService clusterRoleInfoService;
+    private ClusterRoleService clusterRoleService;
 
     @GetMapping("/{clusterId}/list")
     @ResponseBody
@@ -65,7 +65,7 @@ public class ESClusterConfigController {
     @ResponseBody
     @ApiOperation(value = "获取可操作配置文件的ES集群角色")
     public Result<Set<String>> gainEsClusterRoles(@PathVariable Long clusterId) {
-        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleInfoService.getAllRoleClusterByClusterId(clusterId.intValue());
+        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(clusterId.intValue());
         return Result.buildSucc(
 				clusterRoleInfos.stream().filter(Objects::nonNull).map(ClusterRoleInfo::getRole).collect(Collectors.toSet()));
     }

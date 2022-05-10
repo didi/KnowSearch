@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.template;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 
 /**
  *
@@ -9,26 +9,26 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
  */
 public class LogicTemplateModifyEvent extends LogicTemplateEvent {
 
-    private IndexTemplateInfo oldTemplate;
+    private IndexTemplate oldTemplate;
 
-    private IndexTemplateInfo newTemplate;
+    private IndexTemplate newTemplate;
 
     /**
      * Create a new ApplicationEvent.
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public LogicTemplateModifyEvent(Object source, IndexTemplateInfo oldTemplate, IndexTemplateInfo newTemplate) {
+    public LogicTemplateModifyEvent(Object source, IndexTemplate oldTemplate, IndexTemplate newTemplate) {
         super(source);
         this.oldTemplate = oldTemplate;
         this.newTemplate = newTemplate;
     }
 
-    public IndexTemplateInfo getOldTemplate() {
+    public IndexTemplate getOldTemplate() {
         return oldTemplate;
     }
 
-    public IndexTemplateInfo getNewTemplate() {
+    public IndexTemplate getNewTemplate() {
         return newTemplate;
     }
 }

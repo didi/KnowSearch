@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 import org.apache.commons.lang3.StringUtils;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 
 /**
  * @author d06679
@@ -57,7 +57,7 @@ public class TemplateUtils {
      * @param logicWithPhysical
      * @return
      */
-    public static Integer genDeployStatus(IndexTemplateInfoWithPhyTemplates logicWithPhysical) {
+    public static Integer genDeployStatus(IndexTemplateWithPhyTemplates logicWithPhysical) {
         if (!logicWithPhysical.hasPhysicals()) {
             return TemplateDeployStatusEnum.MASTER_SLAVE_OFFLINE.getCode();
         }

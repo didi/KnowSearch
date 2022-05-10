@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHostInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
@@ -12,9 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import io.swagger.annotations.Api;
@@ -51,10 +51,10 @@ public class ESPhyClusterRegionController {
     private RegionRackService         regionRackService;
 
     @Autowired
-    private ClusterRoleHostInfoService clusterRoleHostInfoService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
-    private TemplatePhyService        physicalService;
+    private IndexTemplatePhyService physicalService;
 
     @Autowired
     private ClusterRegionManager      clusterRegionManager;
@@ -119,17 +119,17 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{regionId}/nodes")
     @ResponseBody
     @ApiOperation(value = "获取region下的节点列表", notes = "")
-    public Result<List<ESClusterRoleHostInfoVO>> getRegionNodes(@PathVariable Long regionId) {
+    public Result<List<ESClusterRoleHostVO>> getRegionNodes(@PathVariable Long regionId) {
 
         ClusterRegion region = regionRackService.getRegionById(regionId);
         if (region == null) {
             return Result.buildFail("region不存在");
         }
 
-        List<ClusterRoleHostInfo> hosts = clusterRoleHostInfoService.listRacksNodes(region.getPhyClusterName(),
+        List<ClusterRoleHost> hosts = clusterRoleHostService.listRacksNodes(region.getPhyClusterName(),
             region.getRacks());
 
-        return Result.buildSucc(ConvertUtil.list2List(hosts, ESClusterRoleHostInfoVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(hosts, ESClusterRoleHostVO.class));
 
     }
 

@@ -12,8 +12,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
@@ -30,9 +30,9 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -40,7 +40,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -73,7 +73,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     private TemplateQuotaManager     templateQuotaManager;
 
     @Autowired
-    private TemplatePhyService       templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private ESIndexService           esIndexService;
@@ -106,7 +106,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
                                                                     @RequestParam("logicId") Integer logicId) {
-        IndexTemplateInfoWithCluster indexTemplateLogicWithCluster = indexTemplateInfoService
+        IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
         if (null == indexTemplateLogicWithCluster) {
@@ -131,7 +131,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
         consoleTemplateDetail.setEditable(checkAuthResult.success());
         // 获取indexRollover功能开启状态
-        consoleTemplateDetail.setDisableIndexRollover(indexTemplateInfoService.getTemplateConfig(logicId).getDisableIndexRollover());
+        consoleTemplateDetail.setDisableIndexRollover(indexTemplateService.getTemplateConfig(logicId).getDisableIndexRollover());
 
         return Result.buildSucc(consoleTemplateDetail);
     }
@@ -141,7 +141,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "用户编辑模板接口", notes = "支持修改数据类型、责任人、备注")
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
-        return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateInfoDTO.class),
+        return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -150,7 +150,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "获取索引配额信息接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
-        IndexTemplateInfo templateLogic = indexTemplateInfoService.getLogicTemplateById(logicId);
+        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(logicId);
         if (templateLogic == null) {
             return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
         }
@@ -168,7 +168,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "获取索引清理信息接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(@RequestParam("logicId") Integer logicId) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -183,7 +183,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateClearVO.setLogicId(templateLogicWithPhysical.getId());
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO
-            .setIndices(templatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId()));
+            .setIndices(indexTemplatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId()));
         consoleTemplateClearVO.setAccessApps(
             ConvertUtil.list2List(templateLogicManager.getLogicTemplateAppAccess(logicId), ConsoleAppVO.class));
 
@@ -210,7 +210,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) {
         //与上清理索引信息接口实现合并
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
             return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
@@ -256,7 +256,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             return Result.buildNotExist("应用不存在");
         }
 
-        return indexTemplateInfoService.getLogicTemplatesByAppId(appId);
+        return indexTemplateService.getLogicTemplatesByAppId(appId);
     }
 
     @GetMapping("/cyclicalRoll")
@@ -265,7 +265,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<List<TemplateCyclicalRollInfoVO>> getCyclicalRollInfo(HttpServletRequest request,
                                                                         @RequestParam("logicId") Integer logicId) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
             return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
@@ -273,8 +273,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
         List<CatIndexResult> catIndexResults = Lists.newArrayList();
 
-        List<IndexTemplatePhyInfo> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhyInfo physicalMaster : physicalMasters) {
+        List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+        for (IndexTemplatePhy physicalMaster : physicalMasters) {
             try {
                 catIndexResults.addAll(esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
                     physicalMaster.getExpression()));
@@ -294,10 +294,10 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "获取模板当前限流值接口" )
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
     public Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(@RequestParam("logicId") Integer logicId) throws Exception {    // 一个逻辑模板可能有master slave两种，限流查看时，默认查看master即可
-        List<IndexTemplatePhyInfo> indexTemplatePhysicalInfo = templatePhyService.getTemplateByLogicId(logicId);
+        List<IndexTemplatePhy> indexTemplatePhysicalInfo = indexTemplatePhyService.getTemplateByLogicId(logicId);
         ConsoleTemplateRateLimitVO consoleTemplateRateLimitVO = new ConsoleTemplateRateLimitVO();
-        IndexTemplatePhyInfo indexTemplatePhysicalMasterInfo = new IndexTemplatePhyInfo();
-        for (IndexTemplatePhyInfo item : indexTemplatePhysicalInfo) {
+        IndexTemplatePhy indexTemplatePhysicalMasterInfo = new IndexTemplatePhy();
+        for (IndexTemplatePhy item : indexTemplatePhysicalInfo) {
             if (TemplateDeployRoleEnum.MASTER.getCode().equals(item.getRole())) {
                 indexTemplatePhysicalMasterInfo = item;
             }
@@ -322,7 +322,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             return Result.buildFail("限流调整值变化太大，一次调整比例在100倍以内");
         }
         try {
-            return indexTemplateInfoService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO);
+            return indexTemplateService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO);
         } catch (ESOperateException e) {
             LOGGER.info("限流调整失败", e);
             return Result.buildFail("限流调整失败！");
@@ -352,11 +352,11 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
      * @return
      */
     private List<String> getLogicTemplateIndices(Integer logicId) {
-        IndexTemplateInfoWithPhyTemplates templateLogicWithPhysical = indexTemplateInfoService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (null != templateLogicWithPhysical && null != templateLogicWithPhysical.getAnyOne()) {
-            return templatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId());
+            return indexTemplatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId());
         }
 
         return new ArrayList<>();

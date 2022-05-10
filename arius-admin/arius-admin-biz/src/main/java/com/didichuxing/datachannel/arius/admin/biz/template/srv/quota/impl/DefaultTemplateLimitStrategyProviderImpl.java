@@ -5,7 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicRe
 import static com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MIN;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStr
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -32,7 +32,7 @@ public class DefaultTemplateLimitStrategyProviderImpl implements TemplateLimitSt
     private TemplateQuotaManager templateQuotaManager;
 
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     /**
      * 扩展模板限流接口
@@ -47,7 +47,7 @@ public class DefaultTemplateLimitStrategyProviderImpl implements TemplateLimitSt
     public TemplateLimitStrategy provide(String cluster, String template, long interval,
                                          GetTemplateLimitStrategyContext context) {
 
-        IndexTemplatePhyInfoWithLogic templatePhysicalWithLogic = templatePhyService
+        IndexTemplatePhyWithLogic templatePhysicalWithLogic = indexTemplatePhyService
             .getTemplateWithLogicByClusterAndName(cluster, template);
         if (templatePhysicalWithLogic == null) {
             return TemplateLimitStrategy.buildDefault();

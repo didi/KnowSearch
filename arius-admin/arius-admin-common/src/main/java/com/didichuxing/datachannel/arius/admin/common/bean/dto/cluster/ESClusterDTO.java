@@ -78,10 +78,10 @@ public class ESClusterDTO extends PageDTO {
     private List<PluginDTO>            plugs;
 
     @ApiModelProperty("集群角色列表")
-    private List<ESClusterRoleInfoDTO>     roleClusters;
+    private List<ESClusterRoleDTO>     roleClusters;
 
     @ApiModelProperty("集群角色 对应主机列表")
-    private List<ESClusterRoleHostInfoDTO> roleClusterHosts;
+    private List<ESClusterRoleHostDTO> roleClusterHosts;
 
     @ApiModelProperty("单节点实例数")
     private Integer                    pidCount;

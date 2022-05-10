@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.weekly;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateInfoWithStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithStats;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +31,7 @@ public class Report extends BaseEntity {
      * 模版统计信息: 平均tps、平均qps、quota配额、索引存储容量、索引成本、索引健康分、索引价值分、不健康标签
      *
      */
-    private List<IndexTemplateInfoWithStats> templateStatsAndBaseInfo;
+    private List<IndexTemplateWithStats> templateStatsAndBaseInfo;
 
     /**
      * App查询信息(top10)

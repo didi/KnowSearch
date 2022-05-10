@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
@@ -69,7 +69,7 @@ public class IndexDocsSizeItem extends AbstractCheckerItem {
             if (average > averageSize) {
                 String info = "Index : " + index + " perDocsSize : " + average + "";
 
-                IndexTemplatePhyInfo indexTemplate = getIndexTemplateByIndex(index);
+                IndexTemplatePhy indexTemplate = getIndexTemplateByIndex(index);
                 if(null == indexTemplate){continue;}
 
                 String templateName = indexTemplate.getName();

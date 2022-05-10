@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplateInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
@@ -131,7 +131,7 @@ public class ESTemplateServiceImplTest extends AriusAdminApplicationTest {
         Mockito.when(esTemplateDAO.getTemplate(Mockito.anyString(), Mockito.any())).thenReturn(new TemplateConfig());
         DirectResponse directResponse = new DirectResponse();
         directResponse.setRestStatus(RestStatus.OK);
-        List<IndexTemplateInfoPO> list = CustomDataSource.getTemplateLogicPOList();
+        List<IndexTemplatePO> list = CustomDataSource.getTemplateLogicPOList();
         directResponse.setResponseContent(JSON.toJSONString(list));
         Mockito.when(esTemplateDAO.getDirectResponse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(directResponse);
         Assertions.assertEquals(esTemplateService.syncGetTemplateNum(CustomDataSource.PHY_CLUSTER_NAME), CustomDataSource.SIZE);

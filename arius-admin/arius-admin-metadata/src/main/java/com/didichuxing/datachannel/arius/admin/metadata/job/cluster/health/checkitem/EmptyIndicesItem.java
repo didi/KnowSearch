@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyInfoWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
@@ -33,13 +33,13 @@ public class EmptyIndicesItem extends AbstractCheckerItem {
 
         List<HealthCheckErrInfoPO> healthCheckErrInfoPOS = new ArrayList<>();
 
-        Map<String, IndexTemplatePhyInfoWithLogic> templateMap = getClusterHealthCheckJobConfig().getIndexTemplateMap();
-        for(Map.Entry<String, IndexTemplatePhyInfoWithLogic> entry : templateMap.entrySet()){
+        Map<String, IndexTemplatePhyWithLogic> templateMap = getClusterHealthCheckJobConfig().getIndexTemplateMap();
+        for(Map.Entry<String, IndexTemplatePhyWithLogic> entry : templateMap.entrySet()){
             String key = entry.getKey();
 
             if(isWhiteIndex(key) || iskibanaIndex(key)){continue;}
 
-            IndexTemplatePhyInfoWithLogic template = templateMap.get(key);
+            IndexTemplatePhyWithLogic template = templateMap.get(key);
             if(null == template){continue;}
 
             tempalteNu++;
