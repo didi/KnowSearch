@@ -45,7 +45,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
@@ -87,7 +87,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
     private IndexTemplateTypeDAO        indexTemplateTypeDAO;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private TemplatePhyService          templatePhyService;
@@ -349,8 +349,6 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
         if (oldPO == null) {
             return Result.buildNotExist(TEMPLATE_NOT_EXIST);
         }
-
-        TemplateConfigPO oldConfigPO = indexTemplateConfigDAO.getByLogicId(configDTO.getLogicId());
 
         boolean succ = 1 == indexTemplateConfigDAO
             .update(responsibleConvertTool.obj2Obj(configDTO, TemplateConfigPO.class));

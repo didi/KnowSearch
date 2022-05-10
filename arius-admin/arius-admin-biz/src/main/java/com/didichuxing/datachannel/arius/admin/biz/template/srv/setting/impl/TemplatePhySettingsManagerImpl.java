@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryCon
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
@@ -37,7 +37,7 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
     private ESTemplateService esTemplateService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Override
     public boolean validTemplateSettings(String cluster, String template,

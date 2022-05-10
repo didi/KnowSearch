@@ -12,12 +12,18 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.google.common.collect.Lists;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * 用户操作记录接口(REST)
+ * @author gyp
+ * @date 2022/5/10
+ * @version 1.0
+ */
 @RestController
 @RequestMapping(V3_NORMAL + "/record")
 @Api(tags = "用户操作记录接口(REST)")
@@ -25,18 +31,18 @@ public class NormalOperateRecordController {
 
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @PostMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "查询操作记录接口", notes = "")
+    @ApiOperation(value = "查询操作记录接口")
     public Result<List<OperateRecordVO>> list(@RequestBody OperateRecordDTO query) {
         return operateRecordService.list(query);
     }
 
     @GetMapping("/listModules")
     @ResponseBody
-    @ApiOperation(value = "获取所有模块", notes = "")
+    @ApiOperation(value = "获取所有模块")
     public Result<List<Map<String, Object>>> listModules() {
         List<Map<String, Object>> objects = Lists.newArrayList();
         for (ModuleEnum moduleEnum : ModuleEnum.values()) {
@@ -47,7 +53,7 @@ public class NormalOperateRecordController {
 
     @PostMapping("/{bizId}/{moduleIds}/multiList")
     @ResponseBody
-    @ApiOperation(value = "批量查询操作记录接口", notes = "")
+    @ApiOperation(value = "批量查询操作记录接口")
     public Result<List<OperateRecordVO>> multiList(@PathVariable("bizId") String bizId,
                                                    @PathVariable("moduleIds") List<Integer> moduleIds) {
         return operateRecordService.multiList(bizId, moduleIds);

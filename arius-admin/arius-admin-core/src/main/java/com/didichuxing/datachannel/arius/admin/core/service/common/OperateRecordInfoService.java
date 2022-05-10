@@ -10,10 +10,18 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
-public interface OperateRecordService {
+/**
+ * 操作记录
+ *
+ * @author gyp
+ * @version 1.0
+ * @date 2022/5/10
+ */
+public interface OperateRecordInfoService {
 
     /**
      * 根据指定的查询条件查询
+     *
      * @param condt 查询条件dto
      * @return 操作记录列表
      */
@@ -21,39 +29,42 @@ public interface OperateRecordService {
 
     /**
      * 插入一条操作记录
-     * @param moduleId 模块id  比如索引模板、应用管理、DSL审核
-     * @param operateId 操作行为  OperationEnum
-     * @param bizId 业务id  例如索引模板id、应用id 或者工单id
-     * @param content 操作详情
-     * @param operator 操作人
-     * @return 成功 true   失败 false
      *
+     * @param moduleId  模块id  比如索引模板、应用管理、DSL审核
+     * @param operateId 操作行为  OperationEnum
+     * @param bizId     业务id  例如索引模板id、应用id 或者工单id
+     * @param content   操作详情
+     * @param operator  操作人
+     * @return 成功 true   失败 false
      */
     Result<Void> save(int moduleId, int operateId, String bizId, String content, String operator);
 
     /**
      * 插入一条操作记录
-     * @param moduleEnum
-     * @param operationEnum
-     * @param bizId
-     * @param content
-     * @param operator
-     * @return
+     *
+     * @param moduleEnum    操作记录模块枚举
+     * @param operationEnum 操作枚举
+     * @param bizId         业务id
+     * @param content       内容
+     * @param operator      操作对象
+     * @return Result
      */
     Result<Void> save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content, String operator);
 
     /**
      * 插入一条操作记录
-     * @return 成功 true   失败 false
      *
+     * @param param
+     * @return 成功 true   失败 false
      */
     Result<Void> save(OperateRecordDTO param);
 
     /**
      * 查询某个最新的操作记录
-     * @param moduleId 模块id
+     *
+     * @param moduleId  模块id
      * @param operateId 操作行为
-     * @param bizId 业务id
+     * @param bizId     业务id
      * @param beginDate 起始时间 时间范围是:[beginDate, beginDate + 24h]
      * @return 如果没有一条 返回 null
      */

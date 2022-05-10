@@ -40,7 +40,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
@@ -90,7 +90,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     public static final int MIN_SHARD_NUM = 1;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private ClusterPhyService           clusterPhyService;

@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterConfigDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -43,7 +43,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private ESClusterConfigDAO   esClusterConfigDAO;

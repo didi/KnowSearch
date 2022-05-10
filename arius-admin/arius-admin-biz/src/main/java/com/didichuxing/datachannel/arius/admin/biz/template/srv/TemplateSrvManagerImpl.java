@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -54,7 +54,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private RegionRackService     esClusterRackService;
 
     @Autowired
-    private OperateRecordService  operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private AriusUserInfoService  ariusUserInfoService;
@@ -77,9 +77,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init start.");
         Map<String, BaseTemplateSrvInterface> strTemplateHandlerMap = SpringTool.getBeansOfType(BaseTemplateSrvInterface.class);
 
-        for (String str : strTemplateHandlerMap.keySet()) {
+        for (Map.Entry<String, BaseTemplateSrvInterface> entry : strTemplateHandlerMap.entrySet()) {
             try {
-                BaseTemplateSrvInterface baseTemplateHandler = strTemplateHandlerMap.get(str);
+                BaseTemplateSrvInterface baseTemplateHandler = entry.getValue();
                 TemplateServiceEnum templateServiceEnum = baseTemplateHandler.templateService();
 
                 if (null != templateServiceEnum) {
@@ -90,9 +90,25 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 }
             } catch (Exception e) {
                 LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-                        str);
+                        entry.getKey());
             }
         }
+//        for (String str : strTemplateHandlerMap.keySet()) {
+//            try {
+//                BaseTemplateSrvInterface baseTemplateHandler = strTemplateHandlerMap.get(str);
+//                TemplateServiceEnum templateServiceEnum = baseTemplateHandler.templateService();
+//
+//                if (null != templateServiceEnum) {
+//                    templateHandlerMap.put(templateServiceEnum.getCode(), baseTemplateHandler);
+//
+//                    LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
+//                            templateServiceEnum.getServiceName(), templateServiceEnum.getEsClusterVersion());
+//                }
+//            } catch (Exception e) {
+//                LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
+//                        str);
+//            }
+//        }
         LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init finished.");
     }
 

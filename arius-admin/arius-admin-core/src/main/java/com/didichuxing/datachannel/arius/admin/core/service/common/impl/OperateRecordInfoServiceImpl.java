@@ -16,13 +16,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateR
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordInfoDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -33,13 +33,13 @@ import com.google.common.collect.Lists;
  * @date 2019/3/14
  */
 @Service
-public class OperateRecordServiceImpl implements OperateRecordService {
+public class OperateRecordInfoServiceImpl implements OperateRecordInfoService {
 
-    private static final ILog LOGGER = LogFactory.getLog(OperateRecordServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(OperateRecordInfoServiceImpl.class);
     private static final int     MAX_RECORD_COUNT = 200;
 
     @Autowired
-    private OperateRecordDAO  operateRecordDAO;
+    private OperateRecordInfoDAO operateRecordDAO;
 
     /**
      * 操作日志，每个类别，保留的最近操作日志数
@@ -56,18 +56,18 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         LOGGER.info("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg=操作日志定时删除任务开始执行");
         // 获取所有的分类
         OperationEnum[] operationEnums = OperationEnum.values();
-        List<OperateRecordPO> deleteList = new ArrayList<>();
+        List<OperateRecordInfoPO> deleteList = new ArrayList<>();
         for(OperationEnum operationEnum : operationEnums) {
             // 获取每一个分类倒数第 N 条数据
             int moduleId = operationEnum.getCode();
-            OperateRecordPO operateRecordPO = operateRecordDAO.selectDescTopNByModuleId(moduleId, SAVE_RECENT_NUM);
+            OperateRecordInfoPO operateRecordPO = operateRecordDAO.selectDescTopNByModuleId(moduleId, SAVE_RECENT_NUM);
             if(operateRecordPO == null) {
                 // 说明这个分类数据一共不超过 N 条
                 continue;
             }
             deleteList.add(operateRecordPO);
         }
-        for(OperateRecordPO operateRecordPO : deleteList) {
+        for(OperateRecordInfoPO operateRecordPO : deleteList) {
             // 删除该类别中，比指定id小的数据
             operateRecordDAO.deleteByModuleIdAndLessThanId(operateRecordPO.getModuleId(), operateRecordPO.getId());
         }
@@ -83,7 +83,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         if (condt == null) {
             return Result.buildSucc(Lists.newArrayList());
         }
-        List<OperateRecordVO> records = ConvertUtil.list2List(operateRecordDAO.listByCondition(ConvertUtil.obj2Obj(condt, OperateRecordPO.class)), OperateRecordVO.class);
+        List<OperateRecordVO> records = ConvertUtil.list2List(operateRecordDAO.listByCondition(ConvertUtil.obj2Obj(condt, OperateRecordInfoPO.class)), OperateRecordVO.class);
         if (records.size() > MAX_RECORD_COUNT) {
             records = records.subList(0, MAX_RECORD_COUNT);
         }
@@ -146,7 +146,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
             return Result.buildSucc();
         }
 
-        return Result.build(operateRecordDAO.insert(ConvertUtil.obj2Obj(param, OperateRecordPO.class)) == 1);
+        return Result.build(operateRecordDAO.insert(ConvertUtil.obj2Obj(param, OperateRecordInfoPO.class)) == 1);
     }
 
     /**
@@ -159,14 +159,14 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      */
     @Override
     public OperateRecord getLastRecord(int moduleId, int operateId, String bizId, Date beginDate) {
-        OperateRecordPO condt = new OperateRecordPO();
+        OperateRecordInfoPO condt = new OperateRecordInfoPO();
         condt.setModuleId(moduleId);
         condt.setOperateId(operateId);
         condt.setBizId(bizId);
         condt.setBeginTime(AriusDateUtils.getZeroDate(beginDate));
         condt.setEndTime(AriusDateUtils.getAfterDays(condt.getBeginTime(), 1));
 
-        List<OperateRecordPO> pos = operateRecordDAO.listByCondition(condt);
+        List<OperateRecordInfoPO> pos = operateRecordDAO.listByCondition(condt);
 
         if (CollectionUtils.isEmpty(pos)) {
             return null;
@@ -231,7 +231,6 @@ public class OperateRecordServiceImpl implements OperateRecordService {
 
     private void fillVOField(List<OperateRecordVO> records) {
         if(CollectionUtils.isEmpty(records)){return;}
-
         for(OperateRecordVO vo : records){
             vo.setModule(ModuleEnum.valueOf(vo.getModuleId()).getDesc());
             vo.setOperate( OperationEnum.valueOf(vo.getOperateId()).getDesc());

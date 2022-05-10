@@ -58,7 +58,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -158,7 +158,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private AppService                                       appService;
 
     @Autowired
-    private OperateRecordService                             operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private ESClusterNodeService                             esClusterNodeService;
@@ -582,9 +582,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public List<String> getAppClusterPhyNodeNames(String clusterPhyName) {
-        if (null == clusterPhyName) {
-            LOGGER.error("class=ESClusterPhyServiceImpl||method=getAppClusterPhyNodeNames||cluster={}||errMsg=集群名称为空",
+        LOGGER.error("class=ESClusterPhyServiceImpl||method=getAppClusterPhyNodeNames||cluster={}||errMsg=集群名称为空",
                 clusterPhyName);
+        if (null == clusterPhyName) {
             return Lists.newArrayList();
         }
         return esClusterNodeService.syncGetNodeNames(clusterPhyName);
@@ -975,7 +975,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhyName, String clusterLogicName, String templateSize) {
         //将传入的数据大小转化为字节数的单位,获取逻辑集群信息
-        float beSetDiskSize = Float.valueOf(SizeUtil.getUnitSize(templateSize + "gb"));
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
         if (AriusObjUtils.isNull(clusterLogic)) {
             return Result.buildFail("对应的逻辑集群不存在");

@@ -44,7 +44,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvert
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
@@ -99,7 +99,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ClusterPhyService           clusterPhyService;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private AppService                  appService;

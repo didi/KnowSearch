@@ -36,7 +36,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicA
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppConfigDAO;
@@ -75,7 +75,7 @@ public class AppServiceImpl implements AppService {
     private EmployeeService             employeeService;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private ResponsibleConvertTool      responsibleConvertTool;

@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateR
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordInfoDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,10 +22,10 @@ import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.Oper
 public class OperateRecordServiceTest extends AriusAdminApplicationTest {
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @MockBean
-    private OperateRecordDAO operateRecordDAO;
+    private OperateRecordInfoDAO operateRecordDAO;
 
     @Test
     public void listTest() {

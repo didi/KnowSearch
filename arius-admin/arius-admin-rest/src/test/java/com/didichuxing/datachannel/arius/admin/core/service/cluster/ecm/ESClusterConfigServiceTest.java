@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESCon
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterConfigDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
@@ -38,7 +38,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
     private ClusterPhyService esClusterPhyService;
 
     @MockBean
-    private OperateRecordService operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private ESClusterConfigDAO esClusterConfigDAO;

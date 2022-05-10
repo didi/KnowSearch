@@ -76,7 +76,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
@@ -151,7 +151,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private AppClusterLogicAuthService appClusterLogicAuthService;
 
     @Autowired
-    private OperateRecordService          operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private ESMachineNormsService         esMachineNormsService;
@@ -184,7 +184,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @param logicClusters     逻辑集群列表
      * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
      *                          ，为null则权限为运维人员权限（管理权限）
-     * @return
+     * @return List<ConsoleClusterVO>
      */
     @Override
     public List<ConsoleClusterVO> batchBuildOpClusterVOs(List<ClusterLogic> logicClusters,
@@ -207,7 +207,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @param clusterLogic    逻辑集群
      * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
      *                          ，为null则权限为运维人员权限（管理权限）
-     * @return
+     * @return ConsoleClusterVO
      */
     @Override
     public ConsoleClusterVO buildOpClusterVO(ClusterLogic clusterLogic, Integer appIdForAuthJudge) {
@@ -230,7 +230,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 获取逻辑集群所有访问的APP
      *
      * @param logicClusterId 逻辑集群ID
-     * @return
+     * @return Result
      */
     @Override
     public Result<List<ConsoleAppVO>> getAccessAppsOfLogicCluster(Long logicClusterId) {
@@ -305,7 +305,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 获取逻辑集群分派的物理集群列表
      *
      * @param logicClusterId 逻辑集群ID
-     * @return
+     * @return List<ClusterPhy>
      */
     @Override
     public List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId) {
@@ -348,8 +348,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     /**
      * 获取APP拥有的集群列表
-     * @param appId
-     * @return
+     * @param appId appId
+     * @return Result
      */
     @Override
     public Result<List<ConsoleClusterVO>> getAppLogicClusters(Integer appId) {
@@ -363,8 +363,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     /**
      * 获取平台所有的集群列表
-     * @param appId
-     * @return
+     * @param appId appId
+     * @return Result
      */
     @Override
     public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(Integer appId) {
@@ -380,9 +380,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     /**
      *
-     * @param clusterId
-     * @param appId
-     * @return
+     * @param clusterId 集群id
+     * @param appId     appId
+     * @return          Result
      */
     @Override
     public Result<ConsoleClusterVO> getAppLogicClusters(Long clusterId, Integer appId) {
@@ -396,9 +396,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     /**
      * 获取逻辑集群所有逻辑模板列表
-     * @param request
-     * @param clusterId
-     * @return
+     * @param request       request
+     * @param clusterId     集群id
+     * @return              Result
      */
     @Override
     public Result<List<ConsoleTemplateVO>> getClusterLogicTemplates(HttpServletRequest request, Long clusterId) {
@@ -422,8 +422,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     /**
      * 获取指定逻辑集群datanode的规格接口
-     * @param clusterId
-     * @return
+     * @param clusterId     集群id
+     * @return              Result
      */
     @Override
     public Result<Set<ESClusterNodeSepcVO>> getLogicClusterDataNodeSpec(Long clusterId) {

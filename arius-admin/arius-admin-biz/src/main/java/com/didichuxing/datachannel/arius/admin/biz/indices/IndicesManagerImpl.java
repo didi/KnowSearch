@@ -40,7 +40,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.IndexCatInfoCollector;
@@ -71,7 +71,7 @@ public class IndicesManagerImpl implements IndicesManager {
     private ClusterPhyManager     clusterPhyManager;
 
     @Autowired
-    private OperateRecordService  operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private IndexCatInfoCollector indexCatInfoCollector;

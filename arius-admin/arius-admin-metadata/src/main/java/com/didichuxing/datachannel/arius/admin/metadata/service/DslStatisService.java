@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslT
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslTemplateESDAO;
 import com.didiglobal.logi.elasticsearch.client.parser.DslExtractionUtilV2;
 import com.didiglobal.logi.elasticsearch.client.parser.bean.ExtractResult;
@@ -37,7 +37,7 @@ public class DslStatisService {
     private DslTemplateESDAO dslTemplateEsDao;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     public Result<String> auditDsl(AuditDsls auditDsls){
         // 入参判断

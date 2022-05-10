@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
@@ -73,7 +73,7 @@ public class TemplatePhyServiceImpl implements TemplatePhyService {
     private IndexTemplateLogicDAO                          indexTemplateLogicDAO;
 
     @Autowired
-    private OperateRecordService                           operateRecordService;
+    private OperateRecordInfoService operateRecordService;
 
     @Autowired
     private ESIndexService                                 esIndexService;

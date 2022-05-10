@@ -473,6 +473,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return result;
     }
 
+    @Override
     public Result<ConsoleTemplateSchemaVO> getSchema(Integer logicId) {
         Result<IndexTemplateLogicWithMapping> result = getTemplateWithMapping(logicId);
         if (result.failed()) {
