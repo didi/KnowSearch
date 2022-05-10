@@ -7,8 +7,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_1M;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_5M;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_USAGE_PERCENT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_INDEXING_CONSUME;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_QUERY_CONSUME;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_INDEXING_LATENCY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_QUERY_LATENCY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_RX_SIZE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_TX_SIZE;
 
@@ -168,7 +168,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterIndexingLatency(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_INDEXING_LATENCY_MAX, cluster,
-                NOW_2M, NOW_1M, INDICES_INDEXING_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
@@ -179,7 +179,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterSearchLatency(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_SEARCH_LATENCY_MAX, cluster,
-                NOW_2M, NOW_1M, INDICES_QUERY_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_QUERY_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
@@ -190,7 +190,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public Map<String, Double> getClusterIndexingLatencyAvgAndPercentiles(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT, cluster,
-                NOW_2M, NOW_1M, INDICES_INDEXING_CONSUME.getType(), INDICES_INDEXING_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType(), INDICES_INDEXING_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
@@ -202,7 +202,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public Map<String, Double> getClusterSearchLatencyAvgAndPercentiles(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT, cluster,
-                NOW_2M, NOW_1M, INDICES_QUERY_CONSUME.getType(), INDICES_QUERY_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_QUERY_LATENCY.getType(), INDICES_QUERY_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
