@@ -39,7 +39,7 @@ public class DslTemplateESDAO extends BaseESDAO {
     /**
      * 查询模板过期删除时间
      */
-    @Value("${delay.delete.expired.template.time}")
+    @Value("${delete.expired.template.time}")
     private String deleteExpireDslTime;
     /**
      * 查询历史数据时间
