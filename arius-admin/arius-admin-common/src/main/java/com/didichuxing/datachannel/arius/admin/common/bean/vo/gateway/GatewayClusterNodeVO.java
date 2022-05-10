@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "节点信息")
-public class GatewayNodeVO extends BaseVO {
+public class GatewayClusterNodeVO extends BaseVO {
 
     @ApiModelProperty("节点ID")
     private Integer id;

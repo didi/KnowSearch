@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateP
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalDeployVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
@@ -57,6 +57,9 @@ import java.util.stream.Collectors;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.APP_DEFAULT_READ_AUTH_INDICES;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 
+/**
+ * @author didi
+ */
 @Component
 public class GatewayManagerImpl implements GatewayManager {
 
@@ -108,17 +111,17 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     @Override
-    public Result<List<GatewayNodeVO>> getGatewayAliveNode(String clusterName) {
+    public Result<List<GatewayClusterNodeVO>> getGatewayAliveNode(String clusterName) {
         return Result
-                .buildSucc( ConvertUtil.list2List(gatewayService.getAliveNode(clusterName, TIMEOUT), GatewayNodeVO.class));
+                .buildSucc( ConvertUtil.list2List(gatewayService.getAliveNode(clusterName, TIMEOUT), GatewayClusterNodeVO.class));
     }
 
     @Override
     public Result<List<String>> getGatewayAliveNodeNames(String clusterName) {
-        List<GatewayNode> aliveNodes = gatewayService.getAliveNode(clusterName, TIMEOUT);
+        List<GatewayClusterNode> aliveNodes = gatewayService.getAliveNode(clusterName, TIMEOUT);
         List<String> list = Lists.newArrayList();
         if (aliveNodes != null && !aliveNodes.isEmpty()) {
-            list = aliveNodes.stream().map(GatewayNode::getHostName).collect(Collectors.toList());
+            list = aliveNodes.stream().map(GatewayClusterNode::getHostName).collect(Collectors.toList());
         }
         return Result.buildSucc(list);
     }
@@ -140,7 +143,7 @@ public class GatewayManagerImpl implements GatewayManager {
         List<AppConfig> appConfigs = appService.listConfigWithCache();
         Map<Integer, AppConfig> appId2AppConfigMap = ConvertUtil.list2Map(appConfigs, AppConfig::getAppId);
 
-        String defaultRIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
+        String defaultIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
                 APP_DEFAULT_READ_AUTH_INDICES, "");
 
         Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap = templateLogicService
@@ -150,7 +153,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
         List<GatewayAppVO> appVOS = apps.parallelStream().map(app -> {
             try {
-                return buildAppVO(app, appId2AppTemplateAuthsMap, appId2AppConfigMap,templateId2IndexTemplateLogicMap, defaultRIndices, aliasMap);
+                return buildAppVO(app, appId2AppTemplateAuthsMap, appId2AppConfigMap,templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
             } catch (Exception e) {
                 LOGGER.warn("class=GatewayManagerImpl||method=listApp||errMsg={}||stackTrace={}", e.getMessage(), JSON.toJSONString(e.getStackTrace()), e);
             }

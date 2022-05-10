@@ -3,9 +3,12 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
+/**
+ * @author didi
+ */
 public interface GatewayService {
 
     /**
@@ -34,7 +37,7 @@ public interface GatewayService {
      * @param timeout  存活超时时间
      * @return list
      */
-    List<GatewayNode> getAliveNode(String clusterName, long timeout);
+    List<GatewayClusterNode> getAliveNode(String clusterName, long timeout);
 
     /**
      * sql语句直接操作,可以进行sql语句的直接查询,也可以进行sql到dsl语句的转换

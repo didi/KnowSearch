@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GatewayNode extends BaseEntity {
+public class GatewayClusterNode extends BaseEntity {
 
     private Integer id;
 
