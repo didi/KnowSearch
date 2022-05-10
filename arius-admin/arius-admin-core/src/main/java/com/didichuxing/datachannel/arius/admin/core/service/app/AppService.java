@@ -10,7 +10,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-
+/**
+ * @author linyunan
+ * @date 2021-04-28
+ */
 public interface AppService {
 
     /**
@@ -35,7 +38,7 @@ public interface AppService {
 
     /**
      * 查询app详细信息
-     * @return
+     * @return List<App>
      */
     List<App> listAppWithCache();
 
@@ -94,13 +97,13 @@ public interface AppService {
 
     /**
      * listConfig
-     * @return
+     * @return    List<App>
      */
     List<AppConfig> listConfig();
 
     /**
      * listConfigWithCache
-     * @return
+     * @return     List<App>
      */
     List<AppConfig> listConfigWithCache();
 
@@ -118,11 +121,26 @@ public interface AppService {
      * @return true/false
      */
     boolean isAppExists(Integer appId);
-    boolean isAppExists(App app);
+
     /**
-     * 是否为超级管理员
+     * 判断app是否存在
+     * @param app  app
+     * @return     true or false
+     */
+    boolean isAppExists(App app);
+
+    /**
+     * 根据appId判断是否为超级app
+     * @param appId  appId
+     * @return       true or false
      */
     boolean isSuperApp(Integer appId);
+
+    /**
+     * 根据app信息判断是否为超级app
+     * @param app app
+     * @return    List<App>
+     */
     boolean isSuperApp(App app);
 
     /**

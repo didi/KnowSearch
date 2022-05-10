@@ -21,6 +21,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * @author linyunan
+ * @date 2021-04-28
+ */
 @RestController
 @RequestMapping(V2_CONSOLE + "/app")
 @Api(tags = "Console-用户侧APP相关接口(REST)")
