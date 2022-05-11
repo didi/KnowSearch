@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESCon
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterConfigDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
@@ -38,7 +38,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
     private ClusterPhyService esClusterPhyService;
 
     @MockBean
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESClusterConfigDAO esClusterConfigDAO;
@@ -188,7 +188,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
                 esClusterConfigService.setOldConfigInvalid(esConfig).getMessage());
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
-        esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR).getData();
+        esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR);
         Assertions.assertEquals(Result.buildFail("the old config is empty").getMessage(),
                 esClusterConfigService.setOldConfigInvalid(esConfig).getMessage());
     }

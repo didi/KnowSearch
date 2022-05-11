@@ -24,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicA
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppTemplateAuthDAO;
 import com.didiglobal.logi.log.ILog;
@@ -68,7 +68,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     private AppClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
-    private OperateRecordInfoService      operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Override
     public boolean deleteRedundancyTemplateAuths(boolean shouldDeleteFlags) {

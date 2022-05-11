@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.config.AriusConfigInfoDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -50,7 +50,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
     private AriusConfigInfoDAO               configInfoDAO;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     private Cache<String, AriusConfigInfoPO> configCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();

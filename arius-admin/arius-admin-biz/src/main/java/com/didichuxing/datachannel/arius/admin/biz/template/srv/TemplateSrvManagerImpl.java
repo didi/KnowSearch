@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -54,7 +54,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private RegionRackService     esClusterRackService;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private AriusUserInfoService  ariusUserInfoService;
@@ -296,9 +296,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         for (String phyClusterName : phyClusterNames) {
             Result<List<ClusterTemplateSrv>> templateSrvsRet = getPhyClusterTemplateSrv(phyClusterName);
             if (null != templateSrvsRet && templateSrvsRet.success()) {
-                for (ClusterTemplateSrv templateSrv : templateSrvsRet.getData()) {
-                    templateServiceTotals.add(templateSrv);
-                }
+                templateServiceTotals.addAll(templateSrvsRet.getData());
             }
         }
 

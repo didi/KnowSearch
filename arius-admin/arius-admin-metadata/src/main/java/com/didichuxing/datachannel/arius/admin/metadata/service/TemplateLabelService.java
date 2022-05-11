@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateR
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -64,7 +64,7 @@ public class TemplateLabelService {
     private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     public Result<List<Label>> listAllLabel() throws AmsRemoteException {
         List<TemplateLabelPO> templateLabelPOS = indexTemplateLabelDAO.listAll();
@@ -73,19 +73,9 @@ public class TemplateLabelService {
     }
 
     /**
-     * 模板是否有删除操作
-     * @param logicId
-     * @return
-     */
-    public boolean hasDeleteDoc(Integer logicId) {
-        Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map( listIndexTemplateLabelPO(logicId), TemplateLabelPO::getLabelId);
-        return labelMap.containsKey(TEMPLATE_HAS_DELETED_DOC);
-    }
-
-    /**
      * 是否是重要索引
-     * @param logicId
-     * @return
+     * @param logicId  索引ID
+     * @return boolean
      */
     public boolean isImportantIndex(Integer logicId) {
         Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map( listIndexTemplateLabelPO(logicId), TemplateLabelPO::getLabelId);
@@ -200,7 +190,7 @@ public class TemplateLabelService {
      * @param shouldAdds 需要添加的
      * @param shouldDels 需要删除的
      * @param operator   operator
-     * @return result
+     * @return result result
      */
     public Result<Boolean> updateTemplateLabel(Integer logicId, Set<String> shouldAdds, Set<String> shouldDels,
                                       String operator) {
@@ -227,7 +217,7 @@ public class TemplateLabelService {
     /**
      * 批量保存结果
      *
-     * @return
+     * @return boolean
      */
     public boolean batchInsert(List<TemplateLabelPO> list) {
         Date now = new Date();
@@ -238,7 +228,7 @@ public class TemplateLabelService {
     /**
      * 批量删除
      *
-     * @return
+     * @return boolean
      */
     public boolean batchDelete(List<String> docIds) {
         return indexTemplateLabelDAO.batchDelete(docIds);
@@ -247,8 +237,8 @@ public class TemplateLabelService {
     /**
      * 获取指定索引模板的所有标签
      *
-     * @param logicTemplateId
-     * @return
+     * @param logicTemplateId  模板id
+     * @return List<TemplateLabelPO>
      */
     public List<TemplateLabelPO> listIndexTemplateLabelPO(Integer logicTemplateId) {
         return indexTemplateLabelDAO.getLabelByLogicTemplateId(logicTemplateId);
@@ -257,8 +247,8 @@ public class TemplateLabelService {
     /**
      * 根据标签ID获取标签
      *
-     * @param labelId
-     * @return
+     * @param labelId 索引模板标签
+     * @return List<TemplateLabelPO>
      */
     public List<TemplateLabelPO> listPOByLabelId(String labelId) {
         return indexTemplateLabelDAO.getLabelByLabelId(labelId);
@@ -308,8 +298,8 @@ public class TemplateLabelService {
      * 修改指定索引模板的标签
      * 全量覆盖的方式
      *
-     * @param param
-     * @return
+     * @param param UpdateIndexTemplateLabelParam
+     * @return boolean
      */
     public boolean updateIndexTemplateLabel(UpdateIndexTemplateLabelParam param) {
         int indexTemplateId = param.getTemplateId();
@@ -394,7 +384,7 @@ public class TemplateLabelService {
      * @return
      */
     private String getEditContent(Collection<TemplateLabelPO> deletes, List<TemplateLabelPO> news) {
-        StringBuilder stringBuilder = new StringBuilder("");
+        StringBuilder stringBuilder = new StringBuilder();
         if (CollectionUtils.isNotEmpty(deletes)) {
             stringBuilder.append("删除标签:");
             for (TemplateLabelPO po : deletes) {

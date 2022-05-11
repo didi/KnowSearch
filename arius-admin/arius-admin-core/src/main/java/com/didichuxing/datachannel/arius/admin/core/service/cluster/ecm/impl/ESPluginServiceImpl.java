@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPluginDAO;
@@ -57,7 +57,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESClusterService esClusterService;

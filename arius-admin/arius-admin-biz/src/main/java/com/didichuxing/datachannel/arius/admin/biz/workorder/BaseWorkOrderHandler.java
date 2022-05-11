@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderSt
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,7 +38,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     private AriusUserInfoService   ariusUserInfoService;
 
     @Autowired
-    protected OperateRecordInfoService operateRecordService;
+    protected OperateRecordService operateRecordService;
 
     /**
      * 创建一个工单
@@ -114,7 +114,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     /*************************************** protected method ************************************/
     /**
      * 审核不通过
-     * @param orderPO
+     * @param orderPO WorkOrderPO
      * @return
      */
     protected Result<Void> doProcessDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {

@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.google.common.collect.Lists;
 
 import io.swagger.annotations.Api;
@@ -31,7 +31,7 @@ public class NormalOperateRecordController {
 
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @PostMapping("/list")
     @ResponseBody

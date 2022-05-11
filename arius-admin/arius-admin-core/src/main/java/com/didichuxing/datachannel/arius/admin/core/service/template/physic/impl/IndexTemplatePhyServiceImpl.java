@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -73,7 +73,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     private IndexTemplateDAO indexTemplateDAO;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESIndexService                                 esIndexService;
@@ -695,8 +695,8 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     /**
      * 判定是否是合法的shard number.
      *
-     * @param shardNum
-     * @return
+     * @param shardNum shard 数量
+     * @return boolean
      */
     private boolean isValidShardNum(Integer shardNum) {
         return shardNum != null && shardNum > 0;

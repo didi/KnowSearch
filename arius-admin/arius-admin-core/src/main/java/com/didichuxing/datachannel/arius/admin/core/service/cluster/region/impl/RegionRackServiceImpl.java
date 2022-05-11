@@ -27,7 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.region.ClusterRegionDAO;
 import com.didiglobal.logi.log.ILog;
@@ -46,9 +46,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 
 /**
- * @Author: lanxinzheng
- * @Date: 2021/1/2
- * @Comment:
+ * @author lanxinzheng
+ * @date 2021/1/2
  */
 @Service
 public class RegionRackServiceImpl implements RegionRackService {
@@ -67,7 +66,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     private ClusterPhyService    esClusterPhyService;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -75,7 +74,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     /**
      *
      * @param rackId Rack ID
-     * @return
+     * @return true or false
      * @deprecated
      */
     @Deprecated
@@ -212,7 +211,7 @@ public class RegionRackServiceImpl implements RegionRackService {
         }
 
         ClusterRegionPO clusterRegionPO = new ClusterRegionPO();
-        clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.toString());
+        clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
         clusterRegionPO.setPhyClusterName(clusterName);
         clusterRegionPO.setRacks(racks);
 
@@ -537,7 +536,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     /**
      * 判断region是否被共享类型的逻辑集群绑定
      * @param region region信息
-     * @return
+     * @return true or false
      */
     private boolean isRegionBindByPublicLogicCluster(ClusterRegion region) {
         if (!isRegionBound(region)) {
@@ -572,7 +571,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     /**
      * 构建region下的rack信息
      * @param region region
-     * @return
+     * @return 逻辑集群拥有的rack信息
      */
     private List<ClusterLogicRackInfo> buildRackInfos(ClusterRegion region) {
         List<ClusterLogicRackInfo> rackInfos = new LinkedList<>();

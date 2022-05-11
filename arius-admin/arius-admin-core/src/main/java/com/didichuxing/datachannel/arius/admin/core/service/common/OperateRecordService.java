@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
  * @version 1.0
  * @date 2022/5/10
  */
-public interface OperateRecordInfoService {
+public interface OperateRecordService {
 
     /**
      * 根据指定的查询条件查询
@@ -54,7 +54,7 @@ public interface OperateRecordInfoService {
     /**
      * 插入一条操作记录
      *
-     * @param param
+     * @param param OperateRecordDTO
      * @return 成功 true   失败 false
      */
     Result<Void> save(OperateRecordDTO param);
@@ -73,8 +73,8 @@ public interface OperateRecordInfoService {
     /**
      * 根据指定的查询条件批量查询
      *
-     * @param bizId
-     * @param moduleIds
+     * @param bizId 业务ID
+     * @param moduleIds 模块ID集合
      * @return 操作记录列表
      */
     Result<List<OperateRecordVO>> multiList(String bizId, List<Integer> moduleIds);

@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.task;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -33,7 +33,7 @@ public abstract class BaseConcurrentTask<T> {
     protected AriusTaskThreadPool ariusTaskThreadPool;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @PostConstruct
     public void init(){

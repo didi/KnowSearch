@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryCon
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
@@ -31,13 +31,13 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 @Service
 public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManager {
 
-    private static final ILog sLogger = LogFactory.getLog(IndexTemplateServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     @Autowired
     private ESTemplateService esTemplateService;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Override
     public boolean validTemplateSettings(String cluster, String template,
@@ -71,7 +71,7 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
 
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig == null) {
-            sLogger.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
+            LOGGER.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
                          + "msg=templateNotExists||cluster={}||template={}",
                 cluster, template);
             throw new AdminOperateException("模版不存在，template:" + template);
@@ -83,7 +83,7 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
 
         if (!esTemplateService.syncCheckTemplateConfig(cluster, fetchPreCreateTemplateName(template), templateConfig,
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT)) {
-            sLogger.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
+            LOGGER.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
                          + "msg=checkTemplateConfigFail||cluster={}||templateName={}||templateConfig={}",
                 cluster, fetchPreCreateTemplateName(template), templateConfig);
             throw new AdminOperateException("非法模板settings: " + settings);
@@ -103,7 +103,7 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
     /**
      * 获取预创建模板名称
      * @param templateName 原始模板名称
-     * @return
+     * @return 预创建模板名称
      */
     private String fetchPreCreateTemplateName(String templateName) {
         return AdminConstant.ES_CHECK_TEMPLATE_INDEX_PREFIX + System.currentTimeMillis() + templateName;

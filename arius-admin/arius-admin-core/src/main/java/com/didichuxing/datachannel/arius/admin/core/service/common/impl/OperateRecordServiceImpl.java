@@ -10,7 +10,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
@@ -21,8 +20,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordInfoDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -33,13 +32,13 @@ import com.google.common.collect.Lists;
  * @date 2019/3/14
  */
 @Service
-public class OperateRecordInfoServiceImpl implements OperateRecordInfoService {
+public class OperateRecordServiceImpl implements OperateRecordService {
 
-    private static final ILog LOGGER = LogFactory.getLog(OperateRecordInfoServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(OperateRecordServiceImpl.class);
     private static final int     MAX_RECORD_COUNT = 200;
 
     @Autowired
-    private OperateRecordInfoDAO operateRecordDAO;
+    private OperateRecordDAO operateRecordDAO;
 
     /**
      * 操作日志，每个类别，保留的最近操作日志数

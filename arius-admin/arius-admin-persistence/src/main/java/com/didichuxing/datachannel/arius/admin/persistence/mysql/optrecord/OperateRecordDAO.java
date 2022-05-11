@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.Oper
  * @date 2019/3/14
  */
 @Repository
-public interface OperateRecordInfoDAO {
+public interface OperateRecordDAO {
     /**
      * 通过条件查询列表
      * @param param OperateRecordInfoPO

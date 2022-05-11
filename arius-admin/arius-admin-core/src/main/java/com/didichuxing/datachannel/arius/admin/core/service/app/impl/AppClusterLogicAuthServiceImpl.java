@@ -29,7 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppLogicClusterAuthDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -54,7 +54,7 @@ public class AppClusterLogicAuthServiceImpl implements AppClusterLogicAuthServic
     private AppService             appService;
 
     @Autowired
-    private OperateRecordInfoService operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private AriusUserInfoService   ariusUserInfoService;
