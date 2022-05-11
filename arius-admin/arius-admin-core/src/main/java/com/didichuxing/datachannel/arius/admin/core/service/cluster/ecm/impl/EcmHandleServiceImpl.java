@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -78,7 +78,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     private EcmHostHandler                      ecmHostHandler;
 
     @Autowired
-    private OperateRecordService                operateRecordService;
+    private OperateRecordInfoService            operateRecordService;
 
     @Autowired
     private ESPackageService                    esPackageService;

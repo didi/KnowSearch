@@ -76,7 +76,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -151,7 +151,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private AppClusterLogicAuthService appClusterLogicAuthService;
 
     @Autowired
-    private OperateRecordService          operateRecordService;
+    private OperateRecordInfoService          operateRecordService;
 
     @Autowired
     private ESMachineNormsService         esMachineNormsService;
