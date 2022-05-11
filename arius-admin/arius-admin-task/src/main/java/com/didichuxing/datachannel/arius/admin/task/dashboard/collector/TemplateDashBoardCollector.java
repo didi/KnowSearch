@@ -1,25 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segments;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
 
 /**
  * Created by linyunan on 3/11/22
@@ -30,14 +28,14 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
     private static final ILog             LOGGER     = LogFactory.getLog(TemplateDashBoardCollector.class);
 
     @Autowired
-    TemplatePhyService templatePhyService;
+    IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     ESShardService esShardService;
 
     @Override
     public void collectSingleCluster(String cluster, long currentTime) {
-        List<IndexTemplatePhyWithLogic> logicTemplates = templatePhyService.getTemplateByPhyCluster(cluster);
+        List<IndexTemplatePhyWithLogic> logicTemplates = indexTemplatePhyService.getTemplateByPhyCluster(cluster);
         if (logicTemplates.isEmpty()) {
             LOGGER.error("class=TemplateDashBoardCollector||method=collectSingleCluster||errMsg=clusterTemplateList is null");
             return;
@@ -51,13 +49,13 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
         for (IndexTemplatePhyWithLogic indexTemplatePhyWithLogic : logicTemplates) {
             DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
-            IndexTemplateLogic indexTemplateLogic = indexTemplatePhyWithLogic.getLogicTemplate();
+            IndexTemplate indexTemplate = indexTemplatePhyWithLogic.getLogicTemplate();
 
             TemplateMetrics templateMetrics = new TemplateMetrics();
             templateMetrics.setTimestamp(currentTime);
             templateMetrics.setCluster(cluster);
-            templateMetrics.setTemplate(indexTemplateLogic.getName());
-            templateMetrics.setTemplateId((long) indexTemplateLogic.getId());
+            templateMetrics.setTemplate(indexTemplate.getName());
+            templateMetrics.setTemplateId((long) indexTemplate.getId());
 
             //1 template segments 数量以及占用内存大小
             buildTemplateStats(templateMetrics, segments, indexTemplatePhyWithLogic.getExpression());

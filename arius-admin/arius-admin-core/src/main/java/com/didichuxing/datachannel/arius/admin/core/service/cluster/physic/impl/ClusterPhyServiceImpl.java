@@ -1,27 +1,37 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COLD_RACK_PREFER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
+
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -30,30 +40,25 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COLD_RACK_PREFER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
-
+/**
+ * @author didi
+ */
 @Service
 @NoArgsConstructor
 public class ClusterPhyServiceImpl implements ClusterPhyService {
@@ -66,7 +71,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private String                   esClusterClientPort;
 
     @Autowired
-    private ClusterDAO               clusterDAO;
+    private PhyClusterDAO clusterDAO;
 
     @Autowired
     private ESClusterService         esClusterService;
@@ -75,16 +80,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private ESPluginService          esPluginService;
 
     @Autowired
-    private TemplatePhyService       templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplateLogicService     templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private RoleClusterService       roleClusterService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
-    private RoleClusterHostService   roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     private static final String DEFAULT_WRITE_ACTION = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
 
@@ -94,8 +99,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return 集群列表
      */
     @Override
-    public List<ClusterPhy> listClustersByCondt(ESClusterDTO params) {
-        List<ClusterPO> clusterPOs = clusterDAO.listByCondition(ConvertUtil.obj2Obj(params, ClusterPO.class));
+    public List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params) {
+        List<ClusterPhyPO> clusterPOs = clusterDAO.listByCondition(ConvertUtil.obj2Obj(params, ClusterPhyPO.class));
 
         if (CollectionUtils.isEmpty(clusterPOs)) {
             return Lists.newArrayList();
@@ -116,7 +121,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public Result<Boolean> deleteClusterById(Integer clusterId, String operator) {
-        ClusterPO clusterPO = clusterDAO.getById(clusterId);
+        ClusterPhyPO clusterPO = clusterDAO.getById(clusterId);
         if (clusterPO == null) {
             return Result.buildNotExist(CLUSTER_NOT_EXIST);
         }
@@ -137,7 +142,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> createCluster(ESClusterDTO param, String operator) {
+    public Result<Boolean> createCluster(ClusterPhyDTO param, String operator) {
         Result<Boolean> checkResult = checkClusterParam(param, OperationEnum.ADD);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESClusterPhyServiceImpl||method=addCluster||msg={}", checkResult.getMessage());
@@ -146,7 +151,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         initClusterParam(param);
 
-        ClusterPO clusterPO = ConvertUtil.obj2Obj(param, ClusterPO.class);
+        ClusterPhyPO clusterPO = ConvertUtil.obj2Obj(param, ClusterPhyPO.class);
         boolean succ = (1 == clusterDAO.insert(clusterPO));
         if (succ) {
             param.setId(clusterPO.getId());
@@ -166,14 +171,14 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * 集群不存在
      */
     @Override
-    public Result<Boolean> editCluster(ESClusterDTO param, String operator) {
+    public Result<Boolean> editCluster(ClusterPhyDTO param, String operator) {
         Result<Boolean> checkResult = checkClusterParam(param, OperationEnum.EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESClusterPhyServiceImpl||method=editCluster||msg={}", checkResult.getMessage());
             return checkResult;
         }
 
-        boolean succ = (1 == clusterDAO.update(ConvertUtil.obj2Obj(param, ClusterPO.class)));
+        boolean succ = (1 == clusterDAO.update(ConvertUtil.obj2Obj(param, ClusterPhyPO.class)));
         return Result.buildBoolen(succ);
     }
 
@@ -185,7 +190,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public ClusterPhy getClusterByName(String clusterName) {
         // 获取物理集群
-        ClusterPO clusterPO = clusterDAO.getByName(clusterName);
+        ClusterPhyPO clusterPO = clusterDAO.getByName(clusterName);
         if (null == clusterPO) {
             return null;
         }
@@ -194,20 +199,20 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
 
         // 添加角色、机器信息
-        List<RoleCluster> roleClusters = roleClusterService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(
                 clusterPhy.getId());
-        if (CollectionUtils.isNotEmpty(roleClusters)) {
+        if (CollectionUtils.isNotEmpty(clusterRoleInfos)) {
             // 角色信息
-            clusterPhy.setRoleClusters(roleClusters);
+            clusterPhy.setClusterRoleInfos(clusterRoleInfos);
 
             // 机器信息
-            List<RoleClusterHost> roleClusterHosts = new ArrayList<>();
-            Map<Long, List<RoleClusterHost>> map = roleClusterHostService.getByRoleClusterIds(roleClusters.stream().map(RoleCluster::getId).collect(Collectors.toList()));
-            for (RoleCluster roleCluster : roleClusters) {
-                List<RoleClusterHost> esRoleClusterHosts = map.getOrDefault(roleCluster.getId(), new ArrayList<>());
-                roleClusterHosts.addAll(esRoleClusterHosts);
+            List<ClusterRoleHost> clusterRoleHosts = new ArrayList<>();
+            Map<Long, List<ClusterRoleHost>> map = clusterRoleHostService.getByRoleClusterIds(clusterRoleInfos.stream().map(ClusterRoleInfo::getId).collect(Collectors.toList()));
+            for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfos) {
+                List<ClusterRoleHost> esClusterRoleHosts = map.getOrDefault(clusterRoleInfo.getId(), new ArrayList<>());
+                clusterRoleHosts.addAll(esClusterRoleHosts);
             }
-            clusterPhy.setRoleClusterHosts(roleClusterHosts);
+            clusterPhy.setClusterRoleHosts(clusterRoleHosts);
         }
 
         return clusterPhy;
@@ -259,7 +264,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return true 存在
      */
     @Override
-    public boolean isClusterExistsByList(List<ClusterPhy> list,String clusterName) {
+    public boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName) {
         return list.stream().map(ClusterPhy::getCluster).anyMatch(cluster->cluster.equals(clusterName));
     }
     /**
@@ -296,16 +301,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public Set<String> getClusterRacks(String cluster) {
-        List<RoleClusterHost> nodes = roleClusterHostService.getNodesByCluster(cluster);
+        List<ClusterRoleHost> nodes = clusterRoleHostService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(nodes)) {
             return Sets.newHashSet();
         }
 
         Set<String> rackSet = new HashSet<>();
         // 只有datanode才有rack
-        for (RoleClusterHost roleClusterHost : nodes) {
-            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == roleClusterHost.getRole()) {
-                rackSet.add(roleClusterHost.getRack());
+        for (ClusterRoleHost clusterRoleHost : nodes) {
+            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == clusterRoleHost.getRole()) {
+                rackSet.add(clusterRoleHost.getRack());
             }
         }
 
@@ -333,7 +338,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public List<Plugin> listClusterPlugins(String cluster) {
-        ClusterPO clusterPhy = clusterDAO.getByName(cluster);
+        ClusterPhyPO clusterPhy = clusterDAO.getByName(cluster);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return new ArrayList<>();
         }
@@ -367,7 +372,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public ClusterPhy getClusterById(Integer phyClusterId) {
-        ClusterPO clusterPO = clusterDAO.getById(phyClusterId);
+        ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
         ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
         return clusterPhy;
     }
@@ -379,7 +384,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public int getWriteClientCount(String cluster) {
-        ClusterPO clusterPO = clusterDAO.getByName(cluster);
+        ClusterPhyPO clusterPO = clusterDAO.getByName(cluster);
 
         if (StringUtils.isBlank(clusterPO.getHttpWriteAddress())) {
             return 1;
@@ -395,7 +400,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return
      */
     @Override
-    public boolean ensureDcdrRemoteCluster(String cluster, String remoteCluster) throws ESOperateException {
+    public boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException {
 
         ClusterPhy clusterPhy = getClusterByName(cluster);
         if (clusterPhy == null) {
@@ -417,8 +422,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<RoleCluster> listPhysicClusterRoles(Integer clusterId) {
-        return roleClusterService.getAllRoleClusterByClusterId(clusterId);
+    public List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId) {
+        return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
     @Override
@@ -446,7 +451,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-        List<ClusterPO> clusterPOS = Lists.newArrayList();
+        List<ClusterPhyPO> clusterPOS = Lists.newArrayList();
         try {
             clusterPOS = clusterDAO.pagingByCondition(param.getCluster(), param.getHealth(),
                     param.getEsVersion(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
@@ -458,7 +463,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Override
     public Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param) {
-        return clusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterPO.class));
+        return clusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterPhyPO.class));
     }
 
     @Override
@@ -477,12 +482,14 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         //获取region下的rack列表对应的总的磁盘空间
         Float regionDiskSize = 0F;
         for (String rack : rackList) {
-            if (allocationInfoOfRack.containsKey(rack)) regionDiskSize += allocationInfoOfRack.get(rack);
+            if (allocationInfoOfRack.containsKey(rack)) {
+                regionDiskSize += allocationInfoOfRack.get(rack);
+            }
         }
 
         //获取存储在region上的物理模板列表
         Float templateOnRegionDiskSize = 0F;
-        List<IndexTemplatePhy> normalTemplateOnPhyCluster = templatePhyService.getNormalTemplateByCluster(clusterPhyName);
+        List<IndexTemplatePhy> normalTemplateOnPhyCluster = indexTemplatePhyService.getNormalTemplateByCluster(clusterPhyName);
         if (CollectionUtils.isEmpty(normalTemplateOnPhyCluster)) {
             return regionDiskSize;
         }
@@ -494,7 +501,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             }
 
             //根据物理模板获取对应的逻辑模板中的quota参数
-            IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+            IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
             if (AriusObjUtils.isNull(logicTemplate)) {
                 continue;
             }
@@ -546,7 +553,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
 
-    private Result<Boolean> checkClusterParam(ESClusterDTO param, OperationEnum operation) {
+    private Result<Boolean> checkClusterParam(ClusterPhyDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("集群信息为空");
         }
@@ -571,26 +578,26 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> handleEdit(ESClusterDTO param) {
+    private Result<Boolean> handleEdit(ClusterPhyDTO param) {
         if (AriusObjUtils.isNull(param.getId())) {
             return Result.buildParamIllegal("集群ID为空");
         }
 
-        ClusterPO oldClusterPO = clusterDAO.getById(param.getId());
+        ClusterPhyPO oldClusterPO = clusterDAO.getById(param.getId());
         if (oldClusterPO == null) {
             return Result.buildNotExist(CLUSTER_NOT_EXIST);
         }
         return Result.buildSucc();
     }
 
-    private Result<Boolean> handleAdd(ESClusterDTO param) {
+    private Result<Boolean> handleAdd(ClusterPhyDTO param) {
         Result<Boolean> isFieldNullResult = isFieldNull(param);
         if (isFieldNullResult.failed()) {
             return isFieldNullResult;
         }
 
         if (param.getCluster() != null) {
-            ClusterPO clusterPO = clusterDAO.getByName(param.getCluster());
+            ClusterPhyPO clusterPO = clusterDAO.getByName(param.getCluster());
             if (clusterPO != null && clusterPO.getId().equals(param.getId())) {
                 return Result.buildDuplicate("集群重复");
             }
@@ -598,7 +605,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> isIllegal(ESClusterDTO param) {
+    private Result<Boolean> isIllegal(ClusterPhyDTO param) {
         if (param.getDataCenter() != null && !DataCenterEnum.validate(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心非法");
         }
@@ -609,7 +616,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> isFieldNull(ESClusterDTO param) {
+    private Result<Boolean> isFieldNull(ClusterPhyDTO param) {
         if (AriusObjUtils.isNull(param.getCluster())) {
             return Result.buildParamIllegal("集群名称为空");
         }
@@ -631,7 +638,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private void initClusterParam(ESClusterDTO param) {
+    private void initClusterParam(ClusterPhyDTO param) {
         if (param.getWriteAddress() == null) {
             param.setWriteAddress("");
         }

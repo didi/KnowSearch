@@ -16,7 +16,7 @@ public class IndexTemplatePhyWithLogic extends IndexTemplatePhy {
     /**
      * 逻辑模板信息
      */
-    private IndexTemplateLogic logicTemplate;
+    private IndexTemplate logicTemplate;
 
     public boolean hasLogic() {
         return getLogicTemplate() != null;

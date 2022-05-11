@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.DCDRMasterSlaveSwitchDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
@@ -35,13 +35,13 @@ import io.swagger.annotations.ApiOperation;
 public class OpTaskDCDRController {
 
     @Autowired
-    private TemplateDcdrManager templateDcdrManager;
+    private TemplateDCDRManager templateDCDRManager;
 
     @GetMapping("/{taskId}/detail")
     @ResponseBody
     @ApiOperation(value = "获取dcdr主从切换任务详情")
     public Result<DCDRTasksDetailVO> getDCDRMasterSlaveSwitchDetailVO(@PathVariable("taskId") Integer taskId) {
-        return templateDcdrManager.getDCDRMasterSlaveSwitchDetailVO(taskId);
+        return templateDCDRManager.getDCDRMasterSlaveSwitchDetailVO(taskId);
     }
 
     @GetMapping("/{taskId}/{templateId}/detail")
@@ -49,7 +49,7 @@ public class OpTaskDCDRController {
     @ApiOperation(value = "获取模板dcdr主从切换任务详情")
     public Result<DCDRSingleTemplateMasterSlaveSwitchDetailVO> getDCDRSingleTemplateMasterSlaveSwitchDetailVO(@PathVariable("taskId") Integer taskId,
                                                                                                               @PathVariable("templateId") Long templateId) {
-        return templateDcdrManager.getDCDRSingleTemplateMasterSlaveSwitchDetailVO(taskId, templateId);
+        return templateDCDRManager.getDCDRSingleTemplateMasterSlaveSwitchDetailVO(taskId, templateId);
     }
 
     @PostMapping("/switchMasterSlave")
@@ -57,7 +57,7 @@ public class OpTaskDCDRController {
     @ApiOperation(value = "DCDR主从切换接口", notes = "")
     public Result<WorkTaskVO> dcdrSwitchMasterSlave(HttpServletRequest request,
                                                     @RequestBody DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO) {
-        return templateDcdrManager.batchDcdrSwitchMaster2Slave(dcdrMasterSlaveSwitchDTO,
+        return templateDCDRManager.batchDCDRSwitchMaster2Slave(dcdrMasterSlaveSwitchDTO,
             HttpRequestUtils.getOperator(request));
     }
 
@@ -67,7 +67,7 @@ public class OpTaskDCDRController {
     public Result<Void> cancelDcdrSwitchMasterSlaveByTaskIdAndTemplateIds(HttpServletRequest request,
                                                                           @PathVariable("taskId") Integer taskId,
                                                                           @PathVariable("templateIds") List<Long> templateIds) throws ESOperateException {
-        return templateDcdrManager.cancelDcdrSwitchMasterSlaveByTaskIdAndTemplateIds(taskId, templateIds, false,
+        return templateDCDRManager.cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(taskId, templateIds, false,
             HttpRequestUtils.getOperator(request));
     }
 
@@ -76,7 +76,7 @@ public class OpTaskDCDRController {
     @ApiOperation(value = "根据任务id取消全量DCDR主从切换任务")
     public Result<Void> cancelDcdrSwitchMasterSlaveByTaskId(HttpServletRequest request,
                                                             @PathVariable("taskId") Integer taskId) throws ESOperateException {
-        return templateDcdrManager.cancelDcdrSwitchMasterSlaveByTaskId(taskId, HttpRequestUtils.getOperator(request));
+        return templateDCDRManager.cancelDCDRSwitchMasterSlaveByTaskId(taskId, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/{taskId}/{templateId}/refresh")
@@ -84,7 +84,7 @@ public class OpTaskDCDRController {
     @ApiOperation(value = "刷新dcdr链路任务")
     public Result<Void> refreshDcdrChannelState(@PathVariable("taskId") Integer taskId,
                                                 @PathVariable("templateId") Integer templateId) {
-        return templateDcdrManager.refreshDcdrChannelState(taskId, templateId, null);
+        return templateDCDRManager.refreshDCDRChannelState(taskId, templateId, null);
     }
 
     @PutMapping("/{taskId}/{templateId}/forceSwitch")
@@ -93,6 +93,6 @@ public class OpTaskDCDRController {
     public Result<Void> forceSwitchMasterSlave(HttpServletRequest request,
                                                @PathVariable("taskId") Integer taskId,
                                                @PathVariable ("templateId") Integer templateId) {
-        return templateDcdrManager.forceSwitchMasterSlave(taskId, templateId, HttpRequestUtils.getOperator(request));
+        return templateDCDRManager.forceSwitchMasterSlave(taskId, templateId, HttpRequestUtils.getOperator(request));
     }
 }

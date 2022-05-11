@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health;
 
 import com.alibaba.fastjson.JSON;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.ResultLevel;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckRecordPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckWhiteListPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.cluster.HealthCheckESDAO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didiglobal.logi.log.ILog;
@@ -127,11 +127,11 @@ public abstract class AbstractCheckerItem implements ICheckerItem{
                 if(null != indexTemplate && null != indexTemplate.getLogicTemplate()){
                     String version    = String.valueOf(indexTemplate.getVersion());
                     String indexName  = indexTemplate.getExpression().replace("*", "") + indexTemplate.getLogicTemplate().getDateFormat();
-                    if (
-                            ("0".equals(version) && index.length() == indexName.length()) ||
-                                    (index.length() >= indexName.length() && index.length() <= indexName.length() + version.length() + 2)
-                    )
+                    if (("0".equals(version) && index.length() == indexName.length()) || (
+                            index.length() >= indexName.length()
+                            && index.length() <= indexName.length() + version.length() + 2)) {
                         break;
+                    }
                 }
             }
         }

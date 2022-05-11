@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -25,13 +25,14 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
- * Created by linyunan on 2021-10-14
+ * @author linyunan
+ * @date 2021-10-14
  */
 @Component
 public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClusterPhyVO> {
@@ -48,9 +49,9 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     private ClusterPhyManager        clusterPhyManager;
 
     @Autowired
-    private RoleClusterService       roleClusterService;
+    private ClusterRoleService clusterRoleService;
 
-    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterPhyPageSearchHandle",20, 40, 100);
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyPageSearchHandle",20, 40, 100);
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer appId) {
@@ -128,13 +129,13 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
 
         // 8. 设置集群角色信息
         List<Integer> clusterIds = fuzzyAndLimitConsoleClusterPhyVOList.stream().map(ConsoleClusterPhyVO::getId).collect(Collectors.toList());
-        Map<Long, List<RoleCluster>> roleListMap = roleClusterService.getAllRoleClusterByClusterIds(clusterIds);
+        Map<Long, List<ClusterRoleInfo>> roleListMap = clusterRoleService.getAllRoleClusterByClusterIds(clusterIds);
 
         for (ConsoleClusterPhyVO consoleClusterPhyVO : fuzzyAndLimitConsoleClusterPhyVOList) {
-            futureUtil.runnableTask(() -> clusterPhyManager.buildClusterRole(consoleClusterPhyVO,
+            FUTURE_UTIL.runnableTask(() -> clusterPhyManager.buildClusterRole(consoleClusterPhyVO,
                     roleListMap.get(consoleClusterPhyVO.getId().longValue())));
         }
-        futureUtil.waitExecute();
+        FUTURE_UTIL.waitExecute();
         
         return PaginationResult.buildSucc(fuzzyAndLimitConsoleClusterPhyVOList, hitTotal, condition.getPage(), condition.getSize());
     }

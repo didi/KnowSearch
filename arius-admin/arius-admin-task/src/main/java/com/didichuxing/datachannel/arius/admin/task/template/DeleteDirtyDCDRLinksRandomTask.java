@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
@@ -38,7 +38,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
     private AriusOpTaskManager ariusOpTaskManager;
 
     @Autowired
-    private TemplateDcdrManager templateDcdrManager;
+    private TemplateDCDRManager templateDcdrManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
@@ -61,9 +61,9 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
             for (DCDRSingleTemplateMasterSlaveSwitchDetail switchDetail : switchDetailList) {
                 //强切任务失败，删除脏链路
                 if (DCDRSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())
-                    && !switchDetail.getDeleteDcdrChannelFlag()) {
+                        && !switchDetail.getDeleteDcdrChannelFlag()) {
                     try {
-                        Result<Void> deleteDcdrResult = templateDcdrManager.deleteDcdr(
+                        Result<Void> deleteDcdrResult = templateDcdrManager.deleteDCDR(
                                 switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc());
 
                         if (deleteDcdrResult.failed()) {

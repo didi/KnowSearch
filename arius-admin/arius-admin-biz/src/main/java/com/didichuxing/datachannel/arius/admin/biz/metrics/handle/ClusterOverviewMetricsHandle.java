@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
@@ -21,11 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentilesMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -56,7 +56,7 @@ public class ClusterOverviewMetricsHandle {
     private ESShardService             esShardService;
 
     @Autowired
-    private RoleClusterHostService     roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private ESTemplateService          esTemplateService;
@@ -223,7 +223,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void getInvalidNodesMetrics(ESClusterOverviewMetricsVO metrics) {
         List<String> nodeHostsFromES         = esClusterNodeService.syncGetNodeHosts(metrics.getClusterName());
-        List<RoleClusterHost> nodesByCluster = roleClusterHostService.getNodesByCluster(metrics.getClusterName());
+        List<ClusterRoleHost> nodesByCluster = clusterRoleHostService.getNodesByCluster(metrics.getClusterName());
         List<String> invalidNodeIps = Lists.newArrayList();
         nodesByCluster.forEach(nodeFromDb -> {
             if (!nodeHostsFromES.contains(nodeFromDb.getIp())) {
@@ -341,8 +341,8 @@ public class ClusterOverviewMetricsHandle {
         List<String> esHost = esClusterNodeService.syncGetNodeHosts(clusterName);
         long invalidNodeCount       = 0;
         long activeNodeCount        = 0;
-        List<RoleClusterHost> nodesByCluster = roleClusterHostService.getNodesByCluster(clusterName);
-        Set<String> nodeIps = nodesByCluster.stream().map(RoleClusterHost::getIp).collect(Collectors.toSet());
+        List<ClusterRoleHost> nodesByCluster = clusterRoleHostService.getNodesByCluster(clusterName);
+        Set<String> nodeIps = nodesByCluster.stream().map(ClusterRoleHost::getIp).collect(Collectors.toSet());
         for (String ip : nodeIps) {
             if (!esHost.contains(ip)) {
                 invalidNodeCount++;

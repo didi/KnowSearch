@@ -22,7 +22,7 @@ public class IndexTemplateLogicAggregate implements Serializable {
     /**
      * 具备逻辑集群信息的逻辑模板详情信息
      */
-    private IndexTemplateLogicWithCluster indexTemplateLogicWithCluster;
+    private IndexTemplateWithCluster indexTemplateLogicWithCluster;
 
     /**
      * APP对当前模板的权限

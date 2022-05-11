@@ -308,7 +308,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
         }
 
         // 没有划分的rack上分布的模板
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService
                 .getNormalTemplateByClusterAndRack(capacityPlanArea.getClusterName(), noRegionRackSet);
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildNotExist("集群中没有模板");
@@ -648,7 +648,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
         if(null == area){return;}
 
         // 物理集群下的物理模板
-        List<IndexTemplatePhy> clusterTemplates = templatePhyService.getNormalTemplateByCluster(area.getClusterName());
+        List<IndexTemplatePhy> clusterTemplates = indexTemplatePhyService.getNormalTemplateByCluster(area.getClusterName());
 
         // 校验是否有模板rack不匹配
         for (CapacityPlanRegion region : clusterRegions) {

@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterPlugOperationContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterPlugOperationOrderDetail;
@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
@@ -60,7 +60,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     private EcmTaskManager             ecmTaskManager;
 
     @Autowired
-    private RoleClusterService roleClusterService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
     private EcmHandleService ecmHandleService;
@@ -169,15 +169,15 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(clusterId);
         esEcmTaskDTO.setPhysicClusterId(clusterPhy.getId().longValue());
 
-        List<RoleCluster> roleClusterList = roleClusterService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(
                 clusterPhy.getId());
-        if (CollectionUtils.isEmpty(roleClusterList)) {
+        if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");
         }
 
         List<String> roleNameList = new ArrayList<>();
-        for (RoleCluster roleCluster : roleClusterList) {
-            roleNameList.add(roleCluster.getRole());
+        for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfoList) {
+            roleNameList.add(clusterRoleInfo.getRole());
         }
 
         esEcmTaskDTO.setWorkOrderId(workOrder.getId());
@@ -196,7 +196,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
             plugIdList.removeAll(ListUtils.string2LongList(content.getPlugIds()));
         }
         clusterPhy.setPlugIds(ListUtils.longList2String(plugIdList.stream().distinct().collect(Collectors.toList())));
-        esClusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ESClusterDTO.class), workOrder.getSubmitor());
+        esClusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class), workOrder.getSubmitor());
         return Result.buildSucc();
     }
 }

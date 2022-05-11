@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
@@ -21,26 +21,26 @@ public interface TemplatePipelineManager {
 
     /**
      * 同步pipeline
-     * @param indexTemplatePhysical  物理模板
+     * @param indexTemplatePhysicalInfo  物理模板
      * @param logicWithPhysical 逻辑模板
      */
-    void syncPipeline(IndexTemplatePhy indexTemplatePhysical, IndexTemplateLogicWithPhyTemplates logicWithPhysical);
+    void syncPipeline(IndexTemplatePhy indexTemplatePhysicalInfo, IndexTemplateWithPhyTemplates logicWithPhysical);
 
     /**
      * 创建
-     * @param indexTemplatePhysical 物理模板
+     * @param indexTemplatePhysicalInfo 物理模板
      * @param logicWithPhysical 逻辑模板
      * @return true/false
      */
-    boolean createPipeline(IndexTemplatePhy indexTemplatePhysical,
-                           IndexTemplateLogicWithPhyTemplates logicWithPhysical) throws ESOperateException;
+    boolean createPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
+                           IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
 
     /**
      * 删除
-     * @param indexTemplatePhysical 物理模板
+     * @param indexTemplatePhysicalInfo 物理模板
      * @return true/false
      */
-    boolean deletePipeline(IndexTemplatePhy indexTemplatePhysical) throws ESOperateException;
+    boolean deletePipeline(IndexTemplatePhy indexTemplatePhysicalInfo) throws ESOperateException;
 
     /**
      * 修改逻辑字段
@@ -48,7 +48,7 @@ public interface TemplatePipelineManager {
      * @param newTemplate 逻辑模板
      * @return true/false
      */
-    boolean editFromTemplateLogic(IndexTemplateLogic oldTemplate, IndexTemplateLogic newTemplate);
+    boolean editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
 
     /**
      * 修改物理字段
@@ -56,16 +56,16 @@ public interface TemplatePipelineManager {
      * @return true/false
      */
     boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
-                                     IndexTemplateLogicWithPhyTemplates logicWithPhysical) throws ESOperateException;
+                                     IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
 
     /**
      * 调整限流值
      *
-     * @param indexTemplatePhysical 名字
+     * @param indexTemplatePhysicalInfo 名字
      * @param percent 百分比 [-99, 1000]
      * @return true/false
      */
-    boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysical, Integer percent) throws ESOperateException;
+    boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysicalInfo, Integer percent) throws ESOperateException;
 
-    Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMaster);
+    Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
 }

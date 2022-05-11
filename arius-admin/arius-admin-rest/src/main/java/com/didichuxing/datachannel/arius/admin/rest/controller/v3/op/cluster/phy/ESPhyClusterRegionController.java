@@ -1,36 +1,44 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 新版逻辑集群Controller
@@ -51,10 +59,10 @@ public class ESPhyClusterRegionController {
     private RegionRackService         regionRackService;
 
     @Autowired
-    private RoleClusterHostService    roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
-    private TemplatePhyService        physicalService;
+    private IndexTemplatePhyService physicalService;
 
     @Autowired
     private ClusterRegionManager      clusterRegionManager;
@@ -119,17 +127,17 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{regionId}/nodes")
     @ResponseBody
     @ApiOperation(value = "获取region下的节点列表", notes = "")
-    public Result<List<ESRoleClusterHostVO>> getRegionNodes(@PathVariable Long regionId) {
+    public Result<List<ESClusterRoleHostVO>> getRegionNodes(@PathVariable Long regionId) {
 
         ClusterRegion region = regionRackService.getRegionById(regionId);
         if (region == null) {
             return Result.buildFail("region不存在");
         }
 
-        List<RoleClusterHost> hosts = roleClusterHostService.listRacksNodes(region.getPhyClusterName(),
+        List<ClusterRoleHost> hosts = clusterRoleHostService.listRacksNodes(region.getPhyClusterName(),
             region.getRacks());
 
-        return Result.buildSucc(ConvertUtil.list2List(hosts, ESRoleClusterHostVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(hosts, ESClusterRoleHostVO.class));
 
     }
 

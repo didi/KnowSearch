@@ -3,7 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.NO_CAPACITY_PLAN;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -24,17 +25,16 @@ import org.springframework.stereotype.Service;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateDistributedRack;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterConfigProvider;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterDistributor;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -48,10 +48,10 @@ public class TemplateActionImpl implements TemplateAction {
     private static final ILog          LOGGER = LogFactory.getLog(TemplateActionImpl.class);
 
     @Autowired
-    private TemplateLogicService       templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private TemplatePhyService         templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private ExtendServiceFactory       extendServiceFactory;
@@ -80,7 +80,7 @@ public class TemplateActionImpl implements TemplateAction {
      * @throws AdminOperateException exception
      */
     @Override
-    public Result<Integer> createWithAutoDistributeResource(IndexTemplateLogicDTO logicDTO,
+    public Result<Integer> createWithAutoDistributeResource(IndexTemplateDTO logicDTO,
                                                             String operator) throws AdminOperateException {
         // 必须指定物理模板
         if (CollectionUtils.isEmpty(logicDTO.getPhysicalInfos())) {
@@ -109,13 +109,13 @@ public class TemplateActionImpl implements TemplateAction {
     @Override
     public Result<Void> indecreaseWithAutoDistributeResource(Integer logicId, Integer expectHotTime, Integer expectExpireTime, Double expectQuota,
                                                        String submitor) throws AdminOperateException {
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
+        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(logicId);
 
         if (templateLogic == null) {
             return Result.buildParamIllegal("模板不存在");
         }
 
-        IndexTemplateLogicDTO logicDTO = new IndexTemplateLogicDTO();
+        IndexTemplateDTO logicDTO = new IndexTemplateDTO();
         logicDTO.setId(logicId);
         logicDTO.setExpireTime(expectExpireTime);
         logicDTO.setQuota(expectQuota);
@@ -128,7 +128,7 @@ public class TemplateActionImpl implements TemplateAction {
             logicDTO.setHotTime(expectHotTime);
         }
 
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getTemplateByLogicId(logicId);
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(logicId);
         if (!CollectionUtils.isEmpty(templatePhysicals) && (expectQuota > templateLogic.getQuota())) {
             double deltaQuota = (expectQuota - templateLogic.getQuota()) / templatePhysicals.size();
             if (deltaQuota > 0) {
@@ -153,7 +153,7 @@ public class TemplateActionImpl implements TemplateAction {
         }
 
         // 修改模板quota及保存时长信息
-        return templateLogicService.editTemplate(logicDTO, submitor);
+        return indexTemplateService.editTemplate(logicDTO, submitor);
     }
 
     /**
@@ -232,9 +232,9 @@ public class TemplateActionImpl implements TemplateAction {
         return distributedRackResult;
     }
 
-    private Result<Integer> handleCreateWithAutoDistributeResource(IndexTemplateLogicDTO logicDTO, String operator) throws AdminOperateException {
+    private Result<Integer> handleCreateWithAutoDistributeResource(IndexTemplateDTO logicDTO, String operator) throws AdminOperateException {
         int indexDefaultWriterSetFlags = -1;
-        for (IndexTemplatePhysicalDTO physicalDTO : logicDTO.getPhysicalInfos()) {
+        for (IndexTemplatePhyDTO physicalDTO : logicDTO.getPhysicalInfos()) {
             if (StringUtils.isNotBlank(physicalDTO.getCluster()) && physicalDTO.getRack() != null) {
                 handleIndexTemplatePhysical(physicalDTO);
                 continue;
@@ -265,7 +265,7 @@ public class TemplateActionImpl implements TemplateAction {
         return templateLogicManager.createLogicTemplate(logicDTO, operator);
     }
 
-    private void handleIndexTemplatePhysical(IndexTemplatePhysicalDTO physicalDTO) {
+    private void handleIndexTemplatePhysical(IndexTemplatePhyDTO physicalDTO) {
         if (physicalDTO.getDefaultWriterFlags() == null) {
             physicalDTO.setDefaultWriterFlags(true);
         }
@@ -283,7 +283,7 @@ public class TemplateActionImpl implements TemplateAction {
      * @return 校验结果
      */
     private Result<Void> validOpenColdAndHotServiceResult(Integer logicId, Integer expectHotTime, Integer expectExpireTime) {
-        IndexTemplateLogicWithPhyTemplates logicTemplateWithPhysicalsById = templateLogicService.getLogicTemplateWithPhysicalsById(logicId);
+        IndexTemplateWithPhyTemplates logicTemplateWithPhysicalsById = indexTemplateService.getLogicTemplateWithPhysicalsById(logicId);
         if (AriusObjUtils.isNull(logicTemplateWithPhysicalsById) ||
                 CollectionUtils.isEmpty(logicTemplateWithPhysicalsById.getPhysicals())) {
             return Result.buildFail("逻辑集群指定信息为空");

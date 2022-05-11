@@ -1,15 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,9 +88,9 @@ public interface TemplatePhyManager {
      * @param operator 操作人
      * @return result
      */
-    Result<Void> editTemplate(IndexTemplatePhysicalDTO param, String operator) throws ESOperateException;
+    Result<Void> editTemplate(IndexTemplatePhyDTO param, String operator) throws ESOperateException;
 
-    Result<Boolean> editMultipleTemplate(List<IndexTemplatePhysicalDTO> params,
+    Result<Boolean> editMultipleTemplate(List<IndexTemplatePhyDTO> params,
                                          String operator) throws ESOperateException;
 
     /**
@@ -100,7 +100,7 @@ public interface TemplatePhyManager {
      * @param operation 操作
      * @return result
      */
-    Result<Void> validateTemplate(IndexTemplatePhysicalDTO param, OperationEnum operation);
+    Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation);
 
     /**
      * 批量校验物理模板信息
@@ -109,7 +109,7 @@ public interface TemplatePhyManager {
      * @param operation 操作
      * @return result
      */
-    Result<Void> validateTemplates(List<IndexTemplatePhysicalDTO> params, OperationEnum operation);
+    Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation);
 
     /**
      * 批量新增物理模板
@@ -120,7 +120,7 @@ public interface TemplatePhyManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> addTemplatesWithoutCheck(Integer logicId,
-                                          List<IndexTemplatePhysicalDTO> physicalInfos) throws AdminOperateException;
+                                          List<IndexTemplatePhyDTO> physicalInfos) throws AdminOperateException;
 
     /**
      * 新建
@@ -129,7 +129,7 @@ public interface TemplatePhyManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Long> addTemplateWithoutCheck(IndexTemplatePhysicalDTO param) throws AdminOperateException;
+    Result<Long> addTemplateWithoutCheck(IndexTemplatePhyDTO param) throws AdminOperateException;
 
     /**
      * 修改由于逻辑模板修改而物理模板需要同步修改的属性
@@ -142,7 +142,7 @@ public interface TemplatePhyManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> editTemplateFromLogic(IndexTemplateLogicDTO param, String operator) throws ESOperateException;
+    Result<Void> editTemplateFromLogic(IndexTemplateDTO param, String operator) throws ESOperateException;
 
     /**
      * 主从切换
@@ -183,7 +183,7 @@ public interface TemplatePhyManager {
      * @return
      * @throws ESOperateException
      */
-    Result<Void> editTemplateWithoutCheck(IndexTemplatePhysicalDTO param, String operator,
+    Result<Void> editTemplateWithoutCheck(IndexTemplatePhyDTO param, String operator,
                                           int retryCount) throws ESOperateException;
 
     /**
@@ -207,7 +207,7 @@ public interface TemplatePhyManager {
      * 获取带有App权限信息的物理模板列表
      * @param appId 当前登录appId
      */
-    List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhysicalDTO param, Integer appId);
+    List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer appId);
 
     /**
      * 根据项目获取有管理权限的物理模板

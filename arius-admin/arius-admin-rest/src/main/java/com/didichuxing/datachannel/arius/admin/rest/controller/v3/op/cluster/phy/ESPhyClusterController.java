@@ -23,11 +23,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
@@ -62,13 +62,13 @@ public class ESPhyClusterController {
     @GetMapping("/{clusterId}/roles")
     @ResponseBody
     @ApiOperation(value = "根据物理集群ID获取全部角色列表", notes = "")
-    public Result<List<ESRoleClusterVO>> roleList(@PathVariable Integer clusterId) {
-        List<RoleCluster> roleClusters = esClusterPhyService.listPhysicClusterRoles(clusterId);
+    public Result<List<ESClusterRoleVO>> roleList(@PathVariable Integer clusterId) {
+        List<ClusterRoleInfo> clusterRoleInfos = esClusterPhyService.listPhysicClusterRoles(clusterId);
 
-        if (AriusObjUtils.isNull(roleClusters)) {
+        if (AriusObjUtils.isNull(clusterRoleInfos)) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.list2List(roleClusters, ESRoleClusterVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleVO.class));
     }
 
     @DeleteMapping("/plugin/{id}")
@@ -105,7 +105,7 @@ public class ESPhyClusterController {
     @GetMapping("/{clusterId}/regioninfo")
     @ResponseBody
     @ApiOperation(value = "获取节点划分列表")
-    public Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
+    public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
         return clusterPhyManager.getClusterPhyRegionInfos(clusterId);
     }
 

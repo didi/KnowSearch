@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import java.util.List;
 import java.util.Map;
 import lombok.NoArgsConstructor;
@@ -37,7 +37,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
 
     @Autowired
-    private TemplateLogicService                        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private AppLogicTemplateAuthService                 appLogicTemplateAuthService;
@@ -173,12 +173,12 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
         if (authEnum.equals(AppTemplateAuthEnum.OWN)) {
             // 逻辑模板移交
-            return Result.buildFrom(templateLogicService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
+            return Result.buildFrom(indexTemplateService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
                     content.getResponsible(), workOrder.getSubmitor()));
         } else {
             // 对于索引的工单任务，若没有集群权限，则添加所在集群的访问权限
             // 获取所在集群
-            ClusterLogic clusterLogic = templateLogicService
+            ClusterLogic clusterLogic = indexTemplateService
                 .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId).getLogicCluster();
 
             if (clusterLogic == null) {

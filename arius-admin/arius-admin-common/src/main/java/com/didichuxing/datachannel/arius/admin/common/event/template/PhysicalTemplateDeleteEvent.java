@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.template;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 
 /**
@@ -17,7 +17,7 @@ public class PhysicalTemplateDeleteEvent extends PhysicalTemplateEvent {
      * @param source the object on which the event initially occurred (never {@code null})
      */
     public PhysicalTemplateDeleteEvent(Object source, IndexTemplatePhy delTemplate,
-                                       IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+                                       IndexTemplateWithPhyTemplates logicWithPhysical) {
         super(source, logicWithPhysical);
         this.delTemplate = delTemplate;
     }

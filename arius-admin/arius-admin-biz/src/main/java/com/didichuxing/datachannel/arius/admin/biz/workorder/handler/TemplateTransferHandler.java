@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateTransferOrderDetail;
@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateTransferContent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import java.util.List;
 public class TemplateTransferHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private TemplateLogicService    templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private AriusUserInfoService    ariusUserInfoService;
@@ -105,7 +105,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("责任人非法");
         }
 
-        if (AriusObjUtils.isNull(templateLogicService.getLogicTemplateById(content.getId()))) {
+        if (AriusObjUtils.isNull(indexTemplateService.getLogicTemplateById(content.getId()))) {
             return Result.buildNotExist("索引不存在");
         }
 
@@ -152,7 +152,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             return Result.buildSucc();
         }
 
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(content.getId());
+        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(content.getId());
         if (!templateLogic.getAppId().equals(workOrder.getSubmitorAppid())) {
             return Result.buildOpForBidden("您无权对该索引进行转让操作");
         }
@@ -182,7 +182,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
-        Result<Void> result = templateLogicService.turnOverLogicTemplate(content.getId(), content.getTgtAppId(),
+        Result<Void> result = indexTemplateService.turnOverLogicTemplate(content.getId(), content.getTgtAppId(),
             content.getTgtResponsible(), workOrder.getSubmitor());
 
         if (result.success()) {
