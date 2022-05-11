@@ -4,20 +4,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 
 /**
  *
@@ -96,7 +96,7 @@ public interface ClusterPhyManager {
      * @param clusterPyhId  物理集群ID
      * @return 集群节点信息
      */
-    Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
+    Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
 
     /**
      * 获取逻辑集群可关联region的物理集群名称列表
@@ -198,9 +198,7 @@ public interface ClusterPhyManager {
     List<String> getAppNodeNames(Integer appId);
 
     /**
-     * 删除集群信息
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
-     *
      * @param clusterPhyId 物理集群ID
      * @param operator     操作人
      * @param appId        appId
@@ -268,9 +266,9 @@ public interface ClusterPhyManager {
      * 构建集群作用
      *
      * @param cluster      集群
-     * @param roleClusters 集群角色
+     * @param clusterRoleInfos 集群角色
      */
-    void buildClusterRole(ConsoleClusterPhyVO cluster, List<RoleCluster> roleClusters);
+    void buildClusterRole(ConsoleClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos);
 
     /**
      * 更新物理集群状态

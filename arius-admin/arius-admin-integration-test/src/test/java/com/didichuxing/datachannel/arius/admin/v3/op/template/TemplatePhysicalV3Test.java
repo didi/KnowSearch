@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.v3.op.template;
 
 import com.didichuxing.datachannel.arius.admin.base.BaseTemplateInfoTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.template.TemplatePhysicalV3ControllerMethod;
@@ -45,10 +45,10 @@ public class TemplatePhysicalV3Test extends BaseTemplateInfoTest {
         Assertions.assertTrue(result.success());
         Assertions.assertFalse(result.getData().isEmpty());
         IndexTemplatePhysicalVO indexTemplatePhysicalVO = result.getData().get(0);
-        IndexTemplatePhysicalDTO dto = new IndexTemplatePhysicalDTO();
+        IndexTemplatePhyDTO dto = new IndexTemplatePhyDTO();
         dto.setId(indexTemplatePhysicalVO.getId());
         dto.setName("newNameTest");
-        List<IndexTemplatePhysicalDTO> list = new ArrayList<>();
+        List<IndexTemplatePhyDTO> list = new ArrayList<>();
         list.add(dto);
         Result<Boolean> result2 = TemplatePhysicalV3ControllerMethod.multipleEdit(list);
         Assertions.assertTrue(result2.success());

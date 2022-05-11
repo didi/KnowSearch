@@ -6,10 +6,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLog
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppTemplateAuthDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +32,7 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
     private AppTemplateAuthDAO appTemplateAuthDAO;
 
     @MockBean
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @MockBean
     private AppClusterLogicAuthService logicClusterAuthService;
@@ -172,9 +172,9 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
         Integer templateId = 1147;
         appTemplateAuthDTO.setAppId(1);
         appTemplateAuthDTO.setTemplateId(templateId);
-        IndexTemplateLogic indexTemplateLogic = new IndexTemplateLogic();
-        indexTemplateLogic.setAppId(1);
-        indexTemplateLogic.setId(templateId);
+        IndexTemplate indexTemplate = new IndexTemplate();
+        indexTemplate.setAppId(1);
+        indexTemplate.setId(templateId);
         IndexTemplateLogicWithClusterAndMasterTemplate indexTemplateLogicWithClusterAndMasterTemplate = new IndexTemplateLogicWithClusterAndMasterTemplate();
         ClusterLogic clusterLogic = new ClusterLogic();
         clusterLogic.setId(1L);
@@ -186,9 +186,9 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
         appMap.put(app.getId(),app);
 
         // 创建mock规则
-        Mockito.when(templateLogicService.getAllLogicTemplates()).thenReturn(Collections.singletonList(indexTemplateLogic));
-        Mockito.when(templateLogicService.getLogicTemplateById(Mockito.anyInt())).thenReturn(indexTemplateLogic);
-        Mockito.when(templateLogicService.getLogicTemplateWithClusterAndMasterTemplate(Mockito.anyInt())).thenReturn(indexTemplateLogicWithClusterAndMasterTemplate);
+        Mockito.when(indexTemplateService.getAllLogicTemplates()).thenReturn(Collections.singletonList(indexTemplate));
+        Mockito.when(indexTemplateService.getLogicTemplateById(Mockito.anyInt())).thenReturn(indexTemplate);
+        Mockito.when(indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(Mockito.anyInt())).thenReturn(indexTemplateLogicWithClusterAndMasterTemplate);
         Mockito.when(logicClusterAuthService.getLogicClusterAuthEnum(Mockito.anyInt(), Mockito.anyLong())).thenReturn(AppClusterLogicAuthEnum.OWN);
         Mockito.when(appService.getAppById(Mockito.anyInt())).thenReturn(app);
         Mockito.when(appService.isSuperApp(Mockito.anyInt())).thenReturn(false);

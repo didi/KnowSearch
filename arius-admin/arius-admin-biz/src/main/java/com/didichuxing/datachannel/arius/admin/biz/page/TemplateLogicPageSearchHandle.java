@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -30,8 +30,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -51,13 +51,13 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     private AppLogicTemplateAuthManager appLogicTemplateAuthManager;
 
     @Autowired
-    private TemplatePhyService          templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private TemplateLogicManager        templateLogicManager;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private ClusterLogicService          clusterLogicService;
@@ -115,13 +115,13 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO);
 
         //1. 获取管理/读写/读/无权限的模板信息
-        List<IndexTemplateLogic> appAuthTemplatesList = templateLogicManager.getTemplatesByAppIdAndAuthType(appId, condition.getAuthType());
+        List<IndexTemplate> appAuthTemplatesList = templateLogicManager.getTemplatesByAppIdAndAuthType(appId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthTemplatesList)) {
             return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
 
         //2. 根据无模板名称、有模板名称、有数量类型、有模板名称与数据类型等进行模糊匹配, 得出总结果
-        List<IndexTemplateLogic> meetConditionTemplateList = getMeetConditionTemplateList(condition, appAuthTemplatesList);
+        List<IndexTemplate> meetConditionTemplateList = getMeetConditionTemplateList(condition, appAuthTemplatesList);
 
         //3. 设置命中数
         int hitTotal = meetConditionTemplateList.size();
@@ -130,7 +130,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         sort(meetConditionTemplateList, condition.getSortTerm(), condition.getOrderByDesc());
 
         // 5.内存分页
-        List<IndexTemplateLogic> fuzzyAndLimitTemplateList = filterFullDataByPage(meetConditionTemplateList, condition);
+        List<IndexTemplate> fuzzyAndLimitTemplateList = filterFullDataByPage(meetConditionTemplateList, condition);
         List<ConsoleTemplateVO>  consoleTemplateVOList     = ConvertUtil.list2List(fuzzyAndLimitTemplateList, ConsoleTemplateVO.class);
 
         //6. 设置权限
@@ -150,26 +150,26 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO);
 
         int totalHit;
-        List<IndexTemplateLogic> matchIndexTemplateLogic;
+        List<IndexTemplate> matchIndexTemplate;
         if (!AriusObjUtils.isEmptyList(condition.getClusterPhies())) {
-            List<IndexTemplateLogic> allTemplateLogics = templateLogicService.getAllLogicTemplates();
+            List<IndexTemplate> allTemplateLogics = indexTemplateService.getAllLogicTemplates();
             if (CollectionUtils.isEmpty(allTemplateLogics)) {
                 return PaginationResult.buildSucc();
             }
             //根据无模板名称、有模板名称、有数量类型、有模板名称与数据类型等进行模糊匹配, 得出总结果
-            List<IndexTemplateLogic> meetConditionTemplateList = getMeetConditionTemplateList(condition, allTemplateLogics);
+            List<IndexTemplate> meetConditionTemplateList = getMeetConditionTemplateList(condition, allTemplateLogics);
             //设置命中数
             totalHit = meetConditionTemplateList.size();
             //根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
             sort(meetConditionTemplateList, condition.getSortTerm(), condition.getOrderByDesc());
             //最后页临界点处理
-            matchIndexTemplateLogic = filterFullDataByPage(meetConditionTemplateList, condition);
+            matchIndexTemplate = filterFullDataByPage(meetConditionTemplateList, condition);
         } else {
-            matchIndexTemplateLogic = templateLogicService.pagingGetLogicTemplatesByCondition(condition);
-            totalHit                = templateLogicService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
+            matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
+            totalHit                = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
         }
 
-        List<ConsoleTemplateVO> consoleTemplateVOList = doBuildWithoutAuthType(matchIndexTemplateLogic, appId);
+        List<ConsoleTemplateVO> consoleTemplateVOList = doBuildWithoutAuthType(matchIndexTemplate, appId);
         return PaginationResult.buildSucc(consoleTemplateVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
@@ -181,16 +181,16 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
      * @param appAuthTemplatesList
      * @return
      */
-    private List<IndexTemplateLogic> getMeetConditionTemplateList(TemplateConditionDTO condition,
-                                                                  List<IndexTemplateLogic> appAuthTemplatesList) {
-        List<IndexTemplateLogic> meetConditionTemplateList = Lists.newArrayList();
+    private List<IndexTemplate> getMeetConditionTemplateList(TemplateConditionDTO condition,
+                                                             List<IndexTemplate> appAuthTemplatesList) {
+        List<IndexTemplate> meetConditionTemplateList = Lists.newArrayList();
         if (null != condition.getHasDCDR()) {
             appAuthTemplatesList = appAuthTemplatesList.stream().filter(r -> condition.getHasDCDR().equals(r.getHasDCDR()))
                     .collect(Collectors.toList());
         }
 
         if (!AriusObjUtils.isEmptyList(condition.getClusterPhies())) {
-            Set<String> logicIdSet = templatePhyService.getMatchNormalLogicIdByCluster(condition.getClusterPhies().get(0));
+            Set<String> logicIdSet = indexTemplatePhyService.getMatchNormalLogicIdByCluster(condition.getClusterPhies().get(0));
             appAuthTemplatesList = appAuthTemplatesList.stream().filter(r -> logicIdSet.contains(r.getId().toString()))
                     .collect(Collectors.toList());
         }
@@ -207,19 +207,19 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         return meetConditionTemplateList;
     }
 
-    private List<ConsoleTemplateVO> doBuildWithoutAuthType(List<IndexTemplateLogic> indexTemplateLogicList,
+    private List<ConsoleTemplateVO> doBuildWithoutAuthType(List<IndexTemplate> indexTemplateList,
                                                            Integer appId) {
-        if (CollectionUtils.isEmpty(indexTemplateLogicList)) {
+        if (CollectionUtils.isEmpty(indexTemplateList)) {
             return Lists.newArrayList();
         }
 
         List<AppTemplateAuth> appTemplateAuthList = appLogicTemplateAuthManager
-            .getTemplateAuthListByTemplateListAndAppId(appId, indexTemplateLogicList);
+            .getTemplateAuthListByTemplateListAndAppId(appId, indexTemplateList);
 
         Map<Integer, Integer> templateId2AuthTypeMap = ConvertUtil.list2Map(appTemplateAuthList,
             AppTemplateAuth::getTemplateId, AppTemplateAuth::getType);
 
-        List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateLogicList,
+        List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList,
             ConsoleTemplateVO.class);
 
         //1. 设置权限
@@ -249,7 +249,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
 
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
             BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
-                Set<String> clusterNameList = templatePhyService.getTemplateByLogicId(consoleTemplateVO.getId())
+                Set<String> clusterNameList = indexTemplatePhyService.getTemplateByLogicId(consoleTemplateVO.getId())
                         .stream()
                         .map(IndexTemplatePhy::getCluster)
                         .collect(Collectors.toSet());
@@ -265,7 +265,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         if (CollectionUtils.isEmpty(consoleTemplateVOList)) { return;}
 
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
-            IndexTemplateConfig templateConfig = templateLogicService.getTemplateConfig(consoleTemplateVO.getId());
+            IndexTemplateConfig templateConfig = indexTemplateService.getTemplateConfig(consoleTemplateVO.getId());
             consoleTemplateVO.setDisableIndexRollover(templateConfig.getDisableIndexRollover());
         }
     }
@@ -277,7 +277,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
      * @see   SortTermEnum                           支持的排序字段枚举
      * @param orderByDesc                            是否降序排序 true 是 false 否
      */
-    private void sort(List<IndexTemplateLogic> meetConditionTemplateList, String sortTerm, Boolean orderByDesc) {
+    private void sort(List<IndexTemplate> meetConditionTemplateList, String sortTerm, Boolean orderByDesc) {
         // 使用默认排序
         if (null == sortTerm) {
             Collections.sort(meetConditionTemplateList);

@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
@@ -57,7 +57,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     private ClusterPhyService        clusterPhyService;
 
     @Autowired
-    private TemplatePhyService       templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private AppService               appService;
@@ -127,7 +127,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
         // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
         List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
 
-        final Map<String, Integer> clusterPhyName2TemplateCountMap = templatePhyService.getClusterTemplateCountMap();
+        final Map<String, Integer> clusterPhyName2TemplateCountMap = indexTemplatePhyService.getClusterTemplateCountMap();
 
         int appIdCount = calcAppNu();
 

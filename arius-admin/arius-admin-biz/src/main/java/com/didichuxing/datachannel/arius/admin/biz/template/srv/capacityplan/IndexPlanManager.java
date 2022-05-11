@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 
 /**
  * @author cjm
@@ -31,5 +31,5 @@ public interface IndexPlanManager {
      *
      * @param param IndexTemplatePhysicalDTO
      */
-    void initShardRoutingAndAdjustShard(IndexTemplatePhysicalDTO param);
+    void initShardRoutingAndAdjustShard(IndexTemplatePhyDTO param);
 }

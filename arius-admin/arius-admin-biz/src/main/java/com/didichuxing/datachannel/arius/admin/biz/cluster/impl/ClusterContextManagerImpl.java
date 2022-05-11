@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
@@ -35,7 +35,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -81,7 +81,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     private RegionRackService              regionRackService;
 
     @Autowired
-    private RoleClusterHostService         roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private AriusScheduleThreadPool        ariusScheduleThreadPool;
@@ -293,9 +293,9 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         Map<Long, ClusterLogic> id2ClusterLogicMap = ConvertUtil.list2Map(clusterLogicList, ClusterLogic::getId);
 
         // host信息按【cluster】分组
-        List<RoleClusterHost>      roleClusterHosts = roleClusterHostService.listAllNode();
-        Map<String, List<RoleClusterHost>> cluster2RoleListMap = ConvertUtil.list2MapOfList(roleClusterHosts, 
-                RoleClusterHost::getCluster, roleClusterHost -> roleClusterHost);
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listAllNode();
+        Map<String, List<ClusterRoleHost>> cluster2RoleListMap = ConvertUtil.list2MapOfList(clusterRoleHosts,
+                ClusterRoleHost::getCluster, clusterRoleHost -> clusterRoleHost);
 
         // app信息分组
         List<App> apps = appService.listApps();
@@ -309,21 +309,21 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
                     .associatedLogicNumMax(PHY_ASSOCIATED_LOGIC_MAX_NUMBER)
                     .build();
 
-            List<RoleClusterHost> hostList = cluster2RoleListMap.get(phy.getCluster());
+            List<ClusterRoleHost> hostList = cluster2RoleListMap.get(phy.getCluster());
             if (CollectionUtils.isEmpty(hostList)) {
                 name2ClusterPhyContextMap.put(phy.getCluster(), clusterPhyContext);
                 continue;
             }
 
             // 设置物理集群管理的host信息, 这里暂时不去区分单机器多es实例的场景
-            List<RoleClusterHost> dataNodes = hostList.stream().filter(r -> DATA_NODE.getCode() == r.getRole())
+            List<ClusterRoleHost> dataNodes = hostList.stream().filter(r -> DATA_NODE.getCode() == r.getRole())
                     .collect(Collectors.toList());
 
             clusterPhyContext.setAssociatedDataNodeNum(dataNodes.size());
-            clusterPhyContext.setAssociatedDataNodeIps(dataNodes.stream().map(RoleClusterHost::getIp).collect(Collectors.toList()));
-            clusterPhyContext.setAssociatedNodeIps(hostList.stream().map(RoleClusterHost::getIp).collect(Collectors.toList()));
+            clusterPhyContext.setAssociatedDataNodeIps(dataNodes.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
+            clusterPhyContext.setAssociatedNodeIps(hostList.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
             clusterPhyContext.setAssociatedRacks(
-                dataNodes.stream().map(RoleClusterHost::getRack).distinct().collect(Collectors.toList()));
+                dataNodes.stream().map(ClusterRoleHost::getRack).distinct().collect(Collectors.toList()));
 
             // 设置region信息
             List<ClusterRegion> clusterRegions = phyClusterName2ClusterLogicRackListMap.get(phy.getCluster());
@@ -384,7 +384,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         Map<Long, List<ClusterRegion>> clusterLogicId2ClusterLogicRackListMap = getClusterLogicId2ClusterRegionListMap();
 
         // host信息按【cluster@rack】分组
-        Map<String, List<RoleClusterHost>> phyRack2HostListMap = getPhyRack2HostListMap();
+        Map<String, List<ClusterRoleHost>> phyRack2HostListMap = getPhyRack2HostListMap();
 
         for (ClusterLogic clusterLogic : clusterLogics) {
             // 构建初始化上下文, 按照逻辑集群类型限制上下文信息数量
@@ -414,11 +414,11 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             clusterLogicContext.setAssociatedRegionIds(clusterRegions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
 
             // 获取逻辑集群关联region下的rack节点信息
-            List<RoleClusterHost> associatedRackClusterHosts = Lists.newArrayList();
+            List<ClusterRoleHost> associatedRackClusterHosts = Lists.newArrayList();
             for (ClusterRegion clusterRegion : clusterRegions) {
                 List<String> rackList = ListUtils.string2StrList(clusterRegion.getRacks());
                 for (String rack : rackList) {
-                    List<RoleClusterHost> associatedHosts = phyRack2HostListMap.get(clusterRegion.getPhyClusterName() + "@" + rack);
+                    List<ClusterRoleHost> associatedHosts = phyRack2HostListMap.get(clusterRegion.getPhyClusterName() + "@" + rack);
                     if (CollectionUtils.isEmpty(associatedHosts)) { continue;}
 
                     associatedRackClusterHosts.addAll(associatedHosts);
@@ -429,7 +429,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             clusterLogicContext.setAssociatedDataNodeNum(associatedRackClusterHosts.size());
 
             //设置数据节点Ip地址
-            clusterLogicContext.setAssociatedDataNodeIps(associatedRackClusterHosts.stream().map(RoleClusterHost::getIp)
+            clusterLogicContext.setAssociatedDataNodeIps(associatedRackClusterHosts.stream().map(ClusterRoleHost::getIp)
                     .collect(Collectors.toList()));
 
             id2ClusterLogicContextMap.put(clusterLogic.getId(), clusterLogicContext);
@@ -468,10 +468,10 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
      * @return key -> cluster@rack  value -> List<RoleClusterHost>
      */
     @NotNull
-    private Map<String, List<RoleClusterHost>> getPhyRack2HostListMap() {
-        List<RoleClusterHost>      roleClusterHosts = roleClusterHostService.listAllNode();
-        return ConvertUtil.list2MapOfList(roleClusterHosts,
-                host -> host.getCluster() + "@" + host.getRack(), roleClusterHost -> roleClusterHost);
+    private Map<String, List<ClusterRoleHost>> getPhyRack2HostListMap() {
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listAllNode();
+        return ConvertUtil.list2MapOfList(clusterRoleHosts,
+                host -> host.getCluster() + "@" + host.getRack(), clusterRoleHost -> clusterRoleHost);
     }
 
     /**
@@ -530,17 +530,17 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
 
         //获取逻辑集群关联region下的rack节点信息
-        List<RoleClusterHost> associatedRackClusterHosts = Lists.newArrayList();
+        List<ClusterRoleHost> associatedRackClusterHosts = Lists.newArrayList();
         for (ClusterRegion region : regions) {
-            List<RoleClusterHost> roleClusterHosts = roleClusterHostService.listRacksNodes(region.getPhyClusterName(), region.getRacks());
-            associatedRackClusterHosts.addAll(roleClusterHosts);
+            List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listRacksNodes(region.getPhyClusterName(), region.getRacks());
+            associatedRackClusterHosts.addAll(clusterRoleHosts);
         }
 
         //设置数据节点总数
         build.setAssociatedDataNodeNum(associatedRackClusterHosts.size());
 
         //设置数据节点Ip地址
-        build.setAssociatedDataNodeIps(associatedRackClusterHosts.stream().map(RoleClusterHost::getIp).collect(Collectors.toList()));
+        build.setAssociatedDataNodeIps(associatedRackClusterHosts.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
     }
 
     private void setRegionAndClusterLogicInfoAndAppId(ClusterPhyContext build) {
@@ -580,15 +580,15 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     }
 
     private void setClusterPhyNodeInfo(ClusterPhyContext build) {
-        List<RoleClusterHost> nodes = roleClusterHostService.getNodesByCluster(build.getClusterName());
-        List<RoleClusterHost> dataNodes = nodes.stream().filter(r -> DATA_NODE.getCode() == r.getRole())
+        List<ClusterRoleHost> nodes = clusterRoleHostService.getNodesByCluster(build.getClusterName());
+        List<ClusterRoleHost> dataNodes = nodes.stream().filter(r -> DATA_NODE.getCode() == r.getRole())
             .collect(Collectors.toList());
 
         build.setAssociatedDataNodeNum(dataNodes.size());
-        build.setAssociatedDataNodeIps(dataNodes.stream().map(RoleClusterHost::getIp).collect(Collectors.toList()));
-        build.setAssociatedNodeIps(nodes.stream().map(RoleClusterHost::getIp).collect(Collectors.toList()));
+        build.setAssociatedDataNodeIps(dataNodes.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
+        build.setAssociatedNodeIps(nodes.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
         build.setAssociatedRacks(
-            dataNodes.stream().map(RoleClusterHost::getRack).distinct().collect(Collectors.toList()));
+            dataNodes.stream().map(ClusterRoleHost::getRack).distinct().collect(Collectors.toList()));
     }
 
     /**

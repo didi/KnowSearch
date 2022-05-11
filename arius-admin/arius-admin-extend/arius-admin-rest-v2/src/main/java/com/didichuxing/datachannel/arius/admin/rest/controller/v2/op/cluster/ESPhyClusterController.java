@@ -15,12 +15,12 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.TemplateE
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -39,7 +39,7 @@ public class ESPhyClusterController {
     private TemplateExpireManager    templateExpireManager;
 
     @Autowired
-    private RoleClusterHostService roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private ClusterNodeManager       clusterNodeManager;
@@ -79,16 +79,16 @@ public class ESPhyClusterController {
 
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) {
-        return Result.build(roleClusterHostService.collectClusterNodeSettings(cluster));
+        return Result.build(clusterRoleHostService.collectClusterNodeSettings(cluster));
     }
 
     @PostMapping("/node/list")
     @ResponseBody
     @ApiOperation(value = "获取集群节点列表接口" )
 
-    public Result<List<ESRoleClusterHostVO>> nodeList(@RequestBody ESRoleClusterHostDTO param) {
+    public Result<List<ESClusterRoleHostVO>> nodeList(@RequestBody ESClusterRoleHostDTO param) {
         return Result
-            .buildSucc(clusterNodeManager.convertClusterLogicNodes(roleClusterHostService.queryNodeByCondt(param)));
+            .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostService.queryNodeByCondt(param)));
     }
 
     @GetMapping("/node/getByCluster")
@@ -96,9 +96,9 @@ public class ESPhyClusterController {
     @ApiOperation(value = "根据集群获取集群节点列表接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
 
-    public Result<List<ESRoleClusterHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
+    public Result<List<ESClusterRoleHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
         return Result
-            .buildSucc(clusterNodeManager.convertClusterLogicNodes(roleClusterHostService.getNodesByCluster(cluster)));
+            .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostService.getNodesByCluster(cluster)));
     }
 
     @PostMapping("/deleteExpireIndex")

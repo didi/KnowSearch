@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 public interface ClusterPhyService {
@@ -164,7 +164,7 @@ public interface ClusterPhyService {
      * @param clusterId  物理集群ID
      * @return 物理集群的角色列表
      */
-    List<RoleCluster> listPhysicClusterRoles(Integer clusterId);
+    List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId);
 
     /**
      * 更新集群的动态配置信息

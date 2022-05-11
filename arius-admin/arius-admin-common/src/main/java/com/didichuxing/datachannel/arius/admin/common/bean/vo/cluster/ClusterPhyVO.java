@@ -71,7 +71,7 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     private List<ESClusterTemplateSrvVO> esClusterTemplateSrvVOS;
 
     @ApiModelProperty("集群角色信息")
-    private List<ESRoleClusterVO>        esRoleClusterVOS;
+    private List<ESClusterRoleVO> esClusterRoleVOS;
 
     @ApiModelProperty("磁盘使用率")
     private Double                       diskUsagePercent;

@@ -4,10 +4,10 @@ import com.didichuxing.datachannel.arius.admin.base.BasePhyClusterInfoTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.LogicClusterInfoSource;
@@ -33,13 +33,13 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
 
     @Test
     public void roleListTest() throws IOException {
-        Result<List<ESRoleClusterVO>> result = ESPhyClusterControllerMethod.roleList(phyClusterInfo.getPhyClusterId());
-        Assertions.assertEquals(result.getData().size(), phyClusterInfo.getConsoleClusterPhyVO().getEsRoleClusterVOS().size());
+        Result<List<ESClusterRoleVO>> result = ESPhyClusterControllerMethod.roleList(phyClusterInfo.getPhyClusterId());
+        Assertions.assertEquals(result.getData().size(), phyClusterInfo.getConsoleClusterPhyVO().getEsClusterRoleVOS().size());
     }
 
     @Test
     public void getClusterPhyRegionInfosTest() throws IOException {
-        Result<List<ESRoleClusterHostVO>> result = ESPhyClusterControllerMethod.getClusterPhyRegionInfos(phyClusterInfo.getPhyClusterId());
+        Result<List<ESClusterRoleHostVO>> result = ESPhyClusterControllerMethod.getClusterPhyRegionInfos(phyClusterInfo.getPhyClusterId());
         Assertions.assertTrue(result.success());
     }
 
@@ -80,7 +80,7 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
         if(result1.success()) {
             // 获取接入物理集群时候设置的节点ip信息
             Set<String> ipSet = phyClusterInfo.getClusterJoinDTO()
-                    .getRoleClusterHosts().stream().map(ESRoleClusterHostDTO::getIp).collect(Collectors.toSet());
+                    .getRoleClusterHosts().stream().map(ESClusterRoleHostDTO::getIp).collect(Collectors.toSet());
             // 节点数目一致
             Assertions.assertEquals(result1.getData().size(), ipSet.size());
         }

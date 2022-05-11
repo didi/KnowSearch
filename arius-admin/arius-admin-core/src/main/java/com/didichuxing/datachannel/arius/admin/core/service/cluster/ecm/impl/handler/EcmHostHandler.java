@@ -1,8 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.INVALID_VALUE;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
@@ -14,13 +23,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
+import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
-import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -28,24 +37,16 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
-import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.INVALID_VALUE;
 
 @Service("ecmHostHandler")
 public class EcmHostHandler extends AbstractEcmBaseHandle {
     @Autowired
-    private RoleClusterService roleClusterService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
     private ESPluginService          esPluginService;
@@ -54,7 +55,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
     private ESPackageService         esPackageService;
 
     @Autowired
-    private RoleClusterHostService roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -93,25 +94,25 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
             hostCreateActionParam.setImageName(hostCreateActionParamResult.getData().getImageName());
         }
 
-        // 保存集群角色信息 es_role_cluster
+        // 保存集群角色信息 es_cluster_role_info
         for (HostsCreateActionParam hostCreateActionParam : hostCreateActionParamList) {
             // 角色集群 信息入库
-            ESRoleClusterDTO esRoleClusterDTO = new ESRoleClusterDTO();
-            esRoleClusterDTO.setElasticClusterId(hostCreateActionParam.getPhyClusterId());
+            ESClusterRoleDTO esClusterRoleDTO = new ESClusterRoleDTO();
+            esClusterRoleDTO.setElasticClusterId(hostCreateActionParam.getPhyClusterId());
             if (hostCreateActionParam.getRoleName().startsWith(hostCreateActionParam.getPhyClusterName())) {
-                esRoleClusterDTO.setRoleClusterName(hostCreateActionParam.getRoleName());
+                esClusterRoleDTO.setRoleClusterName(hostCreateActionParam.getRoleName());
             } else {
-                esRoleClusterDTO.setRoleClusterName(
+                esClusterRoleDTO.setRoleClusterName(
                     hostCreateActionParam.getPhyClusterName() + "-" + hostCreateActionParam.getRoleName());
             }
-            esRoleClusterDTO.setRole(hostCreateActionParam.getRoleName());
-            esRoleClusterDTO.setPodNumber(0);
-            esRoleClusterDTO.setPidCount(hostCreateActionParam.getPidCount());
-            esRoleClusterDTO.setMachineSpec(hostCreateActionParam.getMachineSpec());
-            esRoleClusterDTO.setCfgId(INVALID_VALUE.intValue());
-            esRoleClusterDTO.setEsVersion(hostCreateActionParam.getEsVersion());
+            esClusterRoleDTO.setRole(hostCreateActionParam.getRoleName());
+            esClusterRoleDTO.setPodNumber(0);
+            esClusterRoleDTO.setPidCount(hostCreateActionParam.getPidCount());
+            esClusterRoleDTO.setMachineSpec(hostCreateActionParam.getMachineSpec());
+            esClusterRoleDTO.setCfgId(INVALID_VALUE.intValue());
+            esClusterRoleDTO.setEsVersion(hostCreateActionParam.getEsVersion());
 
-            roleClusterService.save(esRoleClusterDTO);
+            clusterRoleService.save(esClusterRoleDTO);
         }
         return Result.buildSucc(hostCreateActionParamResult.getData().getPhyClusterId());
     }
@@ -261,21 +262,21 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
         if (zeusClusterActionEnum.equals(ZeusClusterActionEnum.EXPAND)
                 || zeusClusterActionEnum.equals(ZeusClusterActionEnum.NEW)) {
             // 根据物理集群id和数据节点的角色名称获取所有的当前集群绑定的主机列表
-            List<RoleClusterHost> roleClusterHosts = roleClusterHostService.getByRoleAndClusterId(hostParamBase.getPhyClusterId(),
+            List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(hostParamBase.getPhyClusterId(),
                     ESClusterNodeRoleEnum.DATA_NODE.getDesc());
 
             float initialRackValue = 0;
-            if (CollectionUtils.isEmpty(roleClusterHosts)) {
+            if (CollectionUtils.isEmpty(clusterRoleHosts)) {
                 // 当新建或者扩容前data角色列表为空时，设置基准值
                 initialRackValue += 0.5;
             } else {
                 // 根据rack的大小进行排序并且获取新的data节点类型的rack起始值
-                for (RoleClusterHost roleClusterHost : roleClusterHosts) {
-                    if (!Pattern.matches("r.*", roleClusterHost.getRack())) {
+                for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
+                    if (!Pattern.matches("r.*", clusterRoleHost.getRack())) {
                         // 如果rack 不是r* 形式，则跳过不进行计算, 这里为了与前人逻辑保持一致，hold住特殊case 如cold rack
                         continue;
                     }
-                    int roleHostRackValue = Integer.parseInt(roleClusterHost.getRack().replaceFirst("r", ""));
+                    int roleHostRackValue = Integer.parseInt(clusterRoleHost.getRack().replaceFirst("r", ""));
                     if (roleHostRackValue > initialRackValue) {
                         initialRackValue = roleHostRackValue;
                     } else if (roleHostRackValue == initialRackValue) {

@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO;
 
@@ -27,7 +27,7 @@ public abstract class BaseDashboardCollector {
     protected ClusterLogicService          clusterLogicService;
 
     @Autowired
-    protected TemplateLogicService         templateLogicService;
+    protected IndexTemplateService indexTemplateService;
 
     @Autowired
     protected ESClusterService             esClusterService;

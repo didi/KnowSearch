@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.listener;
 
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
@@ -28,7 +28,7 @@ public class LogicTemplateQuotaEditEventListener implements ApplicationListener<
     private CapacityPlanRegionService capacityPlanRegionService;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     /**
      * Handle an application event.
@@ -38,7 +38,7 @@ public class LogicTemplateQuotaEditEventListener implements ApplicationListener<
     @Override
     public void onApplicationEvent(LogicTemplateEvent event) {
         if (event instanceof LogicTemplateModifyEvent) {
-            IndexTemplateLogicWithPhyTemplates newTemplateWithPhysical = templateLogicService.getLogicTemplateWithPhysicalsById(((LogicTemplateModifyEvent) event).getOldTemplate().getId());
+            IndexTemplateWithPhyTemplates newTemplateWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(((LogicTemplateModifyEvent) event).getOldTemplate().getId());
 
             if (CollectionUtils.isNotEmpty(newTemplateWithPhysical.getPhysicals())) {
                 double deltaQuota = (((LogicTemplateModifyEvent) event).getOldTemplate().getQuota()

@@ -83,10 +83,10 @@ public class ClusterPhyDTO extends PageDTO {
     private List<PluginDTO>            plugs;
 
     @ApiModelProperty("集群角色列表")
-    private List<ESRoleClusterDTO>     roleClusters;
+    private List<ESClusterRoleDTO>     roleClusters;
 
     @ApiModelProperty("集群角色 对应主机列表")
-    private List<ESRoleClusterHostDTO> roleClusterHosts;
+    private List<ESClusterRoleHostDTO> roleClusterHosts;
 
     @ApiModelProperty("单节点实例数")
     private Integer                    pidCount;

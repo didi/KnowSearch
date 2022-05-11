@@ -48,7 +48,7 @@ public interface SecurityService {
      * @return result
      */
     Result<Void> saveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                       int retryCount) throws ESOperateException;
+                                             int retryCount) throws ESOperateException;
 
     /**
      * 删除物理模板的APP管理权限
@@ -59,7 +59,7 @@ public interface SecurityService {
      * @return result
      */
     Result<Void> deleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                         int retryCount) throws ESOperateException;
+                                               int retryCount) throws ESOperateException;
 
     /**
      * APP密码修改
