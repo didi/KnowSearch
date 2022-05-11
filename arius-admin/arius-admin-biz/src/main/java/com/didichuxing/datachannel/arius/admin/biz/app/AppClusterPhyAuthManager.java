@@ -6,15 +6,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import java.util.List;
 
 /**
- * Created by linyunan on 2021-06-15
  * @author linyunan
+ * @date 2021-04-28
  */
 public interface AppClusterPhyAuthManager {
     /**
      * 从缓存中获取当前项目对物理集群列表的权限信息
      * @param appId                    项目
      * @param clusterPhyList           物理集群信息列表
-     * @return
+     * @return                         List<AppClusterPhyAuth>
      */
     List<AppClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId, List<ClusterPhy> clusterPhyList);
 
@@ -22,7 +22,7 @@ public interface AppClusterPhyAuthManager {
     /**
      * 获取项目有访问权限的物理集群列表信息
      * @param appId                项目
-     * @return
+     * @return                      List<AppClusterPhyAuth>
      */
     List<AppClusterPhyAuth> getAppAccessClusterPhyAuths(Integer appId);
 }
