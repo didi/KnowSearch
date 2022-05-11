@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInf
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.MetricsConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.*;
@@ -491,17 +491,17 @@ public class CustomDataSource {
         return metricsConfigPO;
     }
 
-    public static GatewayNodePO getGatewayNodePO() {
-        GatewayNodePO gatewayNodePO = new GatewayNodePO();
-        gatewayNodePO.setId(1);
-        gatewayNodePO.setClusterName(PHY_CLUSTER_NAME);
-        return gatewayNodePO;
+    public static GatewayClusterNodePO getGatewayNodePO() {
+        GatewayClusterNodePO gatewayClusterNodePO = new GatewayClusterNodePO();
+        gatewayClusterNodePO.setId(1);
+        gatewayClusterNodePO.setClusterName(PHY_CLUSTER_NAME);
+        return gatewayClusterNodePO;
     }
 
-    public static List<GatewayNodePO> getGatewayNodePOList() {
-        List<GatewayNodePO> list = new ArrayList<>();
+    public static List<GatewayClusterNodePO> getGatewayNodePOList() {
+        List<GatewayClusterNodePO> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++ ) {
-            GatewayNodePO po = CustomDataSource.getGatewayNodePO();
+            GatewayClusterNodePO po = CustomDataSource.getGatewayNodePO();
             po.setId(i);
             list.add(po);
         }

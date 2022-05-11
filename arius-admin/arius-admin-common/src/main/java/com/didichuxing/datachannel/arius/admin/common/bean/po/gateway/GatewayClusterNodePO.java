@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GatewayNodePO extends BasePO {
+public class GatewayClusterNodePO extends BasePO {
 
     private Integer id;
 

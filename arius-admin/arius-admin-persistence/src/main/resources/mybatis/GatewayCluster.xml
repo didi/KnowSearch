@@ -15,7 +15,7 @@
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert ignore into gateway_cluster
+        insert ignore into gateway_cluster_info
         (cluster_name)
         values
         (#{clusterName})
@@ -24,14 +24,14 @@
     <select id="getByClusterName" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from gateway_cluster
+        from gateway_cluster_info
         where cluster_name = #{clusterName}
     </select>
 
     <select id="listAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from gateway_cluster
+        from gateway_cluster_info
     </select>
 
 </mapper>
