@@ -60,6 +60,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.didichuxing.datachannel</groupId>
+            <artifactId>arius-admin-rest-v2</artifactId>
+        </dependency>
+
+
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
