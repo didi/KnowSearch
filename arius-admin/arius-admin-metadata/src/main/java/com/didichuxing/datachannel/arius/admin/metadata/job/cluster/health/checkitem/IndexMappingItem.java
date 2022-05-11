@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.response.indices.gettemplate.ESIndicesGetTemplateResponse;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;

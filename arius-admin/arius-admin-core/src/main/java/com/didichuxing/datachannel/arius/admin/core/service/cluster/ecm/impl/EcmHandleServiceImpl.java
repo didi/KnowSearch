@@ -10,13 +10,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.Hosts
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
-import com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -27,8 +25,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.han
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler.EcmDockerHandler;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler.EcmHostHandler;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
@@ -43,7 +41,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
@@ -51,8 +48,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant.ODIN_CATEGORY_LEVEL_1;
-import static com.didichuxing.datachannel.arius.admin.common.constant.CloudClusterCreateParamConstant.ODIN_CATEGORY_LEVEL_2;
 import static java.util.Objects.nonNull;
 
 /**
@@ -71,10 +66,10 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     private ClusterPhyService                   esClusterPhyService;
 
     @Autowired
-    private RoleClusterService                  roleClusterService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
-    private RoleClusterHostService              roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private EcmDockerHandler                    ecmDockerHandler;
@@ -261,7 +256,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
             return Result.buildFail(String.format(CLUSTER_NOT_EXIST, phyClusterId));
         }
 
-        List<String> masterHostList = roleClusterHostService
+        List<String> masterHostList = clusterRoleHostService
             .getHostNamesByRoleAndClusterId(clusterPhy.getId().longValue(), MASTER_NODE.getDesc());
 
         List<EcmParamBase> ecmParamBaseList = new ArrayList<>();
@@ -312,9 +307,9 @@ public class EcmHandleServiceImpl implements EcmHandleService {
             hostsParamBase.setEsPluginAction(new EsPluginAction(actionType, pluginId));
         }
 
-        RoleCluster roleCluster = roleClusterService.getByClusterIdAndRole(clusterPhy.getId().longValue(),
+        ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterIdAndRole(clusterPhy.getId().longValue(),
                 roleName);
-        if (null == roleCluster) {
+        if (null == clusterRoleInfo) {
             hostsParamBase.setEsVersion(clusterPhy.getEsVersion());
             // 根据物理集群的版本号获取对应的镜像地址
             ESPackage esPackage = esPackageService.getByVersionAndType(clusterPhy.getEsVersion(), clusterPhy.getType());
@@ -326,16 +321,16 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         }
 
         // 根绝role_cluster获取对应ecm操作的es集群版本号
-        ESPackage esPackage = esPackageService.getByVersionAndType(roleCluster.getEsVersion(), ES_HOST.getCode());
+        ESPackage esPackage = esPackageService.getByVersionAndType(clusterRoleInfo.getEsVersion(), ES_HOST.getCode());
         if (AriusObjUtils.isNull(esPackage)) {
-            return Result.buildParamIllegal(String.format("传入的版本号: %s 有误", roleCluster.getEsVersion()));
+            return Result.buildParamIllegal(String.format("传入的版本号: %s 有误", clusterRoleInfo.getEsVersion()));
         }
 
-        hostsParamBase.setPidCount(roleCluster.getPidCount());
-        hostsParamBase.setEsVersion(roleCluster.getEsVersion());
+        hostsParamBase.setPidCount(clusterRoleInfo.getPidCount());
+        hostsParamBase.setEsVersion(clusterRoleInfo.getEsVersion());
         hostsParamBase.setImageName(esPackage.getUrl());
 
-        List<String> hostList = roleClusterHostService
+        List<String> hostList = clusterRoleHostService
                 .getHostNamesByRoleAndClusterId(clusterPhy.getId().longValue(), roleName);
         hostsParamBase.setHostList(hostList);
         if (!CollectionUtils.isEmpty(hostList)) {
@@ -364,15 +359,15 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         elasticCloudCommonActionParam.setRoleName(roleName);
         elasticCloudCommonActionParam.setMachineRoom(clusterPhy.getIdc());
 
-        RoleCluster roleCluster = roleClusterService.getByClusterIdAndRole(clusterPhy.getId().longValue(),
+        ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterIdAndRole(clusterPhy.getId().longValue(),
                 roleName);
-        ESPackage esPackage = esPackageService.getByVersionAndType(roleCluster.getEsVersion(), ES_DOCKER.getCode());
+        ESPackage esPackage = esPackageService.getByVersionAndType(clusterRoleInfo.getEsVersion(), ES_DOCKER.getCode());
         if (AriusObjUtils.isNull(esPackage)) {
-            return Result.buildParamIllegal(String.format("传入的版本号: %s 有误", roleCluster.getEsVersion()));
+            return Result.buildParamIllegal(String.format("传入的版本号: %s 有误", clusterRoleInfo.getEsVersion()));
         }
 
-        elasticCloudCommonActionParam.setNodeNumber(roleCluster.getPidCount());
-        elasticCloudCommonActionParam.setEsVersion(roleCluster.getEsVersion());
+        elasticCloudCommonActionParam.setNodeNumber(clusterRoleInfo.getPidCount());
+        elasticCloudCommonActionParam.setEsVersion(clusterRoleInfo.getEsVersion());
         elasticCloudCommonActionParam.setImageName(esPackage.getUrl());
 
         return Result.buildSucc(elasticCloudCommonActionParam);
@@ -410,24 +405,24 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         String newRoleName = roleName.startsWith(clusterPhy.getCluster()) ? roleName
             : clusterPhy.getCluster() + "-" + roleName;
         ElasticCloudCommonActionParam elasticCloudCommonActionParam = (ElasticCloudCommonActionParam) actionParamBase;
-        RoleCluster roleCluster = roleClusterService
+        ClusterRoleInfo clusterRoleInfo = clusterRoleService
                 .getByClusterIdAndClusterRole(clusterId, newRoleName);
-        if (null == roleCluster) {
+        if (null == clusterRoleInfo) {
             return Result.buildNotExist(String.format("%d对应的物理集群%s角色不存在", clusterId, roleName));
         }
         elasticCloudCommonActionParam.setMachineRoom(clusterPhy.getIdc());
         elasticCloudCommonActionParam.setNsTree(clusterPhy.getNsTree());
-        elasticCloudCommonActionParam.setRoleName(roleCluster.getRole());
+        elasticCloudCommonActionParam.setRoleName(clusterRoleInfo.getRole());
 
         return Result.buildSucc(elasticCloudCommonActionParam);
     }
 
     private Result<String> getPortFromHost(Long clusterId, String roleName) {
-        List<RoleClusterHost> roleClusterHosts = roleClusterHostService.getByRoleAndClusterId(clusterId, roleName);
-        if (CollectionUtils.isEmpty(roleClusterHosts)) {
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(clusterId, roleName);
+        if (CollectionUtils.isEmpty(clusterRoleHosts)) {
             return Result.buildSucc(ClusterConstant.DEFAULT_PORT, "获取默认配置端口");
         }
-        return Result.buildSucc(roleClusterHosts.get(0).getPort(), "角色端口获取成功");
+        return Result.buildSucc(clusterRoleHosts.get(0).getPort(), "角色端口获取成功");
     }
 
     private Result<EcmParamBase> buildActionParamBase(Long clusterId, String roleName) {
@@ -436,9 +431,9 @@ public class EcmHandleServiceImpl implements EcmHandleService {
             return Result.buildNotExist(String.format(CLUSTER_NOT_EXIST, clusterId));
         }
 
-        RoleCluster roleCluster = roleClusterService
+        ClusterRoleInfo clusterRoleInfo = clusterRoleService
                 .getByClusterIdAndClusterRole(clusterId, roleName);
-        if (null == roleCluster) {
+        if (null == clusterRoleInfo) {
             return Result.buildNotExist(String.format("%d对应的物理集群%s角色不存在", clusterId, roleName));
         }
 
@@ -453,7 +448,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         elasticCloudCommonActionParam.setPhyClusterName(clusterPhy.getCluster());
         elasticCloudCommonActionParam.setType(clusterPhy.getType());
 
-        elasticCloudCommonActionParam.setRoleName(roleCluster.getRole());
+        elasticCloudCommonActionParam.setRoleName(clusterRoleInfo.getRole());
         elasticCloudCommonActionParam.setNsTree(clusterPhy.getNsTree());
         elasticCloudCommonActionParam.setMachineRoom(clusterPhy.getIdc());
 
@@ -510,7 +505,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         }
 
         //逻辑删除
-        Result<Void> deleteRoleClusterResult = roleClusterService.deleteRoleClusterByClusterId(clusterPhy.getId());
+        Result<Void> deleteRoleClusterResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId());
         if (deleteRoleClusterResult.failed()) {
             LOGGER.error("class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||clusterName={}||"
                          + "msg=failed to delete local db role cluster info",
@@ -518,7 +513,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         }
 
         //逻辑删除
-        Result<Void> deleteRoleClusterHostResult = roleClusterHostService.deleteByCluster(clusterPhy.getCluster());
+        Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster());
         if (deleteRoleClusterHostResult.failed()) {
             LOGGER.error(
                 "class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||roleClusterName=={}||roleClusterName={}||"
@@ -552,7 +547,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     }
 
     private Result<List<ElasticCloudCommonActionParam>> deleteOdinMachine(ClusterPhy clusterPhy,
-                                                                          List<RoleCluster> allRoles,
+                                                                          List<ClusterRoleInfo> allRoles,
                                                                           String operator) {
         List<ElasticCloudCommonActionParam> elasticCloudActionParams = Lists.newArrayList();
         allRoles.stream().filter(role -> nonNull(role) && role.getRole() != null).forEach(role -> {

@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -104,7 +104,7 @@ public interface ClusterLogicManager {
      * @param clusterId
      * @return
      */
-    Result<List<ESRoleClusterHostVO>> getLogicClusterNodes(Long clusterId);
+    Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(Long clusterId);
 
     /**
      * 获取当前集群支持的套餐列表

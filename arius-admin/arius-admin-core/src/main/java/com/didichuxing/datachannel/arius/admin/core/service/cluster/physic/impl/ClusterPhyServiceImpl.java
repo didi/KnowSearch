@@ -10,13 +10,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
@@ -30,11 +30,11 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
@@ -75,16 +75,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private ESPluginService          esPluginService;
 
     @Autowired
-    private TemplatePhyService       templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplateLogicService     templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private RoleClusterService       roleClusterService;
+    private ClusterRoleService clusterRoleService;
 
     @Autowired
-    private RoleClusterHostService   roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     private static final String DEFAULT_WRITE_ACTION = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
 
@@ -194,20 +194,20 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
 
         // 添加角色、机器信息
-        List<RoleCluster> roleClusters = roleClusterService.getAllRoleClusterByClusterId(
+        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(
                 clusterPhy.getId());
-        if (CollectionUtils.isNotEmpty(roleClusters)) {
+        if (CollectionUtils.isNotEmpty(clusterRoleInfos)) {
             // 角色信息
-            clusterPhy.setRoleClusters(roleClusters);
+            clusterPhy.setClusterRoleInfos(clusterRoleInfos);
 
             // 机器信息
-            List<RoleClusterHost> roleClusterHosts = new ArrayList<>();
-            Map<Long, List<RoleClusterHost>> map = roleClusterHostService.getByRoleClusterIds(roleClusters.stream().map(RoleCluster::getId).collect(Collectors.toList()));
-            for (RoleCluster roleCluster : roleClusters) {
-                List<RoleClusterHost> esRoleClusterHosts = map.getOrDefault(roleCluster.getId(), new ArrayList<>());
-                roleClusterHosts.addAll(esRoleClusterHosts);
+            List<ClusterRoleHost> clusterRoleHosts = new ArrayList<>();
+            Map<Long, List<ClusterRoleHost>> map = clusterRoleHostService.getByRoleClusterIds(clusterRoleInfos.stream().map(ClusterRoleInfo::getId).collect(Collectors.toList()));
+            for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfos) {
+                List<ClusterRoleHost> esClusterRoleHosts = map.getOrDefault(clusterRoleInfo.getId(), new ArrayList<>());
+                clusterRoleHosts.addAll(esClusterRoleHosts);
             }
-            clusterPhy.setRoleClusterHosts(roleClusterHosts);
+            clusterPhy.setClusterRoleHosts(clusterRoleHosts);
         }
 
         return clusterPhy;
@@ -296,16 +296,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public Set<String> getClusterRacks(String cluster) {
-        List<RoleClusterHost> nodes = roleClusterHostService.getNodesByCluster(cluster);
+        List<ClusterRoleHost> nodes = clusterRoleHostService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(nodes)) {
             return Sets.newHashSet();
         }
 
         Set<String> rackSet = new HashSet<>();
         // 只有datanode才有rack
-        for (RoleClusterHost roleClusterHost : nodes) {
-            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == roleClusterHost.getRole()) {
-                rackSet.add(roleClusterHost.getRack());
+        for (ClusterRoleHost clusterRoleHost : nodes) {
+            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == clusterRoleHost.getRole()) {
+                rackSet.add(clusterRoleHost.getRack());
             }
         }
 
@@ -417,8 +417,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<RoleCluster> listPhysicClusterRoles(Integer clusterId) {
-        return roleClusterService.getAllRoleClusterByClusterId(clusterId);
+    public List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId) {
+        return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
     @Override
@@ -482,7 +482,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         //获取存储在region上的物理模板列表
         Float templateOnRegionDiskSize = 0F;
-        List<IndexTemplatePhy> normalTemplateOnPhyCluster = templatePhyService.getNormalTemplateByCluster(clusterPhyName);
+        List<IndexTemplatePhy> normalTemplateOnPhyCluster = indexTemplatePhyService.getNormalTemplateByCluster(clusterPhyName);
         if (CollectionUtils.isEmpty(normalTemplateOnPhyCluster)) {
             return regionDiskSize;
         }
@@ -494,7 +494,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             }
 
             //根据物理模板获取对应的逻辑模板中的quota参数
-            IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+            IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
             if (AriusObjUtils.isNull(logicTemplate)) {
                 continue;
             }

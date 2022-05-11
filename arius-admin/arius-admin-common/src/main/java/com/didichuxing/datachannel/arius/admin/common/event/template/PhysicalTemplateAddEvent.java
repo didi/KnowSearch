@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.template;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 
 /**
@@ -17,7 +17,7 @@ public class PhysicalTemplateAddEvent extends PhysicalTemplateEvent {
      * @param source the object on which the event initially occurred (never {@code null})
      */
     public PhysicalTemplateAddEvent(Object source, IndexTemplatePhy newTemplate,
-                                    IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+                                    IndexTemplateWithPhyTemplates logicWithPhysical) {
         super(source, logicWithPhysical);
         this.newTemplate = newTemplate;
     }

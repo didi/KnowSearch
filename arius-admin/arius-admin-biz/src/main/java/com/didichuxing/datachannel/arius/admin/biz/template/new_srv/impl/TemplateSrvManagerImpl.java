@@ -2,10 +2,10 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -27,12 +27,12 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     protected static final ILog LOGGER = LogFactory.getLog(TemplateSrvManagerImpl.class);
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateService templateLogicService;
 
     @Override
     public Result<List<TemplateSrv>> getTemplateOpenSrv(Integer logicTemplateId) {
         try {
-            IndexTemplateLogic template = templateLogicService.getLogicTemplateById(logicTemplateId);
+            IndexTemplate template = templateLogicService.getLogicTemplateById(logicTemplateId);
             return getTemplateOpenSrv(template);
         } catch (Exception e) {
             LOGGER.error("class=TemplateSrvManagerImpl||method=getTemplateOpenSrv||logicTemplateId={}", logicTemplateId, e);
@@ -64,7 +64,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         return new TemplateSrv(serviceEnum.getCode(), serviceEnum.getServiceName(), serviceEnum.getEsClusterVersion().getVersion());
     }
 
-    private Result<List<TemplateSrv>> getTemplateOpenSrv(IndexTemplateLogic template) {
+    private Result<List<TemplateSrv>> getTemplateOpenSrv(IndexTemplate template) {
         if (null == template) {
             return Result.buildNotExist("逻辑模板不存在");
         }

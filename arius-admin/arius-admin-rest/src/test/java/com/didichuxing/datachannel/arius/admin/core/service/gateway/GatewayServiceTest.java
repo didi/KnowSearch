@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.gatewayHeartbeatFactory;
 
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayNodeDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class GatewayServiceTest extends AriusAdminApplicationTest {
     private GatewayClusterDAO gatewayClusterDAO;
 
     @MockBean
-    private GatewayNodeDAO gatewayNodeDAO;
+    private GatewayClusterNodeDAO gatewayClusterNodeDAO;
 
     @Test
     void heartbeatTest() {
@@ -46,7 +46,7 @@ public class GatewayServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(ResultType.ILLEGAL_PARAMS.getCode(), gatewayService.heartbeat(gatewayHeartbeat).getCode().intValue());
         // 记录的正确执行操作
         Mockito.when(gatewayClusterDAO.insert(Mockito.any())).thenReturn(1);
-        Mockito.when(gatewayNodeDAO.recordGatewayNode(Mockito.any())).thenReturn(1);
+        Mockito.when(gatewayClusterNodeDAO.recordGatewayNode(Mockito.any())).thenReturn(1);
         gatewayHeartbeat = gatewayHeartbeatFactory();
         Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).success());
 
@@ -80,8 +80,8 @@ public class GatewayServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(gatewayService.heartbeat(gatewayHeartbeat).failed());
         gatewayHeartbeat = gatewayHeartbeatFactory();
         Mockito.when(gatewayClusterDAO.insert(Mockito.any())).thenReturn(1);
-        Mockito.when(gatewayNodeDAO.recordGatewayNode(Mockito.any())).thenReturn(1);
-        Mockito.when(gatewayNodeDAO.listAliveNodeByClusterNameAndTime(Mockito.any(), Mockito.any()))
+        Mockito.when(gatewayClusterNodeDAO.recordGatewayNode(Mockito.any())).thenReturn(1);
+        Mockito.when(gatewayClusterNodeDAO.listAliveNodeByClusterNameAndTime(Mockito.any(), Mockito.any()))
                 .thenReturn(CustomDataSource.getGatewayNodePOList());
         Assertions.assertFalse(gatewayService.getAliveNode(CustomDataSource.PHY_CLUSTER_NAME, 1000).isEmpty());
     }

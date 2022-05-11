@@ -3,8 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.i
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             return Result.buildFail("指定索引模板未开启rollover能力");
         }
 
-        List<IndexTemplatePhy> templatePhyList = templatePhyService.getNormalTemplateByCluster()
+        return Result.buildSucc();
     }
 
     @Override
@@ -43,7 +42,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    public void initShardRoutingAndAdjustShard(IndexTemplatePhysicalDTO param) {
+    public void initShardRoutingAndAdjustShard(IndexTemplatePhyDTO param) {
 
     }
 

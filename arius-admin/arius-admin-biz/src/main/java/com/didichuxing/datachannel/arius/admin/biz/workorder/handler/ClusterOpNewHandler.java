@@ -223,7 +223,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
         }
 
         // 对于address字段进行ip和端口号的拆分
-        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getRoleClusterHosts();
+        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getClusterRoleHosts();
 
         for (ESClusterRoleHost esClusterRoleHost : roleClusterHosts) {
             if(null == esClusterRoleHost.getAddress()) {
@@ -272,7 +272,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     private Result<Void> validateClusterMasterNodeNumberESHost(WorkOrder workOrder) {
         ClusterOpBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewHostContent.class);
 
-        List<ESClusterRoleHost> roleClusterHosts = ((ClusterOpNewHostContent) content).getRoleClusterHosts();
+        List<ESClusterRoleHost> roleClusterHosts = ((ClusterOpNewHostContent) content).getClusterRoleHosts();
         if (CollectionUtils.isEmpty(roleClusterHosts)) {
             return Result.buildParamIllegal("集群角色为空");
         }
@@ -294,7 +294,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
     private Result<Void> validRoleClusterPort(WorkOrder workOrder) {
         ClusterOpNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewHostContent.class);
-        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getRoleClusterHosts();
+        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getClusterRoleHosts();
 
         Map<Object, Object> roleClusterPortMap = Maps.newHashMap();
         for (ESClusterRoleHost esClusterRoleHost : roleClusterHosts) {

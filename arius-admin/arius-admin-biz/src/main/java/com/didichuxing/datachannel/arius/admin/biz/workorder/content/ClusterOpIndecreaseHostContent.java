@@ -30,5 +30,5 @@ public class ClusterOpIndecreaseHostContent extends ClusterOpHostContent {
     /**
      * 集群角色 对应的原始的主机列表
      */
-    private List<ESClusterRoleHost> originRoleClusterHosts;
+    private List<ESClusterRoleHost> originClusterRoleHosts;
 }

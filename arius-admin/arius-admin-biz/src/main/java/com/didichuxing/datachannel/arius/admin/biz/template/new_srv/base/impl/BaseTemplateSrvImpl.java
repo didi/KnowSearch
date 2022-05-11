@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     protected static final ILog LOGGER = LogFactory.getLog(BaseTemplateSrvImpl.class);
 
     @Autowired
-    protected TemplatePhyService templatePhyService;
+    protected IndexTemplatePhyService templatePhyService;
 
     @Autowired
     protected TemplateSrvManager templateSrvManager;
