@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO">
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO">
         <result column="id"                         jdbcType="INTEGER" property="id"/>
         <result column="cluster"                    jdbcType="VARCHAR" property="cluster"/>
         <result column="read_address"               jdbcType="VARCHAR" property="readAddress"/>
@@ -38,7 +38,7 @@
         es_version, `level`, password, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time, run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags
     </sql>
 
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO"
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_data_source
@@ -49,7 +49,7 @@
         #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health}, #{password}, #{activeShardNum}, #{diskTotal}, #{diskUsage}, #{diskUsagePercent},
          #{tags})
     </insert>
-    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO">
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO">
         update es_data_source
         <trim prefix="set" prefixOverrides=",">
             <if test="readAddress != null">,read_address = #{readAddress}</if>
@@ -95,7 +95,7 @@
     </delete>
 
     <select id="listByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
@@ -127,7 +127,7 @@
     </select>
 
     <select id="getTotalHitByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
             resultType="long">
         select
         count(1)

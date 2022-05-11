@@ -3,14 +3,20 @@ package com.didichuxing.datachannel.arius.admin.common.constant.dcdr;
 /**
  * Created by linyunan on 12/14/21
  */
-public enum DcdrSwithTypeEnum {
-                               SMOOTH("smooth", 1),
+public enum DCDRStatusEnum {
+                            CANCELLED("cancelled", 0),
 
-                               FORCE("force", 2),
+                            SUCCESS("success", 1),
 
-                               UNKNOWN("unknown", -1);
+                            RUNNING("running", 2),
 
-    DcdrSwithTypeEnum(String value, Integer code) {
+                            FAILED("failed", 3),
+
+                            WAIT("wait", 4),
+
+                            UNKNOWN("unknown", -1);
+
+    DCDRStatusEnum(String value, Integer code) {
         this.value = value;
         this.code = code;
     }
@@ -35,11 +41,12 @@ public enum DcdrSwithTypeEnum {
         this.code = code;
     }
 
-    public static DcdrSwithTypeEnum valueFromCode(Integer code) {
+    public static DCDRStatusEnum valueFromCode(Integer code) {
         if (code == null) {
             return null;
         }
-        for (DcdrSwithTypeEnum state : DcdrSwithTypeEnum.values()) {
+
+        for (DCDRStatusEnum state : DCDRStatusEnum.values()) {
             if (UNKNOWN.getCode().equals(code)) {
                 continue;
             }

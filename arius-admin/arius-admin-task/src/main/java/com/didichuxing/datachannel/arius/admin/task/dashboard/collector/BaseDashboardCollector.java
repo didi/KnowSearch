@@ -44,10 +44,24 @@ public abstract class BaseDashboardCollector {
     @Autowired
     protected AriusStatsDashBoardInfoESDAO ariusStatsDashBoardInfoESDAO;
 
+    /**
+     * 采集单个集群
+     * @param cluster 集群名称
+     * @param currentTime   当前时间戳
+     */
     public abstract void collectSingleCluster(String cluster, long currentTime);
 
+    /**
+     * 采集多个集群
+     * @param clusterList   集群列表
+     * @param currentTime   时间戳
+     */
     public abstract void collectAllCluster(List<String> clusterList, long currentTime);
 
+    /**
+     * 获取任务名称
+     * @return 任务名称
+     */
     public abstract String getName();
 
     protected DashBoardStats buildInitDashBoardStats(Long timestamp){

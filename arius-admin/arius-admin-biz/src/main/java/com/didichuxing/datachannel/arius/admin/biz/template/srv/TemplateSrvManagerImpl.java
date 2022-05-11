@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrvInterface;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -54,7 +54,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private RegionRackService     esClusterRackService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService  operateRecordService;
 
     @Autowired
     private AriusUserInfoService  ariusUserInfoService;
@@ -77,22 +77,20 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init start.");
         Map<String, BaseTemplateSrvInterface> strTemplateHandlerMap = SpringTool.getBeansOfType(BaseTemplateSrvInterface.class);
 
-        for (Map.Entry<String, BaseTemplateSrvInterface> entry : strTemplateHandlerMap.entrySet()) {
+        strTemplateHandlerMap.forEach((key, val) -> {
             try {
-                BaseTemplateSrvInterface baseTemplateHandler = entry.getValue();
-                TemplateServiceEnum templateServiceEnum = baseTemplateHandler.templateService();
+                TemplateServiceEnum templateServiceEnum = val.templateService();
 
                 if (null != templateServiceEnum) {
-                    templateHandlerMap.put(templateServiceEnum.getCode(), baseTemplateHandler);
+                    templateHandlerMap.put(templateServiceEnum.getCode(), val);
 
                     LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-                            templateServiceEnum.getServiceName(), templateServiceEnum.getEsClusterVersion());
+                        templateServiceEnum.getServiceName(), templateServiceEnum.getEsClusterVersion());
                 }
             } catch (Exception e) {
-                LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-                        entry.getKey());
+                LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}", key);
             }
-        }
+        });
         LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init finished.");
     }
 
@@ -333,9 +331,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             }
         }
 
-        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ESClusterDTO.class),
+        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class),
             operator);
-        if (null != result && result.success()) {
+        if (result.success()) {
             operateRecordService.save(CLUSTER, EDIT, phyCluster,
                 phyCluster + "集群，增加一个索引服务：" + clusterTemplateSrv.getServiceName(), operator);
         }
@@ -408,7 +406,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
 
         clusterPhy.setTemplateSrvs(ListUtils.intList2String(templateSrvIds));
-        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ESClusterDTO.class), operator);
+        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class), operator);
 
     }
 
@@ -432,7 +430,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         templateSrvIds.remove(templateSrvId);
         clusterPhy.setTemplateSrvs(ListUtils.strList2String(templateSrvIds));
 
-        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ESClusterDTO.class),
+        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class),
             operator);
         if (null != result && result.success()) {
             operateRecordService.save(CLUSTER, EDIT, phyCluster, phyCluster + "集群，删除一个索引服务：" + templateSrvId, operator);
@@ -492,7 +490,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
         }
         cluster.setTemplateSrvs("");
-        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ESClusterDTO.class),
+        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class),
                 operator);
         if (result.success()) {
             operateRecordService.save(CLUSTER, DELETE, clusterPhy, clusterPhy + "物理集群绑定逻辑集群，删除索引服务：", operator);

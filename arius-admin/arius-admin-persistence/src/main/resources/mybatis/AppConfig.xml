@@ -16,28 +16,28 @@
     <select id="getByAppId" parameterType="integer" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from query_app
+        from arius_app_info
         where id = #{appId}
     </select>
 
     <select id="listAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from query_app
+        from arius_app_info
     </select>
 
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into query_app
+        insert into arius_app_info
         (app_id, dsl_analyze_enable, aggr_analyze_enable, is_source_separated, analyze_response_enable)
         values
         (#{appId}, #{dslAnalyzeEnable}, #{aggrAnalyzeEnable}, #{isSourceSeparated}, #{aggrAnalyzeEnable})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO">
-        update query_app
+        update arius_app_info
         <trim prefix="set" prefixOverrides=",">
             <if test="dslAnalyzeEnable != null">,dsl_analyze_enable = #{dslAnalyzeEnable}</if>
             <if test="aggrAnalyzeEnable != null">,aggr_analyze_enable = #{aggrAnalyzeEnable}</if>

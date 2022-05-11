@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.logi.log.ILog;
@@ -38,10 +38,10 @@ public class ESOpClient {
     private static final ILog            LOGGER       = LogFactory.getLog(ESOpClient.class);
 
     private final Map<String, ESClient>  esClientMap  = new ConcurrentHashMap<>();
-    private final Map<String, ClusterPO> esClusterMap = new ConcurrentHashMap<>();
+    private final Map<String, ClusterPhyPO> esClusterMap = new ConcurrentHashMap<>();
 
     @Autowired
-    private ClusterDAO                   clusterDAO;
+    private PhyClusterDAO clusterDAO;
 
     @Value("${es.client.io.thread.count:0}")
     private Integer                      ioThreadCount;
@@ -58,7 +58,7 @@ public class ESOpClient {
     public synchronized void refreshConnect() {
 
         LOGGER.info("class=ESOpClient||method=init||ESOpClient refreshConnect start.");
-        List<ClusterPO> dataCluster = clusterDAO.listAll();
+        List<ClusterPhyPO> dataCluster = clusterDAO.listAll();
         Set<String> currentESClientClusters = Sets.newHashSet(esClientMap.keySet());
         dataCluster.parallelStream().forEach(clusterPO -> {
 
@@ -70,7 +70,7 @@ public class ESOpClient {
                             clusterPO.getCluster(), e);
                 }
             } else {
-                ClusterPO cachedCluster = esClusterMap.get(clusterPO.getCluster());
+                ClusterPhyPO cachedCluster = esClusterMap.get(clusterPO.getCluster());
                 if ((cachedCluster != null && !cachedCluster.equals(clusterPO)) || !isActualRunning(clusterPO.getCluster())) {
                     LOGGER.info("class=ESOpClient||method=refreshConnect||msg=clusterMetaUpdate||" +
                                     "cluster={}||cachedClusterMeta={}||currentClusterMeta={}",
@@ -144,7 +144,7 @@ public class ESOpClient {
     }
 
     /**************************************** private method ****************************************************/
-    private void connect(ClusterPO clusterPO) {
+    private void connect(ClusterPhyPO clusterPO) {
         LOGGER.info("class=ESOpClient||method=connect||msg=connect es start||cluster={}", clusterPO.getCluster());
 
         if (StringUtils.isBlank(clusterPO.getHttpAddress())) {

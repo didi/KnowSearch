@@ -932,7 +932,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     private AriusTypeProperty buildOneType(IndexTemplate templateLogic, Map<String, TypeConfig> typeConfigMap,
                                            Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap) {
-        String typeName = typeConfigMap.keySet().iterator().next();
+        Map.Entry<String, TypeConfig> entry = typeConfigMap.entrySet().iterator().next();
+        String typeName = entry.getKey();
 
         // 优先取模板中的id和routing
         String idField = templateLogic.getIdField();
@@ -950,7 +951,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             }
         }
 
-        TypeConfig typeConfig = typeConfigMap.get(typeName);
+        TypeConfig typeConfig = entry.getValue();
 
         AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
         ariusTypeProperty.setTypeName(typeName);

@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DcdrStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,11 +36,11 @@ public class DCDRTasksDetail extends AbstractTaskDetail {
         int waitNum       = 0;
 
         for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrSingleTemplateMasterSlaveSwitchDetail : this.dcdrSingleTemplateMasterSlaveSwitchDetailList) {
-            if (DcdrStatusEnum.SUCCESS.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))   successNum++;
-            if (DcdrStatusEnum.CANCELLED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) cancelNum++;
-            if (DcdrStatusEnum.RUNNING.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))   runningNum++;
-            if (DcdrStatusEnum.FAILED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))    failedNum++;
-            if (DcdrStatusEnum.WAIT.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))      waitNum++;
+            if (DCDRStatusEnum.SUCCESS.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))   successNum++;
+            if (DCDRStatusEnum.CANCELLED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) cancelNum++;
+            if (DCDRStatusEnum.RUNNING.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))   runningNum++;
+            if (DCDRStatusEnum.FAILED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))    failedNum++;
+            if (DCDRStatusEnum.WAIT.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))      waitNum++;
         }
 
         this.total      = this.dcdrSingleTemplateMasterSlaveSwitchDetailList.size();
@@ -52,19 +52,19 @@ public class DCDRTasksDetail extends AbstractTaskDetail {
         this.percent    = successNum * 100 / this.total;
 
         if (runningNum > 0) {
-            this.state = DcdrStatusEnum.RUNNING.getCode(); return;
+            this.state = DCDRStatusEnum.RUNNING.getCode(); return;
         }
         if (failedNum > 0) {
-            this.state = DcdrStatusEnum.FAILED.getCode(); return;
+            this.state = DCDRStatusEnum.FAILED.getCode(); return;
         }
         if (cancelNum == this.dcdrSingleTemplateMasterSlaveSwitchDetailList.size()) {
-            this.state = DcdrStatusEnum.CANCELLED.getCode(); return;
+            this.state = DCDRStatusEnum.CANCELLED.getCode(); return;
         }
         if (cancelNum > 0 && (cancelNum + successNum) == this.dcdrSingleTemplateMasterSlaveSwitchDetailList.size()) {
-            this.state = DcdrStatusEnum.CANCELLED.getCode(); return;
+            this.state = DCDRStatusEnum.CANCELLED.getCode(); return;
         }
         if (successNum > 0 && successNum == this.dcdrSingleTemplateMasterSlaveSwitchDetailList.size()) {
-            this.state = DcdrStatusEnum.SUCCESS.getCode();
+            this.state = DCDRStatusEnum.SUCCESS.getCode();
         }
     }
 }

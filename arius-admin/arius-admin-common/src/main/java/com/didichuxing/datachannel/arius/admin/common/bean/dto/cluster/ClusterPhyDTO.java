@@ -11,11 +11,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ *
+ * @author ohushenglin_v
+ * @date 2022-05-10
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "集群信息")
-public class ESClusterDTO extends PageDTO {
+public class ClusterPhyDTO extends PageDTO {
 
     @ApiModelProperty("集群ID")
     private Integer                    id;

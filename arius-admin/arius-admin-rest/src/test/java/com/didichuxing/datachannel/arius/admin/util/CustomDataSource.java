@@ -177,8 +177,8 @@ public class CustomDataSource {
         return pluginDTO;
     }
 
-    public static ESClusterDTO esClusterDTOFactory() {
-        ESClusterDTO esClusterDTO = new ESClusterDTO();
+    public static ClusterPhyDTO esClusterDTOFactory() {
+        ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
         esClusterDTO.setCluster("wpk_test");
         esClusterDTO.setDesc("test");
         esClusterDTO.setHttpAddress("1234");

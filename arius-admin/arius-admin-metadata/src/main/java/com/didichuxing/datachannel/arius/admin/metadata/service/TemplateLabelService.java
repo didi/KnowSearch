@@ -66,11 +66,16 @@ public class TemplateLabelService {
     @Autowired
     private OperateRecordService operateRecordService;
 
-    public Result<List<Label>> listAllLabel() throws AmsRemoteException {
-        List<TemplateLabelPO> templateLabelPOS = indexTemplateLabelDAO.listAll();
-
-        return Result.buildSucc(ConvertUtil.list2List(templateLabelPOS, Label.class));
+    /**
+     * 模板是否有删除操作
+     * @param logicId
+     * @return
+     */
+    public boolean hasDeleteDoc(Integer logicId) {
+        Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map( listIndexTemplateLabelPO(logicId), TemplateLabelPO::getLabelId);
+        return labelMap.containsKey(TEMPLATE_HAS_DELETED_DOC);
     }
+
 
     /**
      * 是否是重要索引

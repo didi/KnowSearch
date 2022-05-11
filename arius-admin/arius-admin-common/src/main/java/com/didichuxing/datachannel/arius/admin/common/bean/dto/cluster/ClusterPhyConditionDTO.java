@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "物理集群条件查询信息")
-public class ClusterPhyConditionDTO extends ESClusterDTO {
+public class ClusterPhyConditionDTO extends ClusterPhyDTO {
     /**
      * @see AppClusterPhyAuthEnum
      */

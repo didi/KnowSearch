@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitorTask.ClusterMonitorTaskService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
@@ -36,6 +36,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 
 /**
  * 集群维度采集监控数据，包含 es节点存活检查；es集群tps/qps掉底报警
+ * @author ohushenglin_v
  */
 @Component
 public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
@@ -45,7 +46,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     @Autowired
     private ClusterLogicService clusterLogicService;
     @Autowired
-    private ClusterMonitorTaskService clusterMonitorTaskService;
+    private AriusMetaJobClusterDistributeService ariusMetaJobClusterDistributeService;
     @Autowired
     private MonitorMetricsSender monitorMetricsSender;
     @Autowired
@@ -70,7 +71,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     private void handleLogicClusterStats() {
         // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
-        List<ClusterPhy> monitorCluster = clusterMonitorTaskService.getSingleMachineMonitorCluster(hostName);
+        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
         // 2. do handle
         if (CollectionUtils.isNotEmpty(monitorCluster)) {
             Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster).collect(Collectors.toSet());
@@ -130,8 +131,6 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
                 esClusterStats.setStatis(esClusterStatsBean);
                 esClusterStats.setCluster(logicCluster.getName());
                 // 设置集群arius id
-//                esClusterStats.setClusterId(String.valueOf(logicCluster.getId()));
-//                esClusterStats.setClusterGuid(logicCluster.getGuid());
                 esClusterStats.setPhysicCluster(LOGIC_CLUSTER);
                 esClusterStats.setTimestamp(collectTime);
                 esClusterStats.setDataCenter(logicCluster.getDataCenter());

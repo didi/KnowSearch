@@ -45,6 +45,8 @@ import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFacto
 @Service
 public class TemplateColdManagerImpl extends BaseTemplateSrv implements TemplateColdManager {
 
+    public static final int MAX_HOT_DAY = 2;
+    public static final int MIN_HOT_DAY = -2;
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
@@ -229,7 +231,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Result<Integer> batchChangeHotDay(Integer days, String operator) {
-        if (days > 2 || days < -2) {
+        if (days > MAX_HOT_DAY || days < MIN_HOT_DAY) {
             return Result.buildParamIllegal("days参数非法, [-2, 2]");
         }
 
