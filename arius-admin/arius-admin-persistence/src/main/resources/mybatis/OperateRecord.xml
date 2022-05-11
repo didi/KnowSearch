@@ -3,14 +3,14 @@
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordInfoDAO">
     <resultMap id="BaseResultMap"
                type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
-        <result column="id"             jdbcType="INTEGER" property="id"/>
-        <result column="module_id"      jdbcType="INTEGER" property="moduleId"/>
-        <result column="operate_id"     jdbcType="INTEGER" property="operateId"/>
-        <result column="business_id"    jdbcType="INTEGER" property="bizId"/>
-        <result column="biz_id"         jdbcType="VARCHAR" property="bizId"/>
-        <result column="content"        jdbcType="VARCHAR" property="content"/>
-        <result column="operator"       jdbcType="VARCHAR" property="operator"/>
-        <result column="operate_time"   jdbcType="TIMESTAMP" property="operateTime"/>
+        <result column="id"             jdbcType="INTEGER"          property="id"/>
+        <result column="module_id"      jdbcType="INTEGER"          property="moduleId"/>
+        <result column="operate_id"     jdbcType="INTEGER"          property="operateId"/>
+        <result column="business_id"    jdbcType="INTEGER"          property="bizId"/>
+        <result column="biz_id"         jdbcType="VARCHAR"          property="bizId"/>
+        <result column="content"        jdbcType="VARCHAR"          property="content"/>
+        <result column="operator"       jdbcType="VARCHAR"          property="operator"/>
+        <result column="operate_time"   jdbcType="TIMESTAMP"        property="operateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -21,7 +21,7 @@
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into operate_record_info
+        insert into operate_record
         (module_id, operate_id, biz_id, content, operator)
         values
         (#{moduleId}, #{operateId}, #{bizId}, #{content}, #{operator})
@@ -31,7 +31,7 @@
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
         select
         <include refid="Base_Column_List"/>
-        from operate_record_info
+        from operate_record
         <trim prefix="where" prefixOverrides="and">
             <if test="id != null">and id = #{id}</if>
             <if test="moduleId != null">and module_id = #{moduleId}</if>
@@ -45,7 +45,7 @@
     </select>
 
     <update id="compatible">
-      update operate_record_info
+      update operate_record
       set biz_id = CONCAT(business_id,'')
       where biz_id = '';
     </update>
@@ -53,12 +53,12 @@
     <select id="selectDescTopNByModuleId" resultMap="BaseResultMap"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
         select id, module_id
-        from operate_record_info
+        from operate_record
         where module_id = #{moduleId} order by id DESC LIMIT #{topN}, 1
     </select>
 
     <update id="deleteByModuleIdAndLessThanId">
-        delete from operate_record_info
+        delete from operate_record
         where module_id = #{moduleId} and id &lt; #{id}
     </update>
 </mapper>

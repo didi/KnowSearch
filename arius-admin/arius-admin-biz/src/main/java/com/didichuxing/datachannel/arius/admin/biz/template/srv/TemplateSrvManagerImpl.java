@@ -93,22 +93,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         entry.getKey());
             }
         }
-//        for (String str : strTemplateHandlerMap.keySet()) {
-//            try {
-//                BaseTemplateSrvInterface baseTemplateHandler = strTemplateHandlerMap.get(str);
-//                TemplateServiceEnum templateServiceEnum = baseTemplateHandler.templateService();
-//
-//                if (null != templateServiceEnum) {
-//                    templateHandlerMap.put(templateServiceEnum.getCode(), baseTemplateHandler);
-//
-//                    LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-//                            templateServiceEnum.getServiceName(), templateServiceEnum.getEsClusterVersion());
-//                }
-//            } catch (Exception e) {
-//                LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-//                        str);
-//            }
-//        }
         LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init finished.");
     }
 
