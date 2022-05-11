@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.capacityplan;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;

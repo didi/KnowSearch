@@ -1,8 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.capacityplan.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.capacityplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
