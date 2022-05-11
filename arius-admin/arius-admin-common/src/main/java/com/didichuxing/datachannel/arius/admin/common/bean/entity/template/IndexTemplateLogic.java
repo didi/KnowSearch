@@ -9,8 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author d06679
- * @date 2019/3/29
+ * @author chengxiang
+ * @date 2022/5/11
  */
 @Data
 @NoArgsConstructor
@@ -146,6 +146,8 @@ public class IndexTemplateLogic extends BaseEntity implements StringResponsible,
     private Boolean hasDCDR;
 
     private Long    checkPointDiff;
+
+    private String  openSrv;
 
     @Override
     public int compareTo(IndexTemplateLogic o) {
