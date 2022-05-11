@@ -68,7 +68,7 @@ public class CustomDataSource {
             esClusterRoleHostDTO.setRole(i);
             list.add(esClusterRoleHostDTO);
         }
-        param.setEsClusterRoleHosts(list);
+        param.setRoleClusterHosts(list);
         return param;
     }
 
