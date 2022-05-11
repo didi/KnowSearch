@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
@@ -18,7 +18,7 @@ public interface TemplateAction {
      * @return result
      * @throws AdminOperateException exception
      */
-    Result<Integer> createWithAutoDistributeResource(IndexTemplateLogicDTO logicDTO,
+    Result<Integer> createWithAutoDistributeResource(IndexTemplateDTO logicDTO,
                                                      String operator) throws AdminOperateException;
 
     /**

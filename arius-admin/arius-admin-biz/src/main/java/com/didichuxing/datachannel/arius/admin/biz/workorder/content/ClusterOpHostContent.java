@@ -12,5 +12,5 @@ public class ClusterOpHostContent extends ClusterOpBaseContent {
     /**
      * 集群角色 对应主机列表
      */
-    private List<ESClusterRoleHost> roleClusterHosts;
+    private List<ESClusterRoleHost> clusterRoleHosts;
 }

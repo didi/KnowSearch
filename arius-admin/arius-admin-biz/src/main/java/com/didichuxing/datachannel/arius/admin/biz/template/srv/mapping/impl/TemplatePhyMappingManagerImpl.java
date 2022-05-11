@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConf
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
@@ -37,7 +37,7 @@ import java.util.*;
 @Service
 @NoArgsConstructor
 public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager {
-    private static final ILog    LOGGER                   = LogFactory.getLog(TemplateLogicServiceImpl.class);
+    private static final ILog    LOGGER                   = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     private static final String  MAPPING_STR              = "mapping";
     private static final String  MAPPINGS_STR             = "mappings";

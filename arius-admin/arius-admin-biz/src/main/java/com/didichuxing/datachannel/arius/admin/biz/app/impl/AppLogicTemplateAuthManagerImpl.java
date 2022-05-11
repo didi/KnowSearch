@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
@@ -34,21 +34,21 @@ public class AppLogicTemplateAuthManagerImpl implements AppLogicTemplateAuthMana
 
     @Override
     public List<AppTemplateAuth> getTemplateAuthListByTemplateListAndAppId(Integer appId,
-                                                                           List<IndexTemplateLogic> indexTemplateLogicList) {
+                                                                           List<IndexTemplate> indexTemplateList) {
         List<AppTemplateAuth> appTemplateAuthList = Lists.newArrayList();
-        if (CollectionUtils.isEmpty(indexTemplateLogicList)) {
+        if (CollectionUtils.isEmpty(indexTemplateList)) {
             return appTemplateAuthList;
         }
 
         if (!appService.isAppExists(appId)) {
-            appTemplateAuthList = indexTemplateLogicList.stream()
+            appTemplateAuthList = indexTemplateList.stream()
                 .map(r -> appLogicTemplateAuthService.buildTemplateAuth(r, AppTemplateAuthEnum.NO_PERMISSION))
                 .collect(Collectors.toList());
             return appTemplateAuthList;
         }
 
         if (appService.isSuperApp(appId)) {
-            appTemplateAuthList = indexTemplateLogicList.stream()
+            appTemplateAuthList = indexTemplateList.stream()
                 .map(r -> appLogicTemplateAuthService.buildTemplateAuth(r, AppTemplateAuthEnum.OWN))
                 .collect(Collectors.toList());
             return appTemplateAuthList;
@@ -58,11 +58,11 @@ public class AppLogicTemplateAuthManagerImpl implements AppLogicTemplateAuthMana
         Map<Integer, AppTemplateAuth> templateId2AppTemplateAuthMap = ConvertUtil.list2Map(appActiveTemplateRWAuths,
             AppTemplateAuth::getTemplateId);
 
-        for (IndexTemplateLogic indexTemplateLogic : indexTemplateLogicList) {
-            Integer templateLogicId = indexTemplateLogic.getId();
-            if (null != appId && appId.equals(indexTemplateLogic.getAppId())) {
+        for (IndexTemplate indexTemplate : indexTemplateList) {
+            Integer templateLogicId = indexTemplate.getId();
+            if (null != appId && appId.equals(indexTemplate.getAppId())) {
                 appTemplateAuthList.add(
-                    appLogicTemplateAuthService.buildTemplateAuth(indexTemplateLogic, AppTemplateAuthEnum.OWN));
+                    appLogicTemplateAuthService.buildTemplateAuth(indexTemplate, AppTemplateAuthEnum.OWN));
                 continue;
             }
 
@@ -71,7 +71,7 @@ public class AppLogicTemplateAuthManagerImpl implements AppLogicTemplateAuthMana
                 continue;
             }
 
-            appTemplateAuthList.add(appLogicTemplateAuthService.buildTemplateAuth(indexTemplateLogic,
+            appTemplateAuthList.add(appLogicTemplateAuthService.buildTemplateAuth(indexTemplate,
                 AppTemplateAuthEnum.NO_PERMISSION));
         }
 
