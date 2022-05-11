@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl;
 
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -16,7 +18,13 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     protected static final ILog LOGGER = LogFactory.getLog(BaseTemplateSrvImpl.class);
 
     @Autowired
-    protected IndexTemplatePhyService templatePhyService;
+    protected IndexTemplateService indexTemplateService;
+
+    @Autowired
+    protected IndexTemplatePhyService indexTemplatePhyService;
+
+    @Autowired
+    protected TemplatePhyManager templatePhyManager;
 
     @Autowired
     protected TemplateSrvManager templateSrvManager;
