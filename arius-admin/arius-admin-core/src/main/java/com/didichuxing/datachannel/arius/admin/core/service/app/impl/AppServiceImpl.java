@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -38,7 +38,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoServi
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
 import com.didiglobal.logi.log.ILog;
@@ -93,7 +93,7 @@ public class AppServiceImpl implements AppService {
     private ClusterLogicService         clusterLogicService;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private AppClusterLogicAuthService logicClusterAuthService;
@@ -641,7 +641,7 @@ public class AppServiceImpl implements AppService {
     }
 
     private boolean hasOwnTemplate(int appId) {
-        List<IndexTemplateLogic> templateLogics = templateLogicService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplate> templateLogics = indexTemplateService.getAppLogicTemplatesByAppId(appId);
         return CollectionUtils.isNotEmpty(templateLogics);
     }
 

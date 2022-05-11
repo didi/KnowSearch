@@ -8,15 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithLabels;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithLabels;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
 /**
@@ -46,7 +46,7 @@ public interface TemplateLogicManager {
      * @param includeLabelIds 包含的Label ID列表
      * @return list
      */
-    List<IndexTemplateLogicWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds);
+    List<IndexTemplateWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds);
 
     /**
      * 获取最近访问该模板的APP
@@ -61,7 +61,7 @@ public interface TemplateLogicManager {
      * @param logicId 模板id
      * @return label
      */
-    IndexTemplateLogicWithLabels getLabelByLogicId(Integer logicId);
+    IndexTemplateWithLabels getLabelByLogicId(Integer logicId);
 
     /**
      * 新建逻辑模板 无参数校验
@@ -71,7 +71,7 @@ public interface TemplateLogicManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Integer> addTemplateWithoutCheck(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+    Result<Integer> addTemplateWithoutCheck(IndexTemplateDTO param, String operator) throws AdminOperateException;
 
     /**
      * 新建逻辑模板
@@ -81,7 +81,7 @@ public interface TemplateLogicManager {
      * @throws AdminOperateException 操作es失败 或者保存物理模板信息失败
      */
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    Result<Integer> createLogicTemplate(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+    Result<Integer> createLogicTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException;
 
     /**
      * 获取所有逻辑模板聚合
@@ -138,14 +138,14 @@ public interface TemplateLogicManager {
      * @see   AppTemplateAuthEnum
      * @return
      */
-    List<IndexTemplateLogic> getTemplatesByAppIdAndAuthType(Integer appId, Integer authType);
+    List<IndexTemplate> getTemplatesByAppIdAndAuthType(Integer appId, Integer authType);
 
     /**
      * 根据项目获取有管理\读写\读权限的逻辑模版
      */
     List<String> getTemplateLogicNames(Integer appId);
 
-    Result<Void> editTemplate(IndexTemplateLogicDTO param, String operator) throws AdminOperateException;
+    Result<Void> editTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException;
 
     Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
 

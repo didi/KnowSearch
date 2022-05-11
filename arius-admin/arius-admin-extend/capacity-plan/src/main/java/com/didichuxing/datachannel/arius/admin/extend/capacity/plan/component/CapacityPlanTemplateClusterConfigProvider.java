@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResour
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterConfigProvider;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
 import com.didiglobal.logi.log.ILog;
@@ -23,7 +23,7 @@ public class CapacityPlanTemplateClusterConfigProvider implements TemplateCluste
     private CapacityPlanRegionService capacityPlanRegionService;
 
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     /**
      * 获取模板所在资源的配置
@@ -35,7 +35,7 @@ public class CapacityPlanTemplateClusterConfigProvider implements TemplateCluste
     public Result<TemplateResourceConfig> getTemplateResourceConfig(Long physicalId) {
 
         CapacityPlanRegion region = capacityPlanRegionService
-            .getRegionOfPhyTemplate( templatePhyService.getTemplateById(physicalId));
+            .getRegionOfPhyTemplate( indexTemplatePhyService.getTemplateById(physicalId));
 
         if (region == null) {
             LOGGER.warn("class=CapacityPlanTemplateClusterConfigProvide||method=getTemplateResourceConfig||msg=not match any region");

@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.Co
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public interface TemplateLogicAliasesManager {
      * 获取别名
      * @return list
      */
-    List<IndexTemplateAlias> listAlias(List<IndexTemplateLogicWithPhyTemplates> templateLogicList);
+    List<IndexTemplateAlias> listAlias(List<IndexTemplateWithPhyTemplates> templateLogicList);
 
     /**
      * 获取别名

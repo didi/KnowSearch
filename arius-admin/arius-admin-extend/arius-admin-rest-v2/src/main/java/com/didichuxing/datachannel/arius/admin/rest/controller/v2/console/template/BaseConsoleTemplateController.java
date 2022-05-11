@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -16,7 +16,7 @@ public class BaseConsoleTemplateController {
     protected static final ILog    LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
 
     @Autowired
-    protected TemplateLogicService templateLogicService;
+    protected IndexTemplateService indexTemplateService;
 
     @Autowired
     protected TemplateLabelService templateLabelService;
@@ -40,7 +40,7 @@ public class BaseConsoleTemplateController {
             return Result.buildParamIllegal("应用Id为空");
         }
 
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
+        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(logicId);
         if (templateLogic == null) {
             return Result.buildNotExist("索引不存在");
         }

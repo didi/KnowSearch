@@ -9,21 +9,21 @@ import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AmsTemplatePhysicalConfVO;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.MonitorTaskInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsRegister;
@@ -65,10 +65,10 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     private ClusterPhyService           phyClusterService;
 
     @Autowired
-    private TemplatePhyService          templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private ESOpClient                  esOpClient;
@@ -436,12 +436,12 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
 
     private Map<String/*templateName*/, AmsTemplatePhysicalConfVO> listTypeMappingIndex(String dataCenter) {
         Map<String/*templateName*/, AmsTemplatePhysicalConfVO> resultMap = Maps.newHashMap();
-        List<IndexTemplateLogicWithPhyTemplates> logicWithPhysicals = templateLogicService
+        List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
                 .getTemplateWithPhysicalByDataCenter(dataCenter);
 
         String templateConfig = null;
         AmsTemplatePhysicalConfVO item = null;
-        for (IndexTemplateLogicWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
+        for (IndexTemplateWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
             if (logicWithPhysical.hasPhysicals()) {
                 try {
                     templateConfig = logicWithPhysical.getAnyOne().getConfig();
@@ -540,7 +540,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
         metricsRegister.clearComputeValueRegister();
 
         // 从admin获取所有模板信息
-        List<IndexTemplatePhyWithLogic> indexTemplates = templatePhyService.listTemplateWithLogic();
+        List<IndexTemplatePhyWithLogic> indexTemplates = indexTemplatePhyService.listTemplateWithLogic();
 
         Map<String,List<IndexTemplatePhyWithLogic>> indexTemplatesMap = new ConcurrentHashMap<>();
         if(CollectionUtils.isNotEmpty(indexTemplates)){

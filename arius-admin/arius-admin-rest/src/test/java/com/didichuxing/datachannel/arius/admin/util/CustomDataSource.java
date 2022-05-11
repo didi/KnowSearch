@@ -9,9 +9,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfi
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.AppMonitorRuleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
@@ -22,13 +23,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.MetricsConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.*;
@@ -238,8 +238,8 @@ public class CustomDataSource {
         return po;
     }
 
-    public static TemplatePhysicalPO templatePhysicalSource() {
-        TemplatePhysicalPO po = new TemplatePhysicalPO();
+    public static IndexTemplatePhyPO templatePhysicalSource() {
+        IndexTemplatePhyPO po = new IndexTemplatePhyPO();
         po.setLogicId(1);
         po.setName("test");
         po.setExpression("1");
@@ -254,8 +254,8 @@ public class CustomDataSource {
         return po;
     }
 
-    public static TemplateLogicPO templateLogicSource() {
-        TemplateLogicPO po = new TemplateLogicPO();
+    public static IndexTemplatePO templateLogicSource() {
+        IndexTemplatePO po = new IndexTemplatePO();
         po.setId(1);
         po.setAppId(1);
         po.setName("test");
@@ -279,33 +279,33 @@ public class CustomDataSource {
         return po;
     }
 
-    public static ESRoleClusterDTO esRoleClusterDTOFactory() {
-        ESRoleClusterDTO esRoleClusterDTO = new ESRoleClusterDTO();
-        esRoleClusterDTO.setRoleClusterName("wpk");
-        esRoleClusterDTO.setRole(ESClusterNodeRoleEnum.CLIENT_NODE.getDesc());
-        esRoleClusterDTO.setMachineSpec("");
-        esRoleClusterDTO.setPlugIds("");
-        esRoleClusterDTO.setElasticClusterId(12345L);
-        esRoleClusterDTO.setPodNumber(3);
-        esRoleClusterDTO.setCfgId(1);
-        esRoleClusterDTO.setPlugIds("");
-        esRoleClusterDTO.setEsVersion("");
-        esRoleClusterDTO.setPidCount(1);
-        return esRoleClusterDTO;
+    public static ESClusterRoleDTO esRoleClusterDTOFactory() {
+        ESClusterRoleDTO esClusterRoleDTO = new ESClusterRoleDTO();
+        esClusterRoleDTO.setRoleClusterName("wpk");
+        esClusterRoleDTO.setRole(ESClusterNodeRoleEnum.CLIENT_NODE.getDesc());
+        esClusterRoleDTO.setMachineSpec("");
+        esClusterRoleDTO.setPlugIds("");
+        esClusterRoleDTO.setElasticClusterId(12345L);
+        esClusterRoleDTO.setPodNumber(3);
+        esClusterRoleDTO.setCfgId(1);
+        esClusterRoleDTO.setPlugIds("");
+        esClusterRoleDTO.setEsVersion("");
+        esClusterRoleDTO.setPidCount(1);
+        return esClusterRoleDTO;
     }
 
-    public static ESRoleClusterHostDTO esRoleClusterHostDTOFactory() {
-        ESRoleClusterHostDTO esRoleClusterHostDTO = new ESRoleClusterHostDTO();
-        esRoleClusterHostDTO.setCluster("test_cluster");
-        esRoleClusterHostDTO.setIp("127.0.0.0");
-        esRoleClusterHostDTO.setRack("r1");
-        esRoleClusterHostDTO.setHostname("wpk");
-        esRoleClusterHostDTO.setPort("8080");
-        esRoleClusterHostDTO.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
-        esRoleClusterHostDTO.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
-        esRoleClusterHostDTO.setRoleClusterId(1234L);
-        esRoleClusterHostDTO.setNodeSet("");
-        return esRoleClusterHostDTO;
+    public static ESClusterRoleHostDTO esRoleClusterHostDTOFactory() {
+        ESClusterRoleHostDTO esClusterRoleHostDTO = new ESClusterRoleHostDTO();
+        esClusterRoleHostDTO.setCluster("test_cluster");
+        esClusterRoleHostDTO.setIp("127.0.0.0");
+        esClusterRoleHostDTO.setRack("r1");
+        esClusterRoleHostDTO.setHostname("wpk");
+        esClusterRoleHostDTO.setPort("8080");
+        esClusterRoleHostDTO.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
+        esClusterRoleHostDTO.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
+        esClusterRoleHostDTO.setRoleClusterId(1234L);
+        esClusterRoleHostDTO.setNodeSet("");
+        return esClusterRoleHostDTO;
     }
 
     public static ESLogicClusterDTO esLogicClusterDTOFactory() {
@@ -345,19 +345,19 @@ public class CustomDataSource {
         return appTemplateAuthDTO;
     }
 
-    public static IndexTemplateLogicDTO indexTemplateLogicDTOFactory() {
-        IndexTemplateLogicDTO indexTemplateLogicDTO = new IndexTemplateLogicDTO();
-        indexTemplateLogicDTO.setName("wpkTest-1");
-        indexTemplateLogicDTO.setAppId(1);
-        indexTemplateLogicDTO.setDataType(1);
-        indexTemplateLogicDTO.setDateFormat("_yyyy-MM-dd");
-        indexTemplateLogicDTO.setExpression("wpkTest-1*");
-        indexTemplateLogicDTO.setDateField("timeStamp");
-        indexTemplateLogicDTO.setResponsible("admin");
-        indexTemplateLogicDTO.setDataCenter("cn");
-        indexTemplateLogicDTO.setQuota(30D);
+    public static IndexTemplateDTO indexTemplateLogicDTOFactory() {
+        IndexTemplateDTO indexTemplateDTO = new IndexTemplateDTO();
+        indexTemplateDTO.setName("wpkTest-1");
+        indexTemplateDTO.setAppId(1);
+        indexTemplateDTO.setDataType(1);
+        indexTemplateDTO.setDateFormat("_yyyy-MM-dd");
+        indexTemplateDTO.setExpression("wpkTest-1*");
+        indexTemplateDTO.setDateField("timeStamp");
+        indexTemplateDTO.setResponsible("admin");
+        indexTemplateDTO.setDataCenter("cn");
+        indexTemplateDTO.setQuota(30D);
 
-        return indexTemplateLogicDTO;
+        return indexTemplateDTO;
     }
 
     public static TemplateTypePO templateTypeSource() {
@@ -407,10 +407,10 @@ public class CustomDataSource {
     }
 
 
-    public static List<TemplateLogicPO> getTemplateLogicPOList() {
-        List<TemplateLogicPO> list = new ArrayList<>();
+    public static List<IndexTemplatePO> getTemplateLogicPOList() {
+        List<IndexTemplatePO> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++) {
-            TemplateLogicPO po = CustomDataSource.templateLogicSource();
+            IndexTemplatePO po = CustomDataSource.templateLogicSource();
             po.setId(i);
             po.setName(po.getName() + "i");
             list.add(po);
@@ -418,10 +418,10 @@ public class CustomDataSource {
         return list;
     }
 
-    public static List<TemplatePhysicalPO> getTemplatePhysicalPOList() {
-        List<TemplatePhysicalPO> list = new ArrayList<>();
+    public static List<IndexTemplatePhyPO> getTemplatePhysicalPOList() {
+        List<IndexTemplatePhyPO> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++) {
-            TemplatePhysicalPO po = CustomDataSource.templatePhysicalSource();
+            IndexTemplatePhyPO po = CustomDataSource.templatePhysicalSource();
             list.add(po);
         }
         return list;
@@ -491,17 +491,17 @@ public class CustomDataSource {
         return metricsConfigPO;
     }
 
-    public static GatewayNodePO getGatewayNodePO() {
-        GatewayNodePO gatewayNodePO = new GatewayNodePO();
-        gatewayNodePO.setId(1);
-        gatewayNodePO.setClusterName(PHY_CLUSTER_NAME);
-        return gatewayNodePO;
+    public static GatewayClusterNodePO getGatewayNodePO() {
+        GatewayClusterNodePO gatewayClusterNodePO = new GatewayClusterNodePO();
+        gatewayClusterNodePO.setId(1);
+        gatewayClusterNodePO.setClusterName(PHY_CLUSTER_NAME);
+        return gatewayClusterNodePO;
     }
 
-    public static List<GatewayNodePO> getGatewayNodePOList() {
-        List<GatewayNodePO> list = new ArrayList<>();
+    public static List<GatewayClusterNodePO> getGatewayNodePOList() {
+        List<GatewayClusterNodePO> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++ ) {
-            GatewayNodePO po = CustomDataSource.getGatewayNodePO();
+            GatewayClusterNodePO po = CustomDataSource.getGatewayNodePO();
             po.setId(i);
             list.add(po);
         }

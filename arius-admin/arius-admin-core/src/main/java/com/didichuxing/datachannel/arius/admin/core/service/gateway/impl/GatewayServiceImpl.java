@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayNodeDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
@@ -33,6 +33,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * @author didi
+ */
 @Service
 @NoArgsConstructor
 public class GatewayServiceImpl implements GatewayService {
@@ -46,7 +49,7 @@ public class GatewayServiceImpl implements GatewayService {
     private ESGatewayClient esGatewayClient;
 
     @Autowired
-    private GatewayNodeDAO    gatewayNodeDAO;
+    private GatewayClusterNodeDAO gatewayClusterNodeDAO;
 
     @Autowired
     private AppService appService;
@@ -101,7 +104,7 @@ public class GatewayServiceImpl implements GatewayService {
         }
 
         long time = System.currentTimeMillis() - gapTime;
-        return Result.buildSucc(gatewayNodeDAO.aliveCountByClusterNameAndTime(clusterName, new Date(time)));
+        return Result.buildSucc(gatewayClusterNodeDAO.aliveCountByClusterNameAndTime(clusterName, new Date(time)));
     }
 
     /**
@@ -115,10 +118,10 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public List<GatewayNode> getAliveNode(String clusterName, long timeout) {
+    public List<GatewayClusterNode> getAliveNode(String clusterName, long timeout) {
         Date time = new Date(System.currentTimeMillis() - timeout);
-        return ConvertUtil.list2List(gatewayNodeDAO.listAliveNodeByClusterNameAndTime(clusterName, time),
-            GatewayNode.class);
+        return ConvertUtil.list2List(gatewayClusterNodeDAO.listAliveNodeByClusterNameAndTime(clusterName, time),
+            GatewayClusterNode.class);
     }
 
     @Override
@@ -188,12 +191,12 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     private boolean recordHeartbeat(GatewayHeartbeat heartbeat) {
-        GatewayNodePO gatewayNodePO = new GatewayNodePO();
-        gatewayNodePO.setClusterName(heartbeat.getClusterName().trim());
-        gatewayNodePO.setHeartbeatTime(new Date());
-        gatewayNodePO.setHostName(heartbeat.getHostName().trim());
-        gatewayNodePO.setPort(heartbeat.getPort());
-        return gatewayNodeDAO.recordGatewayNode(gatewayNodePO) > 0;
+        GatewayClusterNodePO gatewayClusterNodePO = new GatewayClusterNodePO();
+        gatewayClusterNodePO.setClusterName(heartbeat.getClusterName().trim());
+        gatewayClusterNodePO.setHeartbeatTime(new Date());
+        gatewayClusterNodePO.setHostName(heartbeat.getHostName().trim());
+        gatewayClusterNodePO.setPort(heartbeat.getPort());
+        return gatewayClusterNodeDAO.recordGatewayNode(gatewayClusterNodePO) > 0;
     }
 
     private void saveGatewayCluster(String clusterName) {

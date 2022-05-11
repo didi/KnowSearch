@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 
 import java.util.ArrayList;
 import java.util.List;

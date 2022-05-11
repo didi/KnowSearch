@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -44,7 +44,7 @@ public class TemplatePhysicalController {
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取物理模板列表接口")
-    public Result<List<ConsoleTemplatePhyVO>> list(@RequestBody IndexTemplatePhysicalDTO param,
+    public Result<List<ConsoleTemplatePhyVO>> list(@RequestBody IndexTemplatePhyDTO param,
                                                    HttpServletRequest request) {
         return Result.buildSucc(templatePhyManager.getConsoleTemplatePhyVOS(param, HttpRequestUtils.getAppId(request)));
     }

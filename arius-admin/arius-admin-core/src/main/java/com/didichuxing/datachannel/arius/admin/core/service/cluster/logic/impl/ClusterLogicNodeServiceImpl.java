@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.impl;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
     private RegionRackService regionRackService;
 
     @Autowired
-    private RoleClusterHostService roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     /**
      * 获取逻辑集群对应的节点列表
@@ -32,8 +32,8 @@ public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
      * @return
      */
     @Override
-    public List<RoleClusterHost> getLogicClusterNodes(Long clusterId) {
-        List<RoleClusterHost> logicClusterNodes = new ArrayList<>();
+    public List<ClusterRoleHost> getLogicClusterNodes(Long clusterId) {
+        List<ClusterRoleHost> logicClusterNodes = new ArrayList<>();
 
         List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listLogicClusterRacks(clusterId);
         for (ClusterLogicRackInfo clusterRack : logicClusterRacks) {
@@ -49,8 +49,8 @@ public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
      * @return
      */
     @Override
-    public List<RoleClusterHost> getLogicClusterNodesIncludeNonDataNodes(Long clusterId) {
-        List<RoleClusterHost> logicClusterNodes = new ArrayList<>();
+    public List<ClusterRoleHost> getLogicClusterNodesIncludeNonDataNodes(Long clusterId) {
+        List<ClusterRoleHost> logicClusterNodes = new ArrayList<>();
 
         List<String> phyClusters = new ArrayList<>();
         List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listLogicClusterRacks(clusterId);
@@ -74,13 +74,13 @@ public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
      * @param clusterRack 集群Rack信息
      * @return
      */
-    private List<RoleClusterHost> fetchNodesOfClusterRack(ClusterLogicRackInfo clusterRack) {
+    private List<ClusterRoleHost> fetchNodesOfClusterRack(ClusterLogicRackInfo clusterRack) {
         if (clusterRack != null) {
-            ESRoleClusterHostDTO query = new ESRoleClusterHostDTO();
+            ESClusterRoleHostDTO query = new ESClusterRoleHostDTO();
             query.setCluster(clusterRack.getPhyClusterName());
             query.setRack(clusterRack.getRack());
 
-            return roleClusterHostService.queryNodeByCondt(query);
+            return clusterRoleHostService.queryNodeByCondt(query);
         }
 
         return new ArrayList<>();
