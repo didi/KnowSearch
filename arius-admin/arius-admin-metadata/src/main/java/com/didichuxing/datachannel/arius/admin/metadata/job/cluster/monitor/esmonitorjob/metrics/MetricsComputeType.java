@@ -64,6 +64,11 @@ public enum MetricsComputeType {
     }
 
     private Double minusByDouble(Double before, Double now) {
-        return now - before;
+        // 类似Get {index}/_stat等RPC请求，存在超时的场景，此时获取的now为空, 特殊处理
+        if (null == now || null == before) { return 0.0;}
+        if (0 == now || 0 == before)    { return 0.0;}
+
+        double res = now - before;
+        return res < 0 ? 0 : res;
     }
 }

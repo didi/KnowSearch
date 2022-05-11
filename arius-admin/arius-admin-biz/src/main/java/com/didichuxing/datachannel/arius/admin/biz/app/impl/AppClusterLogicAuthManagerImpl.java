@@ -16,7 +16,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.google.common.collect.Lists;
 
 /**
- * Created by linyunan on 2021-10-17
+ * @author linyunan
+ * @date 2021-04-28
  */
 @Component
 public class AppClusterLogicAuthManagerImpl implements AppClusterLogicAuthManager {
