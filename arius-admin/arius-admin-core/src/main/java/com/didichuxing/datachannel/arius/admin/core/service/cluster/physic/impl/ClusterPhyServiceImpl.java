@@ -400,7 +400,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return
      */
     @Override
-    public boolean ensureDcdrRemoteCluster(String cluster, String remoteCluster) throws ESOperateException {
+    public boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException {
 
         ClusterPhy clusterPhy = getClusterByName(cluster);
         if (clusterPhy == null) {

@@ -3,14 +3,14 @@ package com.didichuxing.datachannel.arius.admin.common.constant.dcdr;
 /**
  * Created by linyunan on 12/14/21
  */
-public enum DcdrSwithTypeEnum {
+public enum DCDRSwithTypeEnum {
                                SMOOTH("smooth", 1),
 
                                FORCE("force", 2),
 
                                UNKNOWN("unknown", -1);
 
-    DcdrSwithTypeEnum(String value, Integer code) {
+    DCDRSwithTypeEnum(String value, Integer code) {
         this.value = value;
         this.code = code;
     }
@@ -35,11 +35,11 @@ public enum DcdrSwithTypeEnum {
         this.code = code;
     }
 
-    public static DcdrSwithTypeEnum valueFromCode(Integer code) {
+    public static DCDRSwithTypeEnum valueFromCode(Integer code) {
         if (code == null) {
             return null;
         }
-        for (DcdrSwithTypeEnum state : DcdrSwithTypeEnum.values()) {
+        for (DCDRSwithTypeEnum state : DCDRSwithTypeEnum.values()) {
             if (UNKNOWN.getCode().equals(code)) {
                 continue;
             }

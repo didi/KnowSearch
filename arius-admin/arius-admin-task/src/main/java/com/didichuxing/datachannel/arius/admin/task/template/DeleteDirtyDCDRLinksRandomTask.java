@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DcdrSwithTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRSingleTemplateMasterSlaveSwitchDetail;
@@ -54,7 +54,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
 
             for (DCDRSingleTemplateMasterSlaveSwitchDetail switchDetail : switchDetailList) {
                 //强切任务失败，删除脏链路
-                if (DcdrSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())
+                if (DCDRSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())
                         && !switchDetail.getDeleteDcdrChannelFlag()) {
                     try {
                         Result<Void> deleteDcdrResult = templateDcdrManager.deleteDCDR(

@@ -258,17 +258,17 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
     public void ensureDcdrRemoteClusterTest() throws ESOperateException {
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         ClusterPhyDTO remoteESClusterDTO = CustomDataSource.esClusterDTOFactory();
-        Assertions.assertFalse(esClusterPhyService.ensureDcdrRemoteCluster(esClusterDTO.getCluster(), null));
+        Assertions.assertFalse(esClusterPhyService.ensureDCDRRemoteCluster(esClusterDTO.getCluster(), null));
         esClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR);
         esClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR);
         Mockito.when(esClusterService.hasSettingExist(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         Assertions.assertTrue(
-                esClusterPhyService.ensureDcdrRemoteCluster(esClusterDTO.getCluster(), remoteESClusterDTO.getCluster()));
+                esClusterPhyService.ensureDCDRRemoteCluster(esClusterDTO.getCluster(), remoteESClusterDTO.getCluster()));
         Mockito.when(esClusterService.hasSettingExist(Mockito.anyString(), Mockito.anyString())).thenReturn(false);
         Mockito.when(esClusterService.syncPutRemoteCluster(Mockito.anyString(), Mockito.anyString(), Mockito.isNull(),
                 Mockito.anyInt())).thenReturn(true);
         Assertions.assertFalse(
-                esClusterPhyService.ensureDcdrRemoteCluster(esClusterDTO.getCluster(), remoteESClusterDTO.getCluster()));
+                esClusterPhyService.ensureDCDRRemoteCluster(esClusterDTO.getCluster(), remoteESClusterDTO.getCluster()));
     }
 
     @Test

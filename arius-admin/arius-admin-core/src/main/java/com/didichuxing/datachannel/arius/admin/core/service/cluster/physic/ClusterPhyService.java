@@ -157,7 +157,7 @@ public interface ClusterPhyService {
      * @throws ESOperateException
      * @return
      */
-    boolean ensureDcdrRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
+    boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
 
     /**
      * 获取物理集群角色

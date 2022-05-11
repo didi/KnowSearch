@@ -46,14 +46,14 @@ public class AriusMetaJobClusterDistributeServiceImpl implements AriusMetaJobClu
         List<ClusterPhy> monitorCluster = Lists.newArrayList();
         List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
         if (CollectionUtils.isEmpty(clusterPhyList)) {
-            LOGGER.warn("class=ClusterMonitorTaskServiceImpl||method=getSingleMachineMonitorCluster||" +
+            LOGGER.warn("class=AriusMetaJobClusterDistributeServiceImpl||method=getSingleMachineMonitorCluster||" +
                     "msg=clusterPhyList is empty");
             return monitorCluster;
         }
 
         List<AriusMetaJobClusterDistribute> ariusMetaJobClusterDistributes = getTaskByHost(monitorHost, maxPoolSize);
         if(CollectionUtils.isEmpty(ariusMetaJobClusterDistributes)){
-            LOGGER.warn("class=ClusterMonitorTaskServiceImpl||method=getSingleMachineMonitorCluster||" +
+            LOGGER.warn("class=AriusMetaJobClusterDistributeServiceImpl||method=getSingleMachineMonitorCluster||" +
                     "msg=clusterMonitorTaskPOS is empty");
         }else {
             Map<String, AriusMetaJobClusterDistribute> taskMap = ariusMetaJobClusterDistributes.stream()
@@ -66,7 +66,7 @@ public class AriusMetaJobClusterDistributeServiceImpl implements AriusMetaJobClu
             }
         }
 
-        LOGGER.info("class=ClusterMonitorJobHandler||method=handlePhysicalClusterStats||monitorCluster={}",
+        LOGGER.info("class=AriusMetaJobClusterDistributeServiceImpl||method=getSingleMachineMonitorCluster||monitorCluster={}",
                 JSON.toJSONString(monitorCluster));
         return monitorCluster;
     }
