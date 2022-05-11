@@ -124,17 +124,19 @@ public interface TemplateSrvManager {
 
     /**
      * 为一个物理集群增加多个索引服务
-     * @param phyCluster         物理集群
-     * @param templateSrvIds     索引服务列表
-     * @return
+     * @param phyCluster     物理集群
+     * @param templateSrvIds 索引服务列表
+     * @param operator       操作人
+     * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> replaceTemplateServes(String phyCluster, List<Integer> templateSrvIds, String operator);
 
     /**
      * 为一个物理集群删除一个索引服务
-     * @param phyCluster
-     * @param templateSrvId
-     * @return
+     * @param phyCluster    物理集群名称
+     * @param templateSrvId templateSrvId
+     * @param operator      操作人
+     * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> delTemplateSrv(String phyCluster, String templateSrvId, String operator);
 
@@ -150,7 +152,8 @@ public interface TemplateSrvManager {
     /**
      * 清理所有索引服务
      * @param clusterPhy 物理集群名称
-     * @return
+     * @param operator   操作人
+     * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator);
 }

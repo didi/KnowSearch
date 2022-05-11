@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterPO extends BasePO {
+public class ClusterPhyPO extends BasePO {
 
     /**
      * 集群id
@@ -153,7 +153,7 @@ public class ClusterPO extends BasePO {
             return false;
         }
 
-        ClusterPO other = (ClusterPO) obj;
+        ClusterPhyPO other = (ClusterPhyPO) obj;
 
         if (StringUtils.isNotBlank(httpAddress) && !httpAddress.equals(other.getHttpAddress())) {
             return false;

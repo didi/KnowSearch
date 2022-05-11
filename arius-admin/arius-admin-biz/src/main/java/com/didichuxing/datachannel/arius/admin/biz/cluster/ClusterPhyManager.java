@@ -4,21 +4,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 
+/**
+ *
+ * @author ohushenglin_v
+ * @date 2022-05-10
+ */
 public interface ClusterPhyManager {
 
     /**
@@ -55,12 +60,19 @@ public interface ClusterPhyManager {
     Result<Void> releaseRacks(String cluster, String racks, int retryCount);
 
     /**
-     * 获取控制台物理集群信息列表
+     * 获取控制台物理集群信息列表(ZH有使用)
      * @param currentAppId 当前登录项目
+     * @param param         查询参数
+     * @return 物理集群列表
      */
-    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param, Integer currentAppId);
+    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ClusterPhyDTO param, Integer currentAppId);
 
-    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param);
+    /**
+     * 获取控制台物理集群信息列表
+     * @param param 查询参数
+     * @return 物理集群列表
+     */
+    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ClusterPhyDTO param);
 
     /**
      * 构建客户端需要的数据
@@ -72,20 +84,17 @@ public interface ClusterPhyManager {
     List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId);
 
     /**
-     * 获取单个控制台物理集群信息
-     * @param currentAppId 当前登录项目
-     */
-    ConsoleClusterPhyVO getConsoleClusterPhyVO(Integer clusterId, Integer currentAppId);
-
-    /**
      * 获取单个物理集群overView信息
      * @param clusterId 物理集群id
      * @param currentAppId 当前登录项目
+     * @return 物理集群信息
      */
     ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentAppId);
 
     /**
      * 获取物理集群节点划分信息
+     * @param clusterPyhId  物理集群ID
+     * @return 集群节点信息
      */
     Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
 
@@ -94,6 +103,7 @@ public interface ClusterPhyManager {
      * @param clusterLogicType 逻辑集群类型
      * @param clusterLogicId   逻辑集群Id
      * @see ResourceLogicTypeEnum
+     * @return 物理集群名称
      */
     Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(Integer clusterLogicType, Long clusterLogicId);
 
@@ -101,21 +111,33 @@ public interface ClusterPhyManager {
      * 获取新建逻辑集群可关联的物理集群名称
      * @param clusterLogicType  逻辑集群类型
      * @see ResourceLogicTypeEnum
+     * @return 物理集群名称
      */
     Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType);
 
     /**
      * 集群接入
-     * Tuple<Long, String> 逻辑集群Id, 物理集群名称
+     * @param param 逻辑集群Id, 物理集群名称
+     * @param operator 操作人
+     * @return  Tuple<Long, String>
      */
 	Result<Tuple<Long, String>> clusterJoin(ClusterJoinDTO param, String operator);
 
     /**
      * 删除接入集群
      * 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
+     * @param clusterId 集群id
+     * @param operator  操作人
+     * @return {@link Result}<{@link Void}>
      */
     Result<Void> deleteClusterJoin(Integer clusterId, String operator);
 
+    /**
+     * 插件列表
+     *
+     * @param cluster 集群
+     * @return {@link Result}<{@link List}<{@link PluginVO}>>
+     */
     Result<List<PluginVO>> listPlugins(String cluster);
 
     /**
@@ -141,43 +163,68 @@ public interface ClusterPhyManager {
 
     /**
      * 获取APP有管理、读写、读权限的物理集群名称列表
+     *
+     * @param appId appId
+     * @return {@link List}<{@link String}>
      */
-	List<String> getAppClusterPhyNames(Integer appId);
+    List<String> getAppClusterPhyNames(Integer appId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
+     * @param appId      appId
+     * @param templateId 模板id
+     * @return {@link Result}<{@link List}<{@link String}>>
      */
     Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId);
 
     /**
      * 获取物理集群节点名称列表
+     * @param clusterPhyName 集群phy名称
+     * @return {@link List}<{@link String}>
      */
     List<String> getAppClusterPhyNodeNames(String clusterPhyName);
 
     /**
      * 构建单个物理集群统计信息
-     * @param cluster
+     * @param cluster 集群
      */
     void buildPhyClusterStatics(ConsoleClusterPhyVO cluster);
 
     /**
      * 获取APP可查看的物理集群节点名称列表
-     * @param appId
+     * @param appId appId
+     * @return {@link List}<{@link String}>
      */
     List<String> getAppNodeNames(Integer appId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
-     * @param clusterPhyId
-     * @param operator
-     * @param appId
-     * @return
+     * @param clusterPhyId 物理集群ID
+     * @param operator     操作人
+     * @param appId        appId
+     * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer appId);
 
-    Result<Boolean> addCluster(ESClusterDTO param, String operator, Integer appId);
+    /**
+     * 添加集群
+     *
+     * @param param    参数
+     * @param operator 操作人
+     * @param appId    appId
+     * @return {@link Result}<{@link Boolean}>
+     */
+    Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer appId);
 
-    Result<Boolean> editCluster(ESClusterDTO param, String operator, Integer appId);
+    /**
+     * 编辑集群
+     *
+     * @param param    参数
+     * @param operator 操作人
+     * @param appId    appId
+     * @return {@link Result}<{@link Boolean}>
+     */
+    Result<Boolean> editCluster(ClusterPhyDTO param, String operator, Integer appId);
 
     /**
      * 条件组合、分页查询
@@ -215,6 +262,12 @@ public interface ClusterPhyManager {
      */
     void buildClusterRole(ConsoleClusterPhyVO cluster);
 
+    /**
+     * 构建集群作用
+     *
+     * @param cluster      集群
+     * @param clusterRoleInfos 集群角色
+     */
     void buildClusterRole(ConsoleClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos);
 
     /**

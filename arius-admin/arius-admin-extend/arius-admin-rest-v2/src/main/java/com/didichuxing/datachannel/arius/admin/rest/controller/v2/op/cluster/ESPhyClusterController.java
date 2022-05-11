@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.TemplateExpireManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
@@ -53,8 +53,7 @@ public class ESPhyClusterController {
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取集群列表接口")
-
-    public Result<List<ConsoleClusterPhyVO>> list(@RequestBody ESClusterDTO param, HttpServletRequest request) {
+    public Result<List<ConsoleClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
         return Result.buildSucc(clusterPhyManager.getConsoleClusterPhyVOS(param));
     }
 
@@ -62,7 +61,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "新建集群接口" )
 
-    public Result<Boolean> add(HttpServletRequest request, @RequestBody ESClusterDTO param) {
+    public Result<Boolean> add(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
         return clusterPhyManager.addCluster(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
     }
 
@@ -70,7 +69,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "编辑集群接口" )
 
-    public Result<Boolean> edit(HttpServletRequest request, @RequestBody ESClusterDTO param) {
+    public Result<Boolean> edit(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
         return clusterPhyManager.editCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
     }
 

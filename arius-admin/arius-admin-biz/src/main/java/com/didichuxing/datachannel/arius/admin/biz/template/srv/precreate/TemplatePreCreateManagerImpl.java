@@ -1,23 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_PRE_CREATE;
+
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_PRE_CREATE;
 
 /**
  * 索引预创建服务实现
@@ -28,7 +29,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
 public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements TemplatePreCreateManager {
 
     @Autowired
-    private TemplateDcdrManager templateDcdrManager;
+    private TemplateDCDRManager templateDcdrManager;
 
     @Autowired
     private ESIndexService           esIndexService;

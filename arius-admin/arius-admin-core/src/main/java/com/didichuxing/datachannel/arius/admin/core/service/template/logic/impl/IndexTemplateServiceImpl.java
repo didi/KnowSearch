@@ -1,34 +1,48 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
+
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.constant.*;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -38,6 +52,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
@@ -60,17 +75,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
 
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
@@ -291,7 +295,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> editTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException {
         Result<Void> checkResult = validateTemplate(param, EDIT);
         if (checkResult.failed()) {
@@ -350,14 +354,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             return Result.buildNotExist(TEMPLATE_NOT_EXIST);
         }
 
-        TemplateConfigPO oldConfigPO = indexTemplateConfigDAO.getByLogicId(configDTO.getLogicId());
-
         boolean succ = 1 == indexTemplateConfigDAO
             .update(responsibleConvertTool.obj2Obj(configDTO, TemplateConfigPO.class));
-        if (succ) {
-            //由于会出现重复record， 这里把底层内部的操作记录注释掉，统一在外层进行记录
-            //operateRecordService.save(TEMPLATE_CONFIG, EDIT, configDTO.getLogicId(),AriusObjUtils.findChangedWithClear(oldConfigPO, configDTO), operator);
-        }
 
         return Result.build(succ);
     }
@@ -527,7 +525,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
                                         String operator) throws AdminOperateException {
 

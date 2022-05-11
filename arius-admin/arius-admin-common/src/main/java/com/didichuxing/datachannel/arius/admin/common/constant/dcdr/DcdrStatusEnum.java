@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant.dcdr;
 /**
  * Created by linyunan on 12/14/21
  */
-public enum DcdrStatusEnum {
+public enum DCDRStatusEnum {
                             CANCELLED("cancelled", 0),
 
                             SUCCESS("success", 1),
@@ -16,7 +16,7 @@ public enum DcdrStatusEnum {
 
                             UNKNOWN("unknown", -1);
 
-    DcdrStatusEnum(String value, Integer code) {
+    DCDRStatusEnum(String value, Integer code) {
         this.value = value;
         this.code = code;
     }
@@ -41,12 +41,12 @@ public enum DcdrStatusEnum {
         this.code = code;
     }
 
-    public static DcdrStatusEnum valueFromCode(Integer code) {
+    public static DCDRStatusEnum valueFromCode(Integer code) {
         if (code == null) {
             return null;
         }
 
-        for (DcdrStatusEnum state : DcdrStatusEnum.values()) {
+        for (DCDRStatusEnum state : DCDRStatusEnum.values()) {
             if (UNKNOWN.getCode().equals(code)) {
                 continue;
             }

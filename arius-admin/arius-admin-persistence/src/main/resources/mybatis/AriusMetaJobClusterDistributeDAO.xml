@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.ClusterMonitorTaskDAO">
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.AriusMetaJobClusterDistributeDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AriusMetaJobClusterDistributePO">
         <result column="id"             jdbcType="BIGINT"       property="id"/>
         <result column="cluster_id"     jdbcType="INTEGER"      property="clusterId"/>
         <result column="cluster"        jdbcType="VARCHAR"      property="cluster"/>
@@ -36,13 +36,13 @@
         where monitor_host = #{monitorHost} order by monitor_time desc limit #{size}
     </select>
 
-    <update id="updateMonitorHost" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+    <update id="updateMonitorHost" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AriusMetaJobClusterDistributePO">
         update es_cluster_monitor_task
         set monitor_host = #{destMonitorHost}, monitor_time = #{monitorTime}
         where id = #{id} and monitor_host = #{monitorHost}
     </update>
 
-    <update id="updateMonitorTime" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+    <update id="updateMonitorTime" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AriusMetaJobClusterDistributePO">
         update es_cluster_monitor_task
         set monitor_time = #{monitorTime}
         where id = #{id} and monitor_host = #{monitorHost}
@@ -57,7 +57,7 @@
         </foreach>
     </insert>
 
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO">
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AriusMetaJobClusterDistributePO">
         <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>

@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Service服务执行的结果
+ @author ohushenglin_v
+ @date 2022-05-10
  */
 @ApiModel(description = "返回结构")
 public class Result<T> extends BaseResult {

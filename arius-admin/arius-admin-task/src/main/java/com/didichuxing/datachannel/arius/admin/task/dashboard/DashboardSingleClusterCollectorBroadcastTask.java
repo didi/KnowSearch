@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitorTask.ClusterMonitorTaskService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.task.component.TaskResultBuilder;
 import com.didichuxing.datachannel.arius.admin.task.dashboard.collector.BaseDashboardCollector;
@@ -25,6 +25,7 @@ import java.util.Map;
 
 /**
  * Created by linyunan on 3/11/22
+ * @author linyunan
  */
 @Task(name = "DashboardSingleClusterCollectorBroadcastTask", description = "采集DashBoard单个集群数据信息", cron = "0 0/5 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
 @Component
@@ -38,11 +39,11 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
     private static final int                          SINGLE_GROUP_CLUSTER_NUM     = 5;
 
     @Autowired
-    private ClusterMonitorTaskService                 clusterMonitorTaskService;
+    private AriusMetaJobClusterDistributeService ariusMetaJobClusterDistributeService;
     @Autowired
     private ClusterPhyService                         clusterPhyService;
 
-    private static final FutureUtil<Void>             batchCollectorFutureUtil     = FutureUtil
+    private static final FutureUtil<Void>             BATCH_COLLECTOR_FUTURE_UTIL     = FutureUtil
         .init("batchCollectorFutureUtil", 30, 30, 1000);
 
     private String                                    hostName                     = HttpHostUtil.HOST_NAME;
@@ -54,7 +55,7 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=DashboardSingleClusterCollectorBroadcastTask||method=execute||msg=DashboardSingleClusterCollectorBroadcastTask start.");
         // 获取单台admin实例能采集的集群数
-        List<ClusterPhy> monitorCluster = clusterMonitorTaskService.getSingleMachineMonitorCluster(hostName);
+        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
         if (CollectionUtils.isEmpty(monitorCluster)) { return TaskResult.SUCCESS;}
 
         long currentTimeMillis = System.currentTimeMillis();
@@ -67,7 +68,7 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
             // 各组执行, 单组并发执行
             for (ClusterPhy clusterPhy : partitionCluster) {
                 for (Map.Entry<String, BaseDashboardCollector> entry : BASE_DASHBOARD_COLLECTOR_MAP.entrySet()) {
-                    batchCollectorFutureUtil.runnableTask(() -> {
+                    BATCH_COLLECTOR_FUTURE_UTIL.runnableTask(() -> {
                         // 并发执行多个不同集群的采集器
                         BaseDashboardCollector collector = entry.getValue();
                         try {
@@ -83,7 +84,7 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
                 }
             }
             // 阻塞等待多个采集器执行结束
-            batchCollectorFutureUtil.waitExecute();
+            BATCH_COLLECTOR_FUTURE_UTIL.waitExecute();
         }
 
         LOGGER.info("class=DashboardSingleClusterCollectorBroadcastTask||method=execute||msg=DashboardSingleClusterCollectorBroadcastTask finish, cost:{}ms",
