@@ -4,10 +4,10 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.region.ClusterRegionDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.google.common.collect.Sets;
@@ -44,7 +44,7 @@ public class RegionRackServiceTest extends AriusAdminApplicationTest {
     private ClusterPhyService esClusterPhyService;
 
     @MockBean
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private RegionRackService regionRackService;
@@ -57,7 +57,7 @@ public class RegionRackServiceTest extends AriusAdminApplicationTest {
     public void mockRules() {
         Mockito.when(esClusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(new ClusterPhy());
         Mockito.when(esClusterPhyService.getClusterRacks(Mockito.anyString())).thenReturn(RackUtils.racks2Set(racks));
-        Mockito.when(templatePhyService.getTemplateByRegionId(Mockito.anyLong())).thenReturn(Collections.singletonList(new IndexTemplatePhy()));
+        Mockito.when(indexTemplatePhyService.getTemplateByRegionId(Mockito.anyLong())).thenReturn(Collections.singletonList(new IndexTemplatePhy()));
     }
 
     @Test
@@ -291,7 +291,7 @@ public class RegionRackServiceTest extends AriusAdminApplicationTest {
         clusterRegionDAO.update(clusterRegionPO);
         Assertions.assertEquals(Result.buildFail(String.format("region %d 上已经分配模板", id)).getMessage(),
                 regionRackService.unbindRegion(id, null, CustomDataSource.OPERATOR).getMessage());
-        Mockito.when(templatePhyService.getTemplateByRegionId(Mockito.anyLong())).thenReturn(null);
+        Mockito.when(indexTemplatePhyService.getTemplateByRegionId(Mockito.anyLong())).thenReturn(null);
         Assertions.assertTrue(regionRackService.unbindRegion(id, null, CustomDataSource.OPERATOR).success());
         Assertions.assertEquals(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID,
                 clusterRegionDAO.getById(id).getLogicClusterIds());

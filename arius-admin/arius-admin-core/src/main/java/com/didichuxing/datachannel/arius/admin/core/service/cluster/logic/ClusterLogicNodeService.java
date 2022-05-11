@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 
 import java.util.List;
 
@@ -15,12 +15,12 @@ public interface ClusterLogicNodeService {
      * @param clusterId 逻辑集群ID
      * @return
      */
-    List<RoleClusterHost> getLogicClusterNodes(Long clusterId);
+    List<ClusterRoleHost> getLogicClusterNodes(Long clusterId);
 
     /**
      * 获取逻辑集群所有节点包括对应物理集群非数据节点
      * @param clusterId 逻辑集群ID
      * @return
      */
-    List<RoleClusterHost> getLogicClusterNodesIncludeNonDataNodes(Long clusterId);
+    List<ClusterRoleHost> getLogicClusterNodesIncludeNonDataNodes(Long clusterId);
 }

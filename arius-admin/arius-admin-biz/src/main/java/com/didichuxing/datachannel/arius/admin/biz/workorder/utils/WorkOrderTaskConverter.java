@@ -114,7 +114,7 @@ public class WorkOrderTaskConverter {
                 ecmParamBaseList.add(hostCreateActionParam);
             }
 
-            for (ESClusterRoleHost esClusterRoleHost : clusterOpNewHostContent.getRoleClusterHosts()) {
+            for (ESClusterRoleHost esClusterRoleHost : clusterOpNewHostContent.getClusterRoleHosts()) {
                 // 这三个节点的顺序一定是这个顺序
                 if (AriusObjUtils.isBlank(esClusterRoleHost.getHostname())) {
                     continue;

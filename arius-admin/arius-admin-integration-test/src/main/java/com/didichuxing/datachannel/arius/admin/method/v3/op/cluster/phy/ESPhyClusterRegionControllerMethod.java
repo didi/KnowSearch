@@ -5,7 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
@@ -66,9 +66,9 @@ public class ESPhyClusterRegionControllerMethod {
         return JSON.parseObject(AriusClient.delete(path, params, null), new TypeReference<Result<Void>>(){});
     }
 
-    public static Result<List<ESRoleClusterHostVO>> getRegionNodes(Long regionId) throws IOException {
+    public static Result<List<ESClusterRoleHostVO>> getRegionNodes(Long regionId) throws IOException {
         String path = String.format("%s/%d/nodes", PHY_CLUSTER_REGION, regionId);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESRoleClusterHostVO>>>(){});
+        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ESClusterRoleHostVO>>>(){});
     }
 
     public static Result<List<IndexTemplatePhysicalVO>> getRegionPhysicalTemplates(Long regionId) throws IOException {

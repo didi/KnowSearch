@@ -3,12 +3,12 @@ package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.component;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegion;
@@ -35,7 +35,7 @@ public class RegionResourceManager {
     private static final ILog         LOGGER = LogFactory.getLog(RegionResourceManager.class);
 
     @Autowired
-    private TemplatePhyService              templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private TemplatePhyStatisManager        templatePhyStatisManager;
@@ -189,7 +189,7 @@ public class RegionResourceManager {
      */
     public List<TemplateMetaMetric> getRegionTemplateMetrics(CapacityPlanRegion region, long interval,
                                                              CapacityPlanConfig capacityPlanConfig) {
-        List<Long> templatePhysicalIds = templatePhyService.getNormalTemplateByCluster(region.getClusterName())
+        List<Long> templatePhysicalIds = indexTemplatePhyService.getNormalTemplateByCluster(region.getClusterName())
             .stream().filter(indexTemplatePhysical -> belong(indexTemplatePhysical.getRack(), region.getRacks()))
             .map( IndexTemplatePhy::getId).collect(Collectors.toList());
         return getTemplateMetrics(templatePhysicalIds, interval, capacityPlanConfig);

@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStr
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -32,7 +32,7 @@ public class DefaultTemplateLimitStrategyProviderImpl implements TemplateLimitSt
     private TemplateQuotaManager templateQuotaManager;
 
     @Autowired
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     /**
      * 扩展模板限流接口
@@ -47,7 +47,7 @@ public class DefaultTemplateLimitStrategyProviderImpl implements TemplateLimitSt
     public TemplateLimitStrategy provide(String cluster, String template, long interval,
                                          GetTemplateLimitStrategyContext context) {
 
-        IndexTemplatePhyWithLogic templatePhysicalWithLogic = templatePhyService
+        IndexTemplatePhyWithLogic templatePhysicalWithLogic = indexTemplatePhyService
             .getTemplateWithLogicByClusterAndName(cluster, template);
         if (templatePhysicalWithLogic == null) {
             return TemplateLimitStrategy.buildDefault();

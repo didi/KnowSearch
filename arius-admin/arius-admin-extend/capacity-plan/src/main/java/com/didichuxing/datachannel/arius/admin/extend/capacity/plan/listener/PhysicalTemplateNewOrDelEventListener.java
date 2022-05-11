@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.extend.capacity.plan.listener;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLogicPO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateEvent;
@@ -29,7 +29,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
     private CapacityPlanRegionService capacityPlanRegionService;
 
     @Autowired
-    private IndexTemplateLogicDAO     indexTemplateLogicDAO;
+    private IndexTemplateDAO indexTemplateDAO;
 
     /**
      * Handle an application event.
@@ -56,10 +56,10 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
      * @param deltaQuota Quota增量
      */
     private void updateLogicTemplateQuota(Integer logicId, Double deltaQuota) {
-        TemplateLogicPO logicPO = indexTemplateLogicDAO.getById(logicId);
+        IndexTemplatePO logicPO = indexTemplateDAO.getById(logicId);
         if (logicPO != null) {
             logicPO.setQuota(logicPO.getQuota() + deltaQuota);
-            if (indexTemplateLogicDAO.update(logicPO) == 0) {
+            if (indexTemplateDAO.update(logicPO) == 0) {
                 LOGGER.error("class=PhysicalTemplateNewOrDelEventListener||method=updateLogicTemplateQuota||errMsg=updateTemplateQuotaFail||logicId={}||targetQuota={}||deltaQuota={}",
                         logicPO.getId(), logicPO.getQuota(), deltaQuota);
             }
@@ -100,7 +100,7 @@ public class PhysicalTemplateNewOrDelEventListener implements ApplicationListene
      * @return
      */
     private Double getDeltaQuota(PhysicalTemplateEvent event) {
-        IndexTemplateLogicWithPhyTemplates logicWithPhysical = event.getLogicWithPhysical();
+        IndexTemplateWithPhyTemplates logicWithPhysical = event.getLogicWithPhysical();
         if (logicWithPhysical.hasPhysicals()) {
             long currentPhysicalSize = logicWithPhysical.getPhysicals().size();
 

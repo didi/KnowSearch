@@ -6,9 +6,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,7 +69,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     private EcmHandleService ecmHandleService;
 
     @Autowired
-    private RoleClusterHostService roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private WorkTaskManager workTaskManager;
@@ -122,7 +122,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             if (content.getOperationType() == EcmTaskTypeEnum.SHRINK.getCode()) {
                 Map<String, Integer> segmentsOfIpByCluster = esClusterService.synGetSegmentsOfIpByCluster(content.getPhyClusterName());
 
-                for (ESClusterRoleHost esClusterRoleHost : content.getRoleClusterHosts()) {
+                for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
                     if (esClusterRoleHost.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
                             && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
                             && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
@@ -192,7 +192,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             esEcmTaskDTO.setOrderType(content.getOperationType());
 
             List<EcmParamBase> hostScaleParamBaseList = getHostScaleParamBaseList(content.getPhyClusterId().intValue(),
-                content.getRoleClusterHosts(), content.getPidCount());
+                content.getClusterRoleHosts(), content.getPidCount());
 
             esEcmTaskDTO.setClusterNodeRole(ListUtils.strList2String(
                 hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
@@ -275,7 +275,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
             // 填充工单中的ip字段,port端口号填充
             Map<String, String> portOfRoleMapFromHost = getPortOfRoleMapFromHost(clusterOpIndecreaseHostContent.getPhyClusterId());
-            for (ESClusterRoleHost esClusterRoleHost : clusterOpIndecreaseHostContent.getRoleClusterHosts()) {
+            for (ESClusterRoleHost esClusterRoleHost : clusterOpIndecreaseHostContent.getClusterRoleHosts()) {
                 esClusterRoleHost.setIp(Getter.strWithDefault(esClusterRoleHost.getIp(), esClusterRoleHost.getHostname()));
                 esClusterRoleHost.setPort(portOfRoleMapFromHost.get(esClusterRoleHost.getRole()));
             }
@@ -321,10 +321,10 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
         Map<String, String> rolePortMap = new HashMap<>();
         for (ESClusterNodeRoleEnum param : ESClusterNodeRoleEnum.values()) {
             if (param != ESClusterNodeRoleEnum.UNKNOWN) {
-                List<RoleClusterHost> roleClusterHosts = roleClusterHostService.getByRoleAndClusterId(phyClusterId, param.getDesc());
+                List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(phyClusterId, param.getDesc());
                 // 默认采用8060端口进行es集群的搭建
                 rolePortMap.put(param.getDesc(),
-                        CollectionUtils.isEmpty(roleClusterHosts) ? ClusterConstant.DEFAULT_PORT : roleClusterHosts.get(0).getPort());
+                        CollectionUtils.isEmpty(clusterRoleHosts) ? ClusterConstant.DEFAULT_PORT : clusterRoleHosts.get(0).getPort());
             }
         }
 
