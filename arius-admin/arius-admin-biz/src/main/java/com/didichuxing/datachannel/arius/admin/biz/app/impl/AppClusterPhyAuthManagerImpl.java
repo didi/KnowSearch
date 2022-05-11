@@ -65,7 +65,7 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
     @Autowired
     private AriusScheduleThreadPool    ariusScheduleThreadPool;
 
-    private static final Map<Integer/*appId*/, List<AppClusterPhyAuth> /*AppClusterPhyAuthList*/> appId2AppClusterPhyAuthListMap = Maps.newConcurrentMap();
+    private static final Map<Integer/*appId*/, List<AppClusterPhyAuth> /*AppClusterPhyAuthList*/> APP_ID_TO_APP_CLUSTER_PHY_AUTH_LIST_MAP = Maps.newConcurrentMap();
 
     @PostConstruct
     private void init(){
@@ -77,7 +77,7 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
                                                                         List<ClusterPhy> clusterPhyList) {
         if (null == appId || CollectionUtils.isEmpty(clusterPhyList)) { return Lists.newArrayList();}
         
-        List<AppClusterPhyAuth> appClusterPhyAuthList = appId2AppClusterPhyAuthListMap.get(appId);
+        List<AppClusterPhyAuth> appClusterPhyAuthList = APP_ID_TO_APP_CLUSTER_PHY_AUTH_LIST_MAP.get(appId);
         if (CollectionUtils.isEmpty(appClusterPhyAuthList)) {
             return buildInitAppClusterPhyAuth(clusterPhyList);
         }
@@ -125,6 +125,7 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
     }
 
     /**
+     * todo：alibaba规范 方法总行数超过80行
      * 定时刷新权限信息
      */
     private void refreshAppClusterPhyAuth() {
@@ -157,10 +158,10 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
                 appClusterPhyAuthList = esClusterPhyList.stream()
                         .map(r -> buildClusterPhyAuth(appId, r.getCluster(), AppClusterPhyAuthEnum.OWN))
                         .collect(Collectors.toList());
-                appId2AppClusterPhyAuthListMap.put(app.getId(), appClusterPhyAuthList);
+                APP_ID_TO_APP_CLUSTER_PHY_AUTH_LIST_MAP.put(app.getId(), appClusterPhyAuthList);
                 continue;
             }
-            
+
             // 处理非超级app拥有的资源权限
             for (ClusterPhy clusterPhy : esClusterPhyList) {
                 ClusterPhyContext clusterPhyContext = name2clusterPhyContextMap.get(clusterPhy.getCluster());
@@ -210,7 +211,7 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
                 AppClusterPhyAuthEnum appClusterPhyAuthEnum = computeAppClusterPhyAuthEnum(appClusterLogicAuthTypeSet);
                 appClusterPhyAuthList.add(buildClusterPhyAuth(appId, clusterPhy.getCluster(), appClusterPhyAuthEnum));
             }
-            appId2AppClusterPhyAuthListMap.put(app.getId(), appClusterPhyAuthList);
+            APP_ID_TO_APP_CLUSTER_PHY_AUTH_LIST_MAP.put(app.getId(), appClusterPhyAuthList);
         }
 
         LOGGER.info("class=AppClusterPhyAuthManagerImpl||method=refreshAppClusterPhyAuth||msg=finish...||consumingTime={}",

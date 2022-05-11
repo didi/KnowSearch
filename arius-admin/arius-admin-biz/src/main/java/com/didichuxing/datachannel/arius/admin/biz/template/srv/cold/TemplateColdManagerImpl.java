@@ -36,7 +36,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * 索引冷存服务
@@ -46,6 +45,8 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 @Service
 public class TemplateColdManagerImpl extends BaseTemplateSrv implements TemplateColdManager {
 
+    public static final int MAX_HOT_DAY = 2;
+    public static final int MIN_HOT_DAY = -2;
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
@@ -230,7 +231,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Result<Integer> batchChangeHotDay(Integer days, String operator) {
-        if (days > 2 || days < -2) {
+        if (days > MAX_HOT_DAY || days < MIN_HOT_DAY) {
             return Result.buildParamIllegal("days参数非法, [-2, 2]");
         }
 

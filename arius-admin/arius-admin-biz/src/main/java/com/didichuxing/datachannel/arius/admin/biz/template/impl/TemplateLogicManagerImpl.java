@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchH
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
@@ -114,7 +114,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private HandleFactory               handleFactory;
 
     @Autowired
-    private TemplateDcdrManager         templateDcdrManager;
+    private TemplateDCDRManager templateDcdrManager;
 
     /**
      * 校验所有逻辑模板元数据信息

@@ -75,6 +75,7 @@ public class MonitorClusterJob {
 
     private static final String[]   DATA_FORMATS = new String[] {"_YYYYMM", "YYYYMM", "YYYYMMdd", "_YYYYMMdd", "YYYY-MM-dd", "_YYYY-MM-dd",
                                                                  "MMdd", "YYMM", "_YYMM", "YY-MM", "_YYYY-MM", "YYYY",  "_YYYY.MM.dd", "YYYY.MM.dd"};
+    public static final int GROUP = 3;
 
     private Pattern pattern   = Pattern.compile("(.*)(_v[1-9]\\d*)(.*)");
 
@@ -123,8 +124,8 @@ public class MonitorClusterJob {
 
     private String                      clusterName;
 
-    private static final FutureUtil<ESNodesStatsResponse>   nodeStatsFuture   = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
-    private static final FutureUtil<ESIndexStatsResponse>   indexStatsFuture  = FutureUtil.init("MonitorClusterJob-indexStats",  10,10,20);
+    private static final FutureUtil<ESNodesStatsResponse> NODE_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
+    private static final FutureUtil<ESIndexStatsResponse> INDEX_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-indexStats",  10,10,20);
 
     private StopWatch indexStopWatch        = new StopWatch();
     private StopWatch nodeStopWatch         = new StopWatch();
@@ -221,7 +222,7 @@ public class MonitorClusterJob {
             // 3.分批次并行获取节点指标
             for (List<String> nodeIdBatch : nodeIdBatches) {
                 // 总任务超时时间也作为子任务超时时间
-                nodeStatsFuture.callableTask(() -> {
+                NODE_STATS_FUTURE.callableTask(() -> {
                     ESNodesStatsResponse response = new ESNodesStatsResponse();
                     response.setNodes(new HashMap<>());
                     try {
@@ -241,7 +242,7 @@ public class MonitorClusterJob {
             }
 
             // 4.获取所有批次结果
-            List<ESNodesStatsResponse> nodeStatsResponseList = nodeStatsFuture.waitResult();
+            List<ESNodesStatsResponse> nodeStatsResponseList = NODE_STATS_FUTURE.waitResult();
 
             // 5.合并批次结果
             Map<String, ClusterNodeStats> clusterNodeStatsMap = new HashMap<>();
@@ -363,7 +364,7 @@ public class MonitorClusterJob {
     private List<String> getClusterOpenIndexNames(ESClient esClient) {
         ESIndicesCatIndicesResponse esIndicesCatIndicesResponse = esClient.admin().indices().prepareCatIndices().execute().actionGet(CLIENT_TO_WITH_MILLS);
         return esIndicesCatIndicesResponse.getCatIndexResults().stream().filter(
-                catIndexResult -> catIndexResult.getStatus().equalsIgnoreCase("open")).map( CatIndexResult::getIndex).collect( Collectors.toList());
+                catIndexResult -> "open".equalsIgnoreCase(catIndexResult.getStatus())).map( CatIndexResult::getIndex).collect( Collectors.toList());
     }
 
     /**
@@ -384,7 +385,7 @@ public class MonitorClusterJob {
             // 分批次并行获取节点指标
             for (List<String> indexNameBatch : indexNameBatches) {
                 // 总任务超时时间也作为子任务超时时间
-                indexStatsFuture.callableTask(()  -> {
+                INDEX_STATS_FUTURE.callableTask(()  -> {
                     ESIndexStatsResponse response = new ESIndexStatsResponse();
                     response.setIndicesMap(new HashMap<>());
                     try {
@@ -405,7 +406,7 @@ public class MonitorClusterJob {
             }
 
             // 获取所有批次结果
-            List<ESIndexStatsResponse> indicesStatsResponseList = indexStatsFuture.waitResult();
+            List<ESIndexStatsResponse> indicesStatsResponseList = INDEX_STATS_FUTURE.waitResult();
 
             // 合并批次结果
             int shardFailedNum = 0;
@@ -451,6 +452,7 @@ public class MonitorClusterJob {
     }
 
     /**
+     * todo：alibaba规范 方法总行数超过80行
      * 采集索引信息
      * @param esClient
      * @param metricsRegister
@@ -1162,7 +1164,7 @@ public class MonitorClusterJob {
     private String genIndexNameClear(String indexName, String expression, String dateFormat) {
         Matcher m = pattern.matcher(indexName);
 
-        if (!m.find() || StringUtils.isNotBlank(m.group(3))) {
+        if (!m.find() || StringUtils.isNotBlank(m.group(GROUP))) {
             //校验是否是当前模板的
             if (indexName.length() != (expression.length() - 1 + dateFormat.length())) {
                 return "";

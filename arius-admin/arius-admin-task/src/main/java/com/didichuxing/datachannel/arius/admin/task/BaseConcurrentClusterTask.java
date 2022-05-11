@@ -77,6 +77,7 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask<Clust
     /**
      * 处理一个集群
      * @param cluster 集群名字
+     * @throws AdminOperateException
      * @return
      */
     protected abstract boolean executeByCluster(String cluster) throws AdminOperateException;

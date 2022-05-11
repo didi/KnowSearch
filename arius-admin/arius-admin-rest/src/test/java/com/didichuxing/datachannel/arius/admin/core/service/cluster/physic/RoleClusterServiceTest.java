@@ -2,15 +2,15 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESRoleClusterDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
     private ESRoleClusterDAO roleClusterDAO;
 
     @Autowired
-    private ClusterDAO clusterDAO;
+    private PhyClusterDAO clusterDAO;
 
     @Autowired
     private RoleClusterService roleClusterService;
@@ -54,7 +54,7 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
     @Test
     public void createRoleClusterIfNotExistTest() {
         ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
-        ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
+        ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         esClusterDTO.setId(12344);
         String role = esRoleClusterDTO.getRole();
         Mockito.when(clusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(ConvertUtil.obj2Obj(esClusterDTO, ClusterPhy.class));
@@ -101,11 +101,11 @@ public class RoleClusterServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getByClusterNameAndRoleTest() {
-        ESClusterDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
+        ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         ESRoleClusterDTO esRoleClusterDTO = CustomDataSource.esRoleClusterDTOFactory();
         Assertions.assertNull(roleClusterService
                 .getByClusterNameAndRole(esClusterDTO.getCluster(), esRoleClusterDTO.getRole()));
-        ClusterPO clusterPO = ConvertUtil.obj2Obj(esClusterDTO, ClusterPO.class);
+        ClusterPhyPO clusterPO = ConvertUtil.obj2Obj(esClusterDTO, ClusterPhyPO.class);
         clusterDAO.insert(clusterPO);
         esRoleClusterDTO.setElasticClusterId(clusterPO.getId().longValue());
         Assertions.assertTrue(roleClusterService.save(esRoleClusterDTO).success());

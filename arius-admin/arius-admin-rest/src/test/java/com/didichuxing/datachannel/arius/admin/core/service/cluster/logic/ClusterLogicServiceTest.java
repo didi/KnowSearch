@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import lombok.SneakyThrows;
@@ -64,7 +64,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     private TemplatePhyService templatePhyService;
 
     @MockBean
-    private ClusterDAO clusterDAO;
+    private PhyClusterDAO clusterDAO;
 
     @MockBean
     private ESPluginService esPluginService;
@@ -293,7 +293,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         esClusterPhy.setId(123);
         Mockito.when(esClusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(esClusterPhy);
         Assertions.assertTrue(clusterLogicService.getClusterLogicPlugins(id).isEmpty());
-        ClusterPO clusterPO = new ClusterPO();
+        ClusterPhyPO clusterPO = new ClusterPhyPO();
         String clusterName = "wpk";
         clusterPO.setCluster(clusterName);
         PluginDTO pluginDTO = CustomDataSource.esPluginDTOFactory();

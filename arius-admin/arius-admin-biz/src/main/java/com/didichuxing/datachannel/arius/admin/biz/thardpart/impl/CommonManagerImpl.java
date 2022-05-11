@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletRequest;
 public class CommonManagerImpl implements CommonManager {
 
     private static final ILog LOGGER = LogFactory.getLog(CommonManagerImpl.class);
+    public static final int MAX_LOGIC_ID_NUM = 200;
 
     @Autowired
     private AppService appService;
@@ -303,7 +304,7 @@ public class CommonManagerImpl implements CommonManager {
 
         List<IndexTemplateLogic> templateLogics = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(logicIds)) {
-            if (logicIds.size() > 200) {
+            if (logicIds.size() > MAX_LOGIC_ID_NUM) {
                 templateLogics = templateLogicService.getAllLogicTemplates().stream()
                         .filter(temp -> logicIds.contains(temp.getId())).collect(Collectors.toList());
             } else {

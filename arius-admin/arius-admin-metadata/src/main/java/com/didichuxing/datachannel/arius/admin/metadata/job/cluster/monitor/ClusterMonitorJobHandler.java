@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
@@ -492,7 +492,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     }
 
     private void handleSaveClusterHealthToDB(ClusterPhy clusterPhy, ESClusterHealthResponse esClusterHealthResponse) {
-        ESClusterDTO esClusterDTO = new ESClusterDTO();
+        ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
         try {
             esClusterDTO.setId(clusterPhy.getId());
 

@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.Hosts
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
@@ -122,7 +122,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
      * @return esClusterDTO
      */
     private Result<HostsCreateActionParam> persistClusterPOAndSupplyField(HostsCreateActionParam param) {
-        ESClusterDTO esClusterDTO = ConvertUtil.obj2Obj(param, ESClusterDTO.class);
+        ClusterPhyDTO esClusterDTO = ConvertUtil.obj2Obj(param, ClusterPhyDTO.class);
         esClusterDTO.setCluster(param.getPhyClusterName());
         ESPackage esPackage = esPackageService.getByVersionAndType(param.getEsVersion(), param.getType());
         esClusterDTO.setImageName(esPackage.getUrl());
@@ -234,7 +234,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
                 hostsParamBase.getPidCount(), action, ListUtils.strList2String(hostLists), initialRack);
     }
 
-    private String buildEsClusterPlugins(ESClusterDTO esClusterDTO) {
+    private String buildEsClusterPlugins(ClusterPhyDTO esClusterDTO) {
         String defaultPlugins = StringUtils.defaultString(esPluginService.getAllSysDefaultPluginIds(), "");
 
         if (StringUtils.isNotEmpty(esClusterDTO.getPlugIds())) {

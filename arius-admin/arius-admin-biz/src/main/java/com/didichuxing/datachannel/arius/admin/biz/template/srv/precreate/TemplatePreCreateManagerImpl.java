@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -28,7 +28,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
 public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements TemplatePreCreateManager {
 
     @Autowired
-    private TemplateDcdrManager templateDcdrManager;
+    private TemplateDCDRManager templateDcdrManager;
 
     @Autowired
     private ESIndexService           esIndexService;

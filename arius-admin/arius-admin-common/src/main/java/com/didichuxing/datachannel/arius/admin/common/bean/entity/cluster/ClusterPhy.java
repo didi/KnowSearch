@@ -12,6 +12,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 物理集群
+ * @author ohushenglin_v
+ * @date 2022-05-10
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

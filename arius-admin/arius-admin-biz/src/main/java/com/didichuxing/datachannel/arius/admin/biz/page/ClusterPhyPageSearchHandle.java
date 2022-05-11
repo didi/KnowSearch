@@ -31,7 +31,8 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**
- * Created by linyunan on 2021-10-14
+ * @author linyunan
+ * @date 2021-10-14
  */
 @Component
 public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClusterPhyVO> {
@@ -50,7 +51,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     @Autowired
     private RoleClusterService       roleClusterService;
 
-    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterPhyPageSearchHandle",20, 40, 100);
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyPageSearchHandle",20, 40, 100);
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer appId) {
@@ -131,10 +132,10 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
         Map<Long, List<RoleCluster>> roleListMap = roleClusterService.getAllRoleClusterByClusterIds(clusterIds);
 
         for (ConsoleClusterPhyVO consoleClusterPhyVO : fuzzyAndLimitConsoleClusterPhyVOList) {
-            futureUtil.runnableTask(() -> clusterPhyManager.buildClusterRole(consoleClusterPhyVO,
+            FUTURE_UTIL.runnableTask(() -> clusterPhyManager.buildClusterRole(consoleClusterPhyVO,
                     roleListMap.get(consoleClusterPhyVO.getId().longValue())));
         }
-        futureUtil.waitExecute();
+        FUTURE_UTIL.waitExecute();
         
         return PaginationResult.buildSucc(fuzzyAndLimitConsoleClusterPhyVOList, hitTotal, condition.getPage(), condition.getSize());
     }

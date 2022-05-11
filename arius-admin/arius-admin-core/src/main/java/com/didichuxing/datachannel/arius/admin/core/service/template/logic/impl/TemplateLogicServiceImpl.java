@@ -291,7 +291,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
      * @return result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> editTemplate(IndexTemplateLogicDTO param, String operator) throws AdminOperateException {
         Result<Void> checkResult = validateTemplate(param, EDIT);
         if (checkResult.failed()) {
@@ -350,14 +350,8 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
             return Result.buildNotExist(TEMPLATE_NOT_EXIST);
         }
 
-        TemplateConfigPO oldConfigPO = indexTemplateConfigDAO.getByLogicId(configDTO.getLogicId());
-
         boolean succ = 1 == indexTemplateConfigDAO
             .update(responsibleConvertTool.obj2Obj(configDTO, TemplateConfigPO.class));
-        if (succ) {
-            //由于会出现重复record， 这里把底层内部的操作记录注释掉，统一在外层进行记录
-            //operateRecordService.save(TEMPLATE_CONFIG, EDIT, configDTO.getLogicId(),AriusObjUtils.findChangedWithClear(oldConfigPO, configDTO), operator);
-        }
 
         return Result.build(succ);
     }
@@ -527,7 +521,7 @@ public class TemplateLogicServiceImpl implements TemplateLogicService {
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
                                         String operator) throws AdminOperateException {
 

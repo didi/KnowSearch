@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 
@@ -48,7 +48,7 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
             return Result.buildSucc();
         }
 
-        ESClusterDTO clusterDTO = new ESClusterDTO();
+        ClusterPhyDTO clusterDTO = new ClusterPhyDTO();
         clusterDTO.setId(clusterPhy.getId());
 
         //如果集群存在client, 用client代替master作为集群读写访问入口
@@ -82,7 +82,7 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
         return Result.buildSucc();
     }
 
-    private void buildESClusterDTOFromZeus(ESClusterDTO clusterDTO, ClusterPhy clusterPhy, ESZeusHostInfoDTO esZeusHostInfoDTO) {
+    private void buildESClusterDTOFromZeus(ClusterPhyDTO clusterDTO, ClusterPhy clusterPhy, ESZeusHostInfoDTO esZeusHostInfoDTO) {
 		String httpAddress = clusterPhy.getHttpAddress();
 		List<String> httpAddressList = ListUtils.string2StrList(httpAddress);
 		if (httpAddressList.contains(esZeusHostInfoDTO.getHttpAddress())) {

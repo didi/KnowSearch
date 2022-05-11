@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
@@ -36,7 +36,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -54,6 +54,9 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COLD_RACK_PREFER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
+/**
+ * @author didi
+ */
 @Service
 @NoArgsConstructor
 public class ClusterPhyServiceImpl implements ClusterPhyService {
@@ -66,7 +69,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     private String                   esClusterClientPort;
 
     @Autowired
-    private ClusterDAO               clusterDAO;
+    private PhyClusterDAO clusterDAO;
 
     @Autowired
     private ESClusterService         esClusterService;
@@ -94,8 +97,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return 集群列表
      */
     @Override
-    public List<ClusterPhy> listClustersByCondt(ESClusterDTO params) {
-        List<ClusterPO> clusterPOs = clusterDAO.listByCondition(ConvertUtil.obj2Obj(params, ClusterPO.class));
+    public List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params) {
+        List<ClusterPhyPO> clusterPOs = clusterDAO.listByCondition(ConvertUtil.obj2Obj(params, ClusterPhyPO.class));
 
         if (CollectionUtils.isEmpty(clusterPOs)) {
             return Lists.newArrayList();
@@ -116,7 +119,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public Result<Boolean> deleteClusterById(Integer clusterId, String operator) {
-        ClusterPO clusterPO = clusterDAO.getById(clusterId);
+        ClusterPhyPO clusterPO = clusterDAO.getById(clusterId);
         if (clusterPO == null) {
             return Result.buildNotExist(CLUSTER_NOT_EXIST);
         }
@@ -137,7 +140,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> createCluster(ESClusterDTO param, String operator) {
+    public Result<Boolean> createCluster(ClusterPhyDTO param, String operator) {
         Result<Boolean> checkResult = checkClusterParam(param, OperationEnum.ADD);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESClusterPhyServiceImpl||method=addCluster||msg={}", checkResult.getMessage());
@@ -146,7 +149,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         initClusterParam(param);
 
-        ClusterPO clusterPO = ConvertUtil.obj2Obj(param, ClusterPO.class);
+        ClusterPhyPO clusterPO = ConvertUtil.obj2Obj(param, ClusterPhyPO.class);
         boolean succ = (1 == clusterDAO.insert(clusterPO));
         if (succ) {
             param.setId(clusterPO.getId());
@@ -166,14 +169,14 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * 集群不存在
      */
     @Override
-    public Result<Boolean> editCluster(ESClusterDTO param, String operator) {
+    public Result<Boolean> editCluster(ClusterPhyDTO param, String operator) {
         Result<Boolean> checkResult = checkClusterParam(param, OperationEnum.EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESClusterPhyServiceImpl||method=editCluster||msg={}", checkResult.getMessage());
             return checkResult;
         }
 
-        boolean succ = (1 == clusterDAO.update(ConvertUtil.obj2Obj(param, ClusterPO.class)));
+        boolean succ = (1 == clusterDAO.update(ConvertUtil.obj2Obj(param, ClusterPhyPO.class)));
         return Result.buildBoolen(succ);
     }
 
@@ -185,7 +188,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public ClusterPhy getClusterByName(String clusterName) {
         // 获取物理集群
-        ClusterPO clusterPO = clusterDAO.getByName(clusterName);
+        ClusterPhyPO clusterPO = clusterDAO.getByName(clusterName);
         if (null == clusterPO) {
             return null;
         }
@@ -259,7 +262,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return true 存在
      */
     @Override
-    public boolean isClusterExistsByList(List<ClusterPhy> list,String clusterName) {
+    public boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName) {
         return list.stream().map(ClusterPhy::getCluster).anyMatch(cluster->cluster.equals(clusterName));
     }
     /**
@@ -333,7 +336,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public List<Plugin> listClusterPlugins(String cluster) {
-        ClusterPO clusterPhy = clusterDAO.getByName(cluster);
+        ClusterPhyPO clusterPhy = clusterDAO.getByName(cluster);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return new ArrayList<>();
         }
@@ -367,7 +370,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public ClusterPhy getClusterById(Integer phyClusterId) {
-        ClusterPO clusterPO = clusterDAO.getById(phyClusterId);
+        ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
         ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
         return clusterPhy;
     }
@@ -379,7 +382,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public int getWriteClientCount(String cluster) {
-        ClusterPO clusterPO = clusterDAO.getByName(cluster);
+        ClusterPhyPO clusterPO = clusterDAO.getByName(cluster);
 
         if (StringUtils.isBlank(clusterPO.getHttpWriteAddress())) {
             return 1;
@@ -446,7 +449,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-        List<ClusterPO> clusterPOS = Lists.newArrayList();
+        List<ClusterPhyPO> clusterPOS = Lists.newArrayList();
         try {
             clusterPOS = clusterDAO.pagingByCondition(param.getCluster(), param.getHealth(),
                     param.getEsVersion(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
@@ -458,7 +461,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Override
     public Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param) {
-        return clusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterPO.class));
+        return clusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterPhyPO.class));
     }
 
     @Override
@@ -477,7 +480,9 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         //获取region下的rack列表对应的总的磁盘空间
         Float regionDiskSize = 0F;
         for (String rack : rackList) {
-            if (allocationInfoOfRack.containsKey(rack)) regionDiskSize += allocationInfoOfRack.get(rack);
+            if (allocationInfoOfRack.containsKey(rack)) {
+                regionDiskSize += allocationInfoOfRack.get(rack);
+            }
         }
 
         //获取存储在region上的物理模板列表
@@ -546,7 +551,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
 
-    private Result<Boolean> checkClusterParam(ESClusterDTO param, OperationEnum operation) {
+    private Result<Boolean> checkClusterParam(ClusterPhyDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("集群信息为空");
         }
@@ -571,26 +576,26 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> handleEdit(ESClusterDTO param) {
+    private Result<Boolean> handleEdit(ClusterPhyDTO param) {
         if (AriusObjUtils.isNull(param.getId())) {
             return Result.buildParamIllegal("集群ID为空");
         }
 
-        ClusterPO oldClusterPO = clusterDAO.getById(param.getId());
+        ClusterPhyPO oldClusterPO = clusterDAO.getById(param.getId());
         if (oldClusterPO == null) {
             return Result.buildNotExist(CLUSTER_NOT_EXIST);
         }
         return Result.buildSucc();
     }
 
-    private Result<Boolean> handleAdd(ESClusterDTO param) {
+    private Result<Boolean> handleAdd(ClusterPhyDTO param) {
         Result<Boolean> isFieldNullResult = isFieldNull(param);
         if (isFieldNullResult.failed()) {
             return isFieldNullResult;
         }
 
         if (param.getCluster() != null) {
-            ClusterPO clusterPO = clusterDAO.getByName(param.getCluster());
+            ClusterPhyPO clusterPO = clusterDAO.getByName(param.getCluster());
             if (clusterPO != null && clusterPO.getId().equals(param.getId())) {
                 return Result.buildDuplicate("集群重复");
             }
@@ -598,7 +603,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> isIllegal(ESClusterDTO param) {
+    private Result<Boolean> isIllegal(ClusterPhyDTO param) {
         if (param.getDataCenter() != null && !DataCenterEnum.validate(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心非法");
         }
@@ -609,7 +614,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> isFieldNull(ESClusterDTO param) {
+    private Result<Boolean> isFieldNull(ClusterPhyDTO param) {
         if (AriusObjUtils.isNull(param.getCluster())) {
             return Result.buildParamIllegal("集群名称为空");
         }
@@ -631,7 +636,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return Result.buildSucc();
     }
 
-    private void initClusterParam(ESClusterDTO param) {
+    private void initClusterParam(ClusterPhyDTO param) {
         if (param.getWriteAddress() == null) {
             param.setWriteAddress("");
         }

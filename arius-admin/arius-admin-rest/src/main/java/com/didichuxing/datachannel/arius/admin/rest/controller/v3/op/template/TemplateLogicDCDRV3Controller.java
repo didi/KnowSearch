@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -20,23 +20,23 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(V3_OP + "/template/logic/dcdr")
 @Api(tags = "模板Dcdr接口(REST)")
-public class TemplateLogicDcdrV3Controller {
+public class TemplateLogicDCDRV3Controller {
 
     @Autowired
-    private TemplateDcdrManager  templateDcdrManager;
+    private TemplateDCDRManager templateDCDRManager;
 
     @PostMapping("/{templateId}/{targetCluster}")
     @ResponseBody
     @ApiOperation(value = "DCDR链路创建接口", notes = "")
-    public Result<Void> createDcdr(HttpServletRequest request, @PathVariable("templateId") Integer templateId,
+    public Result<Void> createDCDR(HttpServletRequest request, @PathVariable("templateId") Integer templateId,
                                    @PathVariable("targetCluster") String targetCluster, @RequestBody TemplatePhysicalRackDTO templatePhysicalRackDTO) throws AdminOperateException {
-        return templateDcdrManager.copyAndCreateDcdr(templateId, targetCluster, templatePhysicalRackDTO.getRack(), HttpRequestUtils.getOperator(request));
+        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, templatePhysicalRackDTO.getRack(), HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/{templateId}/dcdrInfo")
     @ResponseBody
     @ApiOperation("获取模板DCDR详情")
     public Result<TemplateDCDRInfoVO> getTemplateDCDRInfo(@PathVariable("templateId") Integer templateId) {
-        return templateDcdrManager.getTemplateDCDRInfoVO(templateId);
+        return templateDCDRManager.getTemplateDCDRInfoVO(templateId);
     }
 }

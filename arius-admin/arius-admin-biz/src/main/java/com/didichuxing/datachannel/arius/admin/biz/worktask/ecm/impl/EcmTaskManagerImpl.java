@@ -23,7 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.Hosts
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum;
@@ -817,7 +817,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         } else if (ES_HOST.getCode() == ecmTask.getType()) {
             List<String> clusterPhyRWAddress = buildClusterReadAndWriteAddressForHost(ecmTask, ecmParamBases);
             if (CollectionUtils.isNotEmpty(clusterPhyRWAddress)) {
-                ESClusterDTO esClusterDTO = new ESClusterDTO();
+                ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
                 esClusterDTO.setId(ecmTask.getPhysicClusterId().intValue());
                 esClusterDTO.setHttpAddress(ListUtils.strList2String(clusterPhyRWAddress));
                 esClusterDTO.setHttpWriteAddress(ListUtils.strList2String(clusterPhyRWAddress));
@@ -1049,7 +1049,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
 
         //2、更新集群的版本
-        ESClusterDTO esClusterDTO = new ESClusterDTO();
+        ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
         esClusterDTO.setId(ecmTask.getPhysicClusterId().intValue());
         esClusterDTO.setImageName(tuple.getV1());
         esClusterDTO.setEsVersion(tuple.getV2());

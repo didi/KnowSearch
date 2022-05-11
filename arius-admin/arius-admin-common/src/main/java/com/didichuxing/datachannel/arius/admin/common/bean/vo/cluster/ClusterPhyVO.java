@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "集群信息")
-public class ESClusterPhyVO extends BaseVO implements Comparable<ESClusterPhyVO> {
+public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
 
     @ApiModelProperty("集群ID")
     private Integer                      id;
@@ -101,7 +101,7 @@ public class ESClusterPhyVO extends BaseVO implements Comparable<ESClusterPhyVO>
     private Long                        activeShardNum;
 
     @Override
-    public int compareTo(ESClusterPhyVO o) {
+    public int compareTo(ClusterPhyVO o) {
         if (null == o) {
             return 0;
         }

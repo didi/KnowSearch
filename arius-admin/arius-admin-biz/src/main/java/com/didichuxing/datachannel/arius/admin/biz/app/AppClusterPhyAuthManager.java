@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * Created by linyunan on 2021-06-15
+ * @author linyunan
  */
 public interface AppClusterPhyAuthManager {
     /**

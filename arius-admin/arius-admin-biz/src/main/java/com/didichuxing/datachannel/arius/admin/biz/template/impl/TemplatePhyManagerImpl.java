@@ -88,6 +88,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private static final String CHECK_FAIL_MSG = "check fail||msg={}";
 
     public static final int MIN_SHARD_NUM = 1;
+    public static final int MAX_VERSION = 9;
 
     @Autowired
     private OperateRecordService        operateRecordService;
@@ -558,7 +559,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         int version = indexTemplatePhy.getVersion() + 1;
-        if (version > 9) {
+        if (version > MAX_VERSION) {
             version = 0;
         }
 
@@ -976,10 +977,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             if (!clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
                 return Result.buildParamIllegal("集群rack不存在");
             }
-           /* // 校验rack匹配且只匹配到一个region
-            if (regionRackService.countRackMatchedRegion(param.getCluster(), param.getRack()) != 1) {
-                return Result.buildParamIllegal("集群rack不符合逻辑集群规划");
-            }*/
         }
         if (param.getShard() != null && param.getShard() < 1) {
             return Result.buildParamIllegal("shard个数非法");
@@ -1102,9 +1099,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (shard != null && shard > 0) {
             settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
         }
-        /*if (shardRouting != null && shardRoutingEnableClusters.contains(cluster)) {
-            settingsMap.put(INDEX_SHARD_ROUTING_NUM, String.valueOf(shardRouting));
-        }*/
         settingsMap.put(SINGLE_TYPE, "true");
 
         //这里设置自定义分词器、副本数量、translog是否异步
