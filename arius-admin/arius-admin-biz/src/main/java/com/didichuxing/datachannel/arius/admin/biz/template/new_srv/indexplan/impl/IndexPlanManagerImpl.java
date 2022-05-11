@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
@@ -22,18 +23,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_G;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
 
 /**
  * @author chengxiang, jiamin
  * @date 2022/5/11
  */
-@Service
+@Service("newIndexPlanManagerImpl")
 public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPlanManager {
 
     private final Integer singleShardMaxSize = 50;
@@ -99,13 +99,44 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    public Result<Void> adjustShardCountByPhyClusterName(Integer logicTemplateId) {
+    public Result<Void> adjustShardCount(Integer logicTemplateId) {
+        LOGGER.info("class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount", logicTemplateId);
+        if(!isTemplateSrvOpen(logicTemplateId)) {
+            return Result.buildFail(logicTemplateId + "没有开启" + templateSrvName());
+        }
+
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        if (CollectionUtils.isEmpty(templatePhyList)) {
+            LOGGER.info("class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=IndexRolloverTask no physical template", logicTemplateId);
+            return Result.buildSucc();
+        }
+
+        try {
+            governPerTemplate(templatePhyList);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=adjustShardCount error", logicTemplateId, e);
+        }
         return Result.buildSucc();
     }
 
     @Override
     public void initShardRoutingAndAdjustShard(IndexTemplatePhyDTO param) {
-
+        int shard = param.getShard();
+        if (shard >= 320) {
+            param.setShardRouting(32);
+            param.setShard(calculateShardByShardRouting(shard, 32));
+        } else if (shard >= 80) {
+            param.setShardRouting(16);
+            param.setShard(calculateShardByShardRouting(shard, 16));
+        } else if (shard >= 16) {
+            param.setShardRouting(8);
+            param.setShard(calculateShardByShardRouting(shard, 8));
+        } else if (shard >= 4) {
+            param.setShardRouting(4);
+            param.setShard(calculateShardByShardRouting(shard, 4));
+        } else {
+            param.setShardRouting(1);
+        }
     }
 
     //////////private method/////////////////////////////////////////////////////////////
@@ -212,6 +243,119 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             }
         }
         return sizeInBytesMax;
+    }
+
+    private void governPerTemplate(Collection<IndexTemplatePhy> templatePhyList) throws ESOperateException {
+        // 就一个模板 直接改
+        if (templatePhyList.size() == 1) {
+            List<IndexTemplatePhy> list = Lists.newArrayList(templatePhyList);
+            Result<String> result = adjustShardCount(list.get(0));
+            if (result.failed()) {
+                LOGGER.warn("class=IndexPlanManagerImpl||method=governPerTemplate||template={}||msg=adjust shard count fail={}",
+                        list.get(0).getName(), result.getMessage());
+            }
+            return;
+        }
+
+        // 先改主再改从
+        List<IndexTemplatePhy> masterTemplatePhyList = templatePhyList.stream()
+                // 只保留主角色的物理模版
+                .filter(x -> x.getRole().equals(TemplateDeployRoleEnum.MASTER.getCode())).collect(Collectors.toList());
+
+        if (masterTemplatePhyList.isEmpty()) {
+            return;
+        }
+
+        for (IndexTemplatePhy masterTemplatePhy : masterTemplatePhyList) {
+            // 修改主
+            Result<String> masterResult = adjustShardCount(masterTemplatePhy);
+            if (masterResult.failed()) {
+                LOGGER.warn("class=IndexPlanManagerImpl||method=governPerTemplate||masterTemplate={}||msg=adjust shard count fail={}",
+                        masterTemplatePhy.getName(), masterResult.getMessage());
+                return;
+            }
+
+            // 获取从物理模版
+            List<IndexTemplatePhy> slaveTemplatePhyList = templatePhyList.stream()
+                    // 只保留从角色的物理模版
+                    .filter(x -> x.getRole().equals(TemplateDeployRoleEnum.SLAVE.getCode())).collect(Collectors.toList());
+
+            for (IndexTemplatePhy slaveTemplatePhy : slaveTemplatePhyList) {
+                // 修改从
+                Result<String> slaveResult = adjustShardCount(slaveTemplatePhy);
+                if (slaveResult.failed()) {
+                    LOGGER.warn("class=IndexPlanManagerImpl||method=governPerTemplate||slaveTemplate={}||msg=adjust shard count fail={}",
+                            masterTemplatePhy.getName(), masterResult.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * shard个数调整
+     * 非按天滚动，无需调整主shard个数
+     * @param templatePhy 物理模版
+     * @return result 结果
+     * @throws ESOperateException e
+     */
+    private Result<String> adjustShardCount(IndexTemplatePhy templatePhy) throws ESOperateException {
+        IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(templatePhy.getLogicId());
+        if (!TemplateUtils.isSaveByDay(logicTemplate.getDateFormat())) {
+            // 非按天滚动，无需调整主shard个数
+            return Result.buildSucc();
+        }
+        int shardCount = calculateShardCount(templatePhy);
+        if (shardCount < 1) {
+            return Result.buildFail("计算shard个数失败");
+        }
+
+        if (templatePhy.getShard() != shardCount) {
+            // 不等于old的shard，则可能是缩shard、或扩shard
+            Result<Void> result = editTemplateWithoutCheck(templatePhy, shardCount, AriusUser.CAPACITY_PLAN.getDesc());
+            if (result.success()) {
+                LOGGER.info("class=IndexPlanManagerImpl||method=adjustShardCount||template={}||shardCount={}->{}",
+                        templatePhy.getName(), templatePhy.getShard(), shardCount);
+            }
+        }
+
+        return Result.buildSucc();
+    }
+
+    private int calculateShardCount(IndexTemplatePhy templatePhy) {
+        long sizeInBytesMax = getSizeInBytesMax(templatePhy);
+        // 放进缓存（主要提供给IndexRolloverTask功能作数据参考）
+        indexMaxStoreMap.put(templatePhy.getId(), sizeInBytesMax);
+        return (int) (sizeInBytesMax * BYTE_TO_G / G_PER_SHARD) + 1;
+    }
+
+    private Result<Void> editTemplateWithoutCheck(IndexTemplatePhy templatePhy, Integer shardNum, String operator) throws ESOperateException {
+        // 计算 ShardRouting，并通过 ShardRouting 再计算 shard
+        IndexTemplatePhyDTO param = new IndexTemplatePhyDTO();
+        param.setShard(templatePhy.getShard());
+        param.setShardRouting(templatePhy.getShardRouting());
+        initShardRoutingAndAdjustShard(param);
+        templatePhy.setShard(param.getShard());
+        templatePhy.setShardRouting(param.getShardRouting());
+
+        // 获取明天的索引名
+        String indexName =
+                IndexNameUtils.genDailyIndexNameWithVersion(templatePhy.getName(), -1, templatePhy.getVersion());
+        if(esIndexService.syncIsIndexExist(templatePhy.getCluster(), indexName)) {
+            // 如果明天的索引已经存在，则删除
+            List<String> indexNameList = new ArrayList<>();
+            indexNameList.add(indexName);
+            esIndexService.syncBatchDeleteIndices(templatePhy.getCluster(), indexNameList, 1);
+        }
+
+        // 更新
+        return indexTemplatePhyService.updateTemplateShardNum(templatePhy, shardNum, operator);
+    }
+
+    private Integer calculateShardByShardRouting(int shard, int shardRouting) {
+        if (shard % shardRouting == 0) {
+            return shard;
+        }
+        return (shard / shardRouting + 1) * shardRouting;
     }
 
 }

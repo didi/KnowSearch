@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 
 /**
- * @author chengxiang
+ * @author chengxiang, jiamin
  * @date 2022/5/11
  */
 public interface IndexPlanManager {
@@ -25,7 +25,7 @@ public interface IndexPlanManager {
      * @param logicTemplateId 逻辑模板id
      * @return boolean 是否成功
      */
-    Result<Void> adjustShardCountByPhyClusterName(Integer logicTemplateId);
+    Result<Void> adjustShardCount(Integer logicTemplateId);
 
     /**
      * 根据shard设置ShardRouting，再把shard调整到合适大小
