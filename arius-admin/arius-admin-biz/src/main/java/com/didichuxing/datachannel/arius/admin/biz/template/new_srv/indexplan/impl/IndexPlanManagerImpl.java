@@ -99,7 +99,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    public Result<Void> adjustShardCount(Integer logicTemplateId) {
+    public Result<Void> adjustShardNum(Integer logicTemplateId) {
         LOGGER.info("class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount", logicTemplateId);
         if(!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail(logicTemplateId + "没有开启" + templateSrvName());

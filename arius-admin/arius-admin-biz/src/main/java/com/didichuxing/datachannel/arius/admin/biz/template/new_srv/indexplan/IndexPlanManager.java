@@ -16,16 +16,16 @@ public interface IndexPlanManager {
      * 如果大于主shardCnt*50G，则直接升级版本
      * 如果超过了过去7天索引大小的最大值，则升级版本
      * @param logicTemplateId 逻辑模板id
-     * @return boolean
+     * @return Result 是否成功
      */
     Result<Void> indexRollover(Integer logicTemplateId);
 
     /**
      * 调整索引模版的shard个数配置
      * @param logicTemplateId 逻辑模板id
-     * @return boolean 是否成功
+     * @return Result 是否成功
      */
-    Result<Void> adjustShardCount(Integer logicTemplateId);
+    Result<Void> adjustShardNum(Integer logicTemplateId);
 
     /**
      * 根据shard设置ShardRouting，再把shard调整到合适大小
