@@ -80,7 +80,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     private EcmHostHandler                      ecmHostHandler;
 
     @Autowired
-    private OperateRecordService                operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESPackageService                    esPackageService;

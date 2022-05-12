@@ -31,7 +31,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
@@ -171,7 +170,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
     @Override
     public TemplateServiceEnum templateService() { return TEMPLATE_DCDR; }
-    
+
     private AriusTaskThreadPool ariusTaskThreadPool;
 
     private Cache<Integer, ReentrantLock> taskId2ReentrantLockCache = CacheBuilder.newBuilder()
@@ -558,7 +557,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
         DCDRTasksDetail dcdrTasksDetail = ConvertUtil.str2ObjByJson(data.getExpandData(), DCDRTasksDetail.class);
         dcdrTasksDetail.calculateProcess();
 
-        //刷新dcdr任务状态
+        //刷新DCDR任务状态
         if (DCDRStatusEnum.RUNNING.getCode().equals(dcdrTasksDetail.getState())) {
             asyncRefreshDCDRChannelState(taskId, null,null);
         }

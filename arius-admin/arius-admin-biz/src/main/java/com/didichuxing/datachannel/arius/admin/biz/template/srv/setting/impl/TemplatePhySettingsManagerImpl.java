@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManager {
 
-    private static final ILog sLogger = LogFactory.getLog(IndexTemplateServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     @Autowired
     private ESTemplateService esTemplateService;
@@ -70,7 +70,7 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
 
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig == null) {
-            sLogger.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
+            LOGGER.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
                          + "msg=templateNotExists||cluster={}||template={}",
                 cluster, template);
             throw new AdminOperateException("模版不存在，template:" + template);
@@ -82,7 +82,7 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
 
         if (!esTemplateService.syncCheckTemplateConfig(cluster, fetchPreCreateTemplateName(template), templateConfig,
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT)) {
-            sLogger.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
+            LOGGER.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
                          + "msg=checkTemplateConfigFail||cluster={}||templateName={}||templateConfig={}",
                 cluster, fetchPreCreateTemplateName(template), templateConfig);
             throw new AdminOperateException("非法模板settings: " + settings);
@@ -102,7 +102,7 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
     /**
      * 获取预创建模板名称
      * @param templateName 原始模板名称
-     * @return
+     * @return 预创建模板名称
      */
     private String fetchPreCreateTemplateName(String templateName) {
         return AdminConstant.ES_CHECK_TEMPLATE_INDEX_PREFIX + System.currentTimeMillis() + templateName;

@@ -151,7 +151,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private AppClusterLogicAuthService appClusterLogicAuthService;
 
     @Autowired
-    private OperateRecordService          operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESMachineNormsService         esMachineNormsService;

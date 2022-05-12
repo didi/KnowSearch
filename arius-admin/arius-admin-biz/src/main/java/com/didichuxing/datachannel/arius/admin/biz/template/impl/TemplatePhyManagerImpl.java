@@ -105,7 +105,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     public static final int MAX_VERSION = 9;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ClusterPhyService           clusterPhyService;

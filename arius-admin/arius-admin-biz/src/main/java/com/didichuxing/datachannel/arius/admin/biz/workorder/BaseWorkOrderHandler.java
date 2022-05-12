@@ -113,7 +113,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     /*************************************** protected method ************************************/
     /**
      * 审核不通过
-     * @param orderPO
+     * @param orderPO WorkOrderPO
      * @return
      */
     protected Result<Void> doProcessDisagree(AriusWorkOrderInfoPO orderPO, WorkOrderProcessDTO processDTO) {

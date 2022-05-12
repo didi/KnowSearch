@@ -115,7 +115,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ClusterPhyService           clusterPhyService;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private AppService                  appService;

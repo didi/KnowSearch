@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -55,6 +56,9 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
 
     @Autowired
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Override
     public TemplateServiceEnum templateService() {

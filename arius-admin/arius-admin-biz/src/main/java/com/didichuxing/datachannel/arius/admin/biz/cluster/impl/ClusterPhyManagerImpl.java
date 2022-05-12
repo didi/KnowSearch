@@ -161,7 +161,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private AppService                                       appService;
 
     @Autowired
-    private OperateRecordService                             operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESClusterNodeService                             esClusterNodeService;

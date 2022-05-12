@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OperateRecordPO extends BasePO {
+public class OperateRecordInfoPO extends BasePO {
 
     /**
      * 主键
