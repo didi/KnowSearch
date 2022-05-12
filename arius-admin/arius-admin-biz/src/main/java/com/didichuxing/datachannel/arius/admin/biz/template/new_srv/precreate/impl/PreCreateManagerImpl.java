@@ -2,15 +2,34 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.i
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 /**
  * @author chengxiang, zqr
  * @date 2022/5/11
  */
 public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCreateManager {
+
+    private final Integer RETRY_TIMES = 3;
+    private final Double SUCCESS_RATE = 0.7;
+
+    @Autowired
+    private TemplateDCDRManager templateDcdrManager;
+
+    @Autowired
+    private ESIndexService esIndexService;
 
     @Override
     public TemplateServiceEnum templateSrv() {
@@ -19,7 +38,34 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
     @Override
     public Result<Void> preCreateIndex(Integer logicTemplateId) {
-        return Result.buildSucc();
+        if (!isTemplateSrvOpen(logicTemplateId)) {
+            return Result.buildFail("指定索引模板未开启预先创建能力");
+        }
+
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        if (CollectionUtils.isEmpty(templatePhyList)) {
+            LOGGER.info("class=PreCreateManagerImpl||method=preCreateIndex||logicTemplateId={}||msg=PreCreateIndexTask no template", logicTemplateId);
+            return Result.buildSucc();
+        }
+
+        Integer succeedCount = 0;
+        for (IndexTemplatePhy templatePhy: templatePhyList) {
+            try {
+                if (syncCreateTomorrowIndexByPhysicalId(templatePhy.getId(), RETRY_TIMES)) {
+                    succeedCount++;
+                } else {
+                    LOGGER.warn("class=PreCreateManagerImpl||method=preCreateIndex||logicTemplateId={}||physicalTemplateId={}||msg=preCreateIndex fail", logicTemplateId, templatePhy.getId());
+                }
+            } catch (Exception e) {
+                LOGGER.error("class=PreCreateManagerImpl||method=preCreateIndex||errMsg={}||logicTemplate={}||physicalTemplate={}", e.getMessage(), logicTemplateId, templatePhy.getId(), e);
+            }
+        }
+
+        if (succeedCount * 1.0 / templatePhyList.size() > SUCCESS_RATE) {
+            return Result.buildSucc();
+        } else {
+            return Result.buildFail("预创建失败");
+        }
     }
 
     @Override
@@ -30,4 +76,35 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     @Override
     public void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId) {
     }
+
+
+
+    ///////////////////////////////private method/////////////////////////////////////////////
+    /**
+     * 同步创建明天索引
+     *
+     * @param physicalId 物理模板id
+     * @param retryCount 重试次数
+     * @return result
+     * @throws ESOperateException
+     */
+    private boolean syncCreateTomorrowIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
+        if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
+            return false;
+        }
+
+        // 如果是从模板不需要预先创建
+        // 这里耦合了dcdr的逻辑，应该通过接口解耦
+        if (physicalWithLogic.getRole().equals(TemplateDeployRoleEnum.SLAVE.getCode())
+                && templateDcdrManager.clusterSupport(physicalWithLogic.getCluster())) {
+            return true;
+        }
+
+        String tomorrowIndexName = IndexNameFactory.getNoVersion(physicalWithLogic.getExpression(),
+                physicalWithLogic.getLogicTemplate().getDateFormat(), 1);
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
+    }
+
+
 }
