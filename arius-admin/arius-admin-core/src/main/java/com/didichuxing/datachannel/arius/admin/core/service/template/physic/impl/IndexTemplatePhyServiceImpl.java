@@ -73,7 +73,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     private IndexTemplateDAO indexTemplateDAO;
 
     @Autowired
-    private OperateRecordService                           operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESIndexService                                 esIndexService;
@@ -695,8 +695,8 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     /**
      * 判定是否是合法的shard number.
      *
-     * @param shardNum
-     * @return
+     * @param shardNum shard 数量
+     * @return boolean
      */
     private boolean isValidShardNum(Integer shardNum) {
         return shardNum != null && shardNum > 0;

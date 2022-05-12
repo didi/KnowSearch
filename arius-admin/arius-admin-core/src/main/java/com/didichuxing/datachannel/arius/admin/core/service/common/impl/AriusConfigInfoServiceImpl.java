@@ -50,7 +50,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
     private AriusConfigInfoDAO               configInfoDAO;
 
     @Autowired
-    private OperateRecordService             operateRecordService;
+    private OperateRecordService operateRecordService;
 
     private Cache<String, AriusConfigInfoPO> configCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();

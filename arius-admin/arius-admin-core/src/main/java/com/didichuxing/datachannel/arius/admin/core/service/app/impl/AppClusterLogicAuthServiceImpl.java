@@ -54,7 +54,7 @@ public class AppClusterLogicAuthServiceImpl implements AppClusterLogicAuthServic
     private AppService             appService;
 
     @Autowired
-    private OperateRecordService   operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private AriusUserInfoService   ariusUserInfoService;

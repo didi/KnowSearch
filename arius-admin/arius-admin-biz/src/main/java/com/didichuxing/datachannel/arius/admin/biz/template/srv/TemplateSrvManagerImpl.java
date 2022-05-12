@@ -294,9 +294,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         for (String phyClusterName : phyClusterNames) {
             Result<List<ClusterTemplateSrv>> templateSrvsRet = getPhyClusterTemplateSrv(phyClusterName);
             if (null != templateSrvsRet && templateSrvsRet.success()) {
-                for (ClusterTemplateSrv templateSrv : templateSrvsRet.getData()) {
-                    templateServiceTotals.add(templateSrv);
-                }
+                templateServiceTotals.addAll(templateSrvsRet.getData());
             }
         }
 

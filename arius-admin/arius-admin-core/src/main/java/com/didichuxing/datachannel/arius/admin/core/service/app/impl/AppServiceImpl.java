@@ -78,7 +78,7 @@ public class AppServiceImpl implements AppService {
     private EmployeeService             employeeService;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ResponsibleConvertTool      responsibleConvertTool;

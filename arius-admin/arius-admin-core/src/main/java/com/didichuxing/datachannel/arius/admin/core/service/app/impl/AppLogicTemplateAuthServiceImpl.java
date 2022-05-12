@@ -68,7 +68,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     private AppClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
-    private OperateRecordService       operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Override
     public boolean deleteRedundancyTemplateAuths(boolean shouldDeleteFlags) {

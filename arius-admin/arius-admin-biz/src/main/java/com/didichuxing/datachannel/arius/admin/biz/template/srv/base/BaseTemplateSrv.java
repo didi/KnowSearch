@@ -15,6 +15,9 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * @author guoyoupeng
+ */
 public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
 
     protected static final ILog    LOGGER = LogFactory.getLog(BaseTemplateSrv.class);

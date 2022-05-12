@@ -72,7 +72,7 @@ public class IndicesManagerImpl implements IndicesManager {
     private ClusterPhyManager     clusterPhyManager;
 
     @Autowired
-    private OperateRecordService  operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private IndexCatInfoCollector indexCatInfoCollector;

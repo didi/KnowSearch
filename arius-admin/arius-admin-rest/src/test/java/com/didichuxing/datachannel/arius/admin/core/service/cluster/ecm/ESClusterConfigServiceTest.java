@@ -188,7 +188,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
                 esClusterConfigService.setOldConfigInvalid(esConfig).getMessage());
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
-        esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR).getData();
+        esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR);
         Assertions.assertEquals(Result.buildFail("the old config is empty").getMessage(),
                 esClusterConfigService.setOldConfigInvalid(esConfig).getMessage());
     }

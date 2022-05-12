@@ -91,7 +91,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private IndexTemplateTypeDAO        indexTemplateTypeDAO;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
