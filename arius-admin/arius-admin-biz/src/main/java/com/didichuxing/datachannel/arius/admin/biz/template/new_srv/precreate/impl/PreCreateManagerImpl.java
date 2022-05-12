@@ -61,16 +61,28 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
             }
         }
 
-        if (succeedCount * 1.0 / templatePhyList.size() > SUCCESS_RATE) {
-            return Result.buildSucc();
-        } else {
-            return Result.buildFail("预创建失败");
-        }
+        return succeedCount * 1.0 / templatePhyList.size() > SUCCESS_RATE ? Result.buildSucc() : Result.buildFail("预创建失败");
     }
 
     @Override
     public Result<Void> reBuildTomorrowIndex(Integer logicTemplateId) {
-        return Result.buildSucc();
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        if (CollectionUtils.isEmpty(templatePhyList)) {
+            return Result.buildSucc();
+        }
+
+        Boolean succ = Boolean.TRUE;
+        for (IndexTemplatePhy templatePhy : templatePhyList) {
+            Long phyTemplateId = templatePhy.getId();
+            try {
+                if (syncDeleteTomorrowIndexByPhysicalId(phyTemplateId, RETRY_TIMES)) {
+                    succ = succ && syncCreateTomorrowIndexByPhysicalId(phyTemplateId, RETRY_TIMES);
+                }
+            } catch (Exception e) {
+                LOGGER.error("class=PreCreateManagerImpl||method=reBuildTomorrowIndex||errMsg={}||logicTemplate={}||physicalTemplate={}", e.getMessage(), logicTemplateId, phyTemplateId, e);
+            }
+        }
+        return succ ? Result.buildSucc() : Result.buildFail("重建明天索引失败");
     }
 
     @Override
@@ -104,6 +116,31 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
         String tomorrowIndexName = IndexNameFactory.getNoVersion(physicalWithLogic.getExpression(),
                 physicalWithLogic.getLogicTemplate().getDateFormat(), 1);
         return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
+    }
+
+    /**
+     * 同步删除明天索引
+     * @param physicalId 物理模板id
+     * @param retryCount 重试次数
+     * @return
+     * @throws ESOperateException
+     */
+    private boolean syncDeleteTomorrowIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
+        if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
+            return false;
+        }
+
+        String tomorrowIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
+                physicalWithLogic.getLogicTemplate().getDateFormat(), 1, physicalWithLogic.getVersion());
+        String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
+                physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
+
+        if (tomorrowIndexName.equals(todayIndexName)) {
+            return false;
+        }
+
+        return esIndexService.syncDelIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
     }
 
 
