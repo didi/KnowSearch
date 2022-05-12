@@ -7,7 +7,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DCDR;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.limit.TemplateLimitManager;
@@ -859,7 +859,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
      * 根据逻辑索引ID创建物理模板DCDR
      *
      * @param logicId
-     * @return
+     * @return {@link  TemplatePhysicalDCDRDTO}
      */
     private TemplatePhysicalDCDRDTO createDCDRMeta(Integer logicId) {
         TemplatePhysicalDCDRDTO dcdrMeta = new TemplatePhysicalDCDRDTO();
