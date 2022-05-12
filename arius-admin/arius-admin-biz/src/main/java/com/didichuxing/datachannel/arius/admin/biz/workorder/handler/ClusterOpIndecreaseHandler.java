@@ -3,55 +3,62 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpBaseContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpIndecreaseDockerContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpIndecreaseHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpIndecreaseDockerOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpIndecreaseHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.Getter;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+/**
+ * 集群op indecrease处理程序
+ *
+ * @author
+ * @date 2022/05/09
+ */
 @Service("clusterOpIndecreaseHandler")
 public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     protected static final ILog  LOGGER = LogFactory.getLog(ClusterOpIndecreaseHandler.class);
@@ -72,7 +79,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
-    private WorkTaskManager workTaskManager;
+    private OpTaskManager opTaskManager;
 
     @Override
     protected Result validateConsoleParam(WorkOrder workOrder) {
@@ -93,8 +100,8 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
                 return Result.buildParamIllegal("物理集群不存在");
             }
 
-            if (workTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
-                WorkTaskTypeEnum.CLUSTER_EXPAND.getType())) {
+            if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+                AriusOpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
                 return Result.buildParamIllegal("该集群上存在未完成的任务");
             }
 
@@ -113,8 +120,8 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
                 return Result.buildParamIllegal("物理集群不存在");
             }
 
-            if (workTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
-                    WorkTaskTypeEnum.CLUSTER_EXPAND.getType())) {
+            if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+                    AriusOpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
                 return Result.buildParamIllegal("该集群上存在未完成的集群扩缩容任务");
             }
 
@@ -201,11 +208,11 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             return Result.buildFail("type 类型不对");
         }
 
-        WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setExpandData(JSON.toJSONString(esEcmTaskDTO));
-        workTaskDTO.setTaskType(esEcmTaskDTO.getOrderType());
-        workTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setExpandData(JSON.toJSONString(esEcmTaskDTO));
+        opTaskDTO.setTaskType(esEcmTaskDTO.getOrderType());
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
@@ -318,7 +325,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
      * @return 物理集群下的角色端口map
      */
     private Map<String/*角色名称*/, String/*端口号*/> getPortOfRoleMapFromHost(Long phyClusterId) {
-        Map<String, String> rolePortMap = new HashMap<>();
+        Map<String, String> rolePortMap = new HashMap<>(ESClusterNodeRoleEnum.values().length);
         for (ESClusterNodeRoleEnum param : ESClusterNodeRoleEnum.values()) {
             if (param != ESClusterNodeRoleEnum.UNKNOWN) {
                 List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(phyClusterId, param.getDesc());

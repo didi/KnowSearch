@@ -1,27 +1,27 @@
-package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReStart;
+package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterrestart;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -29,15 +29,20 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * 集群op插件启动处理程序
+ *
+ * @author admin
+ * @date 2022/05/09
+ */
 @Service("clusterOpPluginRestartHandler")
-public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
+public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
 
     @Autowired
     private ESPluginService esPluginService;
@@ -46,7 +51,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
     private ClusterRoleService clusterRoleService;
 
     @Autowired
-    private WorkTaskManager workTaskService;
+    private OpTaskManager workTaskService;
 
     @Autowired
     private ESClusterService esClusterService;
@@ -78,7 +83,7 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
             return Result.buildParamIllegal("插件操作类型不合法(合法的操作类型包括安装和卸载)");
         }
 
-        if (workTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()), WorkTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -153,11 +158,11 @@ public class ClusterOpPluginRestartHandler extends ClusterOpRestartHandler {
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(roleNameList));
 
-        WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        workTaskDTO.setTaskType(WorkTaskTypeEnum.CLUSTER_RESTART.getType());
-        workTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<WorkTask> result = workTaskService.addTask(workTaskDTO);
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        Result<OpTask> result = workTaskService.addTask(opTaskDTO);
         if(null == result || result.failed()){
             return Result.buildFail("生成物理集群插件操作任务失败!");
         }

@@ -1,22 +1,18 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.po.task;
+package com.didichuxing.datachannel.arius.admin.common.bean.entity.task;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * WorkTask PO 对象
- * 
  * @author fengqiongfeng
- * @date 2020-12-21
+ * @date 2020/12/21
  */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkTaskPO extends BasePO {
-
+public class OpTask extends BaseEntity {
     /**
      * 序列化版本号
      */
@@ -28,7 +24,7 @@ public class WorkTaskPO extends BasePO {
     private Integer id;
 
     /**
-     * 标题 
+     * 标题
      */
     private String title;
 
@@ -38,12 +34,12 @@ public class WorkTaskPO extends BasePO {
     private Integer taskType;
 
     /**
-     * 业务数据主键 
+     * 业务数据主键
      */
     private String businessKey;
 
     /**
-     * 任务状态：
+     * 任务状态
      * success:成功 failed:失败
      * running:执行中 waiting:等待
      * cancel:取消 pause:暂停
@@ -51,19 +47,18 @@ public class WorkTaskPO extends BasePO {
     private String status;
 
     /**
-     * 创建人 
+     * 创建人
      */
     private String creator;
 
     /**
-     * 标记删除 
+     * 标记删除
      */
     private Boolean deleteFlag;
 
     /**
-     * expandData 
+     * expandData
      */
     private String expandData;
 
 }
-

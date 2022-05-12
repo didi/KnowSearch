@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
@@ -48,7 +48,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("responsible", "admin");
         contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
-        Result<WorkOrderSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assert.assertTrue(result.success());
     }
 
@@ -64,7 +64,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("responsible", "admin");
         contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
-        Result<WorkOrderSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assertions.assertTrue(result.success());
 
         // 通过工单
@@ -86,7 +86,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("responsible", "admin");
         contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
-        Result<WorkOrderSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assertions.assertTrue(result.success());
 
         // 取消工单
@@ -107,7 +107,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("responsible", "admin");
         contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
-        Result<WorkOrderSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assertions.assertTrue(result.success());
 
         // 获得工单细节

@@ -1,23 +1,36 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
+import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_DISK;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.QUOTA_DYNAMIC_LIMIT_BLACK_APP_IDS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.QUOTA_DYNAMIC_LIMIT_BLACK_CLUSTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.QUOTA_DYNAMIC_LIMIT_BLACK_LOGIC_ID;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_QUOTA;
+import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.QUOTA_DISK_WARN_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GetTemplateQuotaUsageContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.PhysicalTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsagePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.quota.ESTemplateQuotaUsageRecordPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateCpuOutOfQuotaEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateDiskOutOfQuotaEvent;
@@ -25,26 +38,22 @@ import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateDiskUs
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.quota.ESTemplateQuotaUsageDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.quota.ESTemplateQuotaUsageRecordDAO;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_ALL;
-import static com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig.QUOTA_CTL_DISK;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_QUOTA;
-import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.QUOTA_DISK_WARN_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.core.component.QuotaTool.TEMPLATE_QUOTA_MIN;
 
 /**
  * 索引quota服务实现

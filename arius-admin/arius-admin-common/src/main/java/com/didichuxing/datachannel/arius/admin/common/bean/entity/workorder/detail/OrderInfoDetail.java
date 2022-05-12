@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDetail {
+public class OrderInfoDetail {
 
     /**
      * 订单id

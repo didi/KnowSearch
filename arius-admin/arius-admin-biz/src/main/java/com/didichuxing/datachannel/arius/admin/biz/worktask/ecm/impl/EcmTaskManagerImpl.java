@@ -1,8 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.impl;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.CANCELLED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.FAILED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.KILL_FAILED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.SUCCESS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum.CANCEL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
+import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.EXPAND;
+import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.SHRINK;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -12,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpHo
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
@@ -25,23 +36,21 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.BaseClusterHostOrderDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.BaseClusterHostOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.event.ecm.EcmTaskEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyHealthEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.EcmRemoteException;
@@ -49,6 +58,7 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleTh
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -60,6 +70,16 @@ import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActi
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -70,17 +90,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum.CANCEL;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
-import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.EXPAND;
-import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.SHRINK;
 
 /**
  * ES工单任务管理
@@ -124,7 +133,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     private AriusScheduleThreadPool ariusScheduleThreadPool;
 
     @Autowired
-    private WorkOrderManager       workOrderManager;
+    private WorkOrderManager workOrderManager;
 
     @Override
     public boolean existUnClosedEcmTask(Long phyClusterId) {

@@ -4,28 +4,27 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsConfigAction;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.AbstractTaskDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.ecm.EcmTaskEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -38,26 +37,31 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+/**
+ * ecm工作任务处理程序
+ *
+ * @author
+ * @date 2022/05/09
+ */
 @Service("ecmWorkTaskHandler")
-public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<EcmTaskEditEvent> {
+public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<EcmTaskEditEvent> {
 
-    private static final ILog      LOGGER = LogFactory.getLog(EcmWorkTaskHandler.class);
+    private static final ILog      LOGGER = LogFactory.getLog(ECMWorkTaskHandler.class);
 
     @Autowired
     private EcmTaskManager         ecmTaskManager;
 
     @Autowired
-    private WorkTaskManager        workTaskManager;
+    private OpTaskManager opTaskManager;
 
     @Autowired
     private ESClusterService       esClusterService;
@@ -66,7 +70,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     private ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private WorkOrderManager       workOrderManager;
+    private WorkOrderManager workOrderManager;
 
     @Autowired
     private ESPluginService        esPluginService;
@@ -75,26 +79,26 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     private ClusterPhyService      esClusterPhyService;
 
     @Override
-    public Result<WorkTask> addTask(WorkTask workTask) {
-        if (AriusObjUtils.isNull(workTask.getExpandData())) {
+    public Result<OpTask> addTask(OpTask opTask) {
+        if (AriusObjUtils.isNull(opTask.getExpandData())) {
             return Result.buildParamIllegal("提交内容为空");
         }
 
-        EcmTaskDTO ecmTaskDTO = ConvertUtil.str2ObjByJson(workTask.getExpandData(), EcmTaskDTO.class);
+        EcmTaskDTO ecmTaskDTO = ConvertUtil.str2ObjByJson(opTask.getExpandData(), EcmTaskDTO.class);
         Result<Long> ret = ecmTaskManager.saveEcmTask(ecmTaskDTO);
         if (null == ret || ret.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
 
-        workTask.setBusinessKey(String.valueOf(ret.getData()));
-        workTask.setTitle(ecmTaskDTO.getTitle());
-        workTask.setCreateTime(new Date());
-        workTask.setUpdateTime(new Date());
-        workTask.setStatus(WorkTaskStatusEnum.WAITING.getStatus());
-        workTask.setDeleteFlag(false);
-        workTaskManager.insert(workTask);
+        opTask.setBusinessKey(String.valueOf(ret.getData()));
+        opTask.setTitle(ecmTaskDTO.getTitle());
+        opTask.setCreateTime(new Date());
+        opTask.setUpdateTime(new Date());
+        opTask.setStatus(WorkTaskStatusEnum.WAITING.getStatus());
+        opTask.setDeleteFlag(false);
+        opTaskManager.insert(opTask);
 
-        return Result.buildSucc(workTask);
+        return Result.buildSucc(opTask);
     }
 
     @Override
@@ -103,25 +107,22 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     }
 
     @Override
-    public Result<Void> process(WorkTask workTask, Integer step, String status, String expandData) {
-        if (AriusObjUtils.isNull(workTask.getExpandData())) {
+    public Result<Void> process(OpTask opTask, Integer step, String status, String expandData) {
+        if (AriusObjUtils.isNull(opTask.getExpandData())) {
             return Result.buildParamIllegal("提交内容为空");
         }
 
-        EcmTaskPO ecmTaskPO = JSON.parseObject(workTask.getExpandData(), EcmTaskPO.class);
+        EcmTaskPO ecmTaskPO = JSON.parseObject(opTask.getExpandData(), EcmTaskPO.class);
 
-        workTask.setStatus(status);
-        workTask.setUpdateTime(new Date());
-        workTask.setExpandData(JSON.toJSONString(ecmTaskPO));
-        workTaskManager.updateTask(workTask);
+        opTask.setStatus(status);
+        opTask.setUpdateTime(new Date());
+        opTask.setExpandData(JSON.toJSONString(ecmTaskPO));
+        opTaskManager.updateTask(opTask);
 
         return Result.buildSucc();
     }
 
-    @Override
-    public AbstractTaskDetail getTaskDetail(String extensions) {
-        return null;
-    }
+ 
 
     @Override
     public void onApplicationEvent(EcmTaskEditEvent event) {
@@ -134,17 +135,17 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         handlerRestartPostConfig(ecmTask);
         handlerRestartPostPlugin(ecmTask);
 
-        Result<WorkTask> result = workTaskManager.getLatestTask(String.valueOf(ecmTask.getId()), ecmTask.getOrderType());
+        Result<OpTask> result = opTaskManager.getLatestTask(String.valueOf(ecmTask.getId()), ecmTask.getOrderType());
         if (result.failed()) {
             return;
         }
-        WorkTaskProcessDTO processDTO = new WorkTaskProcessDTO();
+        OpTaskProcessDTO processDTO = new OpTaskProcessDTO();
         processDTO.setStatus(ecmTask.getStatus());
         processDTO.setTaskId(result.getData().getId());
         processDTO.setExpandData(JSON.toJSONString(ecmTask));
-        workTaskManager.processTask(processDTO);
+        opTaskManager.processTask(processDTO);
 
-        LOGGER.info("class=EcmWorkTaskHandler||method=onApplicationEvent||ecmTaskId={}||event=EcmEditTaskEvent", ecmTask.getId());
+        LOGGER.info("class=ECMWorkTaskHandler||method=onApplicationEvent||ecmTaskId={}||event=EcmEditTaskEvent", ecmTask.getId());
     }
 
     /**************************************** private methods ****************************************/
@@ -194,7 +195,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
                 .forEach(param -> actionEsConfigIds.addAll(param.getEsConfigActions().getActionEsConfigIds()));
         } else {
             LOGGER.error(
-                "class=EcmWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||msg=Type does not exist, require docker or host",
+                "class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||msg=Type does not exist, require docker or host",
                 ecmTask.getId());
         }
 
@@ -206,7 +207,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             //4.任务成功进行配置回写处理
             handleSuccessEcmConfigRestartTask(actionType, actionEsConfigIds, ecmTask);
         } catch (Exception e) {
-            LOGGER.error("class=EcmWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||msg={}", ecmTask.getId(),
+            LOGGER.error("class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||msg={}", ecmTask.getId(),
                 e.getStackTrace());
         }
 
@@ -217,7 +218,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             ESConfig esConfig = esClusterConfigService.getEsConfigById(actionEsConfigId);
             if (AriusObjUtils.isNull(esConfig)) {
                 LOGGER.error(
-                        "class=EcmWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||clusterId={}||msg=es config does not exist",
+                        "class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||clusterId={}||msg=es config does not exist",
                         ecmTask.getId(), ecmTask.getPhysicClusterId());
                 return;
             }
@@ -227,7 +228,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
                 Result<Void> result = esClusterConfigService.deleteByClusterIdAndTypeAndEngin(esConfigById.getClusterId(), esConfigById.getTypeName(), esConfigById.getEnginName());
                 if (result.failed()) {
                     LOGGER.error(
-                            "class=EcmWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||clusterId={}||msg=fail to set new config valid",
+                            "class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||clusterId={}||msg=fail to set new config valid",
                             ecmTask.getId(), ecmTask.getPhysicClusterId());
                 }
                 return;
@@ -237,7 +238,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             Result<Void> result = esClusterConfigService.setConfigValid(actionEsConfigId);
             if (result.failed()) {
                 LOGGER.error(
-                        "class=EcmWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||clusterId={}||msg=fail to set edit config valid",
+                        "class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||clusterId={}||msg=fail to set edit config valid",
                         ecmTask.getId(), ecmTask.getPhysicClusterId());
             }
 
@@ -276,7 +277,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             handleSuccessEcmPluginRestartTask(ecmTask);
         } catch (Exception e) {
             LOGGER.error(
-                    "class=EcmWorkTaskHandler||method=handlerRestartPlugin||ecmTaskId={}||msg={}",
+                    "class=ECMWorkTaskHandler||method=handlerRestartPlugin||ecmTaskId={}||msg={}",
                     ecmTask.getId(),
                     e.getStackTrace());
         }
@@ -297,7 +298,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         String cluster = esClusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue()).getCluster();
         Map</*节点名称*/String, /*插件名称列表*/List<String>> node2PluginMap = esClusterService.syncGetNode2PluginsMap(cluster);
         if (null == node2PluginMap) {
-            LOGGER.warn("class=EcmWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||cluster={}||errMsg={node2PluginMap is null}", cluster);
+            LOGGER.warn("class=ECMWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||cluster={}||errMsg={node2PluginMap is null}", cluster);
             return;
         }
         String pluginName = esPluginService.getESPluginById(content.getPluginId()).getName();
@@ -312,7 +313,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             }
 
             if (!failPluginOperationNodeNames.isEmpty()) {
-                LOGGER.warn("class=EcmWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||msg=节点列表{}插件{}安装失败", failPluginOperationNodeNames, pluginName);
+                LOGGER.warn("class=ECMWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||msg=节点列表{}插件{}安装失败", failPluginOperationNodeNames, pluginName);
                 ecmTask.setStatus(EcmTaskStatusEnum.FAILED.getValue());
                 return;
             }
@@ -327,7 +328,7 @@ public class EcmWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             }
 
             if (!failPluginOperationNodeNames.isEmpty()) {
-                LOGGER.warn("class=EcmWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||msg=节点列表{}插件{}卸载失败", failPluginOperationNodeNames, pluginName);
+                LOGGER.warn("class=ECMWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||msg=节点列表{}插件{}卸载失败", failPluginOperationNodeNames, pluginName);
                 ecmTask.setStatus(EcmTaskStatusEnum.FAILED.getValue());
                 return;
             }

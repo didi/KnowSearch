@@ -3,16 +3,15 @@
  */
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.task;
 
-import java.util.Date;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * WorkTask Vo 对象
+ * OpTask Vo 对象
  * 
  * @author fengqiongfeng
  * @date 2020-12-21
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkTaskDTO extends BaseDTO {
+public class OpTaskDTO extends BaseDTO {
 
     private static final long serialVersionUID = 1L;
 
@@ -63,4 +62,3 @@ public class WorkTaskDTO extends BaseDTO {
     private String  dataCenter;
 
 }
-

@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * dcdr tasks Detail
+ *
+ * @author
+ * @date 2022/05/09
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,11 +40,21 @@ public class DCDRTasksDetail extends AbstractTaskDetail {
         int waitNum       = 0;
 
         for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrSingleTemplateMasterSlaveSwitchDetail : this.dcdrSingleTemplateMasterSlaveSwitchDetailList) {
-            if (DCDRStatusEnum.SUCCESS.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))   successNum++;
-            if (DCDRStatusEnum.CANCELLED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) cancelNum++;
-            if (DCDRStatusEnum.RUNNING.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))   runningNum++;
-            if (DCDRStatusEnum.FAILED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))    failedNum++;
-            if (DCDRStatusEnum.WAIT.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus()))      waitNum++;
+            if (DCDRStatusEnum.SUCCESS.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) {
+                successNum++;
+            }
+            if (DCDRStatusEnum.CANCELLED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) {
+                cancelNum++;
+            }
+            if (DCDRStatusEnum.RUNNING.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) {
+                runningNum++;
+            }
+            if (DCDRStatusEnum.FAILED.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) {
+                failedNum++;
+            }
+            if (DCDRStatusEnum.WAIT.getCode().equals(dcdrSingleTemplateMasterSlaveSwitchDetail.getTaskStatus())) {
+                waitNum++;
+            }
         }
 
         this.total      = this.dcdrSingleTemplateMasterSlaveSwitchDetailList.size();

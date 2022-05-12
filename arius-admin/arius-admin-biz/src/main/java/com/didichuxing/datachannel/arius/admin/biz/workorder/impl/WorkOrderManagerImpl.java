@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.AGREE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.DISAGREE;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
@@ -7,43 +10,39 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderInfoDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
 import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.AGREE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.DISAGREE;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -63,7 +62,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     private AppService           appService;
 
     @Autowired
-    private WorkOrderDAO         orderDao;
+    private WorkOrderDAO orderDao;
 
     @Autowired
     private AriusUserInfoService ariusUserInfoService;
@@ -84,11 +83,11 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result<WorkOrderSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
+    public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
 
-        String workOrderJSONString = JSON.toJSONString(workOrderDTO);
+        String workOrderJsonString = JSON.toJSONString(workOrderDTO);
         LOGGER.info("class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
-            workOrderJSONString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
+            workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
 
         initWorkOrderDTO(workOrderDTO);
 
@@ -278,12 +277,12 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public OrderDetail getBaseDetail(WorkOrderPO orderPO) {
+    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) {
         if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }
 
-        OrderDetail detailBaseDTO = new OrderDetail();
+        OrderInfoDetail detailBaseDTO = new OrderInfoDetail();
         detailBaseDTO.setDescription(orderPO.getDescription());
         detailBaseDTO.setCreateTime(orderPO.getCreateTime());
         detailBaseDTO.setFinishTime(orderPO.getFinishTime());
@@ -371,11 +370,11 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         workOrderDTO.setSubmitor(SpringTool.getUserName());
     }
 
-    private WorkOrderSubmittedVO convert2WorkOrderSubmittedVO(WorkOrderPO workOrderPO) {
+    private AriusWorkOrderInfoSubmittedVO convert2WorkOrderSubmittedVO(WorkOrderPO workOrderPO) {
         if (AriusObjUtils.isNull(workOrderPO)) {
             return null;
         }
-        WorkOrderSubmittedVO vo = new WorkOrderSubmittedVO();
+        AriusWorkOrderInfoSubmittedVO vo = new AriusWorkOrderInfoSubmittedVO();
         vo.setId(workOrderPO.getId());
         vo.setTitle(workOrderPO.getTitle());
         return vo;
@@ -435,23 +434,23 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return workOrder;
     }
 
-    private OrderDetailBaseVO convert2DetailBaseVO(OrderDetail orderDetail) {
+    private OrderDetailBaseVO convert2DetailBaseVO(OrderInfoDetail orderInfoDetail) {
         OrderDetailBaseVO baseVO = new OrderDetailBaseVO();
 
-        baseVO.setId(orderDetail.getId());
-        baseVO.setType(orderDetail.getType());
-        baseVO.setStatus(orderDetail.getStatus());
-        baseVO.setAppDeptName(orderDetail.getAppDeptName());
-        baseVO.setApplicant(ConvertUtil.obj2Obj(orderDetail.getApplicant(), AriusUserInfoVO.class));
-        baseVO.setApplicantAppId(orderDetail.getApplicantAppId());
-        baseVO.setApplicantAppName(getApplicantAppName(orderDetail.getApplicantAppId()));
-        baseVO.setApproverList(ConvertUtil.list2List(orderDetail.getApproverList(), AriusUserInfoVO.class));
-        baseVO.setFinishTime(orderDetail.getFinishTime());
-        baseVO.setCreateTime(orderDetail.getCreateTime());
-        baseVO.setTitle(orderDetail.getTitle());
-        baseVO.setOpinion(orderDetail.getOpinion());
-        baseVO.setDescription(orderDetail.getDescription());
-        baseVO.setDetail(JSON.toJSONString(orderDetail.getDetail()));
+        baseVO.setId(orderInfoDetail.getId());
+        baseVO.setType(orderInfoDetail.getType());
+        baseVO.setStatus(orderInfoDetail.getStatus());
+        baseVO.setAppDeptName(orderInfoDetail.getAppDeptName());
+        baseVO.setApplicant(ConvertUtil.obj2Obj(orderInfoDetail.getApplicant(), AriusUserInfoVO.class));
+        baseVO.setApplicantAppId(orderInfoDetail.getApplicantAppId());
+        baseVO.setApplicantAppName(getApplicantAppName(orderInfoDetail.getApplicantAppId()));
+        baseVO.setApproverList(ConvertUtil.list2List(orderInfoDetail.getApproverList(), AriusUserInfoVO.class));
+        baseVO.setFinishTime(orderInfoDetail.getFinishTime());
+        baseVO.setCreateTime(orderInfoDetail.getCreateTime());
+        baseVO.setTitle(orderInfoDetail.getTitle());
+        baseVO.setOpinion(orderInfoDetail.getOpinion());
+        baseVO.setDescription(orderInfoDetail.getDescription());
+        baseVO.setDetail(JSON.toJSONString(orderInfoDetail.getDetail()));
 
         return baseVO;
     }

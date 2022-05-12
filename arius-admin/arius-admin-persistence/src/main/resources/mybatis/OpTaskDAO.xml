@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.WorkTaskDAO">
-
-    <resultMap id="WorkTaskMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.WorkTaskPO">
-        <result property="title" column="title"/>
-        <result property="taskType" column="task_type"/>
-        <result property="businessKey" column="business_key"/>
-        <result property="status" column="status"/>
-        <result property="creator" column="creator"/>
-        <result property="createTime" column="create_time"/>
-        <result property="updateTime" column="update_time"/>
-        <result property="deleteFlag" column="delete_flag"/>
-        <result property="expandData" column="expand_data"/>
-    </resultMap>
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO">
+  <resultMap id="WorkTaskMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO">
+    <result column="title" jdbcType="VARCHAR" property="title"/>
+    <result column="task_type" jdbcType="INTEGER" property="taskType"/>
+    <result column="business_key" jdbcType="VARCHAR" property="businessKey"/>
+    <result column="status" jdbcType="VARCHAR" property="status"/>
+    <result column="creator" jdbcType="VARCHAR" property="creator"/>
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    <result column="delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+    <result column="expand_data" jdbcType="LONGVARCHAR" property="expandData"/>
+  </resultMap>
     
     <sql id="columns">
         <![CDATA[
@@ -72,7 +71,7 @@
         ]]>
     </select>
 
-    <select id="getPengingTask" resultMap="WorkTaskMap">
+    <select id="getPendingTask" resultMap="WorkTaskMap">
         SELECT <include refid="columns" />
         <![CDATA[
             FROM
@@ -85,7 +84,7 @@
         ]]>
     </select>
 
-    <select id="getPengingTaskByType" resultMap="WorkTaskMap">
+    <select id="getPendingTaskByType" resultMap="WorkTaskMap">
         SELECT <include refid="columns" />
         FROM
             arius_work_task
@@ -175,4 +174,3 @@
     </update>
 
 </mapper>
-

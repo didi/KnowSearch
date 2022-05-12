@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.LOGIC_CLUSTER;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -11,11 +9,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsCells;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ClusterLogicStatisPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorLogicClusterEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
@@ -23,16 +21,16 @@ import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterLogicStaticsService;
 import com.google.common.collect.Lists;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.LOGIC_CLUSTER;
 
 /**
  * 集群维度采集监控数据，包含 es节点存活检查；es集群tps/qps掉底报警

@@ -20,21 +20,18 @@ public interface CapacityPlanAreaService {
      * @return list
      */
     List<CapacityPlanArea> listAllPlanAreas();
-
-
-    /**
+    
+    /**列表区域集群逻辑
      * 获取逻辑集群的所属的area列表，一个逻辑集群可能会绑定到多个物理集群，因此会有多个area
      * @return list
+     @param logicClusterId 逻辑集群id
      */
     List<CapacityPlanArea> listAreasByLogicCluster(Long logicClusterId);
 
-    /**
-     * 获取物理集群的所属的area列表
-     * @return list
-     */
-    List<CapacityPlanArea> listAreasByPhyCluster(String phyClusterName);
+    
 
     /**
+     * todo 行内正在使用
      * 获取所有规划的集群信息
      * @return list
      */

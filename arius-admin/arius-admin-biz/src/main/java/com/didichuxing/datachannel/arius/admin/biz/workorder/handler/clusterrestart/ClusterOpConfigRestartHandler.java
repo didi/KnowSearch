@@ -1,22 +1,26 @@
-package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterReStart;
+package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterrestart;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.EDIT;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpConfigRestartContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpConfigRestartOrderDetail;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -24,20 +28,19 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESCluste
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import java.util.List;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Objects;
-import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.*;
 
 /**
  * @author lyn
  * @date 2021-01-21
  */
 @Service("clusterOpConfigRestartHandler")
-public class ClusterOpConfigRestartHandler extends ClusterOpRestartHandler {
+public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
 
     @Autowired
     private ESClusterConfigService esClusterConfigService;
@@ -73,7 +76,7 @@ public class ClusterOpConfigRestartHandler extends ClusterOpRestartHandler {
             return Result.buildParamIllegal("原始配置为空");
         }
 
-        if (workTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), WorkTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -119,11 +122,11 @@ public class ClusterOpConfigRestartHandler extends ClusterOpRestartHandler {
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
-        WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        workTaskDTO.setTaskType(WorkTaskTypeEnum.CLUSTER_RESTART.getType());
-        workTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }

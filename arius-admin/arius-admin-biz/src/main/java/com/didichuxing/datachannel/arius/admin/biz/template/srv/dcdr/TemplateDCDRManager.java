@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 
-import java.util.List;
-
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.DCDRMasterSlaveSwitchDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalDCDRDTO;
@@ -9,9 +8,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
 
 /**
  * DCDR服务
@@ -25,7 +24,8 @@ public interface TemplateDCDRManager {
      * @param rack                rack信息
      * @param operator            操作人
      * @return Result
-     * @throws ESOperateException
+     *
+     @throws AdminOperateException 管理操作Exception
      */
     Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, String rack,
                                    String operator) throws AdminOperateException;
@@ -77,16 +77,25 @@ public interface TemplateDCDRManager {
     Result<Void> cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(Integer taskId, List<Long> templateId,
                                                                    boolean fullDeleteFlag,
                                                                    String operator) throws ESOperateException;
-
-    /**
+    
+    /**取消dcdr主从切换任务id
      * 根据任务id取消DCDR主从切换
-     * @param taskId
-     * @param operator
-     * @return
+     *
+     @param taskId 任务id
+     @param operator 操作人或角色
+      * @return {@link Result}<{@link Void}>
+     @throws ESOperateException esoperateException
      */
     Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator) throws ESOperateException;
 
-
+  /**
+     * 刷新dcdrChannel状态
+     *
+     * @param taskId 任务id
+     * @param templateId 模板id
+     * @param operator 操作人或角色
+     * @return {@link Result}<{@link Void}>
+     */
     Result<Void> refreshDCDRChannelState(Integer taskId, Integer templateId, String operator);
 
     /**
@@ -94,7 +103,9 @@ public interface TemplateDCDRManager {
      *
      * @param taskId     业务key
      * @param templateId 模板id
-     * @return
+     *
+     @param operator 操作人或角色
+      * @return {@link Result}<{@link Void}>
      */
     Result<Void> asyncRefreshDCDRChannelState(Integer taskId, Integer templateId, String operator);
 
@@ -123,12 +134,16 @@ public interface TemplateDCDRManager {
      */
     Result<DCDRSingleTemplateMasterSlaveSwitchDetailVO> getDCDRSingleTemplateMasterSlaveSwitchDetailVO(Integer taskId,
                                                                                                        Long templateId);
+    
+   
 
     /**
      * 创建DCDR模板
      * @param physicalId 物理模板ID
      * @param replicaCluster 从集群名称
      * @return result
+     @param retryCount 重试计数
+     @throws ESOperateException esoperateException
      */
     boolean syncCreateTemplateDCDR(Long physicalId, String replicaCluster, int retryCount) throws ESOperateException;
 
@@ -137,6 +152,8 @@ public interface TemplateDCDRManager {
      * @param physicalId 物理模板ID
      * @param replicaCluster 从集群名称
      * @return result
+     @param retryCount 重试计数
+     @throws ESOperateException esoperateException
      */
     boolean syncDeleteTemplateDCDR(Long physicalId, String replicaCluster, int retryCount) throws ESOperateException;
 
@@ -155,6 +172,7 @@ public interface TemplateDCDRManager {
      * @param indices 索引列表
      * @param retryCount 重试次数
      * @return result
+     @throws ESOperateException esoperateException
      */
     boolean syncDeleteIndexDCDR(String cluster, String replicaCluster, List<String> indices,
                                 int retryCount) throws ESOperateException;
@@ -166,6 +184,7 @@ public interface TemplateDCDRManager {
      * @param replicaIndex DCDR配置
      * @param retryCount 重试次数
      * @return result
+     @throws ESOperateException esoperateException
      */
     boolean syncDCDRSetting(String cluster, List<String> indices, boolean replicaIndex,
                             int retryCount) throws ESOperateException;
