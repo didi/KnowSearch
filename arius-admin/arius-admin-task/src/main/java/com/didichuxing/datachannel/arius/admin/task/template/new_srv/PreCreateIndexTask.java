@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
 
-
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
 import com.didiglobal.logi.job.annotation.Task;
@@ -19,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Task(name = "preCreateIndexTask", description = "明天索引预先创建任务，预先创建平台中模板明天索引，避免凌晨大规模创建索引", cron = "0 0 03-06 * * ?", autoRegister = true, consensual = ConsensualEnum.RANDOM)
 public class PreCreateIndexTask extends BaseConcurrentTemplateTask implements Job {
 
-    private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(PreCreateIndexTask.class);
 
     @Autowired
     private PreCreateManager preCreateManager;
