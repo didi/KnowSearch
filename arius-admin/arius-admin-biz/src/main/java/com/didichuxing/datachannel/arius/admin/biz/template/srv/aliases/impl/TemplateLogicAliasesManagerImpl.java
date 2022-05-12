@@ -1,34 +1,37 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT_TEMPLATE_ALIASES;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_ALIASES;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT_TEMPLATE_ALIASES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_ALIASES;
 
 /**
  * @author zqr

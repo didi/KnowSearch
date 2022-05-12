@@ -127,11 +127,11 @@ public abstract class AbstractCheckerItem implements ICheckerItem{
                 if(null != indexTemplate && null != indexTemplate.getLogicTemplate()){
                     String version    = String.valueOf(indexTemplate.getVersion());
                     String indexName  = indexTemplate.getExpression().replace("*", "") + indexTemplate.getLogicTemplate().getDateFormat();
-                    if (
-                            ("0".equals(version) && index.length() == indexName.length()) ||
-                                    (index.length() >= indexName.length() && index.length() <= indexName.length() + version.length() + 2)
-                    )
+                    if (("0".equals(version) && index.length() == indexName.length()) || (
+                            index.length() >= indexName.length()
+                            && index.length() <= indexName.length() + version.length() + 2)) {
                         break;
+                    }
                 }
             }
         }

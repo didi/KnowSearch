@@ -1,16 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.expire;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_EXPIRE_TIME_MIN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.SCHEDULE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DEL_EXPIRE;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -19,18 +24,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.SCHEDULE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_EXPIRE_TIME_MIN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DEL_EXPIRE;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * 索引过期服务实现

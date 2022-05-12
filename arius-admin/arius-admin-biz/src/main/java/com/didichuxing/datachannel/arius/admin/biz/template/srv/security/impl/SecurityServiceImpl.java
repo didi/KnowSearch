@@ -1,33 +1,33 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.security.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_SECURITY;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityRoleService;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityUserService;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.SecurityRoleAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_SECURITY;
 
 /**
  * 对于模板删除时权限数据没有清理，这块主要基于以下几个点的思考：
@@ -56,6 +56,9 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
 
     @Autowired
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Override
     public TemplateServiceEnum templateService() {

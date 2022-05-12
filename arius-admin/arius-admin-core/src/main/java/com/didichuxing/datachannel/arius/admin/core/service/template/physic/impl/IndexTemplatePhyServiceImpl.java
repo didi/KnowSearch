@@ -1,23 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -27,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -42,15 +41,21 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 
 /**
  * @author d06679
@@ -73,7 +78,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     private IndexTemplateDAO indexTemplateDAO;
 
     @Autowired
-    private OperateRecordService                           operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ESIndexService                                 esIndexService;
@@ -695,8 +700,8 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     /**
      * 判定是否是合法的shard number.
      *
-     * @param shardNum
-     * @return
+     * @param shardNum shard 数量
+     * @return boolean
      */
     private boolean isValidShardNum(Integer shardNum) {
         return shardNum != null && shardNum > 0;

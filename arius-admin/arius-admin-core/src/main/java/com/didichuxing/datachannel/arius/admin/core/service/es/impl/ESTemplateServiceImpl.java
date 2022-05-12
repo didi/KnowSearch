@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.SINGLE_TYPE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_DEFAULT_ORDER;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -16,14 +16,14 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiT
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679

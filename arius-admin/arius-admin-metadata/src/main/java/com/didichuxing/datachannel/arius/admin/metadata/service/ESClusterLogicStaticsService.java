@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ClusterLogicStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.NodeRackStatisPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -191,10 +192,10 @@ public class ESClusterLogicStaticsService {
             String status = indexStatusResult.getStatus();
             Integer statusType = indexStatusResult.getStatusType();
             if (StringUtils.isEmpty(status)) {
-                indexStatusResult.setStatus("green");
+                indexStatusResult.setStatus(IndexStatusEnum.GREEN.getStatus());
                 indexStatusResult.setStatusType(0);
-            } else if (status.equals("yellow")) {
-                indexStatusResult.setStatus("red".equals(indexStatus.getStatus()) ? "red" : status);
+            } else if (IndexStatusEnum.YELLOW.getStatus().equals(status)) {
+                indexStatusResult.setStatus(IndexStatusEnum.RED.getStatus().equals(indexStatus.getStatus()) ? IndexStatusEnum.RED.getStatus() : status);
                 indexStatusResult.setStatusType(3 == indexStatus.getStatusType() ? 3 : statusType);
             }
             templateStatusMap.put(ofTemplate, indexStatusResult);

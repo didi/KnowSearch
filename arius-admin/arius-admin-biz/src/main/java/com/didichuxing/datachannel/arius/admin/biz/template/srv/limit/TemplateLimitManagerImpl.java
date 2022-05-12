@@ -1,33 +1,35 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.limit;
 
-import java.util.List;
-
-import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStrategyEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
-import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
-
 import static com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MAX;
 import static com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy.TPS_ADJUST_PERCENT_MIN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_LIMIT_W;
+
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.ExtendServiceFactory;
+import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateLimitStrategyProvider;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GetTemplateLimitStrategyContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PhysicalTemplateTpsMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLimitStrategy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.constant.quota.QuotaCtlStrategyEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.PercentUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
+import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * 招行内部去掉基于es节点负载的动态限流策略

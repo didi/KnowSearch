@@ -135,10 +135,10 @@ public class DslStatisService {
      */
     private boolean auditDsl(Integer appid, List<DslInfo> dslInfos, List<DslTemplatePO> dslTemplatePOList) {
 
-        String dsl = null;
-        ExtractResult extractResult = null;
-        String dslTemplateMd5 = null;
-        DslTemplatePO dslTemplatePO = null;
+        String dsl ;
+        ExtractResult extractResult;
+        String dslTemplateMd5;
+        DslTemplatePO dslTemplatePO;
         String timeValue = DateTimeUtil.getCurrentFormatDateTime();
 
         for (DslInfo dslInfo : dslInfos) {

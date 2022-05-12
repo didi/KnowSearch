@@ -2,15 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO">
     <resultMap id="BaseResultMap"
-               type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO">
-        <result column="id"             jdbcType="INTEGER" property="id"/>
-        <result column="module_id"      jdbcType="INTEGER" property="moduleId"/>
-        <result column="operate_id"     jdbcType="INTEGER" property="operateId"/>
-        <result column="business_id"    jdbcType="INTEGER" property="bizId"/>
-        <result column="biz_id"         jdbcType="VARCHAR" property="bizId"/>
-        <result column="content"        jdbcType="VARCHAR" property="content"/>
-        <result column="operator"       jdbcType="VARCHAR" property="operator"/>
-        <result column="operate_time"   jdbcType="TIMESTAMP" property="operateTime"/>
+               type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
+        <result column="id"             jdbcType="INTEGER"          property="id"/>
+        <result column="module_id"      jdbcType="INTEGER"          property="moduleId"/>
+        <result column="operate_id"     jdbcType="INTEGER"          property="operateId"/>
+        <result column="business_id"    jdbcType="INTEGER"          property="bizId"/>
+        <result column="biz_id"         jdbcType="VARCHAR"          property="bizId"/>
+        <result column="content"        jdbcType="VARCHAR"          property="content"/>
+        <result column="operator"       jdbcType="VARCHAR"          property="operator"/>
+        <result column="operate_time"   jdbcType="TIMESTAMP"        property="operateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -18,7 +18,7 @@
     </sql>
 
     <insert id="insert"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into operate_record
@@ -28,7 +28,7 @@
     </insert>
 
     <select id="listByCondition" resultMap="BaseResultMap"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO">
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
         select
         <include refid="Base_Column_List"/>
         from operate_record
@@ -51,7 +51,7 @@
     </update>
 
     <select id="selectDescTopNByModuleId" resultMap="BaseResultMap"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO">
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
         select id, module_id
         from operate_record
         where module_id = #{moduleId} order by id DESC LIMIT #{topN}, 1

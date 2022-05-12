@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterPlugOperationContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -196,7 +196,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
             plugIdList.removeAll(ListUtils.string2LongList(content.getPlugIds()));
         }
         clusterPhy.setPlugIds(ListUtils.longList2String(plugIdList.stream().distinct().collect(Collectors.toList())));
-        esClusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ESClusterDTO.class), workOrder.getSubmitor());
+        esClusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class), workOrder.getSubmitor());
         return Result.buildSucc();
     }
 }

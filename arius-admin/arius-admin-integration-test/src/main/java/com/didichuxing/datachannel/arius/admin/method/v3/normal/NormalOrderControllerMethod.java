@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 
@@ -30,9 +30,9 @@ public class NormalOrderControllerMethod {
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<OrderTypeVO>>>(){});
     }
 
-    public static Result<WorkOrderSubmittedVO> submit(String type, WorkOrderDTO workOrderDTO) throws IOException {
+    public static Result<AriusWorkOrderInfoSubmittedVO> submit(String type, WorkOrderDTO workOrderDTO) throws IOException {
         String path = String.format("%s/%s/submit", ORDER, type);
-        return JSON.parseObject(AriusClient.put(path, workOrderDTO), new TypeReference<Result<WorkOrderSubmittedVO>>(){});
+        return JSON.parseObject(AriusClient.put(path, workOrderDTO), new TypeReference<Result<AriusWorkOrderInfoSubmittedVO>>(){});
     }
 
     public static Result<Void> process(Long orderId, WorkOrderProcessDTO processDTO) throws IOException {

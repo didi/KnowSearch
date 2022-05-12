@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("控制台物理集群信息")
-public class ConsoleClusterPhyVO extends ESClusterPhyVO {
+public class ConsoleClusterPhyVO extends ClusterPhyVO {
 
     @ApiModelProperty("归属项目(App)Id列表")
     private List<Integer> belongAppIds;

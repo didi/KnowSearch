@@ -82,7 +82,8 @@ public abstract class BaseConcurrentClusterLogicTask extends BaseConcurrentTask<
     /**
      * 处理一个集群
      * @param clusterLogicId 逻辑集群Id
-     * @return
+     * @throws AdminOperateException
+     * @return 执行结果
      */
     protected abstract boolean executeByClusterLogic(Long clusterLogicId) throws AdminOperateException;
 }

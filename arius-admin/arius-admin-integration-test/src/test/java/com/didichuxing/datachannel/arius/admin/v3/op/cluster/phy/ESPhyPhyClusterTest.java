@@ -80,7 +80,7 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
         if(result1.success()) {
             // 获取接入物理集群时候设置的节点ip信息
             Set<String> ipSet = phyClusterInfo.getClusterJoinDTO()
-                    .getEsClusterRoleHosts().stream().map(ESClusterRoleHostDTO::getIp).collect(Collectors.toSet());
+                    .getRoleClusterHosts().stream().map(ESClusterRoleHostDTO::getIp).collect(Collectors.toSet());
             // 节点数目一致
             Assertions.assertEquals(result1.getData().size(), ipSet.size());
         }

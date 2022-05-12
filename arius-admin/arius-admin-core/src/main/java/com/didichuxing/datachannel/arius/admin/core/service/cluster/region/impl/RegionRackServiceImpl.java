@@ -1,20 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER_REGION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.REGION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionBindEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionCreateEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionDeleteEvent;
@@ -24,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
@@ -34,6 +37,13 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,14 +51,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER_REGION;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.REGION;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
-
 /**
- * @Author: lanxinzheng
- * @Date: 2021/1/2
- * @Comment:
+ * @author lanxinzheng
+ * @date 2021/1/2
  */
 @Service
 public class RegionRackServiceImpl implements RegionRackService {
@@ -75,7 +80,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     /**
      *
      * @param rackId Rack ID
-     * @return
+     * @return true or false
      * @deprecated
      */
     @Deprecated
@@ -212,7 +217,7 @@ public class RegionRackServiceImpl implements RegionRackService {
         }
 
         ClusterRegionPO clusterRegionPO = new ClusterRegionPO();
-        clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.toString());
+        clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
         clusterRegionPO.setPhyClusterName(clusterName);
         clusterRegionPO.setRacks(racks);
 
@@ -537,7 +542,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     /**
      * 判断region是否被共享类型的逻辑集群绑定
      * @param region region信息
-     * @return
+     * @return true or false
      */
     private boolean isRegionBindByPublicLogicCluster(ClusterRegion region) {
         if (!isRegionBound(region)) {
@@ -572,7 +577,7 @@ public class RegionRackServiceImpl implements RegionRackService {
     /**
      * 构建region下的rack信息
      * @param region region
-     * @return
+     * @return 逻辑集群拥有的rack信息
      */
     private List<ClusterLogicRackInfo> buildRackInfos(ClusterRegion region) {
         List<ClusterLogicRackInfo> rackInfos = new LinkedList<>();

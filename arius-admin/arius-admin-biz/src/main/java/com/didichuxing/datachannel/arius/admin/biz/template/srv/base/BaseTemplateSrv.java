@@ -13,8 +13,14 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ *
+ * @author admin
+ * @date 2022/05/09
+ */
 public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
 
     protected static final ILog    LOGGER = LogFactory.getLog(BaseTemplateSrv.class);

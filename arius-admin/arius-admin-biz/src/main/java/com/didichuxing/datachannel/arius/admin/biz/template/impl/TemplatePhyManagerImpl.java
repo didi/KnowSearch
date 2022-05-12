@@ -1,39 +1,56 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_OPERATE_AHEAD_SECONDS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.COPY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
+import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDEX_SHARD_NUM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.SINGLE_TYPE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_INDEX_INCLUDE_RACK;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
+import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -53,21 +70,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.COPY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 @Component
 public class TemplatePhyManagerImpl implements TemplatePhyManager {
@@ -87,9 +102,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private static final String CHECK_FAIL_MSG = "check fail||msg={}";
 
     public static final int MIN_SHARD_NUM = 1;
+    public static final int MAX_VERSION = 9;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ClusterPhyService           clusterPhyService;
@@ -557,7 +573,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         int version = indexTemplatePhy.getVersion() + 1;
-        if (version > 9) {
+        if (version > MAX_VERSION) {
             version = 0;
         }
 
@@ -975,10 +991,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             if (!clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
                 return Result.buildParamIllegal("集群rack不存在");
             }
-           /* // 校验rack匹配且只匹配到一个region
-            if (regionRackService.countRackMatchedRegion(param.getCluster(), param.getRack()) != 1) {
-                return Result.buildParamIllegal("集群rack不符合逻辑集群规划");
-            }*/
         }
         if (param.getShard() != null && param.getShard() < 1) {
             return Result.buildParamIllegal("shard个数非法");
@@ -1101,9 +1113,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (shard != null && shard > 0) {
             settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
         }
-        /*if (shardRouting != null && shardRoutingEnableClusters.contains(cluster)) {
-            settingsMap.put(INDEX_SHARD_ROUTING_NUM, String.valueOf(shardRouting));
-        }*/
         settingsMap.put(SINGLE_TYPE, "true");
 
         //这里设置自定义分词器、副本数量、translog是否异步

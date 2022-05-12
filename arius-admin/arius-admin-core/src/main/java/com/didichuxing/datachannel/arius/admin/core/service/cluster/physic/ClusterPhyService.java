@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -21,7 +21,7 @@ public interface ClusterPhyService {
      * @return 集群列表
      *
      */
-    List<ClusterPhy> listClustersByCondt(ESClusterDTO params);
+    List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params);
 
     /**
      * 删除物理集群
@@ -37,7 +37,7 @@ public interface ClusterPhyService {
      * @param operator 操作人
      * @return 成功 true 失败 false
      */
-    Result<Boolean> createCluster(ESClusterDTO param, String operator);
+    Result<Boolean> createCluster(ClusterPhyDTO param, String operator);
 
     /**
      * 编辑物理集群信息
@@ -46,7 +46,7 @@ public interface ClusterPhyService {
      * @return 成功 true 失败 false
      *
      */
-    Result<Boolean> editCluster(ESClusterDTO param, String operator);
+    Result<Boolean> editCluster(ClusterPhyDTO param, String operator);
 
     /**
      * 根据集群名字查询集群
@@ -57,8 +57,9 @@ public interface ClusterPhyService {
 
     /**
      * 更新物理集群插件列表
-     * @param pluginIds 插件id列表
+     * @param pluginIds    插件id列表
      * @param phyClusterId 物理集群id
+     * @return {@link Result}<{@link Void}>
      */
     Result<Void> updatePluginIdsById(String pluginIds, Integer phyClusterId);
 
@@ -67,6 +68,12 @@ public interface ClusterPhyService {
      * @return 集群列表,如果没有返回空列表
      */
     List<ClusterPhy> listAllClusters();
+
+    /**
+     * 获取所有集群名称列表
+     *
+     * @return {@link List}<{@link String}>
+     */
     List<String>  listAllClusterNameList();
 
     /**
@@ -150,7 +157,7 @@ public interface ClusterPhyService {
      * @throws ESOperateException
      * @return
      */
-    boolean ensureDcdrRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
+    boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
 
     /**
      * 获取物理集群角色
@@ -175,6 +182,8 @@ public interface ClusterPhyService {
 
     /**
      * 模糊分页查询物理集群列表信息，仅获取部分属性
+     * @param param 参数
+     * @return {@link List}<{@link ClusterPhy}>
      */
     List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO param);
 

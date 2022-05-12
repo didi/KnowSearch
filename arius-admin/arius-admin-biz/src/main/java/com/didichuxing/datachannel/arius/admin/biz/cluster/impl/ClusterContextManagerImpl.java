@@ -286,7 +286,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         // regionk信息按【cluster】分组
         List<ClusterRegion> clusterRegionList = regionRackService.listAllBoundRegions();
         Map<String/*phyClusterName*/, List<ClusterRegion>> phyClusterName2ClusterLogicRackListMap = ConvertUtil.
-                list2MapOfList(clusterRegionList, ClusterRegion::getPhyClusterName, ClusterRegion -> ClusterRegion);
+                list2MapOfList(clusterRegionList, ClusterRegion::getPhyClusterName, clusterRegion -> clusterRegion);
 
         // clusterLogic信息按主键分组
         List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();
@@ -295,7 +295,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         // host信息按【cluster】分组
         List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listAllNode();
         Map<String, List<ClusterRoleHost>> cluster2RoleListMap = ConvertUtil.list2MapOfList(clusterRoleHosts,
-                ClusterRoleHost::getCluster, ClusterRoleHost -> ClusterRoleHost);
+                ClusterRoleHost::getCluster, clusterRoleHost -> clusterRoleHost);
 
         // app信息分组
         List<App> apps = appService.listApps();
@@ -448,7 +448,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         // Rack信息按【逻辑集群Ids】分组
         List<ClusterRegion> clusterRegionList = regionRackService.listAllBoundRegions();
         Map<String/*clusterLogicIds 逗号分隔*/, List<ClusterRegion>> clusterLogicIds2ClusterLogicRackListMap = ConvertUtil.
-                list2MapOfList(clusterRegionList, ClusterRegion::getLogicClusterIds, ClusterRegion -> ClusterRegion);
+                list2MapOfList(clusterRegionList, ClusterRegion::getLogicClusterIds, clusterRegion -> clusterRegion);
 
         // Rack信息按【逻辑集群Id】分组, 特殊处理table中clusterLogicIds列的数据
         Map<Long/*clusterLogicId*/, List<ClusterRegion>> clusterLogicId2ClusterLogicRackListMap = Maps.newHashMap();
@@ -471,7 +471,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     private Map<String, List<ClusterRoleHost>> getPhyRack2HostListMap() {
         List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listAllNode();
         return ConvertUtil.list2MapOfList(clusterRoleHosts,
-                host -> host.getCluster() + "@" + host.getRack(), ClusterRoleHost -> ClusterRoleHost);
+                host -> host.getCluster() + "@" + host.getRack(), clusterRoleHost -> clusterRoleHost);
     }
 
     /**

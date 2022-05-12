@@ -30,7 +30,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNorms
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.MetricsConfigPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
@@ -177,8 +177,8 @@ public class CustomDataSource {
         return pluginDTO;
     }
 
-    public static ESClusterDTO esClusterDTOFactory() {
-        ESClusterDTO esClusterDTO = new ESClusterDTO();
+    public static ClusterPhyDTO esClusterDTOFactory() {
+        ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
         esClusterDTO.setCluster("wpk_test");
         esClusterDTO.setDesc("test");
         esClusterDTO.setHttpAddress("1234");
@@ -539,17 +539,17 @@ public class CustomDataSource {
         return list;
     }
 
-    public static OperateRecordPO getOperateRecordPO() {
-        OperateRecordPO operateRecordPO = new OperateRecordPO();
+    public static OperateRecordInfoPO getOperateRecordPO() {
+        OperateRecordInfoPO operateRecordPO = new OperateRecordInfoPO();
         operateRecordPO.setId(1);
         return operateRecordPO;
     }
 
 
-    public static List<OperateRecordPO> getOperateRecordPOList() {
-        List<OperateRecordPO> list = new ArrayList<>();
+    public static List<OperateRecordInfoPO> getOperateRecordPOList() {
+        List<OperateRecordInfoPO> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++ ) {
-            OperateRecordPO po = CustomDataSource.getOperateRecordPO();
+            OperateRecordInfoPO po = CustomDataSource.getOperateRecordPO();
             po.setId(i);
             list.add(po);
         }

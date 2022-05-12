@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -15,13 +15,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfo
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author d06679
@@ -32,7 +31,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     protected static final ILog    LOGGER = LogFactory.getLog(BaseWorkOrderHandler.class);
 
     @Autowired
-    private WorkOrderManager       workOrderManager;
+    private WorkOrderManager workOrderManager;
 
     @Autowired
     private AriusUserInfoService   ariusUserInfoService;
@@ -114,7 +113,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     /*************************************** protected method ************************************/
     /**
      * 审核不通过
-     * @param orderPO
+     * @param orderPO WorkOrderPO
      * @return
      */
     protected Result<Void> doProcessDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
@@ -185,11 +184,13 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @return result
      */
     protected abstract Result<Void> validateParam(WorkOrder workOrder);
-
-    /**
+    
+    /**过程是否同意
      * 处理工单
      * @param workOrder 工单
      * @return result
+     @param approver 审批人
+     @throws AdminOperateException 管理操作Exception
      */
     protected abstract Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException;
 

@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
@@ -9,14 +11,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 /**
  * @author cjm

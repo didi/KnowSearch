@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -78,7 +78,7 @@ public class PhyClusterInfoSource {
         contentObj.put("phyClusterName", phyClusterName);
         contentObj.put("id", phyClusterId);
         workOrderDTO.setContentObj(contentObj);
-        Result<WorkOrderSubmittedVO> result = NormalOrderControllerMethod.submit("clusterDelete", workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result = NormalOrderControllerMethod.submit("clusterDelete", workOrderDTO);
 
         Assertions.assertTrue(result.success());
 
@@ -140,7 +140,7 @@ public class PhyClusterInfoSource {
         workOrderDTO.setContentObj(contentObj);
 
         // 提交工单
-        Result<WorkOrderSubmittedVO> result2 = NormalOrderControllerMethod.submit(operateType, workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result2 = NormalOrderControllerMethod.submit(operateType, workOrderDTO);
         Assertions.assertTrue(result2.success());
 
         // 审批通过工单
