@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import java.util.List;
  * @author chengxiang, zqr
  * @date 2022/5/11
  */
+@Service
 public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCreateManager {
 
     private final Integer RETRY_TIMES = 3;
