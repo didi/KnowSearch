@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,6 +31,9 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
     @Autowired
     private ESIndexService esIndexService;
+
+    @Autowired
+    private AriusOpThreadPool ariusOpThreadPool;
 
     @Override
     public TemplateServiceEnum templateSrv() {
@@ -87,6 +91,14 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
     @Override
     public void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId) {
+        ariusOpThreadPool.execute(() -> {
+            try {
+                syncCreateTomorrowIndexByPhysicalId(physicalId, RETRY_TIMES);
+                syncCreateTodayIndexByPhysicalId(physicalId, RETRY_TIMES);
+            } catch (ESOperateException e) {
+                LOGGER.error("class=PreCreateManagerImpl||method=asyncCreateTodayIndexAsyncByPhysicalId||errMsg={}||physicalId={}", e.getMessage(), physicalId, e);
+            }
+        });
     }
 
 
@@ -116,6 +128,22 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
         String tomorrowIndexName = IndexNameFactory.getNoVersion(physicalWithLogic.getExpression(),
                 physicalWithLogic.getLogicTemplate().getDateFormat(), 1);
         return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
+    }
+
+    /**
+     * 同步创建今天索引
+     * @param physicalId 物理模板id
+     * @param retryCount 重试次数
+     * @throws ESOperateException
+     */
+    private boolean syncCreateTodayIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
+        if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
+            return false;
+        }
+        String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
+                physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, retryCount);
     }
 
     /**
