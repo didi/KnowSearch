@@ -3,13 +3,13 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterres
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpRestartOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
@@ -31,7 +31,7 @@ public abstract class BaseClusterOpRestartHandler extends BaseWorkOrderHandler {
     protected EcmHandleService ecmHandleService;
 
     @Autowired
-    protected AriusOpTaskManager ariusOpTaskManager;
+    protected OpTaskManager opTaskManager;
 
     @Override
     protected Result validateConsoleAuth(WorkOrder workOrder) {
@@ -65,7 +65,7 @@ public abstract class BaseClusterOpRestartHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result checkAuthority(AriusWorkOrderInfoPO orderPO, String userName) {
+    public Result checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isOP(userName)) {
             return Result.buildSucc(true);
         }

@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalOrderControllerMethod;
@@ -118,13 +118,13 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
 
     @Test
     public void testGetOrderApplyList() throws IOException{
-        Result<List<AriusWorkOrderInfoVO>> result=NormalOrderControllerMethod.getOrderApplyList(0);
+        Result<List<WorkOrderVO>> result=NormalOrderControllerMethod.getOrderApplyList(0);
         Assertions.assertTrue(result.success());
     }
 
     @Test
     public void testGetOrderApprovalList() throws IOException{
-        Result<List<AriusWorkOrderInfoVO>> result=NormalOrderControllerMethod.getOrderApprovalList(1);
+        Result<List<WorkOrderVO>> result=NormalOrderControllerMethod.getOrderApprovalList(1);
         Assertions.assertTrue(result.success());
     }
 }

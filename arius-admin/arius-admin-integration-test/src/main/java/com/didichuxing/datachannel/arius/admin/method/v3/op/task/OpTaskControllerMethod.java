@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class OpTaskControllerMethod {
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<TaskTypeVO>>>(){});
     }
     //todo测试未成功
-    public static Result<WorkTaskVO> submit(Integer type, AriusOpTaskDTO workTaskDTO) throws IOException {
+    public static Result<WorkTaskVO> submit(Integer type, OpTaskDTO workTaskDTO) throws IOException {
         String path=String.format("%s/%d/submit",OpTask,type);
         return JSON.parseObject(AriusClient.put(path,workTaskDTO),new TypeReference<Result<WorkTaskVO>>(){});
     }

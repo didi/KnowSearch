@@ -11,20 +11,20 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpBa
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpNewDockerContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpNewHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpNewDockerOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpNewHostOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
@@ -55,7 +55,7 @@ import org.springframework.stereotype.Service;
 public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private AriusOpTaskManager ariusOpTaskManager;
+    private OpTaskManager opTaskManager;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -157,12 +157,12 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
-        AriusOpTaskDTO ariusOpTaskDTO = new AriusOpTaskDTO();
-        ariusOpTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_NEW.getType());
-        ariusOpTaskDTO.setCreator(workOrder.getSubmitor());
-        ariusOpTaskDTO.setExpandData(ConvertUtil.obj2Json(ecmTaskDTO));
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_NEW.getType());
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        opTaskDTO.setExpandData(ConvertUtil.obj2Json(ecmTaskDTO));
 
-        Result<AriusOpTask> result = ariusOpTaskManager.addTask(ariusOpTaskDTO);
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
@@ -201,7 +201,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public Result<Void> checkAuthority(AriusWorkOrderInfoPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isOP(userName)) {
             return Result.buildSucc();
         }

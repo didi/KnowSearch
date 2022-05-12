@@ -6,7 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.AriusWorkOrderInfoManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
@@ -15,10 +15,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUse
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderInfoDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -33,7 +33,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.AriusWorkOrderInfoDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,9 +49,9 @@ import org.springframework.stereotype.Service;
  * @date 2019/4/29
  */
 @Service
-public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager {
+public class WorkOrderManagerImpl implements WorkOrderManager {
 
-    private static final Logger  LOGGER           = LoggerFactory.getLogger(AriusWorkOrderInfoManagerImpl.class);
+    private static final Logger  LOGGER           = LoggerFactory.getLogger(WorkOrderManagerImpl.class);
 
     private static final int     APP_ID_TO_CREATE = -99;
 
@@ -62,7 +62,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     private AppService           appService;
 
     @Autowired
-    private AriusWorkOrderInfoDAO orderDao;
+    private WorkOrderDAO orderDao;
 
     @Autowired
     private AriusUserInfoService ariusUserInfoService;
@@ -86,7 +86,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
 
         String workOrderJsonString = JSON.toJSONString(workOrderDTO);
-        LOGGER.info("class=AriusWorkOrderInfoManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
+        LOGGER.info("class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
             workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
 
         initWorkOrderDTO(workOrderDTO);
@@ -98,7 +98,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
 
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(workOrderDTO.getType());
 
-        Result<AriusWorkOrderInfoPO> submitResult = handler.submit(ConvertUtil.obj2Obj(workOrderDTO, WorkOrder.class));
+        Result<WorkOrderPO> submitResult = handler.submit(ConvertUtil.obj2Obj(workOrderDTO, WorkOrder.class));
         if (submitResult.failed()) {
             return Result.buildFail(submitResult.getMessage());
         }
@@ -113,7 +113,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             return checkProcessResult;
         }
 
-        AriusWorkOrderInfoPO orderPO = orderDao.getById(processDTO.getOrderId());
+        WorkOrderPO orderPO = orderDao.getById(processDTO.getOrderId());
         if (AriusObjUtils.isNull(orderPO)) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
@@ -122,7 +122,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     }
 
     @Override
-    public int insert(AriusWorkOrderInfoPO orderPO) {
+    public int insert(WorkOrderPO orderPO) {
         try {
             if (orderPO.getApproverAppId() == null) {
                 orderPO.setApproverAppId(AdminConstant.DEFAULT_APP_ID);
@@ -130,17 +130,17 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             orderDao.insert(orderPO);
             return orderPO.getId().intValue();
         } catch (Exception e) {
-            LOGGER.error("class=AriusWorkOrderInfoManagerImpl||method=insert||orderPO={}||msg=add order failed!", orderPO, e);
+            LOGGER.error("class=WorkOrderManagerImpl||method=insert||orderPO={}||msg=add order failed!", orderPO, e);
         }
         return 0;
     }
 
     @Override
-    public int updateOrderById(AriusWorkOrderInfoPO orderPO) {
+    public int updateOrderById(WorkOrderPO orderPO) {
         try {
             return orderDao.update(orderPO);
         } catch (Exception e) {
-            LOGGER.error("class=AriusWorkOrderInfoManagerImpl||method=updateOrderById||orderPO={}||msg=update order failed!",
+            LOGGER.error("class=WorkOrderManagerImpl||method=updateOrderById||orderPO={}||msg=update order failed!",
                 orderPO, e);
         }
         return 0;
@@ -149,7 +149,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     @Override
     public Result<OrderDetailBaseVO> getById(Long id) {
         try {
-            AriusWorkOrderInfoPO orderPO = orderDao.getById(id);
+            WorkOrderPO orderPO = orderDao.getById(id);
             if (AriusObjUtils.isNull(orderPO)) {
                 return Result.buildFail(ResultType.NOT_EXIST.getMessage());
             }
@@ -157,17 +157,17 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             return Result.buildSucc(convert2DetailBaseVO(getBaseDetail(orderPO)));
 
         } catch (Exception e) {
-            LOGGER.error("class=AriusWorkOrderInfoManagerImpl||method=getById||id={}||msg=get order failed!", id, e);
+            LOGGER.error("class=WorkOrderManagerImpl||method=getById||id={}||msg=get order failed!", id, e);
         }
         return Result.buildFail();
     }
 
     @Override
-    public List<AriusWorkOrderInfoPO> list() {
+    public List<WorkOrderPO> list() {
         try {
             return orderDao.list();
         } catch (Exception e) {
-            LOGGER.error("class=AriusWorkOrderInfoManagerImpl||method=list||msg=get all order failed!", e);
+            LOGGER.error("class=WorkOrderManagerImpl||method=list||msg=get all order failed!", e);
         }
         return new ArrayList<>();
     }
@@ -175,7 +175,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     @Override
     public Result<Void> cancelOrder(Long id, String userName) {
         try {
-            AriusWorkOrderInfoPO orderPO = orderDao.getById(id);
+            WorkOrderPO orderPO = orderDao.getById(id);
             if (AriusObjUtils.isNull(orderPO)) {
                 return Result.buildFail(ResultType.NOT_EXIST.getMessage());
             }
@@ -189,16 +189,16 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             }
 
         } catch (Exception e) {
-            LOGGER.error("class=AriusWorkOrderInfoManagerImpl||method=cancelOrder||id={}||msg=cancel order failed!", id, e);
+            LOGGER.error("class=WorkOrderManagerImpl||method=cancelOrder||id={}||msg=cancel order failed!", id, e);
             return Result.buildFail(ResultType.FAIL.getMessage());
         }
         return Result.buildFail(ResultType.FAIL.getMessage());
     }
 
     @Override
-    public Result<Void> processOrder(AriusWorkOrderInfoPO order) {
+    public Result<Void> processOrder(WorkOrderPO order) {
         try {
-            AriusWorkOrderInfoPO orderPO = orderDao.getById(order.getId());
+            WorkOrderPO orderPO = orderDao.getById(order.getId());
             if (AriusObjUtils.isNull(orderPO)) {
                 return Result.buildFail(ResultType.NOT_EXIST.getMessage());
             }
@@ -206,7 +206,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
                 return Result.buildSucc();
             }
         } catch (Exception e) {
-            LOGGER.error("class=AriusWorkOrderInfoManagerImpl||method=processOrder||id={}||msg=cancel order failed!",
+            LOGGER.error("class=WorkOrderManagerImpl||method=processOrder||id={}||msg=cancel order failed!",
                 order.getId(), e);
             return Result.buildFail(ResultType.FAIL.getMessage());
         }
@@ -214,21 +214,21 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     }
 
     @Override
-    public Result<List<AriusWorkOrderInfoVO>> getOrderApplyList(String applicant, Integer status) {
-        List<AriusWorkOrderInfoVO> orderDOList = Lists.newArrayList();
+    public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status) {
+        List<WorkOrderVO> orderDOList = Lists.newArrayList();
         try {
             orderDOList = ConvertUtil.list2List(orderDao.listByApplicantAndStatus(applicant, status),
-                AriusWorkOrderInfoVO.class);
+                WorkOrderVO.class);
         } catch (Exception e) {
             LOGGER.error(
-                "class=AriusWorkOrderInfoManagerImpl||method=getOrderApplyList||applicant={}||status={}||msg=get apply order failed!",
+                "class=WorkOrderManagerImpl||method=getOrderApplyList||applicant={}||status={}||msg=get apply order failed!",
                 applicant, status, e);
         }
         return Result.buildSucc(orderDOList);
     }
 
     @Override
-    public List<AriusWorkOrderInfoPO> getApprovalList(String approver) {
+    public List<WorkOrderPO> getApprovalList(String approver) {
         try {
             if (!ariusUserInfoService.isOPByDomainAccount(approver)) {
                 return orderDao.listByApproverAndStatus(approver, null);
@@ -236,14 +236,14 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             return orderDao.list();
         } catch (Exception e) {
             LOGGER.error(
-                "class=AriusWorkOrderInfoManagerImpl||method=getApprovalList||approver={}||msg=get approval order failed!",
+                "class=WorkOrderManagerImpl||method=getApprovalList||approver={}||msg=get approval order failed!",
                 approver, e);
         }
         return Collections.emptyList();
     }
 
     @Override
-    public List<AriusWorkOrderInfoPO> getPassApprovalList(String approver) {
+    public List<WorkOrderPO> getPassApprovalList(String approver) {
         try {
             if (!ariusUserInfoService.isOPByDomainAccount(approver)) {
                 return orderDao.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
@@ -251,20 +251,20 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             return orderDao.listByStatus(OrderStatusEnum.PASSED.getCode());
         } catch (Exception e) {
             LOGGER.error(
-                "class=AriusWorkOrderInfoManagerImpl||method=getPassApprovalList||approver={}||msg=get approval order list failed!",
+                "class=WorkOrderManagerImpl||method=getPassApprovalList||approver={}||msg=get approval order list failed!",
                 approver, e);
         }
         return Collections.emptyList();
     }
 
     @Override
-    public List<AriusWorkOrderInfoPO> getWaitApprovalList(String userName) {
-        List<AriusWorkOrderInfoPO> orderList = new ArrayList<>();
+    public List<WorkOrderPO> getWaitApprovalList(String userName) {
+        List<WorkOrderPO> orderList = new ArrayList<>();
         try {
             orderList = orderDao.listByStatus(OrderStatusEnum.WAIT_DEAL.getCode());
         } catch (Exception e) {
             LOGGER.error(
-                "class=AriusWorkOrderInfoManagerImpl||method=getWaitApprovalList||userName={}||msg=get wait order list failed!",
+                "class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=get wait order list failed!",
                 userName, e);
         }
 
@@ -277,7 +277,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     }
 
     @Override
-    public OrderInfoDetail getBaseDetail(AriusWorkOrderInfoPO orderPO) {
+    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) {
         if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }
@@ -306,7 +306,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             detailBaseDTO.setApproverList(handler.getApproverList(detailBaseDTO.getDetail()));
         } catch (Exception e) {
             LOGGER.error(
-                "class=AriusWorkOrderInfoManagerImpl||method=getBaseDetail||extensions={}||msg=get order detail failed!",
+                "class=WorkOrderManagerImpl||method=getBaseDetail||extensions={}||msg=get order detail failed!",
                 orderPO.getExtensions(), e);
         }
         detailBaseDTO.setApplicant(ariusUserInfoService.getByDomainAccount(orderPO.getApplicant()));
@@ -314,8 +314,8 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
     }
 
     @Override
-    public Result<List<AriusWorkOrderInfoVO>> getOrderApprovalListByStatus(Integer status) {
-        List<AriusWorkOrderInfoPO> orderDOList = new ArrayList<>();
+    public Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status) {
+        List<WorkOrderPO> orderDOList = new ArrayList<>();
 
         String userName = SpringTool.getUserName();
 
@@ -329,7 +329,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
             orderDOList = getPassApprovalList(userName);
         }
 
-        return Result.buildSucc(ConvertUtil.list2List(orderDOList, AriusWorkOrderInfoVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(orderDOList, WorkOrderVO.class));
     }
 
     /*****************************************private*****************************************************/
@@ -370,13 +370,13 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
         workOrderDTO.setSubmitor(SpringTool.getUserName());
     }
 
-    private AriusWorkOrderInfoSubmittedVO convert2WorkOrderSubmittedVO(AriusWorkOrderInfoPO ariusWorkOrderInfoPO) {
-        if (AriusObjUtils.isNull(ariusWorkOrderInfoPO)) {
+    private AriusWorkOrderInfoSubmittedVO convert2WorkOrderSubmittedVO(WorkOrderPO workOrderPO) {
+        if (AriusObjUtils.isNull(workOrderPO)) {
             return null;
         }
         AriusWorkOrderInfoSubmittedVO vo = new AriusWorkOrderInfoSubmittedVO();
-        vo.setId(ariusWorkOrderInfoPO.getId());
-        vo.setTitle(ariusWorkOrderInfoPO.getTitle());
+        vo.setId(workOrderPO.getId());
+        vo.setTitle(workOrderPO.getTitle());
         return vo;
     }
 
@@ -392,7 +392,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
         return Result.buildSucc();
     }
 
-    private Result<Void> doProcessByWorkOrderHandle(AriusWorkOrderInfoPO orderPO, WorkOrderProcessDTO processDTO) {
+    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderPO.getType());
 
         Result<Void> checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());
@@ -419,7 +419,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
         return Result.buildFail("审批结果非法");
     }
 
-    private WorkOrder builderWorkOrder(AriusWorkOrderInfoPO orderPO, WorkOrderProcessDTO processDTO) {
+    private WorkOrder builderWorkOrder(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
         WorkOrder workOrder = new WorkOrder();
         workOrder.setId(orderPO.getId());
         workOrder.setTitle(orderPO.getTitle());
@@ -455,7 +455,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
         return baseVO;
     }
 
-    private List<AriusWorkOrderInfoPO> handleOrderList(String userName, List<AriusWorkOrderInfoPO> orderList) {
+    private List<WorkOrderPO> handleOrderList(String userName, List<WorkOrderPO> orderList) {
         orderList = orderList.stream().filter(orderDO -> {
             try {
                 WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderDO.getType());
@@ -473,7 +473,7 @@ public class AriusWorkOrderInfoManagerImpl implements AriusWorkOrderInfoManager 
                     }
                 }
             } catch (Exception e) {
-                LOGGER.warn("class=AriusWorkOrderInfoManagerImpl||method=getWaitApprovalList||userName={}||msg=exception!",
+                LOGGER.warn("class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=exception!",
                     userName, e);
             }
             return false;

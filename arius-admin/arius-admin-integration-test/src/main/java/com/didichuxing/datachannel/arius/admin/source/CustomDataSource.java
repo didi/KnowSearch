@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMe
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
@@ -171,20 +171,20 @@ public class CustomDataSource {
         return ariusUserInfoDTO;
     }
 
-    public static AriusOpTaskDTO getworkTaskDTO(){
-        AriusOpTaskDTO ariusOpTaskDTO =new AriusOpTaskDTO();
-        ariusOpTaskDTO.setTaskType(1);
-        ariusOpTaskDTO.setBusinessKey("1");
-        ariusOpTaskDTO.setDataCenter("1");
-        ariusOpTaskDTO.setCreator(operator);
-        ariusOpTaskDTO.setExpandData("1");
-        ariusOpTaskDTO.setStatus("success");
-        ariusOpTaskDTO.setCreateTime(new Date(System.currentTimeMillis()));
-        ariusOpTaskDTO.setDeleteFlag(Boolean.FALSE);
-        ariusOpTaskDTO.setId(2);
-        ariusOpTaskDTO.setTitle("1");
-        ariusOpTaskDTO.setUpdateTime(new Date(System.currentTimeMillis()));
-        return ariusOpTaskDTO;
+    public static OpTaskDTO getworkTaskDTO(){
+        OpTaskDTO opTaskDTO =new OpTaskDTO();
+        opTaskDTO.setTaskType(1);
+        opTaskDTO.setBusinessKey("1");
+        opTaskDTO.setDataCenter("1");
+        opTaskDTO.setCreator(operator);
+        opTaskDTO.setExpandData("1");
+        opTaskDTO.setStatus("success");
+        opTaskDTO.setCreateTime(new Date(System.currentTimeMillis()));
+        opTaskDTO.setDeleteFlag(Boolean.FALSE);
+        opTaskDTO.setId(2);
+        opTaskDTO.setTitle("1");
+        opTaskDTO.setUpdateTime(new Date(System.currentTimeMillis()));
+        return opTaskDTO;
     }
 
     public static void setMetricsClusterPhyDTO(MetricsClusterPhyDTO param) {

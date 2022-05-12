@@ -17,7 +17,7 @@ import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.AriusWorkOrderInfoManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
@@ -133,7 +133,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     private AriusScheduleThreadPool ariusScheduleThreadPool;
 
     @Autowired
-    private AriusWorkOrderInfoManager ariusWorkOrderInfoManager;
+    private WorkOrderManager workOrderManager;
 
     @Override
     public boolean existUnClosedEcmTask(Long phyClusterId) {
@@ -519,7 +519,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         if (CollectionUtils.isEmpty(ecmParamBases)) {
             return Result.buildFail("当前任务没有工单数据");
         }
-        OrderDetailBaseVO orderDetailBaseVO = ariusWorkOrderInfoManager.getById(task.getWorkOrderId()).getData();
+        OrderDetailBaseVO orderDetailBaseVO = workOrderManager.getById(task.getWorkOrderId()).getData();
 
         return Result.buildSucc(orderDetailBaseVO.getDetail(), "ecm任务对应的工单任务详细信息");
     }
@@ -745,7 +745,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     private void addHostInfoFromTaskOrder(EcmTask ecmTask) {
         // 从ecm任务的工单中获取节点全量的信息
-        Result<OrderDetailBaseVO> getOrderDetailResult = ariusWorkOrderInfoManager.getById(ecmTask.getWorkOrderId());
+        Result<OrderDetailBaseVO> getOrderDetailResult = workOrderManager.getById(ecmTask.getWorkOrderId());
         if (getOrderDetailResult.failed()) {
             return;
         }

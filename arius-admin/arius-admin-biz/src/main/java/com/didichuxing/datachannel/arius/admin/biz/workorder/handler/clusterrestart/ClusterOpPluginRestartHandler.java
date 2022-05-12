@@ -2,21 +2,21 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterres
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.order.AriusWorkOrderInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
@@ -51,7 +51,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
     private ClusterRoleService clusterRoleService;
 
     @Autowired
-    private AriusOpTaskManager workTaskService;
+    private OpTaskManager workTaskService;
 
     @Autowired
     private ESClusterService esClusterService;
@@ -83,7 +83,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("插件操作类型不合法(合法的操作类型包括安装和卸载)");
         }
 
-        if (ariusOpTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -158,11 +158,11 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(roleNameList));
 
-        AriusOpTaskDTO ariusOpTaskDTO = new AriusOpTaskDTO();
-        ariusOpTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        ariusOpTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
-        ariusOpTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<AriusOpTask> result = workTaskService.addTask(ariusOpTaskDTO);
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        Result<OpTask> result = workTaskService.addTask(opTaskDTO);
         if(null == result || result.failed()){
             return Result.buildFail("生成物理集群插件操作任务失败!");
         }
@@ -188,7 +188,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
     }
 
     @Override
-    public Result<Void> checkAuthority(AriusWorkOrderInfoPO orderPO, String userName) {
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
         if (isOP(userName)) {
             return Result.buildSucc();
         }

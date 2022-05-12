@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
@@ -43,7 +43,7 @@ public class OpTaskController {
     private static final ILog LOGGER = LogFactory.getLog(OpTaskController.class);
 
     @Autowired
-    private AriusOpTaskManager ariusOpTaskManager;
+    private OpTaskManager opTaskManager;
 
     @ApiOperation(value = "任务类型", notes = "")
     @GetMapping(value = "/type-enums")
@@ -65,7 +65,7 @@ public class OpTaskController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
     public Result<WorkTaskVO> submit(HttpServletRequest request,
                                                @PathVariable(value = "type") Integer type,
-                                               @RequestBody AriusOpTaskDTO workTaskDTO) {
+                                               @RequestBody OpTaskDTO workTaskDTO) {
         String dataCenter = workTaskDTO.getDataCenter();
         String user = HttpRequestUtils.getOperator(request);
 
@@ -77,7 +77,7 @@ public class OpTaskController {
         LOGGER.info("class=OpTaskController||method=OpTaskController.process||workTaskDTO={}||envInfo={}||dataCenter={}",
             JSON.toJSONString(workTaskDTO), EnvUtil.getStr(), dataCenter);
 
-        Result<AriusOpTask> result = ariusOpTaskManager.addTask(workTaskDTO);
+        Result<OpTask> result = opTaskManager.addTask(workTaskDTO);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
@@ -88,7 +88,7 @@ public class OpTaskController {
     @GetMapping(value = "/{taskId}")
     @ResponseBody
     public Result<WorkTaskVO> getOrderDetail(@PathVariable(value = "taskId") Integer taskId) {
-        Result<AriusOpTask> result = ariusOpTaskManager.getById(taskId);
+        Result<OpTask> result = opTaskManager.getById(taskId);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
@@ -100,7 +100,7 @@ public class OpTaskController {
     @ResponseBody
     public Result<List<WorkTaskVO>> getTaskList() {
         return Result.buildSucc(ConvertUtil.list2List(
-                ariusOpTaskManager.list().getData(),WorkTaskVO.class)
+                opTaskManager.list().getData(),WorkTaskVO.class)
         );
     }
 

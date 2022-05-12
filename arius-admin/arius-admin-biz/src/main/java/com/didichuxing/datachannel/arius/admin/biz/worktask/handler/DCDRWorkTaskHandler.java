@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskDCDRProgressEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskStatusEnum;
@@ -28,38 +28,38 @@ import org.springframework.stereotype.Service;
     private static final ILog LOGGER = LogFactory.getLog(DCDRWorkTaskHandler.class);
 
     @Autowired
-    private AriusOpTaskManager ariusOpTaskManager;
+    private OpTaskManager opTaskManager;
 
     @Override
-    public Result<AriusOpTask> addTask(AriusOpTask ariusOpTask) {
-        if (AriusObjUtils.isNull(ariusOpTask.getBusinessKey())) {
+    public Result<OpTask> addTask(OpTask opTask) {
+        if (AriusObjUtils.isNull(opTask.getBusinessKey())) {
             return Result.buildParamIllegal("业务id为空");
         }
-        if (existUnClosedTask(ariusOpTask.getBusinessKey(), ariusOpTask.getTaskType())) {
+        if (existUnClosedTask(opTask.getBusinessKey(), opTask.getTaskType())) {
             return Result.buildParamIllegal(String.format("模版列表[%s]存在未完成的dcdr模板主从切换任务，不允许再次创建",
-                    ariusOpTask.getBusinessKey()));
+                    opTask.getBusinessKey()));
         }
 
-        ariusOpTask.setCreateTime(new Date());
-        ariusOpTask.setUpdateTime(new Date());
-        ariusOpTaskManager.insert(ariusOpTask);
-        boolean succ = 0 < ariusOpTask.getId();
+        opTask.setCreateTime(new Date());
+        opTask.setUpdateTime(new Date());
+        opTaskManager.insert(opTask);
+        boolean succ = 0 < opTask.getId();
         if (!succ) {
             LOGGER.error(
                 "class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg=failed to insert",
-                ariusOpTask.getTaskType(), ariusOpTask.getBusinessKey());
+                opTask.getTaskType(), opTask.getBusinessKey());
             return Result.buildFail();
         }
-        return Result.buildSucc(ariusOpTask);
+        return Result.buildSucc(opTask);
     }
 
     @Override
     public boolean existUnClosedTask(String key, Integer type) {
-        List<AriusOpTask> pengingTaskList = ariusOpTaskManager.getPendingTaskByType(type);
+        List<OpTask> pengingTaskList = opTaskManager.getPendingTaskByType(type);
         if (CollectionUtils.isEmpty(pengingTaskList)) { return false; }
 
         List<String> businessKeyList = pengingTaskList.stream()
-                .map(AriusOpTask::getBusinessKey)
+                .map(OpTask::getBusinessKey)
                 .collect(Collectors.toList());
 
         List<String> templateIdListToCreate = ListUtils.string2StrList(key);
@@ -76,22 +76,22 @@ import org.springframework.stereotype.Service;
     }
 
     @Override
-    public Result<Void> process(AriusOpTask ariusOpTask, Integer step, String status, String expandData) {
-        Result<AriusOpTask> result = ariusOpTaskManager.getById(ariusOpTask.getId());
+    public Result<Void> process(OpTask opTask, Integer step, String status, String expandData) {
+        Result<OpTask> result = opTaskManager.getById(opTask.getId());
         if (result.failed()) {
             return Result.buildFrom(result);
         }
-        AriusOpTask updateAriusOpTask = result.getData();
-        DCDRTaskDetail detail = JSON.parseObject(updateAriusOpTask.getExpandData(), DCDRTaskDetail.class);
+        OpTask updateOpTask = result.getData();
+        DCDRTaskDetail detail = JSON.parseObject(updateOpTask.getExpandData(), DCDRTaskDetail.class);
         detail.setStatus(status);
         detail.setTaskProgress(step);
-        updateAriusOpTask.setExpandData(JSON.toJSONString(detail));
+        updateOpTask.setExpandData(JSON.toJSONString(detail));
         if (WorkTaskStatusEnum.FAILED.getStatus().equals(status)
             || step.equals(WorkTaskDCDRProgressEnum.STEP_9.getProgress())) {
-            updateAriusOpTask.setStatus(status);
+            updateOpTask.setStatus(status);
         }
 
-        ariusOpTaskManager.updateTask(updateAriusOpTask);
+        opTaskManager.updateTask(updateOpTask);
 
         return Result.buildSucc();
     }

@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * AriusOpTask Vo 对象
+ * OpTask Vo 对象
  * 
  * @author fengqiongfeng
  * @date 2020-12-21
@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AriusOpTaskDTO extends BaseDTO {
+public class OpTaskDTO extends BaseDTO {
 
     private static final long serialVersionUID = 1L;
 

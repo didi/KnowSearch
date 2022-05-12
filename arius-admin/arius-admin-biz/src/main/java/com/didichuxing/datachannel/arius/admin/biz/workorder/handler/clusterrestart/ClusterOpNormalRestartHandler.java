@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpRestartOrderDetail;
@@ -47,7 +47,7 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (ariusOpTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -91,11 +91,11 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
-        AriusOpTaskDTO ariusOpTaskDTO = new AriusOpTaskDTO();
-        ariusOpTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
-        ariusOpTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        ariusOpTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<AriusOpTask> result = ariusOpTaskManager.addTask(ariusOpTaskDTO);
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }

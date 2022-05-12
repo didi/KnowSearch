@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRSingleTemplateMasterSlaveSwitchDetail;
@@ -35,7 +35,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteDirtyDCDRLinksRandomTask.class);
 
     @Autowired
-    private AriusOpTaskManager ariusOpTaskManager;
+    private OpTaskManager opTaskManager;
 
     @Autowired
     private TemplateDCDRManager templateDcdrManager;
@@ -45,10 +45,10 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
         LOGGER.info("class=DeleteDirtyDCDRLinksRandomTask||method=execute||msg=start");
 
         //获取失败的dcdr主从切换任务
-        List<AriusOpTask> successDcdrSwitchTaskList = ariusOpTaskManager.getSuccessTaskByType(AriusOpTaskTypeEnum.TEMPLATE_DCDR.getType());
+        List<OpTask> successDcdrSwitchTaskList = opTaskManager.getSuccessTaskByType(AriusOpTaskTypeEnum.TEMPLATE_DCDR.getType());
         if (CollectionUtils.isEmpty(successDcdrSwitchTaskList)) { return TaskResult.SUCCESS; }
 
-        for (AriusOpTask successDcdrSwitchTask : successDcdrSwitchTaskList) {
+        for (OpTask successDcdrSwitchTask : successDcdrSwitchTaskList) {
             DCDRTasksDetail dcdrTasksDetail = JSON.parseObject(successDcdrSwitchTask.getExpandData(),
                 DCDRTasksDetail.class);
 
@@ -82,7 +82,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
             }
 
             successDcdrSwitchTask.setExpandData(ConvertUtil.obj2Json(dcdrTasksDetail));
-            ariusOpTaskManager.updateTask(successDcdrSwitchTask);
+            opTaskManager.updateTask(successDcdrSwitchTask);
         }
 
         return TaskResult.SUCCESS;

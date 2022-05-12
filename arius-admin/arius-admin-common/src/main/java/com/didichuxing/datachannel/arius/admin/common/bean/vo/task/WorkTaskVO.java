@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * AriusOpTask PO 对象
+ * OpTask PO 对象
  * 
  * @author fengqiongfeng
  * @date 2020-12-21

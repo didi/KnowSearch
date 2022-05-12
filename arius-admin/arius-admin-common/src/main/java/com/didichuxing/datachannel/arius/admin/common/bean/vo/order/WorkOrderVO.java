@@ -15,7 +15,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AriusWorkOrderInfoVO extends BaseVO {
+public class WorkOrderVO extends BaseVO {
     @ApiModelProperty(value = "工单ID")
     private Long id;
 

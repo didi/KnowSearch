@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 
 import java.io.IOException;
@@ -50,17 +50,17 @@ public class NormalOrderControllerMethod {
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<OrderDetailBaseVO>>(){});
     }
 
-    public static Result<List<AriusWorkOrderInfoVO>> getOrderApplyList(Integer status) throws IOException {
+    public static Result<List<WorkOrderVO>> getOrderApplyList(Integer status) throws IOException {
         String path = String.format("%s/orders", ORDER);
         Map<String, Object> params = new HashMap<>();
         params.put("status", status);
-        return JSON.parseObject(AriusClient.get(path, params), new TypeReference<Result<List<AriusWorkOrderInfoVO>>>(){});
+        return JSON.parseObject(AriusClient.get(path, params), new TypeReference<Result<List<WorkOrderVO>>>(){});
     }
 
-    public static Result<List<AriusWorkOrderInfoVO>> getOrderApprovalList(Integer status) throws IOException {
+    public static Result<List<WorkOrderVO>> getOrderApprovalList(Integer status) throws IOException {
         String path = String.format("%s/approvals", ORDER);
         Map<String, Object> params = new HashMap<>();
         params.put("status", status);
-        return JSON.parseObject(AriusClient.get(path, params), new TypeReference<Result<List<AriusWorkOrderInfoVO>>>(){});
+        return JSON.parseObject(AriusClient.get(path, params), new TypeReference<Result<List<WorkOrderVO>>>(){});
     }
 }

@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.v3.op.task;
 
 import com.didichuxing.datachannel.arius.admin.BaseContextTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.task.OpTaskControllerMethod;
@@ -26,8 +26,8 @@ public class OpTaskTests extends BaseContextTest {
 
     @Test
     public void testSubmit() throws IOException{
-          AriusOpTaskDTO ariusOpTaskDTO = CustomDataSource.getworkTaskDTO();
-          Result<WorkTaskVO> result=OpTaskControllerMethod.submit(2, ariusOpTaskDTO);
+          OpTaskDTO opTaskDTO = CustomDataSource.getworkTaskDTO();
+          Result<WorkTaskVO> result=OpTaskControllerMethod.submit(2, opTaskDTO);
           Assert.assertTrue(result.success());
     }
 

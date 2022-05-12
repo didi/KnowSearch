@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.AriusWorkOrderInfoManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.AriusOpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -12,11 +12,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsConfigAction;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.AriusOpTaskProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.AriusOpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
@@ -61,7 +61,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     private EcmTaskManager         ecmTaskManager;
 
     @Autowired
-    private AriusOpTaskManager ariusOpTaskManager;
+    private OpTaskManager opTaskManager;
 
     @Autowired
     private ESClusterService       esClusterService;
@@ -70,7 +70,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     private ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private AriusWorkOrderInfoManager ariusWorkOrderInfoManager;
+    private WorkOrderManager workOrderManager;
 
     @Autowired
     private ESPluginService        esPluginService;
@@ -79,26 +79,26 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     private ClusterPhyService      esClusterPhyService;
 
     @Override
-    public Result<AriusOpTask> addTask(AriusOpTask ariusOpTask) {
-        if (AriusObjUtils.isNull(ariusOpTask.getExpandData())) {
+    public Result<OpTask> addTask(OpTask opTask) {
+        if (AriusObjUtils.isNull(opTask.getExpandData())) {
             return Result.buildParamIllegal("提交内容为空");
         }
 
-        EcmTaskDTO ecmTaskDTO = ConvertUtil.str2ObjByJson(ariusOpTask.getExpandData(), EcmTaskDTO.class);
+        EcmTaskDTO ecmTaskDTO = ConvertUtil.str2ObjByJson(opTask.getExpandData(), EcmTaskDTO.class);
         Result<Long> ret = ecmTaskManager.saveEcmTask(ecmTaskDTO);
         if (null == ret || ret.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
 
-        ariusOpTask.setBusinessKey(String.valueOf(ret.getData()));
-        ariusOpTask.setTitle(ecmTaskDTO.getTitle());
-        ariusOpTask.setCreateTime(new Date());
-        ariusOpTask.setUpdateTime(new Date());
-        ariusOpTask.setStatus(WorkTaskStatusEnum.WAITING.getStatus());
-        ariusOpTask.setDeleteFlag(false);
-        ariusOpTaskManager.insert(ariusOpTask);
+        opTask.setBusinessKey(String.valueOf(ret.getData()));
+        opTask.setTitle(ecmTaskDTO.getTitle());
+        opTask.setCreateTime(new Date());
+        opTask.setUpdateTime(new Date());
+        opTask.setStatus(WorkTaskStatusEnum.WAITING.getStatus());
+        opTask.setDeleteFlag(false);
+        opTaskManager.insert(opTask);
 
-        return Result.buildSucc(ariusOpTask);
+        return Result.buildSucc(opTask);
     }
 
     @Override
@@ -107,17 +107,17 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
     }
 
     @Override
-    public Result<Void> process(AriusOpTask ariusOpTask, Integer step, String status, String expandData) {
-        if (AriusObjUtils.isNull(ariusOpTask.getExpandData())) {
+    public Result<Void> process(OpTask opTask, Integer step, String status, String expandData) {
+        if (AriusObjUtils.isNull(opTask.getExpandData())) {
             return Result.buildParamIllegal("提交内容为空");
         }
 
-        EcmTaskPO ecmTaskPO = JSON.parseObject(ariusOpTask.getExpandData(), EcmTaskPO.class);
+        EcmTaskPO ecmTaskPO = JSON.parseObject(opTask.getExpandData(), EcmTaskPO.class);
 
-        ariusOpTask.setStatus(status);
-        ariusOpTask.setUpdateTime(new Date());
-        ariusOpTask.setExpandData(JSON.toJSONString(ecmTaskPO));
-        ariusOpTaskManager.updateTask(ariusOpTask);
+        opTask.setStatus(status);
+        opTask.setUpdateTime(new Date());
+        opTask.setExpandData(JSON.toJSONString(ecmTaskPO));
+        opTaskManager.updateTask(opTask);
 
         return Result.buildSucc();
     }
@@ -135,15 +135,15 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         handlerRestartPostConfig(ecmTask);
         handlerRestartPostPlugin(ecmTask);
 
-        Result<AriusOpTask> result = ariusOpTaskManager.getLatestTask(String.valueOf(ecmTask.getId()), ecmTask.getOrderType());
+        Result<OpTask> result = opTaskManager.getLatestTask(String.valueOf(ecmTask.getId()), ecmTask.getOrderType());
         if (result.failed()) {
             return;
         }
-        AriusOpTaskProcessDTO processDTO = new AriusOpTaskProcessDTO();
+        OpTaskProcessDTO processDTO = new OpTaskProcessDTO();
         processDTO.setStatus(ecmTask.getStatus());
         processDTO.setTaskId(result.getData().getId());
         processDTO.setExpandData(JSON.toJSONString(ecmTask));
-        ariusOpTaskManager.processTask(processDTO);
+        opTaskManager.processTask(processDTO);
 
         LOGGER.info("class=ECMWorkTaskHandler||method=onApplicationEvent||ecmTaskId={}||event=EcmEditTaskEvent", ecmTask.getId());
     }
@@ -289,7 +289,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
      * @param ecmTask 任务
      */
     private void handleSuccessEcmPluginRestartTask(EcmTask ecmTask) {
-        OrderDetailBaseVO orderDetailBaseVO = ariusWorkOrderInfoManager.getById(ecmTask.getWorkOrderId()).getData();
+        OrderDetailBaseVO orderDetailBaseVO = workOrderManager.getById(ecmTask.getWorkOrderId()).getData();
         PhyClusterPluginOperationContent content = JSON.parseObject(orderDetailBaseVO.getDetail(), PhyClusterPluginOperationContent.class);
 
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue());
