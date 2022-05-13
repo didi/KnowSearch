@@ -21,6 +21,9 @@ public interface IndexTemplatePhyDAO {
 
     List<IndexTemplatePhyPO> listByLogicId(Integer logicId);
 
+    List<IndexTemplatePhyPO> getByLogicIdAndStatus(@Param("logicId") Integer logicId,
+                                                   @Param("status") Integer status);
+
     int update(IndexTemplatePhyPO param);
 
     int updateStatus(@Param("physicalId") Long physicalId,
