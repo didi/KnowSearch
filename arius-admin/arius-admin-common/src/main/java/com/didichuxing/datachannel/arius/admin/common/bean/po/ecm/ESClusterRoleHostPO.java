@@ -72,6 +72,11 @@ public class ESClusterRoleHostPO extends BasePO {
      */
     private String machineSpec;
 
+    /**
+     * regionId
+     */
+    private Integer regionId;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -165,4 +165,11 @@ public interface ESClusterRoleHostDAO {
      * @return
      */
     int getPodNumberByRoleId(@Param("roleId") Long roleId);
+
+    /**
+     * 根据regionId获取节点列表
+     * @param regionId  regionId
+     * @return   List<ESClusterRoleHostPO>
+     */
+    List<ESClusterRoleHostPO> listByRegionId(Integer regionId);
 }

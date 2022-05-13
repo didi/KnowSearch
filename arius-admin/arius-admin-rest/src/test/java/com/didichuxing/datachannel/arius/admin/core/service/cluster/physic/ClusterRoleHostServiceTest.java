@@ -269,4 +269,13 @@ public class ClusterRoleHostServiceTest extends AriusAdminApplicationTest {
                 clusterRoleHostService.deleteById(id).getMessage());
         Assertions.assertNull(clusterRoleHostService.getById(id));
     }
+
+    @Test
+    public void listByRegionIdTest() {
+        ESClusterRoleHostDTO esClusterRoleHostDTO = CustomDataSource.esRoleClusterHostDTOFactory();
+        ClusterRoleHost clusterRoleHost = ConvertUtil.obj2Obj(esClusterRoleHostDTO, ClusterRoleHost.class);
+        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRoleHost.getRegionId());
+        if (ret.failed()) { Assertions.assertNull(ret.getMessage());}
+        if (ret.success()) { Assertions.assertNull(ret.getData());}
+    }
 }

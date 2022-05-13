@@ -67,6 +67,11 @@ public class ClusterRoleHost extends BaseEntity {
      */
     private String machineSpec;
 
+    /**
+     * regionId
+     */
+    private Integer regionId;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

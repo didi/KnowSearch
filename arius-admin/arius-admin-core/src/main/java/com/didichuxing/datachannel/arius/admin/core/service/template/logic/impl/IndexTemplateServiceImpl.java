@@ -944,6 +944,17 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return Result.buildSuccWithMsg("索引模板可以使用");
     }
 
+    @Override
+    public Result<List<IndexTemplate>> listByRegionId(Integer regionId) {
+        List<IndexTemplatePO> indexTemplatePOS;
+        try {
+            indexTemplatePOS = indexTemplateDAO.listByRegionId(regionId);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplateServiceImpl||method=listAllByRegionId||errMsg={}", e);
+            return Result.buildFail(String.format("根据regionId获取模板列表失败, msg:%s", e.getMessage()));
+        }
+        return Result.buildSucc(ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class));
+    }
 
     /**************************************** private method ****************************************************/
     /**

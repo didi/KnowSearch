@@ -276,6 +276,7 @@ public class CustomDataSource {
         po.setQuota(0D);
         po.setIngestPipeline("");
         po.setWriteRateLimit(-1);
+        po.setRegionId(100);
         return po;
     }
 
@@ -305,6 +306,7 @@ public class CustomDataSource {
         esClusterRoleHostDTO.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
         esClusterRoleHostDTO.setRoleClusterId(1234L);
         esClusterRoleHostDTO.setNodeSet("");
+        esClusterRoleHostDTO.setRegionId(100);
         return esClusterRoleHostDTO;
     }
 
