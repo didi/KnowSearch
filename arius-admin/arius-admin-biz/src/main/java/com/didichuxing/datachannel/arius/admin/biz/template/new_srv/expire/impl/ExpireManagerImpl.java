@@ -23,6 +23,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
  * @author chengxiang, zqr
  * @date 2022/5/12
  */
+@Service
 public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireManager {
 
     private final Integer RETRY_TIMES = 3;
