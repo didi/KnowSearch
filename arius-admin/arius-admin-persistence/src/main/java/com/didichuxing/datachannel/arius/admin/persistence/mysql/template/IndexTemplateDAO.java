@@ -52,4 +52,6 @@ public interface IndexTemplateDAO {
     int updateBlockWriteState(@Param("logicId") Integer logicId, @Param("blockWrite") Boolean blockWrite);
 
     List<String> listAllNames();
+
+    List<IndexTemplatePO> listByRegionId(Integer regionId);
 }

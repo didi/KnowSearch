@@ -55,6 +55,9 @@ public class ESClusterRoleHostDTO extends BaseDTO {
     @ApiModelProperty("节点set信息")
     private String  nodeSet;
 
+    @ApiModelProperty("regionId")
+    private Integer regionId;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

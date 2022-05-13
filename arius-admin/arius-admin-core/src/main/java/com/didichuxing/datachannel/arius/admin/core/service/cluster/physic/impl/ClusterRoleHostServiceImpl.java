@@ -370,6 +370,18 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return clusterRoleHostDAO.getPodNumberByRoleId(roleId);
     }
 
+    @Override
+    public Result<List<ClusterRoleHost>> listByRegionId(Integer regionId) {
+        List<ESClusterRoleHostPO> esClusterRoleHostPOS = Lists.newArrayList();
+        try {
+            esClusterRoleHostPOS = clusterRoleHostDAO.listByRegionId(regionId);
+        } catch (Exception e) {
+            Result.buildFail(String.format("根据regionId[%d]获取节点信息失败", regionId));
+            LOGGER.error("class=ClusterRoleHostServiceImpl||method=listByRegionId||errMsg={}", e.getMessage(),e);
+        }
+        return Result.buildSucc(ConvertUtil.list2List(esClusterRoleHostPOS, ClusterRoleHost.class));
+    }
+
     /***************************************** private method ****************************************************/
     private Result<Void> checkNodeParam(ESClusterRoleHostDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {

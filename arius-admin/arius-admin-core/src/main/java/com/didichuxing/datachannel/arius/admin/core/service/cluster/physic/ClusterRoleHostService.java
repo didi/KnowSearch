@@ -214,4 +214,11 @@ public interface ClusterRoleHostService {
      * 获取角色id对应的机器数（ip数目）
      */
     int getPodNumberByRoleId(Long roleId);
+
+    /**
+     * 根据regionId获取节点信息
+     * @param regionId      regionId
+     * @return              Result<List<ClusterRoleHost>>
+     */
+    Result<List<ClusterRoleHost>> listByRegionId(Integer regionId);
 }

@@ -45,4 +45,8 @@ public class ESClusterRoleHost {
      */
     private String machineSpec;
 
+    /**
+     * regionId
+     */
+    private Integer regionId;
 }

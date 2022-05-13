@@ -103,7 +103,7 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
     /**
      * 逻辑集群id
      */
-    private Long resourceId;
+    private Long    resourceId;
 
     /**
      * 备注
@@ -143,9 +143,20 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
      */
     private Integer level;
 
+    /**
+     * 是否开启dcdr
+     */
     private Boolean hasDCDR;
 
+    /**
+     * 数据位点差
+     */
     private Long    checkPointDiff;
+
+    /**
+     * regionId
+     */
+    private Integer regionId;
 
     @Override
     public int compareTo(IndexTemplate o) {
