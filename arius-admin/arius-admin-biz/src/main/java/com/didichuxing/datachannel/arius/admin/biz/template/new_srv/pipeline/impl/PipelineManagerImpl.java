@@ -48,6 +48,11 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
+    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
+        return true;
+    }
+
+    @Override
     public Result<Void> createPipeline(Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("未开启pipeLine服务");

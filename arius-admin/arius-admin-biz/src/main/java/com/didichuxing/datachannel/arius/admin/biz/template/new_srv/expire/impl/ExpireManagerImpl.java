@@ -59,6 +59,11 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
     }
 
     @Override
+    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
+        return true;
+    }
+
+    @Override
     public Result<Void> deleteExpireIndex(Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("模板未开启过期删除服务");

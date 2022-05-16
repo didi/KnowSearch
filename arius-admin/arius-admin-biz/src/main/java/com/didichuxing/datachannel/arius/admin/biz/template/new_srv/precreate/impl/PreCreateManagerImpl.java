@@ -43,6 +43,11 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     }
 
     @Override
+    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
+        return true;
+    }
+
+    @Override
     public Result<Void> preCreateIndex(Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("指定索引模板未开启预先创建能力");

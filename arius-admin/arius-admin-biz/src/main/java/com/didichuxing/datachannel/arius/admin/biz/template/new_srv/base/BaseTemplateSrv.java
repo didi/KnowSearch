@@ -24,4 +24,11 @@ public interface BaseTemplateSrv {
      */
     String templateSrvName();
 
+    /**
+     * 判断指定逻辑模板是否可以开启当前模板服务
+     * @param logicTemplateId 逻辑模板id
+     * @return 校验结果
+     */
+    boolean isTemplateSrvAvailable(Integer logicTemplateId);
+
 }

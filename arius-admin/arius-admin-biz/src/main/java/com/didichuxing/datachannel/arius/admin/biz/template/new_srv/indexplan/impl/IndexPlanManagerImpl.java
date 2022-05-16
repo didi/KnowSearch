@@ -51,6 +51,11 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
+    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
+        return true;
+    }
+
+    @Override
     public Result<Void> indexRollover(Integer logicTemplateId) {
         LOGGER.info("class=IndexPlanManagerImpl||method=indexRollover||logicTemplateId={}||msg=start indexRollover", logicTemplateId);
         if (!isTemplateSrvOpen(logicTemplateId)) {

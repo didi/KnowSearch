@@ -26,6 +26,11 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     }
 
     @Override
+    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
+        return true;
+    }
+
+    @Override
     public Result<Void> move2ColdNode(Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("没有开启冷热分离模板服务");
