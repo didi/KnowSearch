@@ -2,12 +2,14 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRolePO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleDAO;
@@ -277,5 +279,17 @@ public class ClusterRoleHostServiceTest extends AriusAdminApplicationTest {
         Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRoleHost.getRegionId());
         if (ret.failed()) { Assertions.assertNull(ret.getMessage());}
         if (ret.success()) { Assertions.assertNull(ret.getData());}
+    }
+
+    @Test
+    public void collectClusterNodeSettingsTest() {
+        ClusterPhyDTO clusterPhyDTO = CustomDataSource.esClusterDTOFactory();
+        boolean succ = false;
+        try {
+            succ = clusterRoleHostService.collectClusterNodeSettings(clusterPhyDTO.getCluster());
+        } catch (AdminTaskException e) {
+            Assertions.assertNotNull(e.getMessage());
+        }
+        Assertions.assertTrue(succ);
     }
 }

@@ -202,7 +202,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         roleClusterHostPO.setCluster(phyClusterName);
         roleClusterHostPO.setRole(ESClusterNodeRoleEnum.getByDesc(esClusterRoleHost.getRole()).getCode());
         roleClusterHostPO.setStatus(2);
-        roleClusterHostPO.setRack("");
         roleClusterHostPO.setNodeSet("");
         setRoleClusterId(roleClusterHostPO, phyClusterName);
         return roleClusterHostPO;
@@ -436,9 +435,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         if (AriusObjUtils.isNull(param.getStatus())) {
             return Result.buildParamIllegal("节点状态为空");
         }
-        if (AriusObjUtils.isNullStr(param.getRack())) {
-            return Result.buildParamIllegal("节点rack为空");
-        }
         if (AriusObjUtils.isNullStr(param.getNodeSet())) {
             return Result.buildParamIllegal("节点set为空");
         }
@@ -618,7 +614,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
 
         nodePO.setStatus(ONLINE.getCode());
-        nodePO.setRack(getRackFromNodeSettings(clusterNodeInfo));
         nodePO.setRole(getRoleFromNodeSettings(clusterNodeInfo));
 
         return nodePO;
