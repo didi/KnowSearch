@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author chengxiang, d06679
@@ -12,28 +12,28 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 public interface PipelineManager {
 
     /**
-     * 同步pipeline
-     * @param indexTemplatePhy 物理模板
-     */
-    void syncPipeline(IndexTemplatePhy indexTemplatePhy);
-
-    /**
      * 创建
-     * @param indexTemplatePhy 物理模板
+     * @param logicTemplateId 逻辑模板id
      * @return true/false
      */
-    Boolean createPipeline(IndexTemplatePhy indexTemplatePhy);
+    Result<Void> createPipeline(Integer logicTemplateId);
+
+    /**
+     * 同步pipeline
+     * @param logicTemplateId 逻辑模板id
+     * @return
+     */
+    Boolean syncPipeline(Integer logicTemplateId);
 
     /**
      * 删除
-     * @param indexTemplatePhysicalInfo 物理模板
+     * @param logicTemplateId 逻辑模板id
      * @return true/false
      */
-    Boolean deletePipeline(IndexTemplatePhy indexTemplatePhysicalInfo);
+    Boolean deletePipeline(Integer logicTemplateId);
 
     /**
      * 修改逻辑字段
-     * @param oldTemplate 逻辑模板
      * @param newTemplate 逻辑模板
      * @return true/false
      */

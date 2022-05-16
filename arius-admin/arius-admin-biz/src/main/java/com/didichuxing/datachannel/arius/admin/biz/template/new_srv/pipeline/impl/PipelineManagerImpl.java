@@ -2,12 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline.im
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline.PipelineManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManagerImpl;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -37,9 +36,6 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     private static final ILog LOGGER = LogFactory.getLog(PipelineManagerImpl.class);
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
-
-    @Autowired
     private ESPipelineDAO esPipelineDAO;
 
     @Autowired
@@ -52,44 +48,23 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public void syncPipeline(IndexTemplatePhy indexTemplatePhy) {
-        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
-        if (null == indexTemplate) {
-            LOGGER.error("class=PipelineManagerImpl||method=syncPipeline||msg=indexTemplate is null||logicId={}", indexTemplatePhy.getLogicId());
-            return;
+    public Result<Void> createPipeline(Integer logicTemplateId) {
+        if (!isTemplateSrvOpen(logicTemplateId)) {
+            return Result.buildFail("未开启pipeLine服务");
         }
 
-        if (!isTemplateSrvOpen(indexTemplate.getId())) {
-            LOGGER.info("class=PipelineManagerImpl||method=syncPipeline||msg=templateSrv is not open||logicId={}", indexTemplate.getId());
-            return;
-        }
-
-        try {
-            ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
-            if (esPipelineProcessor == null) {
-                // pipeline processor不存在，创建
-                LOGGER.info("class=PipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate", indexTemplatePhy.getName());
-                createPipeline(indexTemplatePhy);
-                return;
-            }
-
-            // pipeline processor不一致（有变化），以新元数据创建
-            if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
-                LOGGER.info("class=PipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline", indexTemplatePhy.getName());
-                doCreatePipeline(indexTemplatePhy, indexTemplate, esPipelineProcessor.getThrottle().getInteger("rate_limit"));
-            }
-        } catch (Exception e) {
-            LOGGER.warn("class=PipelineManagerImpl||method=syncPipeline||template={}||errMsg={}", indexTemplatePhy.getName(), e.getMessage(), e);
-        }
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
+        Integer rateLimit = getDynamicQuotaRateLimit(indexTemplate);
+        return Result.buildFail();
     }
 
     @Override
-    public Boolean createPipeline(IndexTemplatePhy indexTemplatePhy) {
-        return Boolean.FALSE;
+    public Boolean syncPipeline(Integer logicTemplateId) {
+        return Boolean.TRUE;
     }
 
     @Override
-    public Boolean deletePipeline(IndexTemplatePhy indexTemplatePhysicalInfo) {
+    public Boolean deletePipeline(Integer logicTemplateId) {
         return Boolean.FALSE;
     }
 
@@ -249,9 +224,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         Integer expireDay = logicTemplate.getHotTime() > 0 ? logicTemplate.getHotTime()
                 : logicTemplate.getExpireTime();
 
-        LOGGER.info(
-                "class=PipelineManagerImpl||method=createPipeline||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}||rateLimit={}||version={}",
-                cluster, pipelineId, dateField, dateFormat, expireDay, rateLimit, version);
+        LOGGER.info("class=PipelineManagerImpl||method=createPipeline||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}||rateLimit={}||version={}", cluster, pipelineId, dateField, dateFormat, expireDay, rateLimit, version);
 
         // 保存限流值到DB
         saveRateLimitToDB(indexTemplatePhy, rateLimit);
@@ -276,5 +249,11 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
 
         // 避免出现死循环风险，这里直接使用DAO
         indexTemplatePhyDAO.update(physicalPO);
+    }
+
+
+    //todo: 等待yunan quota 开发
+    private Integer getDynamicQuotaRateLimit(IndexTemplate template) {
+        return 0;
     }
 }
