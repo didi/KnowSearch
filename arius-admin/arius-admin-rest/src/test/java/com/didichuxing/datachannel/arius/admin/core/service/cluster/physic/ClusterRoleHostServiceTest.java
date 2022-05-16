@@ -288,7 +288,7 @@ public class ClusterRoleHostServiceTest extends AriusAdminApplicationTest {
         try {
             succ = clusterRoleHostService.collectClusterNodeSettings(clusterPhyDTO.getCluster());
         } catch (AdminTaskException e) {
-            Assertions.assertNull(e.getMessage());
+            Assertions.assertNotNull(e.getMessage());
         }
         Assertions.assertTrue(succ);
     }
