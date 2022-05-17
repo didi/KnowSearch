@@ -1,7 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.template;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
-
+import java.util.Arrays;
+import java.util.List;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.*;
 
 /**
@@ -77,5 +78,18 @@ public enum NewTemplateSrvEnum {
         this.code               = code;
         this.serviceName        = serviceName;
         this.esClusterVersion   = esClusterVersion;
+    }
+
+    public static NewTemplateSrvEnum getByCode(Integer code) {
+        for (NewTemplateSrvEnum templateSrv: NewTemplateSrvEnum.values()) {
+            if (templateSrv.getCode().equals(code)) {
+                return templateSrv;
+            }
+        }
+        return null;
+    }
+
+    public static List<NewTemplateSrvEnum> getAll() {
+        return Arrays.asList(NewTemplateSrvEnum.values());
     }
 }

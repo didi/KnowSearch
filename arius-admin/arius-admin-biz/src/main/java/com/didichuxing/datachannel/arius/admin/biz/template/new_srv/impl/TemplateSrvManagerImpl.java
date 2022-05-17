@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: chengxiang
@@ -58,14 +61,18 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     public Result<List<TemplateSrv>> getTemplateUnavailableSrv(Integer logicTemplateId) {
+        List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
+        for (NewTemplateSrvEnum srv : allSrvList) {
+
+        }
         return Result.buildSucc();
     }
 
 
     //////////////////////////////////private method/////////////////////////////////////////////
 
-    private TemplateSrv getTemplateSrvBySrvId(Integer templateSrvId) {
-        TemplateServiceEnum serviceEnum = TemplateServiceEnum.getById(templateSrvId);
+    private TemplateSrv getSrvByCode(Integer templateSrvCode) {
+        NewTemplateSrvEnum serviceEnum = NewTemplateSrvEnum.getByCode(templateSrvCode);
         return new TemplateSrv(serviceEnum.getCode(), serviceEnum.getServiceName(), serviceEnum.getEsClusterVersion().getVersion());
     }
 
@@ -81,7 +88,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         List<TemplateSrv> templateOpenSrv = new ArrayList<>();
         for(String srvId : openSrvs.split(",")) {
-            TemplateSrv templateSrv = getTemplateSrvBySrvId(Integer.parseInt(srvId));
+            TemplateSrv templateSrv = getSrvByCode(Integer.parseInt(srvId));
             if (null != templateSrv) {
                 templateOpenSrv.add(templateSrv);
             }
