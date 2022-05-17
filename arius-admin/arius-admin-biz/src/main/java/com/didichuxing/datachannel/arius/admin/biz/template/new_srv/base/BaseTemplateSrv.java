@@ -3,6 +3,10 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 
+/**
+ * @author chengxiang
+ * @date 2022/5/17
+ */
 public interface BaseTemplateSrv {
 
     /**

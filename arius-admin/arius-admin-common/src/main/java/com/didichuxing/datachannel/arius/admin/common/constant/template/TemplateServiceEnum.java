@@ -89,7 +89,12 @@ public enum TemplateServiceEnum {
     /**
      * 升级版本
      */
-    TEMPLATE_UPGRADE(15, "升级版本", ES_2_3_3_100,  0);
+    TEMPLATE_UPGRADE(15, "升级版本", ES_2_3_3_100,  0),
+
+    /**
+     * 扩缩容（调整shard）
+     */
+    TEMPLATE_ADJUST_SHARD(16, "扩缩容", ES_2_3_3_100, 0);
 
     private Integer code;
 
