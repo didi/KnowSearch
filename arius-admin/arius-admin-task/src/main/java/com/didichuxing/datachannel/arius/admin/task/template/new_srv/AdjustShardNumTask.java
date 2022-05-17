@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 按月滚动的模版：
  *    不动态调整shard
  */
-@Task(name = "AdjustShardNumTask", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
+//@Task(name = "AdjustShardNumTask", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
 public class AdjustShardNumTask extends BaseConcurrentTemplateTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(AdjustShardNumTask.class);

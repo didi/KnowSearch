@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * xxxx-2021-10-22 -> xxxx-2021-10-22_v1
  */
-@Task(name = "IndexRolloverTask", description = "模板Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
+//@Task(name = "IndexRolloverTask", description = "模板Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
 public class IndexRolloverTask extends BaseConcurrentTemplateTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTask.class);
