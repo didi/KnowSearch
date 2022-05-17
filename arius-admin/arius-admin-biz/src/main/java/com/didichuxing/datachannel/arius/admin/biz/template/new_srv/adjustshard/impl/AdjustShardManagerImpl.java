@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.In
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -29,8 +29,8 @@ public class AdjustShardManagerImpl extends BaseTemplateSrvImpl implements Adjus
     private ESTemplateService esTemplateService;
 
     @Override
-    public TemplateServiceEnum templateSrv() {
-        return TemplateServiceEnum.TEMPLATE_ADJUST_SHARD;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_ADJUST_SHARD;
     }
 
     @Override

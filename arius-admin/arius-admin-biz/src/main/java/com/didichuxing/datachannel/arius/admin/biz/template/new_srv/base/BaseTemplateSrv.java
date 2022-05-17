@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 
 /**
  * @author chengxiang
@@ -20,7 +20,7 @@ public interface BaseTemplateSrv {
      * 获取当前模板服务的类型
      * @return 指定的模板服务类型
      */
-    TemplateServiceEnum templateSrv();
+    NewTemplateSrvEnum templateSrv();
 
 
     /**

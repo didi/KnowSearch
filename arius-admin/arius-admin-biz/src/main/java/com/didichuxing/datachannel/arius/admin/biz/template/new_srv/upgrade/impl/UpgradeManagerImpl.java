@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,8 +26,8 @@ public class UpgradeManagerImpl extends BaseTemplateSrvImpl implements UpgradeMa
     private TemplatePreCreateManager templatePreCreateManager;
 
     @Override
-    public TemplateServiceEnum templateSrv() {
-        return TemplateServiceEnum.TEMPLATE_UPGRADE;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_UPGRADE;
     }
 
     @Override

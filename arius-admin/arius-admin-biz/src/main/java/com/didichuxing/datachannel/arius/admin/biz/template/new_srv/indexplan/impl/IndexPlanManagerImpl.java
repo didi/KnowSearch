@@ -8,8 +8,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
@@ -46,8 +46,8 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     private ESIndexService esIndexService;
 
     @Override
-    public TemplateServiceEnum templateSrv() {
-        return TemplateServiceEnum.INDEX_PLAN;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.INDEX_PLAN;
     }
 
     @Override

@@ -20,10 +20,17 @@ public interface TemplateSrvManager {
 
 
     /**
-     * 获取指定模板开启的服务
-     * @param logicTemplateId
+     * 获取指定模板「开启的」服务
+     * @param logicTemplateId 逻辑模板id
      * @return
      */
     Result<List<TemplateSrv>> getTemplateOpenSrv(Integer logicTemplateId);
+
+    /**
+     * 获取指定模板「不可用的」服务
+     * @param logicTemplateId 逻辑模板id
+     * @return
+     */
+    Result<List<TemplateSrv>> getTemplateUnavailableSrv(Integer logicTemplateId);
 
 }

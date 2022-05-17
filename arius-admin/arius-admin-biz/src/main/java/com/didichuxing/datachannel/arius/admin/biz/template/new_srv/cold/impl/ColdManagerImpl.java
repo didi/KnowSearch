@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,8 +15,8 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
 
 
     @Override
-    public TemplateServiceEnum templateSrv() {
-        return TemplateServiceEnum.TEMPLATE_COLD;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_COLD;
     }
 
     @Override

@@ -56,6 +56,11 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         return false;
     }
 
+    @Override
+    public Result<List<TemplateSrv>> getTemplateUnavailableSrv(Integer logicTemplateId) {
+        return Result.buildSucc();
+    }
+
 
     //////////////////////////////////private method/////////////////////////////////////////////
 
