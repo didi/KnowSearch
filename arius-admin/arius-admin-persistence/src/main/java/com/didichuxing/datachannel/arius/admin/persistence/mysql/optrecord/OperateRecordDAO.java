@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 
 /**
  * @author d06679
@@ -13,14 +13,38 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.Oper
  */
 @Repository
 public interface OperateRecordDAO {
+    /**
+     * 通过条件查询列表
+     * @param param OperateRecordInfoPO
+     * @return List<OperateRecordPO>
+     */
+    List<OperateRecordInfoPO> listByCondition(OperateRecordInfoPO param);
 
-    List<OperateRecordPO> listByCondition(OperateRecordPO param);
+    /**
+     * 插入一条数据
+     * @param po    OperateRecordInfoPO
+     * @return      int
+     */
+    int insert(OperateRecordInfoPO po);
 
-    int insert(OperateRecordPO po);
-
+    /**
+     * 当biz_id为空，将business_id设为默认值
+     * @return  int
+     */
     int compatible();
 
-    OperateRecordPO selectDescTopNByModuleId(@Param("moduleId") int moduleId, @Param("topN") int topN);
+    /**
+     * 通过moduleId和topN获取数据
+     * @param moduleId 操作id
+     * @param topN     top数
+     * @return OperateRecordPO
+     */
+    OperateRecordInfoPO selectDescTopNByModuleId(@Param("moduleId") int moduleId, @Param("topN") int topN);
 
+    /**
+     * 通过moduleId和id删除数据
+     * @param moduleId  操作id
+     * @param id        id
+     */
     void deleteByModuleIdAndLessThanId(@Param("moduleId")int moduleId, @Param("id") int id);
 }

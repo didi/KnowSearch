@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndicesPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -58,6 +58,7 @@ import com.google.common.collect.Lists;
 @Component
 public class IndicesManagerImpl implements IndicesManager {
     private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
+    public static final int RETRY_COUNT = 3;
     @Autowired
     private AppService            appService;
 
@@ -71,7 +72,7 @@ public class IndicesManagerImpl implements IndicesManager {
     private ClusterPhyManager     clusterPhyManager;
 
     @Autowired
-    private OperateRecordService  operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private IndexCatInfoCollector indexCatInfoCollector;
@@ -108,7 +109,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
         cluster2IndexNameListMap.forEach((cluster, indexNameList) -> {
             try {
-                if (indexNameList.size() == esIndexService.syncBatchDeleteIndices(cluster, indexNameList, 3)) {
+                if (indexNameList.size() == esIndexService.syncBatchDeleteIndices(cluster, indexNameList, RETRY_COUNT)) {
                     Result<Boolean> batchSetIndexFlagInvalidResult = batchSetIndexFlagInvalid(cluster, indexNameList);
                     if (batchSetIndexFlagInvalidResult.success()) {
                         operateRecordService.save(INDEX_OP, OperationEnum.DELETE, null,

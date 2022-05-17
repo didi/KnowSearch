@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 
@@ -35,7 +35,7 @@ public class TemplatePhysicalV3ControllerMethod {
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<String>>>(){});
     }
 
-    public static Result<Boolean> multipleEdit(List<IndexTemplatePhysicalDTO> params) throws IOException {
+    public static Result<Boolean> multipleEdit(List<IndexTemplatePhyDTO> params) throws IOException {
         String path = String.format("%s/multipleEdit", TEMPLATE_PHYSICAL);
         return JSON.parseObject(AriusClient.put(path, params), new TypeReference<Result<Boolean>>(){});
     }

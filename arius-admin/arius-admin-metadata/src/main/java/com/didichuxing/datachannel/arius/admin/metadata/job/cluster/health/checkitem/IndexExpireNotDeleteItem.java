@@ -1,21 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.checkitem;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.health.HealthCheckErrInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.HealthCheckType;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.AbstractCheckerItem;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
-import org.apache.commons.lang3.StringUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 检查每个索引模板，对于有过期时间的模板，是否有过期的索引未删除

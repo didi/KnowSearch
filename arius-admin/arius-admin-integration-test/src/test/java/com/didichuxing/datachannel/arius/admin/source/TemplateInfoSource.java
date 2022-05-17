@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
@@ -61,7 +61,7 @@ public class TemplateInfoSource {
         templateCreateContent.setDynamicTemplates("");
         templateCreateContent.setLevel(LevelEnum.CORE.getCode());
         workOrderDTO.setContentObj(templateCreateContent);
-        Result<WorkOrderSubmittedVO> result = NormalOrderControllerMethod.submit(type, workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result = NormalOrderControllerMethod.submit(type, workOrderDTO);
         Assertions.assertTrue(result.success());
 
         // 通过工单

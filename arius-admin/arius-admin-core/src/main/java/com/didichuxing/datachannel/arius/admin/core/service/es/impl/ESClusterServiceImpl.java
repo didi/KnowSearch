@@ -39,7 +39,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
@@ -69,9 +68,6 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Autowired
     private ESClusterDAO      esClusterDAO;
-
-    @Autowired
-    private ClusterPhyService clusterPhyService;
 
     /**
      * 关闭集群re balance
@@ -481,7 +477,7 @@ public class ESClusterServiceImpl implements ESClusterService {
         try {
             client.start();
             DirectRequest directRequest = new DirectRequest("GET", "");
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
             return ClusterConnectionStatus.NORMAL;
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterServiceImpl||method=checkClusterWithoutPassword||address={}||mg=get es segments fail", addresses, e);
@@ -500,12 +496,12 @@ public class ESClusterServiceImpl implements ESClusterService {
         List<ESClusterThreadPO> threadStats = esClusterDAO.syncGetThreadStatsByCluster(cluster);
         ESClusterThreadStats esClusterThreadStats = new ESClusterThreadStats(cluster, 0L, 0L, 0L, 0L, 0L, 0L);
         if (threadStats != null) {
-            esClusterThreadStats.setManagement(threadStats.stream().filter(thread -> thread.getThreadName().equals("management")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setRefresh(threadStats.stream().filter(thread -> thread.getThreadName().equals("refresh")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setFlush(threadStats.stream().filter(thread -> thread.getThreadName().equals("flush")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setMerge(threadStats.stream().filter(thread -> thread.getThreadName().equals("force_merge")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setSearch(threadStats.stream().filter(thread -> thread.getThreadName().equals("search")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setWrite(threadStats.stream().filter(thread -> thread.getThreadName().equals("write")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setManagement(threadStats.stream().filter(thread -> "management".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setRefresh(threadStats.stream().filter(thread -> "refresh".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setFlush(threadStats.stream().filter(thread -> "flush".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setMerge(threadStats.stream().filter(thread -> "force_merge".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setSearch(threadStats.stream().filter(thread -> "search".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setWrite(threadStats.stream().filter(thread ->"write".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
         }
         return esClusterThreadStats;
     }

@@ -1,29 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP_CONFIG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.event.app.AppAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.AppDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.AppEditEvent;
@@ -32,13 +31,14 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppDAO;
 import com.didiglobal.logi.log.ILog;
@@ -46,17 +46,21 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-
+/**
+ * @author linyunan
+ * @date 2021-04-28
+ */
 @Service
 public class AppServiceImpl implements AppService {
 
@@ -75,7 +79,7 @@ public class AppServiceImpl implements AppService {
     private EmployeeService             employeeService;
 
     @Autowired
-    private OperateRecordService        operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @Autowired
     private ResponsibleConvertTool      responsibleConvertTool;
@@ -90,12 +94,12 @@ public class AppServiceImpl implements AppService {
     private ClusterLogicService         clusterLogicService;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private AppClusterLogicAuthService logicClusterAuthService;
 
-    private Cache<String, List<?>>      appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
+    private final Cache<String, List<?>>   appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
 
 
     /**
@@ -471,8 +475,8 @@ public class AppServiceImpl implements AppService {
     /**
      * 根据责任人查询
      *
-     * @param responsible
-     * @return
+     * @param  responsible    责任人
+     * @return List<App>
      */
     @Override
     public List<App> getAppsByResponsibleId(Long responsible) {
@@ -638,7 +642,7 @@ public class AppServiceImpl implements AppService {
     }
 
     private boolean hasOwnTemplate(int appId) {
-        List<IndexTemplateLogic> templateLogics = templateLogicService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplate> templateLogics = indexTemplateService.getAppLogicTemplatesByAppId(appId);
         return CollectionUtils.isNotEmpty(templateLogics);
     }
 

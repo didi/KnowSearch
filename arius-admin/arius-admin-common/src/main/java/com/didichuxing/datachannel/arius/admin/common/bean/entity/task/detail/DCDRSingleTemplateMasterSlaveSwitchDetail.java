@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import java.util.Date;
 import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DcdrStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DcdrSwithTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +19,7 @@ public class DCDRSingleTemplateMasterSlaveSwitchDetail extends AbstractTaskDetai
 
     /**
      * dcdr主从切换类型 1 平滑 2 强切
-     * @see DcdrSwithTypeEnum
+     * @see DCDRSwithTypeEnum
      */
     private Integer switchType;
 
@@ -61,7 +60,7 @@ public class DCDRSingleTemplateMasterSlaveSwitchDetail extends AbstractTaskDetai
 
     /**
      * 任务状态: 0 取消 1 成功 2 执行中 3 失败 4 等待
-     * @see DcdrStatusEnum
+     * @see DCDRStatusEnum
      */
     private Integer taskStatus;
 

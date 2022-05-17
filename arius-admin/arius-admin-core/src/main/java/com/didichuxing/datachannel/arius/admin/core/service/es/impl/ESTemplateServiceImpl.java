@@ -1,12 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.SINGLE_TYPE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_DEFAULT_ORDER;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplatePhysicalPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentsPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -18,16 +16,14 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiT
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PATH_SEGMENTS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -293,10 +289,10 @@ public class ESTemplateServiceImpl implements ESTemplateService {
             DirectResponse directResponse = esTemplateDAO.getDirectResponse(cluster, "Get", templateNameRequestContent);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                List<TemplatePhysicalPO> indexBelongNodes = ConvertUtil
-                    .str2ObjArrayByJson(directResponse.getResponseContent(), TemplatePhysicalPO.class);
+                List<IndexTemplatePhyPO> indexBelongNodes = ConvertUtil
+                    .str2ObjArrayByJson(directResponse.getResponseContent(), IndexTemplatePhyPO.class);
 
-                return indexBelongNodes.stream().map(TemplatePhysicalPO::getName).filter(r -> !r.startsWith(".")).count();
+                return indexBelongNodes.stream().map(IndexTemplatePhyPO::getName).filter(r -> !r.startsWith(".")).count();
             }
         } catch (Exception e) {
             LOGGER.error("class=ESTemplateServiceImpl||method=syncGetTemplateNum||clusterName={}||errMsg=exception",

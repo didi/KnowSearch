@@ -33,7 +33,7 @@ public abstract class BaseConcurrentTask<T> {
     protected AriusTaskThreadPool ariusTaskThreadPool;
 
     @Autowired
-    private OperateRecordService  operateRecordService;
+    private OperateRecordService operateRecordService;
 
     @PostConstruct
     public void init(){

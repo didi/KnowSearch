@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.INDEXING_TOTAL_RATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum. INDEXING_RATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.QUERY_RATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant.INDEX;
 
@@ -73,7 +73,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterTps(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_REAL_TIME_TPS_QPS_INFO, cluster,
-            "now-2m", "now-1m", INDEXING_TOTAL_RATE.getType());
+            "now-2m", "now-1m",  INDEXING_RATE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"),
@@ -599,7 +599,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         final Double[] totalIndexing = { 0.0d };
 
         esIndexStats
-            .forEach(esIndexStats1 -> totalIndexing[0] += Double.valueOf(esIndexStats1.getMetrics().get(INDEXING_TOTAL_RATE.getType())));
+            .forEach(esIndexStats1 -> totalIndexing[0] += Double.valueOf(esIndexStats1.getMetrics().get( INDEXING_RATE.getType())));
 
         // TPS_METRICS已经是毫秒级别的统计数据，monitor每分钟统计一次
         return totalIndexing[0] * 1000 * 60 / (endDate - startDate);

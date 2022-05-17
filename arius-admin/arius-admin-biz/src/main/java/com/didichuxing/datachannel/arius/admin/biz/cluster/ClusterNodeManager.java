@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 
 /**
  * ES集群工具类
@@ -21,7 +21,7 @@ public interface ClusterNodeManager {
      * @param clusterNodes       物理集群节点
      * @return
      */
-    List<ESRoleClusterHostVO> convertClusterLogicNodes(List<RoleClusterHost> clusterNodes);
+    List<ESClusterRoleHostVO> convertClusterLogicNodes(List<ClusterRoleHost> clusterNodes);
 
     /**
      * 获取rack的资源统计信息
@@ -47,5 +47,5 @@ public interface ClusterNodeManager {
      * @param clusterPhyName 物理集群名称
      * @return
      */
-    List<ESRoleClusterHostVO> convertClusterPhyNodes(List<RoleClusterHost> nodesInfo, String clusterPhyName);
+    List<ESClusterRoleHostVO> convertClusterPhyNodes(List<ClusterRoleHost> nodesInfo, String clusterPhyName);
 }

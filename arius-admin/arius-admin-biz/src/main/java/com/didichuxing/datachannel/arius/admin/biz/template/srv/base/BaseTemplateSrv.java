@@ -9,12 +9,18 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ *
+ * @author admin
+ * @date 2022/05/09
+ */
 public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
 
     protected static final ILog    LOGGER = LogFactory.getLog(BaseTemplateSrv.class);
@@ -26,10 +32,10 @@ public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
     protected ClusterLogicService  clusterLogicService;
 
     @Autowired
-    protected TemplatePhyService   templatePhyService;
+    protected IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    protected TemplateLogicService templateLogicService;
+    protected IndexTemplateService indexTemplateService;
 
     @Autowired
     protected OperateRecordService operateRecordService;

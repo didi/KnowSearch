@@ -3,10 +3,14 @@ package com.didichuxing.datachannel.arius.admin.source;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESRoleClusterHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
@@ -15,8 +19,13 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.google.common.collect.Lists;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class CustomDataSource {
 
@@ -61,24 +70,23 @@ public class CustomDataSource {
         param.setTemplateSrvs(TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode() + "");
         param.setImportRule(ESClusterImportRuleEnum.AUTO_IMPORT.getCode());
         param.setTags("{\"resourceType\":3, \"createSource\":0}");
-        List<ESRoleClusterHostDTO> list = new ArrayList<>();
+        List<ESClusterRoleHostDTO> list = new ArrayList<>();
         for(int i = 1; i <= 3; i++) {
-            ESRoleClusterHostDTO esRoleClusterHostDTO = getESRoleClusterHostDTO();
-            esRoleClusterHostDTO.setCluster(clusterName);
-            esRoleClusterHostDTO.setRole(i);
-            list.add(esRoleClusterHostDTO);
+            ESClusterRoleHostDTO esClusterRoleHostDTO = getESRoleClusterHostDTO();
+            esClusterRoleHostDTO.setCluster(clusterName);
+            esClusterRoleHostDTO.setRole(i);
+            list.add(esClusterRoleHostDTO);
         }
         param.setRoleClusterHosts(list);
         return param;
     }
 
-    public static ESRoleClusterHostDTO getESRoleClusterHostDTO() {
-        ESRoleClusterHostDTO hostDTO = new ESRoleClusterHostDTO();
+    public static ESClusterRoleHostDTO getESRoleClusterHostDTO() {
+        ESClusterRoleHostDTO hostDTO = new ESClusterRoleHostDTO();
         hostDTO.setCluster(getRandomClusterName());
         hostDTO.setIp(testPhyClusterIp);
         hostDTO.setNodeSet("");
         hostDTO.setPort(String.valueOf(testPhyClusterPort));
-        hostDTO.setRack("");
         hostDTO.setRole(ESClusterNodeRoleEnum.MASTER_NODE.getCode());
         hostDTO.setRoleClusterId(0L);
         hostDTO.setStatus(0);
@@ -162,20 +170,20 @@ public class CustomDataSource {
         return ariusUserInfoDTO;
     }
 
-    public static WorkTaskDTO getworkTaskDTO(){
-        WorkTaskDTO workTaskDTO=new WorkTaskDTO();
-        workTaskDTO.setTaskType(1);
-        workTaskDTO.setBusinessKey("1");
-        workTaskDTO.setDataCenter("1");
-        workTaskDTO.setCreator(operator);
-        workTaskDTO.setExpandData("1");
-        workTaskDTO.setStatus("success");
-        workTaskDTO.setCreateTime(new Date(System.currentTimeMillis()));
-        workTaskDTO.setDeleteFlag(Boolean.FALSE);
-        workTaskDTO.setId(2);
-        workTaskDTO.setTitle("1");
-        workTaskDTO.setUpdateTime(new Date(System.currentTimeMillis()));
-        return workTaskDTO;
+    public static OpTaskDTO getworkTaskDTO(){
+        OpTaskDTO opTaskDTO =new OpTaskDTO();
+        opTaskDTO.setTaskType(1);
+        opTaskDTO.setBusinessKey("1");
+        opTaskDTO.setDataCenter("1");
+        opTaskDTO.setCreator(operator);
+        opTaskDTO.setExpandData("1");
+        opTaskDTO.setStatus("success");
+        opTaskDTO.setCreateTime(new Date(System.currentTimeMillis()));
+        opTaskDTO.setDeleteFlag(Boolean.FALSE);
+        opTaskDTO.setId(2);
+        opTaskDTO.setTitle("1");
+        opTaskDTO.setUpdateTime(new Date(System.currentTimeMillis()));
+        return opTaskDTO;
     }
 
     public static void setMetricsClusterPhyDTO(MetricsClusterPhyDTO param) {

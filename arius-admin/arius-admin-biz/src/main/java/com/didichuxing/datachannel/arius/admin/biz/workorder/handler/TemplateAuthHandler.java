@@ -4,10 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateAuthContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -15,20 +11,21 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateAuthOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import java.util.List;
 import java.util.Map;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -38,17 +35,14 @@ import java.util.Map;
 @Service("templateAuthHandler")
 public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
-    @Value("${admin.url.console}")
-    private String                                      adminUrlConsole;
 
     @Autowired
-    private TemplateLogicService                        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private AppLogicTemplateAuthService                 appLogicTemplateAuthService;
 
-    @Autowired
-    private TemplateLabelService                        templateLabelService;
+
 
     @Autowired
     private AppLogicTemplateAuthService                 logicTemplateAuthService;
@@ -179,12 +173,12 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
         if (authEnum.equals(AppTemplateAuthEnum.OWN)) {
             // 逻辑模板移交
-            return Result.buildFrom(templateLogicService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
+            return Result.buildFrom(indexTemplateService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
                     content.getResponsible(), workOrder.getSubmitor()));
         } else {
             // 对于索引的工单任务，若没有集群权限，则添加所在集群的访问权限
             // 获取所在集群
-            ClusterLogic clusterLogic = templateLogicService
+            ClusterLogic clusterLogic = indexTemplateService
                 .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId).getLogicCluster();
 
             if (clusterLogic == null) {

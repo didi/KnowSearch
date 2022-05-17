@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 
 import java.util.Collection;
 import java.util.List;
@@ -114,5 +114,5 @@ public interface AppLogicTemplateAuthService {
      * @param logicTemplate 逻辑模板
      * @return
      */
-    AppTemplateAuth buildTemplateAuth(IndexTemplateLogic logicTemplate, AppTemplateAuthEnum appTemplateAuthEnum);
+    AppTemplateAuth buildTemplateAuth(IndexTemplate logicTemplate, AppTemplateAuthEnum appTemplateAuthEnum);
 }

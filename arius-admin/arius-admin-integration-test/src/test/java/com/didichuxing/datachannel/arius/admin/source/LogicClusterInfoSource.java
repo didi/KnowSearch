@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterOpV3ControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterRegionControllerMethod;
@@ -49,7 +49,7 @@ public class LogicClusterInfoSource {
         contentObj.put("responsible", "admin");
         contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
-        Result<WorkOrderSubmittedVO> result = NormalOrderControllerMethod.submit(type, workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result = NormalOrderControllerMethod.submit(type, workOrderDTO);
         Assertions.assertTrue(result.success());
 
         // 通过工单
@@ -92,7 +92,7 @@ public class LogicClusterInfoSource {
         workOrderDTO.setContentObj(logicClusterDeleteContent);
         workOrderDTO.setType("logicClusterDelete");
         workOrderDTO.setSubmitorAppid(1);
-        Result<WorkOrderSubmittedVO> result2 = NormalOrderControllerMethod.submit("logicClusterDelete", workOrderDTO);
+        Result<AriusWorkOrderInfoSubmittedVO> result2 = NormalOrderControllerMethod.submit("logicClusterDelete", workOrderDTO);
         Assertions.assertTrue(result2.success());
 
         // 通过工单，删除逻辑集群

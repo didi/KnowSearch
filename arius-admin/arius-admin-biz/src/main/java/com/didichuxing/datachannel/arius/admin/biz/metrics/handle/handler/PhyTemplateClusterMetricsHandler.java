@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle.handler;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
+
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
@@ -7,18 +9,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStaticsService;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
 
 @Service("clusterPhyTemplateMetricsHandler")
 public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
@@ -26,7 +25,7 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
     private ESIndicesStaticsService esIndicesStaticsService;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Override
     protected Result<Void> checkSpecialParam(MetricsClusterPhyDTO param) {
@@ -73,7 +72,7 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
 
             // 将逻辑模板的id转化为对应的逻辑模板名称，使用*进行数据库兜底操作
             for (MetricsContent param : variousLineChartMetrics.getMetricsContents()) {
-                IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(Integer.parseInt(param.getName()));
+                IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(Integer.parseInt(param.getName()));
                 param.setName(logicTemplate == null ? "*" : logicTemplate.getName());
             }
         }

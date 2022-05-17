@@ -1,15 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_COLD_DAY_DEFAULT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.BATCH_CHANGE_TEMPLATE_HOT_DAYS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
+import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
@@ -19,24 +27,16 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateLogicDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.BATCH_CHANGE_TEMPLATE_HOT_DAYS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
-import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * 索引冷存服务
@@ -46,6 +46,8 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 @Service
 public class TemplateColdManagerImpl extends BaseTemplateSrv implements TemplateColdManager {
 
+    public static final int MAX_HOT_DAY = 2;
+    public static final int MIN_HOT_DAY = -2;
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
@@ -56,7 +58,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     private ESIndexService         esIndexService;
 
     @Autowired
-    private IndexTemplateLogicDAO  indexTemplateLogicDAO;
+    private IndexTemplateDAO indexTemplateDAO;
 
     @Autowired
     private ClusterPhyService      clusterPhyService;
@@ -74,7 +76,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Tuple</*冷节点索引列表*/Set<String>, /*热节点索引列表*/Set<String>> getColdAndHotIndex(Long physicalId) {
-        IndexTemplatePhyWithLogic templatePhysicalWithLogic = templatePhyService
+        IndexTemplatePhyWithLogic templatePhysicalWithLogic = indexTemplatePhyService
             .getTemplateWithLogicById(physicalId);
         if (templatePhysicalWithLogic == null) {
             return new Tuple<>();
@@ -170,7 +172,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
          * 配置分片级别重分配的参数由集群控制
          */
 
-        List<IndexTemplatePhy> templatePhysicals = templatePhyService.getNormalTemplateByCluster(phyCluster);
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             return Result.buildSucc(true);
@@ -230,11 +232,11 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Result<Integer> batchChangeHotDay(Integer days, String operator) {
-        if (days > 2 || days < -2) {
+        if (days > MAX_HOT_DAY || days < MIN_HOT_DAY) {
             return Result.buildParamIllegal("days参数非法, [-2, 2]");
         }
 
-        int count = indexTemplateLogicDAO.batchChangeHotDay(days);
+        int count = indexTemplateDAO.batchChangeHotDay(days);
 
         LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
 
@@ -256,12 +258,12 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     @Override
     public boolean updateHotIndexRack(Long physicalId, String tgtRack, int retryCount) throws ESOperateException {
 
-        IndexTemplatePhyWithLogic physicalWithLogic = templatePhyService.getTemplateWithLogicById(physicalId);
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
         if (physicalWithLogic == null) {
             return false;
         }
 
-        List<String> indices = templatePhyService.getMatchIndexNames(physicalWithLogic.getId());
+        List<String> indices = indexTemplatePhyService.getMatchIndexNames(physicalWithLogic.getId());
         if (CollectionUtils.isEmpty(indices)) {
             return true;
         }

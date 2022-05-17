@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,7 +47,7 @@ public class AppTemplateAuthController {
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private AppLogicTemplateAuthManager appLogicTemplateAuthManager;
@@ -109,7 +109,7 @@ public class AppTemplateAuthController {
         List<Integer> templateIds = templateAuths.stream().map(AppTemplateAuthVO::getTemplateId)
             .collect(Collectors.toList());
 
-        Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> logicTemplateMap = templateLogicService
+        Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> logicTemplateMap = indexTemplateService
             .getLogicTemplatesWithClusterAndMasterTemplateMap(new HashSet<>(templateIds));
 
         for (AppTemplateAuthVO authVO : templateAuths) {
