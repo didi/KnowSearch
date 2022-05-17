@@ -6,6 +6,7 @@ import com.didi.arius.gateway.common.exception.QueryDslLengthException;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.common.utils.AppUtil;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
@@ -24,6 +25,7 @@ import com.didi.arius.gateway.elasticsearch.client.model.ESActionRequest;
 import com.didi.arius.gateway.rest.http.IRestHandler;
 import com.didi.arius.gateway.rest.http.RestController;
 import com.didiglobal.logi.log.LogGather;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.*;
 import org.elasticsearch.rest.support.RestUtils;
 import org.slf4j.Logger;
@@ -142,7 +144,8 @@ public abstract class BaseHttpRestController implements IRestHandler {
     }
 
     protected void preRequest(QueryContext queryContext) {
-        if (queryContext.isFromKibana()) {
+        if (queryContext.isFromKibana() || (AppUtil.isAdminAppid(queryContext.getAppDetail())
+                                            && StringUtils.isNotBlank(queryContext.getClusterId()))) {
             // 如果是来自 kibana 的请求，则设置为原生查询
             queryContext.setSearchType(AppDetail.RequestType.Origin_Cluster.getType());
         }
