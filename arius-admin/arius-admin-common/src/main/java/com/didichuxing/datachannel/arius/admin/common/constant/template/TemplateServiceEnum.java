@@ -84,7 +84,12 @@ public enum TemplateServiceEnum {
     /**
      * 清理
      */
-    TEMPLATE_CLEAR(14, "清理", ES_2_3_3_100, 0);
+    TEMPLATE_CLEAR(14, "清理", ES_2_3_3_100, 0),
+
+    /**
+     * 升级版本
+     */
+    TEMPLATE_UPGRADE(15, "升级版本", ES_2_3_3_100,  0);
 
     private Integer code;
 

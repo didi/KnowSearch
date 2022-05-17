@@ -51,8 +51,8 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
-        return true;
+    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
+        return Result.buildSucc();
     }
 
     @Override

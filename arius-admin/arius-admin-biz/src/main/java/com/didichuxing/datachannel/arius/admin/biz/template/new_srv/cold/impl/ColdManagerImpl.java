@@ -3,14 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
-import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author chengxiang, zqr
@@ -26,8 +20,8 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     }
 
     @Override
-    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
-        return true;
+    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
+        return Result.buildSucc();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 
 public interface BaseTemplateSrv {
@@ -29,6 +30,6 @@ public interface BaseTemplateSrv {
      * @param logicTemplateId 逻辑模板id
      * @return 校验结果
      */
-    boolean isTemplateSrvAvailable(Integer logicTemplateId);
+    Result<Void> isTemplateSrvAvailable(Integer logicTemplateId);
 
 }

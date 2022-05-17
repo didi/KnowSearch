@@ -31,14 +31,15 @@ public class ClearManagerImpl extends BaseTemplateSrvImpl implements ClearManage
     }
 
     @Override
-    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
-        return true;
+    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
+        return Result.buildSucc();
     }
 
     @Override
     public Result<Void> clearIndices(TemplateClearDTO clearDTO) {
-        if (!isTemplateSrvAvailable(clearDTO.getTemplateId())) {
-            return Result.buildFail("该模板不可以清理索引");
+        Result<Void> srvAvailableResult = isTemplateSrvAvailable(clearDTO.getTemplateId());
+        if (srvAvailableResult.failed()) {
+            return srvAvailableResult;
         }
 
         if (CollectionUtils.isEmpty(clearDTO.getDelIndices())) {

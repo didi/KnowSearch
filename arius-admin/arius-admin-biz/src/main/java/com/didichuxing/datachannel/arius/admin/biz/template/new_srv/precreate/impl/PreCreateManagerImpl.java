@@ -43,8 +43,8 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     }
 
     @Override
-    public boolean isTemplateSrvAvailable(Integer logicTemplateId) {
-        return true;
+    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
+        return Result.buildSucc();
     }
 
     @Override
