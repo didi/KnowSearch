@@ -7,8 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTempl
 import org.springframework.stereotype.Service;
 
 /**
- * @author: chengxiang
- * @date: 2022/5/16
+ * @author chengxiang
+ * @date 2022/5/16
  */
 @Service
 public class DCDRManagerImpl extends BaseTemplateSrvImpl implements DCDRManager {
