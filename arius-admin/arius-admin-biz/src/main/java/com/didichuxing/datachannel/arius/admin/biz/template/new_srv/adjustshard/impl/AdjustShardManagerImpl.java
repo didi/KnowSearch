@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTem
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  * @author chengxiang
  * @date 2022/5/17
  */
+@Service
 public class AdjustShardManagerImpl extends BaseTemplateSrvImpl implements AdjustShardManager {
 
     private final Integer RETRY_TIMES = 3;

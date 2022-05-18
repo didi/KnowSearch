@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -15,22 +16,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author: chengxiang
- * @date: 2022/5/9
+ * @author chengxiang
+ * @date 2022/5/9
  */
 @Service("newTemplateSrvService")
 @DependsOn("springTool")
 public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     protected static final ILog LOGGER = LogFactory.getLog(TemplateSrvManagerImpl.class);
+    private final Map<Integer, BaseTemplateSrv> BASE_TEMPLATE_SRV_MAP = new HashMap<>();
 
     @Autowired
     private IndexTemplateService templateLogicService;
+
+    @PostConstruct
+    public void init() {
+        Map<String, BaseTemplateSrv> strTemplateSrvHandleMap = SpringTool.getBeansOfType(BaseTemplateSrv.class);
+        strTemplateSrvHandleMap.forEach((k, v) -> {
+            try {
+                NewTemplateSrvEnum srvEnum = v.templateSrv();
+                BASE_TEMPLATE_SRV_MAP.put(srvEnum.getCode(), v);
+            } catch (Exception e) {
+                LOGGER.error("class=TemplateSrvManagerImpl||method=init||error=", e);
+            }
+        });
+        LOGGER.info("class=TemplateSrvManagerImpl||method=init||init finish");
+    }
 
     @Override
     public Result<List<TemplateSrv>> getTemplateOpenSrv(Integer logicTemplateId) {
@@ -61,11 +79,17 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     public Result<List<TemplateSrv>> getTemplateUnavailableSrv(Integer logicTemplateId) {
+        List<TemplateSrv> unavailableSrv = new ArrayList<>();
         List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
-        for (NewTemplateSrvEnum srv : allSrvList) {
-
+        for (NewTemplateSrvEnum srvEnum : allSrvList) {
+            Integer srvCode = srvEnum.getCode();
+            BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
+            Result<Void> availableResult = srvHandle.isTemplateSrvAvailable(logicTemplateId);
+            if (availableResult.failed()) {
+                unavailableSrv.add(getSrvByCode(srvCode));
+            }
         }
-        return Result.buildSucc();
+        return Result.buildSucc(unavailableSrv);
     }
 
 

@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTempl
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
  * @author chengxiang
  * @date 2022/5/16
  */
+@Service
 public class ClearManagerImpl extends BaseTemplateSrvImpl implements ClearManager {
 
     private final Integer RETRY_TIMES = 3;

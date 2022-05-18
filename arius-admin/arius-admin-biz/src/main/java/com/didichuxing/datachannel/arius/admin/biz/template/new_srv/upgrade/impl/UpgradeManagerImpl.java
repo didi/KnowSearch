@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * @author chengxiang
  * @date 2022/5/16
  */
+@Service
 public class UpgradeManagerImpl extends BaseTemplateSrvImpl implements UpgradeManager {
 
     private final Integer RETRY_TIMES = 3;
