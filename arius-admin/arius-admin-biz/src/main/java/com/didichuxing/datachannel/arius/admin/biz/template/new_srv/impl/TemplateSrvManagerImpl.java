@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.impl;
 
+import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -8,7 +9,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
@@ -24,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
+
 /**
  * @author chengxiang
  * @date 2022/5/9
@@ -37,6 +42,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Autowired
     private IndexTemplateService templateLogicService;
+
+    @Autowired
+    private HandleFactory handleFactory;
 
     @PostConstruct
     public void init() {
@@ -96,7 +104,13 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateWithSrvConditionDTO condition) {
-        return null;
+        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(TEMPLATE_SRV.getPageSearchType());
+        if (baseHandle instanceof TemplateSrvPageSearchHandle) {
+            TemplateSrvPageSearchHandle handler = (TemplateSrvPageSearchHandle) baseHandle;
+            //todo: zeying appId
+            return handler.doPageHandle(condition, null, 1);
+        }
+        return PaginationResult.buildFail("没有找到对应的处理器");
     }
 
 

@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -164,6 +161,18 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 e.getMessage(), e);
         }
 
+        return responsibleConvertTool.list2List(indexTemplatePOS, IndexTemplate.class);
+    }
+
+    @Override
+    public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateWithSrvConditionDTO param) {
+        List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
+        try {
+            indexTemplatePOS = indexTemplateDAO.pagingByCondition(param.getName(), null, null,
+                    (param.getPage() - 1) * param.getSize(), param.getSize(), SortConstant.ID, SortConstant.DESC);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplateServiceImpl||method=pagingGetTemplateSrvByCondition||err={}", e.getMessage(), e);
+        }
         return responsibleConvertTool.list2List(indexTemplatePOS, IndexTemplate.class);
     }
 

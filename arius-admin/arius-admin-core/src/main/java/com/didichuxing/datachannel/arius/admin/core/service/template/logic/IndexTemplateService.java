@@ -5,10 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
@@ -43,6 +40,13 @@ public interface IndexTemplateService {
      * 模糊分页查询模板列表信息
      */
     List<IndexTemplate> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param);
+
+    /**
+     * 模糊分页查询「模板服务」列表信息
+     * @param param 模糊查询条件
+     * @return
+     */
+    List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateWithSrvConditionDTO param);
 
     /**
      * 模糊查询统计总命中数, 用于前端分页
