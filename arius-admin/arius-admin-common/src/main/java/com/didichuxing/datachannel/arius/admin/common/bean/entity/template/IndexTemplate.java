@@ -10,11 +10,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author chengxiang
-<<<<<<< HEAD:arius-admin/arius-admin-common/src/main/java/com/didichuxing/datachannel/arius/admin/common/bean/entity/template/IndexTemplateLogic.java
  * @date 2022/5/11
-=======
- * @date 2022/5/9
->>>>>>> master:arius-admin/arius-admin-common/src/main/java/com/didichuxing/datachannel/arius/admin/common/bean/entity/template/IndexTemplate.java
  */
 @Data
 @NoArgsConstructor

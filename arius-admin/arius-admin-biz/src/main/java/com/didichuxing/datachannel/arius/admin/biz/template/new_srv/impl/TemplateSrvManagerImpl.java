@@ -2,9 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateWithSrvConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -89,6 +92,11 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             }
         }
         return Result.buildSucc(unavailableSrv);
+    }
+
+    @Override
+    public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateWithSrvConditionDTO condition) {
+        return null;
     }
 
 

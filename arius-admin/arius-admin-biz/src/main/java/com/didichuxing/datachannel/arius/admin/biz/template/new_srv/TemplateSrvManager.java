@@ -1,7 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateWithSrvConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateWithSrvVO;
+
 import java.util.List;
 
 /**
@@ -32,5 +36,12 @@ public interface TemplateSrvManager {
      * @return
      */
     Result<List<TemplateSrv>> getTemplateUnavailableSrv(Integer logicTemplateId);
+
+    /**
+     * 分页模糊查询模板服务
+     * @param condition
+     * @return
+     */
+    PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateWithSrvConditionDTO condition);
 
 }
