@@ -3,7 +3,8 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSrvQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,8 +38,9 @@ public class TemplateSrvController {
     @ResponseBody
     @ApiOperation(value = "开启模板服务")
     public Result<Void> openTemplateSrv(@PathVariable("srvCode") Integer srvCode,
-                                        @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.openSrv(srvCode, templateIdList);
+                                        @PathVariable("templateIdList") List<Integer> templateIdList,
+                                        @RequestBody BaseTemplateSrvOpenDTO openParam) {
+        return templateSrvManager.openSrv(srvCode, templateIdList, openParam);
     }
 
     @DeleteMapping("/{srvCode}/{templateIdList}")

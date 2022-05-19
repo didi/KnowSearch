@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSrvQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;

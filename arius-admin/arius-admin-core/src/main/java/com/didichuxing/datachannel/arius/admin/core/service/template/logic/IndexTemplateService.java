@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;

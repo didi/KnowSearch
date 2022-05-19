@@ -5,7 +5,8 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvM
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSrvQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
@@ -72,7 +73,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public boolean isTemplateSrvOpen(Integer logicTemplateId, Integer templateSrvId) {
+    public boolean isTemplateSrvOpen(Integer logicTemplateId, Integer srvCode) {
         Result<List<TemplateSrv>> openSrvResult = getTemplateOpenSrv(logicTemplateId);
         if (openSrvResult.failed()) {
             return false;
@@ -80,7 +81,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         List<TemplateSrv> openSrv = openSrvResult.getData();
         for (TemplateSrv srv : openSrv) {
-            if (templateSrvId.equals(srv.getSrvCode())) {
+            if (srvCode.equals(srv.getSrvCode())) {
                 return true;
             }
         }
@@ -111,6 +112,26 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return handler.doPageHandle(condition, null, 1);
         }
         return PaginationResult.buildFail("没有找到对应的处理器");
+    }
+
+    @Override
+    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
+        BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
+        if (null == srvHandle) {
+            return Result.buildParamIllegal("未找到对应的服务");
+        }
+
+        return srvHandle.openSrv(templateIdList, openParam);
+    }
+
+    @Override
+    public Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList) {
+        BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
+        if (null == srvHandle) {
+            return Result.buildParamIllegal("未找到对应服务");
+        }
+
+        return srvHandle.closeSrv(templateIdList);
     }
 
 

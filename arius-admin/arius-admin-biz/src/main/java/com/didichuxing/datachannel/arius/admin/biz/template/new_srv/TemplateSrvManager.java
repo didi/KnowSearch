@@ -2,7 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSrvQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 
@@ -48,9 +49,10 @@ public interface TemplateSrvManager {
      * 开启模板服务
      * @param srvCode 服务代码
      * @param templateIdList 模板id列表
+     * @param openParam 开启参数
      * @return
      */
-    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList);
+    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam);
 
     /**
      * 关闭模板服务

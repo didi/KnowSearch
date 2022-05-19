@@ -1,5 +1,6 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
+package com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
