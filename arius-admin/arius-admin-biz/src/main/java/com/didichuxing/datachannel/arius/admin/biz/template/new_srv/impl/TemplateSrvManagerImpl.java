@@ -5,10 +5,10 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvM
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateWithSrvConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -80,7 +80,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         List<TemplateSrv> openSrv = openSrvResult.getData();
         for (TemplateSrv srv : openSrv) {
-            if (templateSrvId.equals(srv.getServiceId())) {
+            if (templateSrvId.equals(srv.getSrvCode())) {
                 return true;
             }
         }
@@ -103,7 +103,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateWithSrvConditionDTO condition) {
+    public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateSrvQueryDTO condition) {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(TEMPLATE_SRV.getPageSearchType());
         if (baseHandle instanceof TemplateSrvPageSearchHandle) {
             TemplateSrvPageSearchHandle handler = (TemplateSrvPageSearchHandle) baseHandle;

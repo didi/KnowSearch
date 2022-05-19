@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
+package com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
@@ -30,5 +30,9 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("开启的服务")
     private String  openSrv;
+
+    // 不可用加原因
+    @ApiModelProperty("不可用的服务")
+    private List<String> unavailableSrv;
 
 }

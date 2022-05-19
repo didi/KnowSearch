@@ -46,7 +46,7 @@ public interface IndexTemplateService {
      * @param param 模糊查询条件
      * @return
      */
-    List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateWithSrvConditionDTO param);
+    List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateSrvQueryDTO param);
 
     /**
      * 模糊查询统计总命中数, 用于前端分页

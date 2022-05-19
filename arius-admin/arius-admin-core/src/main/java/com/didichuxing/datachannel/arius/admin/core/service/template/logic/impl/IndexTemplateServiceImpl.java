@@ -165,7 +165,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateWithSrvConditionDTO param) {
+    public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateSrvQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(param.getName(), null, null,

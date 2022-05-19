@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateWithSrvConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -54,11 +54,11 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
 
     @Override
     protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
-        if (!(pageDTO instanceof TemplateWithSrvConditionDTO)) {
+        if (!(pageDTO instanceof TemplateSrvQueryDTO)) {
             return Result.buildFail("参数错误");
         }
 
-        TemplateWithSrvConditionDTO condition = (TemplateWithSrvConditionDTO) pageDTO;
+        TemplateSrvQueryDTO condition = (TemplateSrvQueryDTO) pageDTO;
         String templateName = condition.getName();
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
             return Result.buildParamIllegal("模板名称不能以*或者?开头");
@@ -82,7 +82,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
     protected PaginationResult<TemplateWithSrvVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;
-        TemplateWithSrvConditionDTO condition = (TemplateWithSrvConditionDTO) pageDTO;
+        TemplateSrvQueryDTO condition = (TemplateSrvQueryDTO) pageDTO;
         if (AriusObjUtils.isBlank(condition.getCluster())) {
             matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
             totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
@@ -109,7 +109,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
      * @param appAuthTemplatesList
      * @return
      */
-    private List<IndexTemplate> getMeetConditionTemplateList(TemplateWithSrvConditionDTO condition, List<IndexTemplate> appAuthTemplatesList) {
+    private List<IndexTemplate> getMeetConditionTemplateList(TemplateSrvQueryDTO condition, List<IndexTemplate> appAuthTemplatesList) {
         List<IndexTemplate> meetConditionTemplateList = Lists.newArrayList();
         if (!AriusObjUtils.isBlank(condition.getCluster())) {
             Set<String> logicIdSet = indexTemplatePhyService.getMatchNormalLogicIdByCluster(condition.getCluster());

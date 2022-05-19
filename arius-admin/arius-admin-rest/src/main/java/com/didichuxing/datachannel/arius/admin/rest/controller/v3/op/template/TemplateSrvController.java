@@ -3,9 +3,8 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateWithSrvConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSrvQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +26,36 @@ public class TemplateSrvController {
     @Autowired
     private TemplateSrvManager templateSrvManager;
 
-
-    @GetMapping("/{templateId}/unavailableSrv")
-    @ResponseBody
-    @ApiOperation(value = "获取不可用的模板服务")
-    public Result<List<TemplateSrv>> getTemplateUnavailableSrv(@PathVariable Integer templateId) {
-        return templateSrvManager.getTemplateUnavailableSrv(templateId);
-    }
-
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "分页模糊查询模板服务")
-    public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(@RequestBody TemplateWithSrvConditionDTO condition) {
+    public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(@RequestBody TemplateSrvQueryDTO condition) {
         return templateSrvManager.pageGetTemplateWithSrv(condition);
     }
+
+    @PutMapping("/{srvCode}/{templateIdList}")
+    @ResponseBody
+    @ApiOperation(value = "开启模板服务")
+    public Result<Void> openTemplateSrv(@PathVariable("srvCode") Integer srvCode,
+                                        @PathVariable("templateIdList") List<Integer> templateIdList) {
+        return templateSrvManager.openSrv(srvCode, templateIdList);
+    }
+
+    @DeleteMapping("/{srvCode}/{templateIdList}")
+    @ResponseBody
+    @ApiOperation(value = "关闭模板服务")
+    public Result<Void> closeTemplateSrv(@PathVariable("srvCode") Integer srvCode,
+                                         @PathVariable("templateIdList") List<Integer> templateIdList) {
+        return templateSrvManager.closeSrv(srvCode, templateIdList);
+    }
+
+    /**
+    @PostMapping("/checkAvailable/{srvCode}/{templateIdList}")
+    @ResponseBody
+    @ApiOperation(value = "检查模板服务是否可用")
+    public Result<Void> checkTemplateSrvAvailable(@PathVariable("srvCode") Integer srvCode,
+                                                  @PathVariable("templateIdList") List<Integer> templateIdList) {
+        return templateSrvManager.checkSrvAvailable(srvCode, templateIdList);
+    }
+     */
 }
