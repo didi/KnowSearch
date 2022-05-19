@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateHealthDegreeService;
@@ -61,7 +61,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private TemplateHealthDegreeService templateHealthDegreeService;
@@ -376,7 +376,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     }
 
     private Map<Long, LogicResourceConfig> genPhysicalId2ResourceConfigMap(List<IndexTemplatePhyWithLogic> templatePhysicalWithLogics) {
-        List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listAllLogicClusterRacks();
+        List<ClusterLogicRackInfo> logicClusterRacks = clusterRegionService.listAllLogicClusterRacks();
         Map<String, ClusterLogicRackInfo> clusterRack2ResourceIdMap = ConvertUtil.list2Map(logicClusterRacks,
             item -> item.getPhyClusterName() + "@" + item.getRack());
 

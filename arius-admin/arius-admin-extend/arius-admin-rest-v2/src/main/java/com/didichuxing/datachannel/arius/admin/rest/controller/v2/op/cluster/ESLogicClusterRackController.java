@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -38,7 +38,7 @@ import io.swagger.annotations.ApiOperation;
 public class ESLogicClusterRackController {
 
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ClusterRegionManager clusterRegionManager;
@@ -63,7 +63,7 @@ public class ESLogicClusterRackController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
 
     public Result<List<LogicClusterRackVO>> listLogicClusterRacks(@RequestParam(value = "resourceId") Long resourceId) {
-        List<ClusterLogicRackInfo> logicClusterRackInfos = regionRackService.listLogicClusterRacks(resourceId);
+        List<ClusterLogicRackInfo> logicClusterRackInfos = clusterRegionService.listLogicClusterRacks(resourceId);
         return Result.buildSucc( clusterRegionManager.buildLogicClusterRackVOs(logicClusterRackInfos));
     }
 
@@ -73,20 +73,20 @@ public class ESLogicClusterRackController {
 
     public Result<Void> createLogicClusterRack(HttpServletRequest request,
                                          @RequestBody ESLogicClusterRackInfoDTO param) {
-        return regionRackService.addRackToLogicCluster(param, HttpRequestUtils.getOperator(request));
+        return clusterRegionService.addRackToLogicCluster(param, HttpRequestUtils.getOperator(request));
     }
 
     @DeleteMapping("/del")
     @ResponseBody
     @ApiOperation(value = "删除逻辑集群Rack信息" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "itemId", value = "映射ID", required = true) })
-
+    @Deprecated
     public Result<Boolean> deleteLogicClusterRack(@RequestParam(value = "itemId") Long itemId) {
-        return Result.buildSucc(regionRackService.deleteRackById(itemId));
+        return Result.buildSucc(clusterRegionService.deleteRackById(itemId));
     }
 
     public Result<List<LogicClusterRackVO>> listLogicClusterRacksInner(@RequestParam ESLogicClusterRackInfoDTO param) {
-        List<ClusterLogicRackInfo> logicClusterRackInfos = regionRackService.listLogicClusterRacks(param);
+        List<ClusterLogicRackInfo> logicClusterRackInfos = clusterRegionService.listLogicClusterRacks(param);
         return Result.buildSucc(clusterRegionManager.buildLogicClusterRackVOs(logicClusterRackInfos));
     }
 }

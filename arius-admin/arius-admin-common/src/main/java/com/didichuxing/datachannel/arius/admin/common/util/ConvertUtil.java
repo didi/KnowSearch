@@ -2,13 +2,8 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -245,6 +240,26 @@ public class ConvertUtil {
         }
 
         return obj;
+    }
+
+    /**
+     * string 用逗号分隔
+     * @param map  map
+     * @return     key1:value1, key2:value2
+     */
+    public static String map2String(Map<String, String> map) {
+        Set<String> keySet = map.keySet();
+        String[] keyArray = keySet.toArray(new String[0]);
+        Arrays.sort(keyArray);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < keyArray.length; i++) {
+            if ((String.valueOf(map.get(keyArray[i]))).trim().length() > 0) {
+                sb.append(keyArray[i]).append(":").append(String.valueOf(map.get(keyArray[i])).trim());
+            }
+            if (i != keyArray.length - 1) { sb.append(",");}
+        }
+
+        return sb.toString();
     }
 
     public static Map<String, Double> sortMapByValue(Map<String, Double> map) {

@@ -58,7 +58,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplate
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -121,7 +121,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private ClusterPhyService clusterPhyService;
 
     @Autowired
-    private RegionRackService           regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
@@ -1091,7 +1091,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     private Multimap<String, Long> fetchClusterRacks2LogicClusterIdMappings() {
         Multimap<String, Long> logicClusterIdMappings = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : regionRackService.listAllLogicClusterRacks()) {
+        for (ClusterLogicRackInfo param : clusterRegionService.listAllLogicClusterRacks()) {
             List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
             logicClusterIds.forEach(logicClusterId -> logicClusterIdMappings.put(fetchRackKey(param.getPhyClusterName(), param.getRack()), logicClusterId));
         }

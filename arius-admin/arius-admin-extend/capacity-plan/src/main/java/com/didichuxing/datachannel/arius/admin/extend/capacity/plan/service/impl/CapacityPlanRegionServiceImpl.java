@@ -45,7 +45,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanRegionContext;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
@@ -82,7 +82,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
     private RegionResourceMover regionResourceMover;
 
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private QuotaTool quotaTool;
@@ -110,7 +110,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         }
 
         // region元信息
-        List<ClusterRegion> regionsInArea = regionRackService.listRegionsByLogicAndPhyCluster(area.getResourceId(), area.getClusterName());
+        List<ClusterRegion> regionsInArea = clusterRegionService.listRegionsByLogicAndPhyCluster(area.getResourceId(), area.getClusterName());
         List<Long> regionIds = regionsInArea.stream().map(ClusterRegion::getId).collect(Collectors.toList());
 
         // region容量信息
@@ -139,7 +139,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         }
 
         // region元信息
-        ClusterRegion region = regionRackService.getRegionById(regionId);
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
 
         // region容量信息
         CapacityPlanRegionInfoPO regionInfoPO = capacityPlanRegionInfoDAO.getByRegionId(regionId);
@@ -258,7 +258,7 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
                 }
             }
 
-            regionRackService.editRegionRacks(regionDTO.getRegionId(), regionDTO.getRacks(), operator);
+            clusterRegionService.editRegionRacks(regionDTO.getRegionId(), regionDTO.getRacks(), operator);
         }
 
         // 更新容量信息部分，share、configJson、freeQuota、usage
@@ -580,9 +580,9 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
             return null;
         }
 
-        ClusterRegion region = regionRackService.getRegionById(regionId);
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
         // region没有被绑定
-        if (region == null || regionRackService.isRegionBound(region)) {
+        if (region == null || clusterRegionService.isRegionBound(region)) {
             return null;
         }
 
@@ -1540,11 +1540,11 @@ public class CapacityPlanRegionServiceImpl extends BaseTemplateSrv implements Ca
         }
 
         // 删除原region
-        regionRackService.deletePhyClusterRegionWithoutCheck(region.getRegionId(), AriusUser.CAPACITY_PLAN.getDesc());
+        clusterRegionService.deletePhyClusterRegionWithoutCheck(region.getRegionId(), AriusUser.CAPACITY_PLAN.getDesc());
 
         // 重新创建region并绑定
         for (String regionRacks : rack2ResultMultiMap.keySet()) {
-            Result<Long> createAndBindRegionResult = regionRackService.createAndBindRegion(region.getClusterName(),
+            Result<Long> createAndBindRegionResult = clusterRegionService.createAndBindRegion(region.getClusterName(),
                 regionRacks,
                 region.getLogicClusterId(),
                 rack2ResultMultiMap.get(regionRacks).size() > 1 ? 1 : 0,
