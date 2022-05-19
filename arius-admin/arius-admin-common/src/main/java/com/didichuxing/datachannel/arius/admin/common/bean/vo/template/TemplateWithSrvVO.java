@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,9 +17,18 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "「模板服务」信息")
-public class TemplateWithSrvVO extends BaseTemplateVO {
+public class TemplateWithSrvVO extends BaseVO {
+
+    @ApiModelProperty("模板ID")
+    private Integer id;
+
+    @ApiModelProperty("模板名称")
+    private String name;
 
     @ApiModelProperty("所属集群")
     private List<String> cluster;
+
+    @ApiModelProperty("开启的服务")
+    private String  openSrv;
 
 }
