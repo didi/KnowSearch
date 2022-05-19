@@ -3,8 +3,11 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author chengxiang, zqr
@@ -22,6 +25,16 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     @Override
     public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
         return Result.buildSucc();
+    }
+
+    @Override
+    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
+        return Result.buildFail();
+    }
+
+    @Override
+    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
+        return Result.buildFail();
     }
 
     @Override

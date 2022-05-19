@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.Ba
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.clear.ClearManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
@@ -35,6 +36,16 @@ public class ClearManagerImpl extends BaseTemplateSrvImpl implements ClearManage
     @Override
     public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
         return Result.buildSucc();
+    }
+
+    @Override
+    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
+        return Result.buildFail();
+    }
+
+    @Override
+    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
+        return Result.buildFail();
     }
 
     @Override

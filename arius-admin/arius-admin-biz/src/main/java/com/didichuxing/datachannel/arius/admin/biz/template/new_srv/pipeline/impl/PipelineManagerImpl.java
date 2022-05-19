@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline.Pip
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -21,6 +22,8 @@ import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_VERSION;
@@ -49,6 +52,16 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     @Override
     public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
         return Result.buildSucc();
+    }
+
+    @Override
+    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
+        return Result.buildFail();
+    }
+
+    @Override
+    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
+        return Result.buildFail();
     }
 
     @Override

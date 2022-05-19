@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.In
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
@@ -53,6 +54,16 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     @Override
     public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
         return Result.buildSucc();
+    }
+
+    @Override
+    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
+        return Result.buildFail();
+    }
+
+    @Override
+    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
+        return Result.buildFail();
     }
 
     @Override

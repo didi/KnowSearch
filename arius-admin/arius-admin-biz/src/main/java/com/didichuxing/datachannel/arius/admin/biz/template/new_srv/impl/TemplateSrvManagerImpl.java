@@ -17,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -65,7 +64,11 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     public Result<List<TemplateSrv>> getTemplateOpenSrv(Integer logicTemplateId) {
         try {
             IndexTemplate template = templateLogicService.getLogicTemplateById(logicTemplateId);
-            return getTemplateOpenSrv(template);
+            if (null == template) {
+                return Result.buildNotExist("逻辑模板不存在");
+            }
+
+            return Result.buildSucc(TemplateSrv.codeStr2SrvList(template.getOpenSrv()));
         } catch (Exception e) {
             LOGGER.error("class=TemplateSrvManagerImpl||method=getTemplateOpenSrv||logicTemplateId={}", logicTemplateId, e);
             return Result.buildFail( "获取模板开启服务失败");
@@ -97,7 +100,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
             Result<Void> availableResult = srvHandle.isTemplateSrvAvailable(logicTemplateId);
             if (availableResult.failed()) {
-                unavailableSrv.add(getSrvByCode(srvCode));
+                unavailableSrv.add(TemplateSrv.getSrv(srvCode));
             }
         }
         return Result.buildSucc(unavailableSrv);
@@ -133,34 +136,5 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         return srvHandle.closeSrv(templateIdList);
     }
-
-
-    //////////////////////////////////private method/////////////////////////////////////////////
-
-    private TemplateSrv getSrvByCode(Integer templateSrvCode) {
-        NewTemplateSrvEnum serviceEnum = NewTemplateSrvEnum.getByCode(templateSrvCode);
-        return new TemplateSrv(serviceEnum.getCode(), serviceEnum.getServiceName(), serviceEnum.getEsClusterVersion().getVersion());
-    }
-
-    private Result<List<TemplateSrv>> getTemplateOpenSrv(IndexTemplate template) {
-        if (null == template) {
-            return Result.buildNotExist("逻辑模板不存在");
-        }
-
-        String openSrvs = template.getOpenSrv();
-        if (StringUtils.isBlank(openSrvs)) {
-            return Result.buildSucc(new ArrayList<>(), "模板未开启任何服务");
-        }
-
-        List<TemplateSrv> templateOpenSrv = new ArrayList<>();
-        for(String srvId : openSrvs.split(",")) {
-            TemplateSrv templateSrv = getSrvByCode(Integer.parseInt(srvId));
-            if (null != templateSrv) {
-                templateOpenSrv.add(templateSrv);
-            }
-        }
-        return Result.buildSucc(templateOpenSrv);
-    }
-
 
 }

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWithSrvVO> {
 
     private static final ILog LOGGER = LogFactory.getLog(TemplateSrvPageSearchHandle.class);
-    private static final FutureUtil<Void> TEMPLATE_SRV_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_FUTURE_UTIL",10,10,100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL",10,10,100);
 
     @Autowired
     private AppService appService;
@@ -138,7 +138,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
 
     private void setTemplateCluster(List<TemplateWithSrvVO> templateWithSrvVOList) {
         for (TemplateWithSrvVO templateSrvVO : templateWithSrvVOList) {
-            TEMPLATE_SRV_FUTURE_UTIL.runnableTask(() -> {
+            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL.runnableTask(() -> {
                 Set<String> clusterNameList = indexTemplatePhyService.getTemplateByLogicId(templateSrvVO.getId())
                         .stream()
                         .map(IndexTemplatePhy::getCluster)
@@ -147,7 +147,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
                 templateSrvVO.setCluster(Lists.newArrayList(clusterNameList));
             });
         }
-        TEMPLATE_SRV_FUTURE_UTIL.waitExecute();
+        TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL.waitExecute();
     }
 
 }

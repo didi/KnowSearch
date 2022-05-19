@@ -4,14 +4,22 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author chengxiang
@@ -20,6 +28,7 @@ import java.util.List;
 public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
 
     protected static final ILog LOGGER = LogFactory.getLog(BaseTemplateSrvImpl.class);
+    private FutureUtil<Void> BASE_TEMPLATE_SRV_IMPL_FUTURE_UTIL = FutureUtil.init("BASE_TEMPLATE_SRV_IMPL_FUTURE_UTIL",10,10,100);
 
     @Autowired
     protected IndexTemplateService indexTemplateService;
@@ -111,7 +120,45 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
      * @return
      */
     private Result<Void> updateDBSrvStatus(List<Integer> templateIdList, Boolean status) {
-        return Result.buildSuccess();
+        AtomicBoolean isSuccess = new AtomicBoolean(true);
+        String addSrvCode = templateSrv().getCode().toString();
+        for (Integer templateId : templateIdList) {
+            BASE_TEMPLATE_SRV_IMPL_FUTURE_UTIL.runnableTask(() -> {
+                IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(templateId);
+                if (null == indexTemplate) {
+                    isSuccess.set(false);
+                    return;
+                }
+
+                String srvCodeStr = indexTemplate.getOpenSrv();
+                List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
+                if (srvCodeList.isEmpty()) {
+                    indexTemplate.setOpenSrv(addSrvCode);
+                } else {
+                    if (srvCodeList.contains(addSrvCode)) {
+                        return;
+                    }
+                    indexTemplate.setOpenSrv(srvCodeStr + "," + addSrvCode);
+                }
+
+                try {
+                    //todo: indexTeplateDTO 加字段
+                    Result<Void> updateResult = indexTemplateService.editTemplateInfoTODB(ConvertUtil.obj2Obj(indexTemplate, IndexTemplateDTO.class));
+                    if (updateResult.failed()) {
+                        isSuccess.set(false);
+                    }
+                } catch (Exception e) {
+                    isSuccess.set(false);
+                    LOGGER.error("updateDBSrvStatus error, templateId:{}, status:{}", templateId, status, e);
+                }
+            });
+        }
+        BASE_TEMPLATE_SRV_IMPL_FUTURE_UTIL.waitExecute();
+        return isSuccess.get() ? Result.buildSucc() : Result.buildFail("更新DB服务状态失败");
+    }
+
+
+    private String getModifiedSrvCode(String srvCodeStr, String addSrvCode) {
     }
 
 }
