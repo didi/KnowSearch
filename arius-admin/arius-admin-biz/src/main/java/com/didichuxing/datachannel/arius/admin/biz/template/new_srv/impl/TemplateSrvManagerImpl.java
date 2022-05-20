@@ -14,11 +14,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.Templ
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     protected static final ILog LOGGER = LogFactory.getLog(TemplateSrvManagerImpl.class);
     private final Map<Integer, BaseTemplateSrv> BASE_TEMPLATE_SRV_MAP = new HashMap<>();
+    private static final FutureUtil<Void> TEMPLATE_SRV_MANAGER_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_MANAGER_FUTURE_UTIL",10,10,100);
 
     @Autowired
     private IndexTemplateService templateLogicService;
@@ -95,15 +98,18 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     public List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId) {
-        List<UnavailableTemplateSrv> unavailableSrvList = new ArrayList<>();
+        List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
         List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
         for (NewTemplateSrvEnum srvEnum : allSrvList) {
-            BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvEnum.getCode());
-            Result<Void> availableResult = srvHandle.isTemplateSrvAvailable(logicTemplateId);
-            if (availableResult.failed()) {
-                unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(), availableResult.getMessage()));
-            }
+            TEMPLATE_SRV_MANAGER_FUTURE_UTIL.runnableTask(() -> {
+                BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvEnum.getCode());
+                Result<Void> availableResult = srvHandle.isTemplateSrvAvailable(logicTemplateId);
+                if (availableResult.failed()) {
+                    unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(), availableResult.getMessage()));
+                }
+            });
         }
+        TEMPLATE_SRV_MANAGER_FUTURE_UTIL.waitExecute();
         return unavailableSrvList;
     }
 
