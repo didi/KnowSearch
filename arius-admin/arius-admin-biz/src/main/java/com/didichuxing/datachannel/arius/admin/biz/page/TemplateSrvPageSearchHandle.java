@@ -1,12 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -20,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,7 +37,8 @@ import java.util.stream.Collectors;
 public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWithSrvVO> {
 
     private static final ILog LOGGER = LogFactory.getLog(TemplateSrvPageSearchHandle.class);
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL",10,10,100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL",10,10,100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL",10,10,100);
 
     @Autowired
     private AppService appService;
@@ -42,6 +48,9 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
+
+    @Autowired
+    private TemplateSrvManager templateSrvManager;
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer appId) {
@@ -129,16 +138,22 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
             return Lists.newArrayList();
         }
 
-        List<TemplateWithSrvVO> templateWithSrvVOList = ConvertUtil.list2List(templateList, TemplateWithSrvVO.class);
-        // 1.设置模板所属集群
-        setTemplateCluster(templateWithSrvVOList);
+        List<TemplateWithSrvVO> templateWithSrvVOList = new ArrayList<>();
+        for (IndexTemplate template : templateList) {
+            TemplateWithSrvVO templateWithSrvVO = ConvertUtil.obj2Obj(template, TemplateWithSrvVO.class);
+            templateWithSrvVO.setOpenSrv(ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
+            templateWithSrvVOList.add(templateWithSrvVO);
+        }
+
+        buildTemplateCluster(templateWithSrvVOList);
+        buildTemplateUnavailableSrv(templateWithSrvVOList);
 
         return templateWithSrvVOList;
     }
 
-    private void setTemplateCluster(List<TemplateWithSrvVO> templateWithSrvVOList) {
+    private void buildTemplateCluster(List<TemplateWithSrvVO> templateWithSrvVOList) {
         for (TemplateWithSrvVO templateSrvVO : templateWithSrvVOList) {
-            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL.runnableTask(() -> {
+            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
                 Set<String> clusterNameList = indexTemplatePhyService.getTemplateByLogicId(templateSrvVO.getId())
                         .stream()
                         .map(IndexTemplatePhy::getCluster)
@@ -147,7 +162,16 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
                 templateSrvVO.setCluster(Lists.newArrayList(clusterNameList));
             });
         }
-        TEMPLATE_SRV_PAGE_SEARCH_HANDLE_FUTURE_UTIL.waitExecute();
+        TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitExecute();
+    }
+
+    private void buildTemplateUnavailableSrv(List<TemplateWithSrvVO> templateWithSrvVOList) {
+        for (TemplateWithSrvVO templateSrvVO : templateWithSrvVOList) {
+            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL.runnableTask(() -> {
+                templateSrvVO.setUnavailableSrv(ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(templateSrvVO.getId()), UnavailableTemplateSrvVO.class));
+            });
+        }
+        TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL.waitExecute();
     }
 
 }

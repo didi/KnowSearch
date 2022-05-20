@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TemplateSrvVO extends BaseVO {
+public class TemplateSrvVO {
 
     /**
      * 模板服务code

@@ -9,9 +9,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Base
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -92,18 +94,17 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public Result<List<TemplateSrv>> getTemplateUnavailableSrv(Integer logicTemplateId) {
-        List<TemplateSrv> unavailableSrv = new ArrayList<>();
+    public List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId) {
+        List<UnavailableTemplateSrv> unavailableSrvList = new ArrayList<>();
         List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
         for (NewTemplateSrvEnum srvEnum : allSrvList) {
-            Integer srvCode = srvEnum.getCode();
-            BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
+            BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvEnum.getCode());
             Result<Void> availableResult = srvHandle.isTemplateSrvAvailable(logicTemplateId);
             if (availableResult.failed()) {
-                unavailableSrv.add(TemplateSrv.getSrv(srvCode));
+                unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(), availableResult.getMessage()));
             }
         }
-        return Result.buildSucc(unavailableSrv);
+        return unavailableSrvList;
     }
 
     @Override

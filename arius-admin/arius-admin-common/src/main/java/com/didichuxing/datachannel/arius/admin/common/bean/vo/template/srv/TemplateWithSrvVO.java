@@ -29,7 +29,7 @@ public class TemplateWithSrvVO extends BaseVO {
     private List<String> cluster;
 
     @ApiModelProperty("开启的服务")
-    private List<TemplateWithSrvVO> openSrv;
+    private List<TemplateSrvVO> openSrv;
 
     @ApiModelProperty("不可用的服务")
     private List<UnavailableTemplateSrvVO> unavailableSrv;
