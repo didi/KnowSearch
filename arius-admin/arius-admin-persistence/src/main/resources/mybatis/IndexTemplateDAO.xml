@@ -31,12 +31,13 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="resource_id" jdbcType="BIGINT" property="resourceId"/>
         <result column="level" jdbcType="TINYINT" property="level"/>
+        <result column="open_srv" jdbcType="VARCHAR" property="openSrv"/>
     </resultMap>
 
     <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, app_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`
     </sql>
 
     <select id="listByCondition"
@@ -169,6 +170,7 @@
             <if test="level != null">,`level` = #{level}</if>
             <if test="checkPointDiff != null">,check_point_diff = #{checkPointDiff}</if>
             <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
+            <if test="openSrv != null">,open_srv = #{openSrv}</if>
         </trim>
         where id = #{id}
     </update>
