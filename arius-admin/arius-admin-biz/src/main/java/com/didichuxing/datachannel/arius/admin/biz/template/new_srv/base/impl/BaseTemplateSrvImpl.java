@@ -121,7 +121,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
      */
     private Result<Void> updateDBSrvStatus(List<Integer> templateIdList, Boolean status) {
         AtomicBoolean isSuccess = new AtomicBoolean(true);
-        String addSrvCode = templateSrv().getCode().toString();
+        String srvCode = templateSrv().getCode().toString();
         for (Integer templateId : templateIdList) {
             BASE_TEMPLATE_SRV_IMPL_FUTURE_UTIL.runnableTask(() -> {
                 IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(templateId);
@@ -130,15 +130,9 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
                     return;
                 }
 
-                String srvCodeStr = indexTemplate.getOpenSrv();
-                List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
-                if (srvCodeList.isEmpty()) {
-                    indexTemplate.setOpenSrv(addSrvCode);
-                } else {
-                    if (srvCodeList.contains(addSrvCode)) {
-                        return;
-                    }
-                    indexTemplate.setOpenSrv(srvCodeStr + "," + addSrvCode);
+                Boolean modifyFlag = status ? addSrvCode(indexTemplate, srvCode) : removeSrvCode(indexTemplate, srvCode);
+                if (!modifyFlag) {
+                    return;
                 }
 
                 try {
@@ -157,8 +151,40 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         return isSuccess.get() ? Result.buildSucc() : Result.buildFail("更新DB服务状态失败");
     }
 
+    /**
+     * 添加开启服务到对应模板实体中
+     * @param indexTemplate
+     * @param addSrvCode
+     * @return true:有修改, false:无修改；根据返回值判断是否需要刷新到DB
+     */
+    private Boolean addSrvCode(IndexTemplate indexTemplate, String addSrvCode) {
+        Boolean modifiedFlag = Boolean.FALSE;
+        String srvCodeStr = indexTemplate.getOpenSrv();
+        List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
+        if (srvCodeList.isEmpty()) {
+            indexTemplate.setOpenSrv(addSrvCode);
+            modifiedFlag = Boolean.TRUE;
+        } else {
+            if (!srvCodeList.contains(addSrvCode)) {
+                indexTemplate.setOpenSrv(srvCodeStr + "," + addSrvCode);
+                modifiedFlag = Boolean.TRUE;
+            }
+        }
 
-    private String getModifiedSrvCode(String srvCodeStr, String addSrvCode) {
+        return modifiedFlag;
+    }
+
+    private Boolean removeSrvCode(IndexTemplate indexTemplate, String removeSrvCode) {
+        Boolean modifiedFlag = Boolean.FALSE;
+        String srvCodeStr = indexTemplate.getOpenSrv();
+        List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
+        if (srvCodeList.contains(removeSrvCode)) {
+            srvCodeList.remove(removeSrvCode);
+            indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
+            modifiedFlag = Boolean.TRUE;
+        }
+
+        return modifiedFlag;
     }
 
 }

@@ -124,4 +124,7 @@ public class IndexTemplateDTO extends PageDTO {
 
     @ApiModelProperty("物理模板信息")
     private List<IndexTemplatePhyDTO> physicalInfos;
+
+    @ApiModelProperty("开启服务")
+    private String                          openSrv;
 }

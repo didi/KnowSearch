@@ -954,11 +954,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return Result.buildSuccWithMsg("索引模板可以使用");
     }
 
-    @Override
-    public Result<Void> updateOpenSrv(Integer logicId, String openSrv) {
-
-    }
-
 
     /**************************************** private method ****************************************************/
     /**
