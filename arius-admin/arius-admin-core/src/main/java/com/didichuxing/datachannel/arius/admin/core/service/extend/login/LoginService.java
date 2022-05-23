@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.remote.protocol.content.LoginProt
  * @author linyunan
  * @date 2021-04-20
  */
+@Deprecated
 public interface LoginService {
 
     /**

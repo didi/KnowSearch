@@ -24,7 +24,8 @@ import com.didichuxing.datachannel.arius.admin.common.component.RSATool;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@RestController
+@Deprecated
+@RestController("oldLoginController")
 @RequestMapping(V3_THIRD_PART_SSO)
 @Api(tags = "SSO-Login相关接口(REST)")
 public class LoginController {

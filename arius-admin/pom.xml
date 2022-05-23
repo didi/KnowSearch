@@ -37,15 +37,21 @@
         <es.client.version>1.2.17-SNAPSHOT</es.client.version>
         <springfox.version>2.9.1</springfox.version>
         <swagger.version>1.5.21</swagger.version>
-        <mybatis-plus.version>3.3.2</mybatis-plus.version>
+        <mybatis-plus.version>3.4.2</mybatis-plus.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <flatten-maven-plugin.version>1.2.2</flatten-maven-plugin.version>
+         <logi-security-spring-boot-starter.version>1.7.1</logi-security-spring-boot-starter.version>
     </properties>
 
     <dependencyManagement>
+        <!--logicommon-->
         <dependencies>
-
+            <dependency>
+                <groupId>io.github.zqrferrari</groupId>
+                <artifactId>logi-security-spring-boot-starter</artifactId>
+                <version>${logi-security-spring-boot-starter.version}</version>
+            </dependency>
             <!-- self -->
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>

@@ -1,25 +1,31 @@
 package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.login.LoginService;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL_USER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART_SSO;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.LoginService;
+import com.google.common.collect.Lists;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
 
 /**
  * 登陆拦截 && 权限校验
@@ -29,7 +35,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
     private static final ILog      LOGGER = LogFactory.getLog(PermissionInterceptor.class);
 
     @Autowired
-    private LoginService           loginService;
+    private LoginService loginService;
 
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
@@ -54,8 +60,10 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 "class=PermissionInterceptor||method=preHandle||uri={}||msg=parse class request-mapping failed",
                 request.getRequestURI(), e);
         }
-
-        return loginService.interceptorCheck(request, response, classRequestMappingValue);
+        List<String> whiteMappingValues = Lists.newArrayList(HEALTH, V3_THIRD_PART_SSO, V2_THIRD_PART, V3_THIRD_PART,
+                V3_NORMAL_USER, V3_WHITE_PART);
+    
+        return loginService.interceptorCheck(request, response, classRequestMappingValue,whiteMappingValues);
     }
 
     @Override

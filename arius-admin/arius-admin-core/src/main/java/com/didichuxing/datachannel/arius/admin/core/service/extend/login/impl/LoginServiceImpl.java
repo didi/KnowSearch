@@ -1,22 +1,36 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.login.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL_USER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART_SSO;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant.COOKIE_OR_SESSION_MAX_AGE_UNIT_MS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant.REDIRECT_CODE;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.account.LoginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
-import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.login.LoginService;
 import com.didichuxing.datachannel.arius.admin.remote.protocol.LoginProtocolHandle;
 import com.didichuxing.datachannel.arius.admin.remote.protocol.content.LoginProtocolTypeEnum;
 import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,21 +40,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant.COOKIE_OR_SESSION_MAX_AGE_UNIT_MS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant.REDIRECT_CODE;
-
 /**
  * @author linyunan
  * @date 2021-04-20
  */
-@Service
+@Service("oldLoginService")
 @NoArgsConstructor
 public class LoginServiceImpl implements LoginService {
 
