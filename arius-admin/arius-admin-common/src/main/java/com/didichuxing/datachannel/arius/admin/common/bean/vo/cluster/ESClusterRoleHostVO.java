@@ -35,7 +35,7 @@ public class ESClusterRoleHostVO extends BaseVO {
     private String  cluster;
 
     @ApiModelProperty("逻辑集群名称")
-    private String clusterLogicNames;
+    private String  clusterLogicNames;
 
     @ApiModelProperty("端口")
     private String  port;
@@ -56,12 +56,15 @@ public class ESClusterRoleHostVO extends BaseVO {
     @ApiModelProperty("节点规格")
     private String  machineSpec;
 
-    @ApiModelProperty("set")
+    @ApiModelProperty("节点名称")
     private String  nodeSet;
 
     @ApiModelProperty("RegionId")
-    private Long    regionId;
+    private Integer regionId;
 
     @ApiModelProperty("逻辑划分")
     private String  logicDepart;
+
+    @ApiModelProperty("attributes, 逗号分隔 key1:value1,key2:value2")
+    private String attributes;
 }

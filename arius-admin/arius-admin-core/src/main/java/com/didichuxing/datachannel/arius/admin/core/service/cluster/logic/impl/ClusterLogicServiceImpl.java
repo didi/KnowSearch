@@ -42,7 +42,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPlugin
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
@@ -81,7 +81,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     private AppClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
-    private RegionRackService          rackService;
+    private ClusterRegionService rackService;
 
     @Autowired
     private AppService                 appService;
@@ -108,7 +108,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     private ESMachineNormsService      esMachineNormsService;
 
     @Autowired
-    private RegionRackService          regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     /**
      * 条件查询逻辑集群
@@ -142,7 +142,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     public List<ClusterLogicWithRack> listAllClusterLogicsWithRackInfo() {
 
         // 所有逻辑集群rack信息
-        List<ClusterLogicRackInfo> allLogicClusterRackInfos = regionRackService.listAllLogicClusterRacks();
+        List<ClusterLogicRackInfo> allLogicClusterRackInfos = clusterRegionService.listAllLogicClusterRacks();
 
         // 逻辑集群ID到逻辑集群rack信息的Multimap
         Multimap<Long, ClusterLogicRackInfo> logicClusterId2RackInfoMap = ArrayListMultimap.create();
@@ -171,7 +171,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     @Override
     public ClusterLogicWithRack getClusterLogicWithRackInfoById(Long logicClusterId) {
         // 所有逻辑集群rack信息
-        List<ClusterLogicRackInfo> allLogicClusterRackInfos = regionRackService.listAllLogicClusterRacks();
+        List<ClusterLogicRackInfo> allLogicClusterRackInfos = clusterRegionService.listAllLogicClusterRacks();
 
         // 逻辑集群ID到逻辑集群rack信息的Multimap
         Multimap<Long, ClusterLogicRackInfo> logicClusterId2RackInfoMap = ArrayListMultimap.create();
@@ -232,7 +232,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public Boolean hasLogicClusterWithTemplates(Long logicClusterId) {
-        List<ClusterLogicRackInfo> clusterLogicRackInfos = regionRackService.listLogicClusterRacks(logicClusterId);
+        List<ClusterLogicRackInfo> clusterLogicRackInfos = clusterRegionService.listLogicClusterRacks(logicClusterId);
         if (CollectionUtils.isEmpty(clusterLogicRackInfos)) {
             return false;
         }
@@ -415,7 +415,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     @Override
     public ClusterLogic getClusterLogicByRack(String cluster, String racks) {
 
-        List<ClusterLogicRackInfo> logicClusterRackInfos = regionRackService.listAssignedRacksByClusterName(cluster);
+        List<ClusterLogicRackInfo> logicClusterRackInfos = clusterRegionService.listAssignedRacksByClusterName(cluster);
 
         if (CollectionUtils.isEmpty(logicClusterRackInfos)) {
             return null;

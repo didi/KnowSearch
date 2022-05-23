@@ -7,13 +7,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
-/**
- * 处理Region、Rack service
- * @author wangshu
- * @date 2020/10/12
- */
-public interface RegionRackService {
+public interface ClusterRegionService {
     /**
      * 通过Rack ID删除Rack
      * @param rackId Rack ID
@@ -139,7 +135,17 @@ public interface RegionRackService {
      * @param operator    操作人
      * @return 创建的regionId
      */
+    @Deprecated
     Result<Long> createPhyClusterRegion(String clusterName, String racks, Integer share, String operator);
+
+    /**
+     * 创建物理集群region
+     * @param clusterName   物理集群名称
+     * @param regionName    region名称
+     * @param operator      操作人
+     * @return              regionId
+     */
+    Result<Long> createPhyClusterRegion(String clusterName, List<Integer> nodeIds, String regionName, String operator);
 
     /**
      * 创建并绑定region
@@ -217,4 +223,18 @@ public interface RegionRackService {
      * @return 逻辑集群id列表
      */
     Set<Long> getLogicClusterIdByPhyClusterId(Integer phyClusterId);
+
+    /**
+     * 根据名称判断region是否存在
+     * @param regionName region名称
+     * @return   false or true
+     */
+    boolean isExistByRegionName(String regionName);
+
+    /**
+     * 根据regionId判断region是否存在
+     * @param regionId  regionId
+     * @return          false or true
+     */
+    boolean isExistByRegionId(Integer regionId);
 }

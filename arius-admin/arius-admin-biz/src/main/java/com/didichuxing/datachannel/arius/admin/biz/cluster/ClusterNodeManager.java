@@ -5,15 +5,10 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 
-/**
- * ES集群工具类
- *
- * @author wangshu
- * @date 2020/09/10
- */
 public interface ClusterNodeManager {
     /**
      * 逻辑集群节点转换
@@ -42,10 +37,25 @@ public interface ClusterNodeManager {
     Result<List<RackMetaMetric>> meta(String clusterName, Collection<String> racks);
 
     /**
-     * 物理集群节点转换
-     * @param nodesInfo
-     * @param clusterPhyName 物理集群名称
-     * @return
+     * 获取可划分至region的节点信息
+     * @param clusterId   物理集群Id
+     * @return            Result<List<ESClusterRoleHostVO>>
      */
-    List<ESClusterRoleHostVO> convertClusterPhyNodes(List<ClusterRoleHost> nodesInfo, String clusterPhyName);
+    Result<List<ESClusterRoleHostVO>> listDivide2ClusterNodeInfo(Long clusterId);
+
+    /**
+     * 划分指定节点至region
+     * @param operator          操作者
+     * @param param             集群带节点信息的Region实体
+     * @return                  Result<Long>
+     */
+    Result<List<Long>> createNode2Region(List<ClusterRegionWithNodeInfoDTO> param, String operator);
+
+    /**
+     * 编辑节点的region属性
+     * @param operator          操作者
+     * @param param             集群带节点信息的Region实体
+     * @return                  Result<Boolean>
+     */
+    Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param, String operator);
 }
