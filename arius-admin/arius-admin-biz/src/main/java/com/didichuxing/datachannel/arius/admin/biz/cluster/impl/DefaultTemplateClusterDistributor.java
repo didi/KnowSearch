@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateDistri
 import com.didichuxing.datachannel.arius.admin.biz.extend.foctory.TemplateClusterDistributor;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -31,7 +31,7 @@ public class DefaultTemplateClusterDistributor implements TemplateClusterDistrib
     private static final ILog      LOGGER = LogFactory.getLog(DefaultTemplateClusterDistributor.class);
 
     @Autowired
-    private RegionRackService      regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private DistributorUtils       distributorUtils;
@@ -98,7 +98,7 @@ public class DefaultTemplateClusterDistributor implements TemplateClusterDistrib
             return Result.buildNotExist("逻辑资源不存在");
         }
 
-        List<ClusterLogicRackInfo> items = regionRackService.listLogicClusterRacks(resourceId);
+        List<ClusterLogicRackInfo> items = clusterRegionService.listLogicClusterRacks(resourceId);
         items = items.stream().filter(item -> cluster.equals(item.getPhyClusterName())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(items)) {
             return Result.buildNotExist("逻辑资源没有对应的物理资源");

@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -39,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
 public class ESLogicClusterRegionController {
 
     @Autowired
-    private RegionRackService    regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ClusterRegionManager clusterRegionManager;
@@ -50,7 +50,7 @@ public class ESLogicClusterRegionController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "logicClusterId", value = "logicClusterId", required = true) })
     public Result<List<ClusterRegionVO>> listLogicClusterRegions(@RequestParam("logicClusterId") Long logicClusterId) {
 
-        List<ClusterRegion> regions = regionRackService.listLogicClusterRegions(logicClusterId);
+        List<ClusterRegion> regions = clusterRegionService.listLogicClusterRegions(logicClusterId);
         return Result.buildSucc(clusterRegionManager.buildLogicClusterRegionVO(regions));
     }
 

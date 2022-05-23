@@ -5,14 +5,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * @author wangshu
- * @date 2020/09/15
- */
 @Repository
 public interface ClusterRegionDAO {
 
     ClusterRegionPO getById(Long regionId);
+
+    ClusterRegionPO getByName(String regionName);
 
     List<ClusterRegionPO> listByLogicClusterId(Long logicClusterId);
 
@@ -36,5 +34,4 @@ public interface ClusterRegionDAO {
      * @return
      */
     List<ClusterRegionPO> listBoundRegionsByCondition(ClusterRegionPO condt);
-
 }

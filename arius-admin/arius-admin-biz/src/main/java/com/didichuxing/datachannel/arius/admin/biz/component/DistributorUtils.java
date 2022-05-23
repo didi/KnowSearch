@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
@@ -38,7 +38,7 @@ public class DistributorUtils {
     private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ExtendServiceFactory  extendServiceFactory;
@@ -98,7 +98,7 @@ public class DistributorUtils {
             return Result.buildNotExist("逻辑资源不存在");
         }
 
-        List<ClusterLogicRackInfo> items = regionRackService.listLogicClusterRacks(resourceId);
+        List<ClusterLogicRackInfo> items = clusterRegionService.listLogicClusterRacks(resourceId);
         if (CollectionUtils.isEmpty(items)) {
             return Result.buildNotExist("逻辑资源没有对应的物理资源");
         }

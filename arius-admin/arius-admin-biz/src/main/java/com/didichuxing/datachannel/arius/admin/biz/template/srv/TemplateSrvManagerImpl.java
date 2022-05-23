@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
@@ -51,7 +51,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private ClusterLogicService   clusterLogicService;
 
     @Autowired
-    private RegionRackService     esClusterRackService;
+    private ClusterRegionService esClusterRackService;
 
     @Autowired
     private OperateRecordService  operateRecordService;

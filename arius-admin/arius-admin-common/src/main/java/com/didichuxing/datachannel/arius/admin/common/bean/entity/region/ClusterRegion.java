@@ -19,7 +19,12 @@ public class ClusterRegion extends BaseEntity {
     /**
      * region ID
      */
-    private Long id;
+    private Long   id;
+
+    /**
+     * region 名称
+     */
+    private String name;
 
     /**
      * 绑定到的逻辑集群ID列表, 为-1则没有被绑定
@@ -34,5 +39,6 @@ public class ClusterRegion extends BaseEntity {
     /**
      * Rack列表
      */
+    @Deprecated
     private String racks;
 }

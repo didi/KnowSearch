@@ -10,7 +10,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
@@ -131,6 +133,14 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     }
 
     @Override
+    public boolean editNodeRegionId(List<Integer> nodeIds, Integer regionId) throws AriusRunTimeException{
+        if (CollectionUtils.isEmpty(nodeIds)) { throw new AriusRunTimeException("节点不存在", ResultType.ILLEGAL_PARAMS);}
+        if (null == regionId) { throw new AriusRunTimeException("regionId为空", ResultType.ILLEGAL_PARAMS);}
+
+        return clusterRoleHostDAO.updateRegionId(nodeIds, regionId) >= 1;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean collectClusterNodeSettings(String cluster) throws AdminTaskException{
         // get node information from ES engine
@@ -202,7 +212,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         roleClusterHostPO.setCluster(phyClusterName);
         roleClusterHostPO.setRole(ESClusterNodeRoleEnum.getByDesc(esClusterRoleHost.getRole()).getCode());
         roleClusterHostPO.setStatus(2);
-        roleClusterHostPO.setRack("");
         roleClusterHostPO.setNodeSet("");
         setRoleClusterId(roleClusterHostPO, phyClusterName);
         return roleClusterHostPO;
@@ -370,6 +379,18 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return clusterRoleHostDAO.getPodNumberByRoleId(roleId);
     }
 
+    @Override
+    public Result<List<ClusterRoleHost>> listByRegionId(Integer regionId) {
+        List<ESClusterRoleHostPO> esClusterRoleHostPOS = Lists.newArrayList();
+        try {
+            esClusterRoleHostPOS = clusterRoleHostDAO.listByRegionId(regionId);
+        } catch (Exception e) {
+            Result.buildFail(String.format("根据regionId[%d]获取节点信息失败", regionId));
+            LOGGER.error("class=ClusterRoleHostServiceImpl||method=listByRegionId||errMsg={}", e.getMessage(),e);
+        }
+        return Result.buildSucc(ConvertUtil.list2List(esClusterRoleHostPOS, ClusterRoleHost.class));
+    }
+
     /***************************************** private method ****************************************************/
     private Result<Void> checkNodeParam(ESClusterRoleHostDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {
@@ -423,9 +444,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
         if (AriusObjUtils.isNull(param.getStatus())) {
             return Result.buildParamIllegal("节点状态为空");
-        }
-        if (AriusObjUtils.isNullStr(param.getRack())) {
-            return Result.buildParamIllegal("节点rack为空");
         }
         if (AriusObjUtils.isNullStr(param.getNodeSet())) {
             return Result.buildParamIllegal("节点set为空");
@@ -581,10 +599,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
     }
 
-    private boolean hasRoleOfMasterAndData(List<String> roles) {
-        return roles.contains(ES_ROLE_DATA) && roles.contains(ES_ROLE_MASTER);
-    }
-
     private boolean notHasRoleOfMasterAndData(List<String> roles) {
         return !roles.contains(ES_ROLE_DATA) && !roles.contains(ES_ROLE_MASTER);
     }
@@ -596,6 +610,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         nodePO.setIp(Getter.withDefault(clusterNodeInfo.getIp(), ""));
         nodePO.setHostname(Getter.withDefault(clusterNodeInfo.getHost(), ""));
         nodePO.setNodeSet(Getter.withDefault(clusterNodeInfo.getName(), ""));
+        nodePO.setAttributes(ConvertUtil.map2String(clusterNodeInfo.getAttributes()));
 
         HttpInfo httpInfo = clusterNodeInfo.getHttpInfo();
         if (null != httpInfo && null != httpInfo.getPublishAddress()) {
@@ -606,7 +621,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
 
         nodePO.setStatus(ONLINE.getCode());
-        nodePO.setRack(getRackFromNodeSettings(clusterNodeInfo));
         nodePO.setRole(getRoleFromNodeSettings(clusterNodeInfo));
 
         return nodePO;

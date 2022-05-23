@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
 
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -35,7 +35,7 @@ public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
     public List<ClusterRoleHost> getLogicClusterNodes(Long clusterId) {
         List<ClusterRoleHost> logicClusterNodes = new ArrayList<>();
 
-        List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listLogicClusterRacks(clusterId);
+        List<ClusterLogicRackInfo> logicClusterRacks = clusterRegionService.listLogicClusterRacks(clusterId);
         for (ClusterLogicRackInfo clusterRack : logicClusterRacks) {
             logicClusterNodes.addAll(fetchNodesOfClusterRack(clusterRack));
         }
@@ -53,7 +53,7 @@ public class ClusterLogicNodeServiceImpl implements ClusterLogicNodeService {
         List<ClusterRoleHost> logicClusterNodes = new ArrayList<>();
 
         List<String> phyClusters = new ArrayList<>();
-        List<ClusterLogicRackInfo> logicClusterRacks = regionRackService.listLogicClusterRacks(clusterId);
+        List<ClusterLogicRackInfo> logicClusterRacks = clusterRegionService.listLogicClusterRacks(clusterId);
         for (ClusterLogicRackInfo clusterRack : logicClusterRacks) {
             if(null == clusterRack){continue;}
 

@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
 
     @MockBean
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @MockBean
     private ClusterRoleHostService clusterRoleHostService;
@@ -31,7 +31,7 @@ public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getLogicClusterNodesTest() {
         ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
-        Mockito.when(regionRackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
+        Mockito.when(clusterRegionService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
 				clusterLogicRackInfo));
         ClusterRoleHost clusterRoleHost = new ClusterRoleHost();
         String clusterName = "wpk";
@@ -48,7 +48,7 @@ public class ClusterLogicNodeServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getLogicClusterNodesIncludeNonDataNodesTest() {
         ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
-        Mockito.when(regionRackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
+        Mockito.when(clusterRegionService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
 				clusterLogicRackInfo));
         ClusterRoleHost clusterRoleHost = new ClusterRoleHost();
         String clusterName = "wpk";

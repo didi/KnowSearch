@@ -32,7 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.QuotaTool;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.common.CapacityPlanConfig;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanAreaDTO;
@@ -98,7 +98,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
     private QuotaTool quotaTool;
 
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private RegionResourceManager regionResourceManager;
@@ -263,7 +263,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
         }
 
         // area中已经有region绑定
-        List<ClusterRegion> regions =  regionRackService
+        List<ClusterRegion> regions =  clusterRegionService
 				.listRegionsByLogicAndPhyCluster(areaPO.getResourceId(), areaPO.getClusterName());
         if (CollectionUtils.isNotEmpty(regions)) {
             return Result.buildParamIllegal("规划集群存在region，请先删除region");
@@ -721,7 +721,7 @@ public class CapacityPlanAreaServiceImpl extends BaseTemplateSrv implements Capa
             List<TemplateMetaMetric> templateMetaMetrics = entry.getValue();
 
             // 创建并绑定region
-            Result<Long> createAndBindResult = regionRackService.createAndBindRegion(
+            Result<Long> createAndBindResult = clusterRegionService.createAndBindRegion(
                 capacityPlanArea.getClusterName(),
                 racks,
                 capacityPlanArea.getResourceId(),

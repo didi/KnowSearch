@@ -87,7 +87,6 @@ public class CustomDataSource {
         hostDTO.setIp(testPhyClusterIp);
         hostDTO.setNodeSet("");
         hostDTO.setPort(String.valueOf(testPhyClusterPort));
-        hostDTO.setRack("");
         hostDTO.setRole(ESClusterNodeRoleEnum.MASTER_NODE.getCode());
         hostDTO.setRoleClusterId(0L);
         hostDTO.setStatus(0);

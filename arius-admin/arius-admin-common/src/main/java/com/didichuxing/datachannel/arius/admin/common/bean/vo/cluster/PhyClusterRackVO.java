@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "物理集群Rack信息")
+@Deprecated
 public class PhyClusterRackVO extends BaseVO {
 
     @ApiModelProperty("物理集群名称")

@@ -54,7 +54,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -123,7 +123,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private IndexPlanManager indexPlanManager;
 
     @Autowired
-    private RegionRackService           regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private IndexTemplateService indexTemplateService;
