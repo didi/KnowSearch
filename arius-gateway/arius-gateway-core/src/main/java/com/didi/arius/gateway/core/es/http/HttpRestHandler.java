@@ -111,7 +111,7 @@ public abstract class HttpRestHandler extends ESBase {
     }
 
     protected boolean isOriginCluster(QueryContext queryContext){
-        return queryContext.getSearchType() == AppDetail.RequestType.Origin_Cluster.getType();
+        return queryContext.getSearchType() == AppDetail.RequestType.ORIGIN_CLUSTER.getType();
     }
 
     protected void checkWriteIndicesAndTemplateBlockWrite(QueryContext queryContext) {
