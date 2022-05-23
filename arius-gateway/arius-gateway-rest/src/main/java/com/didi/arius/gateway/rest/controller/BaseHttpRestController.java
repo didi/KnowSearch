@@ -147,7 +147,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
         if (queryContext.isFromKibana() || (AppUtil.isAdminAppid(queryContext.getAppDetail())
                                             && StringUtils.isNotBlank(queryContext.getClusterId()))) {
             // 如果是来自 kibana 的请求，则设置为原生查询
-            queryContext.setSearchType(AppDetail.RequestType.Origin_Cluster.getType());
+            queryContext.setSearchType(AppDetail.RequestType.ORIGIN_CLUSTER.getType());
         }
         if (queryContext.getPostBody() != null && queryContext.getPostBody().length() > queryConfig.getDslMaxLength()) {
             throw new QueryDslLengthException(String.format("query length(%d) > %d exception", queryContext.getPostBody().length(), queryConfig.getDslMaxLength()));
