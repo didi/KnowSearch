@@ -65,14 +65,14 @@ public interface ClusterPhyManager {
      * @param param         查询参数
      * @return 物理集群列表
      */
-    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ClusterPhyDTO param, Integer currentAppId);
+    List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentAppId);
 
     /**
      * 获取控制台物理集群信息列表
      * @param param 查询参数
      * @return 物理集群列表
      */
-    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ClusterPhyDTO param);
+    List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param);
 
     /**
      * 构建客户端需要的数据
@@ -121,7 +121,7 @@ public interface ClusterPhyManager {
      * @param operator 操作人
      * @return  Tuple<Long, String>
      */
-	Result<Tuple<Long, String>> clusterJoin(ClusterJoinDTO param, String operator);
+	Result<Tuple<Long, String>> joinCluster(ClusterJoinDTO param, String operator);
 
     /**
      * 删除接入集群
@@ -232,7 +232,7 @@ public interface ClusterPhyManager {
      * @param appId
      * @return
      */
-    PaginationResult<ConsoleClusterPhyVO> pageGetConsoleClusterPhyVOS(ClusterPhyConditionDTO condition, Integer appId);
+    PaginationResult<ConsoleClusterPhyVO> getClusterPhyPages(ClusterPhyConditionDTO condition, Integer appId);
 
     /**
      * 获取项目下指定权限的物理集群列表

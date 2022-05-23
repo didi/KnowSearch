@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,8 +41,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * 物理集群接口
+ *
+ * @author ohushenglin_v
+ * @date 2022-05-20
+ */
 @RestController("esPhyClusterControllerV3")
-@RequestMapping(V3_OP + "/phy/cluster")
+@RequestMapping({V3_OP + "/phy/cluster",V3+"/cluster/phy"})
 @Api(tags = "ES物理集群集群接口(REST)")
 public class ESPhyClusterController {
 
@@ -55,6 +63,9 @@ public class ESPhyClusterController {
 
     @Autowired
     private ESPackageService  packageService;
+
+    @Value("${zeus.server}")
+    private String              zeusServerUrl;
 
     /**
      * 根据物理集群ID获取全部角色
@@ -89,8 +100,8 @@ public class ESPhyClusterController {
     @PostMapping("/join")
     @ResponseBody
     @ApiOperation(value = "接入集群", notes = "支持多类型集群加入")
-    public Result<Tuple<Long, String>> clusterJoin(HttpServletRequest request, @RequestBody ClusterJoinDTO param) {
-        return clusterPhyManager.clusterJoin(param, HttpRequestUtils.getOperator(request));
+    public Result<Tuple<Long, String>> joinCluster(HttpServletRequest request, @RequestBody ClusterJoinDTO param) {
+        return clusterPhyManager.joinCluster(param, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/join/{templateSrvId}/checkTemplateService")
@@ -155,9 +166,9 @@ public class ESPhyClusterController {
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "条件获取物理集群列表")
-    public PaginationResult<ConsoleClusterPhyVO> pageGetConsoleClusterPhyVOS(HttpServletRequest request,
+    public PaginationResult<ConsoleClusterPhyVO> getClusterPhyPages(HttpServletRequest request,
                                                                          @RequestBody ClusterPhyConditionDTO condition) {
-        return clusterPhyManager.pageGetConsoleClusterPhyVOS(condition, HttpRequestUtils.getAppId(request));
+        return clusterPhyManager.getClusterPhyPages(condition, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/{clusterPhyId}/overView")
@@ -191,4 +202,10 @@ public class ESPhyClusterController {
         return clusterPhyManager.getValidRacksListByTemplateSize(clusterPhy, clusterLogic, templateSize);
     }
 
+    @GetMapping("/zeus-url")
+    @ResponseBody
+    @ApiOperation(value = "获取zeus管控平台跳转接口")
+    public Result<String> zeusUrl() {
+        return Result.buildSucc(zeusServerUrl);
+    }
 }
