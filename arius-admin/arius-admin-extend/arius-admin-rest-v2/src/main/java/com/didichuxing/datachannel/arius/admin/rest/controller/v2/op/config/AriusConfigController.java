@@ -76,7 +76,7 @@ public class AriusConfigController {
         return ariusConfigInfoService.editConfig(param, HttpRequestUtils.getOperator(request));
     }
 
-    @GetMapping("/cluster—version")
+    @GetMapping("/cluster-version")
     @ResponseBody
     @ApiOperation(value = "获取集群版本列表", notes = "")
     public Result<List<String>> listClusterVersion() {
@@ -84,7 +84,7 @@ public class AriusConfigController {
                 AriusConfigConstant.CLUSTER_PACKAGE_VERSION_LIST, AriusConfigConstant.CLUSTER_PACKAGE_VERSION_LIST_DEFAULT_VALUE, COMMA)));
     }
 
-    @GetMapping("/cluster—data-center")
+    @GetMapping("/cluster-data-center")
     @ResponseBody
     @ApiOperation(value = "获取数据中心列表", notes = "")
     public Result<List<String>> listClusterDataCenter() {
@@ -92,7 +92,7 @@ public class AriusConfigController {
                 AriusConfigConstant.CLUSTER_DATA_CENTER_LIST, AriusConfigConstant.CLUSTER_DATA_CENTER_LIST_DEFAULT_VALUE, COMMA)));
     }
 
-    @GetMapping("/cluster—resource-type")
+    @GetMapping("/cluster-resource-type")
     @ResponseBody
     @ApiOperation(value = "获取集群资源列表", notes = "")
     public Result<List<String>> listClusterResourceType() {
@@ -101,7 +101,7 @@ public class AriusConfigController {
     }
 
 
-    @GetMapping("/cluster—node-count")
+    @GetMapping("/cluster-node-count")
     @ResponseBody
     @ApiOperation(value = "获取集群节点数", notes = "")
     public Result<List<String>> listClusterNodeCount() {
@@ -118,7 +118,7 @@ public class AriusConfigController {
     }
 
 
-    @GetMapping("/cluster—specification")
+    @GetMapping("/cluster-specification")
     @ResponseBody
     @ApiOperation(value = "获取节点规格列表", notes = "")
     public Result<List<String>> listClusterSpecification() {
