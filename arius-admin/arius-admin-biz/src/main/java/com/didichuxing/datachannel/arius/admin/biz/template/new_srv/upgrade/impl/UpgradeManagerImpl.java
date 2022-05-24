@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.upgrade.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.upgrade.UpgradeManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
@@ -26,7 +26,7 @@ public class UpgradeManagerImpl extends BaseTemplateSrvImpl implements UpgradeMa
     private final String OPERATOR = "admin";
 
     @Autowired
-    private TemplatePreCreateManager templatePreCreateManager;
+    private PreCreateManager preCreateManager;
 
     @Override
     public NewTemplateSrvEnum templateSrv() {
@@ -45,6 +45,12 @@ public class UpgradeManagerImpl extends BaseTemplateSrvImpl implements UpgradeMa
 
     @Override
     protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
+        for (Integer templateId : templateIdList) {
+            Result<Void> upgradeResult = upgradeTemplate(templateId);
+            if (upgradeResult.failed()) {
+                return upgradeResult;
+            }
+        }
         return Result.buildSucc();
     }
 
@@ -74,7 +80,7 @@ public class UpgradeManagerImpl extends BaseTemplateSrvImpl implements UpgradeMa
                     return editResult;
                 }
 
-                templatePreCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId(), RETRY_TIMES);
+                preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
             }
         } catch (Exception e) {
             LOGGER.error("upgrade template error", e);
