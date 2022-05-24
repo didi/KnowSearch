@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInf
 /**
  * @author d06679
  * @date 2019/5/20
+ * @deprecated
  */
 public interface AppUserInfoService {
 

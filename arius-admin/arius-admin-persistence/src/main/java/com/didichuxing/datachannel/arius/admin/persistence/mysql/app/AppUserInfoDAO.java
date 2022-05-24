@@ -10,7 +10,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppUserInfoPO;
 /**
  * @author d06679
  * @date 2019/5/20
+ * @deprecated 后续下线移除
  */
+@Deprecated
 @Repository
 public interface AppUserInfoDAO {
 
