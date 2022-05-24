@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.In
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateAdjustShardDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
@@ -43,12 +44,17 @@ public class AdjustShardManagerImpl extends BaseTemplateSrvImpl implements Adjus
 
     @Override
     protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        return Result.buildFail();
+        if (!(openParam instanceof TemplateAdjustShardDTO)) {
+            return Result.buildFail("参数错误");
+        }
+        TemplateAdjustShardDTO adjustShardDTO = (TemplateAdjustShardDTO) openParam;
+
+        return adjustShard(adjustShardDTO.getTemplateId(), adjustShardDTO.getShardNum());
     }
 
     @Override
     protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildFail();
+        return Result.buildSucc();
     }
 
     @Override
