@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by linyunan on 2021-06-28
+ * @deprecated 后续进行下线移除
  */
+@Deprecated
 public interface LoginManager {
 
 	/**
