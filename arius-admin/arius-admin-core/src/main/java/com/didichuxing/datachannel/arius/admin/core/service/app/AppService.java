@@ -13,7 +13,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 /**
  * @author linyunan
  * @date 2021-04-28
+ * @deprecated
  */
+@Deprecated
 public interface AppService {
 
     /**

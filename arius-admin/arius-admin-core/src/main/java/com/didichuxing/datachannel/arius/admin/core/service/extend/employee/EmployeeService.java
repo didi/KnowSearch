@@ -6,7 +6,9 @@ import com.didichuxing.datachannel.arius.admin.remote.employee.EmployeeTypeEnum;
 /**
  * @author linyunan
  * @date 2021-05-17
+ *
  */
+@Deprecated
 public interface EmployeeService {
     /**
      * 校验用户域账号是否有效
