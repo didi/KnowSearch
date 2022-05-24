@@ -382,9 +382,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             updateRegion(regionId, constructNewLogicIds(logicClusterId,region.getLogicClusterIds()), null);
 
             // 发送消息，添加容量规划area（幂等地），添加容量规划容量信息
-            SpringTool.publish(new RegionBindEvent(this, region, share, operator));
             operateRecordService.save(REGION, OperationEnum.REGION_BIND, regionId, "", operator);
-
             return Result.buildSucc();
         } catch (Exception e) {
             LOGGER.error(
@@ -633,6 +631,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
      * @param logicClusterIds 逻辑集群ID列表，为null则不更新
      * @param racks          racks，为null则不更新
      */
+    @Deprecated
     private void updateRegion(Long regionId, String logicClusterIds, String racks) {
         if (regionId == null) {
             return;

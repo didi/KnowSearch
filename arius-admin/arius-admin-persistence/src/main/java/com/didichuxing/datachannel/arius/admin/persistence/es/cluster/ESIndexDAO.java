@@ -470,22 +470,23 @@ public class ESIndexDAO extends BaseESDAO {
         MultiIndexsConfig multiIndexsConfig = batchGetIndexConfig(cluster, indices);
 
         List<String> needOps = Lists.newArrayList();
-        for (String indexName : indices) {
-            IndexConfig indexConfig = multiIndexsConfig.getIndexConfig(indexName);
-            if (indexConfig == null) {
-                continue;
-            }
+        for (Map.Entry<String, IndexConfig> indexConfigEntry : multiIndexsConfig.getIndexConfigMap().entrySet()) {
+            IndexConfig indexConfig = indexConfigEntry.getValue();
 
             //由于客户端在put-setting的时候会默认加上"index."的前缀 所以这里需要这样搞
             Map<String, String> config = indexConfig.getSettings();
-            String src = config.get("index." + settingName);
+            String src = config.get(INDEX_SETTING_PRE + settingName);
+            if (settingName.startsWith(INDEX_SETTING_PRE)) {
+                src = config.get(settingName);
+            }
+
             if (src == null) {
                 src = defaultValue;
             }
             if (src.equals(String.valueOf(setting))) {
                 continue;
             }
-            needOps.add(indexName);
+            needOps.add(indexConfigEntry.getKey());
         }
 
         if (CollectionUtils.isEmpty(needOps)) {

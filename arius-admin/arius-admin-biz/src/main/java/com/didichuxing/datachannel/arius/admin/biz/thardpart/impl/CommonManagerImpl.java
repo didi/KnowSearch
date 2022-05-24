@@ -166,7 +166,7 @@ public class CommonManagerImpl implements CommonManager {
     @Override
     public Result<List<ThirdpartConfigVO>> queryConfig(AriusConfigInfoDTO param) {
         return Result
-                .buildSucc(ConvertUtil.list2List(ariusConfigInfoService.queryByCondt(param), ThirdpartConfigVO.class));
+                .buildSucc(ConvertUtil.list2List(ariusConfigInfoService.queryByCondition(param), ThirdpartConfigVO.class));
     }
 
     @Override

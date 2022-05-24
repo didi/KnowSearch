@@ -189,4 +189,14 @@
             </otherwise>
         </choose>
     </select>
+
+    <select id="getTotalHitByPackageId"
+            parameterType="long"
+            resultType="long">
+        select
+        count(1)
+        from es_data_source
+        where is_active = 1
+        and package_id = #{packageId}
+    </select>
 </mapper>
