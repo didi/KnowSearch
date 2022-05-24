@@ -1,8 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyIndicesDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -11,13 +19,17 @@ import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by linyunan on 2021-07-30
@@ -43,14 +55,14 @@ public class ClusterPhyMetricsController {
     public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
                                                           HttpServletRequest request) {
         return Result.buildSucc(
-            clusterPhyMetricsManager.getDomainAccountConfigMetrics(param, HttpRequestUtils.getOperator(request)));
+            clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtils.getOperator(request)));
     }
 
     @PostMapping("/updateConfigMetrics")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
     public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param, HttpServletRequest request) {
-        return clusterPhyMetricsManager.updateDomainAccountConfigMetrics(param, HttpRequestUtils.getOperator(request));
+        return clusterPhyMetricsManager.updateUserNameConfigMetrics(param, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/overview")

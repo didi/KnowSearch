@@ -1,45 +1,56 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.ALL_CLUSTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_TIME_INTERVAL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.MAX_TIME_INTERVAL;
+
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import com.didiglobal.logi.security.common.entity.user.User;
+import com.didiglobal.logi.security.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.MAX_TIME_INTERVAL;
-
+/**
+ * 抽象类集群指标处理
+ *
+ * @author
+ * @date 2022/05/24
+ */
 public abstract class BaseClusterMetricsHandle implements BaseHandle {
     private static final ILog LOGGER = LogFactory.getLog(BaseClusterMetricsHandle.class);
-
+    
+    protected static final Integer MAX_TOP_NUM = 20;
+    protected static final Integer MIN_TOP_NUM = 5;
+    
     @Autowired
-    private AppService appService;
-
+    private AppService             appService;
+    
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private UserService userService;
 
     /**
      * 获取物理集群节点、节点任务、模板或者节点任务的指标信息
-     * @param domainAccount 账号类型
+     * @param userName 账号
      * @param appId appId
      * @param param 物理集群指标信息
      * @return 对应视图板块下的时序指标信息列表
      */
-    public Result<List<VariousLineChartMetricsVO>> getClusterPhyRelatedCurveMetrics(MetricsClusterPhyDTO param, Integer appId, String domainAccount) {
+    public Result<List<VariousLineChartMetricsVO>> getClusterPhyRelatedCurveMetrics(MetricsClusterPhyDTO param, Integer appId, String userName) {
         //1. verification
-        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, appId, domainAccount);
+        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, appId, userName);
         if (checkParamResult.failed()) {
             LOGGER.warn("class=ClusterBaseMetricsHandle||method=getClusterPhyMetrics||msg=check param fail");
             return Result.buildFrom(checkParamResult);
@@ -64,12 +75,12 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
      * 获取当前时刻集群的整体指标,其中包含非曲线数据，例如集群总览视图指标
      * @param param 物理集群指标信息
      * @param appId appId
-     * @param domainAccount 账号类型
+     * @param userName 账号类型
      * @return 当前时刻下的集群整体指标
      */
-    public Result<MetricsVO> getOtherClusterPhyRelatedMetricsVO(MetricsClusterPhyDTO param, Integer appId, String domainAccount) {
+    public Result<MetricsVO> getOtherClusterPhyRelatedMetricsVO(MetricsClusterPhyDTO param, Integer appId, String userName) {
         //1. verification
-        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, appId, domainAccount);
+        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, appId, userName);
         if (checkParamResult.failed()) {
             LOGGER.warn("class=ClusterBaseMetricsHandle||method=getMetricsVO||msg=check param fail");
             return Result.buildFrom(checkParamResult);
@@ -82,8 +93,8 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
     }
 
     private Result<Void> checkParamForClusterPhyMetrics(MetricsClusterPhyDTO param, Integer appId,
-                                                        String domainAccount) {
-        Result<Void> checkCommonParam = checkCommonParam(param, appId, domainAccount);
+                                                        String userName) {
+        Result<Void> checkCommonParam = checkCommonParam(param, appId, userName);
         if (checkCommonParam.failed()) {
             return checkCommonParam;
         }
@@ -96,7 +107,7 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
         return Result.buildSucc();
     }
 
-    private Result<Void> checkCommonParam(MetricsClusterPhyDTO param, Integer appId, String domainAccount) {
+    private Result<Void> checkCommonParam(MetricsClusterPhyDTO param, Integer appId, String userName) {
         if (null == param) {
             return Result.buildParamIllegal("param is empty");
         }
@@ -104,8 +115,8 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
         if (null == appId) {
             return Result.buildParamIllegal("appId is empty");
         }
-
-        if (null == ariusUserInfoService.getByName(domainAccount)) {
+        final User user = userService.getUserByUserName(userName);
+        if (Objects.isNull(user)) {
             return Result.buildParamIllegal("user info is empty");
         }
 
@@ -142,11 +153,11 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
 
         if (null != param.getTopNu()) {
             if (param.getTopNu() <= 0) {
-                param.setTopNu(5);
+                param.setTopNu(MIN_TOP_NUM);
             }
 
-            if (param.getTopNu() > 20) {
-                param.setTopNu(20);
+            if (param.getTopNu() > MAX_TOP_NUM) {
+                param.setTopNu(MAX_TOP_NUM);
             }
         }
     }

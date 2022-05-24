@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.Variou
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 
 /**
- * Created by linyunan on 2021-07-30
+ * @author Created by linyunan on 2021-07-30
  *
  *  * 物理集群指标看板业务类
  *  * 1. 查询集群维度指标数据
@@ -24,46 +24,64 @@ public interface ClusterPhyMetricsManager {
      * 获取一级指标类型列表 key:type value:code
      * @param type 类型
      * @see ClusterPhyTypeMetricsEnum
+     * @return {@code List<String>}
      */
     List<String> getMetricsCode2TypeMap(String type);
 
     /**
      * 获取指定类型的指标
-     * @param domainAccount 账号信息
+     * @param userName 账号
      * @param appId appId
      * @param param 物理集群指标
      * @param metricsTypeEnum 指标处理器类型
      * @return result
      */
-    <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum);
+    <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer appId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
 
     /**
      * 获取物理集群多个节点的指标信息
      * @param param 物理集群指标
      * @param appId appId
-     * @param domainAccount 账号信息
+     * @param userName 账号
      * @param metricsTypeEnum 指标处理器类型
      * @return result
      */
-    Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum);
-
+    Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer appId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
+    
     /**
      * 获取物理集群中的索引列表
+     * @param clusterPhyName 物理集群名称
+     * @param appId 应用程序id
+     * @return {@code Result<List<String>>}
      */
     Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId);
-
+    
     /**
-     * 获取账号下已配置指标类型
+     * 获取用户配置指标
+     *
+     @param param 入参
+     @param userName 用户名
+     
+     @return {@code List<String>}
      */
-    List<String> getDomainAccountConfigMetrics(MetricsConfigInfoDTO param, String domainAccount);
-
+    List<String> getUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName);
+    
     /**
      * 更新账号下已配置的指标类型
+     @param param 入参
+     @param userName 用户名
+     @return {@code Result<Integer>}
      */
-    Result<Integer> updateDomainAccountConfigMetrics(MetricsConfigInfoDTO param, String domainAccount);
-
-    /**
+    Result<Integer> updateUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName);
+    
+    /**获取集群体育任务细节
      * 获取物理集群中的索引列表
+     @param clusterPhyName 集群phy名称
+     @param node 节点
+     @param startTime 开始时间
+     @param endTime 结束时间
+     @param appId 应用程序id
+     @return {@code Result<List<ESClusterTaskDetailVO>>}
      */
     Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer appId);
 }

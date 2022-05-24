@@ -8,24 +8,24 @@ import java.util.List;
 /**
  * @author wangpengkai
  */
-public interface MetricsConfigService {
+public interface UserMetricsConfigService {
     /**
      * 获取物理集群指标看板下的配置
      * @param param 指标的信息说明DTO
      * @return 二级目录下的指标名称列表
      */
-    List<String> getMetricsByTypeAndDomainAccount(MetricsConfigInfoDTO param);
+    List<String> getMetricsByTypeAndUserName(MetricsConfigInfoDTO param);
 
     /**
      * 更新物理集群看板下的配置
      * @param param 指标的信息说明DTO
      * @return result
      */
-    Result<Integer> updateByMetricsByTypeAndDomainAccount(MetricsConfigInfoDTO param);
+    Result<Integer> updateByMetricsByTypeAndUserName(MetricsConfigInfoDTO param);
 
     /**
      * 删除用户账号下的指标配置信息
-     * @param domainAccount 账号
+     * @param userName 账号
      */
-    void deleteByDomainAccount(String domainAccount);
+    void deleteByUserName(String userName);
 }

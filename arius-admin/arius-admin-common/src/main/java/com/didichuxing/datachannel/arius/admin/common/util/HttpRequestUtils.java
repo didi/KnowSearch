@@ -1,24 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import java.util.List;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_APP_ID;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
 import com.google.common.collect.Lists;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_APP_ID;
+import java.util.List;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * http请求操作类
- * Created by d06679 on 2019/2/26.
+ * @author Created by d06679 on 2019/2/26.
  */
 public class HttpRequestUtils {
 
@@ -42,6 +37,7 @@ public class HttpRequestUtils {
         return getOperatorFromHeader(request);
     }
 
+    @Deprecated
     public static String getPasswordFromCookies(HttpServletRequest request) {
         List<String> passwords = Lists.newArrayList();
         Cookie[] cookies = request.getCookies();

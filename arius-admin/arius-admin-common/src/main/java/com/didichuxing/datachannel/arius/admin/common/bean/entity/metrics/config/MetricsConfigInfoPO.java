@@ -8,15 +8,21 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * 标准配置信息
+ *
+ * @author shizeying
+ * @date 2022/05/24
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetricsConfigInfo extends BaseEntity {
+public class MetricsConfigInfoPO extends BaseEntity {
 
     /**
-     * 账号信息
+     * 用户名
      */
-    private String       domainAccount;
+    private String userName;
 
     /**
      * 一级目录下的指标配置类型,如集群看板，网关看板
