@@ -64,6 +64,7 @@ public class DruidDbConfig {
      * @throws Exception Exception
      */
     @Bean("adminSqlSessionFactory")
+    @Primary
     public SqlSessionFactory sqlSessionFactory(
             @Qualifier("adminDataSource") DataSource dataSource) throws Exception {
         //将SqlSessionFactoryBean 替换为 MybatisSqlSessionFactoryBean， 否则mybatis-plus 提示 Invalid bound statement (not found)
@@ -84,6 +85,7 @@ public class DruidDbConfig {
     }
     
     @Bean({"adminSqlSessionTemplate"})
+    @Primary
     public SqlSessionTemplate primarySqlSessionTemplate(@Qualifier("adminSqlSessionFactory") SqlSessionFactory sessionFactory) {
         return new SqlSessionTemplate(sessionFactory);
     }
