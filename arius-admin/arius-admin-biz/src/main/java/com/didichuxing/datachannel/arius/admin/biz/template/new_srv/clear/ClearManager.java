@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.clear;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateClearDTO;
 
 /**
  * @author chengxiang

@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
+package com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
