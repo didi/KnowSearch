@@ -36,7 +36,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     private static final ILog      LOGGER                           = LogFactory.getLog(RegionEditEventListener.class);
 
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService   clusterRegionService;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -69,33 +69,34 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
         /**
          * key是集群名，value是列表
          */
-        Map<String, Set<String>> clusterTemplateMap = new HashMap<String, Set<String>>(16);
+        Map<String, Set<String>> cluster2TemplateSetMap = new HashMap<String, Set<String>>(16);
         Set<String> nodeNames = new HashSet<>();
-        regionEditEvent.getRegionIdList().forEach(regionId -> {
-            try {
+        try {
+            regionEditEvent.getRegionIdList().forEach(regionId -> {
                 ClusterRegion clusterRegion = clusterRegionService.getRegionById(regionId);
-                Result<List<ClusterRoleHost>> result =  clusterRoleHostService.listByRegionId(Math.toIntExact(regionId));
+                Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(regionId));
                 if (result.failed()) {
-                    LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,warnMsg={}", result.getMessage());
+                    LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,warnMsg={}",
+                        result.getMessage());
                     return;
                 }
                 result.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
                 String logicClusterIds = clusterRegion.getLogicClusterIds();
                 if (!NOT_BIND_LOGIC_CLUSTER_ID.equals(logicClusterIds)) {
-                    buildClusterTemplateMap(clusterTemplateMap, clusterRegion, logicClusterIds);
+                    buildCluster2TemplateSetMap(cluster2TemplateSetMap, clusterRegion, logicClusterIds);
                 }
-            } catch (Exception e) {
-                LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,warnMsg=build cluster template map error,", e);
-                return;
-            }
-        });
+            });
+        } catch (Exception e) {
+            LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,warnMsg=build cluster template map error,", e);
+            return;
+        }
 
         if (nodeNames.isEmpty()) {
             LOGGER.warn("class=RegionEditEventListener||method=onApplicationEvent,warnMsg=nodeNames is empty");
             return;
         }
 
-        clusterTemplateMap.entrySet().forEach(entry -> {
+        cluster2TemplateSetMap.entrySet().forEach(entry -> {
             for (String templateName : entry.getValue()) {
                 try {
                     updateTemplateAllocationSetting(entry.getKey(), templateName, nodeNames);
@@ -116,7 +117,8 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
      * @param clusterRegion 集群region
      * @param logicClusterIds  逻辑集群ids
      */
-    private void buildClusterTemplateMap(Map<String, Set<String>> clusterTemplateMap, ClusterRegion clusterRegion, String logicClusterIds) {
+    private void buildCluster2TemplateSetMap(Map<String, Set<String>> clusterTemplateMap, ClusterRegion clusterRegion,
+                                             String logicClusterIds) {
         Arrays.stream(logicClusterIds.split(COMMA)).forEach(logicClusterId -> {
             List<IndexTemplate> indexTemplates = indexTemplateService
                 .getLogicClusterTemplates(Long.valueOf(logicClusterId));
@@ -139,7 +141,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
      * @throws ESOperateException
      */
     private void updateIndicesAllocationSetting(String cluster, String templateName,
-                                      Set<String> nodeNames) throws ESOperateException {
+                                                Set<String> nodeNames) throws ESOperateException {
         if (ariusConfigInfoService.booleanSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
             AriusConfigConstant.TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, true)) {
             boolean response = esIndexService.syncPutIndexSetting(cluster,
