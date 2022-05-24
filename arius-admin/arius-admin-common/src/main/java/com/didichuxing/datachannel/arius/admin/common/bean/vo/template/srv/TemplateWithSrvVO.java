@@ -34,4 +34,7 @@ public class TemplateWithSrvVO extends BaseVO {
     @ApiModelProperty("不可用的服务")
     private List<UnavailableTemplateSrvVO> unavailableSrv;
 
+    @ApiModelProperty("DCDR主从位点差")
+    private Long checkPointDiff;
+
 }
