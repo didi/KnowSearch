@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateSrvQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
@@ -47,7 +47,7 @@ public interface IndexTemplateService {
      * @param param 模糊查询条件
      * @return
      */
-    List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateSrvQueryDTO param);
+    List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param);
 
     /**
      * 模糊查询统计总命中数, 用于前端分页
