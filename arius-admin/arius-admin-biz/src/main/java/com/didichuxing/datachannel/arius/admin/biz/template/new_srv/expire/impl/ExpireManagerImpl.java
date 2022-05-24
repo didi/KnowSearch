@@ -63,7 +63,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
     @Override
     protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildFail();
+        return Result.buildSucc();
     }
 
     @Override

@@ -58,12 +58,12 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
 
     @Override
     protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        return Result.buildFail();
+        return Result.buildSucc();
     }
 
     @Override
     protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildFail();
+        return Result.buildSucc();
     }
 
     @Override
