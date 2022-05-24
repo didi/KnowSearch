@@ -140,7 +140,7 @@ spring:
     jdbc-url: ${spring.datasource.druid.url}
     password: ${spring.datasource.druid.password}
     username: ${spring.datasource.druid.username}
-    resource-extend-bean-name: knowSearchResourceExtendImpl
+    resource-extend-bean-name: com.didichuxing.datachannel.arius.admin.biz.security.resource.ResourceExtendManager
   application:
     admin:
       enabled:

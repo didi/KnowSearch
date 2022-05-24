@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.resouce;
+package com.didichuxing.datachannel.arius.admin.biz.security.resource;
 
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.dto.resource.ResourceDTO;
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
  * @date 2022/05/23
  * @see ResourceExtend
  */
-@Component("knowSearchResourceExtendImpl")
-public class ResourceExtendImpl implements ResourceExtend {
+@Component
+public class ResourceExtendManager implements ResourceExtend {
     
     /**
      * 获取资源信息List，资源id指的是该资源所在服务对该资源的标识
