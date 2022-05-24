@@ -33,13 +33,13 @@ public class ESLogicClusterOpV3Controller {
     @GetMapping("/clusterNames")
     @ResponseBody
     @ApiOperation(value = "根据AppId获取逻辑集群下的逻辑集群名称")
-    public Result<List<String>> getAppLogicClusterNames(HttpServletRequest request) {
-        return clusterLogicManager.getAppLogicClusterNames(HttpRequestUtils.getAppId(request));
+    public Result<List<String>> getAppLogicOrPhysicClusterNames(HttpServletRequest request) {
+        return clusterLogicManager.getAppLogicOrPhysicClusterNames(HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "根据AppId获取有权限的逻辑集群信息")
+    @ApiOperation(value = "根据AppId获取有权限的逻辑或物理集群信息")
     public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(HttpServletRequest request) {
         return clusterLogicManager.getAppLogicClusterInfo(HttpRequestUtils.getAppId(request));
     }

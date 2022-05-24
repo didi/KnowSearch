@@ -57,9 +57,11 @@ public interface ClusterLogicManager {
     Result<List<ConsoleClusterVO>> getAppLogicClusters(Integer appId);
 
     /**
-     * 获取APP拥有的逻辑集群名称列表
+     * 获取APP拥有的逻辑集群或者物理集群名称列表
+     * @param appId 应用id
+     * @return
      */
-    Result<List<String>> getAppLogicClusterNames(Integer appId);
+    Result<List<String>> getAppLogicOrPhysicClusterNames(Integer appId);
 
     /**
      * 获取项目下的逻辑集群信息

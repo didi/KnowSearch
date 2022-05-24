@@ -114,4 +114,11 @@ public interface PhyClusterDAO {
      * @return 集群列表
      */
     List<ClusterPhyPO> listByIds(@Param("ids") Set<Long> ids);
+
+    /**
+     * 获取绑定对应安装包的集群数量
+     * @param packageId 安装包id
+     * @return  long count
+     */
+    long getTotalHitByPackageId(@Param("packageId") Long packageId);
 }
