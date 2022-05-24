@@ -72,7 +72,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
@@ -145,7 +145,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private TemplatePhyManager                               templatePhyManager;
 
     @Autowired
-    private RegionRackService                                regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private AppClusterLogicAuthService                       appClusterLogicAuthService;
@@ -420,9 +420,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
-
-        List<ClusterRoleHost> nodesInfo = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
-        return Result.buildSucc(clusterNodeManager.convertClusterPhyNodes(nodesInfo, clusterPhy.getCluster()));
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
+        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
     }
 
     @Override
@@ -623,10 +622,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 throw new AdminOperateException(String.format("删除集群[%s]信息失败", clusterPhy.getCluster()));
             }
 
-            List<ClusterRegion> clusterRegionList = regionRackService.listPhyClusterRegions(clusterPhy.getCluster());
+            List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
             if(!AriusObjUtils.isEmptyList(clusterRegionList)) {
                 // 该物理集群有Region才删除
-                Result<Void> deletePhyClusterRegionResult = regionRackService.deleteByClusterPhy(clusterPhy.getCluster(), operator);
+                Result<Void> deletePhyClusterRegionResult = clusterRegionService.deleteByClusterPhy(clusterPhy.getCluster(), operator);
                 if (deletePhyClusterRegionResult.failed()) {
                     throw new AdminOperateException(String.format("删除集群[%s]Region新失败", clusterPhy.getCluster()));
                 }
@@ -933,7 +932,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         //获取逻辑集群已绑定的物理集群信息
-        List<ClusterLogicRackInfo> clusterLogicRackInfos = regionRackService.listLogicClusterRacks(clusterLogicId);
+        List<ClusterLogicRackInfo> clusterLogicRackInfos = clusterRegionService.listLogicClusterRacks(clusterLogicId);
         if (CollectionUtils.isEmpty(clusterLogicRackInfos)) {
             return canBeAssociatedClustersPhyNamesResult;
         }
@@ -975,7 +974,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         //获取逻辑集群关联到物理集群的region资源信息
-        List<ClusterRegion> logicBindRegions = regionRackService.listRegionsByLogicAndPhyCluster(clusterLogic.getId(), clusterPhyName);
+        List<ClusterRegion> logicBindRegions = clusterRegionService.listRegionsByLogicAndPhyCluster(clusterLogic.getId(), clusterPhyName);
         if (CollectionUtils.isEmpty(logicBindRegions)) {
             return Result.buildFail("无法获取逻辑集群对应的region信息");
         }
@@ -993,7 +992,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(canCreateTemplateRegionLists);
     }
 
-/**************************************** private method ***************************************************/
+
+
+    /**************************************** private method ***************************************************/
     /**
      * 更新物理模板setting single_type为true
      * @param cluster  集群
@@ -1250,7 +1251,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (StringUtils.isBlank(racks)) {
                 continue;
             }
-            Result<Long> createPayClusterRegionResult = regionRackService.createPhyClusterRegion(param.getCluster(),
+            Result<Long> createPayClusterRegionResult = clusterRegionService.createPhyClusterRegion(param.getCluster(),
                 racks, null, operator);
             if (createPayClusterRegionResult.failed()) {
                 throw new AdminOperateException(createPayClusterRegionResult.getMessage());
@@ -1270,7 +1271,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         // 4.绑定Region
         Long clusterLogicId = saveClusterLogicResult.getData();
         for (Long regionId : regionIds) {
-            Result<Void> bindRegionResult = regionRackService.bindRegion(regionId, clusterLogicId, null, operator);
+            Result<Void> bindRegionResult = clusterRegionService.bindRegion(regionId, clusterLogicId, null, operator);
             if (bindRegionResult.failed()) {
                 throw new AdminOperateException(bindRegionResult.getMessage());
             }
@@ -1554,12 +1555,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
         for (Long associatedRegionId : associatedRegionIds) {
-            Result<Void> unbindRegionResult = regionRackService.unbindRegion(associatedRegionId, null, operator);
+            Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
             }
 
-            Result<Void> deletePhyClusterRegionResult = regionRackService.deletePhyClusterRegion(associatedRegionId,
+            Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
                 operator);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));

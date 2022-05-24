@@ -16,11 +16,14 @@
         <result column="create_time"     jdbcType="TIMESTAMP" property="createTime" />
         <result column="update_time"     jdbcType="TIMESTAMP" property="updateTime" />
         <result column="machine_spec"    jdbcType="VARCHAR"   property="machineSpec"/>
+        <result column="region_id"       jdbcType="INTEGER"   property="regionId" />
+        <result column="attributes"      jdbcType="LONGVARCHAR" property="attributes" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id, role_cluster_id, hostname,ip, cluster,`port`,`status`,`role`,rack,node_set,create_time, update_time, delete_flag, machine_spec
+        ,region_id, attributes
     </sql>
 
     <!-- 保存 角色对应主机 -->
@@ -28,9 +31,10 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_cluster_role_host_info
-        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, rack, node_set, machine_spec)
+        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, rack, node_set, machine_spec, region_id, attributes)
         values
-        (#{roleClusterId}, #{hostname}, #{ip}, #{cluster},#{role},#{port},#{status},#{rack}, #{nodeSet}, #{machineSpec})
+        (#{roleClusterId}, #{hostname}, #{ip}, #{cluster},#{role},#{port},#{status},#{rack}, #{nodeSet}, #{machineSpec}, #{regionId}
+        ,#{attributes})
     </insert>
 
     <!-- 根据ID  查询详情 -->
@@ -84,6 +88,8 @@
             <if test="rack != null">and rack = #{rack}</if>
             <if test="nodeSet != null">and node_set = #{nodeSet}</if>
             <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
+            <if test="regionId != null">and region_id = #{regionId}</if>
+            <if test="attributes != null">and attributes = #{attributes}</if>
             and delete_flag = 0
         </trim>
     </select>
@@ -114,20 +120,28 @@
             <if test="status != null">, `status` = #{status}</if>
             <if test="rack != null">, rack = #{rack}</if>
             <if test="nodeSet != null">, node_set = #{nodeSet}</if>
-            <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
+            <if test="machineSpec != null">, machine_spec = #{machineSpec}</if>
+            <if test="regionId != null">, region_id = #{regionId}</if>
+            <if test="attributes != null">, attributes = #{attributes}</if>
         </trim>
         where id = #{id} and delete_flag = 0;
     </update>
 
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into es_cluster_role_host_info
-        (role_cluster_id, hostname, ip, cluster, `port`, `role`, `status`, rack, node_set, machine_spec)
-        values
-        <foreach collection="list" index="index" item="item" separator=",">
-            (#{item.roleClusterId}, #{item.hostname}, #{item.ip},#{item.cluster}, #{item.port},
-            #{item.role}, #{item.status}, #{item.rack}, #{item.nodeSet}, #{item.machineSpec})
-        </foreach>
-    </insert>
+    <update id="updateRegionId">
+        update es_cluster_role_host_info
+        set region_id = #{regionId}
+        where
+        <choose>
+            <when test="ids != null and ids.size > 0">
+                id in <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+            </when>
+            <otherwise>
+                1=0
+            </otherwise>
+        </choose>
+    </update>
+
+
 
     <!--  根据主机名称和角色id删除节点  -->
     <update id="deleteByHostNameAndRoleId">
@@ -206,8 +220,26 @@
             <if test="rack != null">, rack = #{rack}</if>
             <if test="nodeSet != null">, node_set = #{nodeSet}</if>
             <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
+            <if test="regionId != null">and region_id = #{regionId}</if>
+            <if test="attributes != null">and attributes = #{attributes}</if>
              ,delete_flag = 0
         </trim>
         where id = #{id}
     </update>
+
+    <!-- 根据role_cluster_id  查询 -->
+    <select id="listByRegionId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_role_host_info
+        where region_id = #{regionId} and delete_flag = '0'
+    </select>
+
+    <!-- 根据role_cluster_id  查询 -->
+    <select id="listDataNodeByCluster" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_role_host_info
+        where cluster = #{cluster} and role = 1 delete_flag = '0'
+    </select>
 </mapper>

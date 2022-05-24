@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
@@ -57,11 +57,11 @@ public class ESClusterLogicStaticsService {
     @Autowired
     private ClusterPhyService clusterPhyService;
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     public ClusterLogicStatisPO getLogicClusterStats(Long logicClusterId, boolean isJob) {
         ClusterLogic logicCluster = clusterLogicService.getClusterLogicById(logicClusterId);
-        List<ClusterLogicRackInfo> items = regionRackService.listLogicClusterRacks(logicClusterId);
+        List<ClusterLogicRackInfo> items = clusterRegionService.listLogicClusterRacks(logicClusterId);
         if (null == logicCluster) {
             return null;
         }

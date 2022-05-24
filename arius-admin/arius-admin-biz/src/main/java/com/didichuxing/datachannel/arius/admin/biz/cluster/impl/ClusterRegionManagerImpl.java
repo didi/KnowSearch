@@ -36,7 +36,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -47,7 +47,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     private static final ILog     LOGGER = LogFactory.getLog(ClusterRegionManagerImpl.class);
 
     @Autowired
-    private RegionRackService     regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ClusterContextManager clusterContextManager;
@@ -90,7 +90,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
         //根据物理集群获取全量的region数据
-        List<ClusterRegion> clusterRegions = regionRackService.listPhyClusterRegions(phyCluster);
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
         if (CollectionUtils.isEmpty(clusterRegions)) {
             return clusterRegions;
         }
@@ -144,7 +144,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * @return
      */
     private Set<String> fetchDivideRacks(String phyClusterName, Set<String> clusterRacks) {
-        List<ClusterRegion> regions = regionRackService.listRegionsByClusterName(phyClusterName);
+        List<ClusterRegion> regions = clusterRegionService.listRegionsByClusterName(phyClusterName);
         List<String> regionRacks    = Lists.newArrayList();
         regions.forEach(region-> regionRacks.addAll(ListUtils.string2StrList(region.getRacks())));
 
@@ -207,12 +207,12 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
     @Override
     public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator) {
-        return regionRackService.unbindRegion(regionId, logicClusterId, operator);
+        return clusterRegionService.unbindRegion(regionId, logicClusterId, operator);
     }
 
     @Override
     public Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator) {
-        return regionRackService.bindRegion(regionId, logicClusterId, share, operator);
+        return clusterRegionService.bindRegion(regionId, logicClusterId, share, operator);
     }
 
     /***************************************** private method ****************************************************/
@@ -337,7 +337,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
         for (ClusterRegionDTO clusterRegionDTO : clusterRegionDTOS) {
-            Result<Void> bindRegionResult = regionRackService.bindRegion(clusterRegionDTO.getId(), param.getId(), null,
+            Result<Void> bindRegionResult = clusterRegionService.bindRegion(clusterRegionDTO.getId(), param.getId(), null,
                     operator);
             if (bindRegionResult.failed()) {
                 throw new AriusRunTimeException(bindRegionResult.getMessage(), FAIL);

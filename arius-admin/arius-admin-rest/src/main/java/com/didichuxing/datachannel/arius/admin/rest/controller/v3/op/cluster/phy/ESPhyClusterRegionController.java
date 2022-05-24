@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
@@ -50,13 +50,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(V3_OP + "/phy/cluster/region")
 @Api(tags = "ES物理集群region接口(REST)")
+@Deprecated
 public class ESPhyClusterRegionController {
 
     @Autowired
     private ClusterPhyService         clusterPhyService;
 
     @Autowired
-    private RegionRackService         regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -93,7 +94,7 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "新建物理集群region接口", notes = "")
     public Result<Long> createRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
 
-        return regionRackService.createPhyClusterRegion(param.getClusterName(), param.getRacks(), param.getShare(),
+        return clusterRegionService.createPhyClusterRegion(param.getClusterName(), param.getRacks(), param.getShare(),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -121,7 +122,7 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "删除物理集群region接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
     public Result<Void> removeRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
-        return regionRackService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
+        return clusterRegionService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/{regionId}/nodes")
@@ -129,7 +130,7 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "获取region下的节点列表", notes = "")
     public Result<List<ESClusterRoleHostVO>> getRegionNodes(@PathVariable Long regionId) {
 
-        ClusterRegion region = regionRackService.getRegionById(regionId);
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
         if (region == null) {
             return Result.buildFail("region不存在");
         }

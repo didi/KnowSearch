@@ -179,7 +179,8 @@ public class CustomDataSource {
 
     public static ClusterPhyDTO esClusterDTOFactory() {
         ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
-        esClusterDTO.setCluster("wpk_test");
+        esClusterDTO.setId(157);
+        esClusterDTO.setCluster("lyn-test-public12-08");
         esClusterDTO.setDesc("test");
         esClusterDTO.setHttpAddress("1234");
         esClusterDTO.setType(ESClusterTypeEnum.ES_DOCKER.getCode());
@@ -276,6 +277,7 @@ public class CustomDataSource {
         po.setQuota(0D);
         po.setIngestPipeline("");
         po.setWriteRateLimit(-1);
+        po.setRegionId(100);
         return po;
     }
 
@@ -305,6 +307,7 @@ public class CustomDataSource {
         esClusterRoleHostDTO.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
         esClusterRoleHostDTO.setRoleClusterId(1234L);
         esClusterRoleHostDTO.setNodeSet("");
+        esClusterRoleHostDTO.setRegionId(100);
         return esClusterRoleHostDTO;
     }
 

@@ -29,7 +29,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.region.ClusterRegionDAO;
@@ -51,31 +52,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-/**
- * @author lanxinzheng
- * @date 2021/1/2
- */
 @Service
-public class RegionRackServiceImpl implements RegionRackService {
+public class ClusterRegionServiceImpl implements ClusterRegionService {
+    private static final ILog       LOGGER           = LogFactory.getLog(ClusterRegionServiceImpl.class);
 
-    private static final ILog    LOGGER = LogFactory.getLog(RegionRackServiceImpl.class);
-
-    private static final String REGION_NOT_EXIST = "region %d 不存在";
-
-    @Autowired
-    private ClusterRegionDAO     clusterRegionDAO;
+    private static final String     REGION_NOT_EXIST = "region %d 不存在";
 
     @Autowired
-    private ClusterLogicService  clusterLogicService;
+    private ClusterRegionDAO        clusterRegionDAO;
 
     @Autowired
-    private ClusterPhyService    esClusterPhyService;
+    private ClusterLogicService     clusterLogicService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private ClusterPhyService       esClusterPhyService;
+
+    @Autowired
+    private OperateRecordService    operateRecordService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
+
+    @Autowired
+    private ClusterRoleHostService  clusterRoleHostService;
 
     /**
      *
@@ -224,7 +223,7 @@ public class RegionRackServiceImpl implements RegionRackService {
         // 创建
         boolean succeed = clusterRegionDAO.insert(clusterRegionPO) == 1;
         LOGGER.info(
-            "class=RegionRackServiceImpl||method=createPhyClusterRegion||region={}||result={}||msg=create phy cluster region",
+            "class=ClusterRegionServiceImpl||method=createPhyClusterRegion||region={}||result={}||msg=create phy cluster region",
             clusterRegionPO, succeed);
 
         if (succeed) {
@@ -236,6 +235,15 @@ public class RegionRackServiceImpl implements RegionRackService {
         }
 
         return Result.build(succeed, clusterRegionPO.getId());
+    }
+
+    @Override
+    public Result<Long> createPhyClusterRegion(String clusterName, List<Integer> nodeIds, String regionName, String operator) {
+        ClusterRegionPO clusterRegionPO = new ClusterRegionPO();
+        clusterRegionPO.setName(regionName);
+        clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
+        clusterRegionPO.setPhyClusterName(clusterName);
+        return Result.build(1 == clusterRegionDAO.insert(clusterRegionPO), clusterRegionPO.getId());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -571,6 +579,16 @@ public class RegionRackServiceImpl implements RegionRackService {
         Set<Long> logicClusterIds = Sets.newHashSet();
         clusterRegions.forEach(clusterRegion -> logicClusterIds.addAll(new HashSet<>(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))));
         return logicClusterIds;
+    }
+
+    @Override
+    public boolean isExistByRegionName(String regionName) {
+        return null != clusterRegionDAO.getByName(regionName);
+    }
+
+    @Override
+    public boolean isExistByRegionId(Integer regionId) {
+        return null != clusterRegionDAO.getById(regionId.longValue());
     }
 
     /***************************************** private method ****************************************************/

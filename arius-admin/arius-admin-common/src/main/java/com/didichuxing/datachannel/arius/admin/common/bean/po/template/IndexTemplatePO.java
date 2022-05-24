@@ -147,4 +147,9 @@ public class IndexTemplatePO extends BasePO implements DigitResponsible {
      * 是否有创建dcdr链路
      */
     private Boolean hasDCDR;
+
+    /**
+     * regionId
+     */
+    private Integer regionId;
 }

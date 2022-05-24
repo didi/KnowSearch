@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -52,7 +52,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     private LogicClusterDAO logicClusterDAO;
 
     @SpyBean
-    private RegionRackService rackService;
+    private ClusterRegionService rackService;
 
     @MockBean
     private AppService appService;
@@ -76,7 +76,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     private ESMachineNormsService esMachineNormsService;
 
     @MockBean
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ClusterLogicService clusterLogicService;
@@ -116,7 +116,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         clusterLogicRackInfo.setLogicClusterIds(id.toString());
-        Mockito.when(regionRackService.listAllLogicClusterRacks()).thenReturn(Arrays.asList(
+        Mockito.when(clusterRegionService.listAllLogicClusterRacks()).thenReturn(Arrays.asList(
 				clusterLogicRackInfo));
         Assertions.assertTrue(clusterLogicService
                 .listAllClusterLogicsWithRackInfo()
@@ -130,7 +130,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         clusterLogicRackInfo.setLogicClusterIds(id.toString());
-        Mockito.when(regionRackService.listAllLogicClusterRacks()).thenReturn(Collections.singletonList(
+        Mockito.when(clusterRegionService.listAllLogicClusterRacks()).thenReturn(Collections.singletonList(
                 clusterLogicRackInfo));
         Assertions.assertTrue(clusterLogicService.getClusterLogicWithRackInfoById(id).getItems().stream().anyMatch(esClusterLogicRackInfo1 -> ListUtils.string2LongList(esClusterLogicRackInfo1.getLogicClusterIds()).contains(id)));
     }
@@ -147,14 +147,14 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         String rack = "wpk";
         clusterLogicRackInfo.setPhyClusterName(clusterName);
         clusterLogicRackInfo.setRack(rack);
-        Mockito.when(regionRackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
+        Mockito.when(clusterRegionService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
 				clusterLogicRackInfo));
         IndexTemplatePhy indexTemplatePhy = new IndexTemplatePhy();
         indexTemplatePhy.setRack(rack);
         Mockito.when(indexTemplatePhyService.getNormalTemplateByCluster(Mockito.anyString())).thenReturn(Arrays.asList(indexTemplatePhy));
         Assertions.assertEquals(Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中").getMessage(),
                 clusterLogicService.deleteClusterLogicById(id, OPERATOR).getMessage());
-        Mockito.when(regionRackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(new ArrayList<>());
+        Mockito.when(clusterRegionService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(new ArrayList<>());
         Mockito.when(rackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(new ArrayList<>());
         Assertions.assertTrue(clusterLogicService.deleteClusterLogicById(id, OPERATOR).success());
     }
