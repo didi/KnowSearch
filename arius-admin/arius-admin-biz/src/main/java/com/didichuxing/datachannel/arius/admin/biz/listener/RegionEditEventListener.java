@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_INDEX_INCLUDE_RACK;
 
 import java.util.*;
 
@@ -164,7 +163,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     private void updateTemplateAllocationSetting(String cluster, String templateName,
                                                  Set<String> nodeNames) throws ESOperateException {
         Map<String, String> setting = new HashMap<>(16);
-        setting.put(TEMPLATE_INDEX_INCLUDE_RACK, String.join(COMMA, nodeNames));
+        setting.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(COMMA, nodeNames));
         boolean response = esTemplateService.syncUpsertSetting(cluster, templateName, setting, RETRY_COUNT);
         if (!response) {
             LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
