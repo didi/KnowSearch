@@ -33,6 +33,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(V2_OP + "/config")
 @Api(tags = "运维配置接口(REST)")
+@Deprecated
 public class AriusConfigController {
 
     @Autowired
@@ -54,11 +55,11 @@ public class AriusConfigController {
             HttpRequestUtils.getOperator(request));
     }
 
-    @DeleteMapping("/del")
+    @DeleteMapping("/{id}")
     @ResponseBody
     @ApiOperation(value = "删除配置接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "id", value = "配置ID", required = true) })
-    public Result<Void> delete(HttpServletRequest request, @RequestParam(value = "id") Integer id) {
+    public Result<Void> delete(HttpServletRequest request, @PathVariable Integer id) {
         return ariusConfigInfoService.delConfig(id, HttpRequestUtils.getOperator(request));
     }
 

@@ -54,11 +54,11 @@ public class AriusConfigV3Controller {
             HttpRequestUtils.getOperator(request));
     }
 
-    @DeleteMapping("/del")
+    @DeleteMapping("/{id}")
     @ResponseBody
     @ApiOperation(value = "删除配置接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "id", value = "配置ID", required = true) })
-    public Result<Void> deleteConfig(HttpServletRequest request, @RequestParam(value = "id") Integer id) {
+    public Result<Void> deleteConfig(HttpServletRequest request, @PathVariable Integer id) {
         return ariusConfigInfoService.delConfig(id, HttpRequestUtils.getOperator(request));
     }
 

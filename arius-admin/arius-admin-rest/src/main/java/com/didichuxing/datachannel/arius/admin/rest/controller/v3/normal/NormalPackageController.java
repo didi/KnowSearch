@@ -47,7 +47,7 @@ public class NormalPackageController {
         return packageManager.addESPackage(esPackageDTO, HttpRequestUtils.getOperator(request));
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "修改程序包接口", notes = "")
     public Result<ESPackageVO> updatePackage(HttpServletRequest request, ESPackageDTO esPackageDTO) {
