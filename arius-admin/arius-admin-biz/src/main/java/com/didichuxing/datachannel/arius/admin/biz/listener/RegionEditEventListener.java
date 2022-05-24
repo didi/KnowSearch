@@ -110,6 +110,12 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
 
     }
 
+    /**
+     * 构建集群->模板名的map
+     * @param clusterTemplateMap 集群模板map
+     * @param clusterRegion 集群region
+     * @param logicClusterIds  逻辑集群ids
+     */
     private void buildClusterTemplateMap(Map<String, Set<String>> clusterTemplateMap, ClusterRegion clusterRegion, String logicClusterIds) {
         Arrays.stream(logicClusterIds.split(COMMA)).forEach(logicClusterId -> {
             List<IndexTemplate> indexTemplates = indexTemplateService
