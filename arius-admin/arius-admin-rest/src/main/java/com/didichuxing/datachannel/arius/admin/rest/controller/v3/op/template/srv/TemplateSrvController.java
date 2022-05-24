@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -51,13 +51,12 @@ public class TemplateSrvController {
         return templateSrvManager.closeSrv(srvCode, templateIdList);
     }
 
-    /**
     @PostMapping("/checkAvailable/{srvCode}/{templateIdList}")
     @ResponseBody
     @ApiOperation(value = "检查模板服务是否可用")
-    public Result<Void> checkTemplateSrvAvailable(@PathVariable("srvCode") Integer srvCode,
-                                                  @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.checkSrvAvailable(srvCode, templateIdList);
+    public Result<List<TemplateWithSrvVO>> checkAvailable(@PathVariable("srvCode") Integer srvCode,
+                                                          @PathVariable("templateIdList") List<Integer> templateIdList) {
+        return templateSrvManager.checkAvailable(srvCode, templateIdList);
     }
-     */
+
 }

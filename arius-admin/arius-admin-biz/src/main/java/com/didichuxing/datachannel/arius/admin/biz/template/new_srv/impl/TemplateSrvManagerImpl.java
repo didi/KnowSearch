@@ -114,6 +114,11 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
+    public Result<List<TemplateWithSrvVO>> checkAvailable(Integer srvCode, List<Integer> logicTemplateIdList) {
+        return Result.buildFail();
+    }
+
+    @Override
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateSrvQueryDTO condition) {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(TEMPLATE_SRV.getPageSearchType());
         if (baseHandle instanceof TemplateSrvPageSearchHandle) {

@@ -1,10 +1,12 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template.srv;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalRackDTO;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,20 +20,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(V3_OP + "/template/logic/dcdr")
-@Api(tags = "模板Dcdr接口(REST)")
-public class TemplateLogicDCDRV3Controller {
+@RequestMapping(V3_OP + "/template/srv/dcdr")
+@Api(tags = "模板DCDR接口(REST)")
+public class TemplateDCDRController {
 
     @Autowired
     private TemplateDCDRManager templateDCDRManager;
-
-    @PostMapping("/{templateId}/{targetCluster}")
-    @ResponseBody
-    @ApiOperation(value = "DCDR链路创建接口", notes = "")
-    public Result<Void> createDCDR(HttpServletRequest request, @PathVariable("templateId") Integer templateId,
-                                   @PathVariable("targetCluster") String targetCluster, @RequestBody TemplatePhysicalRackDTO templatePhysicalRackDTO) throws AdminOperateException {
-        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, templatePhysicalRackDTO.getRack(), HttpRequestUtils.getOperator(request));
-    }
 
     @GetMapping("/{templateId}/dcdrInfo")
     @ResponseBody
@@ -39,4 +33,5 @@ public class TemplateLogicDCDRV3Controller {
     public Result<TemplateDCDRInfoVO> getTemplateDCDRInfo(@PathVariable("templateId") Integer templateId) {
         return templateDCDRManager.getTemplateDCDRInfoVO(templateId);
     }
+
 }
