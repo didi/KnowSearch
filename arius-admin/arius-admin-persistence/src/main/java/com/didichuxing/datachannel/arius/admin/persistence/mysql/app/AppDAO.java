@@ -9,8 +9,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 /**
  * @author linyunan
  * @date 2021-04-28
+ * @deprecated 引入多租户体系后续进行下线删除
  */
 @Repository
+@Deprecated
 public interface AppDAO {
 
     /**

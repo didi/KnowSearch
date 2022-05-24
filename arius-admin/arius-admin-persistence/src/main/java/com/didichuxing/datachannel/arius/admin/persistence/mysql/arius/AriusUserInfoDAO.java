@@ -9,8 +9,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInf
 /**
  * @author d06679
  * @date 2018/8/27
+ * @deprecated 引入多租户体系后续进行下线删除
  */
 @Repository
+@Deprecated
 public interface AriusUserInfoDAO {
 
     int insert(AriusUserInfoPO param);

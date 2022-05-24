@@ -12,7 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUse
  *
  * @author d06679
  * @date 2018/8/27
+ * @deprecated 引入多租户体系后续进行下线删除
  */
+@Deprecated
 public interface AriusUserInfoService {
 
     /**
