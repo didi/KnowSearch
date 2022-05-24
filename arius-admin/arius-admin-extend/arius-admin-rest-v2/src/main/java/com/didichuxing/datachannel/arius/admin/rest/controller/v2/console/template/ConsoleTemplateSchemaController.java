@@ -74,7 +74,7 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     public Result<Void> modifySchema(HttpServletRequest request,
                                @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
 
-        Result<Void> checkAuthResult = checkAppAuth(schemaDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(schemaDTO.getLogicId(), HttpRequestUtils.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }

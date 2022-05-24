@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -129,14 +128,14 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "根据AppId获取逻辑集群下的物理集群名称")
     public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getProjectId(request)));
     }
 
     @GetMapping("/{templateId}/sameversion/clusternames")
     @ResponseBody
     @ApiOperation(value = "根据模板所在集群，获取与该集群相同版本号的集群名称列表")
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(HttpServletRequest request, @PathVariable Integer templateId) {
-        return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(HttpRequestUtils.getAppId(request), templateId);
+        return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(HttpRequestUtils.getProjectId(request), templateId);
     }
 
     @GetMapping("/{clusterPhyName}/nodes")
@@ -150,7 +149,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
     public Result<List<String>> getAppNodeNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getAppNodeNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.getAppNodeNames(HttpRequestUtils.getProjectId(request)));
     }
 
     @PostMapping("/page")
@@ -158,7 +157,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "条件获取物理集群列表")
     public PaginationResult<ConsoleClusterPhyVO> pageGetConsoleClusterPhyVOS(HttpServletRequest request,
                                                                          @RequestBody ClusterPhyConditionDTO condition) {
-        return clusterPhyManager.pageGetConsoleClusterPhyVOS(condition, HttpRequestUtils.getAppId(request));
+        return clusterPhyManager.pageGetConsoleClusterPhyVOS(condition, HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("/{clusterPhyId}/overView")
@@ -166,7 +165,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "获取物理集群概览信息接口")
     @ApiImplicitParam(type = "Integer", name = "clusterPhyId", value = "物理集群ID", required = true)
     public Result<ConsoleClusterPhyVO> get(@PathVariable("clusterPhyId") Integer clusterId, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhy(clusterId, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhy(clusterId, HttpRequestUtils.getProjectId(request)));
     }
 
     @GetMapping("/{clusterLogicType}/{clusterName}/version/list")

@@ -43,7 +43,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板名称列表接口")
     public Result<List<String>> listTemplateLogicNames(HttpServletRequest request) {
-        return Result.buildSucc(templateLogicManager.getTemplateLogicNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(templateLogicManager.getTemplateLogicNames(HttpRequestUtils.getProjectId(request)));
     }
 
     @PostMapping("/page")
@@ -51,7 +51,7 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "模糊查询模板列表")
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(HttpServletRequest request,
                                                                          @RequestBody TemplateConditionDTO condition) {
-        return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtils.getAppId(request));
+        return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("/{templateName}/nameCheck")
@@ -99,7 +99,7 @@ public class TemplateLogicV3Controller {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true)})
     public Result<Void> customizeSetting(HttpServletRequest request,
                                       @RequestBody TemplateSettingDTO settingDTO) throws AdminOperateException {
-        Result<Void> checkAuthResult = templateLogicManager.checkAppAuthOnLogicTemplate(settingDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = templateLogicManager.checkAppAuthOnLogicTemplate(settingDTO.getLogicId(), HttpRequestUtils.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -120,6 +120,6 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,
                                                                       @RequestParam("cluster") String cluster) {
-        return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getAppId(request));
+        return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getProjectId(request));
     }
 }

@@ -38,7 +38,7 @@ public class DslMetricsController {
     public Result<List<DslTemplateVO>> listByAppid(@RequestParam(value = "appId", required = false) Integer appId,
                                                    @RequestParam(value = "startDate") Long startDate,
                                                    @RequestParam(value = "endDate") Long endDate, HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtils.getAppId(request) : appId;
+        appId = appId == null ? HttpRequestUtils.getProjectId(request) : appId;
         return dslMetricsManager.getDSLMetricsInfoByAppId(appId, startDate, endDate);
     }
 
@@ -54,7 +54,7 @@ public class DslMetricsController {
                                                        @RequestParam(value = "dslTemplateMd5") String dslTemplateMd5,
                                                        @RequestParam(value = "startDate") Long startDate, @RequestParam(value = "endDate") Long endDate,
                                                        HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtils.getAppId(request) : appId;
+        appId = appId == null ? HttpRequestUtils.getProjectId(request) : appId;
         return dslMetricsManager.getDetailMetrics(appId, dslTemplateMd5, startDate, endDate);
     }
 
@@ -77,7 +77,7 @@ public class DslMetricsController {
                                                               @RequestParam(value = "from") Long from, @RequestParam(value = "size") Long size,
                                                               @RequestParam(value = "startDate") Long startDate, @RequestParam(value = "endDate") Long endDate,
                                                               HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtils.getAppId(request) : appId;
+        appId = appId == null ? HttpRequestUtils.getProjectId(request) : appId;
         return dslMetricsManager.getDslTemplateByCondition(appId, searchKeyword, dslTag, sortInfo, from, size,
             startDate, endDate);
     }

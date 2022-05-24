@@ -128,7 +128,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getAppId()));
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
 
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getProjectId(request));
         consoleTemplateDetail.setEditable(checkAuthResult.success());
         // 获取indexRollover功能开启状态
         consoleTemplateDetail.setDisableIndexRollover(indexTemplateService.getTemplateConfig(logicId).getDisableIndexRollover());
@@ -196,7 +196,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
                                             @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtils.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -237,7 +237,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<Void> deleteTemplate(HttpServletRequest request,
                                  @RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }

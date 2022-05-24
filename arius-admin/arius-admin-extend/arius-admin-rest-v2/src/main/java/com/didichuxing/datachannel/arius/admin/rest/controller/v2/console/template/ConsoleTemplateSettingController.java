@@ -33,7 +33,7 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
     public Result<Void> modifySetting(HttpServletRequest request,
                                 @RequestBody ConsoleTemplateSettingDTO settingDTO) throws AdminOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(settingDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(settingDTO.getLogicId(), HttpRequestUtils.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }

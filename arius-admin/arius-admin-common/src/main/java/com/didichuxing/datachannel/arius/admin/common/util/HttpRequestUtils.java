@@ -5,9 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
-import java.util.List;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,9 +21,9 @@ public class HttpRequestUtils {
 
     public static final String  USER           = "X-SSO-USER";
 
-    public static final String  PASSWORD       = "password";
+    
 
-    public static final String  APP_ID          = "X-ARIUS-APP-ID";
+    public static final String PROJECT_ID = "X-ARIUS-PROJECT-ID";
 
     public static String getFromHeader(HttpServletRequest request, String key, String defaultValue) {
         Object value = request.getHeader(key);
@@ -37,21 +34,7 @@ public class HttpRequestUtils {
         return getOperatorFromHeader(request);
     }
 
-    @Deprecated
-    public static String getPasswordFromCookies(HttpServletRequest request) {
-        List<String> passwords = Lists.newArrayList();
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (PASSWORD.equals(cookie.getName())) {
-                passwords.add(cookie.getValue());
-            }
-        }
-
-        if (AriusObjUtils.isEmptyList(passwords)) {
-            throw new OperateForbiddenException("请在请求cookie中携带用户密码:password");
-        }
-        return passwords.get(0);
-    }
+    
 
     public static String getOperatorFromHeader(HttpServletRequest request) {
         Object value = request.getHeader(USER);
@@ -61,27 +44,27 @@ public class HttpRequestUtils {
         return String.valueOf(value);
     }
 
-    public static Integer getAppId(HttpServletRequest request, int defaultAppid) {
-        String appidStr = request.getHeader(APP_ID);
+    public static Integer getProjectId(HttpServletRequest request, int defaultProjectId) {
+        String appidStr = request.getHeader(PROJECT_ID);
 
         if (StringUtils.isBlank(appidStr)) {
-            return defaultAppid;
+            return defaultProjectId;
         }
 
         return Integer.valueOf(appidStr);
     }
 
-    public static Integer getAppId(HttpServletRequest request) {
-        String appidStr = request.getHeader(APP_ID);
+    public static Integer getProjectId(HttpServletRequest request) {
+        String projectIdStr = request.getHeader(PROJECT_ID);
 
-        if (StringUtils.isBlank(appidStr)) {
+        if (StringUtils.isBlank(projectIdStr)) {
             return DEFAULT_APP_ID;
         }
 
         try {
-            return Integer.valueOf(appidStr);
+            return Integer.valueOf(projectIdStr);
         } catch (Exception e) {
-            LOGGER.warn("class=HttpRequestUtils||method=getAppId||errMsg={}||appidStr={}", e.getMessage(), appidStr, e);
+            LOGGER.warn("class=HttpRequestUtils||method=getProjectId||errMsg={}||projectIdStr={}", e.getMessage(), projectIdStr, e);
         }
 
         return null;

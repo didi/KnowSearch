@@ -151,7 +151,7 @@ public class CapacityPlanV3Controller {
                                                    @RequestParam("phyClusterName") String phyClusterName) {
 
         return templateSrvManager.delTemplateSrv(phyClusterName,
-            TemplateServiceEnum.TEMPLATE_CAPA_PLAN.getCode().toString(), HttpRequestUtils.getOperator(request));
+            TemplateServiceEnum.TEMPLATE_CAPA_PLAN.getCode().toString(), HttpRequestUtils.getOperator(request) );
     }
 
 }

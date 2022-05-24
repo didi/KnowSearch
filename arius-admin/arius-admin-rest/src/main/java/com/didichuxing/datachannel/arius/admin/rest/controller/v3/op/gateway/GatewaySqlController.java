@@ -28,7 +28,7 @@ public class GatewaySqlController {
     public Result<String> directSqlSearch(@RequestBody String sql,
                                           @PathVariable(required = false) String phyClusterName,
                                           HttpServletRequest request) {
-        return gatewayManager.directSqlSearch(sql, phyClusterName, HttpRequestUtils.getAppId(request));
+        return gatewayManager.directSqlSearch(sql, phyClusterName, HttpRequestUtils.getProjectId(request));
     }
 
     @PostMapping("/explain")

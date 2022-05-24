@@ -42,7 +42,7 @@ public class TemplatePhysicalV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取物理模板名称列表接口")
     public Result<List<String>> listTemplatePhyNames(HttpServletRequest request) {
-        return Result.buildSucc(templatePhyManager.getTemplatePhyNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(templatePhyManager.getTemplatePhyNames(HttpRequestUtils.getProjectId(request)));
     }
 
     @GetMapping("/{templatePhyId}/copyClusterPhyNames")

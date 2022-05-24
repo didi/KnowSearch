@@ -41,7 +41,7 @@ public class DslTemplateController {
     @PostMapping("/page")
     @ApiOperation(value = "分页获取DSL模版信息", notes = "根据一些条件分页获取DSL模版信息")
     public PaginationResult<DslTemplateVO> page(@RequestBody DslTemplateConditionDTO query, HttpServletRequest request) {
-        return dslTemplateManager.getDslTemplatePage(HttpRequestUtils.getAppId(request), query);
+        return dslTemplateManager.getDslTemplatePage(HttpRequestUtils.getProjectId(request), query);
     }
 
     @GetMapping(path = "/detail/{dslTemplateMd5}")
@@ -49,7 +49,7 @@ public class DslTemplateController {
     @ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5", required = true)
     public Result<DslTemplateVO> getDetailTemplate(@PathVariable(value = "dslTemplateMd5") String dslTemplateMd5,
                                                    HttpServletRequest request) {
-        return dslTemplateManager.getDslTemplateDetail(HttpRequestUtils.getAppId(request), dslTemplateMd5);
+        return dslTemplateManager.getDslTemplateDetail(HttpRequestUtils.getProjectId(request), dslTemplateMd5);
     }
 
     @PutMapping(path = "/change/status/{dslTemplateMd5}")
@@ -57,7 +57,7 @@ public class DslTemplateController {
     @ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5List", required = true)
     public Result<Boolean> changeStatus(@PathVariable(value = "dslTemplateMd5") String dslTemplateMd5,
                                         HttpServletRequest request) {
-        return dslTemplateManager.changeDslTemplateStatus(HttpRequestUtils.getAppId(request), dslTemplateMd5);
+        return dslTemplateManager.changeDslTemplateStatus(HttpRequestUtils.getProjectId(request), dslTemplateMd5);
     }
 
     @PutMapping(path = "/update/queryLimit")
@@ -69,20 +69,20 @@ public class DslTemplateController {
     public Result<Boolean> updateQueryLimit(@RequestParam(value = "dslTemplateMd5List") List<String> dslTemplateMd5List,
                                        @RequestParam(value = "queryLimit") Double queryLimit,
                                        HttpServletRequest request) {
-        return dslTemplateManager.updateDslTemplateQueryLimit(HttpRequestUtils.getAppId(request), dslTemplateMd5List, queryLimit);
+        return dslTemplateManager.updateDslTemplateQueryLimit(HttpRequestUtils.getProjectId(request), dslTemplateMd5List, queryLimit);
     }
 
     @PostMapping(path = "/slow/list")
     @ApiOperation(value = "dsl慢查询列表", notes = "根据指定页获取dsl慢查询列表")
     public Result<List<GatewayJoinVO>> slowList(@RequestBody GatewayJoinQueryDTO queryDTO,
                                                 HttpServletRequest request) {
-        return gatewayJoinLogManager.getGatewayJoinSlowList(HttpRequestUtils.getAppId(request), queryDTO);
+        return gatewayJoinLogManager.getGatewayJoinSlowList(HttpRequestUtils.getProjectId(request), queryDTO);
     }
 
     @PostMapping(path = "/error/list")
     @ApiOperation(value = "dsl异常查询列表", notes = "根据指定条件获取dsl异常查询列表")
     public Result<List<GatewayJoinVO>> errorList(@RequestBody GatewayJoinQueryDTO queryDTO,
                                                  HttpServletRequest request) {
-        return gatewayJoinLogManager.getGatewayJoinErrorList(HttpRequestUtils.getAppId(request), queryDTO);
+        return gatewayJoinLogManager.getGatewayJoinErrorList(HttpRequestUtils.getProjectId(request), queryDTO);
     }
 }

@@ -126,7 +126,7 @@ public class LoginServiceImpl implements LoginService {
         }
 
         String operator = HttpRequestUtils.getOperator(request);
-        Integer appId = HttpRequestUtils.getAppId(request);
+        Integer appId = HttpRequestUtils.getProjectId(request);
         // 登陆成功后, 设置session属性, 后续操作人从该session中获取
         HttpSession session = request.getSession();
         session.setMaxInactiveInterval(COOKIE_OR_SESSION_MAX_AGE_UNIT_MS);

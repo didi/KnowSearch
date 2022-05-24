@@ -40,21 +40,21 @@ public class ESIndicesController {
     @ResponseBody
     @ApiOperation(value = "分页获取索引列表信息", notes = "携带可读可写标志位")
     public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(HttpServletRequest request, @RequestBody IndicesConditionDTO condition) {
-        return indicesManager.pageGetIndexCatInfoVO(condition, HttpRequestUtils.getAppId(request));
+        return indicesManager.pageGetIndexCatInfoVO(condition, HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("/select")
     @ResponseBody
     @ApiOperation(value = "获取单个索引的详情信息")
     public Result<IndexCatCellVO> getIndexCatInfoVO(HttpServletRequest request, @RequestParam String clusterPhyName, @RequestParam String indexName) {
-        return indicesManager.getIndexCatInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indicesManager.getIndexCatInfo(clusterPhyName, indexName, HttpRequestUtils.getProjectId(request));
     }
 
     @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "批量删除索引")
     public Result<Boolean> delete(@RequestBody List<IndicesClearDTO> params, HttpServletRequest request) {
-        return indicesManager.batchDeleteIndex(params, HttpRequestUtils.getAppId(request),
+        return indicesManager.batchDeleteIndex(params, HttpRequestUtils.getProjectId(request),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -62,7 +62,7 @@ public class ESIndicesController {
     @ResponseBody
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> close(@RequestBody List<IndicesOpenOrCloseDTO> params, HttpServletRequest request) {
-        return indicesManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
+        return indicesManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getProjectId(request),
                 HttpRequestUtils.getOperator(request));
     }
 
@@ -70,7 +70,7 @@ public class ESIndicesController {
     @ResponseBody
     @ApiOperation(value = "开启索引")
     public Result<Boolean> open(@RequestBody List<IndicesOpenOrCloseDTO> params, HttpServletRequest request) {
-        return indicesManager.batchUpdateIndexStatus(params, true, HttpRequestUtils.getAppId(request),
+        return indicesManager.batchUpdateIndexStatus(params, true, HttpRequestUtils.getProjectId(request),
                 HttpRequestUtils.getOperator(request));
     }
 
@@ -79,7 +79,7 @@ public class ESIndicesController {
     @ApiOperation(value = "批量编辑索引阻塞设置")
     public Result<Boolean> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
                                                  HttpServletRequest request) {
-        return indicesManager.batchEditIndexBlockSetting(params, HttpRequestUtils.getAppId(request),
+        return indicesManager.batchEditIndexBlockSetting(params, HttpRequestUtils.getProjectId(request),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -88,7 +88,7 @@ public class ESIndicesController {
     @ApiOperation(value = "获取索引shard分配详情")
     public Result<List<IndexShardInfoVO>> getIndexShard(@PathVariable String clusterPhyName,
                                                         @PathVariable String indexName, HttpServletRequest request) {
-        return indicesManager.getIndexShardsInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indicesManager.getIndexShardsInfo(clusterPhyName, indexName, HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("{clusterPhyName}/{indexName}/mapping")
@@ -96,7 +96,7 @@ public class ESIndicesController {
     @ApiOperation(value = "获取索引mapping信息")
     public Result<IndexMappingVO> mapping(@PathVariable String clusterPhyName, @PathVariable String indexName,
                                           HttpServletRequest request) {
-        return indicesManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indicesManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("{clusterPhyName}/{indexName}/setting")
@@ -104,6 +104,6 @@ public class ESIndicesController {
     @ApiOperation(value = "获取模板setting信息")
     public Result<IndexSettingVO> setting(@PathVariable String clusterPhyName, @PathVariable String indexName,
                                           HttpServletRequest request) {
-        return indicesManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indicesManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getProjectId(request));
     }
 }

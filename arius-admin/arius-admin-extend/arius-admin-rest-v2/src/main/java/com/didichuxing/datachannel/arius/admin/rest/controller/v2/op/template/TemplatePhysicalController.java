@@ -46,7 +46,7 @@ public class TemplatePhysicalController {
     @ApiOperation(value = "获取物理模板列表接口")
     public Result<List<ConsoleTemplatePhyVO>> list(@RequestBody IndexTemplatePhyDTO param,
                                                    HttpServletRequest request) {
-        return Result.buildSucc(templatePhyManager.getConsoleTemplatePhyVOS(param, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(templatePhyManager.getConsoleTemplatePhyVOS(param, HttpRequestUtils.getProjectId(request)));
     }
 
     @DeleteMapping("/del")

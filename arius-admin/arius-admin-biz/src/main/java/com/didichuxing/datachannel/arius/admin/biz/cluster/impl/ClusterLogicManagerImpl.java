@@ -405,7 +405,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         List<ConsoleTemplateVO> result = new ArrayList<>();
 
-        Integer appId = HttpRequestUtils.getAppId(request, AdminConstant.DEFAULT_APP_ID);
+        Integer appId = HttpRequestUtils.getProjectId(request, AdminConstant.DEFAULT_APP_ID);
         List<IndexTemplateLogicAggregate> aggregates =templateLogicManager.getLogicClusterTemplatesAggregate(clusterId,
                 appId);
         if (CollectionUtils.isNotEmpty(aggregates)) {

@@ -50,7 +50,7 @@ public class ESLogicClusterController {
 
     public Result<List<ConsoleClusterVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
                                                                 HttpServletRequest request) {
-        return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtils.getProjectId(request)));
     }
 
     @GetMapping("/resource/get")
@@ -61,7 +61,7 @@ public class ESLogicClusterController {
     public Result<ConsoleClusterVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
                                                         HttpServletRequest request) {
         return Result.buildSucc(
-            clusterLogicManager.getConsoleClusterVOByIdAndAppId(resourceId, HttpRequestUtils.getAppId(request)));
+            clusterLogicManager.getConsoleClusterVOByIdAndAppId(resourceId, HttpRequestUtils.getProjectId(request)));
     }
 
     @DeleteMapping("/resource/del")
@@ -72,7 +72,7 @@ public class ESLogicClusterController {
     public Result<Void> deleteLogicClusterById(HttpServletRequest request,
                                          @RequestParam(value = "resourceId") Long resourceId) throws AdminOperateException {
         return clusterLogicManager.deleteLogicCluster(resourceId, HttpRequestUtils.getOperator(request),
-            HttpRequestUtils.getAppId(request));
+            HttpRequestUtils.getProjectId(request));
     }
 
     @PutMapping("/resource/add")
@@ -81,7 +81,7 @@ public class ESLogicClusterController {
 
     public Result<Long> createLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.addLogicCluster(param, HttpRequestUtils.getOperator(request),
-            HttpRequestUtils.getAppId(request));
+            HttpRequestUtils.getProjectId(request));
     }
 
     @PostMapping("/resource/edit")
@@ -89,7 +89,7 @@ public class ESLogicClusterController {
     @ApiOperation(value = "编辑逻辑集群接口" )
 
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("/logic/cluster/nodes")

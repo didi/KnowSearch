@@ -52,7 +52,7 @@ public class GatewayMetricsController {
     @GetMapping("/dslMd5/list")
     @ApiOperation(value = "获取当前项目下的dslMd5列表", notes = "")
     public Result<List<String>> getDslMd5List(Long startTime, Long endTime, HttpServletRequest request) {
-        return gatewayMetricsManager.getDslMd5List(HttpRequestUtils.getAppId(request), startTime, endTime);
+        return gatewayMetricsManager.getDslMd5List(HttpRequestUtils.getProjectId(request), startTime, endTime);
     }
 
     @PostMapping("/overview")
@@ -67,7 +67,7 @@ public class GatewayMetricsController {
     public Result<List<VariousLineChartMetricsVO>> getGatewayNodeMetrics(@RequestBody GatewayNodeDTO dto,
                                                                          HttpServletRequest request) {
         validateParam(dto);
-        return gatewayMetricsManager.getGatewayNodeMetrics(dto, HttpRequestUtils.getAppId(request));
+        return gatewayMetricsManager.getGatewayNodeMetrics(dto, HttpRequestUtils.getProjectId(request));
     }
 
     @PostMapping("/nodes")
@@ -75,7 +75,7 @@ public class GatewayMetricsController {
     public Result<List<VariousLineChartMetricsVO>> getMultiGatewayNodesMetrics(@RequestBody MultiGatewayNodesDTO dto,
                                                                                HttpServletRequest request) {
         validateParam(dto);
-        return gatewayMetricsManager.getMultiGatewayNodesMetrics(dto, HttpRequestUtils.getAppId(request));
+        return gatewayMetricsManager.getMultiGatewayNodesMetrics(dto, HttpRequestUtils.getProjectId(request));
     }
 
     @PostMapping("/node/client")
@@ -83,14 +83,14 @@ public class GatewayMetricsController {
     public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(@RequestBody ClientNodeDTO dto,
                                                                          HttpServletRequest request) {
         validateParam(dto);
-        return gatewayMetricsManager.getClientNodeMetrics(dto, HttpRequestUtils.getAppId(request));
+        return gatewayMetricsManager.getClientNodeMetrics(dto, HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("/node/client/list")
     @ApiOperation(value = "获取取gatewayNode相关的clientNode ip列表")
     public Result<List<String>> getClientNodeIpList(String gatewayNode, Long startTime,
                                                     Long endTime, HttpServletRequest request) {
-        return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime, HttpRequestUtils.getAppId(request));
+        return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime, HttpRequestUtils.getProjectId(request));
     }
 
     @PostMapping("/index")
@@ -98,7 +98,7 @@ public class GatewayMetricsController {
     public Result<List<VariousLineChartMetricsVO>> getGatewayIndexMetrics(@RequestBody GatewayIndexDTO dto,
                                                                           HttpServletRequest request) {
         validateParam(dto);
-        return gatewayMetricsManager.getGatewayIndexMetrics(dto, HttpRequestUtils.getAppId(request));
+        return gatewayMetricsManager.getGatewayIndexMetrics(dto, HttpRequestUtils.getProjectId(request));
     }
 
     @PostMapping("/app")
@@ -114,7 +114,7 @@ public class GatewayMetricsController {
     public Result<List<VariousLineChartMetricsVO>> getGatewayDslMetrics(@RequestBody GatewayDslDTO dto,
                                                                         HttpServletRequest request) {
         validateParam(dto);
-        return gatewayMetricsManager.getGatewayDslMetrics(dto, HttpRequestUtils.getAppId(request));
+        return gatewayMetricsManager.getGatewayDslMetrics(dto, HttpRequestUtils.getProjectId(request));
     }
 
     private void validateParam(GatewayMetricsDTO dto) {

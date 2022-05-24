@@ -54,7 +54,7 @@ public class LoginController {
     @ResponseBody
     @ApiOperation(value = "注册")
     public Result<Long> register(@RequestBody AriusUserInfoDTO userInfoDTO, HttpServletRequest request) {
-        return loginManager.register(userInfoDTO, HttpRequestUtils.getAppId(request));
+        return loginManager.register(userInfoDTO, HttpRequestUtils.getProjectId(request));
     }
 
     @GetMapping("/publicKey")

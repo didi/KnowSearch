@@ -54,6 +54,6 @@ public class ClusterLogicTemplateSrvController {
     public Result<Boolean> delTemplateSrvId(HttpServletRequest request, @PathVariable Long clusterLogicId,
                                             @PathVariable String templateSrvId) {
         return templateSrvManager.delTemplateSrvForClusterLogic(clusterLogicId, templateSrvId,
-            HttpRequestUtils.getOperator(request));
+            HttpRequestUtils.getOperator(request) );
     }
 }
