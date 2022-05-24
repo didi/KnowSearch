@@ -36,7 +36,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -78,7 +78,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     private ClusterPhyService              clusterPhyService;
 
     @Autowired
-    private RegionRackService              regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -284,7 +284,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         }
 
         // regionk信息按【cluster】分组
-        List<ClusterRegion> clusterRegionList = regionRackService.listAllBoundRegions();
+        List<ClusterRegion> clusterRegionList = clusterRegionService.listAllBoundRegions();
         Map<String/*phyClusterName*/, List<ClusterRegion>> phyClusterName2ClusterLogicRackListMap = ConvertUtil.
                 list2MapOfList(clusterRegionList, ClusterRegion::getPhyClusterName, clusterRegion -> clusterRegion);
 
@@ -446,7 +446,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     @NotNull
     private Map<Long, List<ClusterRegion>> getClusterLogicId2ClusterRegionListMap() {
         // Rack信息按【逻辑集群Ids】分组
-        List<ClusterRegion> clusterRegionList = regionRackService.listAllBoundRegions();
+        List<ClusterRegion> clusterRegionList = clusterRegionService.listAllBoundRegions();
         Map<String/*clusterLogicIds 逗号分隔*/, List<ClusterRegion>> clusterLogicIds2ClusterLogicRackListMap = ConvertUtil.
                 list2MapOfList(clusterRegionList, ClusterRegion::getLogicClusterIds, clusterRegion -> clusterRegion);
 
@@ -512,7 +512,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     }
 
     private void setAssociatedClusterPhyInfo(ClusterLogicContext build) {
-        List<String> clusterPhyNames = regionRackService.listPhysicClusterNames(build.getClusterLogicId());
+        List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(build.getClusterLogicId());
         if (build.getAssociatedPhyNumMax() < clusterPhyNames.size()) {
             LOGGER.error("class=ClusterContextManagerImpl||method=setAssociatedClusterPhyInfo"
                          + "||logicClusterType={}||esClusterLogicId={}||msg=集群间关联超过最大限制数{}, 请纠正",
@@ -526,7 +526,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
 
     private void setRegionAndAssociatedClusterPhyDataNodeInfo(ClusterLogicContext build) {
         //获取逻辑集群已关联的Region信息
-        List<ClusterRegion> regions = regionRackService.listLogicClusterRegions(build.getClusterLogicId());
+        List<ClusterRegion> regions = clusterRegionService.listLogicClusterRegions(build.getClusterLogicId());
         build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
 
         //获取逻辑集群关联region下的rack节点信息
@@ -545,7 +545,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
 
     private void setRegionAndClusterLogicInfoAndAppId(ClusterPhyContext build) {
         // 1. set region
-        List<ClusterRegion> regions = regionRackService.listPhyClusterRegions(build.getClusterName());
+        List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(build.getClusterName());
         build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
 
         // 2. set ClusterLogicInfo
@@ -637,7 +637,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
      * @return
      */
     private boolean canClusterLogicBoundRegion(Long regionId, String clusterPhyName, Long clusterLogicId) {
-        ClusterRegion region                =  regionRackService.getRegionById(regionId);
+        ClusterRegion region                =  clusterRegionService.getRegionById(regionId);
         ClusterPhyContext clusterPhyContext =  getClusterPhyContext(clusterPhyName);
         List<Long> clusterLogicIds          =  clusterPhyContext.getAssociatedClusterLogicIds();
         if (CollectionUtils.isNotEmpty(clusterLogicIds) && !clusterLogicIds.contains(clusterLogicId)) {

@@ -179,7 +179,8 @@ public class CustomDataSource {
 
     public static ClusterPhyDTO esClusterDTOFactory() {
         ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
-        esClusterDTO.setCluster("wpk_test");
+        esClusterDTO.setId(157);
+        esClusterDTO.setCluster("lyn-test-public12-08");
         esClusterDTO.setDesc("test");
         esClusterDTO.setHttpAddress("1234");
         esClusterDTO.setType(ESClusterTypeEnum.ES_DOCKER.getCode());

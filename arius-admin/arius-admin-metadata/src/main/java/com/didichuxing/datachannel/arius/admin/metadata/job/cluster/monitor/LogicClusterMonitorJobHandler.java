@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterLogicStaticsService;
@@ -50,7 +50,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     @Autowired
     private ESClusterLogicStaticsService clusterLogicStaticsService;
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     private final String hostName = HttpHostUtil.HOST_NAME;
 
@@ -80,7 +80,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     private void doHandleLogicClusterStats(Set<String> monitorClusterSet) {
         List<ESClusterStats> esLogicClusterStatsList = Lists.newCopyOnWriteArrayList();
         List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();
-        List<ClusterRegion> regionList = regionRackService.listAllBoundRegions();
+        List<ClusterRegion> regionList = clusterRegionService.listAllBoundRegions();
         if (CollectionUtils.isEmpty(clusterLogicList) || CollectionUtils.isEmpty(regionList)) {
             LOGGER.info("class=ClusterMonitorJobHandler||method=doHandleLogicClusterStats||msg=ClusterLogic is empty");
             return;

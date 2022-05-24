@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 
 /**
  * ES集群节点 服务类
@@ -53,6 +54,14 @@ public interface ClusterRoleHostService {
      * @return 成功 true  失败  false
      */
     Result<Void> editNode(ESClusterRoleHostDTO param);
+
+    /**
+     * 编辑节点列表regionId
+     * @param nodeIds  节点主键列表
+     * @param regionId regionId
+     * @return      false or true
+     */
+    boolean editNodeRegionId(List<Integer> nodeIds, Integer regionId) throws AriusRunTimeException;
 
     /**
      * 采集集群节点配置信息到MySQL, 包括节点状态

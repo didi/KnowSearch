@@ -79,12 +79,7 @@ public interface ESClusterRoleHostDAO {
      */
     int update(ESClusterRoleHostPO param);
 
-    /**
-     * 根据主机信息批量插入记录
-     * @param params
-     * @return
-     */
-    int insertBatch(List<ESClusterRoleHostPO> params);
+    int updateRegionId(@Param("ids")List<Integer> ids, @Param("regionId")Integer regionId);
 
     /**
      * 将所有在线的节点置为离线,在同步集群节点时调用;需要在事务内调用,保证失败后回滚
@@ -172,4 +167,11 @@ public interface ESClusterRoleHostDAO {
      * @return   List<ESClusterRoleHostPO>
      */
     List<ESClusterRoleHostPO> listByRegionId(Integer regionId);
+
+    /**
+     * 根据集群名称获取region节点信息,
+     * @param cluster  集群名称
+     * @return         List<ESClusterRoleHostPO>
+     */
+    List<ESClusterRoleHostPO> listDataNodeByCluster(String cluster);
 }

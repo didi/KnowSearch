@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemp
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
@@ -53,7 +53,7 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
     private ESIndexService esIndexService;
 
     @MockBean
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     private static final String operator = "System";
     private static int size = 10;
@@ -484,10 +484,10 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
         region.setPhyClusterName(cluster);
         region.setRacks(rack);
         List<IndexTemplatePhyPO> list = batchInsertWithClusterAndRack(logicId, cluster, rack, status);
-        Mockito.when(regionRackService.getRegionById(Mockito.anyLong())).thenReturn(null);
+        Mockito.when(clusterRegionService.getRegionById(Mockito.anyLong())).thenReturn(null);
         List<IndexTemplatePhy> invalid = service.getTemplateByRegionId(1000L);
         Assertions.assertTrue(invalid.isEmpty());
-        Mockito.when(regionRackService.getRegionById(Mockito.eq(regionId))).thenReturn(region);
+        Mockito.when(clusterRegionService.getRegionById(Mockito.eq(regionId))).thenReturn(region);
         List<IndexTemplatePhy> templates = service.getTemplateByRegionId(regionId);
         for (IndexTemplatePhy template : templates) {
             Assertions.assertEquals(cluster, template.getCluster());

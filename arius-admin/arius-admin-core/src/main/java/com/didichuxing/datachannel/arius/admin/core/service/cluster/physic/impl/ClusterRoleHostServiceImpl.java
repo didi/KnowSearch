@@ -10,7 +10,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
@@ -128,6 +130,14 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
             return checkResult;
         }
         return Result.build(1 == clusterRoleHostDAO.update(ConvertUtil.obj2Obj(param, ESClusterRoleHostPO.class)));
+    }
+
+    @Override
+    public boolean editNodeRegionId(List<Integer> nodeIds, Integer regionId) throws AriusRunTimeException{
+        if (CollectionUtils.isEmpty(nodeIds)) { throw new AriusRunTimeException("节点不存在", ResultType.ILLEGAL_PARAMS);}
+        if (null == regionId) { throw new AriusRunTimeException("regionId为空", ResultType.ILLEGAL_PARAMS);}
+
+        return clusterRoleHostDAO.updateRegionId(nodeIds, regionId) >= 1;
     }
 
     @Override
@@ -589,10 +599,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
     }
 
-    private boolean hasRoleOfMasterAndData(List<String> roles) {
-        return roles.contains(ES_ROLE_DATA) && roles.contains(ES_ROLE_MASTER);
-    }
-
     private boolean notHasRoleOfMasterAndData(List<String> roles) {
         return !roles.contains(ES_ROLE_DATA) && !roles.contains(ES_ROLE_MASTER);
     }
@@ -604,6 +610,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         nodePO.setIp(Getter.withDefault(clusterNodeInfo.getIp(), ""));
         nodePO.setHostname(Getter.withDefault(clusterNodeInfo.getHost(), ""));
         nodePO.setNodeSet(Getter.withDefault(clusterNodeInfo.getName(), ""));
+        nodePO.setAttributes(ConvertUtil.map2String(clusterNodeInfo.getAttributes()));
 
         HttpInfo httpInfo = clusterNodeInfo.getHttpInfo();
         if (null != httpInfo && null != httpInfo.getPublishAddress()) {
