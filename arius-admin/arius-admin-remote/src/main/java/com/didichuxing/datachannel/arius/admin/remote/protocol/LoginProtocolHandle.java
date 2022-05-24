@@ -8,7 +8,9 @@ import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 /**
  * @author linyunan
  * @date 2021-04-29
+ * @deprecated 登录验证能力移至logicommon
  */
+@Deprecated
 public interface LoginProtocolHandle extends BaseHandle {
 
     /**

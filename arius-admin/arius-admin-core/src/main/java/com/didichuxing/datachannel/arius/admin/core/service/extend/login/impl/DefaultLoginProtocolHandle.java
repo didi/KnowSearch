@@ -16,8 +16,10 @@ import com.didichuxing.datachannel.arius.admin.remote.protocol.LoginProtocolHand
 /**
  * @author linyunan
  * @date 2021-04-29
+ * @deprecated 登录放在logicommon中做，统一需要下线
  */
 @Component
+@Deprecated
 public class DefaultLoginProtocolHandle implements LoginProtocolHandle {
 
     @Autowired

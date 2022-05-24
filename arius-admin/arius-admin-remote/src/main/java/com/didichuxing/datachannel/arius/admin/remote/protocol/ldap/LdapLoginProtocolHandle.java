@@ -12,8 +12,10 @@ import com.didiglobal.logi.log.LogFactory;
 /**
  * @author linyunan
  * @date 2021-04-29
+ * @deprecated 登录验证能力移至logicommon
  */
 @Component
+@Deprecated
 public class LdapLoginProtocolHandle implements LoginProtocolHandle {
     private static final ILog LOGGER = LogFactory.getLog(LdapLoginProtocolHandle.class);
 

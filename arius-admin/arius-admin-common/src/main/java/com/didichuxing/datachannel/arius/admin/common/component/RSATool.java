@@ -31,6 +31,7 @@ import com.google.common.collect.Maps;
  * 暂且不考虑动态钥匙, 仅存在一对
  */
 @Component
+@Deprecated
 public class RSATool {
 
     private static final ILog LOGGER         = LogFactory.getLog(RSATool.class);
