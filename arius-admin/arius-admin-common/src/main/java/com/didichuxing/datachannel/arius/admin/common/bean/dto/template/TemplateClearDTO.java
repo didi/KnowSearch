@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板清理参数")
-public class TemplateClearDTO extends BaseDTO {
+public class TemplateClearDTO extends BaseTemplateSrvOpenDTO {
 
     @ApiModelProperty("模板id")
     private Integer templateId;
