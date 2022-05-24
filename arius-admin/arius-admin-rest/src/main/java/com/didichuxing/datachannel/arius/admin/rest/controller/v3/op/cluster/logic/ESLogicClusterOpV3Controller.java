@@ -30,7 +30,7 @@ public class ESLogicClusterOpV3Controller {
     @Autowired
     private ClusterLogicManager clusterLogicManager;
 
-    @GetMapping("/clusterNames")
+    @GetMapping("/cluster-names")
     @ResponseBody
     @ApiOperation(value = "根据AppId获取逻辑集群下的逻辑集群名称")
     public Result<List<String>> getAppLogicOrPhysicClusterNames(HttpServletRequest request) {
