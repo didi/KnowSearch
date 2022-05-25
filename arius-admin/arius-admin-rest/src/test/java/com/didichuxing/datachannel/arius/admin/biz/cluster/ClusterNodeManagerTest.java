@@ -41,7 +41,7 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
         param.setPhyClusterName("logi-elasticsearch-7.6.0");
         param.setName("region-lyn");
 
-        Result<List<Long>> ret = clusterNodeManager.createNode2Region(Lists.newArrayList(param), AriusUser.SYSTEM.getDesc());
+        Result<List<Long>> ret = clusterNodeManager.createMultiNode2Region(Lists.newArrayList(param), AriusUser.SYSTEM.getDesc());
         Assertions.assertNotNull(ret);
         if (ret.success()) { Assertions.assertNotNull(ret.getData());}
         if (ret.failed())  { Assertions.assertNotNull(ret.getMessage());}
@@ -59,7 +59,7 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
         param.setPhyClusterName("logi-elasticsearch-7.6.0");
         param.setName("region-lyn");
 
-        Result<Boolean> ret = clusterNodeManager.editNode2Region(param, AriusUser.SYSTEM.getDesc());
+        Result<Boolean> ret = clusterNodeManager.editMultiNode2Region(Lists.newArrayList(param), AriusUser.SYSTEM.getDesc());
         Assertions.assertNotNull(ret);
         if (ret.success()) { Assertions.assertTrue(ret.getData());}
         if (ret.failed())  { Assertions.assertNotNull(ret.getMessage());}

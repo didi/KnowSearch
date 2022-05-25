@@ -47,16 +47,16 @@ public interface ClusterNodeManager {
     /**
      * 划分指定节点至region
      * @param operator          操作者
-     * @param param             集群带节点信息的Region实体
+     * @param params             集群带节点信息的Region实体
      * @return                  Result<Long>
      */
-    Result<List<Long>> createNode2Region(List<ClusterRegionWithNodeInfoDTO> param, String operator);
+    Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator);
 
     /**
      * 编辑节点的region属性
      * @param operator          操作者
-     * @param param             集群带节点信息的Region实体
+     * @param params             集群带节点信息的Region实体
      * @return                  Result<Boolean>
      */
-    Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param, String operator);
+    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator);
 }
