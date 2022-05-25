@@ -60,7 +60,7 @@ public class AppLogicTemplateAuthManagerImpl implements AppLogicTemplateAuthMana
 
         for (IndexTemplate indexTemplate : indexTemplateList) {
             Integer templateLogicId = indexTemplate.getId();
-            if (null != appId && appId.equals(indexTemplate.getAppId())) {
+            if (null != appId && appId.equals(indexTemplate.getProjectId())) {
                 appTemplateAuthList.add(
                     appLogicTemplateAuthService.buildTemplateAuth(indexTemplate, AppTemplateAuthEnum.OWN));
                 continue;
