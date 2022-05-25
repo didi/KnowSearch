@@ -514,6 +514,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         return regionDiskSize - templateOnRegionDiskSize;
     }
 
+    /**
+     * 安装包是否绑定集群
+     * @param packageId 安装包名
+     * @return true or false
+     */
+    @Override
+    public boolean isClusterExistsByPackageId(Long packageId) {
+        return clusterDAO.getTotalHitByPackageId(packageId) > 0;
+    }
+
     /**************************************** private method ***************************************************/
     private List<String> genTcpAddr(String httpAddress, int tcpPort) {
         try {
