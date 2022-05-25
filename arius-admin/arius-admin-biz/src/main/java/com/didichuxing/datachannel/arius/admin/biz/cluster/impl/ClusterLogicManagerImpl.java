@@ -672,6 +672,15 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ConsoleClusterVO.class));
     }
 
+    @Override
+    public Result<List<String>> getAppLogicClusterNameByType(Integer appId, Integer type) {
+        ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
+        logicClusterDTO.setAppId(appId);
+        logicClusterDTO.setType(type);
+        return Result.buildSucc(clusterLogicService.listClusterLogics(logicClusterDTO)
+                .stream().map(ClusterLogic::getName).collect(Collectors.toList()));
+    }
+
 /**************************************************** private method ****************************************************/
     /**
      * 构建OP逻辑集群权限
