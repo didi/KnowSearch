@@ -173,11 +173,8 @@
             <if test="level != null">,`level` = #{level}</if>
             <if test="checkPointDiff != null">,check_point_diff = #{checkPointDiff}</if>
             <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
-<<<<<<< HEAD
             <if test="openSrv != null">,open_srv = #{openSrv}</if>
-=======
             <if test="regionId != null">,region_id = #{regionId}</if>
->>>>>>> master
         </trim>
         where id = #{id}
     </update>
