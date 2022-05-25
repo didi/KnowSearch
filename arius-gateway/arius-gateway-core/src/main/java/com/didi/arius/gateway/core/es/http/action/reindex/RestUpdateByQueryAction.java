@@ -1,7 +1,10 @@
 package com.didi.arius.gateway.core.es.http.action.reindex;
 
+import java.util.stream.Collectors;
+
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.es.http.ESAction;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
@@ -25,7 +28,11 @@ public class RestUpdateByQueryAction extends ESAction {
         String updateByQueryIndex = queryContext.getRequest().param("index");
 
         if (StringUtils.isNotBlank(updateByQueryIndex)) {
-            indexAction(queryContext, updateByQueryIndex);
+            preIndexAction(queryContext, updateByQueryIndex);
+            if (CollectionUtils.isNotEmpty(queryContext.getIndices()) && null != queryContext.getIndexTemplate() && queryContext.getIndexTemplate().getExpression().endsWith("*")) {
+                queryContext.setIndices(queryContext.getIndices().stream().map(str -> (StringUtils.isNotBlank(str) && !str.endsWith("*")) ? str + "*" : str).collect(Collectors.toList()));
+            }
+            doIndexAction(queryContext, queryContext.getIndexTemplate());
         } else {
             throw new IllegalArgumentException("index must not be null when arius gateway in index mode");
         }

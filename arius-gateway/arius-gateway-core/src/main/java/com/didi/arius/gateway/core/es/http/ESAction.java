@@ -51,17 +51,25 @@ public abstract class ESAction extends HttpRestHandler {
 
 	protected abstract void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel) throws Exception;
 
-	protected void indexAction(QueryContext queryContext, String index){
+	protected void indexAction(QueryContext queryContext, String index) {
+		preIndexAction(queryContext, index);
+		doIndexAction(queryContext, queryContext.getIndexTemplate());
+	}
+
+	protected void preIndexAction(QueryContext queryContext, String index) {
 		String[] indicesArr = Strings.splitStringByCommaToArray(index);
 		List<String> indices = Lists.newArrayList(indicesArr);
 		queryContext.setIndices(indices);
 		checkIndices(queryContext);
 
-		IndexTemplate indexTemplate = null;
-		if(!queryContext.isFromKibana()) {
+		if (!queryContext.isFromKibana()) {
 			// kibana的请求就不需要搜索模版了
-			indexTemplate = getTemplateByIndexTire(indices, queryContext);
+			IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
+			queryContext.setIndexTemplate(indexTemplate);
 		}
+	}
+
+	protected void doIndexAction(QueryContext queryContext, IndexTemplate indexTemplate) {
 		ESClient client = esClusterService.getClient(queryContext, indexTemplate, actionName);
 
 		directRequest(client, queryContext);
