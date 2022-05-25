@@ -15,21 +15,56 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfig
 @Repository
 public interface AriusConfigInfoDAO {
 
+    /**
+     * 插入平台配置
+     * @param param po
+     * @return 插入数量
+     */
     int insert(AriusConfigInfoPO param);
 
+    /**
+     * 更新平台配置
+     * @param param po
+     * @return 更新数量
+     */
     int update(AriusConfigInfoPO param);
 
+    /**
+     * 通过id去更新status
+     * @param id 平台配置id
+     * @param status 状态
+     * @return 更新数量
+     */
     int updateByIdAndStatus(@Param("id") Integer id,
                             @Param("status") int status);
 
-    int updateByGroupAndName(AriusConfigInfoPO param);
+    /**
+     * 通过条件获取平台配置
+     * @param condition 条件
+     * @return 平台配置list
+     */
+    List<AriusConfigInfoPO> listByCondition(AriusConfigInfoPO condition);
 
-    List<AriusConfigInfoPO> listByCondition(AriusConfigInfoPO condt);
+    /**
+     * 通过id获取平台配置
+     * @param configId 配置id
+     * @return 平台配置po
+     */
+    AriusConfigInfoPO getById(Integer configId);
 
-    AriusConfigInfoPO getbyId(Integer configId);
-
+    /**
+     * 通过group和name获取平台配置
+     * @param valueGroup 配置组
+     * @param valueName 配置名称
+     * @return 平台配置po
+     */
     AriusConfigInfoPO getByGroupAndName(@Param("valueGroup") String valueGroup,
                                         @Param("valueName") String valueName);
 
+    /**
+     * 通过配置组获取平台配置list
+     * @param group 配置组
+     * @return 配置po
+     */
     List<AriusConfigInfoPO> listByGroup(String group);
 }

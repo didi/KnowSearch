@@ -7,12 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.espackage.ESPackageManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -41,21 +36,28 @@ public class NormalPackageController {
     @GetMapping("/{id}")
     @ResponseBody
     @ApiOperation(value = "根据ID获取程序包详情接口")
-    public Result<ESPackageVO> packageDetail(@PathVariable Long id) {
+    public Result<ESPackageVO> getPackageDetailInfo(@PathVariable Long id) {
         return packageManager.getESPackageById(id);
     }
 
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "新增程序包接口", notes = "")
-    public Result<Long> packageSave(HttpServletRequest request, ESPackageDTO esPackageDTO) {
+    public Result<Long> savePackage(HttpServletRequest request, ESPackageDTO esPackageDTO) {
         return packageManager.addESPackage(esPackageDTO, HttpRequestUtils.getOperator(request));
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "修改程序包接口", notes = "")
-    public Result<ESPackageVO> packageUpdate(HttpServletRequest request, ESPackageDTO esPackageDTO) {
+    public Result<ESPackageVO> updatePackage(HttpServletRequest request, ESPackageDTO esPackageDTO) {
         return packageManager.updateESPackage(esPackageDTO, HttpRequestUtils.getOperator(request));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseBody
+    @ApiOperation(value = "删除程序包接口", notes = "")
+    public Result<Long> deletePackage(HttpServletRequest request, @PathVariable Long id) {
+        return packageManager.deleteESPackage(id, HttpRequestUtils.getOperator(request));
     }
 }
