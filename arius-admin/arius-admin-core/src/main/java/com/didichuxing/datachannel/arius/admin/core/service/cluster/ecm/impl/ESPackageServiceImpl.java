@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPackageDAO;
@@ -39,6 +40,9 @@ public class ESPackageServiceImpl implements ESPackageService {
 
     @Autowired
     private FileStorageService   fileStorageService;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     private static final Long MULTI_PART_FILE_SIZE_MAX = 1024 * 1024 * 500L;
 
@@ -135,7 +139,7 @@ public class ESPackageServiceImpl implements ESPackageService {
     }
 
     private boolean isHostType(ESPackageDTO esPackageDTO) {
-        return esPackageDTO.getManifest() == ESClusterTypeEnum.ES_HOST.getCode();
+        return null == esPackageDTO.getManifest() || esPackageDTO.getManifest() == ESClusterTypeEnum.ES_HOST.getCode();
     }
 
     private Result<Void> checkValid(ESPackageDTO esPackageDTO, String operator, OperationEnum operation) {
@@ -174,6 +178,11 @@ public class ESPackageServiceImpl implements ESPackageService {
             if(esPackagePO == null) {
                 return Result.buildFail("对应id的集群版本不存在");
             }
+
+            if (clusterPhyService.isClusterExistsByPackageId(esPackageDTO.getId())) {
+               return Result.buildFail("版本已绑定集群无法删除");
+            }
+
         }
 
         if (!AriusObjUtils.isNull(packageByVersion)) {

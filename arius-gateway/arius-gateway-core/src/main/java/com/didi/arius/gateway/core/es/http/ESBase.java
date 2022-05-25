@@ -440,7 +440,7 @@ public abstract class ESBase {
 		if(index.startsWith(".")) {
 			// kibana 有一些请求，是把 .kibana_arius 索引放在请求体里面的，例如 /_mget
 			queryContext.setFromKibana(true);
-			queryContext.setSearchType(AppDetail.RequestType.Origin_Cluster.getType());
+			queryContext.setSearchType(AppDetail.RequestType.ORIGIN_CLUSTER.getType());
 			return null;
 		}
 

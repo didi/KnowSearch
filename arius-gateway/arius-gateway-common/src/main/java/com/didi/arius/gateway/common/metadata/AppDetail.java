@@ -66,7 +66,7 @@ public class AppDetail {
     public enum RequestType {
         CLUSTER(0),
         INDEX(1),
-        Origin_Cluster(2);
+        ORIGIN_CLUSTER(2);
 
         int type;
 

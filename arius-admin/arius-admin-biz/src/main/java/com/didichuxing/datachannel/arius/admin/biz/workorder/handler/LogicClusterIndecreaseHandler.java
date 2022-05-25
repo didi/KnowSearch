@@ -1,9 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterIndecreaseContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -14,16 +16,24 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.event.region.RegionBindEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
 /**
  * @author d06679
@@ -37,6 +47,9 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private AppClusterLogicAuthService appClusterLogicAuthService;
+
+    @Autowired
+    private ClusterNodeManager clusterNodeManager;
 
     /**
      * 工单是否自动审批
@@ -151,10 +164,22 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         LogicClusterIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterIndecreaseContent.class);
 
+        List<Long> regionIdList = new ArrayList<>();
+        for (ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO : content.getRegionWithNodeInfo()) {
+            regionIdList.add(clusterRegionWithNodeInfoDTO.getId());
+            Result<Boolean> regionEditResult = clusterNodeManager.editNode2Region(clusterRegionWithNodeInfoDTO, approver);
+            if (regionEditResult.failed()) {
+                throw new AriusRunTimeException(regionEditResult.getMessage(), FAIL);
+            }
+        }
+
+        // 发布region变更的事件，对模板和索引生效
+        SpringTool.publish(new RegionEditEvent(this, regionIdList));
         operateRecordService.save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
             workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
                                                                                            + JSON.toJSONString(content),

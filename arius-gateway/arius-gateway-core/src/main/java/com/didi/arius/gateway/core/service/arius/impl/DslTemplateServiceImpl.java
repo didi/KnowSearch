@@ -136,13 +136,6 @@ public class DslTemplateServiceImpl implements DslTemplateService{
                     try {
                         String key = response.getKey();
 
-                        if (response.getEnable() != null && !response.getEnable()) {
-                            removeDSLTemplate(key);
-
-                            bootLogger.info("dsl_remove||key={}", key);
-                            continue ;
-                        }
-
                         boolean queryForbidden = isQueryForbidden(response);
 
                         double queryLimit = queryConfig.getDslQPSLimit();
@@ -173,7 +166,7 @@ public class DslTemplateServiceImpl implements DslTemplateService{
     }
 
     private boolean isQueryForbidden(DSLTemplateResponse response) {
-        boolean queryForbidden = false;
+        boolean queryForbidden = response.getEnable() != null&&!response.getEnable();
         if (response.getCheckMode() != null && QueryConsts.CHECK_MODE_BLACK.equals(response.getCheckMode())) {
             queryForbidden = true;
         }

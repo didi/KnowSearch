@@ -55,8 +55,7 @@ public class RestCommonAction extends HttpRestHandler {
                 client = esClusterService.getClient(queryContext, indexTemplate, actionName);
             }
         } else if (!AppUtil.isAdminAppid(queryContext.getAppDetail())
-                && !uri.startsWith("/.")
-                && !queryContext.isNewKibana()) {
+                && !queryContext.isFromKibana()) {
             throw new AccessForbiddenException("action(" + queryContext.getUri() + ") forbidden");
         }
 

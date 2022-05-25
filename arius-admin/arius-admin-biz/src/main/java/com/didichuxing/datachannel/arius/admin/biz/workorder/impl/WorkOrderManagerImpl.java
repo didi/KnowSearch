@@ -69,17 +69,12 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
 
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
-        List<OrderTypeVO> orderTypeVOS = new ArrayList<>();
-
-        for (WorkOrderTypeEnum elem : WorkOrderTypeEnum.values()) {
-            if (WorkOrderTypeEnum.UNKNOWN.getName().equals(elem.getName())) {
-                continue;
-            }
-
-            orderTypeVOS.add(new OrderTypeVO(elem.getName(), elem.getMessage()));
-        }
-
-        return Result.buildSucc(orderTypeVOS);
+        List<OrderTypeVO> orderTypeVOList = new ArrayList<>();
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.name(),
+                WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getName(),
+                WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
+        return Result.buildSucc(orderTypeVOList);
     }
 
     @Override

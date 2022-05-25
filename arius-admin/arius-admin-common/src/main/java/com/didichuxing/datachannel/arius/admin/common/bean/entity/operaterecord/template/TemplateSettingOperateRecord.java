@@ -5,6 +5,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author liuchengxiang
@@ -14,24 +18,30 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TemplateSettingOperateRecord extends TemplateOperateRecord {
 
-    public TemplateSettingOperateRecord(IndexTemplatePhySettings oldConfig, IndexTemplatePhySettings newConfig ) {
+    public TemplateSettingOperateRecord(IndexTemplatePhySettings oldConfig, IndexTemplatePhySettings newConfig) {
         this.operateType = TemplateOperateRecordEnum.SETTING.getCode();
 
         StringBuilder settingChange = new StringBuilder();
-        JSONObject oldSetting = oldConfig.getSettings().getJSONObject("index");
-        JSONObject newSetting = newConfig.getSettings().getJSONObject("index");
-
-        Integer newSettingShardNum = newSetting.getInteger("number_of_replicas");
-        Integer oldSettingShardNum = oldSetting.getInteger("number_of_replicas");
-        if (oldSettingShardNum != newSettingShardNum) {
-            settingChange.append(newSettingShardNum > 0 ? "关闭取消副本": "开启取消副本").append("，");
-        }
-
-        String newSettingTranslog = newSetting.getJSONObject("translog").getString("durability");
-        String oldSettingTranslog = oldSetting.getJSONObject("translog").getString("durability");
-        if (!oldSettingTranslog.equals(newSettingTranslog)) {
-            settingChange.append(newSettingTranslog.equals("async") ? "开启异步translog" : "关闭异步translog");
-        }
+        Optional<JSONObject> oldSetting = Optional.ofNullable(oldConfig.getSettings())
+            .map(json -> json.getJSONObject("index"));
+        Optional<JSONObject> newSetting = Optional.ofNullable(newConfig.getSettings())
+            .map(json -> json.getJSONObject("index"));
+        Optional<Integer> newSettingShardNum = newSetting.map(json -> json.getInteger("number_of_replicas"));
+        Integer oldSettingShardNum = oldSetting.map(json -> json.getInteger("number_of_replicas")).orElse(null);
+        newSettingShardNum.ifPresent(newShardNum -> {
+            if (!Objects.equals(newShardNum, oldSettingShardNum)) {
+                settingChange.append(newShardNum > 0 ? "关闭取消副本" : "开启取消副本").append("，");
+            }
+        });
+        Optional<String> newSettingTranslog = newSetting.map(json -> json.getJSONObject("translog"))
+            .map(json -> json.getString("durability"));
+        String oldSettingTranslog = oldSetting.map(json -> json.getJSONObject("translog"))
+            .map(json -> json.getString("durability")).orElse("");
+        newSettingTranslog.ifPresent(newTranslog -> {
+            if (!StringUtils.equals(oldSettingTranslog, newTranslog)) {
+                settingChange.append(newTranslog.equals("async") ? "开启异步translog" : "关闭异步translog");
+            }
+        });
         this.operateDesc = settingChange.toString();
     }
 

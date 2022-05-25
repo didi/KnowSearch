@@ -330,12 +330,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<String>> getAppLogicClusterNames(Integer appId) {
-        List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(appId);
-        return Result.buildSucc(appAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));
-    }
-
-    @Override
     public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer appId) {
         List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), ConsoleClusterVO.class);
         for(ConsoleClusterVO consoleClusterVO : list) {
@@ -359,6 +353,15 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         return Result.buildSucc(batchBuildOpClusterVOs(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), appId));
+    }
+
+    @Override
+    public Result<List<String>> getAppLogicOrPhysicClusterNames(Integer appId) {
+        if (appService.isSuperApp(appId)) {
+            return Result.buildSucc(esClusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
+        }
+        List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(appId);
+        return Result.buildSucc(appAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));
     }
 
     /**

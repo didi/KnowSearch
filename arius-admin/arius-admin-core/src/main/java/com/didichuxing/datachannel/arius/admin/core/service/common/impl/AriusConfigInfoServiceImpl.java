@@ -1,13 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CONFIG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigDimensionEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigDimensionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -20,18 +32,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CONFIG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 
 /**
  *
@@ -98,7 +98,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> delConfig(Integer configId, String operator) {
-        AriusConfigInfoPO configInfoPO = configInfoDAO.getbyId(configId);
+        AriusConfigInfoPO configInfoPO = configInfoDAO.getById(configId);
         if (configInfoPO == null) {
             return Result.buildNotExist(NOT_EXIST);
         }
@@ -126,7 +126,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             return Result.buildParamIllegal("配置ID为空");
         }
 
-        AriusConfigInfoPO configInfoPO = configInfoDAO.getbyId(configInfoDTO.getId());
+        AriusConfigInfoPO configInfoPO = configInfoDAO.getById(configInfoDTO.getId());
         if (configInfoPO == null) {
             return Result.buildNotExist(NOT_EXIST);
         }
@@ -153,7 +153,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> switchConfig(Integer configId, Integer status, String operator) {
-        AriusConfigInfoPO configInfoPO = configInfoDAO.getbyId(configId);
+        AriusConfigInfoPO configInfoPO = configInfoDAO.getById(configId);
         if (configInfoPO == null) {
             return Result.buildNotExist(NOT_EXIST);
         }
@@ -183,12 +183,12 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
     public List<AriusConfigInfo> getConfigByGroup(String group) {
         List<AriusConfigInfo> configInfos = Lists.newArrayList();
 
-        List<AriusConfigInfoPO> configInfoPOs = configInfoDAO.listByGroup(group);
-        if (CollectionUtils.isEmpty(configInfoPOs)) {
+        List<AriusConfigInfoPO> configInfoPOList = configInfoDAO.listByGroup(group);
+        if (CollectionUtils.isEmpty(configInfoPOList)) {
             return configInfos;
         }
 
-        return ConvertUtil.list2List(configInfoPOs, AriusConfigInfo.class);
+        return ConvertUtil.list2List(configInfoPOList, AriusConfigInfo.class);
     }
 
     /**
@@ -199,10 +199,10 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      * 如果不存在,返回空列表
      */
     @Override
-    public List<AriusConfigInfo> queryByCondt(AriusConfigInfoDTO param) {
-        List<AriusConfigInfoPO> configInfoPOs = configInfoDAO
+    public List<AriusConfigInfo> queryByCondition(AriusConfigInfoDTO param) {
+        List<AriusConfigInfoPO> configInfoPOList = configInfoDAO
             .listByCondition(ConvertUtil.obj2Obj(param, AriusConfigInfoPO.class));
-        return ConvertUtil.list2List(configInfoPOs, AriusConfigInfo.class);
+        return ConvertUtil.list2List(configInfoPOList, AriusConfigInfo.class);
     }
 
     /**
@@ -212,59 +212,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
      */
     @Override
     public AriusConfigInfo getConfigById(Integer configId) {
-        return ConvertUtil.obj2Obj(configInfoDAO.getbyId(configId), AriusConfigInfo.class);
-    }
-
-    /**
-     * 修改一个配置项的值
-     * @param group 配置组
-     * @param name  配置名字
-     * @param value 配置内容
-     * @return 成功 true  失败 false
-     *
-     * NotExistExceptio 配置不存在
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result<Void> updateValueByGroupAndName(String group, String name, String value) {
-        if (value == null) {
-            return Result.buildParamIllegal("值为空");
-        }
-
-        AriusConfigInfoPO configInfoPO = getByGroupAndNameFromDB(group, name);
-        if (configInfoPO == null) {
-            return Result.buildNotExist(NOT_EXIST);
-        }
-
-        AriusConfigInfoDTO param = new AriusConfigInfoDTO();
-        param.setId(configInfoPO.getId());
-        param.setValue(value);
-
-        return editConfig(param, AriusUser.SYSTEM.getDesc());
-    }
-
-    /**
-     * 修改一个配置项的值, 获取不存在就新增一个
-     * @param group 配置组
-     * @param name  配置名字
-     * @param value 配置内容
-     * @return 成功 true  失败 false
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result upsertValueByGroupAndName(String group, String name, String value) {
-        AriusConfigInfoPO configInfoPO = getByGroupAndNameFromDB(group, name);
-
-        if (configInfoPO != null) {
-            return updateValueByGroupAndName(group, name, value);
-        }
-
-        AriusConfigInfoDTO configInfoDTO = new AriusConfigInfoDTO();
-        configInfoDTO.setValueGroup(group);
-        configInfoDTO.setValueName(name);
-        configInfoDTO.setValue(value);
-
-        return addConfig(configInfoDTO, AriusUser.SYSTEM.getDesc());
+        return ConvertUtil.obj2Obj(configInfoDAO.getById(configId), AriusConfigInfo.class);
     }
 
     /**
