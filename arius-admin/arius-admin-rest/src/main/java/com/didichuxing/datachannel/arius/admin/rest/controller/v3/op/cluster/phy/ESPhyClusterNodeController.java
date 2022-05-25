@@ -36,15 +36,15 @@ public class ESPhyClusterNodeController {
     @PostMapping("/divide/region")
     @ResponseBody
     @ApiOperation(value = "节点划分且创建region")
-    public Result<List<Long>> divideNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> param) {
-        return clusterNodeManager.createNode2Region(param, HttpRequestUtils.getOperator(request));
+    public Result<List<Long>> createMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+        return clusterNodeManager.createMultiNode2Region(params, HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/divide/region")
     @ResponseBody
-    @ApiOperation(value = "编辑region中的节点")
-    public Result<Boolean> editNode2Region(HttpServletRequest request, @RequestBody ClusterRegionWithNodeInfoDTO param) {
-        return clusterNodeManager.editNode2Region(param, HttpRequestUtils.getOperator(request));
+    @ApiOperation(value = "编辑多个region中的节点信息（扩缩容）")
+    public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+        return clusterNodeManager.editMultiNode2Region(params, HttpRequestUtils.getOperator(request));
     }
 
 }
