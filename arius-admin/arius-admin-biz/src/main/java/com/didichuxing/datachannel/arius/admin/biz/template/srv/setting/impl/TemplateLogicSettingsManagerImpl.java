@@ -185,6 +185,42 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
         return Result.buildSucc();
     }
 
+    @Override
+    public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySettings settings) {
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
+                .getLogicTemplateWithPhysicalsById(logicId);
+
+        if (templateLogicWithPhysical == null) {
+            return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
+        }
+
+        if (!templateLogicWithPhysical.hasPhysicals()) {
+            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+        }
+
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+
+        if (!isTemplateSrvOpen(templatePhysicals)) {
+            return Result.buildFail("集群没有开启" + templateServiceName());
+        }
+
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            try {
+                templatePhySettingsManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(), templatePhysical.getName(),  settings);
+            } catch (AdminOperateException adminOperateException) {
+                return Result.buildFail(adminOperateException.getMessage());
+            }
+        }
+
+        try {
+            templatePreCreateManager.reBuildTomorrowIndex(logicId, 3);
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicServiceImpl||method=updateSettings||logicId:{}", logicId, e);
+        }
+
+        return Result.buildSucc();
+    }
+
     /**
      * 通过逻辑ID获取Settings
      * @param logicId 逻辑ID
