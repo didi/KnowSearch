@@ -111,10 +111,16 @@ public interface ESClusterRoleHostDAO {
                                   @Param("roleId") Long roleId);
 
     /**
-     * 获取所有主机信息
-     * @return
+     * 获取所有节点信息
+     * @return       List<ESClusterRoleHostPO>
      */
     List<ESClusterRoleHostPO> listAll();
+
+    /**
+     * 获取指定角色节点信息
+     * @return           List<ESClusterRoleHostPO>
+     */
+    List<ESClusterRoleHostPO> listAllByRoleCode(Integer roleCode);
 
     /**
      * 根据主机名获取主机信息

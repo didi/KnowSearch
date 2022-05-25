@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 
 public interface ClusterNodeManager {
     /**
@@ -41,7 +42,7 @@ public interface ClusterNodeManager {
      * @param clusterId   物理集群Id
      * @return            Result<List<ESClusterRoleHostVO>>
      */
-    Result<List<ESClusterRoleHostVO>> listDivide2ClusterNodeInfo(Long clusterId);
+    Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId);
 
     /**
      * 划分指定节点至region

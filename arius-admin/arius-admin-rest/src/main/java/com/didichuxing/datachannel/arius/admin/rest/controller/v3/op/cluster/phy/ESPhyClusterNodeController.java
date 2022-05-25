@@ -8,12 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,7 +29,7 @@ public class ESPhyClusterNodeController {
     @GetMapping("/{clusterId}/region/")
     @ResponseBody
     @ApiOperation(value = "获取可划分至region的节点信息")
-    public Result<List<ESClusterRoleHostVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId) {
+    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId) {
         return clusterNodeManager.listDivide2ClusterNodeInfo(clusterId);
     }
 

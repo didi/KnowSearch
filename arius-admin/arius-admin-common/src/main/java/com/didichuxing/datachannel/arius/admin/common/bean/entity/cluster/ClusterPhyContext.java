@@ -41,8 +41,6 @@ public class ClusterPhyContext {
 
     private List<String> associatedNodeIps;
 
-    private List<String> associatedRacks;
-
     /*****************************************regionInfo********************************************/
 
     private List<Long>   associatedRegionIds;
