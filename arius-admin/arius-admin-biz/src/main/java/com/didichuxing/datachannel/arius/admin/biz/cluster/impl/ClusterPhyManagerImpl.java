@@ -981,12 +981,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(canCreateTemplateRegionLists);
     }
 
-    @Override
-    //todo
-    public Result<Map<String, Long>> getPhyClusterNameByType(Integer type) {
-        return Result.buildFail();
-    }
-
 
 
     /**************************************** private method ***************************************************/

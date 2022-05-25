@@ -349,11 +349,4 @@ public interface ClusterPhyManager {
      * @return 可以绑定的rack列表
      */
     Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
-
-    /**
-     * 根据物理集群类型获取名称列表
-     * @param type 物理集群类型
-     * @return 物理集群名称列表
-     */
-    Result<Map<String, Long>> getPhyClusterNameByType(Integer type);
 }

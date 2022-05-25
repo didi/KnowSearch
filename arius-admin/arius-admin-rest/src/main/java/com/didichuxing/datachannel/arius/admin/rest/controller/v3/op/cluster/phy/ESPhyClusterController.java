@@ -193,11 +193,4 @@ public class ESPhyClusterController {
         return clusterPhyManager.getValidRacksListByTemplateSize(clusterPhy, clusterLogic, templateSize);
     }
 
-    @GetMapping("/{type}")
-    @ResponseBody
-    @ApiOperation(value = "根据物理集群类型获取名称列表")
-    public Result<Map<String, Long>> getPhyClusterNameByType(@PathVariable Integer type) {
-        return clusterPhyManager.getPhyClusterNameByType(type);
-    }
-
 }
