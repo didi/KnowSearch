@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "「模板服务」分页查询条件")
+@ApiModel(description = "模板分页查询条件")
 public class TemplateQueryDTO extends IndexTemplateDTO {
 
     @ApiModelProperty("所属集群")
