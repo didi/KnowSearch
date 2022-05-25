@@ -49,9 +49,9 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void delConfigTest() {
-        Mockito.when(configInfoDAO.getbyId(1)).thenReturn(null);
+        Mockito.when(configInfoDAO.getById(1)).thenReturn(null);
         Assertions.assertTrue(ariusConfigInfoService.delConfig(1, CustomDataSource.OPERATOR).failed());
-        Mockito.when(configInfoDAO.getbyId(Mockito.anyInt())).thenReturn(new AriusConfigInfoPO());
+        Mockito.when(configInfoDAO.getById(Mockito.anyInt())).thenReturn(new AriusConfigInfoPO());
         Mockito.when(configInfoDAO.updateByIdAndStatus(Mockito.anyInt(), Mockito.eq(AriusConfigStatusEnum.DELETED.getCode()))).thenReturn(1);
         Assertions.assertTrue(ariusConfigInfoService.delConfig(1, CustomDataSource.OPERATOR).success());
     }
@@ -63,11 +63,11 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(ariusConfigInfoService.editConfig(configInfoDTO, CustomDataSource.OPERATOR).failed());
 
         configInfoDTO.setId(1);
-        Mockito.when(configInfoDAO.getbyId(1)).thenReturn(null);
+        Mockito.when(configInfoDAO.getById(1)).thenReturn(null);
         Assertions.assertTrue(ariusConfigInfoService.editConfig(configInfoDTO, CustomDataSource.OPERATOR).failed());
 
         configInfoDTO.setId(2);
-        Mockito.when(configInfoDAO.getbyId(2)).thenReturn(new AriusConfigInfoPO());
+        Mockito.when(configInfoDAO.getById(2)).thenReturn(new AriusConfigInfoPO());
         Mockito.when(configInfoDAO.update(Mockito.any())).thenReturn(1);
         Assertions.assertTrue(ariusConfigInfoService.editConfig(configInfoDTO, CustomDataSource.OPERATOR).success());
     }
@@ -77,9 +77,9 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
      */
     @Test
     public void switchConfigTest() {
-        Mockito.when(configInfoDAO.getbyId(1)).thenReturn(null);
+        Mockito.when(configInfoDAO.getById(1)).thenReturn(null);
         Assertions.assertTrue(ariusConfigInfoService.switchConfig(1, 1, CustomDataSource.OPERATOR).failed());
-        Mockito.when(configInfoDAO.getbyId(2)).thenReturn(new AriusConfigInfoPO());
+        Mockito.when(configInfoDAO.getById(2)).thenReturn(new AriusConfigInfoPO());
         Assertions.assertTrue(ariusConfigInfoService.switchConfig(2, -10, CustomDataSource.OPERATOR).failed());
         Mockito.when(configInfoDAO.updateByIdAndStatus(2, 1)).thenReturn(1);
         Assertions.assertTrue(ariusConfigInfoService.switchConfig(2, 1, CustomDataSource.OPERATOR).success());
@@ -94,31 +94,18 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void queryByCondtTest() {
+    public void queryByConditionTest() {
         Mockito.when(configInfoDAO.listByCondition(Mockito.any())).thenReturn(CustomDataSource.getAriusConfigInfoPOList());
-        Assertions.assertFalse(ariusConfigInfoService.queryByCondt(ariusConfigInfoDTOFactory()).isEmpty());
+        Assertions.assertFalse(ariusConfigInfoService.queryByCondition(ariusConfigInfoDTOFactory()).isEmpty());
     }
 
     @Test
     public void getConfigByIdTest() {
-        Mockito.when(configInfoDAO.getbyId(Mockito.anyInt())).thenReturn(CustomDataSource.getAriusConfigInfoPO());
+        Mockito.when(configInfoDAO.getById(Mockito.anyInt())).thenReturn(CustomDataSource.getAriusConfigInfoPO());
         Assertions.assertNotNull(ariusConfigInfoService.getConfigById(1));
     }
 
     @Test
-    public void updateValuebyGroupAndNameTest() {
-        Assertions.assertTrue(ariusConfigInfoService.updateValueByGroupAndName(null, null, null).failed());
-        Mockito.when(configInfoDAO.getByGroupAndName("test", "test")).thenReturn(null);
-        Assertions.assertTrue(ariusConfigInfoService.updateValueByGroupAndName("test", "test", "test").failed());
-        AriusConfigInfoPO ariusConfigInfoPO = new AriusConfigInfoPO();
-        ariusConfigInfoPO.setId(1);
-        Mockito.when(configInfoDAO.getByGroupAndName("test", "test")).thenReturn(ariusConfigInfoPO);
-        Mockito.when(configInfoDAO.getbyId(1)).thenReturn(new AriusConfigInfoPO());
-        Mockito.when(configInfoDAO.update(Mockito.any())).thenReturn(1);
-        Assertions.assertTrue(ariusConfigInfoService.updateValueByGroupAndName("test", "test", "test").success());
-    }
-
-    // @Test
     public void intSettingTest() {
         Mockito.when(configInfoDAO.getByGroupAndName("test", "test")).thenReturn(null);
         Assertions.assertEquals(1, ariusConfigInfoService.intSetting("test", "test", 1));
@@ -128,7 +115,7 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(2, ariusConfigInfoService.intSetting("test", "test", 1));
     }
 
-    // @Test
+    @Test
     public void longSettingTest() {
         AriusConfigInfoPO ariusConfigInfoPO = CustomDataSource.getAriusConfigInfoPO();
         ariusConfigInfoPO.setValue("3");
@@ -139,7 +126,7 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(defaultValue, ariusConfigInfoService.longSetting("test", "test", defaultValue));
     }
 
-    // @Test
+    @Test
     public void doubleSettingTest() {
         Mockito.when(configInfoDAO.getByGroupAndName("test", "test")).thenReturn(null);
         Assertions.assertEquals(1D, ariusConfigInfoService.doubleSetting("test", "test", 1D));
@@ -149,7 +136,7 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(2D, ariusConfigInfoService.doubleSetting("test", "test", 1D));
     }
 
-    // @Test
+    @Test
     public void stringSettingTest() {
         Mockito.when(configInfoDAO.getByGroupAndName("test", "test")).thenReturn(null);
         Assertions.assertEquals("1", ariusConfigInfoService.stringSetting("test", "test", "1"));
@@ -159,7 +146,7 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals("2", ariusConfigInfoService.stringSetting("test", "test", "1"));
     }
 
-    // @Test
+    @Test
     public void stringSettingSplit2SetTest() {
         Mockito.when(configInfoDAO.getByGroupAndName("test", "test")).thenReturn(null);
         Assertions.assertEquals(2, ariusConfigInfoService.stringSettingSplit2Set("test", "test", "1,2", ",").size());
@@ -169,7 +156,7 @@ public class AriusConfigInfoServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(2, ariusConfigInfoService.stringSettingSplit2Set("test", "test", "1", ",").size());
     }
 
-    // @Test
+    @Test
     public void booleanSettingTest() {
         Mockito.when(configInfoDAO.getByGroupAndName("test", "test")).thenReturn(null);
         Assertions.assertTrue(ariusConfigInfoService.booleanSetting("test", "test", true));

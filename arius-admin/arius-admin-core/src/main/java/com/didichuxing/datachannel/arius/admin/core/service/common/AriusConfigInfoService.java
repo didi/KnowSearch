@@ -65,7 +65,7 @@ public interface AriusConfigInfoService {
      *
      * 如果不存在,返回空列表
      */
-    List<AriusConfigInfo> queryByCondt(AriusConfigInfoDTO param);
+    List<AriusConfigInfo> queryByCondition(AriusConfigInfoDTO param);
 
     /**
      * 查询指定配置
@@ -73,25 +73,6 @@ public interface AriusConfigInfoService {
      * @return 配置信息  不存在返回null
      */
     AriusConfigInfo getConfigById(Integer configId);
-
-    /**
-     * 修改一个配置项的值
-     * @param group 配置组
-     * @param name 配置名字
-     * @param value 配置内容
-     * @return  成功 true  失败 false
-     *
-     */
-    Result<Void> updateValueByGroupAndName(String group, String name, String value);
-
-    /**
-     * 修改一个配置项的值, 获取不存在就新增一个
-     * @param group 配置组
-     * @param name 配置名字
-     * @param value 配置内容
-     * @return  成功 true  失败 false
-     */
-    Result upsertValueByGroupAndName(String group, String name, String value);
 
     /**
      * 获取int类型配置

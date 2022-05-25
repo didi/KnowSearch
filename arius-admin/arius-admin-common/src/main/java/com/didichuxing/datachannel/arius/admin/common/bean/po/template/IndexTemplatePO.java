@@ -152,4 +152,9 @@ public class IndexTemplatePO extends BasePO implements DigitResponsible {
      * 已开启的模板服务
      */
     private String openSrv;
+
+    /*
+     * regionId
+     */
+    private Integer regionId;
 }

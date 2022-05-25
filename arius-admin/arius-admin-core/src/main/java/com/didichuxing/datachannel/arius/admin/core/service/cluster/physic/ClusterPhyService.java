@@ -210,4 +210,12 @@ public interface ClusterPhyService {
      * @return 指定rack的总的磁盘大小，单位是字节数目
      */
     Float getSurplusDiskSizeOfRacks(String clusterPhyName, String racks, Map</*rack信息*/String, /*rack对应的总磁盘大小*/Float> allocationInfoOfRack);
+
+    /**
+     * 是否存在绑定指定安装包的集群
+     *
+     * @param packageId 安装包名
+     * @return true or false
+     */
+    boolean isClusterExistsByPackageId(Long packageId);
 }

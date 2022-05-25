@@ -21,73 +21,73 @@ import lombok.NoArgsConstructor;
 public class IndexTemplateDTO extends PageDTO {
 
     @ApiModelProperty("模板ID")
-    private Integer                        id;
+    private Integer                   id;
 
     @ApiModelProperty("模板名字")
-    private String                         name;
+    private String                    name;
 
     @ApiModelProperty("索引应用ID")
-    private Integer                        appId;
+    private Integer                   appId;
 
     @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds数据；4:离线导入数据")
-    private Integer                        dataType;
+    private Integer                   dataType;
 
     @ApiModelProperty("时间后缀,索引滚动格式")
-    private String                         dateFormat;
+    private String                    dateFormat;
 
     @ApiModelProperty("数据中心")
-    private String                         dataCenter;
+    private String                    dataCenter;
 
     @ApiModelProperty("保存天数, 单位天")
-    private Integer                        expireTime;
+    private Integer                   expireTime;
 
     @ApiModelProperty("热数据保存天数, 单位天")
-    private Integer                        hotTime;
+    private Integer                   hotTime;
 
     @ApiModelProperty("成本部门ID")
-    private String                         libraDepartmentId;
+    private String                    libraDepartmentId;
 
     @ApiModelProperty("成本部门名称")
-    private String                         libraDepartment;
+    private String                    libraDepartment;
 
     @ApiModelProperty("责任人")
-    private String                         responsible;
+    private String                    responsible;
 
     @ApiModelProperty("时间分区字段")
-    private String                         dateField;
+    private String                    dateField;
 
     @ApiModelProperty("时间字段格式")
-    private String                         dateFieldFormat;
+    private String                    dateFieldFormat;
 
     @ApiModelProperty("主键字段")
-    private String                         idField;
+    private String                    idField;
 
     @ApiModelProperty("routing字段")
-    private String                         routingField;
+    private String                    routingField;
 
     @ApiModelProperty("表达式")
-    private String                         expression;
+    private String                    expression;
 
     @ApiModelProperty("描述")
-    private String                         desc;
+    private String                    desc;
 
     @ApiModelProperty("配额")
-    private Double                         quota;
+    private Double                    quota;
 
     @ApiModelProperty("ingestPipeline")
-    private String                         ingestPipeline;
+    private String                    ingestPipeline;
 
     @ApiModelProperty("preCreateFlags")
-    private Boolean                        preCreateFlags;
+    private Boolean                   preCreateFlags;
 
     @ApiModelProperty("shardNum")
-    private Integer                        shardNum;
+    private Integer                   shardNum;
 
     @ApiModelProperty("disableSourceFlags，禁用索引_source标识")
-    private Boolean                        disableSourceFlags;
+    private Boolean                   disableSourceFlags;
 
     @ApiModelProperty("disableIndexRollover，禁用indexRollover")
-    private Boolean                        disableIndexRollover;
+    private Boolean                   disableIndexRollover;
 
     /**
      * 写入限流值，
@@ -96,35 +96,38 @@ public class IndexTemplateDTO extends PageDTO {
      * writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档
      */
     @ApiModelProperty("writeRateLimit")
-    private Integer                        writeRateLimit;
+    private Integer                   writeRateLimit;
 
     /**
      * 是否禁读
      */
     @ApiModelProperty("是否禁读")
-    private Boolean                        blockRead;
+    private Boolean                   blockRead;
 
     /**
      * 是否禁写
      */
     @ApiModelProperty("是否禁写")
-    private Boolean                        blockWrite;
+    private Boolean                   blockWrite;
 
     @ApiModelProperty("逻辑集群id")
-    private Long                           resourceId;
+    private Long                      resourceId;
 
     @ApiModelProperty("是否禁写")
-    private Long                           checkPointDiff;
+    private Long                      checkPointDiff;
 
     @ApiModelProperty("是否已创建dcdr")
-    private Boolean                        hasDCDR;
+    private Boolean                   hasDCDR;
 
     @ApiModelProperty("服务等级")
-    private Integer                         level;
+    private Integer                   level;
 
     @ApiModelProperty("物理模板信息")
     private List<IndexTemplatePhyDTO> physicalInfos;
 
     @ApiModelProperty("开启服务")
     private String                          openSrv;
+
+    @ApiModelProperty("regionId")
+    private Integer                   regionId;
 }

@@ -75,7 +75,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachin
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -109,7 +109,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private static final ILog             LOGGER     = LogFactory.getLog(ClusterLogicManagerImpl.class);
 
     @Autowired
-    private RegionRackService             esClusterRackService;
+    private ClusterRegionService esClusterRackService;
 
     @Autowired
     private ClusterLogicNodeService       clusterLogicNodeService;
@@ -130,7 +130,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private ClusterLogicService           clusterLogicService;
 
     @Autowired
-    private RegionRackService             regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private TemplateSrvManager            templateSrvManager;
@@ -313,7 +313,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         // 目前可以不用Fix，未来所有跟Rack关联都可以换成是Region关联；
         List<ClusterPhy> logicClusterAssignedClusters = new ArrayList<>();
         if (logicClusterId != null) {
-            Set<String> clusters = parseClusterNames(regionRackService.listLogicClusterRacks(logicClusterId));
+            Set<String> clusters = parseClusterNames(clusterRegionService.listLogicClusterRacks(logicClusterId));
             for (String cluster : clusters) {
                 ClusterPhy physicalCluster = esClusterPhyService.getClusterByName(cluster);
                 if (physicalCluster != null) {
@@ -330,16 +330,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<String>> getAppLogicClusterNames(Integer appId) {
-        List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(appId);
-        return Result.buildSucc(appAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));
-    }
-
-    @Override
     public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer appId) {
         List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), ConsoleClusterVO.class);
         for(ConsoleClusterVO consoleClusterVO : list) {
-            List<String> clusterPhyNames = regionRackService.listPhysicClusterNames(consoleClusterVO.getId());
+            List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(consoleClusterVO.getId());
             consoleClusterVO.setPhyClusterAssociated(!AriusObjUtils.isEmptyList(clusterPhyNames));
             consoleClusterVO.setAssociatedPhyClusterName(clusterPhyNames);
         }
@@ -359,6 +353,15 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         return Result.buildSucc(batchBuildOpClusterVOs(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), appId));
+    }
+
+    @Override
+    public Result<List<String>> getAppLogicOrPhysicClusterNames(Integer appId) {
+        if (appService.isSuperApp(appId)) {
+            return Result.buildSucc(esClusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
+        }
+        List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(appId);
+        return Result.buildSucc(appAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));
     }
 
     /**
@@ -627,7 +630,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         float beSetDiskSizeOfTemplate = Float.valueOf(SizeUtil.getUnitSize(templateSize + "gb"));
 
         //获取逻辑集群绑定的region
-        List<ClusterRegion> clusterRegions = regionRackService.listLogicClusterRegions(logicClusterId);
+        List<ClusterRegion> clusterRegions = clusterRegionService.listLogicClusterRegions(logicClusterId);
         if (CollectionUtils.isEmpty(clusterRegions)) {
             return Result.buildFail("指定的逻辑集群没有绑定任何物理集群的region");
         }

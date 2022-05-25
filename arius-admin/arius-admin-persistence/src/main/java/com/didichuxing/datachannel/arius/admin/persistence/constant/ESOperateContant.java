@@ -115,6 +115,7 @@ public class ESOperateContant {
     public static final String  INDEX                               = "index";
     public static final String  DEFAULTS                            = "defaults";
     public static final String  PRIMARY                             = "p";
+    public static final String  INDEX_SETTING_PRE                   = "index.";
 
     /**
      * task管理

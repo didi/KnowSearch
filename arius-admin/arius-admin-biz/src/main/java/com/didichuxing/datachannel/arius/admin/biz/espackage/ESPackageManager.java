@@ -1,11 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.biz.espackage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.espackage.AriusESPackageEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +23,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+
 /**
  * @author linyunan
  * @date 2021-05-19
@@ -27,6 +35,10 @@ public class ESPackageManager {
     @Autowired
     private ESPackageService packageService;
 
+    /**
+     * 获取所有的package列表
+     * @return package列表
+     */
     public Result<List<ESPackageVO>> listESPackage() {
         List<ESPackage> esPackageList = packageService.listESPackage();
         if (CollectionUtils.isEmpty(esPackageList)) {
@@ -36,16 +48,33 @@ public class ESPackageManager {
         return Result.buildSucc(esPackageList.stream().map(this::buildESPackageVO).collect(Collectors.toList()));
     }
 
+    /**
+     * 根据id获取es package
+     * @param id 安装包id
+     * @return 安装包
+     */
     public Result<ESPackageVO> getESPackageById(Long id) {
         return AriusOptional
                 .ofObjNullable(buildESPackageVO(packageService.getESPackagePOById(id)))
                 .orGetResult(() -> Result.buildFail("ES安装包不存在"));
     }
 
+    /**
+     * 创建一个Package
+     * @param esPackageDTO dto
+     * @param operator 操作者
+     * @return 创建数量
+     */
     public Result<Long> addESPackage(ESPackageDTO esPackageDTO, String operator) {
         return packageService.addESPackage(esPackageDTO, operator);
     }
 
+    /**
+     * 修改ES package
+     * @param esPackageDTO dto
+     * @param operator 操作者
+     * @return 更新的es package
+     */
     public Result<ESPackageVO> updateESPackage(ESPackageDTO esPackageDTO, String operator) {
 
         Result<ESPackage> esPackageResult = packageService.updateESPackage(esPackageDTO, operator);
@@ -56,6 +85,11 @@ public class ESPackageManager {
         return Result.buildSucc(buildESPackageVO(esPackageResult.getData()));
     }
 
+    /**
+     * 构建es package vo
+     * @param esPackage es安装包
+     * @return
+     */
     private ESPackageVO buildESPackageVO(ESPackage esPackage) {
         ESPackageVO esPackageVO = ConvertUtil.obj2Obj(esPackage, ESPackageVO.class);
 
@@ -63,5 +97,15 @@ public class ESPackageManager {
         esPackageVO.setPackageType(AriusESPackageEnum.valueOfLength(ESVersionUtil.getVersionLength(esPackage.getEsVersion())).getCode());
 
         return esPackageVO;
+    }
+
+    /**
+     * 删除es对应的package
+     * @param id 插件包
+     * @param operator 操作人
+     * @return
+     */
+    public Result<Long> deleteESPackage(Long id, String operator) {
+        return packageService.deleteESPackage(id, operator);
     }
 }

@@ -2,10 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.apache.commons.compress.utils.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

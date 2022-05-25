@@ -3,32 +3,40 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER_REGION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
 @Component
 public class ClusterNodeManagerImpl implements ClusterNodeManager {
@@ -45,7 +53,13 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     private ClusterLogicService    clusterLogicService;
 
     @Autowired
-    private RegionRackService      regionRackService;
+    private ClusterRegionService   clusterRegionService;
+
+    @Autowired
+    private ClusterPhyService      clusterPhyService;
+
+    @Autowired
+    private OperateRecordService   operateRecordService;
 
     /**
      * 物理集群节点转换
@@ -57,7 +71,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     public List<ESClusterRoleHostVO> convertClusterLogicNodes(List<ClusterRoleHost> clusterNodes) {
         List<ESClusterRoleHostVO> result = Lists.newArrayList();
 
-        List<ClusterLogicRackInfo> clusterRacks = regionRackService.listAllLogicClusterRacks();
+        List<ClusterLogicRackInfo> clusterRacks = clusterRegionService.listAllLogicClusterRacks();
 
         Multimap<String, ClusterLogic> rack2LogicClusters = getRack2LogicClusterMappings(clusterRacks,
                 clusterLogicService.listAllClusterLogics());
@@ -69,7 +83,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             String clusterRack = createClusterRackKey(node.getCluster(), node.getRack());
             ClusterLogicRackInfo rackInfo = rack2ClusterRacks.get(clusterRack);
             if (rackInfo != null) {
-                nodeVO.setRegionId(rackInfo.getRegionId());
+                nodeVO.setRegionId(rackInfo.getRegionId().intValue());
             }
 
             Collection<ClusterLogic> clusterLogics = rack2LogicClusters.get(clusterRack);
@@ -203,18 +217,77 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     @Override
-    public List<ESClusterRoleHostVO> convertClusterPhyNodes(List<ClusterRoleHost> clusterRoleHosts,
-                                                            String clusterPhyName) {
-        List<ESClusterRoleHostVO> esClusterRoleHostVOS = ConvertUtil.list2List(clusterRoleHosts,
-            ESClusterRoleHostVO.class);
+    public Result<List<ESClusterRoleHostVO>> listDivide2ClusterNodeInfo(Long clusterId) {
+        List<ClusterRoleHost> clusterRoleHostList = null;
+        try {
+            clusterRoleHostList = clusterRoleHostService.getByRoleAndClusterId(clusterId, DATA_NODE.getDesc());
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=listDivide2ClusterNodeInfo||clusterId={}||errMsg={}",
+                    clusterId, e.getMessage(), e);
+        }
+        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
+    }
 
-        //获取host所在regionId
-        List<ClusterRegion> regions = regionRackService.listPhyClusterRegions(clusterPhyName);
-        esClusterRoleHostVOS.forEach(esRoleClusterHostVO->{
-            buildHostRegionIdAndLogicName(esRoleClusterHostVO, regions);
-        });
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<List<Long>> createNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator) {
+        List<Long> regionIdLis = Lists.newArrayList();
+        for (ClusterRegionWithNodeInfoDTO param : params) {
+            Result<Boolean> checkRet = baseCheckParamValid(param);
+            if (checkRet.failed()) { return Result.buildFrom(checkRet);}
+            if (clusterRegionService.isExistByRegionName(param.getName())) {
+                return Result.buildFail(String.format("region名称[%s]已经存在", param.getName()));
+            }
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) { return Result.buildFail("region节点集合为空");}
 
-        return esClusterRoleHostVOS;
+            Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(), param.getBindingNodeIds(),
+                    param.getName(), operator);
+            if (addRegionRet.success()) {
+                Result<Boolean> booleanResult = editNode2Region(param, operator);
+                if (booleanResult.success()) {
+                    // 2. 操作记录
+                    operateRecordService.save(CLUSTER_REGION, ADD, addRegionRet.getMessage(), "", operator);
+                    // 3. 发送消息
+                    regionIdLis.add(addRegionRet.getData());
+                }
+            }
+        }
+        return Result.buildSucc(regionIdLis);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param, String operator) {
+        Result<Boolean> checkRet = baseCheckParamValid(param);
+        if (checkRet.failed()) { return Result.buildFrom(checkRet);}
+        if (!clusterRegionService.isExistByRegionId(param.getId().intValue())) {
+            return Result.buildFail(String.format("regionId[%s]不存在", param.getId()));
+        }
+
+        // 校验bindingNodeIds 和 unBindingNodeIds的重复性
+        List<Integer> bindingNodeIds   = param.getBindingNodeIds();
+        List<Integer> unBindingNodeIds = param.getUnBindingNodeIds();
+        if (CollectionUtils.isNotEmpty(bindingNodeIds)) {
+            for (Integer bindingNodeId : bindingNodeIds) {
+                if (CollectionUtils.isNotEmpty(unBindingNodeIds) && unBindingNodeIds.contains(bindingNodeId)) {
+                    return Result.buildFail("region中绑定节点类别和解绑节点列表不能有相同节点");
+                }
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(bindingNodeIds)) {
+            // 绑定node 到指定 region
+            boolean editBindingNodeRegionFlag = clusterRoleHostService.editNodeRegionId(bindingNodeIds, param.getId().intValue());
+            if (CollectionUtils.isEmpty(param.getUnBindingNodeIds())) { return Result.build(editBindingNodeRegionFlag);}
+        }
+
+        if (CollectionUtils.isNotEmpty(unBindingNodeIds)) {
+            // 解绑node 到指定 region
+            boolean editUnBingingNodeRegionFlag = clusterRoleHostService.editNodeRegionId(unBindingNodeIds, -1);
+            return Result.build(editUnBingingNodeRegionFlag);
+        }
+
+        return Result.buildSucc(true);
     }
 
     /**************************************** private method ***************************************************/
@@ -310,39 +383,14 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return builder.toString();
     }
 
-    private void buildHostRegionIdAndLogicName(ESClusterRoleHostVO esClusterRoleHostVO, List<ClusterRegion> regions) {
-        Map<Long/*regionId*/, List<String>/*racks*/> regionId2RacksMap = ConvertUtil.list2Map(regions,
-                ClusterRegion::getId, region -> ListUtils.string2StrList(region.getRacks()));
-
-        regionId2RacksMap.forEach((key, value) -> {
-            if (value.contains(esClusterRoleHostVO.getRack())) {
-                esClusterRoleHostVO.setRegionId(key);
-                // 根据region获取data节点被绑定的逻辑集群的信息并设置到host视图当中
-                buildHostLogicName(esClusterRoleHostVO, key);
-            }
-        });
-    }
-
-    private void buildHostLogicName(ESClusterRoleHostVO esClusterRoleHostVO, Long key) {
-        ClusterRegion clusterRegion = regionRackService.getRegionById(key);
-        if (clusterRegion == null) {
-            LOGGER.error("class=ClusterNodeManagerImpl||method=buildHostRegionIdAndLogicName||errMsg=clusterRegion doesn't exit!");
-            return;
+    @Nullable
+    private Result<Boolean> baseCheckParamValid(ClusterRegionWithNodeInfoDTO param) {
+        if (null == param) {
+            return Result.buildFail("参数为空");
         }
-
-        List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
-        // region没有绑定到逻辑集群，则不设置关联的逻辑集群
-        if (CollectionUtils.isEmpty(logicClusterIds) ||
-                logicClusterIds.get(0).equals(Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))) {
-            return;
+        if (!clusterPhyService.isClusterExists(param.getPhyClusterName())) {
+            return Result.buildFail(String.format("物理集群[%s]不存在", param.getPhyClusterName()));
         }
-
-        //获取逻辑集群对应的名称列表
-        List<String> clusterLogicNames = logicClusterIds.stream()
-                .map(logicClusterId -> clusterLogicService.getClusterLogicById(logicClusterId))
-                .map(ClusterLogic::getName)
-                .collect(Collectors.toList());
-
-        esClusterRoleHostVO.setClusterLogicNames(ListUtils.strList2String(clusterLogicNames));
+        return Result.buildSucc();
     }
 }

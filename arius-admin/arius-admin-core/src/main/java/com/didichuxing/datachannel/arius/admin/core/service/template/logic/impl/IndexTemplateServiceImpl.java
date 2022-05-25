@@ -56,7 +56,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplate
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -119,7 +119,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private ClusterPhyService clusterPhyService;
 
     @Autowired
-    private RegionRackService           regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
@@ -954,6 +954,17 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return Result.buildSuccWithMsg("索引模板可以使用");
     }
 
+    @Override
+    public Result<List<IndexTemplate>> listByRegionId(Integer regionId) {
+        List<IndexTemplatePO> indexTemplatePOS;
+        try {
+            indexTemplatePOS = indexTemplateDAO.listByRegionId(regionId);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplateServiceImpl||method=listAllByRegionId||errMsg={}", e);
+            return Result.buildFail(String.format("根据regionId获取模板列表失败, msg:%s", e.getMessage()));
+        }
+        return Result.buildSucc(ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class));
+    }
 
     /**************************************** private method ****************************************************/
     /**
@@ -1090,7 +1101,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     private Multimap<String, Long> fetchClusterRacks2LogicClusterIdMappings() {
         Multimap<String, Long> logicClusterIdMappings = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : regionRackService.listAllLogicClusterRacks()) {
+        for (ClusterLogicRackInfo param : clusterRegionService.listAllLogicClusterRacks()) {
             List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
             logicClusterIds.forEach(logicClusterId -> logicClusterIdMappings.put(fetchRackKey(param.getPhyClusterName(), param.getRack()), logicClusterId));
         }

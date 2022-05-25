@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -93,7 +93,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private CacheSwitch                                    cacheSwitch;
@@ -660,7 +660,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
 
     @Override
     public List<IndexTemplatePhy> getTemplateByRegionId(Long regionId) {
-        ClusterRegion region = regionRackService.getRegionById(regionId);
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
         if (AriusObjUtils.isNull(region)) {
             return Lists.newArrayList();
         }

@@ -21,6 +21,9 @@ public class ClusterRegionVO extends BaseVO {
     @ApiModelProperty("主键")
     private Long id;
 
+    @ApiModelProperty("region 名称")
+    private String name;
+
     @ApiModelProperty("逻辑集群ID")
     private String logicClusterIds;
 
@@ -28,5 +31,6 @@ public class ClusterRegionVO extends BaseVO {
     private String clusterName;
 
     @ApiModelProperty("Rack列表")
+    @Deprecated
     private String racks;
 }
