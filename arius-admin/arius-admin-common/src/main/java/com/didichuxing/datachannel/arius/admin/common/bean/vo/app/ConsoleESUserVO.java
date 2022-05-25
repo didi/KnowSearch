@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,24 +16,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "app信息")
-@Deprecated
-public class ConsoleAppVO extends BaseVO {
+@ApiModel(description = "es user 信息")
+public class ConsoleESUserVO extends BaseVO {
 
-    @ApiModelProperty("应用")
+    @ApiModelProperty("es user")
     private Integer id;
 
-    @ApiModelProperty("应用名称")
-    private String  name;
-
-    @ApiModelProperty("部门ID")
-    private String  departmentId;
-
-    @ApiModelProperty("部门名称")
-    private String  department;
-
-    @ApiModelProperty("责任人")
-    private String  responsible;
 
     @ApiModelProperty("备注")
     private String  memo;

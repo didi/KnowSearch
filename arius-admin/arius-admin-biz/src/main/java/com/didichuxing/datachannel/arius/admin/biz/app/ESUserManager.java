@@ -1,14 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
+/**
+ * es user 操作
+ *
+ * @author shizeying
+ * @date 2022/05/25
+ */
 public interface ESUserManager {
     
     /**
@@ -131,5 +140,17 @@ public interface ESUserManager {
      * @return result
      */
     Result<Void> verifyAppCode(Integer esUserName, String verifyCode);
+    
+        /**
+     * 编辑APP接口
+     * @param request    request
+     * @param consoleESUserDTO     consoleESUserDTO
+     * @return           Result<Void>
+     */
+    Result<Void> update(HttpServletRequest request, ConsoleESUserDTO consoleESUserDTO);
+    
+    Result<ConsoleESUserVO> get(Integer esUser);
+    
+    Result<List<ConsoleESUserVO>> list();
     
 }

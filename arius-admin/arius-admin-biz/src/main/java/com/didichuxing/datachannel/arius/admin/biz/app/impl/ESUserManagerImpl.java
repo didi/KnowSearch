@@ -9,12 +9,15 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserDeleteEvent;
@@ -30,11 +33,13 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,7 +77,7 @@ public class ESUserManagerImpl implements ESUserManager {
         final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
                 .distinct().collect(Collectors.toList());
         //根据项目下所有的es user
-        final List<ESUser> users = esUserService.listESUserWithCache(projectIds);
+        final List<ESUser> users = esUserService.listESUsers(projectIds);
         
         return Result.buildSucc(users);
     }
@@ -245,7 +250,7 @@ public class ESUserManagerImpl implements ESUserManager {
         //校验项目是否存在
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
         if (Objects.isNull(projectVO)) {
-            return Result.buildFail(String.format("项目[%s]不存在", projectId));
+            return Result.buildParamIllegal(String.format("项目[%s]不存在", projectId));
         }
         //校验当前项目下所有的es user
         final List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
@@ -353,5 +358,48 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<Void> verifyAppCode(Integer esUserName, String verifyCode) {
         return esUserService.verifyAppCode(esUserName,verifyCode);
+    }
+    
+    @Override
+    public Result<Void> update(HttpServletRequest request, ConsoleESUserDTO consoleESUserDTO) {
+       
+        //获取项目id
+        Integer projectId = HttpRequestUtil.getAppId(request);
+        //获取操作用户
+        String userName = HttpRequestUtil.getOperator(request);
+        //校验项目中是否包含该用户
+        ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
+        if (Objects.isNull(projectVO)){
+            return Result.buildFail(String.format("项目[%s]不存在", projectId));
+        }
+        //校验当前操作者是否为超级用户
+        if (AdminConstant.SUPER_USER_NAME.equals(userName)) {
+         return Result.buildFail("当前用户不是管理员账号");
+        }
+        //校验es user 是否存在于该项目下
+        ESUser user = esUserService.getEsUserById(consoleESUserDTO.getId());
+        if (Objects.isNull(user)){
+            return Result.buildParamIllegal(String.format("es user [%s]不存在", consoleESUserDTO.getId()));
+        }
+        if (user.getProjectId().equals(projectId)){
+             return Result.buildParamIllegal(String.format("当前项目[%s]下不存在es user [%s]",
+                     projectId,consoleESUserDTO.getId()));
+        }
+    
+        return this.editESUser(ConvertUtil.obj2Obj(consoleESUserDTO, ESUserDTO.class),userName);
+    }
+    
+    @Override
+    public Result<ConsoleESUserVO> get(Integer esUser) {
+        return Result.buildSucc(ConvertUtil.obj2Obj(esUserService.getEsUserById(esUser), ConsoleESUserVO.class));
+    }
+    
+    @Override
+    public Result<List<ConsoleESUserVO>> list() {
+        Result<List<ESUser>> result = listESUsersByAllProject();
+        if (result.failed()) {
+            return Result.buildFail();
+        }
+        return Result.buildSucc(ConvertUtil.list2List(result.getData(), ConsoleESUserVO.class));
     }
 }
