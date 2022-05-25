@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Assertions;
@@ -26,7 +27,7 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
     @Test
     public void listDivide2ClusterNodeInfoTest(){
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        Result<List<ESClusterRoleHostVO>> ret = clusterNodeManager.listDivide2ClusterNodeInfo(esClusterDTO.getId().longValue());
+        Result<List<ESClusterRoleHostWithRegionInfoVO>> ret = clusterNodeManager.listDivide2ClusterNodeInfo(esClusterDTO.getId().longValue());
         Assertions.assertNotNull(ret);
         if (ret.success()) { Assertions.assertNotNull(ret.getData());}
         if (ret.failed()) { Assertions.assertNotNull(ret.getMessage());}
