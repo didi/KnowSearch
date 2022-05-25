@@ -153,7 +153,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
         }
 
         IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(content.getId());
-        if (!templateLogic.getAppId().equals(workOrder.getSubmitorAppid())) {
+        if (!templateLogic.getProjectId().equals(workOrder.getSubmitorAppid())) {
             return Result.buildOpForBidden("您无权对该索引进行转让操作");
         }
 

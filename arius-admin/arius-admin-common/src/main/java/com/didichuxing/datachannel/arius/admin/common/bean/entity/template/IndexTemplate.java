@@ -25,9 +25,9 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
     private String  name;
 
     /**
-     * appid
+     * projectId
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 用户数据类型

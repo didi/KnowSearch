@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
  * @date 2019/5/20
  */
 @Data
+@Deprecated
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppUserInfo extends BaseEntity {

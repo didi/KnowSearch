@@ -171,10 +171,10 @@ public interface IndexTemplateService {
 
     /**
      * 根据appId查询模板
-     * @param appId appId
+     * @param projectId projectId
      * @return list
      */
-    List<IndexTemplate> getAppLogicTemplatesByAppId(Integer appId);
+    List<IndexTemplate> getAppLogicTemplatesByAppId(Integer projectId);
 
     /**
      * 获取所有逻辑集群对应逻辑模板
@@ -185,10 +185,10 @@ public interface IndexTemplateService {
 
     /**
      * 获取模板具体的物理索引
-     * @param appId appId
+     * @param projectId projectId
      * @return result
      */
-    Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer appId);
+    Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer projectId);
 
     /**
      * 模板移交
@@ -241,10 +241,10 @@ public interface IndexTemplateService {
 
     /**
      * 获取APP有权限的集群下的所有逻辑模板.
-     * @param appId APP的id
+     * @param projectId APP的id
      * @return list
      */
-    List<IndexTemplate> getTemplatesByHasAuthCluster(Integer appId);
+    List<IndexTemplate> getTemplatesByHasAuthCluster(Integer projectId);
 
     /**
      * 获取APP在指定逻辑集群下有权限的逻辑模板.

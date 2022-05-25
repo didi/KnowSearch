@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
  * @date 2019/3/13
  */
 @Data
+@Deprecated
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppConfig extends BaseEntity {

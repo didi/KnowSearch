@@ -24,7 +24,7 @@ public interface IndexTemplateDAO {
 
     IndexTemplatePO getById(Integer logicId);
 
-    List<IndexTemplatePO> listByAppId(Integer appId);
+    List<IndexTemplatePO> listByProjectId(Integer projectId);
 
     List<IndexTemplatePO> listAll();
 

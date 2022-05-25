@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppTemplateAuthPO extends BasePO implements DigitResponsible {
+public class ProjectTemplateAuthPO extends BasePO implements DigitResponsible {
 
     /**
      * 主键
@@ -25,7 +25,7 @@ public class AppTemplateAuthPO extends BasePO implements DigitResponsible {
     /**
      * app id
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 模板ID

@@ -8,9 +8,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppTemplateAuthDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectTemplateAuthDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
 
     @Autowired
-    private AppTemplateAuthDAO appTemplateAuthDAO;
+    private ProjectTemplateAuthDAO projectTemplateAuthDAO;
 
     @MockBean
     private IndexTemplateService indexTemplateService;
@@ -43,12 +43,12 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
     @Test
     public void deleteExcessTemplateAuthsIfNeedTest() {
         AppTemplateAuthDTO appTemplateAuthDTO = mockAddTemplateAuth();
-        AppTemplateAuthPO byAppIdAndTemplateId = appTemplateAuthDAO.getByAppIdAndTemplateId(appTemplateAuthDTO.getAppId(), appTemplateAuthDTO.getTemplateId().toString());
+        ProjectTemplateAuthPO byAppIdAndTemplateId = projectTemplateAuthDAO.getByAppIdAndTemplateId(appTemplateAuthDTO.getAppId(), appTemplateAuthDTO.getTemplateId().toString());
         Long authId = byAppIdAndTemplateId.getId();
         //删除冗余数据
         Assertions.assertTrue(appLogicTemplateAuthService.deleteRedundancyTemplateAuths(true));
         //检测冗余的数据是否被清除掉
-        Assertions.assertNull(appTemplateAuthDAO.getById(authId));
+        Assertions.assertNull(projectTemplateAuthDAO.getById(authId));
     }
 
     @Test
@@ -64,11 +64,12 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(appLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,logicTemplateId,null,responsible,CustomDataSource.OPERATOR).success());
         //插入读写权限
         AppTemplateAuthDTO appTemplateAuthDTO = mockAddTemplateAuth();
-        Assertions.assertNotNull(appTemplateAuthDAO.getByAppIdAndTemplateId(appId,logicTemplateId.toString()).getId());
+        Assertions.assertNotNull(projectTemplateAuthDAO.getByAppIdAndTemplateId(appId,logicTemplateId.toString()).getId());
         //对于权限进行更新操作
         Assertions.assertTrue(appLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,logicTemplateId,AppTemplateAuthEnum.R,responsible,CustomDataSource.OPERATOR).success());
         //确认权限是否真的被更新
-        Assertions.assertEquals(AppTemplateAuthEnum.R.getCode(),appTemplateAuthDAO.getByAppIdAndTemplateId(appId,logicTemplateId.toString()).getType());
+        Assertions.assertEquals(AppTemplateAuthEnum.R.getCode(),
+                projectTemplateAuthDAO.getByAppIdAndTemplateId(appId,logicTemplateId.toString()).getType());
     }
 
     @Test
@@ -114,12 +115,12 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
         AppTemplateAuthDTO appTemplateAuthDTO = mockAddTemplateAuth();
         //对于插入的数据的权限信息进行相应的修改
         appTemplateAuthDTO.setType(AppTemplateAuthEnum.R.getCode());
-        AppTemplateAuthPO byAppIdAndTemplateId = appTemplateAuthDAO.getByAppIdAndTemplateId(appTemplateAuthDTO.getAppId(), appTemplateAuthDTO.getTemplateId().toString());
+        ProjectTemplateAuthPO byAppIdAndTemplateId = projectTemplateAuthDAO.getByAppIdAndTemplateId(appTemplateAuthDTO.getAppId(), appTemplateAuthDTO.getTemplateId().toString());
         appTemplateAuthDTO.setId(byAppIdAndTemplateId.getId());
         Assertions.assertTrue(appLogicTemplateAuthService.updateTemplateAuth(appTemplateAuthDTO, CustomDataSource.OPERATOR).success());
         //再次确认权限的修改已经成功
-        AppTemplateAuthPO updateAppTemplateAuthPO = appTemplateAuthDAO.getById(byAppIdAndTemplateId.getId());
-        Assertions.assertEquals(AppTemplateAuthEnum.R.getCode(), updateAppTemplateAuthPO.getType());
+        ProjectTemplateAuthPO updateProjectTemplateAuthPO = projectTemplateAuthDAO.getById(byAppIdAndTemplateId.getId());
+        Assertions.assertEquals(AppTemplateAuthEnum.R.getCode(), updateProjectTemplateAuthPO.getType());
         //设置Owner权限，这是不允许的
         appTemplateAuthDTO.setType(AppTemplateAuthEnum.OWN.getCode());
         Assertions.assertTrue(appLogicTemplateAuthService.addTemplateAuth(appTemplateAuthDTO, CustomDataSource.OPERATOR).failed());
@@ -129,12 +130,12 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
     public void deleteTemplateAuthTest() {
         //插入数据，对数据进行对应的删除
         AppTemplateAuthDTO appTemplateAuthDTO = mockAddTemplateAuth();
-        AppTemplateAuthPO byAppIdAndTemplateId = appTemplateAuthDAO.getByAppIdAndTemplateId(appTemplateAuthDTO.getAppId(), appTemplateAuthDTO.getTemplateId().toString());
+        ProjectTemplateAuthPO byAppIdAndTemplateId = projectTemplateAuthDAO.getByAppIdAndTemplateId(appTemplateAuthDTO.getAppId(), appTemplateAuthDTO.getTemplateId().toString());
         Long authId = byAppIdAndTemplateId.getId();
         //对插入的数据进行删除
         Assertions.assertTrue(appLogicTemplateAuthService.deleteTemplateAuth(authId, CustomDataSource.OPERATOR).success());
         //确认是否真的被删除
-        Assertions.assertNull(appTemplateAuthDAO.getById(authId));
+        Assertions.assertNull(projectTemplateAuthDAO.getById(authId));
         //null异常情况的判断
         Assertions.assertTrue(appLogicTemplateAuthService.deleteTemplateAuth(null,CustomDataSource.OPERATOR).failed());
     }
@@ -173,7 +174,7 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
         appTemplateAuthDTO.setAppId(1);
         appTemplateAuthDTO.setTemplateId(templateId);
         IndexTemplate indexTemplate = new IndexTemplate();
-        indexTemplate.setAppId(1);
+        indexTemplate.setProjectId(1);
         indexTemplate.setId(templateId);
         IndexTemplateLogicWithClusterAndMasterTemplate indexTemplateLogicWithClusterAndMasterTemplate = new IndexTemplateLogicWithClusterAndMasterTemplate();
         ClusterLogic clusterLogic = new ClusterLogic();

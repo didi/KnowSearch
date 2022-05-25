@@ -178,7 +178,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
         List<Integer> deleteAliasList = new ArrayList<>();
         Set<Integer> logicIdList = new HashSet<>();
         List<PutAliasNode> nodes;
-        List<IndexTemplatePO> indexIndexTemplatePOS = indexTemplateDAO.listByAppId(aliasSwitchDTO.getAppId());
+        List<IndexTemplatePO> indexIndexTemplatePOS = indexTemplateDAO.listByProjectId(aliasSwitchDTO.getAppId());
         //检查索引
         if (CollectionUtils.isEmpty(aliasSwitchDTO.getAddAliasIndices()) && CollectionUtils.isEmpty(aliasSwitchDTO.getDelAliasIndices())) {
             return Result.buildFail("操作的索引名称不能为空！");
@@ -334,7 +334,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
                 appIds.add(appId);
             }
             if (CollectionUtils.isNotEmpty(indexTemplatePOS)) {
-                appIds.addAll(indexTemplatePOS.stream().map(IndexTemplatePO::getAppId).collect(Collectors.toSet()));
+                appIds.addAll(indexTemplatePOS.stream().map(IndexTemplatePO::getProjectId).collect(Collectors.toSet()));
             } else if (CollectionUtils.isEmpty(indexTemplatePOS) && CollectionUtils.isNotEmpty(logicIds)) {
                 return Result.buildFail("索引模板不存在！");
             }

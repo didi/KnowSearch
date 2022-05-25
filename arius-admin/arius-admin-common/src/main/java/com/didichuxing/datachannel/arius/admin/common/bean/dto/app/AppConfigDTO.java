@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "应用配置信息")
+@Deprecated
 public class AppConfigDTO extends BaseDTO {
 
     @ApiModelProperty("主键")

@@ -48,13 +48,13 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
         if (null == newIndexTemplate) {
             return;
         }
-        if (newIndexTemplate.getAppId().intValue() == oldIndexTemplate.getAppId().intValue()) {
+        if (newIndexTemplate.getProjectId().intValue() == oldIndexTemplate.getProjectId().intValue()) {
             return;
         }
 
         //如果模板的appid发生变更了，代表模板的管理权限发生变更，但是原appid还要拥有模板的读写权限
         //给原appid赋予索引的读写权限
-        Result<Void> result = appLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getAppId(),
+        Result<Void> result = appLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getProjectId(),
             logicTemplateId, AppTemplateAuthEnum.RW, oldIndexTemplate.getResponsible(), AriusUser.SYSTEM.getDesc());
 
         if (!EnvUtil.isOnline()) {

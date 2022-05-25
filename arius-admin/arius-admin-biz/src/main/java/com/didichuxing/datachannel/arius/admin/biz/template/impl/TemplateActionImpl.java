@@ -88,8 +88,8 @@ public class TemplateActionImpl implements TemplateAction {
         }
 
         Long logicClusterId = logicDTO.getPhysicalInfos().get(0).getResourceId();
-        if (!logicClusterAuthService.canCreateLogicTemplate(logicDTO.getAppId(), logicClusterId)) {
-            return Result.buildFail(String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", logicDTO.getAppId(), logicClusterId));
+        if (!logicClusterAuthService.canCreateLogicTemplate(logicDTO.getProjectId(), logicClusterId)) {
+            return Result.buildFail(String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", logicDTO.getProjectId(), logicClusterId));
         }
 
         return handleCreateWithAutoDistributeResource(logicDTO, operator);

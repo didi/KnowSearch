@@ -327,7 +327,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
         logicDTO.setQuota(quotaTool.getQuotaCountByDisk(NodeSpecifyEnum.DOCKER.getCode(), content.getDiskQuota() * 1.2,
                 TEMPLATE_QUOTA_MIN));
-        logicDTO.setAppId(submitorAppid);
+        logicDTO.setProjectId(submitorAppid);
         return logicDTO;
     }
 

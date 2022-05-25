@@ -1,21 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NOT_EXIST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_SAVE_BY_DAY_EXPIRE_MAX;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_SAVE_BY_MONTH_EXPIRE_MIN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
-
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -30,7 +25,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -55,11 +56,9 @@ import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvert
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -69,12 +68,30 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
@@ -95,12 +112,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
-
+    
     @Autowired
-    private AppService                  appService;
-
-    @Autowired
-    private AriusUserInfoService        ariusUserInfoService;
+    private ProjectService projectService;
 
     @Autowired
     private ResponsibleConvertTool      responsibleConvertTool;
@@ -453,12 +467,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     /**
      * 根据APP ID查询模板
      *
-     * @param appId APP ID
+     * @param projectId APP ID
      * @return list
      */
     @Override
-    public List<IndexTemplate> getAppLogicTemplatesByAppId(Integer appId) {
-        return responsibleConvertTool.list2List(indexTemplateDAO.listByAppId(appId), IndexTemplate.class);
+    public List<IndexTemplate> getAppLogicTemplatesByAppId(Integer projectId) {
+        return responsibleConvertTool.list2List(indexTemplateDAO.listByProjectId(projectId), IndexTemplate.class);
     }
 
     /**
@@ -482,11 +496,11 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     /**
      * 获取模板具体的物理索引
      *
-     * @param appId appId
+     * @param projectId appId
      */
     @Override
-    public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer appId) {
-        List<AppTemplateAuth> appTemplateAuths = logicTemplateAuthService.getTemplateAuthsByAppId(appId);
+    public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer projectId) {
+        List<AppTemplateAuth> appTemplateAuths = logicTemplateAuthService.getTemplateAuthsByAppId(projectId);
         if (CollectionUtils.isEmpty(appTemplateAuths)) {
             return Result.buildSucc();
         }
@@ -510,7 +524,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         });
 
         LOGGER.info("class=TemplateLogicServiceImpl||method=getAllTemplateIndicesByAppid||appId={}||indicesList={}",
-            appId, JSON.toJSONString(indicesClusterTupleList));
+                projectId, JSON.toJSONString(indicesClusterTupleList));
 
         return Result.buildSucc(indicesClusterTupleList);
     }
@@ -536,7 +550,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         IndexTemplateDTO logicDTO = new IndexTemplateDTO();
         logicDTO.setId(logicId);
-        logicDTO.setAppId(tgtAppId);
+        logicDTO.setProjectId(tgtAppId);
         logicDTO.setResponsible(tgtResponsible);
 
         return editTemplate(logicDTO, operator);
@@ -649,13 +663,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplate> getTemplatesByHasAuthCluster(Integer appId) {
-        if (appId == null) {
+    public List<IndexTemplate> getTemplatesByHasAuthCluster(Integer projectId) {
+        if (projectId == null) {
             return new ArrayList<>();
         }
 
         // 获取有权限的集群id
-        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(appId).stream()
+        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
             .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
 
         // 获取集群下的模板
@@ -1276,11 +1290,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     private Result<Void> validateIndexTemplateLogicStep2(IndexTemplateDTO param, String dateFormatFinal, String expressionFinal, String nameFinal, String dateFieldFinal) {
         List<String> responsibles = ListUtils.string2StrList(param.getResponsible());
+        //todo 后期变更
+        /**
         for (String responsible : responsibles) {
             if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(responsible))) {
                 return Result.buildParamIllegal(String.format("责任人%s非法", responsible));
             }
-        }
+        }**/
         if (expressionFinal != null && expressionFinal.endsWith("*") && AriusObjUtils.isNull(dateFormatFinal)) {
             return Result.buildParamIllegal("表达式*结尾,后缀格式必填");
         }
@@ -1322,8 +1338,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 && !DataCenterEnum.validate(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心非法");
         }
-        if (param.getAppId() != null
-                && !appService.isAppExists(param.getAppId())) {
+        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(param.getProjectId());
+        if (param.getProjectId() != null
+                && Objects.isNull(projectVO)) {
             return Result.buildParamIllegal("所属应用不存在");
         }
         if (param.getDataType() != null
@@ -1370,7 +1387,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (AriusObjUtils.isNull(param.getName())) {
             return Result.buildParamIllegal("名字为空");
         }
-        if (AriusObjUtils.isNull(param.getAppId())) {
+        if (AriusObjUtils.isNull(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用为空");
         }
         if (AriusObjUtils.isNull(param.getDataType())) {

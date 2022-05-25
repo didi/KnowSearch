@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthDeleteEvent;
@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppTemplateAuthDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectTemplateAuthDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -50,7 +50,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     private static final ILog          LOGGER = LogFactory.getLog(AppLogicTemplateAuthServiceImpl.class);
 
     @Autowired
-    private AppTemplateAuthDAO         templateAuthDAO;
+    private ProjectTemplateAuthDAO templateAuthDAO;
 
     @Autowired
     private AppService                 appService;
@@ -75,30 +75,30 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
         Map<Integer, IndexTemplate> logicTemplateId2LogicTemplateMappings = ConvertUtil
             .list2Map(indexTemplateService.getAllLogicTemplates(), IndexTemplate::getId);
 
-        Multimap<Integer, AppTemplateAuthPO> appId2TemplateAuthsMappings = ConvertUtil
-            .list2MulMap(templateAuthDAO.listWithRwAuths(), AppTemplateAuthPO::getAppId);
+        Multimap<Integer, ProjectTemplateAuthPO> appId2TemplateAuthsMappings = ConvertUtil
+            .list2MulMap(templateAuthDAO.listWithRwAuths(), ProjectTemplateAuthPO::getProjectId);
 
-        Map<Long, AppTemplateAuthPO> needDeleteTemplateAuths = Maps.newHashMap();
+        Map<Long, ProjectTemplateAuthPO> needDeleteTemplateAuths = Maps.newHashMap();
 
         for (Integer appId : appId2TemplateAuthsMappings.keySet()) {
-            List<AppTemplateAuthPO> appTemplateAuths = Lists.newArrayList(appId2TemplateAuthsMappings.get(appId));
+            List<ProjectTemplateAuthPO> appTemplateAuths = Lists.newArrayList(appId2TemplateAuthsMappings.get(appId));
 
-            Multimap<Integer, AppTemplateAuthPO> currentAppLogicId2TemplateAuthsMappings = ConvertUtil
-                .list2MulMap(appTemplateAuths, AppTemplateAuthPO::getTemplateId);
+            Multimap<Integer, ProjectTemplateAuthPO> currentAppLogicId2TemplateAuthsMappings = ConvertUtil
+                .list2MulMap(appTemplateAuths, ProjectTemplateAuthPO::getTemplateId);
 
             for (Integer logicTemplateId : currentAppLogicId2TemplateAuthsMappings.keySet()) {
-                List<AppTemplateAuthPO> currentLogicTemplateAuths = Lists
+                List<ProjectTemplateAuthPO> currentLogicTemplateAuths = Lists
                     .newArrayList(currentAppLogicId2TemplateAuthsMappings.get(logicTemplateId));
 
                 if (!logicTemplateId2LogicTemplateMappings.containsKey(logicTemplateId)) {
                     needDeleteTemplateAuths
-                        .putAll(ConvertUtil.list2Map(currentLogicTemplateAuths, AppTemplateAuthPO::getId));
+                        .putAll(ConvertUtil.list2Map(currentLogicTemplateAuths, ProjectTemplateAuthPO::getId));
 
                     LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=templateDeleted||appId=={}||logicId={}", appId, logicTemplateId);
 
-                } else if (appId.equals(logicTemplateId2LogicTemplateMappings.get(logicTemplateId).getAppId())) {
+                } else if (appId.equals(logicTemplateId2LogicTemplateMappings.get(logicTemplateId).getProjectId())) {
                     needDeleteTemplateAuths
-                        .putAll(ConvertUtil.list2Map(currentLogicTemplateAuths, AppTemplateAuthPO::getId));
+                        .putAll(ConvertUtil.list2Map(currentLogicTemplateAuths, ProjectTemplateAuthPO::getId));
 
                     LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=appOwnTemplate||appId=={}||logicId={}", appId, logicTemplateId);
                 } else {
@@ -107,11 +107,11 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
                         continue;
                     }
 
-                    currentLogicTemplateAuths.sort(Comparator.comparing(AppTemplateAuthPO::getType));
+                    currentLogicTemplateAuths.sort(Comparator.comparing(ProjectTemplateAuthPO::getType));
 
                     needDeleteTemplateAuths.putAll(
                         ConvertUtil.list2Map(currentLogicTemplateAuths.subList(1, currentLogicTemplateAuths.size()),
-                            AppTemplateAuthPO::getId));
+                            ProjectTemplateAuthPO::getId));
 
                     LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=appHasMultiTemplateAuth||appId=={}||logicId={}", appId,
                         logicTemplateId);
@@ -141,7 +141,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
         }
 
         // 获取权限表中已经存在的权限¬记录
-        AppTemplateAuthPO oldAuthPO = templateAuthDAO.getByAppIdAndTemplateId(appId, String.valueOf(logicTemplateId));
+        ProjectTemplateAuthPO oldAuthPO = templateAuthDAO.getByAppIdAndTemplateId(appId, String.valueOf(logicTemplateId));
 
         if (oldAuthPO == null) {
             // 之前无权限
@@ -255,7 +255,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     @Override
     public Result<Void> deleteTemplateAuth(Long authId, String operator) {
 
-        AppTemplateAuthPO oldAuthPO = templateAuthDAO.getById(authId);
+        ProjectTemplateAuthPO oldAuthPO = templateAuthDAO.getById(authId);
         if (oldAuthPO == null) {
             return Result.buildNotExist("权限不存在");
         }
@@ -277,12 +277,12 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     public Result<Void> deleteTemplateAuthByTemplateId(Integer templateId, String operator) {
         boolean succeed = false;
         try {
-            List<AppTemplateAuthPO> oldAppTemplateAuthPO = templateAuthDAO.getByTemplateId(templateId);
-            if (CollectionUtils.isEmpty(oldAppTemplateAuthPO)) {
+            List<ProjectTemplateAuthPO> oldProjectTemplateAuthPO = templateAuthDAO.getByTemplateId(templateId);
+            if (CollectionUtils.isEmpty(oldProjectTemplateAuthPO)) {
                 return Result.buildSucc();
             }
 
-            List<Integer> oldTemplateIds = oldAppTemplateAuthPO.stream().map(AppTemplateAuthPO::getTemplateId).collect(Collectors.toList());
+            List<Integer> oldTemplateIds = oldProjectTemplateAuthPO.stream().map(ProjectTemplateAuthPO::getTemplateId).collect(Collectors.toList());
             succeed = oldTemplateIds.size() == templateAuthDAO.batchDeleteByTemplateIds(oldTemplateIds);
             if (succeed) {
                 operateRecordService.save(ModuleEnum.LOGIC_TEMPLATE_PERMISSIONS, OperationEnum.DELETE, templateId,
@@ -329,7 +329,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     @Override
     public AppTemplateAuth buildTemplateAuth(IndexTemplate logicTemplate, AppTemplateAuthEnum appTemplateAuthEnum) {
         AppTemplateAuth auth = new AppTemplateAuth();
-        auth.setAppId(logicTemplate.getAppId());
+        auth.setAppId(logicTemplate.getProjectId());
         auth.setTemplateId(logicTemplate.getId());
         auth.setType(appTemplateAuthEnum.getCode());
         auth.setResponsible(logicTemplate.getResponsible());
@@ -345,8 +345,8 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
      */
     private Result<Void> updateTemplateAuthWithoutCheck(AppTemplateAuthDTO authDTO, String operator) {
 
-        AppTemplateAuthPO oldAuthPO = templateAuthDAO.getById(authDTO.getId());
-        AppTemplateAuthPO newAuthPO = responsibleConvertTool.obj2Obj(authDTO, AppTemplateAuthPO.class);
+        ProjectTemplateAuthPO oldAuthPO = templateAuthDAO.getById(authDTO.getId());
+        ProjectTemplateAuthPO newAuthPO = responsibleConvertTool.obj2Obj(authDTO, ProjectTemplateAuthPO.class);
 
         boolean succeed = 1 == templateAuthDAO.update(newAuthPO);
 
@@ -369,7 +369,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
      * @return result
      */
     private Result<Void> addTemplateAuthWithoutCheck(AppTemplateAuthDTO authDTO, String operator) {
-        AppTemplateAuthPO authPO = responsibleConvertTool.obj2Obj(authDTO, AppTemplateAuthPO.class);
+        ProjectTemplateAuthPO authPO = responsibleConvertTool.obj2Obj(authDTO, ProjectTemplateAuthPO.class);
 
         boolean succeed = 1 == templateAuthDAO.insert(authPO);
         if (succeed) {
@@ -476,7 +476,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
         }
 
         // APP是逻辑模板的owner，无需添加
-        if (logicTemplate.getAppId().equals(appId) && authEnum == AppTemplateAuthEnum.OWN) {
+        if (logicTemplate.getProjectId().equals(appId) && authEnum == AppTemplateAuthEnum.OWN) {
             return Result.buildDuplicate(String.format("APP[%d]已有管理权限", appId));
         }
 
@@ -500,7 +500,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
 
         return logicTemplates
                 .stream()
-                .filter(indexTemplateLogic -> appsMap.containsKey(indexTemplateLogic.getAppId()))
+                .filter(indexTemplateLogic -> appsMap.containsKey(indexTemplateLogic.getProjectId()))
                 .map(r -> buildTemplateAuth(r, AppTemplateAuthEnum.OWN))
                 .collect(Collectors.toList());
     }
@@ -540,20 +540,20 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
 
     @Override
     public List<AppTemplateAuth> getAppActiveTemplateRWAuths(Integer appId) {
-        AppTemplateAuthPO appTemplateAuthPO = new AppTemplateAuthPO();
-        appTemplateAuthPO.setAppId(appId);
-        appTemplateAuthPO.setType(AppTemplateAuthEnum.RW.getCode());
+        ProjectTemplateAuthPO projectTemplateAuthPO = new ProjectTemplateAuthPO();
+        projectTemplateAuthPO.setProjectId(appId);
+        projectTemplateAuthPO.setType(AppTemplateAuthEnum.RW.getCode());
         return responsibleConvertTool
-                .list2List(templateAuthDAO.listByCondition(appTemplateAuthPO), AppTemplateAuth.class);
+                .list2List(templateAuthDAO.listByCondition(projectTemplateAuthPO), AppTemplateAuth.class);
     }
 
     @Override
     public List<AppTemplateAuth> getAppActiveTemplateRAuths(Integer appId) {
-        AppTemplateAuthPO appTemplateAuthPO = new AppTemplateAuthPO();
-        appTemplateAuthPO.setAppId(appId);
-        appTemplateAuthPO.setType(AppTemplateAuthEnum.R.getCode());
+        ProjectTemplateAuthPO projectTemplateAuthPO = new ProjectTemplateAuthPO();
+        projectTemplateAuthPO.setProjectId(appId);
+        projectTemplateAuthPO.setType(AppTemplateAuthEnum.R.getCode());
         return responsibleConvertTool
-                .list2List(templateAuthDAO.listByCondition(appTemplateAuthPO), AppTemplateAuth.class);
+                .list2List(templateAuthDAO.listByCondition(projectTemplateAuthPO), AppTemplateAuth.class);
     }
 
     /**
@@ -561,9 +561,9 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
      * @param templateAuths 模板权限列表
      * @param deleteFlags   删除标示
      */
-    private void doDeleteOperationForNeed(Collection<AppTemplateAuthPO> templateAuths, boolean deleteFlags) {
+    private void doDeleteOperationForNeed(Collection<ProjectTemplateAuthPO> templateAuths, boolean deleteFlags) {
         if (CollectionUtils.isNotEmpty(templateAuths)) {
-            for (AppTemplateAuthPO templateAuth : templateAuths) {
+            for (ProjectTemplateAuthPO templateAuth : templateAuths) {
                 if (deleteFlags) {
                     if (1 == templateAuthDAO.delete(templateAuth.getId())) {
                         LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=deleteTemplateAuthSucceed||authId={}", templateAuth.getId());

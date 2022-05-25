@@ -6,8 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO;
 
-@Deprecated
+
 @Repository
+@Deprecated
 public interface AppConfigDAO {
 
     AppConfigPO getByAppId(int appId);

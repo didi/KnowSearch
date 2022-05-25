@@ -417,7 +417,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 ConsoleTemplateVO consoleTemplateVO = fetchConsoleTemplate(aggregate);
 
                 //获取项目名称
-                Integer appId = consoleTemplateVO.getAppId();
+                Integer appId = consoleTemplateVO.getProjectId();
                 if (appId2AppNameMap.containsKey(appId)) {
                     consoleTemplateVO.setAppName(appId2AppNameMap.get(appId));
                 } else {
@@ -553,7 +553,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
                 List<IndexTemplate> notAuthIndexTemplateList = allLogicTemplates
                         .stream()
-                        .filter(r -> !appId.equals(r.getAppId()) && !appRAndRwAuthTemplateIdList.contains(r.getId()))
+                        .filter(r -> !appId.equals(r.getProjectId()) && !appRAndRwAuthTemplateIdList.contains(r.getId()))
                         .collect(Collectors.toList());
                 return notAuthIndexTemplateList;
 
@@ -734,7 +734,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildSucc();
         }
 
-        if (!templateLogic.getAppId().equals(appId)) {
+        if (!templateLogic.getProjectId().equals(appId)) {
             return Result.buildOpForBidden("您无权对该索引进行操作");
         }
 
@@ -808,8 +808,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private Result<Void> checkLogicTemplateMeta(IndexTemplate templateLogic, Map<Integer, App> appId2AppMap) {
         List<String> errMsg = Lists.newArrayList();
 
-        if (!appId2AppMap.containsKey(templateLogic.getAppId())) {
-            errMsg.add("所属APP ID不存在：" + templateLogic.getAppId());
+        if (!appId2AppMap.containsKey(templateLogic.getProjectId())) {
+            errMsg.add("所属APP ID不存在：" + templateLogic.getProjectId());
         }
 
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(templateLogic.getId());

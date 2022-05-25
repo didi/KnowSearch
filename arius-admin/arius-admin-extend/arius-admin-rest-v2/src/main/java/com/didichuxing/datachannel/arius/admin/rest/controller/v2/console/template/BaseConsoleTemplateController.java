@@ -53,7 +53,7 @@ public class BaseConsoleTemplateController {
             return Result.buildSucc();
         }
 
-        if (!templateLogic.getAppId().equals(appId)) {
+        if (!templateLogic.getProjectId().equals(appId)) {
             return Result.buildOpForBidden("您无权对该索引进行操作");
         }
 

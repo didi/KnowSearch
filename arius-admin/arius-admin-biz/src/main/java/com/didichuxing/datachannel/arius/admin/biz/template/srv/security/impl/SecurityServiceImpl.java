@@ -323,7 +323,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     private void doCheckMeta(IndexTemplatePhy templatePhysical) {
         IndexTemplate templateLogic = indexTemplateService
             .getLogicTemplateWithPhysicalsById(templatePhysical.getLogicId());
-        checkTemplateOwnApp(templatePhysical, templateLogic.getAppId());
+        checkTemplateOwnApp(templatePhysical, templateLogic.getProjectId());
 
         List<AppTemplateAuth> templateAuths = appLogicTemplateAuthService
             .getTemplateAuthsByLogicTemplateId(templateLogic.getId());

@@ -27,15 +27,15 @@ public class LogicTemplateModifyEventListener implements ApplicationListener<Log
     public void onApplicationEvent(LogicTemplateModifyEvent event) {
         IndexTemplate oldTemplate = event.getOldTemplate();
         IndexTemplate newTemplate = event.getNewTemplate();
-        if (oldTemplate.getAppId().equals(newTemplate.getAppId())) {
+        if (oldTemplate.getProjectId().equals(newTemplate.getProjectId())) {
             return;
         }
 
         LOGGER.info(
             "class=LogicTemplateModifyEventListener||method=onApplicationEvent||event=LogicTemplateModifyEvent||srcAppid={}||tgtAppid={}||templateId={}",
-            oldTemplate.getAppId(), newTemplate.getAppId(), newTemplate.getId());
+            oldTemplate.getProjectId(), newTemplate.getProjectId(), newTemplate.getId());
 
-        securityService.editLogicTemplateOwnApp(newTemplate.getId(), oldTemplate.getAppId(), newTemplate.getAppId(),
+        securityService.editLogicTemplateOwnApp(newTemplate.getId(), oldTemplate.getProjectId(), newTemplate.getProjectId(),
             20);
     }
 }

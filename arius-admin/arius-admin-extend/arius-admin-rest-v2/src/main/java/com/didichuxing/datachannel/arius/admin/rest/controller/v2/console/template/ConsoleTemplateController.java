@@ -125,7 +125,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             consoleTemplateDetail.setClusterType(indexTemplateLogicWithCluster.getLogicClusters().get(0).getType());
             consoleTemplateDetail.setClusterLevel(indexTemplateLogicWithCluster.getLogicClusters().get(0).getLevel());
         }
-        consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getAppId()));
+        consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getProjectId()));
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
 
         Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getProjectId(request));

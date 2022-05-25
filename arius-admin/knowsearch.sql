@@ -47,9 +47,10 @@ create table index_template_info2
     open_srv          varchar(255)                                           null comment '已开启的模板服务'
 )
     comment '逻辑索引模板表' charset = utf8;
-
+create index idx_project_id
+    on index_template_info2 (project_id);
 create index idx_data_center
-    on index_template_info (data_center);
+    on index_template_info2 (data_center);
 
 create index idx_is_active
     on index_template_info2 (is_active);
@@ -150,7 +151,7 @@ create index idx_name
 
 #work_order 变更：approver_app_id 变更为 approver_project_id applicant->applicant_user_id applicant_app_id 变更为
 # applicant_project_id approver->approver_user_id
-create table work_order
+create table arius_work_order_info
 (
     id               bigint unsigned auto_increment comment 'id'
         primary key,
@@ -191,6 +192,8 @@ create table arius_es_user
     analyze_response_enable tinyint       default 1                 not null comment '响应结果解析开关 默认是0：关闭，1：开启',
     search_type             tinyint       default 0                 not null comment '0表示app的查询请求需要app里配置的集群(一般配置的都是trib集群) 1表示app的查询请求必须只能访问一个模板',
     create_time             timestamp     default CURRENT_TIMESTAMP not null comment '创建时间',
-    update_time             timestamp     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间'
+    update_time             timestamp     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间',
+    project_id              bigint(10)                              not null comment '项目id',
+    is_default_display      tinyint(2)    default 0                 not null comment '1：项目默认的es user；0:项目新增的es user'
 )
     comment 'es操作用户表' charset = utf8;

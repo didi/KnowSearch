@@ -109,11 +109,11 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     }
 
     @Override
-    protected PaginationResult<ConsoleClusterVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
+    protected PaginationResult<ConsoleClusterVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
         ClusterLogicConditionDTO condition = buildClusterLogicConditionDTO(pageDTO);
 
         //1. 获取管理/访问/无权限的逻辑集群信息
-        List<ClusterLogic> appAuthClusterLogicList = clusterLogicManager.getClusterLogicByAppIdAndAuthType(appId, condition.getAuthType());
+        List<ClusterLogic> appAuthClusterLogicList = clusterLogicManager.getClusterLogicByAppIdAndAuthType(projectId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthClusterLogicList)) {
             return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
@@ -144,11 +144,11 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     }
 
     @Override
-    protected PaginationResult<ConsoleClusterVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<ConsoleClusterVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
         ClusterLogicConditionDTO condition = buildClusterLogicConditionDTO(pageDTO);
         
         List<ClusterLogic> pagingGetClusterLogicList   =  clusterLogicService.pagingGetClusterLogicByCondition(condition);
-        List<ConsoleClusterVO> consoleClusterPhyVOList =  doBuildWithoutAuthType(pagingGetClusterLogicList, appId);
+        List<ConsoleClusterVO> consoleClusterPhyVOList =  doBuildWithoutAuthType(pagingGetClusterLogicList, projectId);
 
         long totalHit = clusterLogicService.fuzzyClusterLogicHitByCondition(condition);
 
@@ -266,7 +266,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     }
 
     private void setAppName(ConsoleClusterVO consoleClusterVO) {
-        App app = appService.getAppById(consoleClusterVO.getAppId());
+        App app = appService.getAppById(consoleClusterVO.getProjectId());
         if (null != app && !AriusObjUtils.isBlack(app.getName())) {
             consoleClusterVO.setAppName(app.getName());
         }

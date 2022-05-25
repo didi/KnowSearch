@@ -27,6 +27,7 @@ public class ResponsibleConvertTool {
      * 将PO中的responsible字段转换为String
      * @param resp pos列表
      */
+    @Deprecated
     private void id2Str(StringResponsible resp) {
         String str = ariusUserInfoService.getUserByIds(resp.getResponsible());
         if (StringUtils.isNotBlank(str)) {
@@ -52,6 +53,7 @@ public class ResponsibleConvertTool {
      * @param <T>
      * @return
      */
+    @Deprecated
     public <T,R> List<T> list2List(List<R> list, Class<T> tClass) {
         return ConvertUtil.list2List(list, tClass, tgtO -> {
             if (tgtO instanceof StringResponsible) {

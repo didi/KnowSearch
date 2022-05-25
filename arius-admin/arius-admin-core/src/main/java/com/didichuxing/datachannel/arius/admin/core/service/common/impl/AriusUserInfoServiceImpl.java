@@ -46,6 +46,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 @Service
+@Deprecated
 public class AriusUserInfoServiceImpl implements AriusUserInfoService {
 
     private static final ILog                             LOGGER                = LogFactory

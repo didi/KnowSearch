@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO">
+        <result column="id"               jdbcType="INTEGER"    property="id"/>
+        <result column="project_id"             jdbcType="VARCHAR"    property="projectId"/>
+        <result column="is_root"          jdbcType="TINYINT"    property="isRoot"/>
+        <result column="verify_code"      jdbcType="VARCHAR"    property="verifyCode"/>
+        <result column="memo"             jdbcType="VARCHAR"    property="memo"/>
+        <result column="is_active"        jdbcType="TINYINT"    property="isActive"/>
+        <result column="query_threshold"  jdbcType="INTEGER"    property="queryThreshold"/>
+        <result column="cluster"          jdbcType="VARCHAR"    property="cluster"/>
+        <result column="search_type"      jdbcType="TINYINT"    property="searchType"/>
+        <result column="responsible"      jdbcType="TINYINT"    property="responsible"/>
+        <result column="is_default_display" jdbcType="TINYINT" property="defaultDisplay" />
+        <result column="ip"               jdbcType="VARCHAR"    property="ip"/>
+        <result column="data_center"      jdbcType="VARCHAR"    property="dataCenter"/>
+        <result column="create_time"      jdbcType="TIMESTAMP"  property="createTime"/>
+        <result column="update_time"      jdbcType="TIMESTAMP"  property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, project_id is_root, memo, query_threshold, verify_code, cluster, is_active,
+        search_type, ip, data_center, index_exp, create_time, update_time,responsible,is_default_display
+    </sql>
+    
+    
+    <select id="listByCondition" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_es_user
+        where is_active = 1
+        <if test="id != null">and id = #{id}</if>
+        <if test="queryThreshold != null">and query_threshold = #{queryThreshold}</if>
+        <if test="cluster != null">and cluster = #{cluster}</if>
+        <if test="searchType != null">and search_type = #{searchType}</if>
+        <if test="isRoot != null">and is_root = #{isRoot}</if>
+        <if test="projectId != null">and project_id = #{projectId}</if>
+         <if test="responsible != null">and responsible = #{responsible}</if>
+        order by id desc
+    </select>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into arius_es_user
+        (project_id, is_root, memo, query_threshold, verify_code, cluster,
+        search_type, data_center,responsible,is_default_display)
+        values
+        (#{projectId}, #{isRoot}, #{memo}, #{queryThreshold}, #{verifyCode}, #{cluster}, #{searchType},
+        #{dataCenter},#{responsible},#{defaultDisplay})
+    </insert>
+
+    <select id="getByESUser" parameterType="integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_es_user
+        where is_active = 1 and id = #{esUser}
+    </select>
+
+    <select id="listByProjectId" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_es_user
+        where is_active = 1 and project_id = #{projectId}
+    </select>
+
+    <select id="listByESUsers" parameterType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_es_user
+        where is_active = 1 and
+        id in
+        <foreach collection="esUser" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO">
+        update arius_es_user
+        <trim prefix="set" prefixOverrides=",">
+            <if test="projectId != null">,project_id = #{projectId}</if>
+            <if test="queryThreshold != null">,query_threshold = #{queryThreshold}</if>
+            <if test="verifyCode != null">,verify_code = #{verifyCode}</if>
+            <if test="cluster != null">,cluster = #{cluster}</if>
+            <if test="searchType != null">,search_type = #{searchType}</if>
+            <if test="memo != null">,memo = #{memo}</if>
+            <if test="isRoot != null">,is_root = #{isRoot}</if>
+            <if test="responsible != null">,responsible = #{responsible}</if>
+            <if test="defaultDisplay != null">,is_default_display = #{defaultDisplay}</if>
+            
+        </trim>
+        where id = #{id} and is_active = 1
+    </update>
+
+    <update id="delete" parameterType="integer">
+        update arius_es_user
+        set is_active = 0
+        where id = #{esUser}
+    </update>
+    <update id="deleteByProjectId">
+        update arius_es_user
+        set is_active = 0
+        where id = #{projectId}
+    </update>
+
+  <select id="listByResponsible" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_es_user
+        where  is_active = 1 and (responsible = #{responsible}
+                                    or responsible like concat(#{responsible},',%')
+                                    or responsible like concat('%,', #{responsible})
+                                    or responsible like concat('%,', #{responsible},',%'))
+    </select>
+    <select id="countByProjectId" resultType="java.lang.Integer">
+        select count(project_id) from arius_es_user where is_active=1 and project_id=#{projectId}
+    </select>
+</mapper>

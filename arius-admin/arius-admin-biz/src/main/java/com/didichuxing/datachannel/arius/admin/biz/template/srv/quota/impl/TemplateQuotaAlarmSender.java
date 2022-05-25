@@ -84,7 +84,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
 
         LogicTemplateQuotaUsage templateQuotaUsage = event.getTemplateQuotaUsage();
         IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(templateQuotaUsage.getLogicId());
-        App app = appService.getAppById(templateLogic.getAppId());
+        App app = appService.getAppById(templateLogic.getProjectId());
 
         if (!templateQuotaManager.enableClt(templateLogic.getId())) {
             return;

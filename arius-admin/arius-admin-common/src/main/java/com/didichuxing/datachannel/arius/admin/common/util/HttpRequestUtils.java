@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_APP_ID;
-
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -56,11 +54,7 @@ public class HttpRequestUtils {
 
     public static Integer getProjectId(HttpServletRequest request) {
         String projectIdStr = request.getHeader(PROJECT_ID);
-
-        if (StringUtils.isBlank(projectIdStr)) {
-            return DEFAULT_APP_ID;
-        }
-
+        
         try {
             return Integer.valueOf(projectIdStr);
         } catch (Exception e) {

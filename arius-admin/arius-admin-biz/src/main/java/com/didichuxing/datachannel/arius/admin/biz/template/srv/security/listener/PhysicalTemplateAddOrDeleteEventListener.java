@@ -34,10 +34,10 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
                 IndexTemplatePhy templatePhysical = addEvent.getNewTemplate();
 
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateAddEvent||appid={}||template={}",
-                    addEvent.getLogicWithPhysical().getAppId(), templatePhysical.getName());
+                    addEvent.getLogicWithPhysical().getProjectId(), templatePhysical.getName());
 
                 securityService.saveAppPhysicalTemplateAuth(templatePhysical,
-                    addEvent.getLogicWithPhysical().getAppId(), AppTemplateAuthEnum.OWN.getCode(), 20);
+                    addEvent.getLogicWithPhysical().getProjectId(), AppTemplateAuthEnum.OWN.getCode(), 20);
                 return;
             }
 
@@ -46,10 +46,10 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
                 IndexTemplatePhy templatePhysical = deleteEvent.getDelTemplate();
 
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateDeleteEvent||appid={}||template={}",
-                    deleteEvent.getLogicWithPhysical().getAppId(), templatePhysical.getName());
+                    deleteEvent.getLogicWithPhysical().getProjectId(), templatePhysical.getName());
 
                 securityService.deleteAppPhysicalTemplateAuth(templatePhysical,
-                    deleteEvent.getLogicWithPhysical().getAppId(), AppTemplateAuthEnum.OWN.getCode(), 20);
+                    deleteEvent.getLogicWithPhysical().getProjectId(), AppTemplateAuthEnum.OWN.getCode(), 20);
             }
         } catch (Exception e) {
             LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||errMsg={}", e.getMessage(), e);

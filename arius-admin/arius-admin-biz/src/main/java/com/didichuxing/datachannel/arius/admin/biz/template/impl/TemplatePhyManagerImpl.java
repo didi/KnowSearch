@@ -948,14 +948,14 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     private void handleIndexTemplateLogic(Integer currentAppId, Map<Integer, String> appId2AppNameMap, ConsoleTemplatePhyVO consoleTemplatePhyVO, IndexTemplate logicTemplate) {
         //设置归属项目信息
-        Integer appIdFromLogicTemplate = logicTemplate.getAppId();
+        Integer appIdFromLogicTemplate = logicTemplate.getProjectId();
         if (!AriusObjUtils.isNull(appIdFromLogicTemplate)) {
             consoleTemplatePhyVO.setAppId(appIdFromLogicTemplate);
 
             if (appId2AppNameMap.containsKey(appIdFromLogicTemplate)) {
-                consoleTemplatePhyVO.setAppName(appId2AppNameMap.get(logicTemplate.getAppId()));
+                consoleTemplatePhyVO.setAppName(appId2AppNameMap.get(logicTemplate.getProjectId()));
             } else {
-                String appName = appService.getAppName(logicTemplate.getAppId());
+                String appName = appService.getAppName(logicTemplate.getProjectId());
                 if (!AriusObjUtils.isNull(appName)) {
                     consoleTemplatePhyVO.setAppName(appName);
                     appId2AppNameMap.put(appIdFromLogicTemplate, appName);

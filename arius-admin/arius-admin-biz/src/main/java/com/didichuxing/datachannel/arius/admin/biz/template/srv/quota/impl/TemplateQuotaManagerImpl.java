@@ -241,7 +241,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         // appid黑名单控制
         Set<String> disableAppIdSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
             QUOTA_DYNAMIC_LIMIT_BLACK_APP_IDS, "none", ",");
-        if (disableAppIdSet.contains(String.valueOf(templateLogicWithPhysical.getAppId()))
+        if (disableAppIdSet.contains(String.valueOf(templateLogicWithPhysical.getProjectId()))
             || disableAppIdSet.contains("all")) {
             LOGGER.info("class=TemplateQuotaManagerImpl||method=ctlSwitch||logicId={}||msg=black.appIds", logicId);
             return false;
@@ -324,7 +324,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
         ESTemplateQuotaUsagePO usagePO = ConvertUtil.obj2Obj(usage, ESTemplateQuotaUsagePO.class);
         usagePO.setDataCenter(templateLogicWithResource.getDataCenter());
         usagePO.setQuota(templateLogicWithResource.getQuota());
-        usagePO.setAppId(templateLogicWithResource.getAppId());
+        usagePO.setAppId(templateLogicWithResource.getProjectId());
         usagePO.setLogicClusters(getLogicClusters(templateLogicWithResource.getLogicClusters()));
 
         boolean succ1 = esTemplateQuotaUsageDAO.insert(usagePO);

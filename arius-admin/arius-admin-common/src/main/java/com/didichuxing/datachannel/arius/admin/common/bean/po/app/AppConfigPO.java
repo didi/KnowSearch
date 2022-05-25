@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
  * @author d06679
  * @date 2019/3/13
  */
+@Deprecated
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

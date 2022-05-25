@@ -27,7 +27,7 @@ public class IndexTemplatePO extends BasePO implements DigitResponsible {
     /**
      * appid
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 用户数据类型
@@ -58,16 +58,19 @@ public class IndexTemplatePO extends BasePO implements DigitResponsible {
     /**
      * 成本部门
      */
+    @Deprecated
     private String  libraDepartmentId;
 
     /**
      * 成本部门
      */
+      @Deprecated
     private String  libraDepartment;
 
     /**
      * 责任人，id列表，英文逗号分隔
      */
+      @Deprecated
     private String  responsible;
 
     /**

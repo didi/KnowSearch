@@ -37,7 +37,7 @@ public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleCluste
     private Integer                      type;
 
     @ApiModelProperty("所属应用ID")
-    private Integer                      appId;
+    private Integer projectId;
 
     @ApiModelProperty("所属应用名")
     private String                       appName;

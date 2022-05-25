@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.AppTemplateAuthDAO">
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectTemplateAuthDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO">
         <result column="id" jdbcType="BIGINT" property="id"/>
-        <result column="appid" jdbcType="INTEGER" property="appId"/>
+        <result column="project_id" jdbcType="INTEGER" property="projectId"/>
         <result column="template" jdbcType="VARCHAR" property="templateId"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="responsible_ids" jdbcType="VARCHAR" property="responsible"/>
@@ -12,18 +12,18 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-       id, appid, template, `type`, responsible_ids, create_time, update_time
+       id, project_id, template, `type`, responsible_ids, create_time, update_time
     </sql>
 
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO"
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into appid_template_info (appid, template, `type`, responsible_ids)
-        values (#{appId}, #{templateId}, #{type}, #{responsible})
+        insert into project_id_template_info (project_id, template, `type`, responsible_ids)
+        values (#{projectId}, #{templateId}, #{type}, #{responsible})
     </insert>
 
-    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO">
-        update appid_template_info
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO">
+        update project_id_template_info
         <trim prefix="set" prefixOverrides=",">
             <if test="type != null">,`type` = #{type}</if>
             <if test="responsible != null">,responsible_ids = #{responsible}</if>
@@ -32,14 +32,14 @@
     </update>
 
     <select id="listByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppTemplateAuthPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
+        from project_id_template_info
         <trim prefix="where" prefixOverrides="and">
             <if test="id != null">and id = #{id}</if>
-            <if test="appId != null">and appid = #{appId}</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
             <if test="templateId != null">and template = #{templateId}</if>
             <if test="type != null">and `type` = #{type}</if>
             <if test="responsible != null">
@@ -54,19 +54,19 @@
     </select>
 
     <delete id="delete" parameterType="long">
-        update appid_template_info
+        update project_id_template_info
         set status = 0
         where id = #{authId}
     </delete>
 
     <delete id="deleteByTemplate" parameterType="int">
-        update appid_template_info
+        update project_id_template_info
         set status = 0
         where template = #{templateId}
     </delete>
 
     <delete id="batchDeleteByTemplateIds" parameterType="java.util.List">
-        delete from appid_template_info
+        delete from project_id_template_info
         where template in
         <foreach item="item" collection="list" open="(" separator="," close=")">
             #{item}
@@ -76,49 +76,49 @@
     <select id="listWithRwAuthsByAppId" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
-        where appid = #{appId} and (`type` = 2 or `type` = 3) and status = 1
+        from project_id_template_info
+        where project_id = #{projectId} and (`type` = 2 or `type` = 3) and status = 1
     </select>
 
     <select id="getByAppIdAndTemplateId" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
-        where appid = #{appId} and template = #{templateId} and (`type` = 2 or `type` = 3) and status = 1
+        from project_id_template_info
+        where project_id = #{projectId} and template = #{templateId} and (`type` = 2 or `type` = 3) and status = 1
     </select>
 
     <select id="getByAppIdAndTemplateIdAndType" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
-        where appid = #{appId} and template = #{templateId} and `type` = #{type} and status = 1
+        from project_id_template_info
+        where project_id = #{projectId} and template = #{templateId} and `type` = #{type} and status = 1
     </select>
 
     <select id="listByLogicTemplateId" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
+        from project_id_template_info
         where template = #{templateId} and (`type` = 2 or `type` = 3) and status = 1
     </select>
 
     <select id="getByTemplateId" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
+        from project_id_template_info
         where template = #{templateId} and status = 1
     </select>
 
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
+        from project_id_template_info
         where id = #{authId} and status = 1
     </select>
 
     <select id="listWithRwAuths" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
+        from project_id_template_info
         where (`type` = 2 or `type` = 3) and status = 1
     </select>
 
@@ -126,7 +126,7 @@
     <select id="listWithOwnerAuths" parameterType="long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from appid_template_info
+        from project_id_template_info
         where `type` = 1 and status = 1
     </select>
 </mapper>

@@ -258,7 +258,7 @@ public class CustomDataSource {
     public static IndexTemplatePO templateLogicSource() {
         IndexTemplatePO po = new IndexTemplatePO();
         po.setId(1);
-        po.setAppId(1);
+        po.setProjectId(1);
         po.setName("test");
         po.setDataType(1);
         po.setDateFormat("");
@@ -351,7 +351,7 @@ public class CustomDataSource {
     public static IndexTemplateDTO indexTemplateLogicDTOFactory() {
         IndexTemplateDTO indexTemplateDTO = new IndexTemplateDTO();
         indexTemplateDTO.setName("wpkTest-1");
-        indexTemplateDTO.setAppId(1);
+        indexTemplateDTO.setProjectId(1);
         indexTemplateDTO.setDataType(1);
         indexTemplateDTO.setDateFormat("_yyyy-MM-dd");
         indexTemplateDTO.setExpression("wpkTest-1*");

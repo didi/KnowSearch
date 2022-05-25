@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.event.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 
+@Deprecated
 public class AppEditEvent extends AppEvent {
 
     private App srcApp;
