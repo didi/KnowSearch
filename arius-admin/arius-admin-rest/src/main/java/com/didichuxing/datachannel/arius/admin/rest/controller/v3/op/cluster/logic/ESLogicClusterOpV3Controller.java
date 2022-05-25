@@ -51,17 +51,8 @@ public class ESLogicClusterOpV3Controller {
     @GetMapping("/{type}")
     @ResponseBody
     @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
-    @Deprecated
     public Result<List<ConsoleClusterVO>> getAppLogicClusterInfoByType(HttpServletRequest request, @PathVariable Integer type) {
         return clusterLogicManager.getAppLogicClusterInfoByType(HttpRequestUtils.getAppId(request), type);
-    }
-
-    // todo: replace deprecated method
-    @GetMapping("/new/{type}")
-    @ResponseBody
-    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
-    public Result<Map<String, Long>> getAppLogicClusterNameByType(HttpServletRequest request, @PathVariable Integer type) {
-        return clusterLogicManager.getAppLogicClusterNameByType(HttpRequestUtils.getAppId(request), type);
     }
 
     @PostMapping("/page")

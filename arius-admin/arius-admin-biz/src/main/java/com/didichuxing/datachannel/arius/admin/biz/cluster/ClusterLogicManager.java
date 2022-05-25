@@ -193,14 +193,6 @@ public interface ClusterLogicManager {
     Result<List<ConsoleClusterVO>> getAppLogicClusterInfoByType(Integer appId, Integer type);
 
     /**
-     * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param appId
-     * @param type
-     * @return
-     */
-    Result<Map<String, Long>> getAppLogicClusterNameByType(Integer appId, Integer type);
-
-    /**
      * 更新逻辑集群状态
      * @param clusterLogicId
      * @return
