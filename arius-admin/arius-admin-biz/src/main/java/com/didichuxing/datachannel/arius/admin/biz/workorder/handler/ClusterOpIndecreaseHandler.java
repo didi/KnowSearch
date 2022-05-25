@@ -5,10 +5,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpBaseContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpIndecreaseDockerContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpIndecreaseHostContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterIndecreaseDockerContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterIndecreaseHostContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
@@ -30,7 +30,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -60,6 +60,7 @@ import org.springframework.stereotype.Service;
  * @date 2022/05/09
  */
 @Service("clusterOpIndecreaseHandler")
+@Deprecated
 public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     protected static final ILog  LOGGER = LogFactory.getLog(ClusterOpIndecreaseHandler.class);
 
@@ -84,12 +85,12 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     @Override
     protected Result validateConsoleParam(WorkOrder workOrder) {
 
-        ClusterOpBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpBaseContent.class);
+        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterBaseContent.class);
 
         if (ES_DOCKER.getCode() == baseContent.getType()) {
-            ClusterOpIndecreaseDockerContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                ClusterOpIndecreaseDockerContent.class);
+            ClusterIndecreaseDockerContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+                ClusterIndecreaseDockerContent.class);
 
             if (AriusObjUtils.isNull(content.getPhyClusterId())) {
                 return Result.buildParamIllegal("物理集群id为空");
@@ -101,15 +102,15 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             }
 
             if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
-                AriusOpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
+                OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
                 return Result.buildParamIllegal("该集群上存在未完成的任务");
             }
 
             return Result.buildSucc();
         } else if (ES_HOST.getCode() == baseContent.getType()) {
             initParam(workOrder);
-            ClusterOpIndecreaseHostContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                ClusterOpIndecreaseHostContent.class);
+            ClusterIndecreaseHostContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+                ClusterIndecreaseHostContent.class);
 
             if (AriusObjUtils.isNull(content.getPhyClusterId())) {
                 return Result.buildParamIllegal("物理集群id为空");
@@ -121,7 +122,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             }
 
             if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
-                    AriusOpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
+                    OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
                 return Result.buildParamIllegal("该集群上存在未完成的集群扩缩容任务");
             }
 
@@ -147,8 +148,8 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterOpBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpBaseContent.class);
+        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterBaseContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -173,28 +174,28 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        ClusterOpBaseContent clusterOpBaseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpBaseContent.class);
+        ClusterBaseContent clusterBaseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterBaseContent.class);
 
         EcmTaskDTO esEcmTaskDTO = new EcmTaskDTO();
         esEcmTaskDTO.setWorkOrderId(workOrder.getId());
         esEcmTaskDTO.setTitle(workOrder.getTitle());
         esEcmTaskDTO.setCreator(workOrder.getSubmitor());
-        esEcmTaskDTO.setType(clusterOpBaseContent.getType());
+        esEcmTaskDTO.setType(clusterBaseContent.getType());
 
-        if (ES_DOCKER.getCode() == clusterOpBaseContent.getType()) {
-            ClusterOpIndecreaseDockerContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                ClusterOpIndecreaseDockerContent.class);
+        if (ES_DOCKER.getCode() == clusterBaseContent.getType()) {
+            ClusterIndecreaseDockerContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+                ClusterIndecreaseDockerContent.class);
             esEcmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
             esEcmTaskDTO.setOrderType(content.getOperationType());
-            List<EcmParamBase> ecmParamBaseList = WorkOrderTaskConverter.convert2EcmParamBaseList(ES_DOCKER,
+            List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ES_DOCKER,
                 EcmTaskTypeEnum.valueOf(content.getOperationType()), content);
             esEcmTaskDTO.setClusterNodeRole(ListUtils
                 .strList2String(ecmParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
             esEcmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
-        } else if (ES_HOST.getCode() == clusterOpBaseContent.getType()) {
-            ClusterOpIndecreaseHostContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                ClusterOpIndecreaseHostContent.class);
+        } else if (ES_HOST.getCode() == clusterBaseContent.getType()) {
+            ClusterIndecreaseHostContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+                ClusterIndecreaseHostContent.class);
             esEcmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
             esEcmTaskDTO.setOrderType(content.getOperationType());
 
@@ -227,17 +228,17 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterOpBaseContent baseContent = ConvertUtil.obj2ObjByJSON(JSON.parse(extensions),
-            ClusterOpBaseContent.class);
+        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(JSON.parse(extensions),
+            ClusterBaseContent.class);
 
         if (ES_DOCKER.getCode() == baseContent.getType()) {
-            ClusterOpIndecreaseDockerContent content = JSON.parseObject(JSON.parse(extensions).toString(),
-                ClusterOpIndecreaseDockerContent.class);
+            ClusterIndecreaseDockerContent content = JSON.parseObject(JSON.parse(extensions).toString(),
+                ClusterIndecreaseDockerContent.class);
 
             return ConvertUtil.obj2Obj(content, ClusterOpIndecreaseDockerOrderDetail.class);
         } else if (ES_HOST.getCode() == baseContent.getType()) {
-            ClusterOpIndecreaseHostContent content = JSON.parseObject(JSON.parse(extensions).toString(),
-                ClusterOpIndecreaseHostContent.class);
+            ClusterIndecreaseHostContent content = JSON.parseObject(JSON.parse(extensions).toString(),
+                ClusterIndecreaseHostContent.class);
 
             return ConvertUtil.obj2Obj(content, ClusterOpIndecreaseHostOrderDetail.class);
         }
@@ -273,7 +274,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     }
 
     private void initParam(WorkOrder workOrder) {
-        ClusterOpIndecreaseHostContent clusterOpIndecreaseHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpIndecreaseHostContent.class);
+        ClusterIndecreaseHostContent clusterOpIndecreaseHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterIndecreaseHostContent.class);
         if (ES_HOST.getCode() == clusterOpIndecreaseHostContent.getType()) {
             // 如果当前角色对应pid_count为null，则设置为默认值1
             if (null == clusterOpIndecreaseHostContent.getPidCount()) {

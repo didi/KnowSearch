@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
+package com.didichuxing.datachannel.arius.admin.biz.worktask.content;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
@@ -7,9 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-24
+ */
 @Data
 @NoArgsConstructor
-public class ClusterOpNewDockerContent extends ClusterOpBaseContent {
+public class ClusterNewDockerContent extends ClusterBaseContent {
 
     /**
      * 数据中心

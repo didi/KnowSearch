@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterrestart;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterRestartContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpRestartOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -27,12 +27,13 @@ import org.springframework.stereotype.Service;
  * @date 2021-01-21
  */
 @Service("clusterOpRestartHandler")
+@Deprecated
 public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
-        ClusterOpRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpRestartContent.class);
+        ClusterRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterRestartContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {
             return Result.buildParamIllegal("物理集群id为空");
@@ -47,7 +48,7 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -56,8 +57,8 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterOpRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpRestartContent.class);
+        ClusterRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterRestartContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -67,8 +68,8 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        ClusterOpRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpRestartContent.class);
+        ClusterRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterRestartContent.class);
 
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
@@ -92,7 +93,7 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
         OpTaskDTO opTaskDTO = new OpTaskDTO();
-        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
         opTaskDTO.setCreator(workOrder.getSubmitor());
         Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
@@ -105,7 +106,7 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterOpRestartContent content = JSON.parseObject(extensions, ClusterOpRestartContent.class);
+        ClusterRestartContent content = JSON.parseObject(extensions, ClusterRestartContent.class);
 
         return ConvertUtil.obj2Obj(content, ClusterOpRestartOrderDetail.class);
     }

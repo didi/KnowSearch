@@ -1,13 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 @Data
 @AllArgsConstructor
@@ -55,6 +58,15 @@ public class HostsCreateActionParam extends HostsParamBase {
      * @see ResourceLogicLevelEnum
      */
     private Integer  level;
+
+
+    private String                    iaas;
+
+    /**
+     * @see ClusterResourceTypeEnum
+     */
+    private Integer                    resourceType;
+
 
     public Result<Void> validateFiledIllegal() {
         if (StringUtils.isBlank(this.phyClusterName)) {

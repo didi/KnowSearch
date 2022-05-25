@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterres
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpRestartContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterRestartContent;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
@@ -54,7 +54,7 @@ public abstract class BaseClusterOpRestartHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterOpRestartContent content = JSON.parseObject(extensions, ClusterOpRestartContent.class);
+        ClusterRestartContent content = JSON.parseObject(extensions, ClusterRestartContent.class);
 
         return ConvertUtil.obj2Obj(content, ClusterOpRestartOrderDetail.class);
     }

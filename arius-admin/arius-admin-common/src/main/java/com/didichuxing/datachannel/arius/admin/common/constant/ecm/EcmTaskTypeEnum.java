@@ -1,5 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.ecm;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-24
+ */
 public enum EcmTaskTypeEnum {
                              /**新增*/
                              NEW(1, "集群新增"),
@@ -16,11 +20,11 @@ public enum EcmTaskTypeEnum {
 
                              OFFLINE(7, "集群下线操作"),
 
-                             CONFIG_ADD(8, "集群配置新增"),
+                             CONFIG_ADD(11, "集群配置新增"),
 
-                             CONFIG_EDIT(9, "集群配置编辑"),
+                             CONFIG_EDIT(12, "集群配置编辑"),
 
-                             CONFIG_DELETE(10, "集群配置删除"),
+                             CONFIG_DELETE(13, "集群配置删除"),
 
                              UNKNOWN(-1, "unknown");
 

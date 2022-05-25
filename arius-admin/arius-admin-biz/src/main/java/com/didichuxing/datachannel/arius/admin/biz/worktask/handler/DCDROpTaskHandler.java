@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTaskDetail;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskDCDRProgressEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskDCDRProgressEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didiglobal.logi.log.ILog;
@@ -23,9 +23,9 @@ import org.springframework.stereotype.Service;
  * @author d06679
  * @date 2019/4/29
  */
-@Service("dcdrWorkTaskHandler")
-    public class DCDRWorkTaskHandler implements WorkTaskHandler {
-    private static final ILog LOGGER = LogFactory.getLog(DCDRWorkTaskHandler.class);
+@Service("dcdrOpTaskHandler")
+public class DCDROpTaskHandler implements OpTaskHandler {
+    private static final ILog LOGGER = LogFactory.getLog(DCDROpTaskHandler.class);
 
     @Autowired
     private OpTaskManager opTaskManager;
@@ -46,8 +46,8 @@ import org.springframework.stereotype.Service;
         boolean succ = 0 < opTask.getId();
         if (!succ) {
             LOGGER.error(
-                "class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg=failed to insert",
-                opTask.getTaskType(), opTask.getBusinessKey());
+                    "class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg=failed to insert",
+                    opTask.getTaskType(), opTask.getBusinessKey());
             return Result.buildFail();
         }
         return Result.buildSucc(opTask);
@@ -86,8 +86,8 @@ import org.springframework.stereotype.Service;
         detail.setStatus(status);
         detail.setTaskProgress(step);
         updateOpTask.setExpandData(JSON.toJSONString(detail));
-        if (WorkTaskStatusEnum.FAILED.getStatus().equals(status)
-            || step.equals(WorkTaskDCDRProgressEnum.STEP_9.getProgress())) {
+        if (OpTaskStatusEnum.FAILED.getStatus().equals(status)
+                || step.equals(OpTaskDCDRProgressEnum.STEP_9.getProgress())) {
             updateOpTask.setStatus(status);
         }
 
@@ -96,6 +96,6 @@ import org.springframework.stereotype.Service;
         return Result.buildSucc();
     }
 
-  
+
 
 }

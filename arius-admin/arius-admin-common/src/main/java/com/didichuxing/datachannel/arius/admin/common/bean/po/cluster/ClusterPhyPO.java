@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.cluster;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
@@ -146,6 +148,18 @@ public class ClusterPhyPO extends BasePO {
     private Long    diskTotal;
     private Long    diskUsage;
     private Double  diskUsagePercent;
+
+    /**
+     * IaaS平台类型
+     */
+    private String                    iaas;
+
+    /**
+     * 集群资源类型(-1 未知 1 共享 2 独立 3 独享)
+     * @see ClusterResourceTypeEnum
+     */
+
+    private Integer                    resourceType;
 
     @Override
     public boolean equals(Object obj) {

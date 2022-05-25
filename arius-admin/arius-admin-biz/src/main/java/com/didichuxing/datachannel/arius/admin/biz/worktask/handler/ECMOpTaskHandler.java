@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.biz.worktask.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
@@ -24,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatus
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.ecm.EcmTaskEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -52,31 +52,31 @@ import org.springframework.stereotype.Service;
  * @author
  * @date 2022/05/09
  */
-@Service("ecmWorkTaskHandler")
-public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<EcmTaskEditEvent> {
+@Service("ecmOpTaskHandler")
+public class ECMOpTaskHandler implements OpTaskHandler, ApplicationListener<EcmTaskEditEvent> {
 
-    private static final ILog      LOGGER = LogFactory.getLog(ECMWorkTaskHandler.class);
-
-    @Autowired
-    private EcmTaskManager         ecmTaskManager;
+    private static final ILog      LOGGER = LogFactory.getLog(ECMOpTaskHandler.class);
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    protected EcmTaskManager         ecmTaskManager;
 
     @Autowired
-    private ESClusterService       esClusterService;
+    protected OpTaskManager opTaskManager;
 
     @Autowired
-    private ESClusterConfigService esClusterConfigService;
+    protected ESClusterService       esClusterService;
 
     @Autowired
-    private WorkOrderManager workOrderManager;
+    protected ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    private ESPluginService        esPluginService;
+    protected WorkOrderManager workOrderManager;
 
     @Autowired
-    private ClusterPhyService      esClusterPhyService;
+    protected ESPluginService        esPluginService;
+
+    @Autowired
+    protected ClusterPhyService clusterPhyService;
 
     @Override
     public Result<OpTask> addTask(OpTask opTask) {
@@ -94,7 +94,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         opTask.setTitle(ecmTaskDTO.getTitle());
         opTask.setCreateTime(new Date());
         opTask.setUpdateTime(new Date());
-        opTask.setStatus(WorkTaskStatusEnum.WAITING.getStatus());
+        opTask.setStatus(OpTaskStatusEnum.WAITING.getStatus());
         opTask.setDeleteFlag(false);
         opTaskManager.insert(opTask);
 
@@ -121,8 +121,6 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
 
         return Result.buildSucc();
     }
-
- 
 
     @Override
     public void onApplicationEvent(EcmTaskEditEvent event) {
@@ -166,7 +164,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         //3.判断是不是配置重启类型的工单, configIds为空则为非配置重启
         List<Long> actionEsConfigIds = Lists.newArrayList();
         Integer actionType = Integer.MIN_VALUE;
-        List<EcmParamBase> ecmParamBaseList = WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
+        List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
 
         if (ESClusterTypeEnum.ES_HOST.getCode() == ecmTask.getType()) {
             List<HostsParamBase> hostsParamBases = ConvertUtil.list2List(ecmParamBaseList, HostsParamBase.class);
@@ -176,27 +174,27 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
                 }
             }
             actionType = hostsParamBases.stream().map(HostsParamBase::getEsConfigAction)
-                .map(EsConfigAction::getActionType).findAny().orElse(null);
+                    .map(EsConfigAction::getActionType).findAny().orElse(null);
 
             hostsParamBases.stream()
-                .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isNull(r.getEsConfigAction())
-                             && CollectionUtils.isNotEmpty(r.getEsConfigAction().getActionEsConfigIds()))
-                .forEach(param -> actionEsConfigIds.addAll(param.getEsConfigAction().getActionEsConfigIds()));
+                    .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isNull(r.getEsConfigAction())
+                            && CollectionUtils.isNotEmpty(r.getEsConfigAction().getActionEsConfigIds()))
+                    .forEach(param -> actionEsConfigIds.addAll(param.getEsConfigAction().getActionEsConfigIds()));
 
         } else if (ESClusterTypeEnum.ES_DOCKER.getCode() == ecmTask.getType()) {
             List<ElasticCloudCommonActionParam> cloudCommonActionParams = ConvertUtil.list2List(ecmParamBaseList,
-                ElasticCloudCommonActionParam.class);
+                    ElasticCloudCommonActionParam.class);
             actionType = cloudCommonActionParams.stream().map(ElasticCloudCommonActionParam::getEsConfigActions)
-                .map(EsConfigAction::getActionType).findAny().orElse(null);
+                    .map(EsConfigAction::getActionType).findAny().orElse(null);
 
             cloudCommonActionParams.stream()
-                .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isNull(r.getEsConfigActions())
-                             && CollectionUtils.isNotEmpty(r.getEsConfigActions().getActionEsConfigIds()))
-                .forEach(param -> actionEsConfigIds.addAll(param.getEsConfigActions().getActionEsConfigIds()));
+                    .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isNull(r.getEsConfigActions())
+                            && CollectionUtils.isNotEmpty(r.getEsConfigActions().getActionEsConfigIds()))
+                    .forEach(param -> actionEsConfigIds.addAll(param.getEsConfigActions().getActionEsConfigIds()));
         } else {
             LOGGER.error(
-                "class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||msg=Type does not exist, require docker or host",
-                ecmTask.getId());
+                    "class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||msg=Type does not exist, require docker or host",
+                    ecmTask.getId());
         }
 
         if (CollectionUtils.isEmpty(actionEsConfigIds)) {
@@ -208,7 +206,7 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             handleSuccessEcmConfigRestartTask(actionType, actionEsConfigIds, ecmTask);
         } catch (Exception e) {
             LOGGER.error("class=ECMWorkTaskHandler||method=handlerRestartConfig||ecmTaskId={}||msg={}", ecmTask.getId(),
-                e.getStackTrace());
+                    e.getStackTrace());
         }
 
     }
@@ -263,13 +261,13 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         }
 
         // 3.判断当前重启操作是否是插件安装或者卸载
-        List<EcmParamBase> ecmParamBases = WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
+        List<EcmParamBase> ecmParamBases = OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
         if(CollectionUtils.isEmpty(ecmParamBases)) {
             return;
         }
         HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBases.get(0);
         if(AriusObjUtils.isNull(hostsParamBase.getEsPluginAction())) {
-           return;
+            return;
         }
 
         try {
@@ -292,10 +290,10 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
         OrderDetailBaseVO orderDetailBaseVO = workOrderManager.getById(ecmTask.getWorkOrderId()).getData();
         PhyClusterPluginOperationContent content = JSON.parseObject(orderDetailBaseVO.getDetail(), PhyClusterPluginOperationContent.class);
 
-        ClusterPhy clusterPhy = esClusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue());
+        ClusterPhy clusterPhy = clusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue());
         List<Long> plugIdList = ListUtils.string2LongList(clusterPhy.getPlugIds());
 
-        String cluster = esClusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue()).getCluster();
+        String cluster = clusterPhyService.getClusterById(ecmTask.getPhysicClusterId().intValue()).getCluster();
         Map</*节点名称*/String, /*插件名称列表*/List<String>> node2PluginMap = esClusterService.syncGetNode2PluginsMap(cluster);
         if (null == node2PluginMap) {
             LOGGER.warn("class=ECMWorkTaskHandler||method=handleSuccessEcmPluginRestartTask||cluster={}||errMsg={node2PluginMap is null}", cluster);
@@ -336,6 +334,6 @@ public class ECMWorkTaskHandler implements WorkTaskHandler, ApplicationListener<
             // 将插件信息同步到物理集群中
             plugIdList.remove(content.getPluginId());
         }
-        esClusterPhyService.updatePluginIdsById(ListUtils.longList2String(plugIdList.stream().distinct().collect(Collectors.toList())), clusterPhy.getId());
+        clusterPhyService.updatePluginIdsById(ListUtils.longList2String(plugIdList.stream().distinct().collect(Collectors.toList())), clusterPhy.getId());
     }
 }

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -155,7 +155,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
             return Result.buildFail("任务不存在");
         }
 
-        List<EcmParamBase> ecmParamBaseList = WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
+        List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
             if (!ecmTaskDetailPO.getTaskId().equals(ecmParamBase.getTaskId().longValue())) {
                 continue;
@@ -198,7 +198,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
         }
 
         EcmTaskDetailProgress ecmTaskDetailProgress = EcmTaskDetailProgress.newFieldInitializedInstance();
-        List<EcmParamBase> ecmParamBases = WorkOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
+        List<EcmParamBase> ecmParamBases = OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
         if (CollectionUtils.isEmpty(ecmParamBases)) {
             LOGGER.error("class=EcmTaskDetailManagerImpl||method=buildInitialEcmTaskDetail||orderTaskId={}||"
                          + "msg=the convert ecm param is empty",

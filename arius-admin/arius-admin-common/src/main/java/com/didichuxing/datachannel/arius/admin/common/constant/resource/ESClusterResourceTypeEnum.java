@@ -4,6 +4,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant.resource;
  * 集群所属资源类型枚举
  * @author chengxiang
  */
+@Deprecated
 public enum ESClusterResourceTypeEnum {
                                /**
                                 * acs集群

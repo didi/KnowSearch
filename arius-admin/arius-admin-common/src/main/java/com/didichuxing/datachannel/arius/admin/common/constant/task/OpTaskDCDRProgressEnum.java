@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public enum WorkTaskDCDRProgressEnum {
+public enum OpTaskDCDRProgressEnum {
                                       /**创建DCDR链路*/
                                       STEP_0(0, "创建DCDR链路"),
 
@@ -28,7 +28,7 @@ public enum WorkTaskDCDRProgressEnum {
 
                                       UNKNOWN(-1, "unknown");
 
-    WorkTaskDCDRProgressEnum(Integer progress, String value) {
+    OpTaskDCDRProgressEnum(Integer progress, String value) {
         this.progress = progress;
         this.value = value;
     }
@@ -45,7 +45,7 @@ public enum WorkTaskDCDRProgressEnum {
         return value;
     }
 
-    public static List<WorkTaskDCDRProgressEnum> listAll() {
-        return new ArrayList<>(Arrays.asList(WorkTaskDCDRProgressEnum.values()));
+    public static List<OpTaskDCDRProgressEnum> listAll() {
+        return new ArrayList<>(Arrays.asList(OpTaskDCDRProgressEnum.values()));
     }
 }

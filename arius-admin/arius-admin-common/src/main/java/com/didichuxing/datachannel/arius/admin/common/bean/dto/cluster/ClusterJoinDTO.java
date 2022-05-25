@@ -66,4 +66,10 @@ public class ClusterJoinDTO extends BaseDTO {
 
     @ApiModelProperty("数据中心")
     private String                     dataCenter;
+
+    @ApiModelProperty("IaaS平台类型")
+    private String                    iaas;
+
+    @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
+    private Integer                    resourceType;
 }
