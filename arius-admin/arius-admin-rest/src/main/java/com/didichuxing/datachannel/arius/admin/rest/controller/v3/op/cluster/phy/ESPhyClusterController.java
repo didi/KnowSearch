@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -195,7 +196,7 @@ public class ESPhyClusterController {
     @GetMapping("/{type}")
     @ResponseBody
     @ApiOperation(value = "根据物理集群类型获取名称列表")
-    public Result<List<String>> getPhyClusterNameByType(@PathVariable Integer type) {
+    public Result<Map<String, Long>> getPhyClusterNameByType(@PathVariable Integer type) {
         return clusterPhyManager.getPhyClusterNameByType(type);
     }
 

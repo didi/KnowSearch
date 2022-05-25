@@ -983,7 +983,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     //todo
-    public Result<List<String>> getPhyClusterNameByType(Integer type) {
+    public Result<Map<String, Long>> getPhyClusterNameByType(Integer type) {
         return Result.buildFail();
     }
 

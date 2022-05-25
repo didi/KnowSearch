@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -197,7 +198,7 @@ public interface ClusterLogicManager {
      * @param type
      * @return
      */
-    Result<List<String>> getAppLogicClusterNameByType(Integer appId, Integer type);
+    Result<Map<String, Long>> getAppLogicClusterNameByType(Integer appId, Integer type);
 
     /**
      * 更新逻辑集群状态

@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.lo
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -55,11 +56,11 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.getAppLogicClusterInfoByType(HttpRequestUtils.getAppId(request), type);
     }
 
-    // todo: replace upper
+    // todo: replace deprecated method
     @GetMapping("/new/{type}")
     @ResponseBody
     @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
-    public Result<List<String>> getAppLogicClusterNameByType(HttpServletRequest request, @PathVariable Integer type) {
+    public Result<Map<String, Long>> getAppLogicClusterNameByType(HttpServletRequest request, @PathVariable Integer type) {
         return clusterLogicManager.getAppLogicClusterNameByType(HttpRequestUtils.getAppId(request), type);
     }
 

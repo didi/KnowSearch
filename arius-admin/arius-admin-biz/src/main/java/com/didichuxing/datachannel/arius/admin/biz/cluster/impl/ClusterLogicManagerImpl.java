@@ -673,12 +673,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<String>> getAppLogicClusterNameByType(Integer appId, Integer type) {
+    public Result<Map<String, Long>> getAppLogicClusterNameByType(Integer appId, Integer type) {
         ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
         logicClusterDTO.setAppId(appId);
         logicClusterDTO.setType(type);
-        return Result.buildSucc(clusterLogicService.listClusterLogics(logicClusterDTO)
-                .stream().map(ClusterLogic::getName).collect(Collectors.toList()));
+        return Result.buildSucc(clusterLogicService.listClusterLogics(logicClusterDTO).stream().collect(Collectors.toMap(ClusterLogic::getName, ClusterLogic::getId)));
     }
 
 /**************************************************** private method ****************************************************/

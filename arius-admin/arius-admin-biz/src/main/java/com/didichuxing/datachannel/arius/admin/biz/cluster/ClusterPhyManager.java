@@ -355,5 +355,5 @@ public interface ClusterPhyManager {
      * @param type 物理集群类型
      * @return 物理集群名称列表
      */
-    Result<List<String>> getPhyClusterNameByType(Integer type);
+    Result<Map<String, Long>> getPhyClusterNameByType(Integer type);
 }
