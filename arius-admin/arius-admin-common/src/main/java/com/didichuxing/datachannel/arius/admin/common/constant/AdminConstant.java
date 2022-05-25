@@ -162,7 +162,7 @@ public class AdminConstant {
     /**
      * 超级项目
      */
-    public static final Integer SUPER_PROJECT_ID = 1;
+    public static final Integer SUPER_PROJECT_ID = 1593;
     /**
      * 超级用户
      */

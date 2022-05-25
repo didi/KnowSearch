@@ -360,7 +360,7 @@ public class ESUserServiceImpl implements ESUserService {
             return validateAppFieldIsNullResult;
         }
         //todo 暂定校验超级用户 user name
-        if (appDTO.getResponsible().equals(AdminConstant.SUPER_USER_NAME)) {
+        if (!appDTO.getResponsible().equals(AdminConstant.SUPER_USER_NAME)) {
             return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
         }
         ESUserPO oldESUser = esUserDAO.getByESUser(appDTO.getId());
