@@ -25,6 +25,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
+import lombok.Data;
+
 /**
  * @author didi
  * @date 2022-05-23 2:46 下午
@@ -66,13 +68,14 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
         }
 
         /**
-         * key是集群名，value是列表
+         * key是集群名，value是TemplateWithNodeNames
          */
-        Map<String, Set<String>> cluster2TemplateSetMap = new HashMap<String, Set<String>>(16);
-        Set<String> nodeNames = new HashSet<>();
+        Map<String, List<TemplateWithNodeNames>> cluster2TemplateWithNodeNames = new HashMap<String, List<TemplateWithNodeNames>>(
+            16);
         try {
             regionEditEvent.getRegionIdList().forEach(regionId -> {
                 ClusterRegion clusterRegion = clusterRegionService.getRegionById(regionId);
+                Set<String> nodeNames = new HashSet<>();
                 Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(regionId));
                 if (result.failed()) {
                     LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,warnMsg={}",
@@ -80,29 +83,30 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
                     return;
                 }
                 result.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
-                String logicClusterIds = clusterRegion.getLogicClusterIds();
-                if (!NOT_BIND_LOGIC_CLUSTER_ID.equals(logicClusterIds)) {
-                    buildCluster2TemplateSetMap(cluster2TemplateSetMap, clusterRegion, logicClusterIds);
-                }
+                buildCluster2TemplateWithNodeNamesSetMap(cluster2TemplateWithNodeNames, clusterRegion, nodeNames);
             });
         } catch (Exception e) {
-            LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,warnMsg=build cluster template map error,", e);
+            LOGGER.error(
+                "class=RegionEditEventListener||method=onApplicationEvent,warnMsg=build cluster template map error,",
+                e);
             return;
         }
 
-        if (nodeNames.isEmpty()) {
-            LOGGER.warn("class=RegionEditEventListener||method=onApplicationEvent,warnMsg=nodeNames is empty");
-            return;
-        }
-
-        cluster2TemplateSetMap.entrySet().forEach(entry -> {
-            for (String templateName : entry.getValue()) {
+        cluster2TemplateWithNodeNames.entrySet().forEach(entry -> {
+            for (TemplateWithNodeNames templateWithNodeNames : entry.getValue()) {
                 try {
-                    updateTemplateAllocationSetting(entry.getKey(), templateName, nodeNames);
-                    updateIndicesAllocationSetting(entry.getKey(), templateName, nodeNames);
+                    if (templateWithNodeNames.getNodeNames().isEmpty()) {
+                        LOGGER.warn("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
+                            templateWithNodeNames.getTemplateName(), "has no node names");
+                        continue;
+                    }
+                    updateTemplateAllocationSetting(entry.getKey(), templateWithNodeNames.getTemplateName(),
+                        templateWithNodeNames.getNodeNames());
+                    updateIndicesAllocationSetting(entry.getKey(), templateWithNodeNames.getTemplateName(),
+                        templateWithNodeNames.getNodeNames());
                 } catch (Exception e) {
                     LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
-                        templateName, e.getMessage());
+                        templateWithNodeNames.getTemplateName(), e.getMessage());
                 }
             }
 
@@ -111,25 +115,27 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     }
 
     /**
-     * 构建集群->模板名的map
-     * @param clusterTemplateMap 集群模板map
-     * @param clusterRegion 集群region
-     * @param logicClusterIds  逻辑集群ids
+     * 构建集群->模板以及对应的节点名称
+     * @param cluster2TemplateWithNodeNames map
+     * @param clusterRegion region
+     * @param nodeNames 节点名称
      */
-    private void buildCluster2TemplateSetMap(Map<String, Set<String>> clusterTemplateMap, ClusterRegion clusterRegion,
-                                             String logicClusterIds) {
-        Arrays.stream(logicClusterIds.split(COMMA)).forEach(logicClusterId -> {
-            List<IndexTemplate> indexTemplates = indexTemplateService
-                .getLogicClusterTemplates(Long.valueOf(logicClusterId));
-            Set<String> logicTemplateNames = clusterTemplateMap.get(clusterRegion.getPhyClusterName());
-            if (null == logicTemplateNames) {
-                logicTemplateNames = new HashSet<>();
-                clusterTemplateMap.put(clusterRegion.getPhyClusterName(), logicTemplateNames);
-            }
-            for (IndexTemplate indexTemplate : indexTemplates) {
-                logicTemplateNames.add(indexTemplate.getName());
-            }
-        });
+    private void buildCluster2TemplateWithNodeNamesSetMap(Map<String, List<TemplateWithNodeNames>> cluster2TemplateWithNodeNames,
+                                                          ClusterRegion clusterRegion, Set<String> nodeNames) {
+        List<IndexTemplate> indexTemplates = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()))
+            .getData();
+        List<TemplateWithNodeNames> logicTemplateWithNodeNames = cluster2TemplateWithNodeNames
+            .get(clusterRegion.getPhyClusterName());
+        if (null == logicTemplateWithNodeNames) {
+            logicTemplateWithNodeNames = new ArrayList<>();
+            cluster2TemplateWithNodeNames.put(clusterRegion.getPhyClusterName(), logicTemplateWithNodeNames);
+        }
+        for (IndexTemplate indexTemplate : indexTemplates) {
+            TemplateWithNodeNames templateWithNodeNames = new TemplateWithNodeNames();
+            templateWithNodeNames.setNodeNames(nodeNames);
+            templateWithNodeNames.setTemplateName(indexTemplate.getName());
+            logicTemplateWithNodeNames.add(templateWithNodeNames);
+        }
     }
 
     /**
@@ -169,6 +175,12 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
             LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
                 templateName, "update template setting failed");
         }
+    }
+
+    @Data
+    public class TemplateWithNodeNames {
+        private String      templateName;
+        private Set<String> nodeNames;
     }
 
 }

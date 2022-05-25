@@ -16,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.event.region.RegionBindEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -164,22 +163,15 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         LogicClusterIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterIndecreaseContent.class);
 
-        List<Long> regionIdList = new ArrayList<>();
-        for (ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO : content.getRegionWithNodeInfo()) {
-            regionIdList.add(clusterRegionWithNodeInfoDTO.getId());
-            Result<Boolean> regionEditResult = clusterNodeManager.editNode2Region(clusterRegionWithNodeInfoDTO, approver);
-            if (regionEditResult.failed()) {
-                throw new AriusRunTimeException(regionEditResult.getMessage(), FAIL);
-            }
-        }
+        List<ClusterRegionWithNodeInfoDTO> clusterRegionWithNodeInfoDTOList = content.getRegionWithNodeInfo();
 
-        // 发布region变更的事件，对模板和索引生效
-        SpringTool.publish(new RegionEditEvent(this, regionIdList));
+        Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList, approver);
+        if (regionEditResult.failed()) { return Result.buildFrom(regionEditResult);}
+
         operateRecordService.save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
             workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
                                                                                            + JSON.toJSONString(content),

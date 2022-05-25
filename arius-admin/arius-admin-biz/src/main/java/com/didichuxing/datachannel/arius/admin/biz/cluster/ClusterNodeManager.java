@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 
 public interface ClusterNodeManager {
     /**
@@ -41,21 +42,21 @@ public interface ClusterNodeManager {
      * @param clusterId   物理集群Id
      * @return            Result<List<ESClusterRoleHostVO>>
      */
-    Result<List<ESClusterRoleHostVO>> listDivide2ClusterNodeInfo(Long clusterId);
+    Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId);
 
     /**
      * 划分指定节点至region
      * @param operator          操作者
-     * @param param             集群带节点信息的Region实体
+     * @param params             集群带节点信息的Region实体
      * @return                  Result<Long>
      */
-    Result<List<Long>> createNode2Region(List<ClusterRegionWithNodeInfoDTO> param, String operator);
+    Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator);
 
     /**
      * 编辑节点的region属性
      * @param operator          操作者
-     * @param param             集群带节点信息的Region实体
+     * @param params             集群带节点信息的Region实体
      * @return                  Result<Boolean>
      */
-    Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param, String operator);
+    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator);
 }

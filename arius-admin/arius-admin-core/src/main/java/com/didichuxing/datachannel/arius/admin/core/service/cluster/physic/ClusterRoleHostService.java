@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 
@@ -157,6 +158,13 @@ public interface ClusterRoleHostService {
      * @return
      */
     List<ClusterRoleHost> listAllNode();
+
+    /**
+     * 获取平台指定角色(masternode/datanode/clientnode)节点列表
+     * @param roleCode    节点角色 {@link ESClusterNodeRoleEnum}
+     * @return            List<ClusterRoleHost>
+     */
+    List<ClusterRoleHost> listAllNodeByRole(Integer roleCode);
 
     /**
      * 获取指定集群指定racks包含的节点
