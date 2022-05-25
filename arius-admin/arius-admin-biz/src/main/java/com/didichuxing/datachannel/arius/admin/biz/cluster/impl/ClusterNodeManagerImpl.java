@@ -267,6 +267,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(), param.getBindingNodeIds(),
                     param.getName(), operator);
             if (addRegionRet.success()) {
+                param.setId(addRegionRet.getData());
                 Result<Boolean> booleanResult = editNode2Region(param, operator);
                 if (booleanResult.success()) {
                     // 2. 操作记录
