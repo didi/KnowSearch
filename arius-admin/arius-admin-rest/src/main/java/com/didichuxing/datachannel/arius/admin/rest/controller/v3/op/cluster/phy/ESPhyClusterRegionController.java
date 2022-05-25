@@ -121,7 +121,7 @@ public class ESPhyClusterRegionController {
         return capacityPlanRegionService.editRegion(param, HttpRequestUtils.getOperator(request));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/{regionId}")
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
