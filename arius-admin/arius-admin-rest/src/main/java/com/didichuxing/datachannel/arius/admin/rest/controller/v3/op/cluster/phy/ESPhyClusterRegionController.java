@@ -125,8 +125,7 @@ public class ESPhyClusterRegionController {
     @DeleteMapping("/{regionId}")
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    public Result<Void> removeRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
+    public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) {
         return clusterRegionService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
     }
 
