@@ -371,11 +371,11 @@ public class ESUserServiceImpl implements ESUserService {
         }
         if (ADD.equals(operation)) {
             if (Objects.nonNull(oldESUser)) {
-                return Result.buildParamIllegal(String.format("es user [%s] is exists", appDTO.getId()));
+                return Result.buildParamIllegal(String.format("es user [%s] 已存在", appDTO.getId()));
             }
         } else if (EDIT.equals(operation)) {
             if (AriusObjUtils.isNull(appDTO.getId())) {
-                return Result.buildParamIllegal(String.format("es user [%s] not exists", appDTO.getId()));
+                return Result.buildParamIllegal(String.format("es user [%s] 不存在", appDTO.getId()));
             }
             if (AriusObjUtils.isNull(oldESUser)) {
                 return Result.buildNotExist(APP_NOT_EXIST);
