@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.Base64;
 import org.elasticsearch.rest.RestRequest;
@@ -247,26 +248,23 @@ public class Convert {
     	esSearchRequest.indices(convertIndices(esSearchRequest.indices()));
 	}
 
+	/**
+	 * 将具体索引带上*，支持访问带版本索引数据
+	 *
+	 * @param indices 索引
+	 * @return {@link String[]}
+	 */
 	public static String[] convertIndices(String[] indices) {
 		if (indices == null) {
 			return indices;
 		}
-		
+
 		boolean changed = false;
 		String[] newIndices = new String[indices.length];
 
 		for (int i = 0; i < indices.length; ++i) {
 			String index = indices[i];
-			
-			if (index == null || index.length() < 5) {
-				newIndices[i] = index;
-				continue;
-			}
-			
-			String suffix = index.substring(index.length() - 5, index.length());
-
-			Matcher m = r.matcher(suffix);
-			if (m.matches()) {
+			if (StringUtils.isNotBlank(index) && index.endsWith("*")) {
 				String newIndex = index + "*";
 				newIndices[i] = newIndex;
 				changed = true;
@@ -274,18 +272,11 @@ public class Convert {
 				newIndices[i] = index;
 			}
 		}
-		
+
 		if (changed) {
 			if (logger.isDebugEnabled()) {
-				StringBuilder buffer = new StringBuilder();
-				for (int i = 0; i < newIndices.length; ++i) {
-					buffer.append(newIndices[i]);
-					buffer.append(",");
-				}
-				
-				logger.debug("convertIndices||newIndices={}", buffer);
+				logger.debug("convertIndices||newIndices={}", StringUtils.join(newIndices, ","));
 			}
-			
 			return newIndices;
 		} else {
 			return indices;

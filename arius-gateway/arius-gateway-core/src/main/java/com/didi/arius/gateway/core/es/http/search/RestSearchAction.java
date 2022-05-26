@@ -121,7 +121,7 @@ public class RestSearchAction extends ESAction {
 
         long indexTemplateTime = System.currentTimeMillis();
 
-        // 日期索引加上*号后缀，支持异常索引修复方案
+        // 索引加上*号后缀，支持异常索引修复方案
         Convert.convertIndices(esSearchRequest);
 
         ESClient readClient = esClusterService.getClient(queryContext, indexTemplate, actionName);
