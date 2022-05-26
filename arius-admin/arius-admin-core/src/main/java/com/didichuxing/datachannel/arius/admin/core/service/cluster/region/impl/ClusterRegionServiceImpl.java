@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
@@ -278,14 +279,10 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
     @Override
     public Result<Void> deletePhyClusterRegion(Long regionId, String operator) {
-        if (regionId == null) {
-            return Result.buildFail("regionId为null");
-        }
+        if (regionId == null) { return Result.buildFail("regionId不能为null");}
 
         ClusterRegion region = getRegionById(regionId);
-        if (region == null) {
-            return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));
-        }
+        if (region == null) { return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));}
 
         // 已经绑定过的region不能删除
         if (isRegionBound(region)) {
@@ -300,18 +297,20 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                 // 获取被绑定的全部逻辑集群的名称
                 logicClusterNames.add(clusterLogic.getName());
             }
-
             return Result.buildFail(String.format("region %d 已经被绑定到逻辑集群 %s", regionId, ListUtils.strList2String(logicClusterNames)));
         }
 
-        boolean succeed = clusterRegionDAO.delete(regionId) == 1;
-
-        if (succeed) {
-            // 发送消息
-            SpringTool.publish(new RegionDeleteEvent(this, region, operator));
-            // 操作记录
-            operateRecordService.save(CLUSTER_REGION, DELETE, regionId, "", operator);
+        // 校验region是否还存在数据节点，如region中存在数据节点，需要先进行移除
+        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(region.getId().intValue());
+        if (ret.failed()) { return Result.buildFrom(ret);}
+        if (CollectionUtils.isNotEmpty(ret.getData())) {
+            List<ClusterRoleHost> clusterRoleHostList = ret.getData();
+            List<String> nodeNameList = clusterRoleHostList.stream().map(ClusterRoleHost::getNodeSet).distinct().collect(Collectors.toList());
+            return Result.buildFail(String.format("当前region中存在节点[%s]，需要先进行编辑移除", ListUtils.strList2String(nodeNameList)));
         }
+
+        boolean succeed = clusterRegionDAO.delete(regionId) == 1;
+        if (succeed) { operateRecordService.save(CLUSTER_REGION, DELETE, regionId, "", operator);}
 
         return Result.build(succeed);
     }

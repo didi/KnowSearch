@@ -211,6 +211,18 @@ public class ClusterRoleHostServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
+    public void listAllNodeByRole() {
+        List<ClusterRoleHost> dataNodeList = clusterRoleHostService.listAllNodeByRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
+        Assertions.assertFalse(dataNodeList.isEmpty());
+
+        List<ClusterRoleHost> clientNodeList = clusterRoleHostService.listAllNodeByRole(ESClusterNodeRoleEnum.CLIENT_NODE.getCode());
+        Assertions.assertFalse(clientNodeList.isEmpty());
+
+        List<ClusterRoleHost> masterNodeList = clusterRoleHostService.listAllNodeByRole(ESClusterNodeRoleEnum.MASTER_NODE.getCode());
+        Assertions.assertFalse(masterNodeList.isEmpty());
+    }
+
+    @Test
     public void listRacksNodesTest() {
         ESClusterRoleHostDTO esClusterRoleHostDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Assertions.assertTrue(clusterRoleHostService.listRacksNodes(null, null).isEmpty());

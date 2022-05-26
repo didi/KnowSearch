@@ -298,6 +298,11 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     }
 
     @Override
+    public List<ClusterRoleHost> listAllNodeByRole(Integer roleCode) {
+        return ConvertUtil.list2List(clusterRoleHostDAO.listAllByRoleCode(roleCode), ClusterRoleHost.class);
+    }
+
+    @Override
     public List<ClusterRoleHost> listRacksNodes(String clusterName, String racks) {
         List<ClusterRoleHost> nodes = new ArrayList<>();
         if (StringUtils.isAnyBlank(clusterName, racks)) {
