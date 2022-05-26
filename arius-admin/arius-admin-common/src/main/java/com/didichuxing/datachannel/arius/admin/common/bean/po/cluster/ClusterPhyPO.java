@@ -161,6 +161,11 @@ public class ClusterPhyPO extends BasePO {
 
     private Integer                    resourceType;
 
+    /**
+     * gateway地址
+     */
+    private String                    gatewayUrl;
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null || obj.getClass() != this.getClass()) {

@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
@@ -119,9 +120,9 @@ public interface ClusterPhyManager {
      * 集群接入
      * @param param 逻辑集群Id, 物理集群名称
      * @param operator 操作人
-     * @return  Tuple<Long, String>
+     * @return  ClusterPhyVO
      */
-	Result<Tuple<Long, String>> joinCluster(ClusterJoinDTO param, String operator);
+	Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator);
 
     /**
      * 删除接入集群
@@ -349,4 +350,6 @@ public interface ClusterPhyManager {
      * @return 可以绑定的rack列表
      */
     Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
+
+    Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId);
 }

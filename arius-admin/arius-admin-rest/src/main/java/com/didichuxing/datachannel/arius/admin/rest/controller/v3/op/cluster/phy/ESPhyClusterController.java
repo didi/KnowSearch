@@ -9,7 +9,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
@@ -91,20 +93,21 @@ public class ESPhyClusterController {
     @PostMapping("/join")
     @ResponseBody
     @ApiOperation(value = "接入集群", notes = "支持多类型集群加入")
-    public Result<Tuple<Long, String>> joinCluster(HttpServletRequest request, @RequestBody ClusterJoinDTO param) {
+    public Result<ClusterPhyVO> joinCluster(HttpServletRequest request, @RequestBody ClusterJoinDTO param) {
         return clusterPhyManager.joinCluster(param, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/join/{templateSrvId}/checkTemplateService")
     @ResponseBody
     @ApiOperation(value = "集群接入的时候校验是否可以开启指定索引服务")
+    @Deprecated
     public Result<Boolean> addTemplateSrvId(HttpServletRequest request,
                                             @RequestBody ClusterJoinDTO clusterJoinDTO,
                                             @PathVariable("templateSrvId") String templateSrvId) {
         return clusterPhyManager.checkTemplateServiceWhenJoin(clusterJoinDTO, templateSrvId, HttpRequestUtils.getOperator(request));
     }
 
-    @GetMapping("/{clusterId}/regioninfo")
+    @GetMapping("/{clusterId}/regions")
     @ResponseBody
     @ApiOperation(value = "获取节点划分列表")
     public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
@@ -162,11 +165,11 @@ public class ESPhyClusterController {
         return clusterPhyManager.pageGetClusterPhys(condition, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("/{clusterPhyId}/overView")
+    @GetMapping("/{clusterPhyId}/overview")
     @ResponseBody
     @ApiOperation(value = "获取物理集群概览信息接口")
     @ApiImplicitParam(type = "Integer", name = "clusterPhyId", value = "物理集群ID", required = true)
-    public Result<ConsoleClusterPhyVO> get(@PathVariable("clusterPhyId") Integer clusterId, HttpServletRequest request) {
+    public Result<ConsoleClusterPhyVO> overview(@PathVariable("clusterPhyId") Integer clusterId, HttpServletRequest request) {
         return Result.buildSucc(clusterPhyManager.getConsoleClusterPhy(clusterId, HttpRequestUtils.getAppId(request)));
     }
 
@@ -187,6 +190,7 @@ public class ESPhyClusterController {
     @GetMapping("/{clusterPhy}/{clusterLogic}/{templateSize}/bindRack")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表")
+    @Deprecated
     public Result<Set<String>> getValidRacksListByDiskSize(@PathVariable("clusterPhy") String clusterPhy,
                                                 @PathVariable("clusterLogic") String clusterLogic,
                                                 @PathVariable("templateSize") String templateSize) {
@@ -198,5 +202,12 @@ public class ESPhyClusterController {
     @ApiOperation(value = "获取zeus管控平台跳转接口")
     public Result<String> zeusUrl() {
         return Result.buildSucc(zeusServerUrl);
+    }
+
+    @PutMapping("/gateway")
+    @ResponseBody
+    @ApiOperation(value = "更新物理集群的gateway" )
+    public Result<ClusterPhyVO> updateClusterGateway(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
+        return clusterPhyManager.updateClusterGateway(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
     }
 }

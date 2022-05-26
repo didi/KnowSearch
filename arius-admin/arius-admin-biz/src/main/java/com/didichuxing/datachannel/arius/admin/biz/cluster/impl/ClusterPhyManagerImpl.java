@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManag
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
@@ -53,6 +51,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.*;
@@ -423,7 +422,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Tuple<Long, String>> joinCluster(ClusterJoinDTO param, String operator) {
+    public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator) {
         try {
             
             Result<Void> checkResult = checkClusterJoin(param, operator);
@@ -438,14 +437,16 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 return Result.buildFail(initResult.getMessage());
             }
 
-            Result<Tuple<Long, String>> doClusterJoinResult = doClusterJoin(param, operator);
-            if (doClusterJoinResult.success()) {
+            // 1.保存物理集群信息(集群、角色、节点)
+            Result<ClusterPhyVO> saveClusterResult = saveClusterPhy(param, operator);
+            if (saveClusterResult.failed()) {
+                throw new AdminOperateException(saveClusterResult.getMessage());
+            } else {
                 SpringTool.publish(new ClusterPhyEvent(param.getCluster(), param.getAppId()));
-                
-                postProcessingForClusterJoin(param, doClusterJoinResult.getData(), operator);
+                postProcessingForClusterJoin(param, operator);
             }
 
-            return doClusterJoinResult;
+            return saveClusterResult;
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||logicCluster={}||clusterPhy={}||errMsg={}", param.getLogicCluster(),
                 param.getCluster(), e.getMessage());
@@ -989,6 +990,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(canCreateTemplateRegionLists);
     }
 
+    @Override
+    public Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId) {
+        ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
+        clusterPhyDTO.setId(param.getId());
+        clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
+        ClusterPhy oldCluster = clusterPhyService.getClusterById(param.getId());
+        Result<Boolean> result = clusterPhyService.editCluster(clusterPhyDTO, operator);
+        if (result.failed() || !result.getData()) {
+            return Result.buildFail("编辑gateway失败！");
+        }
+        ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());
+        //todo 这里需要记录操作记录
+        return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
+    }
 
 
     /**************************************** private method ***************************************************/
@@ -1216,70 +1231,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     /**
-     * 集群接入
-     *
-     * @param param    参数
-     * @param operator 操作人
-     * @return {@link Result}<{@link Tuple}<{@link Long}, {@link String}>>  逻辑集群id, 物理集群名称
-     * @throws AdminOperateException 管理操作异常
-     */
-    private Result<Tuple<Long, String>> doClusterJoin(ClusterJoinDTO param,
-                                                      String operator) throws AdminOperateException {
-        Tuple<Long, String> clusterLogicIdAndClusterPhyNameTuple = new Tuple<>();
-
-        // 1.保存物理集群信息(集群、角色、节点)
-        Result<Void> saveClusterResult = saveClusterPhy(param, operator);
-        if (saveClusterResult.failed()) {
-            throw new AdminOperateException(saveClusterResult.getMessage());
-        }
-        clusterLogicIdAndClusterPhyNameTuple.setV2(param.getCluster());
-
-        //如果没有携带逻辑集群，则不操作region的绑定以及后续步骤
-        if (StringUtils.isBlank(param.getLogicCluster())) {
-            return Result.buildSucc(clusterLogicIdAndClusterPhyNameTuple);
-        }
-
-        // 2.创建region信息
-        List<Long> regionIds = Lists.newArrayList();
-        for (String racks : param.getRegionRacks()) {
-            //过滤掉regionRacks中的cold节点，不允许绑定到region中
-            racks = filterColdRackFromRegionRacks(racks);
-
-            if (StringUtils.isBlank(racks)) {
-                continue;
-            }
-            Result<Long> createPayClusterRegionResult = clusterRegionService.createPhyClusterRegion(param.getCluster(),
-                racks, null, operator);
-            if (createPayClusterRegionResult.failed()) {
-                throw new AdminOperateException(createPayClusterRegionResult.getMessage());
-            }
-
-            if (createPayClusterRegionResult.success()) {
-                regionIds.add(createPayClusterRegionResult.getData());
-            }
-        }
-
-        // 3.保存逻辑集群信息
-        Result<Long> saveClusterLogicResult = saveClusterLogic(param, operator);
-        if (saveClusterLogicResult.failed()) {
-            throw new AdminOperateException(saveClusterLogicResult.getMessage());
-        }
-
-        // 4.绑定Region
-        Long clusterLogicId = saveClusterLogicResult.getData();
-        for (Long regionId : regionIds) {
-            Result<Void> bindRegionResult = clusterRegionService.bindRegion(regionId, clusterLogicId, null, operator);
-            if (bindRegionResult.failed()) {
-                throw new AdminOperateException(bindRegionResult.getMessage());
-            }
-        }
-
-        clusterLogicIdAndClusterPhyNameTuple.setV1(clusterLogicId);
-
-        return Result.buildSucc(clusterLogicIdAndClusterPhyNameTuple);
-    }
-
-    /**
      * 过滤rack中的cold节点信息
      *
      * @param racks 架
@@ -1295,12 +1246,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return RackUtils.list2Racks(rackList);
     }
 
-    private Result<Void> saveClusterPhy(ClusterJoinDTO param, String operator) {
+    private Result<ClusterPhyVO> saveClusterPhy(ClusterJoinDTO param, String operator) {
         //保存集群信息
         ClusterPhyDTO clusterDTO    =  buildClusterPhy(param, operator);
         Result<Boolean> addClusterRet =  clusterPhyService.createCluster(clusterDTO, operator);
         if (addClusterRet.failed()) { return Result.buildFrom(addClusterRet);}
-        return Result.buildSucc();
+        return Result.buildSucc(ConvertUtil.obj2Obj(clusterDTO, ClusterPhyVO.class));
     }
 
     private ClusterPhyDTO buildClusterPhy(ClusterJoinDTO param, String operator) {
@@ -1642,8 +1593,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return triple;
     }
 
-    private void postProcessingForClusterJoin(ClusterJoinDTO param,
-                                              Tuple<Long, String> clusterLogicIdAndClusterPhyIdTuple, String operator) {
+    private void postProcessingForClusterJoin(ClusterJoinDTO param, String operator) {
         esOpClient.connect(param.getCluster());
 
         if (ESClusterImportRuleEnum.AUTO_IMPORT == ESClusterImportRuleEnum.valueOf(param.getImportRule())) {
@@ -1656,11 +1606,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         updateClusterHealth(param.getCluster(), AriusUser.SYSTEM.getDesc());
-
-        Long clusterLogicId = clusterLogicIdAndClusterPhyIdTuple.getV1();
-        if (null != clusterLogicId) {
-            clusterLogicManager.updateClusterLogicHealth(clusterLogicId);
-        }
 
         operateRecordService.save(ModuleEnum.ES_CLUSTER_JOIN, OperationEnum.ADD, param.getCluster(),
             param.getPhyClusterDesc(), operator);
