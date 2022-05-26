@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -140,6 +141,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
                 .runnableTask(() -> consoleTemplateVOList.forEach(consoleTemplateVO -> consoleTemplateVO.setAuthType(condition.getAuthType())))
                 .runnableTask(() -> setTemplateBelongClusterPhyNames(consoleTemplateVOList))
                 .runnableTask(() -> setTemplateIndexRolloverStatus(consoleTemplateVOList))
+                .runnableTask(() -> setTemplateClusterName(consoleTemplateVOList))
                 .waitExecute();
 
         return PaginationResult.buildSucc(consoleTemplateVOList, hitTotal, condition.getPage(), condition.getSize());
@@ -230,6 +232,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
                         consoleTemplateVO -> consoleTemplateVO.setAuthType(templateId2AuthTypeMap.get(consoleTemplateVO.getId()))))
                 .runnableTask(() -> setTemplateBelongClusterPhyNames(consoleTemplateVOList))
                 .runnableTask(() -> setTemplateIndexRolloverStatus(consoleTemplateVOList))
+                .runnableTask(() -> setTemplateClusterName(consoleTemplateVOList))
                 .waitExecute();
 
         return consoleTemplateVOList;
@@ -255,6 +258,21 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
                         .collect(Collectors.toSet());
 
                 consoleTemplateVO.setClusterPhies(Lists.newArrayList(clusterNameList));
+            });
+        }
+
+        BUILD_BELONG_CLUSTER_FUTURE_UTIL.waitExecute();
+    }
+
+    private void setTemplateClusterName(List<ConsoleTemplateVO> consoleTemplateVOList) {
+        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
+            return;
+        }
+
+        for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
+            BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
+                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(consoleTemplateVO.getResourceId());
+                consoleTemplateVO.setCluster(clusterLogic.getName());
             });
         }
 
