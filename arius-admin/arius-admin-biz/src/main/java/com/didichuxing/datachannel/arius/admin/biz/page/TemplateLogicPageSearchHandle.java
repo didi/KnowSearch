@@ -85,10 +85,6 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
                 return Result.buildParamIllegal("数据类型不存在");
             }
 
-            if (null != templateConditionDTO.getAuthType() && !isTemplateAuthExitByCode(templateConditionDTO.getAuthType())){
-                return Result.buildParamIllegal("权限类型不存在");
-            }
-
             String templateName = templateConditionDTO.getName();
             if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
                 return Result.buildParamIllegal("模板名称不允许带类似*, ?等通配符查询");
