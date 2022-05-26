@@ -399,6 +399,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         if (null == param) {
             return Result.buildFail("参数为空");
         }
+
+        if (AriusObjUtils.isBlank(param.getName())) { return Result.buildFail("region名称不允许为空或者空字符串");}
+
         if (!clusterPhyService.isClusterExists(param.getPhyClusterName())) {
             return Result.buildFail(String.format("物理集群[%s]不存在", param.getPhyClusterName()));
         }

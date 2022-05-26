@@ -5,6 +5,7 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
@@ -79,4 +80,11 @@ public interface ClusterRegionManager {
      * @return
      */
     Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator);
+
+    /**
+     * 根据物理集群名称获region信息，包含region中的数据节点信息
+     * @param clusterName          物理集群名称
+     * @return                     Result<List<ClusterRegionWithNodeInfoVO>>
+     */
+    Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(String clusterName);
 }
