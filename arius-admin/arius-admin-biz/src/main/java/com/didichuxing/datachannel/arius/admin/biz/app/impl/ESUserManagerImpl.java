@@ -311,11 +311,6 @@ public class ESUserManagerImpl implements ESUserManager {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
         }
-        //校验项目是否存在
-        ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (Objects.nonNull(projectVO)) {
-            return Result.buildFail(String.format("项目[%s]正在使用，不能删除所有的es user", projectId));
-        }
         final Tuple<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
         if (resultListTuple.getV1().success()) {
             operateRecordService.save(ES_USER, DELETE, projectId, String.format("删除项目[%s]下的所有es user", projectId),

@@ -44,17 +44,16 @@ public class ProjectESUserV3Controller {
 	
 	@Autowired
 	private ESUserManager esUserManager;
-    
-    @PostMapping("{projectId}")
-    @ResponseBody
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
-    public Result<Integer> createESUerByProject(HttpServletRequest request,
-                                                @PathVariable("projectId") Integer projectId,
-                                                @RequestBody ESUserDTO appDTO) {
-        return esUserManager.registerESUser(appDTO, projectId, HttpRequestUtil.getOperator(request));
-    }
 	
+	@PostMapping("{projectId}")
+	@ResponseBody
+	@ApiImplicitParams({
+			@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
+	public Result<Integer> createESUerByProject(HttpServletRequest request,
+	                                            @PathVariable("projectId") Integer projectId,
+	                                            @RequestBody ESUserDTO appDTO) {
+		return esUserManager.registerESUser(appDTO, projectId, HttpRequestUtil.getOperator(request));
+	}
 	
 	@GetMapping("all")
 	@ResponseBody
@@ -100,14 +99,14 @@ public class ProjectESUserV3Controller {
 		return esUserManager.update(request, appDTO);
 	}
 	
-
-	 @GetMapping("/get")
-    @ResponseBody
-    @ApiOperation(value = "获取es user详情接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "esUser", value = "esUser详情", required = true) })
-    public Result<ConsoleESUserVO> get(@RequestParam("esUser") Integer esUser) {
-        return esUserManager.get(esUser);
-    }
+	@GetMapping("/get")
+	@ResponseBody
+	@ApiOperation(value = "获取es user详情接口")
+	@ApiImplicitParams({
+			@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "esUser", value = "esUser详情", required = true) })
+	public Result<ConsoleESUserVO> get(@RequestParam("esUser") Integer esUser) {
+		return esUserManager.get(esUser);
+	}
 	
 	@GetMapping("/list")
 	@ResponseBody
@@ -115,12 +114,14 @@ public class ProjectESUserV3Controller {
 	public Result<List<ConsoleESUserVO>> list() {
 		return esUserManager.list();
 	}
+	
 	@GetMapping("/get-no-code-login")
-    @ResponseBody
-    @ApiOperation(value = "查询用户可以免密登陆的APP接口", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true)})
-    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request) {
-        return esUserManager.getNoCodeLogin(request);
-    }
-
+	@ResponseBody
+	@ApiOperation(value = "查询用户可以免密登陆的APP接口", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
+	@ApiImplicitParams({
+			@ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true) })
+	public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request) {
+		return esUserManager.getNoCodeLogin(request);
+	}
+	
 }
