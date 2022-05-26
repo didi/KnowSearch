@@ -82,7 +82,7 @@ public interface ClusterRegionManager {
     Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator);
 
     /**
-     * 根据物理集群名称获取region信息
+     * 根据物理集群名称获region信息，包含region中的数据节点信息
      * @param clusterName          物理集群名称
      * @return                     Result<List<ClusterRegionWithNodeInfoVO>>
      */

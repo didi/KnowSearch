@@ -227,6 +227,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(clusterName);
         if (CollectionUtils.isEmpty(clusterRegions)) { return Result.buildSucc();}
 
+        // 构建region中的节点信息
         List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions, ClusterRegionWithNodeInfoVO.class);
         for (ClusterRegionWithNodeInfoVO clusterRegionWithNodeInfoVO : clusterRegionWithNodeInfoVOS) {
             Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRegionWithNodeInfoVO.getId().intValue());

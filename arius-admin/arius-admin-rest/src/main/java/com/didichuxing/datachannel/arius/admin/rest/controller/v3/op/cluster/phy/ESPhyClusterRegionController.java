@@ -132,7 +132,7 @@ public class ESPhyClusterRegionController {
 
     @GetMapping("/{clusterName}")
     @ResponseBody
-    @ApiOperation(value = "根据物理集群名称获取region信息")
+    @ApiOperation(value = "根据物理集群名称获region信息，包含region中的数据节点信息")
     public Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(HttpServletRequest request, @PathVariable String clusterName) {
         return clusterRegionManager.getClusterRegionWithNodeInfoByClusterName(clusterName);
     }
