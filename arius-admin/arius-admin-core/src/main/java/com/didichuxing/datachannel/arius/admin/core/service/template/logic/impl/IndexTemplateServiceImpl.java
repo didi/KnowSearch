@@ -153,10 +153,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
+
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
-            indexTemplatePOS = indexTemplateDAO.pagingByCondition(param.getName(),
-                    param.getDataType(), param.getHasDCDR(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType, param.getResourceId());
+            indexTemplatePOS = indexTemplateDAO.pagingByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class),
+                    (param.getPage() - 1) * param.getSize(), param.getSize(),
+                    sortTerm, sortType);
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicServiceImpl||method=pagingGetLogicTemplatesByCondition||err={}",
                 e.getMessage(), e);
@@ -169,8 +171,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
-            indexTemplatePOS = indexTemplateDAO.pagingByCondition(param.getName(), null, null,
-                    (param.getPage() - 1) * param.getSize(), param.getSize(), SortConstant.ID, SortConstant.DESC, null);
+            indexTemplatePOS = indexTemplateDAO.pagingByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class),
+                    (param.getPage() - 1) * param.getSize(), param.getSize(),
+                    SortConstant.ID, SortConstant.DESC);
         } catch (Exception e) {
             LOGGER.error("class=IndexTemplateServiceImpl||method=pagingGetTemplateSrvByCondition||err={}", e.getMessage(), e);
         }

@@ -108,8 +108,9 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     }
 
     @Override
+    // todo: 灰度后清空这里代码
     protected PaginationResult<ConsoleTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
-        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO);
+        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
 
         //1. 获取管理/读写/读/无权限的模板信息
         List<IndexTemplate> appAuthTemplatesList = templateLogicManager.getTemplatesByAppIdAndAuthType(appId, condition.getAuthType());
@@ -145,30 +146,12 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
 
     @Override
     protected PaginationResult<ConsoleTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
-        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO);
+        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
 
-        int totalHit;
-        List<IndexTemplate> matchIndexTemplate;
-        // todo: 0.3 灰度完成后, 删除此处查询物理集群代码
-        if (!AriusObjUtils.isEmptyList(condition.getClusterPhies())) {
-            List<IndexTemplate> allTemplateLogics = indexTemplateService.getAllLogicTemplates();
-            if (CollectionUtils.isEmpty(allTemplateLogics)) {
-                return PaginationResult.buildSucc();
-            }
-            //根据无模板名称、有模板名称、有数量类型、有模板名称与数据类型等进行模糊匹配, 得出总结果
-            List<IndexTemplate> meetConditionTemplateList = getMeetConditionTemplateList(condition, allTemplateLogics);
-            //设置命中数
-            totalHit = meetConditionTemplateList.size();
-            //根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
-            sort(meetConditionTemplateList, condition.getSortTerm(), condition.getOrderByDesc());
-            //最后页临界点处理
-            matchIndexTemplate = filterFullDataByPage(meetConditionTemplateList, condition);
-        } else {
-            matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
-            totalHit                = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
-        }
+        List<IndexTemplate> matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
+        Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
 
-        List<ConsoleTemplateVO> consoleTemplateVOList = doBuildWithoutAuthType(matchIndexTemplate, appId);
+        List<ConsoleTemplateVO> consoleTemplateVOList = doBuildWithoutAuthType(matchIndexTemplate);
         return PaginationResult.buildSucc(consoleTemplateVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
@@ -212,38 +195,25 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         return meetConditionTemplateList;
     }
 
-    private List<ConsoleTemplateVO> doBuildWithoutAuthType(List<IndexTemplate> indexTemplateList,
-                                                           Integer appId) {
+    private List<ConsoleTemplateVO> doBuildWithoutAuthType(List<IndexTemplate> indexTemplateList) {
         if (CollectionUtils.isEmpty(indexTemplateList)) {
             return Lists.newArrayList();
         }
 
-        List<AppTemplateAuth> appTemplateAuthList = appLogicTemplateAuthManager
-            .getTemplateAuthListByTemplateListAndAppId(appId, indexTemplateList);
-
-        Map<Integer, Integer> templateId2AuthTypeMap = ConvertUtil.list2Map(appTemplateAuthList,
-            AppTemplateAuth::getTemplateId, AppTemplateAuth::getType);
-
-        List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList,
-            ConsoleTemplateVO.class);
-
-        //1. 设置权限
-        //2. 设置所属物理集群名称列表
-        //4. 设置是否开启了indexRollover能力
+        List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList, ConsoleTemplateVO.class);
+        //1. 设置逻辑集群
         RESOURCE_BUILD_FUTURE_UTIL
-                .runnableTask(() -> consoleTemplateVOList.forEach(
-                        consoleTemplateVO -> consoleTemplateVO.setAuthType(templateId2AuthTypeMap.get(consoleTemplateVO.getId()))))
-                .runnableTask(() -> setTemplateBelongClusterPhyNames(consoleTemplateVOList))
-                .runnableTask(() -> setTemplateIndexRolloverStatus(consoleTemplateVOList))
                 .runnableTask(() -> setTemplateClusterName(consoleTemplateVOList))
                 .waitExecute();
 
         return consoleTemplateVOList;
     }
 
-    private TemplateConditionDTO buildInitTemplateConditionDTO(PageDTO pageDTO) {
+    private TemplateConditionDTO buildInitTemplateConditionDTO(PageDTO pageDTO, Integer appId) {
         if (pageDTO instanceof TemplateConditionDTO) {
-            return (TemplateConditionDTO) pageDTO;
+            TemplateConditionDTO condition = (TemplateConditionDTO) pageDTO;
+            condition.setAppId(appId);
+            return condition;
         }
         return null;
     }

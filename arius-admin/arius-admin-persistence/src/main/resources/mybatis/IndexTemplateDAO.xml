@@ -68,15 +68,17 @@
         order by id desc
     </select>
 
-    <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
+    <select id="pagingByCondition" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from index_template_info
         where is_active = 1
-        <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
-        <if test="dataType != null"> and `data_type` = #{dataType}</if>
-        <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
-        <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
+        <if test="param.id != null"> and `id` = #{param.id}</if>
+        <if test="param.name != null">     and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
+        <if test="param.dataType != null"> and `data_type` = #{param.dataType}</if>
+        <if test="param.resourceId != null"> and `resource_id` = #{param.resourceId}</if>
+        <if test="param.desc != null"> and `desc` LIKE CONCAT('%', #{param.desc}, '%')</if>
+        <if test="param.appId != null"> and `app_id` = #{param.appId}</if>
         order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
     </select>
@@ -87,10 +89,12 @@
         count(1)
         from index_template_info
         where is_active = 1
-        <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
+        <if test="id != null"> and `id` = #{id}</if>
+        <if test="name != null">     and `name` LIKE CONCAT('%', #{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
-        <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
         <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
+        <if test="desc != null"> and `desc` LIKE CONCAT('%', #{desc}, '%')</if>
+        <if test="appId != null"> and `app_id` = #{appId}</if>
         order by id desc
     </select>
 
