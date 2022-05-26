@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
@@ -128,6 +129,14 @@ public class ESPhyClusterRegionController {
     public Result<Void> removeRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
         return clusterRegionService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
     }
+
+    @GetMapping("/{clusterName}")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取region信息")
+    public Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(HttpServletRequest request, @PathVariable String clusterName) {
+        return clusterRegionManager.getClusterRegionWithNodeInfoByClusterName(clusterName);
+    }
+
 
     @GetMapping("/{regionId}/nodes")
     @ResponseBody

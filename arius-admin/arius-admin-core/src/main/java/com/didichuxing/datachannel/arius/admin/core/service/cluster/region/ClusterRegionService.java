@@ -33,7 +33,7 @@ public interface ClusterRegionService {
     List<ClusterRegion> listLogicClusterRegions(Long logicClusterId);
 
     /**
-     * 获取物理下的region
+     * 获取物理集群下的region
      * @param phyClusterName 物理集群名
      * @return 物理集群下的region
      */
