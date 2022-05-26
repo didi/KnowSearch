@@ -55,9 +55,8 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ResponseBody
     @ApiOperation(value = "更新索引Setting接口" )
     public Result<Void> modifySetting(@RequestParam("logicId") Integer logicId,
-                                      @RequestBody JSONObject settingDTO) {
-        // 这里反序列化出来的内层是hashmap 不是jsonObject, 所以需要转化一下
-        IndexTemplatePhySettings settings = new IndexTemplatePhySettings(JSONObject.parseObject(settingDTO.toJSONString()));
+                                      @RequestBody String settingDTO) {
+        IndexTemplatePhySettings settings = new IndexTemplatePhySettings(JSONObject.parseObject(settingDTO));
         return templateLogicSettingsManager.updateSettings(logicId, settings);
     }
 }
