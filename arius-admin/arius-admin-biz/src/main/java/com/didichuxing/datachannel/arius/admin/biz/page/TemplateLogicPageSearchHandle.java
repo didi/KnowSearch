@@ -153,6 +153,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
 
         int totalHit;
         List<IndexTemplate> matchIndexTemplate;
+        // todo: 0.3 灰度完成后, 删除此处查询物理集群代码
         if (!AriusObjUtils.isEmptyList(condition.getClusterPhies())) {
             List<IndexTemplate> allTemplateLogics = indexTemplateService.getAllLogicTemplates();
             if (CollectionUtils.isEmpty(allTemplateLogics)) {
