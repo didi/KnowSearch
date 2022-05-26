@@ -232,7 +232,7 @@ public interface ClusterPhyManager {
      * @param appId
      * @return
      */
-    PaginationResult<ConsoleClusterPhyVO> getClusterPhyPages(ClusterPhyConditionDTO condition, Integer appId);
+    PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId);
 
     /**
      * 获取项目下指定权限的物理集群列表

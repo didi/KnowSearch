@@ -657,7 +657,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public PaginationResult<ConsoleClusterPhyVO> getClusterPhyPages(ClusterPhyConditionDTO condition, Integer appId) {
+    public PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId) {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
         if (baseHandle instanceof ClusterPhyPageSearchHandle) {
             ClusterPhyPageSearchHandle handle =   (ClusterPhyPageSearchHandle) baseHandle;
