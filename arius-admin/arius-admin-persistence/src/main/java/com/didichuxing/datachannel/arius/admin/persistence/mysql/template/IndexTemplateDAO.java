@@ -39,7 +39,8 @@ public interface IndexTemplateDAO {
     List<IndexTemplatePO> pagingByCondition(@Param("name") String name, @Param("dataType") Integer dataType,
                                             @Param("hasDCDR") Boolean hasDCDR,
                                             @Param("from") Long from, @Param("size") Long size,
-                                            @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+                                            @Param("sortTerm") String sortTerm, @Param("sortType") String sortType,
+                                            @Param("resourceId") Long resourceId);
 
     long getTotalHitByCondition(IndexTemplatePO param);
 

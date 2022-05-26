@@ -205,6 +205,12 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
             appAuthTemplatesList = appAuthTemplatesList.stream()
                 .filter(r -> r.getDataType().equals(condition.getDataType())).collect(Collectors.toList());
         }
+
+        if (null != condition.getResourceId()) {
+            appAuthTemplatesList = appAuthTemplatesList.stream()
+                    .filter(r -> r.getResourceId().equals(condition.getResourceId())).collect(Collectors.toList());
+        }
+
         meetConditionTemplateList.addAll(appAuthTemplatesList);
         return meetConditionTemplateList;
     }

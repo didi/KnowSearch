@@ -76,6 +76,7 @@
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
         <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
+        <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
         order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
     </select>
@@ -89,6 +90,7 @@
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
         <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
+        <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
         order by id desc
     </select>
 

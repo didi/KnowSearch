@@ -156,7 +156,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(param.getName(),
-                    param.getDataType(), param.getHasDCDR(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
+                    param.getDataType(), param.getHasDCDR(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType, param.getResourceId());
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicServiceImpl||method=pagingGetLogicTemplatesByCondition||err={}",
                 e.getMessage(), e);
@@ -170,7 +170,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(param.getName(), null, null,
-                    (param.getPage() - 1) * param.getSize(), param.getSize(), SortConstant.ID, SortConstant.DESC);
+                    (param.getPage() - 1) * param.getSize(), param.getSize(), SortConstant.ID, SortConstant.DESC, null);
         } catch (Exception e) {
             LOGGER.error("class=IndexTemplateServiceImpl||method=pagingGetTemplateSrvByCondition||err={}", e.getMessage(), e);
         }
