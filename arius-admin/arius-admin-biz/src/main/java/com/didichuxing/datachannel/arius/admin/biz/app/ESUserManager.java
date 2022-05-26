@@ -7,7 +7,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didiglobal.logi.security.common.po.ProjectPO;
+import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -22,16 +26,17 @@ public interface ESUserManager {
     
     /**
      * 获取所有项目下全部的es user
-     *
-     * @return 返回app列表
+     * {@link ProjectService#getProjectBriefList()} 获取全部项目
+     * {@link ProjectPO#getId()} 去获取全量的es user
+     * @return 返回es user 列表
      */
     Result<List<ESUser>> listESUsersByAllProject();
     
     /**
-     * 通过项目 id 获取全部的es user
+     * 通过项目id获取es user 列表
      *
-     * @param projectId 项目id
-     * @param operator
+     * @param projectId {@link ProjectPO#getId()}
+     * @param operator 操作者属于{@link ProjectVO#getUserList()}
      * @return {@code List<ESUser>}
      */
     Result<List<ESUser>> listESUsersByProjectId(Integer projectId, String operator);
@@ -55,8 +60,8 @@ public interface ESUserManager {
      * 新建APP
      *
      * @param appDTO    dto
-     * @param projectId
-     * @param operator  操作人
+     * @param projectId {@link ProjectPO#getId()}
+     * @param operator  操作人 {@link AdminConstant#SUPER_USER_NAME}
      * @return 成功 true  失败 false
      */
     Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator);
@@ -64,8 +69,8 @@ public interface ESUserManager {
     /**
      * 指定es user查询应用的名称
      *
-     * @param esUser appID
-     * @return app的名称，不存在则返回null
+     * @param esUser es user
+     * @return {@link ProjectPO#getProjectName()}
      */
     Result</*projectName*/String> getProjectName(Integer esUser);
     
@@ -73,33 +78,35 @@ public interface ESUserManager {
      * 更新 es user config
      *
      * @param configDTO configdto
-     * @param operator 操作人或角色
+     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
      * @return {@code Result<Void>}
      */
     Result<Void> updateESUserConfig(ESUserConfigDTO configDTO, String operator);
     
     /**
-     * 编辑应用程序
+     * 编辑es user
      *
-     * @param esUserDTO 应用dto
-     * @param operator 操作人或角色
+     * @param esUserDTO
+     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
      * @return {@code Result<Void>}
      */
     Result<Void> editESUser(ESUserDTO esUserDTO, String operator);
     
     /**
-     * 删除项目下指定的es user
-     * @param esUser esUser
-     * @param operator 操作人
-     * @return 成功 true  失败 false
+     * 删除项目下的指定es user
+     *
+     * @param esUser ES用户
+     * @param projectId {@link ProjectPO#getId()}
+     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
+     * @return {@code Result<Void>}
      */
     Result<Void> deleteESUserByProject(int esUser, int projectId, String operator);
     
     /**
      * 删除项目下所有的es user
      *
-     * @param projectId 项目id
-     * @param operator 操作人或角色
+     * @param projectId {@link ProjectPO#getId()}
+     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
      * @return {@code Result<Void>}
      */
     Result<Void> deleteAllESUserByProject(int projectId, String operator);
@@ -126,7 +133,7 @@ public interface ESUserManager {
     boolean isESUserExists(ESUser esUser);
 
     /**
-     * 根据appId判断是否为超级app
+     * 根据es user name 判断是否为root es user
      * @param esUserName  esUserName
      * @return       true or false
      */
@@ -135,22 +142,33 @@ public interface ESUserManager {
     
     /**
      * 校验验证码
-     * @param esUserName app
+     * @param esUserName es user
      * @param verifyCode 验证码
      * @return result
      */
     Result<Void> verifyAppCode(Integer esUserName, String verifyCode);
     
-        /**
+    /**
      * 编辑APP接口
      * @param request    request
      * @param consoleESUserDTO     consoleESUserDTO
-     * @return           Result<Void>
+     * @return Result<Void>
      */
     Result<Void> update(HttpServletRequest request, ConsoleESUserDTO consoleESUserDTO);
     
+    /**
+     * 获取
+     *
+     * @param esUser ES用户
+     * @return {@code Result<ConsoleESUserVO>}
+     */
     Result<ConsoleESUserVO> get(Integer esUser);
     
+    /**
+     * 列表
+     *
+     * @return {@code Result<List<ConsoleESUserVO>>}
+     */
     Result<List<ConsoleESUserVO>> list();
     
 }

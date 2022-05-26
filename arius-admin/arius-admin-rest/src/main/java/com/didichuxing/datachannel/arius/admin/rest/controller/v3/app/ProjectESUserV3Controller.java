@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -27,20 +28,38 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 项目关联的es user
+ *
+ * @author shizeying
+ * @date 2022/05/26
+ * @since 0.3
+ */
 @RestController
 @RequestMapping({ V3 + "/project/es-user/" })
-@Api(tags = "Project关联es user (REST)")
+@Api(tags = "应用关联es user (REST)")
 public class ProjectESUserV3Controller {
 	
 	@Autowired
 	private ESUserManager esUserManager;
+    
+    @PutMapping("{projectId}")
+    @ResponseBody
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
+    public Result<Integer> createESUerByProject(HttpServletRequest request,
+                                                @PathVariable("projectId") Integer projectId,
+                                                @RequestBody ESUserDTO appDTO) {
+        return esUserManager.registerESUser(appDTO, projectId, HttpRequestUtil.getOperator(request));
+    }
+	
 	
 	@GetMapping("all")
 	@ResponseBody
 	@ApiOperation(value = "管理员获取所有项目的es user")
 	public Result<List<ESUser>> listESUserByALLProject(HttpServletRequest request) {
 		final String operator = HttpRequestUtil.getOperator(request);
-		if (operator.equals(AdminConstant.SUPER_USER_NAME)) {
+		if (!operator.equals(AdminConstant.SUPER_USER_NAME)) {
 			return Result.buildFail("当前用户权限不足");
 		}
 		return esUserManager.listESUsersByAllProject();
@@ -94,5 +113,5 @@ public class ProjectESUserV3Controller {
 	public Result<List<ConsoleESUserVO>> list() {
 		return esUserManager.list();
 	}
-	
+
 }

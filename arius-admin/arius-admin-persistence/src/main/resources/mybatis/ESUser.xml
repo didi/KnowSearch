@@ -2,25 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserDAO">
     <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO">
-        <result column="id"               jdbcType="INTEGER"    property="id"/>
-        <result column="project_id"             jdbcType="VARCHAR"    property="projectId"/>
-        <result column="is_root"          jdbcType="TINYINT"    property="isRoot"/>
-        <result column="verify_code"      jdbcType="VARCHAR"    property="verifyCode"/>
-        <result column="memo"             jdbcType="VARCHAR"    property="memo"/>
-        <result column="is_active"        jdbcType="TINYINT"    property="isActive"/>
-        <result column="query_threshold"  jdbcType="INTEGER"    property="queryThreshold"/>
-        <result column="cluster"          jdbcType="VARCHAR"    property="cluster"/>
-        <result column="search_type"      jdbcType="TINYINT"    property="searchType"/>
-        <result column="responsible"      jdbcType="TINYINT"    property="responsible"/>
-        <result column="is_default_display" jdbcType="TINYINT" property="defaultDisplay" />
-        <result column="ip"               jdbcType="VARCHAR"    property="ip"/>
-        <result column="data_center"      jdbcType="VARCHAR"    property="dataCenter"/>
-        <result column="create_time"      jdbcType="TIMESTAMP"  property="createTime"/>
-        <result column="update_time"      jdbcType="TIMESTAMP"  property="updateTime"/>
-    </resultMap>
+        <!--@mbg.generated-->
+    <!--@Table arius_es_user-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_exp" jdbcType="LONGVARCHAR" property="indexExp" />
+    <result column="data_center" jdbcType="VARCHAR" property="dataCenter" />
+    <result column="is_root" jdbcType="TINYINT" property="isRoot" />
+    <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="ip" jdbcType="VARCHAR" property="ip" />
+    <result column="verify_code" jdbcType="VARCHAR" property="verifyCode" />
+    <result column="is_active" jdbcType="TINYINT" property="isActive" />
+    <result column="query_threshold" jdbcType="INTEGER" property="queryThreshold" />
+    <result column="cluster" jdbcType="VARCHAR" property="cluster" />
+    <result column="responsible" jdbcType="VARCHAR" property="responsible" />
+    <result column="search_type" jdbcType="TINYINT" property="searchType" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="project_id" jdbcType="BIGINT" property="projectId" />
+    <result column="is_default_display" jdbcType="TINYINT" property="defaultDisplay" />
+  </resultMap>
 
     <sql id="Base_Column_List">
-        id, project_id is_root, memo, query_threshold, verify_code, cluster, is_active,
+        id, project_id,is_root, memo, query_threshold, verify_code, cluster, is_active,
         search_type, ip, data_center, index_exp, create_time, update_time,responsible,is_default_display
     </sql>
     
@@ -40,17 +43,15 @@
          <if test="responsible != null">and responsible = #{responsible}</if>
         order by id desc
     </select>
-
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
-            useGeneratedKeys="true"
-            keyColumn="id" keyProperty="id">
-        insert into arius_es_user
-        (project_id, is_root, memo, query_threshold, verify_code, cluster,
-        search_type, data_center,responsible,is_default_display)
-        values
-        (#{projectId}, #{isRoot}, #{memo}, #{queryThreshold}, #{verifyCode}, #{cluster}, #{searchType},
-        #{dataCenter},#{responsible},#{defaultDisplay})
-    </insert>
+	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
+	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		<!--@mbg.generated-->
+		insert into arius_es_user
+		(id,is_root, memo, query_threshold, verify_code, cluster, responsible, search_type, data_center, project_id,
+		 is_default_display)
+		values (#{id},#{isRoot}, #{memo}, #{queryThreshold}, #{verifyCode}, #{cluster}, #{responsible}, #{searchType},
+		        #{dataCenter}, #{projectId}, #{defaultDisplay})
+	</insert>
 
     <select id="getByESUser" parameterType="integer" resultMap="BaseResultMap">
         select
@@ -65,15 +66,18 @@
         from arius_es_user
         where is_active = 1 and project_id = #{projectId}
     </select>
-
-    <select id="listByESUsers" parameterType="list" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from arius_es_user
-        where is_active = 1 and
-        id in
-        <foreach collection="esUser" item="id" open="(" separator="," close=")">#{id}</foreach>
-    </select>
+  
+  <select id="listByProjectIds" parameterType="list" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from arius_es_user
+    where is_active = 1
+      and
+      project_id in
+    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+      #{projectId}
+    </foreach>
+  </select>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO">
         update arius_es_user
@@ -115,4 +119,8 @@
     <select id="countByProjectId" resultType="java.lang.Integer">
         select count(project_id) from arius_es_user where is_active=1 and project_id=#{projectId}
     </select>
+	<select id="maxById" resultType="java.lang.Integer">
+		select max(id)
+		from arius_es_user
+	</select>
 </mapper>

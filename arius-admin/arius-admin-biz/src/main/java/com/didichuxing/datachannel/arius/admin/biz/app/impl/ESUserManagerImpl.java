@@ -32,6 +32,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.Collections;
@@ -60,11 +61,11 @@ public class ESUserManagerImpl implements ESUserManager {
     private static final ILog LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
     
     @Autowired
-    private ProjectService         projectService;
+    private ProjectService       projectService;
     @Autowired
-    private ESUserService          esUserService;
+    private ESUserService        esUserService;
     @Autowired
-    private OperateRecordService   operateRecordService;
+    private OperateRecordService operateRecordService;
     
     /**
      * 获取所有项目下全部的es user
@@ -74,10 +75,17 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<List<ESUser>> listESUsersByAllProject() {
         //获取全部项目id
-        final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
+        final List<ProjectBriefVO> briefVOList = projectService.getProjectBriefList();
+        final List<Integer> projectIds = briefVOList.stream().map(ProjectBriefVO::getId)
                 .distinct().collect(Collectors.toList());
         //根据项目下所有的es user
-        final List<ESUser> users = esUserService.listESUsers(projectIds);
+        List<ESUser> users = esUserService.listESUsers(projectIds);
+        for (ESUser user : users) {
+            final Integer projectId = user.getProjectId();
+           briefVOList.stream().filter(projectBriefVO -> projectBriefVO.getId().equals(projectId))
+                   .findFirst().map(ProjectBriefVO::getProjectName).ifPresent(user::setName);
+            
+        }
         
         return Result.buildSucc(users);
     }
@@ -89,17 +97,26 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<List<ESUser>> listESUsersByProjectId(Integer projectId, String operator) {
-        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        
-        if (Objects.isNull(projectVO)){
-            return Result.buildNotExist(String.format("项目:[%s]不存在", projectId));
+    
+        ProjectVO projectVO = null;
+        try {
+            projectVO = projectService.getProjectDetailByProjectId(projectId);
+        } catch (LogiSecurityException logiSecurityException) {
+            final String[] error = logiSecurityException.getMessage().split("-");
+            return Result.build(Integer.parseInt(error[0]),error[1]);
         }
+        
         //确定当前操作者属于该项目成员
         if (Objects.nonNull(projectId) && projectVO.getUserList().stream().map(UserBriefVO::getUserName)
-                .noneMatch(userName -> StringUtils.equals(userName, operator))) {
+                .noneMatch(userName -> StringUtils.equals(userName, operator))||!StringUtils.equals(operator,
+                AdminConstant.SUPER_USER_NAME)) {
             return Result.buildFail(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
         }
         final List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
+        for (ESUser user : users) {
+            user.setName(projectVO.getProjectName());
+        
+        }
         return Result.buildSucc(users);
     }
     
@@ -139,10 +156,14 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator) {
         //校验项目是否存在
-        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (Objects.isNull(projectVO)){
-            return Result.buildNotExist(String.format("project id:[%s] is not exits",projectId));
+    
+        try {
+            projectService.getProjectDetailByProjectId(projectId);
+        } catch (LogiSecurityException logiSecurityException) {
+            final String[] error = logiSecurityException.getMessage().split("-");
+            return Result.build(Integer.parseInt(error[0]), error[1]);
         }
+        
     
         final Tuple</*创建的es user*/Result<Integer>,/*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService.registerESUser(appDTO, operator);
     
@@ -248,10 +269,13 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<Void> deleteESUserByProject(int esUser, int projectId, String operator) {
         //校验项目是否存在
-        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (Objects.isNull(projectVO)) {
-            return Result.buildParamIllegal(String.format("项目[%s]不存在", projectId));
+        try {
+            projectService.getProjectDetailByProjectId(projectId);
+        } catch (LogiSecurityException logiSecurityException) {
+            final String[] error = logiSecurityException.getMessage().split("-");
+            return Result.build(Integer.parseInt(error[0]), error[1]);
         }
+        
         //校验当前项目下所有的es user
         final List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
         if (esUsers.size()==1){
@@ -287,7 +311,13 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<Void> deleteAllESUserByProject(int projectId, String operator) {
         //校验项目是否存在
-        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
+        ProjectVO projectVO = null;
+        try {
+            projectVO = projectService.getProjectDetailByProjectId(projectId);
+        } catch (LogiSecurityException logiSecurityException) {
+            final String[] error = logiSecurityException.getMessage().split("-");
+            return Result.build(Integer.parseInt(error[0]), error[1]);
+        }
         if (Objects.nonNull(projectVO)) {
             return Result.buildFail(String.format("项目[%s]正在使用，不能删除所有的es user", projectId));
         }
@@ -368,10 +398,14 @@ public class ESUserManagerImpl implements ESUserManager {
         //获取操作用户
         String userName = HttpRequestUtil.getOperator(request);
         //校验项目中是否包含该用户
-        ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (Objects.isNull(projectVO)){
-            return Result.buildFail(String.format("项目[%s]不存在", projectId));
+        ProjectVO projectVO = null;
+        try {
+            projectVO = projectService.getProjectDetailByProjectId(projectId);
+        } catch (LogiSecurityException logiSecurityException) {
+            final String[] error = logiSecurityException.getMessage().split("-");
+            return Result.build(Integer.parseInt(error[0]), error[1]);
         }
+        
         //校验当前操作者是否为超级用户
         if (AdminConstant.SUPER_USER_NAME.equals(userName)) {
          return Result.buildFail("当前用户不是管理员账号");

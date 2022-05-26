@@ -69,7 +69,7 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     public List<ESUser> listESUsers(List<Integer> projectIds) {
-        return         ConvertUtil.list2List(esUserDAO.listByESUsers(projectIds), ESUser.class);
+        return         ConvertUtil.list2List(esUserDAO.listByProjectIds(projectIds), ESUser.class);
     }
 
     @Override
