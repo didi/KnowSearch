@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
@@ -50,7 +51,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(V3_OP + "/phy/cluster/region")
 @Api(tags = "ES物理集群region接口(REST)")
-@Deprecated
 public class ESPhyClusterRegionController {
 
     @Autowired
@@ -74,6 +74,7 @@ public class ESPhyClusterRegionController {
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
+    @Deprecated
     public Result<List<ClusterRegionVO>> listPhyClusterRegions(@RequestParam("cluster") String cluster,
                                                                @RequestParam("clusterLogicType") Integer clusterLogicType) {
         return listPhyClusterRegionsAfterFilter(cluster, clusterLogicType, null);
@@ -82,6 +83,7 @@ public class ESPhyClusterRegionController {
     @GetMapping("/bind")
     @ResponseBody
     @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
+    @Deprecated
     public Result<List<ClusterRegionVO>> listPhyClusterRegions(@RequestParam("cluster") String cluster,
                                                                @RequestParam("clusterLogicType") Integer clusterLogicType,
                                                                @RequestParam("clusterLogicId") Long clusterLogicId) {
@@ -92,6 +94,7 @@ public class ESPhyClusterRegionController {
     @PostMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建物理集群region接口", notes = "")
+    @Deprecated
     public Result<Long> createRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
 
         return clusterRegionService.createPhyClusterRegion(param.getClusterName(), param.getRacks(), param.getShare(),
@@ -101,6 +104,7 @@ public class ESPhyClusterRegionController {
     @GetMapping("/phyClusterRacks")
     @ResponseBody
     @ApiOperation(value = "获取物理集群可划分至region的Racks信息", notes = "")
+    @Deprecated
     public Result<List<PhyClusterRackVO>> listPhyClusterRacks(@RequestParam("cluster") String cluster) {
         return Result.buildSucc(clusterRegionManager.buildCanDividePhyClusterRackVOs(cluster));
     }
@@ -108,6 +112,7 @@ public class ESPhyClusterRegionController {
     @PutMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "修改容量规划region接口", notes = "同时可修改物理集群region的racks")
+    @Deprecated
     public Result<Void> editClusterRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
 
         // 当前接口只更改两部分内容：
@@ -117,17 +122,25 @@ public class ESPhyClusterRegionController {
         return capacityPlanRegionService.editRegion(param, HttpRequestUtils.getOperator(request));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/{regionId}")
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
-    public Result<Void> removeRegion(HttpServletRequest request, @RequestParam("regionId") Long regionId) {
+    public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) {
         return clusterRegionService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
     }
+
+    @GetMapping("/{clusterName}")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获region信息，包含region中的数据节点信息")
+    public Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(HttpServletRequest request, @PathVariable String clusterName) {
+        return clusterRegionManager.getClusterRegionWithNodeInfoByClusterName(clusterName);
+    }
+
 
     @GetMapping("/{regionId}/nodes")
     @ResponseBody
     @ApiOperation(value = "获取region下的节点列表", notes = "")
+    @Deprecated
     public Result<List<ESClusterRoleHostVO>> getRegionNodes(@PathVariable Long regionId) {
 
         ClusterRegion region = clusterRegionService.getRegionById(regionId);
@@ -145,6 +158,7 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{regionId}/templates")
     @ResponseBody
     @ApiOperation(value = "获取Region物理模板列表接口")
+    @Deprecated
     public Result<List<IndexTemplatePhysicalVO>> getRegionPhysicalTemplates(@PathVariable Long regionId) {
         return Result.buildSucc(
             ConvertUtil.list2List(physicalService.getTemplateByRegionId(regionId), IndexTemplatePhysicalVO.class));
@@ -153,6 +167,7 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{clusterPhyName}/rack")
     @ResponseBody
     @ApiOperation(value = "获取物理集群下的rack列表")
+    @Deprecated
     public Result<Set<String>> getClusterPhyRacks(@PathVariable String clusterPhyName) {
         return Result.buildSucc(clusterPhyService.getClusterRacks(clusterPhyName));
     }

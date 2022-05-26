@@ -9,9 +9,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +64,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
     @Autowired
     private TemplateSrvManager    templateSrvManager;
+
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
 
     /**
      * 构建regionVO
@@ -213,6 +220,26 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Override
     public Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator) {
         return clusterRegionService.bindRegion(regionId, logicClusterId, share, operator);
+    }
+
+    @Override
+    public Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(String clusterName) {
+        List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(clusterName);
+        if (CollectionUtils.isEmpty(clusterRegions)) { return Result.buildSucc();}
+
+        // 构建region中的节点信息
+        List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions, ClusterRegionWithNodeInfoVO.class);
+        for (ClusterRegionWithNodeInfoVO clusterRegionWithNodeInfoVO : clusterRegionWithNodeInfoVOS) {
+            Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRegionWithNodeInfoVO.getId().intValue());
+            if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
+                List<ClusterRoleHost> data = ret.getData();
+                List<String> nodeNameList = data.stream().filter(Objects::nonNull).map(ClusterRoleHost::getNodeSet).distinct().collect(Collectors.toList());
+                String nodeNames = ListUtils.strList2String(nodeNameList);
+                clusterRegionWithNodeInfoVO.setNodeNames(nodeNames);
+            }
+        }
+
+        return Result.buildSucc(clusterRegionWithNodeInfoVOS.stream().filter(r -> !AriusObjUtils.isBlank(r.getName())).distinct().collect(Collectors.toList()));
     }
 
     /***************************************** private method ****************************************************/
