@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConf
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
@@ -59,7 +60,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ESUserManagerImpl implements ESUserManager {
     private static final ILog LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
-    
+    private static final String GET_USER_APPID_LIST_TICKET      = "xTc59aY72";
+    private static final String GET_USER_APPID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
     @Autowired
     private ProjectService       projectService;
     @Autowired
@@ -424,5 +426,38 @@ public class ESUserManagerImpl implements ESUserManager {
             return Result.buildFail();
         }
         return Result.buildSucc(ConvertUtil.list2List(result.getData(), ConsoleESUserVO.class));
+    }
+    
+    /**
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request) {
+          String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
+        if (!GET_USER_APPID_LIST_TICKET.equals(ticket)) {
+            return Result.buildParamIllegal("ticket错误");
+        }
+        final String operator = HttpRequestUtil.getOperator(request);
+        final Integer projectId = HttpRequestUtil.getProjectId(request);
+        if (Objects.isNull(projectId)){
+            return Result.buildParamIllegal("未设置项目");
+        }
+        if (projectService.checkProjectExist(projectId)){
+              return Result.buildParamIllegal("项目不存在");
+        }
+        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
+        if (projectService.getProjectDetailByProjectId(projectId).getUserList().stream().noneMatch(user->StringUtils.equals(user.getUserName(),operator))||StringUtils.equals(AdminConstant.SUPER_USER_NAME,operator)){
+            return Result.buildParamIllegal("权限不足");
+        }
+        List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
+        for (ESUser user : users) {
+            user.setName(projectVO.getProjectName());
+        
+        }
+        return Result.buildSucc(
+                ConvertUtil.list2List(users, ConsoleESUserWithVerifyCodeVO.class));
+       
     }
 }

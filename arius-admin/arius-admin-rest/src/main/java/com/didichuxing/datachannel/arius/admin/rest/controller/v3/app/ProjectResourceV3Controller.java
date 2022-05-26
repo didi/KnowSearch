@@ -24,7 +24,7 @@ public class ProjectResourceV3Controller {
 	
 	@GetMapping("logic-cluster/{projectId}")
 	@ResponseBody
-	@ApiOperation(value = "项目项目中是否绑定了逻辑集群")
+	@ApiOperation(value = "项目中是否绑定了逻辑集群")
 	@ApiImplicitParams({
 			@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
 	public Result<Void> checkProjectLogicCluster(@PathVariable("projectId") Integer projectId) {
@@ -33,7 +33,7 @@ public class ProjectResourceV3Controller {
 	
 	@GetMapping("template/{projectId}")
 	@ResponseBody
-	@ApiOperation(value = "项目项目中是否绑定了模板")
+	@ApiOperation(value = "项目中是否绑定了模板")
 	@ApiImplicitParams({
 			@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
 	public Result<Void> checkProjectTemplate(@PathVariable("projectId") Integer projectId) {

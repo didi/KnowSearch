@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,9 +16,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "app信息（包含验证码）")
-@Deprecated
-public class ConsoleAppWithVerifyCodeVO extends BaseVO {
+@ApiModel(description = "es user 信息（包含验证码）")
+public class ConsoleESUserWithVerifyCodeVO extends BaseVO {
 
     @ApiModelProperty("应用ID")
     private Integer id;

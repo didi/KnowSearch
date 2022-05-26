@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUser
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,14 +38,14 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 0.3
  */
 @RestController
-@RequestMapping({ V3 + "/project/es-user/" })
+@RequestMapping({ V3 + "/es-user/" })
 @Api(tags = "应用关联es user (REST)")
 public class ProjectESUserV3Controller {
 	
 	@Autowired
 	private ESUserManager esUserManager;
     
-    @PutMapping("{projectId}")
+    @PostMapping("{projectId}")
     @ResponseBody
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
@@ -67,7 +69,7 @@ public class ProjectESUserV3Controller {
 	
 	@GetMapping("")
 	@ResponseBody
-	@ApiOperation(value = "获取项目下所有的es user")
+	@ApiOperation(value = "获取项目下的es user")
 	public Result<List<ESUser>> listESUserByProjectId(HttpServletRequest request) {
 		return esUserManager.listESUsersByProjectId(HttpRequestUtil.getProjectId(request),
 				HttpRequestUtils.getOperator(request));
@@ -113,5 +115,12 @@ public class ProjectESUserV3Controller {
 	public Result<List<ConsoleESUserVO>> list() {
 		return esUserManager.list();
 	}
+	@GetMapping("/get-no-code-login")
+    @ResponseBody
+    @ApiOperation(value = "查询用户可以免密登陆的APP接口", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true)})
+    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request) {
+        return esUserManager.getNoCodeLogin(request);
+    }
 
 }

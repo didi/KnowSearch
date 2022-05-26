@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didiglobal.logi.security.common.po.ProjectPO;
@@ -171,4 +172,5 @@ public interface ESUserManager {
      */
     Result<List<ConsoleESUserVO>> list();
     
+    Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request);
 }
