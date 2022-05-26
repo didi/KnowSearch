@@ -69,7 +69,7 @@ public class ProjectESUserV3Controller {
 	@ResponseBody
 	@ApiOperation(value = "获取项目下所有的es user")
 	public Result<List<ESUser>> listESUserByProjectId(HttpServletRequest request) {
-		return esUserManager.listESUsersByProjectId(HttpRequestUtil.getAppId(request),
+		return esUserManager.listESUsersByProjectId(HttpRequestUtil.getProjectId(request),
 				HttpRequestUtils.getOperator(request));
 	}
 	
@@ -79,7 +79,7 @@ public class ProjectESUserV3Controller {
 	@ApiImplicitParams({
 			@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "esUser", value = "es user", required = true) })
 	public Result<Void> deleteESUserByProject(HttpServletRequest request, @PathVariable("esUser") Integer esUserName) {
-		return esUserManager.deleteESUserByProject(esUserName, HttpRequestUtil.getAppId(request),
+		return esUserManager.deleteESUserByProject(esUserName, HttpRequestUtil.getProjectId(request),
 				HttpRequestUtils.getOperator(request));
 	}
 	
@@ -87,7 +87,7 @@ public class ProjectESUserV3Controller {
 	@ResponseBody
 	@ApiOperation(value = "删除项目下全部的es user")
 	public Result<Void> deleteAllESUserByProject(HttpServletRequest request) {
-		return esUserManager.deleteAllESUserByProject(HttpRequestUtil.getAppId(request),
+		return esUserManager.deleteAllESUserByProject(HttpRequestUtil.getProjectId(request),
 				HttpRequestUtils.getOperator(request));
 	}
 	
