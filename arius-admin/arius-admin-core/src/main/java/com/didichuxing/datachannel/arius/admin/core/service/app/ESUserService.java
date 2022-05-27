@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import java.util.List;
@@ -114,7 +113,7 @@ public interface ESUserService {
      * @param operator  操作人
      * @return 成功 true  失败  false
      */
-    Tuple<Result<Void>, ESUserConfigPO> updateESUserConfig(ESUserConfigDTO configDTO, String operator);
+    Tuple<Result<Void>, ESUserPO> updateESUserConfig(ESUserConfigDTO configDTO, String operator);
     
     /**
      * 校验app id是否存在

@@ -68,7 +68,7 @@ public interface ESUserDAO {
 
     /**
      * 根据主键列表获取app信息
-     * @param esUsers    主键列表
+     * @param projectIds    项目集合
      * @return           List<AppPO>
      */
     List<ESUserPO> listByProjectIds(@Param("projectIds") List<Integer> projectIds);
@@ -81,6 +81,37 @@ public interface ESUserDAO {
     
     
     Integer maxById();
+    
+    /**
+     * 获取es user 获取config
+     *
+     * @param esUser ES用户
+     * @return {@code ESUserConfigPO}
+     */
+    ESUserPO getByESUserConfig(@Param("esUser") int esUser);
+    
+    /**
+     * 新增es config
+     *
+     * @param param 入参
+     * @return int
+     */
+    int insertConfig(ESUserPO param);
+    
+    /**
+     * 更新es config
+     *
+     * @param param 入参
+     * @return int
+     */
+    int updateConfig(ESUserPO param);
+    
+    /**
+     * 获取es user 的全部配置
+     *
+     * @return {@code List<ESUserConfigPO>}
+     */
+    List<ESUserPO> listConfig();
 
 
 }

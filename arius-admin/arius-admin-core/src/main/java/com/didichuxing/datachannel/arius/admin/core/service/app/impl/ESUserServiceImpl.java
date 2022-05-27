@@ -11,7 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -22,7 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -55,8 +53,7 @@ public class ESUserServiceImpl implements ESUserService {
 
     @Autowired
     private ESUserDAO esUserDAO;
-    @Autowired
-    private ESUserConfigDAO esUserConfigDAO;
+ 
 
    
 
@@ -193,14 +190,14 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     public Result<Void> initConfig(Integer esUserName) {
-        ESUserConfigPO param = new ESUserConfigPO();
-        param.setEsUser(esUserName);
+        ESUserPO param = new ESUserPO();
+        param.setId(esUserName);
         param.setDslAnalyzeEnable(AdminConstant.YES);
         param.setIsSourceSeparated(AdminConstant.NO);
         param.setAggrAnalyzeEnable(AdminConstant.YES);
         param.setAnalyzeResponseEnable(AdminConstant.YES);
 
-        return Result.build(esUserConfigDAO.update(param) == 1);
+        return Result.build(esUserDAO.updateConfig(param) == 1);
     }
 
     /**
@@ -218,10 +215,10 @@ public class ESUserServiceImpl implements ESUserService {
             return null;
         }
     
-        ESUserConfigPO oldConfigPO = esUserConfigDAO.getByESUser(esUserName);
+        ESUserPO oldConfigPO = esUserDAO.getByESUserConfig(esUserName);
         if (oldConfigPO == null) {
             initConfig(esUserName);
-            oldConfigPO = esUserConfigDAO.getByESUser(esUserName);
+            oldConfigPO = esUserDAO.getByESUser(esUserName);
         
         }
 
@@ -235,7 +232,7 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     public List<ESUserConfig> listConfig() {
-        return ConvertUtil.list2List(esUserConfigDAO.listAll(), ESUserConfig.class);
+        return ConvertUtil.list2List(esUserDAO.listConfig(), ESUserConfig.class);
     }
 
     @Override
@@ -258,7 +255,7 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Tuple<Result<Void>, ESUserConfigPO> updateESUserConfig(ESUserConfigDTO configDTO, String operator) {
+    public Tuple<Result<Void>, ESUserPO> updateESUserConfig(ESUserConfigDTO configDTO, String operator) {
         Result<Void> checkResult = checkConfigParam(configDTO);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESUserServiceImpl||method=updateESUserConfig||msg={}||msg=check fail!", checkResult.getMessage());
@@ -270,9 +267,9 @@ public class ESUserServiceImpl implements ESUserService {
             return new Tuple<>(Result.buildNotExist(APP_NOT_EXIST), null);
         }
 
-        ESUserConfigPO oldConfigPO = esUserConfigDAO.getByESUser(configDTO.getEsUser());
+        ESUserPO oldConfigPO = esUserDAO.getByESUser(configDTO.getEsUser());
 
-        boolean succ = (1 == esUserConfigDAO.update(obj2Obj(configDTO, ESUserConfigPO.class)));
+        boolean succ = (1 == esUserDAO.updateConfig(obj2Obj(configDTO, ESUserPO.class)));
         
 
         return new Tuple<>(Result.build(succ),oldConfigPO);

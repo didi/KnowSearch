@@ -14,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
@@ -202,7 +201,7 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<Void> updateESUserConfig(ESUserConfigDTO configDTO, String operator) {
         //只有success时候会存在tuple._2不为null
-        final Tuple<Result<Void>, ESUserConfigPO> tuple = esUserService.updateESUserConfig(configDTO, operator);
+        final Tuple<Result<Void>, ESUserPO> tuple = esUserService.updateESUserConfig(configDTO, operator);
         if (tuple.getV1().success()) {
             operateRecordService.save(APP_CONFIG, EDIT, configDTO.getEsUser(),
                     AriusObjUtils.findChangedWithClear(tuple.getV2(), configDTO), operator);
