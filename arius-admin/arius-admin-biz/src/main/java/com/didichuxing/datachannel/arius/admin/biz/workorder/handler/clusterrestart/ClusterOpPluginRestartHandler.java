@@ -17,9 +17,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -54,9 +54,6 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
     private OpTaskManager workTaskService;
 
     @Autowired
-    private ESClusterService esClusterService;
-
-    @Autowired
     private EcmTaskManager ecmTaskManager;
 
     @Override
@@ -83,7 +80,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("插件操作类型不合法(合法的操作类型包括安装和卸载)");
         }
 
-        if (opTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()), OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -152,7 +149,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
         ecmTaskDTO.setPhysicClusterId(Long.parseLong(pluginPO.getPhysicClusterId()));
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
         ecmTaskDTO.setType(clusterPhy.getType());
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
@@ -160,7 +157,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
 
         OpTaskDTO opTaskDTO = new OpTaskDTO();
         opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         opTaskDTO.setCreator(workOrder.getSubmitor());
         Result<OpTask> result = workTaskService.addTask(opTaskDTO);
         if(null == result || result.failed()){

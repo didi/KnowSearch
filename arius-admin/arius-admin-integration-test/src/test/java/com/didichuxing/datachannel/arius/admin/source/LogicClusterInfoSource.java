@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterOpV3ControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterRegionControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalOrderControllerMethod;
@@ -30,7 +30,7 @@ public class LogicClusterInfoSource {
     public static class LogicClusterInfo {
         private String logicClusterName;
         private Long logicClusterId;
-        private Integer type = ResourceLogicTypeEnum.PRIVATE.getCode();
+        private Integer type = ClusterResourceTypeEnum.PRIVATE.getCode();
     }
 
     /**
@@ -47,7 +47,7 @@ public class LogicClusterInfoSource {
         contentObj.put("dataNodeSpec", "16-64Gi-3072g");
         contentObj.put("dataNodeNu", 3);
         contentObj.put("responsible", "admin");
-        contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
+        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
         Result<AriusWorkOrderInfoSubmittedVO> result = NormalOrderControllerMethod.submit(type, workOrderDTO);
         Assertions.assertTrue(result.success());
@@ -88,7 +88,7 @@ public class LogicClusterInfoSource {
         logicClusterDeleteContent.setId(logicClusterId);
         logicClusterDeleteContent.setName(logicClusterName);
         logicClusterDeleteContent.setResponsible(CustomDataSource.operator);
-        logicClusterDeleteContent.setType(ResourceLogicTypeEnum.PRIVATE.getCode());
+        logicClusterDeleteContent.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(logicClusterDeleteContent);
         workOrderDTO.setType("logicClusterDelete");
         workOrderDTO.setSubmitorAppid(1);

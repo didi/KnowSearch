@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterDeleteContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterDeleteContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -29,9 +29,11 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
 /**
- * Created by linyunan on 2021-06-11
+ * @author linyunan
+ * @date 2021-06-11
  */
 @Service
+@Deprecated
 public class ClusterDeleteHandler extends BaseWorkOrderHandler {
     protected static final ILog    LOGGER = LogFactory.getLog(ClusterDeleteHandler.class);
 

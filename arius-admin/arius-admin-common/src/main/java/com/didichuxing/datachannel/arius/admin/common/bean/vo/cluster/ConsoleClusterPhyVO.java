@@ -11,8 +11,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * Created by linyunan on 2021-06-16
+ * @Deprecated 这里由泽颖处理
+ *
+ * @author linyunan
+ * @date 2021-06-16
  */
+@Deprecated
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

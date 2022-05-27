@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -81,7 +81,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
             }
 
             if (null != clusterLogicConditionDTO.getType()
-                    && !ResourceLogicTypeEnum.isExist(clusterLogicConditionDTO.getType())) {
+                    && !ClusterResourceTypeEnum.isExist(clusterLogicConditionDTO.getType())) {
                 return Result.buildParamIllegal("逻辑集群类型不存在");
             }
 

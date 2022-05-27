@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
@@ -84,7 +84,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
 
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
         resourceLogicDTO.setAppId(workOrder.getSubmitorAppid());
-        resourceLogicDTO.setType(ResourceLogicTypeEnum.PRIVATE.getCode());
+        resourceLogicDTO.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
         return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD);
     }
 

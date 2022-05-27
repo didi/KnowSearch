@@ -18,7 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAu
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -316,7 +316,7 @@ public class CustomDataSource {
         esLogicClusterDTO.setName("wpkTest");
         esLogicClusterDTO.setAppId(123);
         esLogicClusterDTO.setResponsible("wpk");
-        esLogicClusterDTO.setType(ResourceLogicTypeEnum.EXCLUSIVE.getCode());
+        esLogicClusterDTO.setType(ClusterResourceTypeEnum.EXCLUSIVE.getCode());
         esLogicClusterDTO.setQuota(3d);
         esLogicClusterDTO.setMemo("Test");
         return esLogicClusterDTO;

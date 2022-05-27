@@ -2,6 +2,12 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
+import javax.servlet.http.HttpServletRequest;
+
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
@@ -34,6 +40,7 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ResponseBody
     @ApiOperation(value = "更新索引Setting接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
+    @Deprecated
     public Result<Void> modifySetting(HttpServletRequest request,
                                 @RequestBody ConsoleTemplateSettingDTO settingDTO) throws AdminOperateException {
         Result<Void> checkAuthResult = checkAppAuth(settingDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
@@ -50,5 +57,14 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<IndexTemplatePhySettings> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
         return templateLogicSettingsManager.getSettings(logicId);
+    }
+
+    @PutMapping("/new")
+    @ResponseBody
+    @ApiOperation(value = "更新索引Setting接口" )
+    public Result<Void> modifySetting(@RequestParam("logicId") Integer logicId,
+                                      @RequestBody String settingDTO) {
+        IndexTemplatePhySettings settings = new IndexTemplatePhySettings(JSONObject.parseObject(settingDTO));
+        return templateLogicSettingsManager.updateSettings(logicId, settings);
     }
 }

@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterControllerMethod;
@@ -97,7 +97,7 @@ public class PhyClusterInfoSource {
 
         // 获取物理集群的空闲 region
         Result<List<ClusterRegionVO>> result =
-                ESPhyClusterRegionControllerMethod.listPhyClusterRegions(phyClusterName, ResourceLogicTypeEnum.PRIVATE.getCode());
+                ESPhyClusterRegionControllerMethod.listPhyClusterRegions(phyClusterName, ClusterResourceTypeEnum.PRIVATE.getCode());
         Assertions.assertTrue(result.success());
         Long regionId = null;
         for(ClusterRegionVO clusterRegionVO : result.getData()) {
@@ -136,7 +136,7 @@ public class PhyClusterInfoSource {
         contentObj.put("libraDepartmentId", "");
         contentObj.put("quota", 0);
         contentObj.put("name", logicClusterName);
-        contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
+        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
 
         // 提交工单

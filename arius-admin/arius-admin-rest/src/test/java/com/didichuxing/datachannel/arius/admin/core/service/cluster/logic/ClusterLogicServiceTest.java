@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -181,7 +181,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         esLogicClusterDTO.setName("");
         Assertions.assertEquals(Result.buildParamIllegal("集群名字为空").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        esLogicClusterDTO.setType(ResourceLogicTypeEnum.UNKNOWN.getCode());
+        esLogicClusterDTO.setType(ClusterResourceTypeEnum.UNKNOWN.getCode());
         Assertions.assertEquals(Result.buildParamIllegal("新建逻辑集群提交内容中集群类型非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
         esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();

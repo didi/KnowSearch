@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author chengxiang
- * @date 2022/5/9
+ * @date 2022/5/11
  */
 @Data
 @NoArgsConstructor
@@ -153,6 +153,10 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
      */
     private Long    checkPointDiff;
 
+    /**
+     * 已开启的模板服务
+     */
+    private String  openSrv;
     /**
      * regionId
      */

@@ -4,9 +4,11 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.NewTemplateCreateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
@@ -115,6 +117,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取索引Setting接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
+    @Deprecated
     public Result<TemplateSettingVO> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
         return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
     }
@@ -125,5 +128,12 @@ public class TemplateLogicV3Controller {
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,
                                                                       @RequestParam("cluster") String cluster) {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtil.getProjectId(request));
+    }
+
+    @PutMapping("")
+    @ResponseBody
+    @ApiOperation(value = "创建逻辑模板")
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody TemplateCreateDTO createContent) {
+        return Result.buildSucc();
     }
 }

@@ -31,17 +31,15 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="resource_id" jdbcType="BIGINT" property="resourceId"/>
         <result column="level" jdbcType="TINYINT" property="level"/>
+        <result column="open_srv" jdbcType="VARCHAR" property="openSrv"/>
         <result column="region_id" jdbcType="INTEGER" property="regionId"/>
     </resultMap>
-	
-	<sql id="Base_Column_List">
-		<!--@mbg.generated-->
-		<!--@Table index_template_info2-->
-		id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
-		department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-		`desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`
-		,region_id
-	</sql>
+
+    <sql id="Base_Column_List">
+         id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
+         department, responsible, date_field, date_field_format, id_field, routing_field, expression,
+         `desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, `region_id`
+    </sql>
 
     <select id="listByCondition"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO"
@@ -70,14 +68,17 @@
         order by id desc
     </select>
 
-    <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
+    <select id="pagingByCondition" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from index_template_info2
         where is_active = 1
-        <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
-        <if test="dataType != null"> and `data_type` = #{dataType}</if>
-        <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
+        <if test="param.id != null"> and `id` = #{param.id}</if>
+        <if test="param.name != null">     and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
+        <if test="param.dataType != null"> and `data_type` = #{param.dataType}</if>
+        <if test="param.resourceId != null"> and `resource_id` = #{param.resourceId}</if>
+        <if test="param.desc != null"> and `desc` LIKE CONCAT('%', #{param.desc}, '%')</if>
+        <if test="param.projectId != null"> and `project_id` = #{param.projectId}</if>
         order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
     </select>
@@ -88,9 +89,12 @@
         count(1)
         from index_template_info2
         where is_active = 1
-        <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
+        <if test="id != null"> and `id` = #{id}</if>
+        <if test="name != null">     and `name` LIKE CONCAT('%', #{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
-        <if test="hasDCDR != null">  and `has_dcdr` = #{hasDCDR}</if>
+        <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
+        <if test="desc != null"> and `desc` LIKE CONCAT('%', #{desc}, '%')</if>
+        <if test="projectId != null"> and `project_id` = #{projectId}</if>
         order by id desc
     </select>
 
@@ -175,6 +179,7 @@
             <if test="level != null">,`level` = #{level}</if>
             <if test="checkPointDiff != null">,check_point_diff = #{checkPointDiff}</if>
             <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
+            <if test="openSrv != null">,open_srv = #{openSrv}</if>
             <if test="regionId != null">,region_id = #{regionId}</if>
         </trim>
         where id = #{id}

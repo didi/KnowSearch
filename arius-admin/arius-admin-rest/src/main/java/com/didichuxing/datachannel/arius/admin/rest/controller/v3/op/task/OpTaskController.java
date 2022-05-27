@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.alibaba.fastjson.JSON;
@@ -9,28 +10,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author fengqiongfeng
@@ -38,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Api(tags = "任务相关接口(REST)")
 @RestController
-@RequestMapping(V3_OP + "/worktask")
+@RequestMapping({V3_OP + "/worktask",V3 + "/op-task"})
 public class OpTaskController {
     private static final ILog LOGGER = LogFactory.getLog(OpTaskController.class);
 
@@ -50,7 +39,7 @@ public class OpTaskController {
     @ResponseBody
     public Result<List<TaskTypeVO>> getOrderTypes() {
         List<TaskTypeVO> voList = new ArrayList<>();
-        for (AriusOpTaskTypeEnum elem : AriusOpTaskTypeEnum.values()) {
+        for (OpTaskTypeEnum elem : OpTaskTypeEnum.values()) {
             voList.add(new TaskTypeVO(elem.getType(), elem.getMessage()));
         }
         return Result.buildSucc(voList);
@@ -102,6 +91,28 @@ public class OpTaskController {
         return Result.buildSucc(ConvertUtil.list2List(
                 opTaskManager.list().getData(),WorkTaskVO.class)
         );
+    }
+
+    @PostMapping(path = "/{type}")
+    @ResponseBody
+    @ApiOperation(value = "提交任务接口", notes = "")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
+    public Result<WorkTaskVO> addTask(HttpServletRequest request, @PathVariable(value = "type") String code,
+                                     @RequestBody OpTaskDTO opTaskDTO) {
+        String dataCenter = opTaskDTO.getDataCenter();
+        String user = HttpRequestUtils.getOperator(request);
+
+        opTaskDTO.setTaskType(OpTaskTypeEnum.valueOfPath(code).getType());
+        opTaskDTO.setCreator(user);
+        LOGGER.info(
+            "class=OpTaskController||method=OpTaskController.addTask||workTaskDTO={}||envInfo={}||dataCenter={}",
+            JSON.toJSONString(opTaskDTO), EnvUtil.getStr(), dataCenter);
+
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(),WorkTaskVO.class));
     }
 
 }

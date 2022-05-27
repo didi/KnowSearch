@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -32,7 +32,7 @@ public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleCluste
     @ApiModelProperty("数据中心")
     private String                       dataCenter;
 
-    /** @see ResourceLogicTypeEnum */
+    /** @see ClusterResourceTypeEnum */
     @ApiModelProperty("集群类型（1：公共；2：独立）")
     private Integer                      type;
 
