@@ -451,19 +451,21 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-        List<ClusterPhyPO> clusterPOS = Lists.newArrayList();
+        param.setSortTerm(sortTerm);
+        param.setSortType(sortType);
+        param.setFrom((param.getPage() - 1) * param.getSize());
+        List<ClusterPhyPO> clusters = Lists.newArrayList();
         try {
-            clusterPOS = clusterDAO.pagingByCondition(param.getCluster(), param.getHealth(),
-                    param.getEsVersion(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
+            clusters = clusterDAO.pagingByCondition(param);
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(), e);
         }
-        return ConvertUtil.list2List(clusterPOS, ClusterPhy.class);
+        return ConvertUtil.list2List(clusters, ClusterPhy.class);
     }
 
     @Override
     public Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param) {
-        return clusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterPhyPO.class));
+        return clusterDAO.getTotalHitByCondition(param);
     }
 
     @Override

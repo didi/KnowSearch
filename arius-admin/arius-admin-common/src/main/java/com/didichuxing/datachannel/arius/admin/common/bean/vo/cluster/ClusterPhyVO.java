@@ -102,7 +102,7 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     private Long                        activeShardNum;
 
     @ApiModelProperty("IaaS平台类型")
-    private String                    iaas;
+    private String                    platformType;
 
     /**
      * @see ClusterResourceTypeEnum

@@ -52,15 +52,6 @@ public interface ClusterPhyManager {
     boolean isClusterExists(String clusterName);
 
     /**
-     * 释放racks
-     * @param cluster    集群名称
-     * @param racks      要释放的racks，逗号分隔
-     * @param retryCount 重试次数
-     * @return result
-     */
-    Result<Void> releaseRacks(String cluster, String racks, int retryCount);
-
-    /**
      * 获取控制台物理集群信息列表(ZH有使用)
      * @param currentAppId 当前登录项目
      * @param param         查询参数
@@ -82,7 +73,7 @@ public interface ClusterPhyManager {
      * @param appId           当前项目
      * @return
      */
-    List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId);
+    List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId);
 
     /**
      * 获取单个物理集群overView信息
@@ -233,7 +224,7 @@ public interface ClusterPhyManager {
      * @param appId
      * @return
      */
-    PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId);
+    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId);
 
     /**
      * 获取项目下指定权限的物理集群列表
@@ -261,7 +252,7 @@ public interface ClusterPhyManager {
      * 构建物理集群角色信息
      * @param cluster
      */
-    void buildClusterRole(ConsoleClusterPhyVO cluster);
+    void buildClusterRole(ClusterPhyVO cluster);
 
     /**
      * 构建集群作用
@@ -269,7 +260,7 @@ public interface ClusterPhyManager {
      * @param cluster      集群
      * @param clusterRoleInfos 集群角色
      */
-    void buildClusterRole(ConsoleClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos);
+    void buildClusterRole(ClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos);
 
     /**
      * 更新物理集群状态
@@ -351,5 +342,13 @@ public interface ClusterPhyManager {
      */
     Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
 
+    /**
+     * 更新集群网关
+     *
+     * @param param    参数
+     * @param operator 操作人
+     * @param appId    应用程序id
+     * @return {@link Result}<{@link ClusterPhyVO}>
+     */
     Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId);
 }
