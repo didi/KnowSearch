@@ -194,7 +194,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateClearVO
             .setIndices(indexTemplatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId()));
         consoleTemplateClearVO.setAccessApps(
-            ConvertUtil.list2List(templateLogicManager.getLogicTemplateAppAccess(logicId), ConsoleAppVO.class));
+            ConvertUtil.list2List(templateLogicManager.getLogicTemplateProjectAccess(logicId), ConsoleAppVO.class));
 
         return Result.buildSucc(consoleTemplateClearVO);
     }
@@ -234,7 +234,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
 
         consoleTemplateDeleteVO.setAccessApps(
-            ConvertUtil.list2List(templateLogicManager.getLogicTemplateAppAccess(logicId), ConsoleAppVO.class));
+            ConvertUtil.list2List(templateLogicManager.getLogicTemplateProjectAccess(logicId), ConsoleAppVO.class));
 
         return Result.buildSucc(consoleTemplateDeleteVO);
     }

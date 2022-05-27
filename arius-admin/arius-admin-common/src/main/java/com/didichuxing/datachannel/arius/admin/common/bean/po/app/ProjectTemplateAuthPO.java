@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.app;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 
@@ -34,12 +34,12 @@ public class ProjectTemplateAuthPO extends BasePO implements DigitResponsible {
 
     /**
      * 权限类型  读写  读
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     private Integer type;
 
     /**
-     * 责任人列表，id列表，英文逗号分隔
+     * 责任人列表
      */
     private String responsible;
 

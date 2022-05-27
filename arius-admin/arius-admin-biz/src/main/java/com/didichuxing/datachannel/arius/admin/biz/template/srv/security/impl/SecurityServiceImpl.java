@@ -7,15 +7,15 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.Securit
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityUserService;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.SecurityRoleAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
@@ -55,7 +55,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     private AppService                  appService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
     private ClusterPhyService clusterPhyService;
@@ -89,8 +89,8 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
         }
 
-        AppTemplateAuthEnum authEnum = AppTemplateAuthEnum.valueOf(authType);
-        if (AppTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
+        ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
+        if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
             LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||authType={}||msg=authType not exist", appId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
@@ -140,8 +140,8 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
         }
 
-        AppTemplateAuthEnum authEnum = AppTemplateAuthEnum.valueOf(authType);
-        if (AppTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
+        ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
+        if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
             LOGGER.warn("class=SecurityServiceImpl||method=deleteAppLogicTemplateAuth||authType={}||msg=authType not exist", appId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
@@ -178,12 +178,12 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      */
     @Override
     public Result<Void> editLogicTemplateOwnApp(Integer logicTemplateId, Integer srcAppId, Integer tgtAppId, int retryCount) {
-        Result<Void> deleteResult = deleteAppLogicTemplateAuth(srcAppId, logicTemplateId, AppTemplateAuthEnum.OWN.getCode(),
+        Result<Void> deleteResult = deleteAppLogicTemplateAuth(srcAppId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
             retryCount);
         LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnApp||logicTemplateId={}||srcAppid={}||tgtAppid={}||msg={}",
             logicTemplateId, srcAppId, tgtAppId, deleteResult.getMessage());
 
-        Result<Void> saveResult = saveAppLogicTemplateAuth(tgtAppId, logicTemplateId, AppTemplateAuthEnum.OWN.getCode(),
+        Result<Void> saveResult = saveAppLogicTemplateAuth(tgtAppId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
             retryCount);
         LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnApp||logicTemplateId={}||srcAppid={}||tgtAppid={}||msg={}",
             logicTemplateId, srcAppId, tgtAppId, saveResult.getMessage());
@@ -208,8 +208,8 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
         }
 
-        AppTemplateAuthEnum authEnum = AppTemplateAuthEnum.valueOf(authType);
-        if (AppTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
+        ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
+        if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
             LOGGER.warn("class=SecurityServiceImpl||method=saveAppPhysicalTemplateAuth||authType={}||msg=authType not exist", appId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
@@ -240,8 +240,8 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
         }
 
-        AppTemplateAuthEnum authEnum = AppTemplateAuthEnum.valueOf(authType);
-        if (AppTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
+        ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
+        if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
             LOGGER.warn("class=SecurityServiceImpl||method=deleteAppPhysicalTemplateAuth||authType={}||msg=authType not exist", appId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
@@ -325,29 +325,29 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             .getLogicTemplateWithPhysicalsById(templatePhysical.getLogicId());
         checkTemplateOwnApp(templatePhysical, templateLogic.getProjectId());
 
-        List<AppTemplateAuth> templateAuths = appLogicTemplateAuthService
+        List<ProjectTemplateAuth> templateAuths = projectLogicTemplateAuthService
             .getTemplateAuthsByLogicTemplateId(templateLogic.getId());
         checkTemplateRWAuth(templatePhysical, templateAuths);
     }
 
-    private void checkTemplateRWAuth(IndexTemplatePhy templatePhysical, List<AppTemplateAuth> templateAuths) {
+    private void checkTemplateRWAuth(IndexTemplatePhy templatePhysical, List<ProjectTemplateAuth> templateAuths) {
         if (CollectionUtils.isEmpty(templateAuths)) {
             return;
         }
 
-        for (AppTemplateAuth templateAuth : templateAuths) {
+        for (ProjectTemplateAuth templateAuth : templateAuths) {
             String roleName = getRoleName(templatePhysical, templateAuth.getType());
             securityRoleService.ensureRoleExist(templatePhysical.getCluster(), roleName,
                 templatePhysical.getExpression(), getRolePrivilegeSet(templateAuth.getType()));
-            securityUserService.ensureUserHasAuth(templatePhysical.getCluster(), getUserName(templateAuth.getAppId()),
-                roleName, templateAuth.getAppId());
+            securityUserService.ensureUserHasAuth(templatePhysical.getCluster(), getUserName(templateAuth.getProjectId()),
+                roleName, templateAuth.getProjectId());
         }
     }
 
     private void checkTemplateOwnApp(IndexTemplatePhy templatePhysical, Integer appId) {
-        String roleName = getRoleName(templatePhysical, AppTemplateAuthEnum.OWN.getCode());
+        String roleName = getRoleName(templatePhysical, ProjectTemplateAuthEnum.OWN.getCode());
         securityRoleService.ensureRoleExist(templatePhysical.getCluster(), roleName, templatePhysical.getExpression(),
-            getRolePrivilegeSet(AppTemplateAuthEnum.OWN.getCode()));
+            getRolePrivilegeSet(ProjectTemplateAuthEnum.OWN.getCode()));
         securityUserService.ensureUserHasAuth(templatePhysical.getCluster(), getUserName(appId), roleName, appId);
     }
 
@@ -406,7 +406,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
 
     private String getRoleName(IndexTemplatePhy template, Integer authType) {
         SecurityRoleAuthEnum securityRoleAuthEnum = SecurityRoleAuthEnum
-            .valueByAuth(AppTemplateAuthEnum.valueOf(authType));
+            .valueByAuth(ProjectTemplateAuthEnum.valueOf(authType));
         if (securityRoleAuthEnum == null) {
             return null;
         }
@@ -415,7 +415,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
 
     private Set<String> getRolePrivilegeSet(Integer authType) {
         SecurityRoleAuthEnum securityRoleAuthEnum = SecurityRoleAuthEnum
-            .valueByAuth(AppTemplateAuthEnum.valueOf(authType));
+            .valueByAuth(ProjectTemplateAuthEnum.valueOf(authType));
         if (securityRoleAuthEnum == null) {
             return Sets.newHashSet();
         }

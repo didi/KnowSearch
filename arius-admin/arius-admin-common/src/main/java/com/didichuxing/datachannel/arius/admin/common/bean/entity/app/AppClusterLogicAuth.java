@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.app;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 import lombok.AllArgsConstructor;
@@ -28,7 +28,7 @@ public class AppClusterLogicAuth extends BaseEntity implements StringResponsible
 
     /**
      * 权限类型  管理、访问、无权限
-     * @see AppClusterLogicAuthEnum
+     * @see ProjectClusterLogicAuthEnum
      */
     private Integer type;
 

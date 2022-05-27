@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,7 @@ public class AppTemplateAuthVO extends BaseVO {
 
     /**
      * 权限类型  读写  读
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     @ApiModelProperty("权限类型（-1 无权限 ;1:管理；2:读写；3:读）")
     private Integer type;

@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import java.util.List;
 import java.util.UUID;
@@ -66,7 +66,7 @@ public class TemplateActionImpl implements TemplateAction {
     private DistributorUtils           distributorUtils;
 
     @Autowired
-    private AppClusterLogicAuthService logicClusterAuthService;
+    private ProjectClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
     private TemplateLogicManager       templateLogicManager;

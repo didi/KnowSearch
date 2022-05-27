@@ -5,16 +5,16 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.event.auth.AppAuthEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthAddEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthDeleteEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.auth.AppTemplateAuthEditEvent;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectAuthEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplateAuthAddEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplateAuthDeleteEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplateAuthEditEvent;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
 @Component
-public class AppAuthEventListener implements ApplicationListener<AppAuthEvent> {
+public class AppAuthEventListener implements ApplicationListener<ProjectAuthEvent> {
 
     private static final ILog LOGGER = LogFactory.getLog(AppAuthEventListener.class);
 
@@ -27,43 +27,43 @@ public class AppAuthEventListener implements ApplicationListener<AppAuthEvent> {
      * @param event the event to respond to
      */
     @Override
-    public void onApplicationEvent(AppAuthEvent event) {
-        if (event instanceof AppTemplateAuthAddEvent) {
-            AppTemplateAuthAddEvent appTemplateAuthAddEvent = (AppTemplateAuthAddEvent) event;
-            AppTemplateAuth appTemplateAuth = appTemplateAuthAddEvent.getAppTemplateAuth();
+    public void onApplicationEvent(ProjectAuthEvent event) {
+        if (event instanceof ProjectTemplateAuthAddEvent) {
+            ProjectTemplateAuthAddEvent projectTemplateAuthAddEvent = (ProjectTemplateAuthAddEvent) event;
+            ProjectTemplateAuth projectTemplateAuth = projectTemplateAuthAddEvent.getAppTemplateAuth();
 
             LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthAddEvent||appid={}||template={}||authType={}",
-                appTemplateAuth.getAppId(), appTemplateAuth.getTemplateId(), appTemplateAuth.getType());
+                projectTemplateAuth.getProjectId(), projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType());
 
-            securityService.saveAppLogicTemplateAuth(appTemplateAuth.getAppId(),
-                appTemplateAuth.getTemplateId(), appTemplateAuth.getType(), 20);
+            securityService.saveAppLogicTemplateAuth(projectTemplateAuth.getProjectId(),
+                projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType(), 20);
             return;
         }
 
-        if (event instanceof AppTemplateAuthEditEvent) {
-            AppTemplateAuthEditEvent appTemplateAuthEditEvent = (AppTemplateAuthEditEvent) event;
-            AppTemplateAuth srcAuth = appTemplateAuthEditEvent.getSrcAuth();
-            AppTemplateAuth tgtAuth = appTemplateAuthEditEvent.getTgtAuth();
+        if (event instanceof ProjectTemplateAuthEditEvent) {
+            ProjectTemplateAuthEditEvent projectTemplateAuthEditEvent = (ProjectTemplateAuthEditEvent) event;
+            ProjectTemplateAuth srcAuth = projectTemplateAuthEditEvent.getSrcAuth();
+            ProjectTemplateAuth tgtAuth = projectTemplateAuthEditEvent.getTgtAuth();
 
             LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthEditEvent||appid={}||template={}||authType={}",
-                tgtAuth.getAppId(), tgtAuth.getTemplateId(), tgtAuth.getType());
+                tgtAuth.getProjectId(), tgtAuth.getTemplateId(), tgtAuth.getType());
 
             if (!srcAuth.getType().equals(tgtAuth.getType())) {
-                securityService.saveAppLogicTemplateAuth(tgtAuth.getAppId(), tgtAuth.getTemplateId(),
+                securityService.saveAppLogicTemplateAuth(tgtAuth.getProjectId(), tgtAuth.getTemplateId(),
                     tgtAuth.getType(), 20);
             }
             return;
         }
 
-        if (event instanceof AppTemplateAuthDeleteEvent) {
-            AppTemplateAuthDeleteEvent appTemplateAuthDeleteEvent = (AppTemplateAuthDeleteEvent) event;
-            AppTemplateAuth appTemplateAuth = appTemplateAuthDeleteEvent.getAppTemplateAuth();
+        if (event instanceof ProjectTemplateAuthDeleteEvent) {
+            ProjectTemplateAuthDeleteEvent appTemplateAuthDeleteEvent = (ProjectTemplateAuthDeleteEvent) event;
+            ProjectTemplateAuth projectTemplateAuth = appTemplateAuthDeleteEvent.getAppTemplateAuth();
 
             LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthDeleteEvent||appid={}||template={}||authType={}",
-                appTemplateAuth.getAppId(), appTemplateAuth.getTemplateId(), appTemplateAuth.getType());
+                projectTemplateAuth.getProjectId(), projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType());
 
-            securityService.deleteAppLogicTemplateAuth(appTemplateAuth.getAppId(),
-                appTemplateAuth.getTemplateId(), appTemplateAuth.getType(), 20);
+            securityService.deleteAppLogicTemplateAuth(projectTemplateAuth.getProjectId(),
+                projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType(), 20);
         }
 
     }

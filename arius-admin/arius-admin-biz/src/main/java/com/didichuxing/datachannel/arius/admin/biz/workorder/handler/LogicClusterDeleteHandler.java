@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
     private ClusterContextManager      clusterContextManager;
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
 	@Override
 	protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -108,7 +108,7 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
         try {
             Result<Void> deleteLogicClusterResult = clusterLogicManager.deleteLogicCluster(content.getId(), workOrder.getSubmitor(), workOrder.getSubmitorAppid());
             if (deleteLogicClusterResult.success()){
-                appClusterLogicAuthService.deleteLogicClusterAuthByLogicClusterId(content.getId());
+                projectClusterLogicAuthService.deleteLogicClusterAuthByLogicClusterId(content.getId());
             }
         } catch (AdminOperateException e) {
             LOGGER.error("class=LogicClusterDeleteHandler||method=doProcessAgree||clusterLogicId={}||errMsg={}",

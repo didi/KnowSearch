@@ -44,7 +44,21 @@
 		responsible,
 		is_default_display
 	</sql>
-	
+	<select id="getDefaultESUserByProject" resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser">
+		select
+		<include refid="Base_Column_List"/>
+		from arius_es_user
+		where is_active = 1
+		and is_default_display=1 and project_id=#{projectId} limit  1
+	</select>
+	<select id="countDefaultESUserByProject" resultType="java.lang.Integer">
+		select count(id)
+		from arius_es_user
+		where is_active = 1
+			and is_default_display = 1
+			and project_id = #{projectId}
+	</select>
+
 	
 	<select id="listByCondition" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
 	        resultMap="BaseResultMap">
@@ -179,6 +193,7 @@
 		select max(id)
 		from arius_es_user
 	</select>
+	
 	<!--es user config 配置-->
 	<sql id="Base_Column_List_ES_Config">
 		id,
@@ -200,7 +215,13 @@
 		select
 		<include refid="Base_Column_List_ES_Config"/>
 		from arius_es_user
+		where is_active = 1
+			and project_id in
+		<foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+			#{projectId}
+		</foreach>
 	</select>
+
 	
 	
 	<insert id="insertConfig" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"

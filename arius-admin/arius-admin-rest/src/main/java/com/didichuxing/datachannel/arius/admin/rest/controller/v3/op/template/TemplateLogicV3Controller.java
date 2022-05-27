@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.NewTemplateCreateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
@@ -57,7 +56,8 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "模糊查询模板列表")
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(HttpServletRequest request,
                                                                          @RequestBody TemplateConditionDTO condition) {
-        return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtil.getProjectId(request));
+        return templateLogicManager.pageGetConsoleTemplateVOS(condition,
+                HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{templateName}/nameCheck")
@@ -105,7 +105,7 @@ public class TemplateLogicV3Controller {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true)})
     public Result<Void> customizeSetting(HttpServletRequest request,
                                       @RequestBody TemplateSettingDTO settingDTO) throws AdminOperateException {
-        Result<Void> checkAuthResult = templateLogicManager.checkAppAuthOnLogicTemplate(settingDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = templateLogicManager.checkProjectAuthOnLogicTemplate(settingDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -127,7 +127,7 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,
                                                                       @RequestParam("cluster") String cluster) {
-        return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtil.getProjectId(request));
+        return templateLogicManager.getTemplateVOByPhyCluster(cluster);
     }
 
     @PutMapping("")

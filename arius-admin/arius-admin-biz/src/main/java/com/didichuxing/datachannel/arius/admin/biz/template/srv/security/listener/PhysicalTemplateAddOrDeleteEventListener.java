@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateEvent;
@@ -37,7 +37,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
                     addEvent.getLogicWithPhysical().getProjectId(), templatePhysical.getName());
 
                 securityService.saveAppPhysicalTemplateAuth(templatePhysical,
-                    addEvent.getLogicWithPhysical().getProjectId(), AppTemplateAuthEnum.OWN.getCode(), 20);
+                    addEvent.getLogicWithPhysical().getProjectId(), ProjectTemplateAuthEnum.OWN.getCode(), 20);
                 return;
             }
 
@@ -49,7 +49,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
                     deleteEvent.getLogicWithPhysical().getProjectId(), templatePhysical.getName());
 
                 securityService.deleteAppPhysicalTemplateAuth(templatePhysical,
-                    deleteEvent.getLogicWithPhysical().getProjectId(), AppTemplateAuthEnum.OWN.getCode(), 20);
+                    deleteEvent.getLogicWithPhysical().getProjectId(), ProjectTemplateAuthEnum.OWN.getCode(), 20);
             }
         } catch (Exception e) {
             LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||errMsg={}", e.getMessage(), e);

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.app;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -111,7 +112,21 @@ public interface ESUserDAO {
      *
      * @return {@code List<ESUserPO>}
      */
-    List<ESUserPO> listConfig();
-
-
+    List<ESUserPO> listConfig(@Param("projectIds")List<Integer> projectIds);
+    
+    /**
+     * 通过项目id获取默认的es user
+     *
+     * @param projectId 项目id
+     * @return {@code ESUser}
+     */
+    ESUser getDefaultESUserByProject(Integer projectId);
+    
+    /**
+     * 获取项目中的默认es user
+     *
+     * @param projectId 项目id
+     * @return int
+     */
+    int countDefaultESUserByProject(Integer projectId);
 }

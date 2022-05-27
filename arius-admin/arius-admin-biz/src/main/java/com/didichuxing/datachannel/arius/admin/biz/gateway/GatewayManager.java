@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.gateway;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
@@ -50,9 +50,9 @@ public interface GatewayManager {
     /**
      * 获取app列表,包含APP全部元信息
      * @param request 请求
-     * @return Result<List<GatewayAppVO>>
+     * @return Result<List<GatewayESUserVO>>
      */
-    Result<List<GatewayAppVO>> listApp(HttpServletRequest request);
+    Result<List<GatewayESUserVO>> listProject(HttpServletRequest request);
 
     /**
      * 以map结构组织,key是表达式
@@ -92,18 +92,18 @@ public interface GatewayManager {
     /**
      * sql语句翻译
      * @param sql sql查询语句
-     * @param appId 项目id
+     * @param projectId 项目id
      * @return 翻译结果
      */
-    Result<String> sqlExplain(String sql, Integer appId);
+    Result<String> sqlExplain(String sql, Integer projectId);
 
     /**
      * sql语句直接查询
      * @param sql sql查询语句
      * @param phyClusterName 指定查询物理集群名
-     * @param appId 项目id
+     * @param projectId 项目id
      * @return 数据查询结果
      */
-    Result<String> directSqlSearch(String sql, String phyClusterName, Integer appId);
+    Result<String> directSqlSearch(String sql, String phyClusterName, Integer projectId);
 
 }

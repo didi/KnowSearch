@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
+import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterPhyAuthManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,13 +19,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.AppClusterPhyAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -27,9 +30,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterPhyAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
@@ -43,16 +45,18 @@ import com.google.common.collect.Sets;
  * @date 2021-04-28
  */
 @Component
-public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
-    private static final ILog LOGGER = LogFactory.getLog(AppClusterPhyAuthManagerImpl.class);
+public class ProjectClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthManager {
+    private static final ILog           LOGGER = LogFactory.getLog(ProjectClusterPhyAuthManagerImpl.class);
     @Autowired
-    private AppService                 appService;
+    private              ProjectService projectService;
+    @Autowired
+    private ESUserService esUserService;
 
     @Autowired
     private AppClusterPhyAuthService   appClusterPhyAuthService;
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
     private ClusterContextManager      clusterContextManager;
@@ -66,7 +70,7 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
     @Autowired
     private AriusScheduleThreadPool    ariusScheduleThreadPool;
 
-    private static final Map<Integer/*appId*/, List<AppClusterPhyAuth> /*AppClusterPhyAuthList*/> APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP = Maps.newConcurrentMap();
+    private static final Map<Integer/*appId*/, List<ProjectClusterPhyAuth> /*AppClusterPhyAuthList*/> APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP = Maps.newConcurrentMap();
 
     @PostConstruct
     private void init(){
@@ -74,34 +78,34 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
     }
 
     @Override
-    public List<AppClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId,
-                                                                        List<ClusterPhy> clusterPhyList) {
+    public List<ProjectClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId,
+                                                                            List<ClusterPhy> clusterPhyList) {
         if (null == appId || CollectionUtils.isEmpty(clusterPhyList)) { return Lists.newArrayList();}
         
-        List<AppClusterPhyAuth> appClusterPhyAuthList = APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP.get(appId);
-        if (CollectionUtils.isEmpty(appClusterPhyAuthList)) {
+        List<ProjectClusterPhyAuth> projectClusterPhyAuthList = APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP.get(appId);
+        if (CollectionUtils.isEmpty(projectClusterPhyAuthList)) {
             return buildInitAppClusterPhyAuth(clusterPhyList);
         }
 
-        return appClusterPhyAuthList;
+        return projectClusterPhyAuthList;
     }
 
-    private List<AppClusterPhyAuth> buildInitAppClusterPhyAuth(List<ClusterPhy> clusterPhyList) {
-        List<AppClusterPhyAuth>  initAppClusterPhyAuthList = Lists.newArrayList();
+    private List<ProjectClusterPhyAuth> buildInitAppClusterPhyAuth(List<ClusterPhy> clusterPhyList) {
+        List<ProjectClusterPhyAuth> initProjectClusterPhyAuthList = Lists.newArrayList();
         for (ClusterPhy clusterPhy : clusterPhyList) {
-            AppClusterPhyAuth appClusterPhyAuth = new AppClusterPhyAuth();
-            appClusterPhyAuth.setClusterPhyName(clusterPhy.getCluster());
-            appClusterPhyAuth.setType(AppClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
-            initAppClusterPhyAuthList.add(appClusterPhyAuth);
+            ProjectClusterPhyAuth projectClusterPhyAuth = new ProjectClusterPhyAuth();
+            projectClusterPhyAuth.setClusterPhyName(clusterPhy.getCluster());
+            projectClusterPhyAuth.setType(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
+            initProjectClusterPhyAuthList.add(projectClusterPhyAuth);
         }
 
-        return initAppClusterPhyAuthList;
+        return initProjectClusterPhyAuthList;
     }
 
     @Override
-    public List<AppClusterPhyAuth> getAppAccessClusterPhyAuths(Integer appId) {
-        List<AppClusterPhyAuth> appAccessClusterPhyAuthList = Lists.newArrayList();
-        List<AppClusterLogicAuth> logicClusterAccessAuths   = appClusterLogicAuthService.getLogicClusterAccessAuths(appId);
+    public List<ProjectClusterPhyAuth> getAppAccessClusterPhyAuths(Integer appId) {
+        List<ProjectClusterPhyAuth> appAccessClusterPhyAuthList = Lists.newArrayList();
+        List<AppClusterLogicAuth> logicClusterAccessAuths   = projectClusterLogicAuthService.getLogicClusterAccessAuths(appId);
         if (CollectionUtils.isEmpty(logicClusterAccessAuths)) {
             return appAccessClusterPhyAuthList;
         }
@@ -116,9 +120,9 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
         
         for (List<String> clusterPhyList : clusterPhyLists) {
             clusterPhyList.forEach(clusterPhy -> {
-                AppClusterPhyAuth appClusterPhyAuth = appClusterPhyAuthService.buildClusterPhyAuth(appId, clusterPhy,
+                ProjectClusterPhyAuth projectClusterPhyAuth = appClusterPhyAuthService.buildClusterPhyAuth(appId, clusterPhy,
                                                       AppClusterPhyAuthEnum.ACCESS);
-                appAccessClusterPhyAuthList.add(appClusterPhyAuth);
+                appAccessClusterPhyAuthList.add(projectClusterPhyAuth);
             });
         }
         
@@ -130,13 +134,15 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
      */
     private void refreshAppClusterPhyAuth() {
         long currentTimeMillis = System.currentTimeMillis();
-        LOGGER.info("class=AppClusterPhyAuthManagerImpl||method=refreshAppClusterPhyAuth||msg=start...");
+        LOGGER.info("class=ProjectClusterPhyAuthManagerImpl||method=refreshAppClusterPhyAuth||msg=start...");
 
         Map<String, ClusterPhyContext> name2clusterPhyContextMap = clusterContextManager.listClusterPhyContextMap();
         if (MapUtils.isEmpty(name2clusterPhyContextMap)) { return;}
-
-        List<App> appList = appService.listApps();
-        if (CollectionUtils.isEmpty(appList)) { return;}
+        //刷新项目信息和es user的信息
+        final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
+                .collect(Collectors.toList());
+        final List<ESUser> esUsers = esUserService.listESUsers(projectIds);
+        if (CollectionUtils.isEmpty(esUsers)) { return;}
 
         List<ClusterPhy> esClusterPhyList = clusterPhyService.listClustersByCondt(null);
         if (CollectionUtils.isEmpty(esClusterPhyList)) { return;}
@@ -145,34 +151,37 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
 
         Map<Long, ClusterLogic> id2ClusterLogicMap = ConvertUtil.list2Map(clusterLogicList, ClusterLogic::getId);
 
-        List<AppClusterLogicAuth> appClusterLogicAuthList= appClusterLogicAuthService.list();
+        List<AppClusterLogicAuth> appClusterLogicAuthList= projectClusterLogicAuthService.list();
         // 注意这里的key appId@clusterLogiId
         Map<String, AppClusterLogicAuth> key2AppClusterLogicAuthMap = ConvertUtil.list2Map(appClusterLogicAuthList,
                                                 a -> a.getAppId() + "@" + a.getLogicClusterId());
 
-        for (App app : appList) {
-            // 超级app，有最高权限
-            int appId = app.getId();
-            List<AppClusterPhyAuth> appClusterPhyAuthList = Lists.newArrayList();
-            if (app.getIsRoot() == 1) {
-                appClusterPhyAuthList = esClusterPhyList.stream()
-                        .map(r -> buildClusterPhyAuth(appId, r.getCluster(), AppClusterPhyAuthEnum.OWN))
+        for (ESUser esUser : esUsers) {
+            // 超级es user，有最高权限
+            int esUserName = esUser.getId();
+            final Integer projectId = esUser.getProjectId();
+            List<ProjectClusterPhyAuth> projectClusterPhyAuthList = Lists.newArrayList();
+            if (esUser.getIsRoot() == 1) {
+                projectClusterPhyAuthList = esClusterPhyList.stream()
+                        .map(r -> buildClusterPhyAuth(projectId, r.getCluster(), AppClusterPhyAuthEnum.OWN))
                         .collect(Collectors.toList());
-                APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP.put(app.getId(), appClusterPhyAuthList);
+                APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP.put(esUser.getId(), projectClusterPhyAuthList);
                 continue;
             }
             
-            // 处理非超级app拥有的资源权限
+            // 处理非超级es user 拥有的资源权限
+            // todo 除了管理员 其他用户不具有物理集群 需要讨论
             for (ClusterPhy clusterPhy : esClusterPhyList) {
                 ClusterPhyContext clusterPhyContext = name2clusterPhyContextMap.get(clusterPhy.getCluster());
                 if (null == clusterPhyContext) {
-                    appClusterPhyAuthList.add(buildClusterPhyAuth(appId, clusterPhy.getCluster(), AppClusterPhyAuthEnum.NO_PERMISSIONS));
+                    projectClusterPhyAuthList.add(buildClusterPhyAuth(projectId, clusterPhy.getCluster(),
+                            AppClusterPhyAuthEnum.NO_PERMISSIONS));
                     continue;
                 }
 
                 List<Long> associatedClusterLogicIds        =   clusterPhyContext.getAssociatedClusterLogicIds();
                 if (CollectionUtils.isEmpty(associatedClusterLogicIds)) {
-                    appClusterPhyAuthList.add(buildClusterPhyAuth(appId, clusterPhy.getCluster(), AppClusterPhyAuthEnum.NO_PERMISSIONS));
+                    projectClusterPhyAuthList.add(buildClusterPhyAuth(projectId, clusterPhy.getCluster(), AppClusterPhyAuthEnum.NO_PERMISSIONS));
                     continue;
                 }
 
@@ -181,45 +190,45 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
                 for (Long associatedClusterLogicId : associatedClusterLogicIds) {
                     // 从逻辑集群表获取创建信息
                     ClusterLogic clusterLogic = id2ClusterLogicMap.get(associatedClusterLogicId);
-                    AppClusterLogicAuthEnum authFromCreateRecord = (clusterLogic != null && appId == clusterLogic.getAppId())
-                            ? AppClusterLogicAuthEnum.OWN
-                            : AppClusterLogicAuthEnum.NO_PERMISSIONS;
+                    ProjectClusterLogicAuthEnum authFromCreateRecord = (clusterLogic != null && esUserName == clusterLogic.getProjectId())
+                            ? ProjectClusterLogicAuthEnum.OWN
+                            : ProjectClusterLogicAuthEnum.NO_PERMISSIONS;
 
                     // 从权限表获取权限信息
-                    AppClusterLogicAuth authPO = key2AppClusterLogicAuthMap.get(appId + "@" + clusterLogic);
-                    AppClusterLogicAuthEnum authFromAuthRecord = authPO != null ? AppClusterLogicAuthEnum.valueOf(authPO.getType()) :
-                            AppClusterLogicAuthEnum.NO_PERMISSIONS;
+                    AppClusterLogicAuth authPO = key2AppClusterLogicAuthMap.get(esUserName + "@" + clusterLogic);
+                    ProjectClusterLogicAuthEnum authFromAuthRecord = authPO != null ? ProjectClusterLogicAuthEnum.valueOf(authPO.getType()) :
+                            ProjectClusterLogicAuthEnum.NO_PERMISSIONS;
 
                     // 都没有权限
-                    if (authFromCreateRecord == AppClusterLogicAuthEnum.NO_PERMISSIONS
-                            && authFromAuthRecord == AppClusterLogicAuthEnum.NO_PERMISSIONS) {
-                        AppClusterLogicAuth appClusterLogicAuth = buildLogicClusterAuth(clusterLogic, AppClusterLogicAuthEnum.NO_PERMISSIONS);
-                        appClusterLogicAuthTypeSet.add(null == appClusterLogicAuth ? AppClusterLogicAuthEnum.NO_PERMISSIONS.getCode() :
+                    if (authFromCreateRecord == ProjectClusterLogicAuthEnum.NO_PERMISSIONS
+                            && authFromAuthRecord == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
+                        AppClusterLogicAuth appClusterLogicAuth = buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.NO_PERMISSIONS);
+                        appClusterLogicAuthTypeSet.add(null == appClusterLogicAuth ? ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode() :
                                 appClusterLogicAuth.getType());
                         continue;
                     }
 
                     AppClusterLogicAuth appClusterLogicAuth = authFromAuthRecord.higherOrEqual(authFromCreateRecord)
                             ? ConvertUtil.obj2Obj(authPO, AppClusterLogicAuth.class)
-                            : buildLogicClusterAuth(clusterLogic, AppClusterLogicAuthEnum.OWN);
+                            : buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.OWN);
 
-                    appClusterLogicAuthTypeSet.add(null == appClusterLogicAuth ? AppClusterLogicAuthEnum.NO_PERMISSIONS.getCode() :
+                    appClusterLogicAuthTypeSet.add(null == appClusterLogicAuth ? ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode() :
                             appClusterLogicAuth.getType());
                 }
 
                 // 合并计算
                 AppClusterPhyAuthEnum appClusterPhyAuthEnum = computeAppClusterPhyAuthEnum(appClusterLogicAuthTypeSet);
-                appClusterPhyAuthList.add(buildClusterPhyAuth(appId, clusterPhy.getCluster(), appClusterPhyAuthEnum));
+                projectClusterPhyAuthList.add(buildClusterPhyAuth(esUserName, clusterPhy.getCluster(), appClusterPhyAuthEnum));
             }
-            APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP.put(app.getId(), appClusterPhyAuthList);
+            APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP.put(esUser.getId(), projectClusterPhyAuthList);
         }
 
-        LOGGER.info("class=AppClusterPhyAuthManagerImpl||method=refreshAppClusterPhyAuth||msg=finish...||consumingTime={}",
+        LOGGER.info("class=ProjectClusterPhyAuthManagerImpl||method=refreshAppClusterPhyAuth||msg=finish...||consumingTime={}",
                 System.currentTimeMillis() - currentTimeMillis);
     }
 
-    private AppClusterPhyAuth buildClusterPhyAuth(Integer appId, String clusterPhyName, AppClusterPhyAuthEnum appClusterPhyAuthEnum) {
-        if (null == appClusterPhyAuthEnum || null == appId || AriusObjUtils.isBlack(clusterPhyName)) {
+    private ProjectClusterPhyAuth buildClusterPhyAuth(Integer projectId, String clusterPhyName, AppClusterPhyAuthEnum appClusterPhyAuthEnum) {
+        if (null == appClusterPhyAuthEnum || null == projectId || AriusObjUtils.isBlack(clusterPhyName)) {
             return null;
         }
 
@@ -227,25 +236,25 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
             return null;
         }
 
-        AppClusterPhyAuth appClusterPhyAuth = new AppClusterPhyAuth();
-        appClusterPhyAuth.setAppId(appId);
-        appClusterPhyAuth.setClusterPhyName(clusterPhyName);
-        appClusterPhyAuth.setType(appClusterPhyAuthEnum.getCode());
-        return appClusterPhyAuth;
+        ProjectClusterPhyAuth projectClusterPhyAuth = new ProjectClusterPhyAuth();
+        projectClusterPhyAuth.setProjectId(projectId);
+        projectClusterPhyAuth.setClusterPhyName(clusterPhyName);
+        projectClusterPhyAuth.setType(appClusterPhyAuthEnum.getCode());
+        return projectClusterPhyAuth;
     }
 
     /**
      * 由逻辑集群记录构建owner APP的权限数据
      * @param clusterLogic 逻辑集群记录
      */
-    private AppClusterLogicAuth buildLogicClusterAuth(ClusterLogic clusterLogic, AppClusterLogicAuthEnum appClusterLogicAuthEnum) {
+    private AppClusterLogicAuth buildLogicClusterAuth(ClusterLogic clusterLogic, ProjectClusterLogicAuthEnum projectClusterLogicAuthEnum) {
         if (clusterLogic == null) { return null;}
 
         AppClusterLogicAuth appLogicClusterAuth = new AppClusterLogicAuth();
         appLogicClusterAuth.setId(null);
-        appLogicClusterAuth.setAppId(clusterLogic.getAppId());
+        appLogicClusterAuth.setAppId(clusterLogic.getProjectId());
         appLogicClusterAuth.setLogicClusterId(clusterLogic.getId());
-        appLogicClusterAuth.setType(appClusterLogicAuthEnum.getCode());
+        appLogicClusterAuth.setType(projectClusterLogicAuthEnum.getCode());
         appLogicClusterAuth.setResponsible(clusterLogic.getResponsible());
         return appLogicClusterAuth;
     }

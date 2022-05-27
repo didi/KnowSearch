@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -20,7 +20,7 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
     private static final ILog           LOGGER = LogFactory.getLog(TemplateAppIdChangedListener.class);
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Override
     public void onApplicationEvent(LogicTemplateModifyEvent logicTemplateEvent) {
@@ -32,11 +32,11 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
         }
 
         //在模板的appid发生变更的时候，处理权限问题
-        handleTemplateAppid(logicTemplateEvent.getOldTemplate(), logicTemplateEvent.getNewTemplate());
+        handleTemplateProjectId(logicTemplateEvent.getOldTemplate(), logicTemplateEvent.getNewTemplate());
     }
 
     /**************************************** private method ****************************************************/
-    private void handleTemplateAppid(IndexTemplate oldIndexTemplate, IndexTemplate newIndexTemplate) {
+    private void handleTemplateProjectId(IndexTemplate oldIndexTemplate, IndexTemplate newIndexTemplate) {
         Integer logicTemplateId = oldIndexTemplate.getId();
 
         if (!EnvUtil.isOnline()) {
@@ -54,8 +54,8 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
 
         //如果模板的appid发生变更了，代表模板的管理权限发生变更，但是原appid还要拥有模板的读写权限
         //给原appid赋予索引的读写权限
-        Result<Void> result = appLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getProjectId(),
-            logicTemplateId, AppTemplateAuthEnum.RW, oldIndexTemplate.getResponsible(), AriusUser.SYSTEM.getDesc());
+        Result<Void> result = projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getProjectId(),
+            logicTemplateId, ProjectTemplateAuthEnum.RW, oldIndexTemplate.getResponsible(), AriusUser.SYSTEM.getDesc());
 
         if (!EnvUtil.isOnline()) {
             LOGGER.info("class=LogicTemplateModifyEventListener||method=handleTemplateAppid||result={}",

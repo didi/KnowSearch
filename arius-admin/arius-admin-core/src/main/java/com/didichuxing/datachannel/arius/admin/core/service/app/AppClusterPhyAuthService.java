@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
 
 /**
  * Created by linyunan on 2021-10-15
@@ -15,6 +15,6 @@ public interface AppClusterPhyAuthService {
      * @param appClusterPhyAuthEnum  权限点
      * @return
      */
-    AppClusterPhyAuth buildClusterPhyAuth(Integer appId, String clusterPhyName,
-                                          AppClusterPhyAuthEnum appClusterPhyAuthEnum);
+    ProjectClusterPhyAuth buildClusterPhyAuth(Integer appId, String clusterPhyName,
+                                              AppClusterPhyAuthEnum appClusterPhyAuthEnum);
 }

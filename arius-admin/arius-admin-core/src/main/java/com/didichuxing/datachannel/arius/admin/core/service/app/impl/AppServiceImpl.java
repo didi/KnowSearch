@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -32,7 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -97,7 +97,7 @@ public class AppServiceImpl implements AppService {
     private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private AppClusterLogicAuthService logicClusterAuthService;
+    private ProjectClusterLogicAuthService logicClusterAuthService;
 
     private final Cache<String, List<?>>   appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
 
@@ -493,20 +493,20 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, AppClusterLogicAuthEnum logicClusterAuth) {
+    public List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, ProjectClusterLogicAuthEnum logicClusterAuth) {
         if (logicClusterId == null || logicClusterAuth == null) {
             return new ArrayList<>();
         }
 
         // 要求的最低权限是无权限，所有APP否符合
-        if (logicClusterAuth == AppClusterLogicAuthEnum.NO_PERMISSIONS) {
+        if (logicClusterAuth == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
             return listApps();
         }
 
         // 获取集群的全部权限点，然后筛选
         List<AppClusterLogicAuth> auths = logicClusterAuthService.getLogicClusterAuths(logicClusterId, null);
         // 筛选出权限大于指定值的app
-        List<Integer> appIds = auths.stream().filter(appLogicClusterAuth -> AppClusterLogicAuthEnum
+        List<Integer> appIds = auths.stream().filter(appLogicClusterAuth -> ProjectClusterLogicAuthEnum
             .valueOf(appLogicClusterAuth.getType()).higherOrEqual(logicClusterAuth))
             .map(AppClusterLogicAuth::getAppId).collect(Collectors.toList());
 
@@ -642,7 +642,7 @@ public class AppServiceImpl implements AppService {
     }
 
     private boolean hasOwnTemplate(int appId) {
-        List<IndexTemplate> templateLogics = indexTemplateService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplate> templateLogics = indexTemplateService.getProjectLogicTemplatesByProjectId(appId);
         return CollectionUtils.isNotEmpty(templateLogics);
     }
 

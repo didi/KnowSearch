@@ -59,7 +59,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
     private ESIndexService      esIndexService;
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
+    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof IndicesConditionDTO) {
             IndicesConditionDTO indicesConditionDTO = (IndicesConditionDTO) pageDTO;
 
@@ -99,20 +99,20 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
     }
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
-        if (!appService.isAppExists(appId)) {
+    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+        if (!appService.isAppExists(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);
     }
 
     @Override
-    protected PaginationResult<IndexCatCellVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
+    protected PaginationResult<IndexCatCellVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
         return PaginationResult.buildSucc();
     }
 
     @Override
-    protected PaginationResult<IndexCatCellVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<IndexCatCellVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
         IndicesConditionDTO condition = buildIndicesConditionDTO(pageDTO);
 
         if (null == condition) {

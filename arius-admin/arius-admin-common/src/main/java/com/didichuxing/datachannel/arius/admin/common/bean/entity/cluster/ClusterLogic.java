@@ -32,7 +32,7 @@ public class ClusterLogic extends BaseEntity implements StringResponsible, Compa
     /**
      * 所属APP ID
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 数据中心

@@ -1,22 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
@@ -25,13 +18,17 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @author didi
@@ -51,8 +48,8 @@ public class GatewayServiceImpl implements GatewayService {
     @Autowired
     private GatewayClusterNodeDAO gatewayClusterNodeDAO;
 
-    @Autowired
-    private AppService appService;
+   
+    
 
     private Set<String>       clusterNames;
 
@@ -125,8 +122,8 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public Result<String> sqlOperate(String sql, String phyClusterName, Integer appId, String postFix) {
-        Result<String> result = preSqlParamCheck(sql, appId, postFix);
+    public Result<String> sqlOperate(String sql, String phyClusterName, ESUser esUser, String postFix) {
+        Result<String> result = preSqlParamCheck(sql, postFix);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
@@ -137,7 +134,7 @@ public class GatewayServiceImpl implements GatewayService {
 
         try {
             // gateway的sql语句操作接口直接以字符串的形式返还结果
-            String sqlResponse = BaseHttpUtil.postForString(url, sql, buildGatewayHeader(phyClusterName, appId));
+            String sqlResponse = BaseHttpUtil.postForString(url, sql, buildGatewayHeader(phyClusterName, esUser));
             return Result.buildSucc(sqlResponse, "");
         } catch (Exception e) {
             LOGGER.error("class=GatewayManageServiceImpl||method=directSqlSearch||postFix={}||errMsg={}", postFix, e);
@@ -145,24 +142,21 @@ public class GatewayServiceImpl implements GatewayService {
         return Result.buildFail();
     }
 
-    private Result<String> preSqlParamCheck(String sql, Integer appId, String postFix) {
+    private Result<String> preSqlParamCheck(String sql,  String postFix) {
         if (StringUtils.isBlank(sql)) {
             return Result.buildParamIllegal("查询的sql语句为空");
         }
         if (StringUtils.isBlank(postFix)) {
             return Result.buildParamIllegal("查询gateway的路径后缀为空");
         }
-        List<Integer> appIds = appService.listApps().stream().map(App::getId).collect(Collectors.toList());
-        if (appId == null || !appIds.contains(appId)) {
-            return Result.buildParamIllegal("对应的appId字段非法");
-        }
+        
         return Result.buildSucc();
     }
 
-    private Map<String, String> buildGatewayHeader(String phyClusterName, Integer appId) {
+    private Map<String, String> buildGatewayHeader(String phyClusterName, ESUser esUser) {
         Map<String, String> headers = Maps.newHashMap();
-        App app = appService.getAppById(appId);
-        Header header = BaseHttpUtil.buildHttpHeader(String.valueOf(appId), app.getVerifyCode());
+        
+        Header header = BaseHttpUtil.buildHttpHeader(String.valueOf(esUser.getId()), esUser.getVerifyCode());
         headers.put("Content-Type", "application/json;charset=utf-8");
         headers.put(header.getName(), header.getValue());
         if(!AriusObjUtils.isBlack(phyClusterName)) {

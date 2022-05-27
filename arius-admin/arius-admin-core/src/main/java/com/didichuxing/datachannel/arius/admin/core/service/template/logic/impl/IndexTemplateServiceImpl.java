@@ -11,9 +11,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 
-import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -31,7 +29,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -65,8 +63,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -94,15 +92,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
@@ -134,10 +123,10 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private ESIndexService              esIndexService;
 
     @Autowired
-    private AppLogicTemplateAuthService logicTemplateAuthService;
+    private ProjectLogicTemplateAuthService logicTemplateAuthService;
 
     @Autowired
-    private AppClusterLogicAuthService  logicClusterAuthService;
+    private ProjectClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
     private ClusterLogicService         clusterLogicService;
@@ -497,7 +486,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return list
      */
     @Override
-    public List<IndexTemplate> getAppLogicTemplatesByAppId(Integer projectId) {
+    public List<IndexTemplate> getProjectLogicTemplatesByProjectId(Integer projectId) {
         return responsibleConvertTool.list2List(indexTemplateDAO.listByProjectId(projectId), IndexTemplate.class);
     }
 
@@ -526,14 +515,14 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer projectId) {
-        List<AppTemplateAuth> appTemplateAuths = logicTemplateAuthService.getTemplateAuthsByAppId(projectId);
-        if (CollectionUtils.isEmpty(appTemplateAuths)) {
+        List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(projectId);
+        if (CollectionUtils.isEmpty(projectTemplateAuths)) {
             return Result.buildSucc();
         }
 
         List<Tuple<String, String>> indicesClusterTupleList = new ArrayList<>();
 
-        appTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
+        projectTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
             IndexTemplateWithPhyTemplates logicWithPhysical = getLogicTemplateWithPhysicalsById(
                 appTemplateAuth.getTemplateId());
 
@@ -715,8 +704,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             logicClusterId);
 
         // 获取app的模板权限记录
-        List<AppTemplateAuth> appTemplateAuths = logicTemplateAuthService.getTemplateAuthsByAppId(appId);
-        Set<Integer> hasAuthTemplateIds = appTemplateAuths.stream().map(AppTemplateAuth::getTemplateId)
+        List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(appId);
+        Set<Integer> hasAuthTemplateIds = projectTemplateAuths.stream().map(ProjectTemplateAuth::getTemplateId)
             .collect(Collectors.toSet());
 
         // 筛选app有权限的逻辑模板

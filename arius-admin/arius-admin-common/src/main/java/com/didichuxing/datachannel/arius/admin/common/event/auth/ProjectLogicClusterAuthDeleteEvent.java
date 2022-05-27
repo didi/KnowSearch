@@ -7,10 +7,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
  * @author wangshu
  * @date 2020/09/19
  */
-public class AppLogicClusterAuthDeleteEvent extends AppAuthEvent {
+public class ProjectLogicClusterAuthDeleteEvent extends ProjectAuthEvent {
     private AppClusterLogicAuth logicClusterAuth;
 
-    public AppLogicClusterAuthDeleteEvent(Object source, AppClusterLogicAuth appClusterLogicAuth) {
+    public ProjectLogicClusterAuthDeleteEvent(Object source, AppClusterLogicAuth appClusterLogicAuth) {
         super(source);
         this.logicClusterAuth = appClusterLogicAuth;
     }

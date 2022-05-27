@@ -74,15 +74,15 @@ public class ESGatewayClient {
     private Integer                                              ioThreadCount;
 
     /**
-     * 访问索引的appid
+     * 访问索引的es user
      */
-    @Value("${es.appid}")
-    private String                                               appid;
+    @Value("${es.user}")
+    private String esUser;
     /**
      * 访问索引的密钥
      */
     @Value("${es.password}")
-    private String                                               password;
+    private String password;
 
     @Value("${scroll.timeout}")
     private String                                               scrollTimeOut;
@@ -92,7 +92,7 @@ public class ESGatewayClient {
     /**
      * 查询es的客户端
      */
-    private Map<String/*appId*/, ESClient>                       queryClientMap        = Maps.newLinkedHashMap();
+    private Map<String/*esUser*/, ESClient>                       queryClientMap        = Maps.newLinkedHashMap();
     /**
      * 访问国内索引模板和appid的映射
      */
@@ -100,7 +100,7 @@ public class ESGatewayClient {
     /**
      * 认证header
      */
-    private Map<String/*appId*/, Header>                         appidHeaderMap        = Maps.newTreeMap();
+    private Map<String/*esUser*/, Header>                        esUserHeaderMap       = Maps.newTreeMap();
 
     /**
      * 初始化访问es客户端
@@ -110,10 +110,10 @@ public class ESGatewayClient {
     public void init() {
         LOGGER.info("class=ESGatewayClient||method=init||ESGatewayClient init start.");
         // 多个appid
-        String[] appids = StringUtils.splitByWholeSeparatorPreserveAllTokens(appid, COMMA);
+        String[] esUsers = StringUtils.splitByWholeSeparatorPreserveAllTokens(esUser, COMMA);
         String[] passwords = StringUtils.splitByWholeSeparatorPreserveAllTokens(password, COMMA);
 
-        if (appids == null || passwords == null || appids.length != passwords.length) {
+        if (esUsers == null || passwords == null || esUsers.length != passwords.length) {
             throw new AriusGatewayException("please check cn gateway appid,password");
         }
 
@@ -121,12 +121,12 @@ public class ESGatewayClient {
         Header accessHeader = null;
         ESClient esClient   = null;
 
-        for (int i = 0; i < appids.length; ++i) {
-            accessHeader = BaseHttpUtil.buildHttpHeader(appids[i], passwords[i]);
+        for (int i = 0; i < esUsers.length; ++i) {
+            accessHeader = BaseHttpUtil.buildHttpHeader(esUsers[i], passwords[i]);
             esClient = buildGateWayClient(this.gatewayUrl, this.gatewayPort, accessHeader, "gateway");
 
-            queryClientMap.put(appids[i], esClient);
-            appidHeaderMap.put(appids[i], accessHeader);
+            queryClientMap.put(esUsers[i], esClient);
+            esUserHeaderMap.put(esUsers[i], accessHeader);
         }
         LOGGER.info("class=ESGatewayClient||method=init||ESGatewayClient init finished.");
     }
@@ -875,35 +875,35 @@ public class ESGatewayClient {
      * @return
      */
     private Tuple<String, ESClient> getGatewayClientByDataCenterAndIndexName(String clusterName, String indexName) {
-        // 默认第一个appId
-        String appId = queryClientMap.keySet().iterator().next();
+        // 默认第一个esUser
+        String esUser = queryClientMap.keySet().iterator().next();
 
-        // 只有一个appid时或者没传索引名称时，直接返回第一个；配置多个appid时，根据访问索引名称进行选择
+        // 只有一个es user时或者没传索引名称时，直接返回第一个；配置多个es user时，根据访问索引名称进行选择
         if (queryClientMap.size() > 1 && StringUtils.isNotBlank(indexName)) {
-            for (Map.Entry<String/*access template name*/, String/*appId*/> entry : accessTemplateNameMap
+            for (Map.Entry<String/*access template name*/, String/*esUser*/> entry : accessTemplateNameMap
                 .entrySet()) {
-                // 去掉索引表达式最后的*，如果访问的索引名称以表达式开头，则返回该appId
+                // 去掉索引表达式最后的*，如果访问的索引名称以表达式开头，则返回该es user
                 String accessTemplateName = StringUtils.removeEnd(entry.getKey(), "*");
                 if (StringUtils.isNotBlank(accessTemplateName) && indexName.startsWith(accessTemplateName)) {
-                    appId = entry.getValue();
+                    esUser = entry.getValue();
                     break;
                 }
             }
         }
 
-        ESClient esClient = queryClientMap.get(appId);
+        ESClient esClient = queryClientMap.get(esUser);
 
         if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=GatewayClient||method=getGatewayClientByDataCenterAndIndexName||appId={}||indexName={}",
-                appId, indexName);
+            LOGGER.info("class=GatewayClient||method=getGatewayClientByDataCenterAndIndexName||esUser={}||indexName={}",
+                esUser, indexName);
         }
 
-        Header appidHeader = appidHeaderMap.get(appId);
+        Header esUserHeader = esUserHeaderMap.get(esUser);
         if (esClient != null) {
             List<Header> headers = Lists.newArrayList();
-            if (appidHeader != null) {
+            if (esUserHeader != null) {
                 // 添加认证头
-                headers.add(appidHeader);
+                headers.add(esUserHeader);
 
                 // 添加指定集群访问头
                 if (StringUtils.isNotBlank(clusterName)) {
@@ -915,7 +915,7 @@ public class ESGatewayClient {
             }
         }
 
-        return new Tuple<>(appId, esClient);
+        return new Tuple<>(esUser, esClient);
     }
 
     private ESClient buildGateWayClient(String url, Integer port, Header header, String clusterName) {

@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
  * Created by linyunan on 2021-10-17
  */
 
-public interface AppClusterLogicAuthManager {
+public interface ProjectClusterLogicAuthManager {
 
     /**
      * 获取当前项目对逻辑集群列表的权限信息

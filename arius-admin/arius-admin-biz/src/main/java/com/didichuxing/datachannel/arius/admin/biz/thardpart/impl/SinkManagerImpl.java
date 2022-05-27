@@ -9,17 +9,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkID
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplatePhysicalDeployVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -45,7 +45,7 @@ public class SinkManagerImpl implements SinkManager {
     private AppService appService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -71,7 +71,7 @@ public class SinkManagerImpl implements SinkManager {
         Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
 
-        return Result.buildSucc(buildAppAuthInfo(app, appLogicTemplateAuthService.getTemplateAuthsByAppId(appId),
+        return Result.buildSucc(buildAppAuthInfo(app, projectLogicTemplateAuthService.getTemplateAuthsByProjectId(appId),
                 templateId2IndexTemplateLogicMap, ""));
     }
 
@@ -208,7 +208,7 @@ public class SinkManagerImpl implements SinkManager {
         return templateSrvManager.getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
     }
 
-    private SinkSdkAppVO buildAppAuthInfo(App app, List<AppTemplateAuth> appTemplateAuths,
+    private SinkSdkAppVO buildAppAuthInfo(App app, List<ProjectTemplateAuth> projectTemplateAuths,
                                           Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
                                           String defaultRIndices) {
         SinkSdkAppVO appVO = ConvertUtil.obj2Obj(app, SinkSdkAppVO.class);
@@ -221,14 +221,14 @@ public class SinkManagerImpl implements SinkManager {
             Set<String> wIndexExpressSet = Sets.newHashSet();
 
             // 构建读权限列表
-            rIndexExpressSet.addAll(appTemplateAuths.stream()
+            rIndexExpressSet.addAll(projectTemplateAuths.stream()
                     .map(auth -> templateId2IndexTemplateLogicMap.get(auth.getTemplateId()).getExpression())
                     .collect( Collectors.toSet()));
 
             // 构建写权限列表
-            wIndexExpressSet.addAll(appTemplateAuths.stream()
-                    .filter(auth -> (auth.getType().equals( AppTemplateAuthEnum.OWN.getCode())
-                            || auth.getType().equals(AppTemplateAuthEnum.RW.getCode())))
+            wIndexExpressSet.addAll(projectTemplateAuths.stream()
+                    .filter(auth -> (auth.getType().equals( ProjectTemplateAuthEnum.OWN.getCode())
+                            || auth.getType().equals(ProjectTemplateAuthEnum.RW.getCode())))
                     .map(auth -> templateId2IndexTemplateLogicMap.get(auth.getTemplateId()).getExpression())
                     .collect(Collectors.toList()));
 

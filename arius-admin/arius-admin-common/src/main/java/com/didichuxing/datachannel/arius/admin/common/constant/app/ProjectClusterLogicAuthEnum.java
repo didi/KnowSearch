@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant.app;
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum AppClusterLogicAuthEnum {
+public enum ProjectClusterLogicAuthEnum {
                                      /**
                                       * 超级权限
                                       */
@@ -28,36 +28,36 @@ public enum AppClusterLogicAuthEnum {
     private final String  name;
     private final String  desc;
 
-    AppClusterLogicAuthEnum(int code, String name, String desc) {
+    ProjectClusterLogicAuthEnum(int code, String name, String desc) {
         this.code = code;
         this.name = name;
         this.desc = desc;
     }
 
-    public static AppClusterLogicAuthEnum valueOf(Integer code) {
+    public static ProjectClusterLogicAuthEnum valueOf(Integer code) {
         if (code != null) {
-            for (AppClusterLogicAuthEnum state : AppClusterLogicAuthEnum.values()) {
+            for (ProjectClusterLogicAuthEnum state : ProjectClusterLogicAuthEnum.values()) {
                 if (state.getCode().equals(code)) {
                     return state;
                 }
             }
         }
 
-        return AppClusterLogicAuthEnum.NO_PERMISSIONS;
+        return ProjectClusterLogicAuthEnum.NO_PERMISSIONS;
     }
 
-    public static AppClusterLogicAuthEnum highestAuth(AppClusterLogicAuthEnum... authEnums) {
+    public static ProjectClusterLogicAuthEnum highestAuth(ProjectClusterLogicAuthEnum... authEnums) {
         if (authEnums == null) {
             return NO_PERMISSIONS;
         }
 
         // ordinal越小权限越大
-        return Arrays.stream(authEnums).filter(Objects::nonNull).min(AppClusterLogicAuthEnum::compareTo)
+        return Arrays.stream(authEnums).filter(Objects::nonNull).min(ProjectClusterLogicAuthEnum::compareTo)
             .orElse(NO_PERMISSIONS);
 
     }
 
-    public boolean higherOrEqual(AppClusterLogicAuthEnum anotherEnums) {
+    public boolean higherOrEqual(ProjectClusterLogicAuthEnum anotherEnums) {
         if (anotherEnums == null) {
             return true;
         }
@@ -65,7 +65,7 @@ public enum AppClusterLogicAuthEnum {
         return this.ordinal() <= anotherEnums.ordinal();
     }
 
-    public boolean higher(AppClusterLogicAuthEnum anotherEnums) {
+    public boolean higher(ProjectClusterLogicAuthEnum anotherEnums) {
         if (anotherEnums == null) {
             return true;
         }
@@ -78,7 +78,7 @@ public enum AppClusterLogicAuthEnum {
             return false;
         }
 
-        for (AppClusterLogicAuthEnum state : AppClusterLogicAuthEnum.values()) {
+        for (ProjectClusterLogicAuthEnum state : ProjectClusterLogicAuthEnum.values()) {
             if (state.getCode().equals(code)) {
                 return true;
             }

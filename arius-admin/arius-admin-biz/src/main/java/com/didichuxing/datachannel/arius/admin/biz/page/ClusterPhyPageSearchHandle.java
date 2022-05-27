@@ -54,15 +54,15 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyPageSearchHandle",20, 40, 100);
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
-        if (!appService.isAppExists(appId)) {
+    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+        if (!appService.isAppExists(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);
     }
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
+    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof ClusterPhyConditionDTO) {
             ClusterPhyConditionDTO clusterPhyConditionDTO = (ClusterPhyConditionDTO) pageDTO;
 
@@ -94,11 +94,11 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     }
 
     @Override
-    protected PaginationResult<ConsoleClusterPhyVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
+    protected PaginationResult<ConsoleClusterPhyVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
         ClusterPhyConditionDTO condition = buildClusterPhyConditionDTO(pageDTO);
         
         // 1. 获取管理/读写/读/无权限的物理集群信息
-        List<ClusterPhy> appAuthClusterPhyList = clusterPhyManager.getClusterPhyByAppIdAndAuthType(appId, condition.getAuthType());
+        List<ClusterPhy> appAuthClusterPhyList = clusterPhyManager.getClusterPhyByAppIdAndAuthType(projectId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthClusterPhyList)) {
             return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
@@ -137,12 +137,13 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     }
 
     @Override
-    protected PaginationResult<ConsoleClusterPhyVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<ConsoleClusterPhyVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
         ClusterPhyConditionDTO condition = buildClusterPhyConditionDTO(pageDTO);
 
         List<ClusterPhy> pagingGetClusterPhyList      =  clusterPhyService.pagingGetClusterPhyByCondition(condition);
 
-        List<ConsoleClusterPhyVO> consoleClusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList, appId);
+        List<ConsoleClusterPhyVO> consoleClusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList,
+                projectId);
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
         return PaginationResult.buildSucc(consoleClusterPhyVOList, totalHit, condition.getPage(), condition.getSize());

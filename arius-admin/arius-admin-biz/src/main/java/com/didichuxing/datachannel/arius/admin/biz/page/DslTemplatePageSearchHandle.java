@@ -35,15 +35,15 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     private DslTemplateService dslTemplateService;
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
-        if (!appService.isAppExists(appId)) {
+    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+        if (!appService.isAppExists(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);
     }
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
+    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof DslTemplateConditionDTO) {
             DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) pageDTO;
             String queryIndex = dslTemplateConditionDTO.getQueryIndex();
@@ -65,15 +65,15 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     }
 
     @Override
-    protected PaginationResult<DslTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
+    protected PaginationResult<DslTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
         return PaginationResult.buildSucc();
     }
 
     @Override
-    protected PaginationResult<DslTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<DslTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
         DslTemplateConditionDTO condition = buildInitDslTemplateConditionDTO(pageDTO);
 
-        Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(appId, condition);
+        Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
         if (tuple == null) {
             return PaginationResult.buildSucc( new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
         }

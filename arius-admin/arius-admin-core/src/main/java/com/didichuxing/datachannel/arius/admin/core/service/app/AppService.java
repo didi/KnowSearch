@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import java.util.List;
 import java.util.Map;
@@ -189,5 +189,5 @@ public interface AppService {
      * @param lowestLogicClusterAuth 需要拥有的最低逻辑集群权限
      * @return 对logicClusterId指定的集群权限大于lowestLogicClusterAuth的APP
      */
-    List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, AppClusterLogicAuthEnum lowestLogicClusterAuth);
+    List<App> getAppsByLowestLogicClusterAuth(Long logicClusterId, ProjectClusterLogicAuthEnum lowestLogicClusterAuth);
 }

@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.thirdpart;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayESUserVO;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
 
@@ -61,8 +61,8 @@ public class ThirdpartGatewayController {
     @ResponseBody
     @ApiOperation(value = "获取APP列表接口", notes = "获取app列表,包含APP全部元信息")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-GATEWAY-TICKET", value = "接口ticket", required = true) })
-    public Result<List<GatewayAppVO>> listApp(HttpServletRequest request) {
-        return gatewayManager.listApp(request);
+    public Result<List<GatewayESUserVO>> listApp(HttpServletRequest request) {
+        return gatewayManager.listProject(request);
     }
 
     @GetMapping("/getTemplateMap")

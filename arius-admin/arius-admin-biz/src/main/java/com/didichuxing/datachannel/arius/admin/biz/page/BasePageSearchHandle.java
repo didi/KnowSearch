@@ -18,16 +18,16 @@ public abstract class BasePageSearchHandle<T> implements BaseHandle {
      * 处理模糊分页查询
      * @param pageDTO     查询条件
      * @param authType    权限
-     * @param appId       项目
+     * @param projectId       项目
      * @return            PaginationResult<T>
      */
-    public PaginationResult<T> doPageHandle(PageDTO pageDTO, Integer authType, Integer appId) {
-        Result<Boolean> validCheckForAppIdResult = validCheckForAppId(appId);
+    public PaginationResult<T> doPageHandle(PageDTO pageDTO, Integer authType, Integer projectId) {
+        Result<Boolean> validCheckForAppIdResult = validCheckForAppId(projectId);
         if (validCheckForAppIdResult.failed()) {
             return PaginationResult.buildParamIllegal(validCheckForAppIdResult.getMessage());
         }
 
-        Result<Boolean> validCheckForConditionResult = validCheckForCondition(pageDTO, appId);
+        Result<Boolean> validCheckForConditionResult = validCheckForCondition(pageDTO, projectId);
         if (validCheckForConditionResult.failed()) {
             return PaginationResult.buildParamIllegal(validCheckForConditionResult.getMessage());
         }
@@ -37,29 +37,29 @@ public abstract class BasePageSearchHandle<T> implements BaseHandle {
         // 根据权限类型获取数据，获取APP管理或访问或无权限其中一种权限类型的资源数据
         // 这里涉及权限表和其他业务table多个字段的条件查询，需要放置在内存中去做条件查询和分页处理
         if (null != authType) {
-            return buildWithAuthType(pageDTO, authType, appId);
+            return buildWithAuthType(pageDTO, authType, projectId);
         }
 
         // 不区分权限类型，直接获取全量数据，包括管理、访问、无权限等资源数据
-        return buildWithoutAuthType(pageDTO, appId);
+        return buildWithoutAuthType(pageDTO, projectId);
     }
 
     /**
      * 校验项目合法性
      *
-     * @param appId 项目
+     * @param projectId 项目
      * @return Result<Boolean>
      */
-    protected abstract Result<Boolean> validCheckForAppId(Integer appId);
+    protected abstract Result<Boolean> validCheckForAppId(Integer projectId);
 
     /**
      * 校验模糊查询的实体参数合法性
      *
      * @param pageDTO 带分页信息的条件查询实体
-     * @param appId
+     * @param projectId
      * @return Result<Boolean>
      */
-    protected abstract Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId);
+    protected abstract Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId);
 
     /**
      * 初始化，处理某些特殊场景中的参数
@@ -72,19 +72,19 @@ public abstract class BasePageSearchHandle<T> implements BaseHandle {
      * 根据权限和其他条件获取模糊查询结果
      *
      * @param pageDTO 带分页信息的条件查询实体
-     * @param appId   项目
+     * @param projectId   项目
      * @return pageVO    需要构建的分页结果
      */
-    protected abstract PaginationResult<T> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId);
+    protected abstract PaginationResult<T> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId);
 
     /**
      * 获取不带权限条件模糊查询结果
      *
      * @param pageDTO 带分页信息的条件查询实体
-     * @param appId   项目
+     * @param projectId   项目
      * @return pageVO   需要构建的分页结果
      */
-    protected abstract PaginationResult<T> buildWithoutAuthType(PageDTO pageDTO, Integer appId);
+    protected abstract PaginationResult<T> buildWithoutAuthType(PageDTO pageDTO, Integer projectId);
 
     /**
      * 获取最后一条数据的index，以防止数组溢出

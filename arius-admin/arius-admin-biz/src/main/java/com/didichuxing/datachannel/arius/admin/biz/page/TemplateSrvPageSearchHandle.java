@@ -53,8 +53,8 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
     private TemplateSrvManager templateSrvManager;
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
-        if (!appService.isAppExists(appId)) {
+    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+        if (!appService.isAppExists(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
 
@@ -62,7 +62,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
     }
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
+    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (!(pageDTO instanceof TemplateQueryDTO)) {
             return Result.buildFail("参数错误");
         }
@@ -82,13 +82,13 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
     }
 
     @Override
-    protected PaginationResult<TemplateWithSrvVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
+    protected PaginationResult<TemplateWithSrvVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
         // nothing to do
         return PaginationResult.buildFail("暂时不支持带有鉴权的查询");
     }
 
     @Override
-    protected PaginationResult<TemplateWithSrvVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<TemplateWithSrvVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;
         TemplateQueryDTO condition = (TemplateQueryDTO) pageDTO;

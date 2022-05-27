@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.app;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppClusterLogicAuthPO extends BasePO implements DigitResponsible {
+public class ProjectClusterLogicAuthPO extends BasePO implements DigitResponsible {
     /**
      * 主键
      */
@@ -24,7 +24,7 @@ public class AppClusterLogicAuthPO extends BasePO implements DigitResponsible {
     /**
      * app id
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 逻辑集群ID
@@ -33,7 +33,7 @@ public class AppClusterLogicAuthPO extends BasePO implements DigitResponsible {
 
     /**
      * 权限类型
-     * @see AppClusterLogicAuthEnum
+     * @see ProjectClusterLogicAuthEnum
      */
     private Integer type;
 

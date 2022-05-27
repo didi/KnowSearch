@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppLogicClusterAuthVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AppLogicClusterAuthV3Controller {
 
     @Autowired
-    private AppClusterLogicAuthService authService;
+    private ProjectClusterLogicAuthService authService;
 
     @Autowired
     private IndexTemplateService indexTemplateService;

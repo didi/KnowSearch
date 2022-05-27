@@ -33,12 +33,7 @@ public interface ESUserService {
      */
     List<ESUser> listESUsers(List<Integer> projectIds);
     
-    /**
-     * 查询app详细信息
-     *
-     * @return List<App>
-     */
-    List<ESUser> listESUserWithCache(List<Integer> projectIds);
+
     
     /**
      * 新建APP
@@ -97,14 +92,9 @@ public interface ESUserService {
      *
      * @return List<App>
      */
-    List<ESUserConfig> listConfig();
+    List<ESUserConfig> listConfig(List<Integer> projectIds);
     
-    /**
-     * listConfigWithCache
-     *
-     * @return List<App>
-     */
-    List<ESUserConfig> listConfigWithCache();
+
     
     /**
      * 修改APP配置
@@ -161,4 +151,13 @@ public interface ESUserService {
      */
     List<ESUser> getProjectWithoutCodeApps(Integer projectId);
     
+    /**
+     * 通过project 获取默认的es user
+     *
+     * @param projectId 项目id
+     * @return {@code ESUser}
+     */
+    ESUser getDefaultESUserByProject(Integer projectId);
+    
+    boolean checkDefaultESUserByProject(Integer projectId);
 }

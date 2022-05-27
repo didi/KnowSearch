@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateQueryDslContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsls;
@@ -34,7 +34,7 @@ import java.util.Map;
 public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
     private DslStatisService dslStatisService;
@@ -125,10 +125,10 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
         TemplateQueryDslContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateQueryDslContent.class);
 
-        List<AppTemplateAuth> appTemplateAuths = appLogicTemplateAuthService
+        List<ProjectTemplateAuth> projectTemplateAuths = projectLogicTemplateAuthService
             .getTemplateAuthsByLogicTemplateId(content.getId());
-        Map<Integer, AppTemplateAuth> appId2AppTemplateAuthMap = ConvertUtil.list2Map(appTemplateAuths,
-            AppTemplateAuth::getAppId);
+        Map<Integer, ProjectTemplateAuth> appId2AppTemplateAuthMap = ConvertUtil.list2Map(projectTemplateAuths,
+            ProjectTemplateAuth::getProjectId);
 
         if (appId2AppTemplateAuthMap.containsKey(workOrder.getSubmitorAppid())) {
             return Result.buildSucc();

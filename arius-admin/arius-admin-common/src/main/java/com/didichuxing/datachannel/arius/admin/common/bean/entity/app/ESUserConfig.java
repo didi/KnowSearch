@@ -19,9 +19,9 @@ public class ESUserConfig extends BaseEntity {
 
 
     /**
-     * app主键
+     * es user
      */
-    private Integer esUser;
+    private Integer id;
 
     /**
      * gateway返回结果解析开关

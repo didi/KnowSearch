@@ -55,7 +55,7 @@ public class ESUserServiceImpl implements ESUserService {
     @Autowired
     private ESUserDAO esUserDAO;
     
-    private final Cache<String, List<?>> appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
+    private final Cache<String, List<?>> esUserListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
             .maximumSize(100).build();
 
 
@@ -69,14 +69,7 @@ public class ESUserServiceImpl implements ESUserService {
         return         ConvertUtil.list2List(esUserDAO.listByProjectIds(projectIds), ESUser.class);
     }
 
-    @Override
-    public List<ESUser> listESUserWithCache(List<Integer> projectIds) {
-        try {
-            return (List<ESUser>) appListCache.get("listESUsers", () -> listESUsers(projectIds));
-        } catch (ExecutionException e) {
-            return listESUsers(projectIds);
-        }
-    }
+  
 
 
 
@@ -230,19 +223,11 @@ public class ESUserServiceImpl implements ESUserService {
      * @return list
      */
     @Override
-    public List<ESUserConfig> listConfig() {
-        return ConvertUtil.list2List(esUserDAO.listConfig(), ESUserConfig.class);
+    public List<ESUserConfig> listConfig(List<Integer> projectIds) {
+        return ConvertUtil.list2List(esUserDAO.listConfig(projectIds), ESUserConfig.class);
     }
 
-    @Override
-    public List<ESUserConfig> listConfigWithCache() {
-        try {
-            return (List<ESUserConfig>) appListCache.get("listConfig", this::listConfig);
-        } catch (ExecutionException e) {
-            return listConfig();
-        }
-    }
-
+   
     /**
      * 修改APP配置
      *
@@ -410,6 +395,26 @@ public class ESUserServiceImpl implements ESUserService {
     
         return listESUsers(Collections.singletonList(projectId));
     
+    }
+    
+    /**
+     *
+     * @param projectId
+     * @return
+     */
+    @Override
+    public boolean checkDefaultESUserByProject(Integer projectId) {
+        return esUserDAO.countDefaultESUserByProject(projectId)==1;
+    }
+    
+    /**
+     *
+     * @param projectId
+     * @return
+     */
+    @Override
+    public ESUser getDefaultESUserByProject(Integer projectId) {
+        return esUserDAO.getDefaultESUserByProject(projectId);
     }
     
     /**************************************** private method ****************************************************/

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,19 +17,19 @@ import lombok.NoArgsConstructor;
 @ApiModel(description ="应用权限信息")
 @AllArgsConstructor
 @NoArgsConstructor
-public class AppTemplateAuthDTO extends BaseDTO {
+public class ProjectTemplateAuthDTO extends BaseDTO {
 
     @ApiModelProperty("ID")
     private Long    id;
 
     @ApiModelProperty("应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("模板ID")
     private Integer templateId;
 
     /**
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     @ApiModelProperty("权限类型（1:管理；2:读写；3:读）")
     private Integer type;

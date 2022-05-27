@@ -1,45 +1,40 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.app;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @author d06679
- * @date 2019/4/16
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppTemplateAuth extends BaseEntity implements StringResponsible {
+public class ProjectClusterPhyAuth extends BaseEntity implements StringResponsible {
+    /**
+     * ID
+     */
+    private Long    id;
 
     /**
-     * 主键
+     * 应用ID
      */
-    private Long id;
+    private Integer projectId;
 
     /**
-     * APP ID
+     * 物理集群名称
      */
-    private Integer appId;
-
-    /**
-     * 模板ID
-     */
-    private Integer templateId;
+    private String  clusterPhyName;
 
     /**
      * 权限类型  读写  读
-     * @see AppTemplateAuthEnum
+     * @see ProjectClusterLogicAuthEnum
      */
     private Integer type;
 
     /**
      * 责任人列表
      */
-    private String responsible;
-
+    private String  responsible;
 }

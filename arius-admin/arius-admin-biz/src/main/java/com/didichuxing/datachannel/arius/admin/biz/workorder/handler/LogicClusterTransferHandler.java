@@ -115,7 +115,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         }
 
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getClusterLogicId());
-        if (!clusterLogic.getAppId().equals(workOrder.getSubmitorAppid())) {
+        if (!clusterLogic.getProjectId().equals(workOrder.getSubmitorAppid())) {
             return Result.buildOpForBidden("您无权对该集群进行转让操作");
         }
 

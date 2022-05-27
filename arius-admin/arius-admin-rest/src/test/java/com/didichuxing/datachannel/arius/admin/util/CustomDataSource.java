@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.util;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.AppMonitorRuleDTO;
@@ -13,14 +13,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
@@ -339,13 +339,13 @@ public class CustomDataSource {
         return clusterSettingDTO;
     }
 
-    public static AppTemplateAuthDTO appTemplateAuthDTOFactory() {
-        AppTemplateAuthDTO appTemplateAuthDTO = new AppTemplateAuthDTO();
-        appTemplateAuthDTO.setAppId(1);
-        appTemplateAuthDTO.setTemplateId(1147);
-        appTemplateAuthDTO.setType(AppTemplateAuthEnum.RW.getCode());
-        appTemplateAuthDTO.setResponsible("admin");
-        return appTemplateAuthDTO;
+    public static ProjectTemplateAuthDTO appTemplateAuthDTOFactory() {
+        ProjectTemplateAuthDTO projectTemplateAuthDTO = new ProjectTemplateAuthDTO();
+        projectTemplateAuthDTO.setProjectId(1);
+        projectTemplateAuthDTO.setTemplateId(1147);
+        projectTemplateAuthDTO.setType(ProjectTemplateAuthEnum.RW.getCode());
+        projectTemplateAuthDTO.setResponsible("admin");
+        return projectTemplateAuthDTO;
     }
 
     public static IndexTemplateDTO indexTemplateLogicDTOFactory() {
@@ -385,23 +385,23 @@ public class CustomDataSource {
         appClusterLogicAuth.setLogicClusterId(1L);
         appClusterLogicAuth.setAppId(1);
         appClusterLogicAuth.setId(1L);
-        appClusterLogicAuth.setType(AppClusterLogicAuthEnum.ACCESS.getCode());
+        appClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.ACCESS.getCode());
         appClusterLogicAuth.setResponsible("admin");
         return appClusterLogicAuth;
     }
 
-    public static AppTemplateAuth appTemplateAuthSource() {
-        AppTemplateAuth appTemplateAuth = new AppTemplateAuth();
-        appTemplateAuth.setAppId(1);
-        appTemplateAuth.setTemplateId(1);
-        appTemplateAuth.setId(1l);
-        return appTemplateAuth;
+    public static ProjectTemplateAuth appTemplateAuthSource() {
+        ProjectTemplateAuth projectTemplateAuth = new ProjectTemplateAuth();
+        projectTemplateAuth.setProjectId(1);
+        projectTemplateAuth.setTemplateId(1);
+        projectTemplateAuth.setId(1l);
+        return projectTemplateAuth;
     }
 
-    public static List<AppTemplateAuth> getAppTemplateAuthList() {
-        List<AppTemplateAuth> list = new ArrayList<>();
+    public static List<ProjectTemplateAuth> getAppTemplateAuthList() {
+        List<ProjectTemplateAuth> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++) {
-            AppTemplateAuth po = CustomDataSource.appTemplateAuthSource();
+            ProjectTemplateAuth po = CustomDataSource.appTemplateAuthSource();
             po.setTemplateId(i);
             po.setId((long) i);
             list.add(po);

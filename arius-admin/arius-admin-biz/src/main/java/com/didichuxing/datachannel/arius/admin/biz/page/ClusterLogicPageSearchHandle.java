@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.biz.app.AppClusterLogicAuthManager;
+import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterLogicAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
@@ -51,7 +51,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     private ClusterLogicManager        clusterLogicManager;
 
     @Autowired
-    private AppClusterLogicAuthManager appClusterLogicAuthManager;
+    private ProjectClusterLogicAuthManager projectClusterLogicAuthManager;
 
     @Autowired
     private ClusterContextManager      clusterContextManager;
@@ -59,19 +59,19 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     private static final FutureUtil<Void> futureUtilForClusterNum      = FutureUtil.init("futureUtilForClusterNum",10,10,100);
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
-        if (!appService.isAppExists(appId)) {
+    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+        if (!appService.isAppExists(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);
     }
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
+    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof ClusterLogicConditionDTO) {
             ClusterLogicConditionDTO clusterLogicConditionDTO = (ClusterLogicConditionDTO) pageDTO;
             Integer authType = clusterLogicConditionDTO.getAuthType();
-            if (null != authType && !AppClusterLogicAuthEnum.isExitByCode(authType)) {
+            if (null != authType && !ProjectClusterLogicAuthEnum.isExitByCode(authType)) {
                 return Result.buildParamIllegal("权限类型不存在");
             }
 
@@ -161,7 +161,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         }
 
         //获取项目对集群列表的权限信息
-        List<AppClusterLogicAuth> appClusterLogicAuthList = appClusterLogicAuthManager.getByClusterLogicListAndAppId(appId, clusterLogicList);
+        List<AppClusterLogicAuth> appClusterLogicAuthList = projectClusterLogicAuthManager.getByClusterLogicListAndAppId(appId, clusterLogicList);
         Map<Long, AppClusterLogicAuth> clusterLogicId2AppClusterLogicAuthMap = ConvertUtil.list2Map(appClusterLogicAuthList,
                 AppClusterLogicAuth::getLogicClusterId);
 
@@ -224,7 +224,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         if (null != condition.getAppId()) {
             appAuthClusterLogicList = appAuthClusterLogicList
                     .stream()
-                    .filter(r -> r.getAppId().equals(condition.getAppId()))
+                    .filter(r -> r.getProjectId().equals(condition.getAppId()))
                     .collect(Collectors.toList());
         }
         meetConditionClusterLogicList.addAll(appAuthClusterLogicList);

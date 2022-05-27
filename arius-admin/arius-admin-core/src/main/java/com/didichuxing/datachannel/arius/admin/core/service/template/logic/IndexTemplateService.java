@@ -179,7 +179,7 @@ public interface IndexTemplateService {
      * @param projectId projectId
      * @return list
      */
-    List<IndexTemplate> getAppLogicTemplatesByAppId(Integer projectId);
+    List<IndexTemplate> getProjectLogicTemplatesByProjectId(Integer projectId);
 
     /**
      * 获取所有逻辑集群对应逻辑模板

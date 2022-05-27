@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
@@ -40,10 +41,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartCo
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -78,7 +78,7 @@ public class CommonManagerImpl implements CommonManager {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -284,13 +284,13 @@ public class CommonManagerImpl implements CommonManager {
                     .buildSucc(ConvertUtil.list2List(indexTemplateService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
         }
 
-        List<AppTemplateAuth> templateAuths = appLogicTemplateAuthService.getTemplateAuthsByAppId(appId);
+        List<ProjectTemplateAuth> templateAuths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(appId);
         if (CollectionUtils.isEmpty(templateAuths)) {
             return Result.buildSucc(Lists.newArrayList());
         }
 
-        AppTemplateAuthEnum authEnum = AppTemplateAuthEnum.valueOfName(auth);
-        if (AppTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
+        ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOfName(auth);
+        if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
             return Result.buildParamIllegal("auth非法");
         }
 
@@ -301,7 +301,7 @@ public class CommonManagerImpl implements CommonManager {
         }
 
         Set<Integer> logicIds = templateAuths.stream()
-                .map(AppTemplateAuth::getTemplateId).collect(Collectors.toSet());
+                .map(ProjectTemplateAuth::getTemplateId).collect(Collectors.toSet());
 
         List<IndexTemplate> templateLogics = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(logicIds)) {

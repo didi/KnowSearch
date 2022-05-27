@@ -23,7 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterPlugOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
@@ -32,7 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -45,7 +45,7 @@ import com.didiglobal.logi.log.LogFactory;
 public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
     private ClusterRegionService rackService;
@@ -102,7 +102,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         LogicClusterPlugOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPlugOperationContent.class);
 
-        AppClusterLogicAuthEnum logicClusterAuthEnum = appClusterLogicAuthService
+        ProjectClusterLogicAuthEnum logicClusterAuthEnum = projectClusterLogicAuthService
             .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), content.getLogicClusterId());
 
         switch (logicClusterAuthEnum) {

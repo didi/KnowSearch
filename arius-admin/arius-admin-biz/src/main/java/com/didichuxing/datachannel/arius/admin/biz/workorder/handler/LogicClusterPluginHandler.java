@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterPluginContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
     private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -61,7 +61,7 @@ public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
         LogicClusterPluginContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPluginContent.class);
 
-        AppClusterLogicAuthEnum logicClusterAuthEnum = appClusterLogicAuthService
+        ProjectClusterLogicAuthEnum logicClusterAuthEnum = projectClusterLogicAuthService
             .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), content.getLogicClusterId());
 
         switch (logicClusterAuthEnum) {

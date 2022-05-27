@@ -21,9 +21,9 @@ public class ClusterPhyContext {
     private String       clusterName;
 
     /*****************************************appId***********************************/
-    private List<String> associatedAppNames;
+    private List<String> associatedProjectNames;
 
-    private List<Integer> associatedAppIds;
+    private List<Integer> associatedProjectIds;
 
     /*****************************************clusterLogicInfo***********************************/
 

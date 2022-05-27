@@ -62,8 +62,8 @@ create index idx_region_id
     on index_template_info2 (region_id);
 
 
-#appid_template_info /**appid模板信息**/ 变更为 project_id_template_info appid  /* 用户账号 */ 变更为 project_id
-create table project_id_template_info
+#appid_template_info /**appid模板信息**/ 变更为 project_template_info appid  /* 用户账号 */ 变更为 project_id
+create table project_template_info
 (
     id              bigint unsigned auto_increment comment '主键自增'
         primary key,
@@ -75,22 +75,22 @@ create table project_id_template_info
     create_time     timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
     update_time     timestamp    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间'
 )
-    comment 'project_id模板信息' charset = utf8;
+    comment 'project关联模板信息' charset = utf8;
 
 create index idx_project_id
-    on project_id_template_info (project_id);
+    on project_template_info (project_id);
 
 create index idx_responsibleids
-    on project_id_template_info (responsible_ids);
+    on project_template_info (responsible_ids);
 
 create index idx_status
-    on project_id_template_info (status);
+    on project_template_info (status);
 
 create index idx_template_id
-    on project_id_template_info (template);
+    on project_template_info (template);
 
 create index idx_type
-    on project_id_template_info (type);
+    on project_template_info (type);
 
 
 #app_logic_cluster_auth /**appid逻辑集群权限**/变更为project_logi_cluster_auth app_id变更为project_id
@@ -149,8 +149,8 @@ create index idx_name
     on arius_resource_logic (name);
 
 
-#work_order 变更：approver_app_id 变更为 approver_project_id applicant->applicant_user_id applicant_app_id 变更为
-# applicant_project_id approver->approver_user_id
+#work_order 变更：approver_app_id 变更为 approver_project_id applicant->applicant_user_name applicant_app_id 变更为
+# applicant_project_id approver->approver_user_name
 create table arius_work_order_info
 (
     id               bigint unsigned auto_increment comment 'id'
@@ -158,10 +158,10 @@ create table arius_work_order_info
     type             varchar(25)  default 'unknown'         not null comment 'appcreate 创建app,clustercreate 创建集群,clusterindecrease 集群扩缩溶,clusteroffline 集群下线,clusterupdate 集群修改,templateauth 索引申请,templatecreate 索引创建,templateindecrease 索引扩容,templatequerydsl 查询语句创建,templatetransfer 索引转让,querydsllimitedit 查询语句编辑,responsiblegovern 员工离职,unhealthytemplategovern 不健康索引处理',
     title            varchar(64)  default ''                not null comment '标题',
     approver_project_id  int(16)      default -1                not null comment '审批人projectId',
-    applicant_user_id        varchar(64)  default ''                not null comment '申请人用户id',
+    applicant_user_name        varchar(64)  default ''                not null comment '申请人用户id',
     extensions       text                                   null comment '拓展字段',
     description      text                                   null comment '备注信息',
-    approver_user_id         varchar(64)  default ''                not null comment '审批人用户id',
+    approver_user_name         varchar(64)  default ''                not null comment '审批人用户id',
     finish_time      timestamp    default CURRENT_TIMESTAMP not null comment '结束时间',
     opinion          varchar(256) default ''                not null comment '审批信息',
     status           int(16)      default 0                 not null comment '工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消',
@@ -197,3 +197,9 @@ create table arius_es_user
     is_default_display      tinyint(2)    default 0                 not null comment '1：项目默认的es user；0:项目新增的es user'
 )
     comment 'es操作用户表' charset = utf8;
+
+create table project_arius_es_config(
+        id                      bigint(10) unsigned auto_increment comment 'project id'
+        primary key,
+
+)

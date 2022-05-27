@@ -56,7 +56,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
@@ -69,8 +69,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -160,7 +160,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -559,15 +559,15 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         //超级用户对所有模板都是管理权限
-        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId) && !AppClusterLogicAuthEnum.OWN.getCode().equals(authType)) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId) && !ProjectClusterLogicAuthEnum.OWN.getCode().equals(authType)) {
             return Lists.newArrayList();
         }
 
-        if (!AppClusterLogicAuthEnum.isExitByCode(authType)) {
+        if (!ProjectClusterLogicAuthEnum.isExitByCode(authType)) {
             return Lists.newArrayList();
         }
 
-        switch (AppClusterLogicAuthEnum.valueOf(authType)) {
+        switch (ProjectClusterLogicAuthEnum.valueOf(authType)) {
             case OWN:
                 if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
                     return clusterLogicService.listAllClusterLogics();
@@ -602,7 +602,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public List<ClusterLogic> getAppAccessClusterLogicList(Integer projectId) {
-        List<Long> clusterLogicIdList = appClusterLogicAuthService.getLogicClusterAccessAuths(projectId)
+        List<Long> clusterLogicIdList = projectClusterLogicAuthService.getLogicClusterAccessAuths(projectId)
                                         .stream()
                                         .map(AppClusterLogicAuth::getLogicClusterId)
                                         .collect(Collectors.toList());
@@ -706,8 +706,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         if (projectIdForAuthJudge == null) {
             // 未指定需要判断权限的app，取运维人员权限
             consoleClusterVO.setAuthId(null);
-            consoleClusterVO.setAuthType( AppClusterLogicAuthEnum.OWN.getCode());
-            consoleClusterVO.setPermissions(AppClusterLogicAuthEnum.OWN.getDesc());
+            consoleClusterVO.setAuthType( ProjectClusterLogicAuthEnum.OWN.getCode());
+            consoleClusterVO.setPermissions(ProjectClusterLogicAuthEnum.OWN.getDesc());
         } else {
             // 指定了需要判断权限的app
             buildLogicClusterPermission(consoleClusterVO, projectIdForAuthJudge);
@@ -748,24 +748,24 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 return;
             }
             if (AuthConstant.SUPER_PROJECT_ID.equals(projectIdForAuthJudge)) {
-                logicClusterVO.setAuthType(   AppClusterLogicAuthEnum.OWN.getCode());
-                logicClusterVO.setPermissions(AppClusterLogicAuthEnum.OWN.getDesc());
+                logicClusterVO.setAuthType(   ProjectClusterLogicAuthEnum.OWN.getCode());
+                logicClusterVO.setPermissions(ProjectClusterLogicAuthEnum.OWN.getDesc());
                 return;
             }
 
-            AppClusterLogicAuth auth = appClusterLogicAuthService.getLogicClusterAuth(projectIdForAuthJudge,
+            AppClusterLogicAuth auth = projectClusterLogicAuthService.getLogicClusterAuth(projectIdForAuthJudge,
                     logicClusterVO.getId());
 
             if (auth == null) {
                 // 没有权限
                 logicClusterVO.setAuthId(null);
-                logicClusterVO.setAuthType(AppClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
-                logicClusterVO.setPermissions(AppClusterLogicAuthEnum.NO_PERMISSIONS.getDesc());
+                logicClusterVO.setAuthType(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
+                logicClusterVO.setPermissions(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getDesc());
             } else {
                 // 有权限
                 logicClusterVO.setAuthId(auth.getId());
-                logicClusterVO.setAuthType(AppClusterLogicAuthEnum.valueOf(auth.getType()).getCode());
-                logicClusterVO.setPermissions(AppClusterLogicAuthEnum.valueOf(auth.getType()).getDesc());
+                logicClusterVO.setAuthType(ProjectClusterLogicAuthEnum.valueOf(auth.getType()).getCode());
+                logicClusterVO.setPermissions(ProjectClusterLogicAuthEnum.valueOf(auth.getType()).getDesc());
             }
 
 

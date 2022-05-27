@@ -33,7 +33,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -51,8 +51,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -66,6 +65,8 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingC
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -76,6 +77,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -135,10 +137,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private AriusConfigInfoService      ariusConfigInfoService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private AppService                  appService;
+    private ProjectService projectService;
 
     @Override
     public boolean checkMeta() {
@@ -350,7 +352,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             LOGGER.warn("class=TemplatePhyManagerImpl||methood=copyTemplate||TemplatePhysicalCopyDTO={}||msg=syncCopyMappingAndAlias fail", param);
         }
 
-        return Result.buildSucWithTips("模板部署集群变更!请注意模板APP是否可以使用修改后的集群rack\n模板复制后请确认逻辑模板quota是否充足");
+        return Result.buildSucWithTips("模板部署集群变更!请注意模板PROJECT是否可以使用修改后的集群rack\n模板复制后请确认逻辑模板quota是否充足");
     }
 
 
@@ -600,7 +602,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 esTemplateService.syncUpdateRackAndShard(oldIndexTemplatePhy.getCluster(), oldIndexTemplatePhy.getName(), param.getRack(),
                         param.getShard(), param.getShardRouting(), retryCount);
                 if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())) {
-                    tips = "模板部署rack变更!请注意模板APP是否可以使用修改后的rack";
+                    tips = "模板部署rack变更!请注意模板PROJECT是否可以使用修改后的rack";
                 }
             }
 
@@ -671,18 +673,18 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer appId) {
+    public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer projectId) {
         List<ConsoleTemplatePhyVO> consoleTemplatePhyVOS = ConvertUtil.list2List(indexTemplatePhyService.getByCondt(param),
             ConsoleTemplatePhyVO.class);
 
-        buildConsoleTemplatePhyVO(consoleTemplatePhyVOS, appId);
+        buildConsoleTemplatePhyVO(consoleTemplatePhyVOS, projectId);
 
         return consoleTemplatePhyVOS;
     }
 
     @Override
-    public List<String> getTemplatePhyNames(Integer appId) {
-        return getConsoleTemplatePhyVOS(null, appId).parallelStream().map(ConsoleTemplatePhyVO::getName)
+    public List<String> getTemplatePhyNames(Integer projectId) {
+        return getConsoleTemplatePhyVOS(null, projectId).parallelStream().map(ConsoleTemplatePhyVO::getName)
             .collect(Collectors.toList());
     }
 
@@ -927,9 +929,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return  (shardNum != null && shardNum > 0);
     }
 
-    private void buildConsoleTemplatePhyVO(List<ConsoleTemplatePhyVO> params, Integer currentAppId) {
+    private void buildConsoleTemplatePhyVO(List<ConsoleTemplatePhyVO> params, Integer currentProjectId) {
         
-        Map<Integer, String> appId2AppNameMap = Maps.newHashMap();
+        Map<Integer, String> projectId2ProjectNameMap = Maps.newHashMap();
 
         for (ConsoleTemplatePhyVO consoleTemplatePhyVO : params) {
 
@@ -941,24 +943,28 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 continue;
             }
 
-            handleIndexTemplateLogic(currentAppId, appId2AppNameMap, consoleTemplatePhyVO, logicTemplate);
+            handleIndexTemplateLogic(currentProjectId, projectId2ProjectNameMap, consoleTemplatePhyVO, logicTemplate);
 
         }
     }
 
-    private void handleIndexTemplateLogic(Integer currentAppId, Map<Integer, String> appId2AppNameMap, ConsoleTemplatePhyVO consoleTemplatePhyVO, IndexTemplate logicTemplate) {
+    private void handleIndexTemplateLogic(Integer currentProjectId, Map<Integer, String> projectId2ProjectNameMap, ConsoleTemplatePhyVO consoleTemplatePhyVO, IndexTemplate logicTemplate) {
         //设置归属项目信息
-        Integer appIdFromLogicTemplate = logicTemplate.getProjectId();
-        if (!AriusObjUtils.isNull(appIdFromLogicTemplate)) {
-            consoleTemplatePhyVO.setAppId(appIdFromLogicTemplate);
+        Integer projectIdFromLogicTemplate = logicTemplate.getProjectId();
+        if (!AriusObjUtils.isNull(projectIdFromLogicTemplate)) {
+            consoleTemplatePhyVO.setProjectId(projectIdFromLogicTemplate);
 
-            if (appId2AppNameMap.containsKey(appIdFromLogicTemplate)) {
-                consoleTemplatePhyVO.setAppName(appId2AppNameMap.get(logicTemplate.getProjectId()));
+            if (projectId2ProjectNameMap.containsKey(projectIdFromLogicTemplate)) {
+                consoleTemplatePhyVO.setProjectName(projectId2ProjectNameMap.get(logicTemplate.getProjectId()));
             } else {
-                String appName = appService.getAppName(logicTemplate.getProjectId());
-                if (!AriusObjUtils.isNull(appName)) {
-                    consoleTemplatePhyVO.setAppName(appName);
-                    appId2AppNameMap.put(appIdFromLogicTemplate, appName);
+                String projectName =
+                        Optional.ofNullable(projectService.getProjectBriefByProjectId(logicTemplate.getProjectId()))
+                                .map(ProjectBriefVO::getProjectName)
+                                .orElse(null);
+        
+                if (!AriusObjUtils.isNull(projectName)) {
+                    consoleTemplatePhyVO.setProjectName(projectName);
+                    projectId2ProjectNameMap.put(projectIdFromLogicTemplate, projectName);
                 }
             }
         }
@@ -970,15 +976,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         consoleTemplatePhyVO.setMemo(logicTemplate.getDesc());
 
         //设置权限
-        if (AriusObjUtils.isNull(currentAppId)) {
-            consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.NO_PERMISSION.getCode());
+        if (AriusObjUtils.isNull(currentProjectId)) {
+            consoleTemplatePhyVO.setAuthType(ProjectTemplateAuthEnum.NO_PERMISSION.getCode());
             return;
         }
-        if (currentAppId.equals(appIdFromLogicTemplate)) {
-            consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.OWN.getCode());
+        if (currentProjectId.equals(projectIdFromLogicTemplate)) {
+            consoleTemplatePhyVO.setAuthType(ProjectTemplateAuthEnum.OWN.getCode());
         } else {
-            AppTemplateAuthEnum authEnum = appLogicTemplateAuthService.getAuthEnumByAppIdAndLogicId(currentAppId,
-                    appIdFromLogicTemplate);
+            ProjectTemplateAuthEnum authEnum = projectLogicTemplateAuthService.getAuthEnumByProjectIdAndLogicId(currentProjectId,
+                    projectIdFromLogicTemplate);
             consoleTemplatePhyVO.setAuthType(authEnum.getCode());
         }
     }

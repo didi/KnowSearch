@@ -85,7 +85,7 @@ public class ResourceExtendManager implements ResourceExtend {
 		}
 		
 		//校验项目绑定模板服务
-		List<IndexTemplate> indexTemplates = indexTemplateService.getAppLogicTemplatesByAppId(projectId);
+		List<IndexTemplate> indexTemplates = indexTemplateService.getProjectLogicTemplatesByProjectId(projectId);
 		if (CollectionUtils.isNotEmpty(indexTemplates)) {
 			ResourceDTO resourceDTO = new ResourceDTO();
 			resourceDTO.setResourceName((ProjectResourceEnum.PROJECT_INDEX_TEMPLATE.getDesc()));

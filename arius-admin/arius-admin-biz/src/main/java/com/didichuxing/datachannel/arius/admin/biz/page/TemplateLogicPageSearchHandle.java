@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.AppLogicTemplateAuthManager;
+import com.didichuxing.datachannel.arius.admin.biz.app.ProjectLogicTemplateAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -43,7 +43,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     private AppService                  appService;
 
     @Autowired
-    private AppLogicTemplateAuthManager appLogicTemplateAuthManager;
+    private ProjectLogicTemplateAuthManager projectLogicTemplateAuthManager;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -63,15 +63,15 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL = FutureUtil.init("RESOURCE_BUILD_FUTURE_UTIL",10,10,100);
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
-        if (!appService.isAppExists(appId)) {
+    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+        if (!appService.isAppExists(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);
     }
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
+    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof TemplateConditionDTO) {
             TemplateConditionDTO templateConditionDTO = (TemplateConditionDTO) pageDTO;
 
@@ -103,11 +103,11 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
 
     @Override
     // todo: 灰度后清空这里代码
-    protected PaginationResult<ConsoleTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
-        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
+    protected PaginationResult<ConsoleTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
+        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, projectId);
 
         //1. 获取管理/读写/读/无权限的模板信息
-        List<IndexTemplate> appAuthTemplatesList = templateLogicManager.getTemplatesByAppIdAndAuthType(appId, condition.getAuthType());
+        List<IndexTemplate> appAuthTemplatesList = templateLogicManager.getTemplatesByProjectIdAndAuthType(projectId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthTemplatesList)) {
             return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
@@ -139,8 +139,8 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     }
 
     @Override
-    protected PaginationResult<ConsoleTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
-        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
+    protected PaginationResult<ConsoleTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
+        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, projectId);
 
         List<IndexTemplate> matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
         Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();

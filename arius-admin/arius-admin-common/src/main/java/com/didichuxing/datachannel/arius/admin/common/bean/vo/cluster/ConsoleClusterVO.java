@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -75,7 +75,7 @@ public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleCluste
     @ApiModelProperty("权限记录ID")
     private Long                         authId;
 
-    /** @see AppClusterLogicAuthEnum */
+    /** @see ProjectClusterLogicAuthEnum */
     @ApiModelProperty("权限,1:配置管理,2:访问,-1:无权限")
     private Integer                      authType;
 

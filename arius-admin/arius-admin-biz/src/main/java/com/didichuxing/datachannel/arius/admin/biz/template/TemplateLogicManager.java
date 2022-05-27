@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -11,8 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
@@ -54,7 +54,7 @@ public interface TemplateLogicManager {
      * @param logicId logicId
      * @return result
      */
-    List<App> getLogicTemplateAppAccess(Integer logicId);
+    List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId);
 
     /**
      * 获取模板的标签信息
@@ -86,19 +86,19 @@ public interface TemplateLogicManager {
     /**
      * 获取所有逻辑模板聚合
      *
-     * @param appId 当前App Id
+     * @param projectId 当前project Id
      * @return
      */
-    List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer appId);
+    List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId);
 
     /**
      * 获取逻辑集群所有逻辑模板聚合
      *
      * @param logicClusterId 逻辑集群ID
-     * @param appId 操作的App Id
+     * @param projectId 操作的project Id
      * @return
      */
-    List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer appId);
+    List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer projectId);
 
     /**
      * 拼接集群名称
@@ -124,21 +124,21 @@ public interface TemplateLogicManager {
     /**
      * 获取逻辑集群所有逻辑模板列表
      */
-    List<ConsoleTemplateVO> getConsoleTemplateVOSForClusterLogic(Long clusterLogicId, Integer appId);
+    List<ConsoleTemplateVO> getConsoleTemplateVOSForClusterLogic(Long clusterLogicId, Integer projectId);
 
     /**
      * 获取逻辑索引列表
      */
-    List<ConsoleTemplateVO> getConsoleTemplatesVOS(Integer appId);
+    List<ConsoleTemplateVO> getConsoleTemplatesVOS(Integer projectId);
 
     /**
      * 根据项目和权限类型获取模板信息
-     * @param appId                 项目Id
+     * @param projectId                 项目Id
      * @param authType              权限类型
-     * @see   AppTemplateAuthEnum
+     * @see   ProjectTemplateAuthEnum
      * @return
      */
-    List<IndexTemplate> getTemplatesByAppIdAndAuthType(Integer appId, Integer authType);
+    List<IndexTemplate> getTemplatesByProjectIdAndAuthType(Integer projectId, Integer authType);
 
     /**
      * 根据项目获取有管理\读写\读权限的逻辑模版
@@ -196,10 +196,10 @@ public interface TemplateLogicManager {
     /**
      * 校验指定appId能否对指定的逻辑模板进行操作
      * @param logicId 逻辑模板id
-     * @param appId appId
+     * @param projectId projectId
      * @return result
      */
-    Result<Void> checkAppAuthOnLogicTemplate(Integer logicId, Integer appId);
+    Result<Void> checkProjectAuthOnLogicTemplate(Integer logicId, Integer projectId);
 
     /**
      * 同步dcdr相关信息
@@ -210,8 +210,9 @@ public interface TemplateLogicManager {
 
     /**
      * 全量获取指定物理集群所关联的逻辑模板信息列表
+     *
      * @param phyCluster 物理集群名称
      * @return 物理集群下的全量模板信息列表视图
      */
-    Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId);
+    Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster);
 }

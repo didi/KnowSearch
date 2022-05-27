@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +27,7 @@ public class IndexTemplateLogicAggregate implements Serializable {
     /**
      * APP对当前模板的权限
      */
-    private AppTemplateAuth               appTemplateAuth;
+    private ProjectTemplateAuth projectTemplateAuth;
 
     /**
      * 模板Quota使用

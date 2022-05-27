@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * @author d06679
  * @date 2017/7/14
  */
-public enum AppTemplateAuthEnum {
+public enum ProjectTemplateAuthEnum {
 
                                  /**
                                   * Owner权限
@@ -32,7 +32,7 @@ public enum AppTemplateAuthEnum {
                                   */
                                  NO_PERMISSION(-1, "", "unknown");
 
-    AppTemplateAuthEnum(int code, String name, String desc) {
+    ProjectTemplateAuthEnum(int code, String name, String desc) {
         this.code = code;
         this.name = name;
         this.desc = desc;
@@ -54,22 +54,22 @@ public enum AppTemplateAuthEnum {
         return desc;
     }
 
-    public static AppTemplateAuthEnum valueOf(Integer code) {
+    public static ProjectTemplateAuthEnum valueOf(Integer code) {
         if (code == null) {
-            return AppTemplateAuthEnum.NO_PERMISSION;
+            return ProjectTemplateAuthEnum.NO_PERMISSION;
         }
-        for (AppTemplateAuthEnum state : AppTemplateAuthEnum.values()) {
+        for (ProjectTemplateAuthEnum state : ProjectTemplateAuthEnum.values()) {
             if (state.getCode().equals(code)) {
                 return state;
             }
         }
         
-        return AppTemplateAuthEnum.NO_PERMISSION;
+        return ProjectTemplateAuthEnum.NO_PERMISSION;
     }
 
-    public static AppTemplateAuthEnum valueOfName(String name) {
+    public static ProjectTemplateAuthEnum valueOfName(String name) {
         if (name == null) {
-            return AppTemplateAuthEnum.NO_PERMISSION;
+            return ProjectTemplateAuthEnum.NO_PERMISSION;
         }
 
         name = name.toLowerCase();
@@ -78,20 +78,20 @@ public enum AppTemplateAuthEnum {
             name = RW.getName();
         }
 
-        for (AppTemplateAuthEnum state : AppTemplateAuthEnum.values()) {
+        for (ProjectTemplateAuthEnum state : ProjectTemplateAuthEnum.values()) {
             if (state.getName().equals(name)) {
                 return state;
             }
         }
 
-        return AppTemplateAuthEnum.NO_PERMISSION;
+        return ProjectTemplateAuthEnum.NO_PERMISSION;
     }
 
     public static boolean isTemplateAuthExitByCode(Integer code){
         if (code == null) {
             return false;
         }
-        for (AppTemplateAuthEnum state : AppTemplateAuthEnum.values()) {
+        for (ProjectTemplateAuthEnum state : ProjectTemplateAuthEnum.values()) {
             if (state.getCode().equals(code)) {
                 return true;
             }
@@ -101,8 +101,8 @@ public enum AppTemplateAuthEnum {
     }
     
     public static List<Integer> listAppTemplateAuthCodes() {
-        return Arrays.stream(AppTemplateAuthEnum.values())
-                     .map(AppTemplateAuthEnum::getCode)
+        return Arrays.stream(ProjectTemplateAuthEnum.values())
+                     .map(ProjectTemplateAuthEnum::getCode)
                      .distinct()
                      .collect(Collectors.toList());
     }
