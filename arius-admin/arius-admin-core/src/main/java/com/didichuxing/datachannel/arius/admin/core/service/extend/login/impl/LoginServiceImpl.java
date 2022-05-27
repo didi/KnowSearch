@@ -18,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.login.Login;
 import com.didichuxing.datachannel.arius.admin.common.constant.LoginConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
@@ -26,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.extend.login.LoginSe
 import com.didichuxing.datachannel.arius.admin.remote.protocol.LoginProtocolHandle;
 import com.didichuxing.datachannel.arius.admin.remote.protocol.content.LoginProtocolTypeEnum;
 import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -125,12 +125,12 @@ public class LoginServiceImpl implements LoginService {
             return Boolean.FALSE;
         }
 
-        String operator = HttpRequestUtils.getOperator(request);
-        Integer appId = HttpRequestUtils.getProjectId(request);
+        String operator = HttpRequestUtil.getOperator(request);
+        Integer appId = HttpRequestUtil.getProjectId(request);
         // 登陆成功后, 设置session属性, 后续操作人从该session中获取
         HttpSession session = request.getSession();
         session.setMaxInactiveInterval(COOKIE_OR_SESSION_MAX_AGE_UNIT_MS);
-        session.setAttribute(HttpRequestUtils.USER, operator);
+        session.setAttribute(HttpRequestUtil.USER, operator);
 
         //添加到threadLocal 里面
         GlobalParams.CURRENT_USER.set(operator);

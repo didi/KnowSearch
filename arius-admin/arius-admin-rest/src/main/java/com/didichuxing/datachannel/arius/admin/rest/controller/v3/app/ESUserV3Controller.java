@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -79,7 +78,7 @@ public class ESUserV3Controller {
     @ApiOperation(value = "获取项目下的es user")
     public Result<List<ESUser>> listESUserByProjectId(HttpServletRequest request) {
         return esUserManager.listESUsersByProjectId(HttpRequestUtil.getProjectId(request),
-                HttpRequestUtils.getOperator(request));
+                HttpRequestUtil.getOperator(request));
     }
     
     @DeleteMapping("{projectId}/{esUser}")
@@ -91,7 +90,7 @@ public class ESUserV3Controller {
     public Result<Void> deleteESUserByProject(HttpServletRequest request, @PathVariable("projectId") Integer projectId,
                                               @PathVariable("esUser") Integer esUserName) {
       
-        return esUserManager.deleteESUserByProject(esUserName, projectId, HttpRequestUtils.getOperator(request));
+        return esUserManager.deleteESUserByProject(esUserName, projectId, HttpRequestUtil.getOperator(request));
     }
     
     @DeleteMapping("{projectId}")
@@ -102,7 +101,7 @@ public class ESUserV3Controller {
     public Result<Void> deleteAllESUserByProject(HttpServletRequest request,
                                                  @PathVariable("projectId") Integer projectId) {
        
-        return esUserManager.deleteAllESUserByProject(projectId, HttpRequestUtils.getOperator(request));
+        return esUserManager.deleteAllESUserByProject(projectId, HttpRequestUtil.getOperator(request));
     }
     
     @PutMapping("")

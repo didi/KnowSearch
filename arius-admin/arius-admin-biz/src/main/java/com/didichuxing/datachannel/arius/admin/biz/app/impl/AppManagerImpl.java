@@ -5,22 +5,21 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleAppDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleAppLoginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppWithVerifyCodeVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayJoinLogService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.List;
 /**
  * @author linyunan
  * @date 2021-04-28
@@ -42,7 +41,7 @@ public class AppManagerImpl implements AppManager {
      */
     @Override
     public Result<Void> login(HttpServletRequest request, ConsoleAppLoginDTO loginDTO) {
-        return appService.login(loginDTO.getAppId(), loginDTO.getVerifyCode(), HttpRequestUtils.getOperator(request));
+        return appService.login(loginDTO.getAppId(), loginDTO.getVerifyCode(), HttpRequestUtil.getOperator(request));
     }
 
     /**
@@ -78,7 +77,7 @@ public class AppManagerImpl implements AppManager {
      */
     @Override
     public Result<Void> update(HttpServletRequest request, ConsoleAppDTO appDTO) {
-        return appService.editApp(ConvertUtil.obj2Obj(appDTO, AppDTO.class), HttpRequestUtils.getOperator(request));
+        return appService.editApp(ConvertUtil.obj2Obj(appDTO, AppDTO.class), HttpRequestUtil.getOperator(request));
     }
 
     /**
@@ -110,6 +109,6 @@ public class AppManagerImpl implements AppManager {
      */
     @Override
     public Result<Void> delete(HttpServletRequest request, @RequestParam("appId") Integer appId) {
-        return appService.deleteAppById(appId, HttpRequestUtils.getOperator(request));
+        return appService.deleteAppById(appId, HttpRequestUtil.getOperator(request));
     }
 }

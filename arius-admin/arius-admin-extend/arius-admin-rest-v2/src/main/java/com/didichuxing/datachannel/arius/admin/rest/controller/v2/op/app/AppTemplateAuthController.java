@@ -4,14 +4,24 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.AppLogicTemplateAuthManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppTemplateAuthVO;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,19 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppTemplateAuthVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping({ V2_OP + "/app/auth",V3_OP + "/app/auth/template" })
@@ -69,14 +66,14 @@ public class AppTemplateAuthController {
     @ResponseBody
     @ApiOperation(value = "增加APP权限接口" )
     public Result<Void> addTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
-        return appLogicTemplateAuthService.addTemplateAuth(authDTO, HttpRequestUtils.getOperator(request));
+        return appLogicTemplateAuthService.addTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "更新APP权限接口" )
     public Result<Void> updateTemplateAuth(HttpServletRequest request, @RequestBody AppTemplateAuthDTO authDTO) {
-        return appLogicTemplateAuthManager.updateTemplateAuth(authDTO, HttpRequestUtils.getOperator(request));
+        return appLogicTemplateAuthManager.updateTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/delete")
@@ -84,7 +81,7 @@ public class AppTemplateAuthController {
     @ApiOperation(value = "删除APP权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "authId", value = "权限ID", required = true) })
     public Result<Void> deleteTemplateAuth(HttpServletRequest request, @RequestParam("authId") Long authId) {
-        return appLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtils.getOperator(request));
+        return appLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/checkMeta")

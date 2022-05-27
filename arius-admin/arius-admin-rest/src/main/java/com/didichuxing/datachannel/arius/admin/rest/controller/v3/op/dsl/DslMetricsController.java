@@ -2,22 +2,24 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.dsl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import io.swagger.annotations.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SearchDslTemplateResponseVO;
-
-import lombok.NoArgsConstructor;
-
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor
 @RestController()
@@ -38,7 +40,7 @@ public class DslMetricsController {
     public Result<List<DslTemplateVO>> listByAppid(@RequestParam(value = "appId", required = false) Integer appId,
                                                    @RequestParam(value = "startDate") Long startDate,
                                                    @RequestParam(value = "endDate") Long endDate, HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtils.getProjectId(request) : appId;
+        appId = appId == null ? HttpRequestUtil.getProjectId(request) : appId;
         return dslMetricsManager.getDSLMetricsInfoByAppId(appId, startDate, endDate);
     }
 
@@ -54,7 +56,7 @@ public class DslMetricsController {
                                                        @RequestParam(value = "dslTemplateMd5") String dslTemplateMd5,
                                                        @RequestParam(value = "startDate") Long startDate, @RequestParam(value = "endDate") Long endDate,
                                                        HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtils.getProjectId(request) : appId;
+        appId = appId == null ? HttpRequestUtil.getProjectId(request) : appId;
         return dslMetricsManager.getDetailMetrics(appId, dslTemplateMd5, startDate, endDate);
     }
 
@@ -77,7 +79,7 @@ public class DslMetricsController {
                                                               @RequestParam(value = "from") Long from, @RequestParam(value = "size") Long size,
                                                               @RequestParam(value = "startDate") Long startDate, @RequestParam(value = "endDate") Long endDate,
                                                               HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtils.getProjectId(request) : appId;
+        appId = appId == null ? HttpRequestUtil.getProjectId(request) : appId;
         return dslMetricsManager.getDslTemplateByCondition(appId, searchKeyword, dslTag, sortInfo, from, size,
             startDate, endDate);
     }

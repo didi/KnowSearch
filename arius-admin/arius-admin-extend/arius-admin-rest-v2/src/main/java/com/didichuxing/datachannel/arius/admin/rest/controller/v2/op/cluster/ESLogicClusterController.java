@@ -2,13 +2,6 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -16,13 +9,24 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
-
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 逻辑集群Controller
@@ -50,7 +54,7 @@ public class ESLogicClusterController {
 
     public Result<List<ConsoleClusterVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
                                                                 HttpServletRequest request) {
-        return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtils.getProjectId(request)));
+        return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtil.getProjectId(request)));
     }
 
     @GetMapping("/resource/get")
@@ -61,7 +65,7 @@ public class ESLogicClusterController {
     public Result<ConsoleClusterVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
                                                         HttpServletRequest request) {
         return Result.buildSucc(
-            clusterLogicManager.getConsoleClusterVOByIdAndAppId(resourceId, HttpRequestUtils.getProjectId(request)));
+            clusterLogicManager.getConsoleClusterVOByIdAndAppId(resourceId, HttpRequestUtil.getProjectId(request)));
     }
 
     @DeleteMapping("/resource/del")
@@ -71,8 +75,8 @@ public class ESLogicClusterController {
 
     public Result<Void> deleteLogicClusterById(HttpServletRequest request,
                                          @RequestParam(value = "resourceId") Long resourceId) throws AdminOperateException {
-        return clusterLogicManager.deleteLogicCluster(resourceId, HttpRequestUtils.getOperator(request),
-            HttpRequestUtils.getProjectId(request));
+        return clusterLogicManager.deleteLogicCluster(resourceId, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/resource/add")
@@ -80,8 +84,8 @@ public class ESLogicClusterController {
     @ApiOperation(value = "新建带有region信息的逻辑集群接口" )
 
     public Result<Long> createLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return clusterLogicManager.addLogicCluster(param, HttpRequestUtils.getOperator(request),
-            HttpRequestUtils.getProjectId(request));
+        return clusterLogicManager.addLogicCluster(param, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/resource/edit")
@@ -89,7 +93,7 @@ public class ESLogicClusterController {
     @ApiOperation(value = "编辑逻辑集群接口" )
 
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getProjectId(request));
+        return clusterLogicManager.editLogicCluster(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/logic/cluster/nodes")

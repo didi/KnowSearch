@@ -13,16 +13,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +96,7 @@ public class ESPhyClusterRegionController {
     public Result<Long> createRegion(HttpServletRequest request, @RequestBody CapacityPlanRegionDTO param) {
 
         return clusterRegionService.createPhyClusterRegion(param.getClusterName(), param.getRacks(), param.getShare(),
-            HttpRequestUtils.getOperator(request));
+            HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/phyClusterRacks")
@@ -119,14 +117,14 @@ public class ESPhyClusterRegionController {
         // 1. racks（属于物理集群region部分）
         // 2. share、configJson（属于容量规划部分）
         // capacityPlanRegionService.editRegion()中的修改操作包含了对两张表的修改
-        return capacityPlanRegionService.editRegion(param, HttpRequestUtils.getOperator(request));
+        return capacityPlanRegionService.editRegion(param, HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/{regionId}")
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
     public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) {
-        return clusterRegionService.deletePhyClusterRegion(regionId, HttpRequestUtils.getOperator(request));
+        return clusterRegionService.deletePhyClusterRegion(regionId, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{clusterName}")

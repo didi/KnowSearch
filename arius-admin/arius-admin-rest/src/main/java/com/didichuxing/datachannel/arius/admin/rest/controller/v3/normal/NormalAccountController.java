@@ -7,8 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUse
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
@@ -47,7 +47,7 @@ public class NormalAccountController {
     @ResponseBody
     @ApiOperation(value = "查询角色", notes = "查询角色的权限")
     public Result<AriusUserInfoVO> role(HttpServletRequest request) {
-        String username = HttpRequestUtils.getOperator(request);
+        String username = HttpRequestUtil.getOperator(request);
 
         AriusUserInfo ariusUserInfo = ariusUserInfoService.getByDomainAccount(username);
         if(null == ariusUserInfo){

@@ -2,11 +2,23 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.capacityplan;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegionSplitResult;
+import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.vo.CapacityPlanRegionTaskItemVO;
+import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.vo.CapacityPlanRegionTaskVO;
+import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
+import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,22 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.entity.CapacityPlanRegionSplitResult;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.vo.CapacityPlanRegionTaskItemVO;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.vo.CapacityPlanRegionTaskVO;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionService;
-import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.service.CapacityPlanRegionTaskService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * @Author: lanxinzheng
@@ -140,7 +136,7 @@ public class CapacityPlanV3Controller {
 
         // 容量规划开关统一到索引服务
         return templateSrvManager.checkTemplateSrv(phyClusterName,
-            TemplateServiceEnum.TEMPLATE_CAPA_PLAN.getCode().toString(), HttpRequestUtils.getOperator(request));
+            TemplateServiceEnum.TEMPLATE_CAPA_PLAN.getCode().toString(), HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/phyCluster/close")
@@ -151,7 +147,7 @@ public class CapacityPlanV3Controller {
                                                    @RequestParam("phyClusterName") String phyClusterName) {
 
         return templateSrvManager.delTemplateSrv(phyClusterName,
-            TemplateServiceEnum.TEMPLATE_CAPA_PLAN.getCode().toString(), HttpRequestUtils.getOperator(request) );
+            TemplateServiceEnum.TEMPLATE_CAPA_PLAN.getCode().toString(), HttpRequestUtil.getOperator(request) );
     }
 
 }

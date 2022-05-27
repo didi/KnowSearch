@@ -2,17 +2,22 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateFieldConvertVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
 import com.didichuxing.datachannel.arius.admin.common.mapping.SpecialField;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,15 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping(V2_CONSOLE + "/template")
@@ -74,12 +70,12 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     public Result<Void> modifySchema(HttpServletRequest request,
                                @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
 
-        Result<Void> checkAuthResult = checkAppAuth(schemaDTO.getLogicId(), HttpRequestUtils.getProjectId(request));
+        Result<Void> checkAuthResult = checkAppAuth(schemaDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
 
-        return templateLogicMappingManager.modifySchema(schemaDTO, HttpRequestUtils.getOperator(request));
+        return templateLogicMappingManager.modifySchema(schemaDTO, HttpRequestUtil.getOperator(request));
     }
 
 }

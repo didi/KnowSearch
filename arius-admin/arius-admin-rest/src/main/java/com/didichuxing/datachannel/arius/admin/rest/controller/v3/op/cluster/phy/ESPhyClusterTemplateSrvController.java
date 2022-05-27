@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
@@ -61,13 +61,13 @@ public class ESPhyClusterTemplateSrvController {
     public Result<Boolean> addTemplateSrvId(HttpServletRequest request,
                                             @PathVariable("clusterName") String clusterName,
                                             @PathVariable("templateSrvId") String templateSrvId) {
-        return templateSrvManager.checkTemplateSrv(clusterName, templateSrvId, HttpRequestUtils.getOperator(request));
+        return templateSrvManager.checkTemplateSrv(clusterName, templateSrvId, HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/{clusterName}/{templateSrvId}")
     @ResponseBody
     @ApiOperation(value = "关闭指定集群的指定索引服务", notes = "")
     public Result<Boolean> delTemplateSrvId(HttpServletRequest request, @PathVariable String clusterName, @PathVariable String templateSrvId) {
-        return templateSrvManager.delTemplateSrv(clusterName, templateSrvId, HttpRequestUtils.getOperator(request) );
+        return templateSrvManager.delTemplateSrv(clusterName, templateSrvId, HttpRequestUtil.getOperator(request) );
     }
 }

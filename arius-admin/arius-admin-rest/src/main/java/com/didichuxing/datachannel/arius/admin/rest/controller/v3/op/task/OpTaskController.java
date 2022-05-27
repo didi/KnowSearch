@@ -12,9 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -67,7 +67,7 @@ public class OpTaskController {
                                                @PathVariable(value = "type") Integer type,
                                                @RequestBody OpTaskDTO workTaskDTO) {
         String dataCenter = workTaskDTO.getDataCenter();
-        String user = HttpRequestUtils.getOperator(request);
+        String user = HttpRequestUtil.getOperator(request);
 
         workTaskDTO.setTaskType(type);
         workTaskDTO.setCreator(user);

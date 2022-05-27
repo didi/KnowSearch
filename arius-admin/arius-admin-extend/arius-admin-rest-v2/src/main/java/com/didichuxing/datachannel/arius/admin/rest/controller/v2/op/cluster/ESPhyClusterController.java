@@ -2,13 +2,6 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.TemplateExpireManager;
@@ -19,13 +12,23 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({ V2_OP + "/cluster"})
@@ -62,7 +65,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "新建集群接口" )
 
     public Result<Boolean> add(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.addCluster(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getProjectId(request));
+        return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/edit")
@@ -70,7 +73,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "编辑集群接口" )
 
     public Result<Boolean> edit(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.editCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getProjectId(request));
+        return clusterPhyManager.editCluster(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/collectClusterNodeSettings")
