@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -77,12 +77,12 @@ public class ClusterIndecreaseTaskHandler extends AbstractClusterTaskHandler {
         }
 
         if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_EXPAND.getType())
-            || opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
+            || opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群扩缩容任务");
         }
 
         // 对于datanode的缩容，如果该节点上存在数据分片,做出警告
-        if (content.getOperationType() == EcmTaskTypeEnum.SHRINK.getCode()) {
+        if (content.getOperationType() == OpTaskTypeEnum.CLUSTER_SHRINK.getType()) {
             Map<String, Integer> segmentsOfIpByCluster = esClusterService.synGetSegmentsOfIpByCluster(content.getPhyClusterName());
 
             for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
@@ -120,7 +120,7 @@ public class ClusterIndecreaseTaskHandler extends AbstractClusterTaskHandler {
         ecmTaskDTO.setOrderType(content.getOperationType());
 
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ES_DOCKER,
-            EcmTaskTypeEnum.valueOf(content.getOperationType()), content);
+                OpTaskTypeEnum.valueOfType(content.getOperationType()), content);
         ecmTaskDTO.setClusterNodeRole(ListUtils
             .strList2String(ecmParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);

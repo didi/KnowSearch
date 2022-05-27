@@ -4,23 +4,21 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 
 import java.util.Optional;
 
-import com.didichuxing.datachannel.arius.admin.biz.worktask.handler.ECMOpTaskHandler;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.handler.AbstractOpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 
 /**
  * 集群处理器
@@ -29,9 +27,8 @@ import com.didiglobal.logi.log.LogFactory;
  * @author ohushenglin_v
  * @date 2022-05-20
  */
-public abstract class AbstractClusterTaskHandler extends ECMOpTaskHandler {
+public abstract class AbstractClusterTaskHandler extends AbstractOpTaskHandler {
     public static final Result<Void> CLUSTER_TYPE_NOT_SUPPORT = Result.buildFail("集群类型暂时不支持！");
-    protected final ILog             LOGGER                   = LogFactory.getLog(this.getClass());
     @Autowired
     protected ESPackageService       esPackageService;
     @Autowired

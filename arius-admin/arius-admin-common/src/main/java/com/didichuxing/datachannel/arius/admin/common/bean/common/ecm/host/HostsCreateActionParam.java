@@ -60,7 +60,7 @@ public class HostsCreateActionParam extends HostsParamBase {
     private Integer  level;
 
 
-    private String                    iaas;
+    private String                    platformType;
 
     /**
      * @see ClusterResourceTypeEnum

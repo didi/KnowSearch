@@ -126,7 +126,7 @@ public class ClusterPhyDTO extends PageDTO {
     private Double                     diskUsagePercent;
 
     @ApiModelProperty("IaaS平台类型")
-    private String                    iaas;
+    private String                    platformType;
 
     /**
      * @see ClusterResourceTypeEnum

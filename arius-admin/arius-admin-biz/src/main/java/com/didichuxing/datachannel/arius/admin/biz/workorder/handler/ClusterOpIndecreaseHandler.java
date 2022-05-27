@@ -27,7 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpIndecreaseHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
@@ -127,7 +127,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             }
 
             // 对于datanode的缩容，如果该节点上存在数据分片,做出警告
-            if (content.getOperationType() == EcmTaskTypeEnum.SHRINK.getCode()) {
+            if (content.getOperationType() == OpTaskTypeEnum.CLUSTER_SHRINK.getType()) {
                 Map<String, Integer> segmentsOfIpByCluster = esClusterService.synGetSegmentsOfIpByCluster(content.getPhyClusterName());
 
                 for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
@@ -189,7 +189,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             esEcmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
             esEcmTaskDTO.setOrderType(content.getOperationType());
             List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ES_DOCKER,
-                EcmTaskTypeEnum.valueOf(content.getOperationType()), content);
+                    OpTaskTypeEnum.valueOfType(content.getOperationType()), content);
             esEcmTaskDTO.setClusterNodeRole(ListUtils
                 .strList2String(ecmParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
             esEcmTaskDTO.setEcmParamBaseList(ecmParamBaseList);

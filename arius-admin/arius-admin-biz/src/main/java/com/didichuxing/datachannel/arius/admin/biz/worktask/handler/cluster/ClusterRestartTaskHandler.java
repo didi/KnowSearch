@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 
@@ -68,7 +68,7 @@ public class ClusterRestartTaskHandler extends AbstractClusterTaskHandler {
         ClusterRestartContent content = ConvertUtil.str2ObjByJson(param, ClusterRestartContent.class);
 
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
 
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(content.getPhyClusterId().intValue());
         ecmTaskDTO.setType(clusterPhy.getType());

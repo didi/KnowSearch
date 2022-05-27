@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,7 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -172,7 +172,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
      */
     @Override
     public Result<List<String>> getCanBeAssociatedClustersPhys(Integer clusterLogicType, Long clusterLogicId) {
-        if (!ResourceLogicTypeEnum.isExist(clusterLogicType)) {
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
             return Result.buildParamIllegal("逻辑集群类型非法");
         }
 
@@ -594,7 +594,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             return Result.buildParamIllegal("逻辑集群类型为空");
         }
 
-        if (UNKNOWN.getCode() == ResourceLogicTypeEnum.valueOf(clusterLogicType).getCode()) {
+        if (UNKNOWN.getCode() == ClusterResourceTypeEnum.valueOf(clusterLogicType).getCode()) {
             return Result.buildParamIllegal("无法识别逻辑集群类型");
         }
 

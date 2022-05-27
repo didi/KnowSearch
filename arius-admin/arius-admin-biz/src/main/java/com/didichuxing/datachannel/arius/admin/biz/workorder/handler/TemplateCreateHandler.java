@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -94,7 +94,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
                 TemplateCreateContent.class);
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getResourceId());
 
-        if (!clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())) {
+        if (!clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode())) {
             return false;
         }
 

@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.LogicClusterInfoSource;
 import com.didichuxing.datachannel.arius.admin.source.PhyClusterInfoSource;
@@ -49,7 +49,7 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
         LogicClusterInfoSource.LogicClusterInfo logicClusterInfo = LogicClusterInfoSource.applyLogicCluster(phyClusterInfo.getPhyClusterName(), phyClusterInfo.getPhyClusterName());
 
         Result<List<String>> result = ESPhyClusterControllerMethod
-                .listCanBeAssociatedRegionOfClustersPhys(ResourceLogicTypeEnum.PRIVATE.getCode(), logicClusterInfo.getLogicClusterId());
+                .listCanBeAssociatedRegionOfClustersPhys(ClusterResourceTypeEnum.PRIVATE.getCode(), logicClusterInfo.getLogicClusterId());
         Assertions.assertTrue(result.success());
         Assertions.assertTrue(result.getData().contains(phyClusterInfo.getPhyClusterName()));
         
@@ -62,7 +62,7 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
         // 无效的 type
         Result<List<String>> result1 = ESPhyClusterControllerMethod.listCanBeAssociatedClustersPhys(-1);
         Assertions.assertTrue(result1.failed());
-        Result<List<String>> result2 = ESPhyClusterControllerMethod.listCanBeAssociatedClustersPhys(ResourceLogicTypeEnum.PRIVATE.getCode());
+        Result<List<String>> result2 = ESPhyClusterControllerMethod.listCanBeAssociatedClustersPhys(ClusterResourceTypeEnum.PRIVATE.getCode());
         Assertions.assertTrue(result2.success());
     }
 
@@ -118,13 +118,13 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
     @Test
     public void getPhyClusterNameWithSameEsVersionTest() throws IOException {
         Result<List<String>> result = ESPhyClusterControllerMethod
-                .getPhyClusterNameWithSameEsVersion(ResourceLogicTypeEnum.PRIVATE.getCode(), phyClusterInfo.getPhyClusterName());
+                .getPhyClusterNameWithSameEsVersion(ClusterResourceTypeEnum.PRIVATE.getCode(), phyClusterInfo.getPhyClusterName());
         Assertions.assertTrue(result.success());
         // 再接入一个物理集群
         PhyClusterInfoSource.PhyClusterInfo phyClusterInfo = PhyClusterInfoSource.phyClusterJoin();
         try {
             Result<List<String>> result2 = ESPhyClusterControllerMethod
-                    .getPhyClusterNameWithSameEsVersion(ResourceLogicTypeEnum.PRIVATE.getCode(), phyClusterInfo.getPhyClusterName());
+                    .getPhyClusterNameWithSameEsVersion(ClusterResourceTypeEnum.PRIVATE.getCode(), phyClusterInfo.getPhyClusterName());
             Assertions.assertTrue(result2.success());
             // 再获取一次，会包含刚才接入的物理集群
             Assertions.assertTrue(result2.getData().contains(phyClusterInfo.getPhyClusterName()));

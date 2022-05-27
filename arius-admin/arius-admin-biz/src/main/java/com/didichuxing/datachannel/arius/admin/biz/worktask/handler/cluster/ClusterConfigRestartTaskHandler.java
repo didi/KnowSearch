@@ -5,7 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.E
 import java.util.List;
 import java.util.Objects;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.google.common.collect.ArrayListMultimap;
@@ -77,7 +76,7 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
             ClusterConfigRestartContent.class);
 
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
 
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(content.getPhyClusterId().intValue());
         ecmTaskDTO.setType(clusterPhy.getType());

@@ -24,12 +24,7 @@ import org.springframework.stereotype.Service;
  * @date 2019/4/29
  */
 @Service("dcdrOpTaskHandler")
-public class DCDROpTaskHandler implements OpTaskHandler {
-    private static final ILog LOGGER = LogFactory.getLog(DCDROpTaskHandler.class);
-
-    @Autowired
-    private OpTaskManager opTaskManager;
-
+public class DCDROpTaskHandler extends AbstractOpTaskHandler {
     @Override
     public Result<OpTask> addTask(OpTask opTask) {
         if (AriusObjUtils.isNull(opTask.getBusinessKey())) {

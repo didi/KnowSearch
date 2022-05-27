@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
@@ -52,9 +52,6 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
 
     @Autowired
     private OpTaskManager workTaskService;
-
-    @Autowired
-    private ESClusterService esClusterService;
 
     @Autowired
     private EcmTaskManager ecmTaskManager;
@@ -152,7 +149,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
         ecmTaskDTO.setPhysicClusterId(Long.parseLong(pluginPO.getPhysicClusterId()));
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
         ecmTaskDTO.setType(clusterPhy.getType());
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);

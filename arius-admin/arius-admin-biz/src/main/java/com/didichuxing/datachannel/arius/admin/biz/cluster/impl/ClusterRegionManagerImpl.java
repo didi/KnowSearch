@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -92,7 +92,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      */
     @Override
     public List<ClusterRegion> filterClusterRegionByLogicClusterType(Long clusterLogicId, String phyCluster, Integer clusterLogicType) {
-        if (ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.UNKNOWN)) {
+        if (ClusterResourceTypeEnum.valueOf(clusterLogicType).equals(ClusterResourceTypeEnum.UNKNOWN)) {
             return new ArrayList<>();
         }
 
@@ -472,8 +472,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         // 当region有被逻辑集群绑定时，如需被指定逻辑集群绑定需要满足：region已绑定的逻辑集群类型为共享且指定的逻辑集群类型为共享
         // 当满足上述条件之后，分为两种情况讨论：新建共享逻辑集群可以绑定该region;已建立逻辑集群需要过滤掉本来已经绑定了的region模块
-        return ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.PUBLIC)
-                && clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())
+        return ClusterResourceTypeEnum.valueOf(clusterLogicType).equals(ClusterResourceTypeEnum.PUBLIC)
+                && clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode())
                 && (AriusObjUtils.isNull(clusterLogicId) || !logicClusterIds.contains(clusterLogicId));
     }
 }

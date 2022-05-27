@@ -1,9 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.CANCELLED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.FAILED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.KILL_FAILED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.SUCCESS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum.CANCEL;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
@@ -14,12 +11,26 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.EXPAND;
 import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.SHRINK;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -48,9 +59,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.ecm.EcmTaskEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyHealthEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.EcmRemoteException;
@@ -70,26 +81,8 @@ import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActi
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ES工单任务管理
@@ -184,7 +177,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         EcmTask ecmTask = ConvertUtil.obj2Obj(ecmTaskPO, EcmTask.class);
         EcmTaskBasic ecmTaskBasic = ConvertUtil.obj2Obj(ecmTaskPO, EcmTaskBasic.class);
 
-        if (EcmTaskTypeEnum.NEW.getCode() == ecmTaskPO.getOrderType()
+        if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), ecmTaskPO.getOrderType())
             && ESClusterTypeEnum.ES_HOST.getCode() == ecmTaskBasic.getType()) {
             // 集群新建的工单, 该信息从参数中获取
             Map<String, EcmParamBase> ecmParamBaseMap = OpOrderTaskConverter.convert2EcmParamBaseMap(ecmTask);
@@ -592,25 +585,25 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     
     private Result<EcmOperateAppBase> runEcmTask(EcmParamBase ecmParamBase, Integer orderType, String operator) {
         Result<EcmOperateAppBase> result;
-        if (EcmTaskTypeEnum.NEW.getCode() == orderType) {
+        if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), orderType)) {
             result = ecmHandleService.startESCluster(ecmParamBase, operator);
-        } else if (EcmTaskTypeEnum.EXPAND.getCode() == orderType) {
+        } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), orderType)) {
             if (ecmParamBase instanceof HostsScaleActionParam) {
                 HostsScaleActionParam hostScaleActionParam = (HostsScaleActionParam) ecmParamBase;
                 hostScaleActionParam.setAction(EXPAND.getValue());
             }
 
             result = ecmHandleService.scaleESCluster(ecmParamBase, operator);
-        } else if (EcmTaskTypeEnum.SHRINK.getCode() == orderType) {
+        } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), orderType)) {
             if (ecmParamBase instanceof HostsScaleActionParam) {
                 HostsScaleActionParam hostScaleActionParam = (HostsScaleActionParam) ecmParamBase;
                 hostScaleActionParam.setAction(SHRINK.getValue());
             }
 
             result = ecmHandleService.scaleESCluster(ecmParamBase, operator);
-        } else if (EcmTaskTypeEnum.RESTART.getCode() == orderType) {
+        } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_RESTART.getType(), orderType)) {
             result = ecmHandleService.restartESCluster(ecmParamBase, operator);
-        } else if (EcmTaskTypeEnum.UPGRADE.getCode() == orderType) {
+        } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_UPGRADE.getType(), orderType)) {
             result = ecmHandleService.upgradeESCluster(ecmParamBase, operator);
         } else {
             return Result.buildFail("任务类型未知, 类型Code:" + orderType);
@@ -740,10 +733,10 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
             return;
         }
 
-        switch (EcmTaskTypeEnum.valueOf(ecmTask.getOrderType())) {
-            case EXPAND:
-            case NEW: addHostInfoFromTaskOrder(ecmTask); break;
-            case SHRINK: deleteRoleClusterAndHost(mergedStatusEnum,ecmTask); break;
+        switch (OpTaskTypeEnum.valueOfType(ecmTask.getOrderType())) {
+            case CLUSTER_EXPAND:
+            case CLUSTER_NEW: addHostInfoFromTaskOrder(ecmTask); break;
+            case CLUSTER_SHRINK: deleteRoleClusterAndHost(mergedStatusEnum,ecmTask); break;
             default: break;
         }
     }
@@ -841,18 +834,18 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     private List<String> buildClusterReadAndWriteAddressForHost(EcmTask ecmTask, List<EcmParamBase> ecmParamBases) {
-        if (ecmTask.getOrderType().equals(EcmTaskTypeEnum.NEW.getCode())) {
+        if (ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_NEW.getType())) {
             return buildClusterReadAndWriteAddressForHostWhenCreate(ecmParamBases);
         }
 
-        if (ecmTask.getOrderType().equals(EcmTaskTypeEnum.SHRINK.getCode())
-                || ecmTask.getOrderType().equals(EcmTaskTypeEnum.EXPAND.getCode())) {
+        if (ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType())
+                || ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
             return buildClusterReadAndWriteAddressForHostWhenScale(ecmTask.getOrderType(),
                     ecmTask.getPhysicClusterId(),
                     ecmParamBases);
         }
 
-        if(ecmTask.getOrderType().equals(EcmTaskTypeEnum.RESTART.getCode())) {
+        if(ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return buildClusterReadAndWriteAddressForHostWhenRestart(ecmTask.getPhysicClusterId());
         }
 
@@ -911,21 +904,21 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
             // 根据扩缩容和角色的类型对masternode和clientnode做对应删除增加操作
             if (hostsParamBase.getRoleName().equals(CLIENT_NODE.getDesc())) {
-                if (orderType.equals(EcmTaskTypeEnum.SHRINK.getCode())) {
+                if (orderType.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
                     clientHttpAddresses.removeAll(shouldOperateAddresses);
                 }
 
-                if (orderType.equals(EcmTaskTypeEnum.EXPAND.getCode())) {
+                if (orderType.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
                     clientHttpAddresses.addAll(shouldOperateAddresses);
                 }
             }
 
             if (hostsParamBase.getRoleName().equals(MASTER_NODE.getDesc())) {
-                if (orderType.equals(EcmTaskTypeEnum.SHRINK.getCode())) {
+                if (orderType.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
                     masterHttpAddresses.removeAll(shouldOperateAddresses);
                 }
 
-                if (orderType.equals(EcmTaskTypeEnum.EXPAND.getCode())) {
+                if (orderType.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
                     masterHttpAddresses.addAll(shouldOperateAddresses);
                 }
             }
@@ -1025,7 +1018,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
             return;
         }
         
-        if (EcmTaskTypeEnum.UPGRADE.getCode() != ecmTask.getOrderType()) {
+        if (!Objects.equals(OpTaskTypeEnum.CLUSTER_UPGRADE.getType(), ecmTask.getOrderType())) {
             return;
         }
 
@@ -1111,10 +1104,10 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     private boolean hasCallBackAddress(EcmTaskStatusEnum mergedStatusEnum, EcmTask ecmTask) {
         return SUCCESS.getValue().equals(mergedStatusEnum.getValue())
-               && (EcmTaskTypeEnum.NEW.getCode() == ecmTask.getOrderType()
-                   || EcmTaskTypeEnum.EXPAND.getCode() == ecmTask.getOrderType()
-                   || EcmTaskTypeEnum.SHRINK.getCode() == ecmTask.getOrderType()
-                   || EcmTaskTypeEnum.RESTART.getCode() == ecmTask.getOrderType());
+               && (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), ecmTask.getOrderType())
+                   || Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), ecmTask.getOrderType())
+                   || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())
+                   || Objects.equals(OpTaskTypeEnum.CLUSTER_RESTART.getType(), ecmTask.getOrderType()));
     }
 
     private void updateRoleClusterNumber(EcmTask ecmTask, EcmParamBase ecmParamBase) {
@@ -1133,8 +1126,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     private boolean hasCallBackRoleNumber(EcmTask ecmTask) {
-        return EcmTaskTypeEnum.EXPAND.getCode() == ecmTask.getOrderType()
-               || EcmTaskTypeEnum.SHRINK.getCode() == ecmTask.getOrderType();
+        return Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), ecmTask.getOrderType())
+               || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType());
     }
 
     private EcmTaskStatusEnum convertStatus(EcmHostStatusEnum ecmHostStatusEnum) {

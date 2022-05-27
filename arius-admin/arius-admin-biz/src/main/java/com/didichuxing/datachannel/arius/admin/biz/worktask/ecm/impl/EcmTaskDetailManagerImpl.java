@@ -1,5 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.impl;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
@@ -9,11 +20,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskDet
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskDetailProgress;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskDetailPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
@@ -22,16 +33,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDetailDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  *ES工单任务管理详情 服务实现类
@@ -213,16 +214,16 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
         ecmTaskDetailProgress.setSum(sum.longValue());
 
         //2.状态计算
-        if (EcmTaskTypeEnum.NEW.getCode() == ecmTask.getOrderType()
-            || EcmTaskTypeEnum.UPGRADE.getCode() == ecmTask.getOrderType()
-            || EcmTaskTypeEnum.RESTART.getCode() == ecmTask.getOrderType()) {
+        if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), ecmTask.getOrderType())
+            || Objects.equals(OpTaskTypeEnum.CLUSTER_UPGRADE.getType(), ecmTask.getOrderType())
+            || Objects.equals(OpTaskTypeEnum.CLUSTER_RESTART.getType(), ecmTask.getOrderType())) {
             ecmParamBases.stream().filter(Objects::nonNull).forEachOrdered(ecmParam -> ecmTaskDetailProgress
                 .getRoleNameTaskDetailMap().put(ecmParam.getRoleName(), Lists.newArrayList()));
         }
 
         //扩缩容获取变化的机器
-        if (EcmTaskTypeEnum.EXPAND.getCode() == ecmTask.getOrderType()
-            || EcmTaskTypeEnum.SHRINK.getCode() == ecmTask.getOrderType()) {
+        if (Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), ecmTask.getOrderType())
+                || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
 
             for (Map.Entry<String, List<String>> e : role2HostNamesMap.entrySet()) {
                 ecmParamBases.stream().filter(r -> !AriusObjUtils.isNull(r) && r.getRoleName().equals(e.getKey()))

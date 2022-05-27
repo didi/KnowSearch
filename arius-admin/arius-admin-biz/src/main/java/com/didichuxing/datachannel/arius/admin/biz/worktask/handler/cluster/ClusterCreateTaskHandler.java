@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -119,10 +120,10 @@ public class ClusterCreateTaskHandler extends AbstractClusterTaskHandler {
         if (StringUtils.isBlank(clusterOpNewHostContent.getCreator())) {
             clusterOpNewHostContent.setCreator(creator);
         }
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.NEW.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_NEW.getType());
 
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_HOST,
-            EcmTaskTypeEnum.NEW, clusterOpNewHostContent);
+            OpTaskTypeEnum.CLUSTER_NEW, clusterOpNewHostContent);
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
@@ -132,7 +133,7 @@ public class ClusterCreateTaskHandler extends AbstractClusterTaskHandler {
     @Override
     Result<Void> buildDockerEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_DOCKER,
-            EcmTaskTypeEnum.NEW, ConvertUtil.obj2ObjByJSON(param, ClusterNewDockerContent.class));
+            OpTaskTypeEnum.CLUSTER_NEW, ConvertUtil.obj2ObjByJSON(param, ClusterNewDockerContent.class));
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
         return Result.buildSucc();

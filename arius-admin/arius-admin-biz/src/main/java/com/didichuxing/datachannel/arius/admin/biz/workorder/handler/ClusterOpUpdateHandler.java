@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpUpdateOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -119,7 +119,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.UPGRADE.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_UPGRADE.getType());
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
 
         Result<List<EcmParamBase>> ecmParamBaseResult = ecmHandleService.buildEcmParamBaseList(

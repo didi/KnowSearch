@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 import static com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum.CN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_PHY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum.PRIVATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PRIVATE;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -260,6 +260,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
+    @Deprecated
     public Result<Void> releaseRacks(String cluster, String racks, int retryCount) {
         if (!isClusterExists(cluster)) {
             return Result.buildNotExist("集群不存在");
@@ -309,6 +310,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
+    @Deprecated
     public List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentAppId) {
 
         List<ClusterPhy> esClusterPhies = clusterPhyService.listClustersByCondt(param);
@@ -964,6 +966,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * @return 满足条件的rack列表
      */
     @Override
+    @Deprecated
     public Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhyName, String clusterLogicName, String templateSize) {
         //将传入的数据大小转化为字节数的单位,获取逻辑集群信息
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
@@ -1078,7 +1081,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             clusterLogicType = clusterLogicById.getType();
         }
 
-        if (!ResourceLogicTypeEnum.isExist(clusterLogicType)) {
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
             return Result.buildParamIllegal("逻辑集群类型非法");
         }
 
@@ -1174,7 +1177,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * 3. 物理集群责任人
      */
     private void buildWithOtherInfo(ConsoleClusterPhyVO cluster, Integer currentAppId) {
-        cluster.setGatewayAddress(esGatewayClient.getGatewayAddress());
 
         if (appService.isSuperApp(currentAppId)) {
             cluster.setCurrentAppAuth(AppClusterLogicAuthEnum.ALL.getCode());
@@ -1230,21 +1232,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return clusterLogic;
     }
 
-    /**
-     * 过滤rack中的cold节点信息
-     *
-     * @param racks 架
-     * @return {@link String}
-     */
-    private String filterColdRackFromRegionRacks(String racks) {
-        List<String> rackList = RackUtils.racks2List(racks);
-        if(CollectionUtils.isEmpty(rackList)) {
-            return null;
-        }
-
-        rackList.removeIf(AdminConstant.DEFAULT_COLD_RACK::equals);
-        return RackUtils.list2Racks(rackList);
-    }
 
     private Result<ClusterPhyVO> saveClusterPhy(ClusterJoinDTO param, String operator) {
         //保存集群信息
@@ -1274,31 +1261,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
         return clusterDTO;
     }
-
-    private Result<Long> saveClusterLogic(ClusterJoinDTO param, String operator) {
-        ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
-        esLogicClusterDTO.setAppId(param.getAppId());
-        esLogicClusterDTO.setResponsible(param.getResponsible());
-        esLogicClusterDTO.setName(param.getLogicCluster());
-        esLogicClusterDTO.setDataCenter(CN.getCode());
-        esLogicClusterDTO.setType(PRIVATE.getCode());
-        esLogicClusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
-
-        Long dataNodeNumber = param.getRoleClusterHosts().stream().filter(hosts -> DATA_NODE.getCode() == hosts.getRole()).count();
-
-        esLogicClusterDTO.setDataNodeNu(dataNodeNumber.intValue());
-        esLogicClusterDTO.setLibraDepartmentId("");
-        esLogicClusterDTO.setLibraDepartment("");
-        esLogicClusterDTO.setMemo(param.getPhyClusterDesc());
-
-        Result<Long> result = clusterLogicService.createClusterLogic(esLogicClusterDTO);
-        if (result.failed()) {
-            return Result.buildFail("逻辑集群创建失败");
-        }
-
-        return result;
-    }
-
     /**
      * 集群接入参数校验
      *
@@ -1418,11 +1380,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     private Result<Void> initClusterJoin(ClusterJoinDTO param, String operator, String esClientHttpAddressesStr) {
-        //获取设置rack
-        Result<Void> rackSetResult = initRackValueForClusterJoin(param, esClientHttpAddressesStr);
-        if (rackSetResult.failed()) {
-            return rackSetResult;
-        }
         //获取设置es版本
         Result<Void> esVersionSetResult = initESVersionForClusterJoin(param, esClientHttpAddressesStr);
         if (esVersionSetResult.failed()) {
@@ -1474,24 +1431,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal(String.format("%s无法获取es版本", esClientHttpAddressesStr));
         }
         param.setEsVersion(esVersion);
-        return Result.buildSucc();
-    }
-
-    /**
-     * 初始化rack信息
-     * @param param ClusterJoinDTO
-     * @param esClientHttpAddressesStr  http连接地址
-     * @return
-     */
-    private Result<Void> initRackValueForClusterJoin(ClusterJoinDTO param, String esClientHttpAddressesStr) {
-        if(CollectionUtils.isEmpty(param.getRegionRacks())) {
-            Result<Set<String>> rackSetResult = esClusterService.getClusterRackByHttpAddress(esClientHttpAddressesStr,param.getPassword());
-            if (rackSetResult.failed()) {
-                return Result.buildFail(rackSetResult.getMessage());
-            } else {
-                param.setRegionRacks(new ArrayList<>(rackSetResult.getData()));
-            }
-        }
         return Result.buildSucc();
     }
 

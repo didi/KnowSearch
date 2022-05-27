@@ -68,7 +68,7 @@ public class ClusterNewHostContent extends ClusterHostContent {
      */
     private String  tags;
 
-    private String                    iaas;
+    private String                    platformType;
 
     /**
      * @see ClusterResourceTypeEnum

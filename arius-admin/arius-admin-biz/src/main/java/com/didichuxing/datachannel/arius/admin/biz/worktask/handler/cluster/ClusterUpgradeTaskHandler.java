@@ -18,7 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskD
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 
@@ -73,7 +73,7 @@ public class ClusterUpgradeTaskHandler extends AbstractClusterTaskHandler {
     Result<Void> buildHostEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
         ClusterUpdateContent content = ConvertUtil.str2ObjByJson(param, ClusterUpdateContent.class);
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.UPGRADE.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_UPGRADE.getType());
 
         Result<List<EcmParamBase>> ecmParamBaseResult = ecmHandleService.buildEcmParamBaseList(
             content.getPhyClusterId().intValue(), ConvertUtil.str2ObjArrayByJson(content.getRoleOrder(), String.class));

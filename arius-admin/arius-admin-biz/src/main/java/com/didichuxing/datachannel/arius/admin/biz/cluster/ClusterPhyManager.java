@@ -18,7 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClu
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 
 /**
  *
@@ -103,7 +103,7 @@ public interface ClusterPhyManager {
      * 获取逻辑集群可关联region的物理集群名称列表
      * @param clusterLogicType 逻辑集群类型
      * @param clusterLogicId   逻辑集群Id
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      * @return 物理集群名称
      */
     Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(Integer clusterLogicType, Long clusterLogicId);
@@ -111,7 +111,7 @@ public interface ClusterPhyManager {
     /**
      * 获取新建逻辑集群可关联的物理集群名称
      * @param clusterLogicType  逻辑集群类型
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      * @return 物理集群名称
      */
     Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType);

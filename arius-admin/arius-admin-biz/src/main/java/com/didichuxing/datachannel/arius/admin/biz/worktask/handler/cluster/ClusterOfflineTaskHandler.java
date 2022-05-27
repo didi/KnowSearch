@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterOffli
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 
@@ -43,7 +43,7 @@ public class ClusterOfflineTaskHandler extends AbstractClusterTaskHandler {
     Result<Void> buildHostEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
         ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(param, ClusterOfflineContent.class);
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.OFFLINE.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_OFFLINE.getType());
         return Result.buildSucc();
     }
 }

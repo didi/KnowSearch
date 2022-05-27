@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpNewHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
@@ -135,7 +135,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.NEW.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_NEW.getType());
         ecmTaskDTO.setType(clusterBaseContent.getType());
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
         ecmTaskDTO.setPhysicClusterId(ClusterConstant.INVALID_VALUE);
@@ -144,7 +144,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
         List<EcmParamBase> ecmParamBaseList = null;
         if (ES_DOCKER.getCode() == clusterBaseContent.getType()) {
             ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_DOCKER,
-                EcmTaskTypeEnum.NEW,
+                OpTaskTypeEnum.CLUSTER_NEW,
                 ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewDockerContent.class));
         } else if (ES_HOST.getCode() == clusterBaseContent.getType()) {
             // 获取并且设置新建集群工单内容中的集群创建人信息
@@ -152,7 +152,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             clusterOpNewHostContent.setCreator(workOrder.getSubmitor());
 
             ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_HOST,
-                EcmTaskTypeEnum.NEW, clusterOpNewHostContent);
+                OpTaskTypeEnum.CLUSTER_NEW, clusterOpNewHostContent);
         } else {
             return Result.buildFail("集群类型(Docker|Host)错误");
         }

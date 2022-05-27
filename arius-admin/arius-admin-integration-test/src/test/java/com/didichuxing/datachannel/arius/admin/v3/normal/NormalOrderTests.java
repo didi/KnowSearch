@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalOrderControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.CustomDataSource;
 import org.junit.Assert;
@@ -46,7 +46,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("dataNodeSpec", "16-64Gi-3072g");
         contentObj.put("dataNodeNu", 3);
         contentObj.put("responsible", "admin");
-        contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
+        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
         Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assert.assertTrue(result.success());
@@ -62,7 +62,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("dataNodeSpec", "16-64Gi-3072g");
         contentObj.put("dataNodeNu", 3);
         contentObj.put("responsible", "admin");
-        contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
+        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
         Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assertions.assertTrue(result.success());
@@ -84,7 +84,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("dataNodeSpec", "16-64Gi-3072g");
         contentObj.put("dataNodeNu", 3);
         contentObj.put("responsible", "admin");
-        contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
+        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
         Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assertions.assertTrue(result.success());
@@ -105,7 +105,7 @@ public class NormalOrderTests extends BasePhyClusterInfoTest {
         contentObj.put("dataNodeSpec", "16-64Gi-3072g");
         contentObj.put("dataNodeNu", 3);
         contentObj.put("responsible", "admin");
-        contentObj.put("type", ResourceLogicTypeEnum.PRIVATE.getCode());
+        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(contentObj);
         Result<AriusWorkOrderInfoSubmittedVO> result=NormalOrderControllerMethod.submit(type,workOrderDTO);
         Assertions.assertTrue(result.success());

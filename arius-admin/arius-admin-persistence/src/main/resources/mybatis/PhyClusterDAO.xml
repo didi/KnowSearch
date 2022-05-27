@@ -31,15 +31,15 @@
         <result column="disk_usage"                 jdbcType="BIGINT" property="diskUsage"/>
         <result column="disk_usage_percent"         jdbcType="DECIMAL" property="diskUsagePercent"/>
         <result column="tags"                 jdbcType="VARCHAR" property="tags" />
-        <result column="iaas"                       jdbcType="TINYINT" property="iaas"/>
-        <result column="resource_type"                jdbcType="VARCHAR" property="resourceType"/>
+        <result column="platform_type"                       jdbcType="VARCHAR" property="platformType"/>
+        <result column="resource_type"                jdbcType="TINYINT" property="resourceType"/>
         <result column="gateway_url"                jdbcType="VARCHAR" property="gatewayUrl"/>
     </resultMap>
 
     <sql id="Base_Column_List">
        id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
         es_version, `level`, `password`, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time,
-           run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags,iaas,resource_type,gateway_url
+           run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags,platform_type,resource_type,gateway_url
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
@@ -47,11 +47,11 @@
             keyColumn="id" keyProperty="id">
         insert into es_cluster_phy_info
         ( cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent, `tags`,iaas,resource_type)
+        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent, `tags`,platform_type,resource_type)
         values
         (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type}, #{dataCenter},#{imageName},#{idc},
         #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health}, #{password}, #{activeShardNum}, #{diskTotal}, #{diskUsage}, #{diskUsagePercent},
-         #{tags},#{iaas},#{resourceType})
+         #{tags},#{platformType},#{resourceType})
     </insert>
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO">
         update es_cluster_phy_info

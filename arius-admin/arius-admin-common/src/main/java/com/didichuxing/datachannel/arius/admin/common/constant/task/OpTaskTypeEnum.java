@@ -2,8 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
 import java.util.Arrays;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-
 /**
  * 任务枚举类型
  *
@@ -12,31 +10,31 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEn
  */
 public enum OpTaskTypeEnum {
                             /**新增*/
-                            CLUSTER_NEW(EcmTaskTypeEnum.NEW.getCode(), "集群新建", "cluster-create"),
+                            CLUSTER_NEW(1, "集群新建", "cluster-create"),
 
-                            CLUSTER_EXPAND(EcmTaskTypeEnum.EXPAND.getCode(), "集群扩容", "cluster-expand"),
+                            CLUSTER_EXPAND(2, "集群扩容", "cluster-expand"),
 
-                            CLUSTER_SHRINK(EcmTaskTypeEnum.SHRINK.getCode(), "集群缩容", "cluster-shrink"),
+                            CLUSTER_SHRINK(3, "集群缩容", "cluster-shrink"),
 
-                            CLUSTER_RESTART(EcmTaskTypeEnum.RESTART.getCode(), "集群重启", "cluster-restart"),
+                            CLUSTER_RESTART(4, "集群重启", "cluster-restart"),
 
-                            CLUSTER_UPGRADE(EcmTaskTypeEnum.UPGRADE.getCode(), "集群升级", "cluster-upgrade"),
+                            CLUSTER_UPGRADE(5, "集群升级", "cluster-upgrade"),
 
-                            CLUSTER_PLUG_OPERATION(EcmTaskTypeEnum.PLUG_OPERATION.getCode(), "集群插件操作",
+                            CLUSTER_PLUG_OPERATION(6, "集群插件操作",
                                                    "cluster-plug-operation"),
 
-                            CLUSTER_OFFLINE(EcmTaskTypeEnum.OFFLINE.getCode(), "集群下线操作", "cluster-offline"),
+                            CLUSTER_OFFLINE(7, "集群下线操作", "cluster-offline"),
 
                             TEMPLATE_DCDR(10, "索引模板主从切换", "template-dcdr"),
 
-                            CLUSTER_CONFIG_ADD(EcmTaskTypeEnum.CONFIG_ADD.getCode(), "集群配置新增", "cluster-config-add"),
+                            CLUSTER_CONFIG_ADD(11, "集群配置新增", "cluster-config-add"),
 
-                            CLUSTER_CONFIG_EDIT(EcmTaskTypeEnum.CONFIG_EDIT.getCode(), "集群配置编辑", "cluster-config-edit"),
+                            CLUSTER_CONFIG_EDIT(12, "集群配置编辑", "cluster-config-edit"),
 
-                            CLUSTER_CONFIG_DELETE(EcmTaskTypeEnum.CONFIG_DELETE.getCode(), "集群配置删除",
+                            CLUSTER_CONFIG_DELETE(13, "集群配置删除",
                                                   "cluster-config-delete"),
 
-                            UNKNOWN(EcmTaskTypeEnum.UNKNOWN.getCode(), "unknown");
+                            UNKNOWN(-1, "unknown");
 
     OpTaskTypeEnum(Integer type, String message) {
         this.type = type;

@@ -1,37 +1,34 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-import org.apache.tomcat.util.http.parser.Upgrade;
-
 /**
  * @author ohushenglin_v
  * @date 2022-05-24
  */
 public enum OpTaskHandleEnum {
     /**新增*/
-    CLUSTER_NEW(1, OpTaskConstant.CLUSTER_CREATE_TASK),
+    CLUSTER_NEW(OpTaskTypeEnum.CLUSTER_NEW.getType(), OpTaskConstant.CLUSTER_CREATE_TASK),
 
-    CLUSTER_EXPAND(2, OpTaskConstant.CLUSTER_INDECREASE_TASK),
+    CLUSTER_EXPAND(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), OpTaskConstant.CLUSTER_INDECREASE_TASK),
 
-    CLUSTER_SHRINK(3, OpTaskConstant.CLUSTER_INDECREASE_TASK),
+    CLUSTER_SHRINK(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), OpTaskConstant.CLUSTER_INDECREASE_TASK),
 
-    CLUSTER_RESTART(4, OpTaskConstant.CLUSTER_RESTART_TASK),
+    CLUSTER_RESTART(OpTaskTypeEnum.CLUSTER_RESTART.getType(), OpTaskConstant.CLUSTER_RESTART_TASK),
 
-    CLUSTER_UPGRADE(5, OpTaskConstant.CLUSTER_UPGRADE_TASK),
+    CLUSTER_UPGRADE(OpTaskTypeEnum.CLUSTER_UPGRADE.getType(), OpTaskConstant.CLUSTER_UPGRADE_TASK),
 
-    CLUSTER_PLUG_OPERATION(6, OpTaskConstant.ECM_WORK_TASK),
+    CLUSTER_PLUG_OPERATION(OpTaskTypeEnum.CLUSTER_PLUG_OPERATION.getType(), OpTaskConstant.ECM_WORK_TASK),
 
-    CLUSTER_OFFLINE(7, OpTaskConstant.CLUSTER_OFFLINE_TASK),
+    CLUSTER_OFFLINE(OpTaskTypeEnum.CLUSTER_OFFLINE.getType(), OpTaskConstant.CLUSTER_OFFLINE_TASK),
 
-    TEMPLATE_DCDR(10, OpTaskConstant.DCDR_WORK_TASK),
+    TEMPLATE_DCDR(OpTaskTypeEnum.TEMPLATE_DCDR.getType(), OpTaskConstant.DCDR_WORK_TASK),
 
-    CLUSTER_CONFIG_ADD(11, OpTaskConstant.CLUSTER_CONFIG_RESTART_TASK),
+    CLUSTER_CONFIG_ADD(OpTaskTypeEnum.CLUSTER_CONFIG_ADD.getType(), OpTaskConstant.CLUSTER_CONFIG_RESTART_TASK),
 
-    CLUSTER_CONFIG_EDIT(12, OpTaskConstant.ECM_WORK_TASK),
+    CLUSTER_CONFIG_EDIT(OpTaskTypeEnum.CLUSTER_CONFIG_EDIT.getType(), OpTaskConstant.ECM_WORK_TASK),
 
-    CLUSTER_CONFIG_DELETE(13, OpTaskConstant.ECM_WORK_TASK),
+    CLUSTER_CONFIG_DELETE(OpTaskTypeEnum.CLUSTER_CONFIG_DELETE.getType(), OpTaskConstant.ECM_WORK_TASK),
 
-    UNKNOWN(-1, OpTaskConstant.UNKNOWN);
+    UNKNOWN(OpTaskTypeEnum.UNKNOWN.getType(), OpTaskConstant.UNKNOWN);
 
     OpTaskHandleEnum(Integer type, String message) {
         this.type = type;

@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterRegionControllerMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -74,7 +74,7 @@ public class ESLogicClusterRegionTest extends BaseLogicClusterInfoTest {
         dto.setLibraDepartment("");
         dto.setLibraDepartmentId("");
         dto.setQuota(0D);
-        dto.setType(ResourceLogicTypeEnum.PRIVATE.getCode());
+        dto.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
 
         List<ClusterRegionDTO> list = new ArrayList<>();
         for (Long regionId : regionIdList) {

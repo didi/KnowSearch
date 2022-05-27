@@ -175,7 +175,7 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
     /**
      * IaaS平台类型
      */
-    private String                iaas;
+    private String                platformType;
 
     /**
      * 集群资源类型(-1 未知 1 共享 2 独立 3 独享
