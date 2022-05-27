@@ -5,7 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.EDIT;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart.ClusterOpConfigRestartContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterConfigRestartContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
@@ -17,9 +17,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpConfigRestartOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
  * @date 2021-01-21
  */
 @Service("clusterOpConfigRestartHandler")
+@Deprecated
 public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
 
     @Autowired
@@ -47,8 +48,8 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
-        ClusterOpConfigRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpConfigRestartContent.class);
+        ClusterConfigRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterConfigRestartContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {
             return Result.buildParamIllegal("物理集群id为空");
@@ -76,7 +77,7 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("原始配置为空");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), AriusOpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -85,8 +86,8 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterOpConfigRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpConfigRestartContent.class);
+        ClusterConfigRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterConfigRestartContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -96,15 +97,15 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        ClusterOpConfigRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpConfigRestartContent.class);
+        ClusterConfigRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterConfigRestartContent.class);
 
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
 
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.RESTART.getCode());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
 
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(content.getPhyClusterId().intValue());
@@ -124,7 +125,7 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
 
         OpTaskDTO opTaskDTO = new OpTaskDTO();
         opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        opTaskDTO.setTaskType(AriusOpTaskTypeEnum.CLUSTER_RESTART.getType());
+        opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         opTaskDTO.setCreator(workOrder.getSubmitor());
         Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
         if (null == result || result.failed()) {
@@ -136,7 +137,7 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterOpConfigRestartContent content = JSON.parseObject(extensions, ClusterOpConfigRestartContent.class);
+        ClusterConfigRestartContent content = JSON.parseObject(extensions, ClusterConfigRestartContent.class);
         if (EDIT.getCode() == content.getActionType()) {
             buildOriginalConfigsData(content.getNewEsConfigs());
         }
@@ -158,7 +159,7 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
     }
 
     /**落配置信息入DB*/
-    private Multimap</*集群角色*/String, /*改动的配置id*/Long> saveAndGetEsConfigIds(ClusterOpConfigRestartContent content, String approver) {
+    private Multimap</*集群角色*/String, /*改动的配置id*/Long> saveAndGetEsConfigIds(ClusterConfigRestartContent content, String approver) {
         Multimap<String, Long> role2ConfigIdsMultiMap = ArrayListMultimap.create();
         if (ADD.getCode() == content.getActionType()) {
             List<ESConfigDTO> newEsConfigs = ConvertUtil.list2List(content.getNewEsConfigs(), ESConfigDTO.class);

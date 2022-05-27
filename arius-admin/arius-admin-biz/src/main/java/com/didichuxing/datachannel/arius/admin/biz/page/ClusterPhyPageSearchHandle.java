@@ -65,10 +65,6 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
         if (pageDTO instanceof ClusterPhyConditionDTO) {
             ClusterPhyConditionDTO clusterPhyConditionDTO = (ClusterPhyConditionDTO) pageDTO;
-            Integer authType = clusterPhyConditionDTO.getAuthType();
-            if (null != authType && !AppClusterPhyAuthEnum.isExitByCode(authType)) {
-                return Result.buildParamIllegal("权限类型不存在");
-            }
 
             Integer status = clusterPhyConditionDTO.getHealth();
             if (null != status && !ClusterHealthEnum.isExitByCode(status)) {

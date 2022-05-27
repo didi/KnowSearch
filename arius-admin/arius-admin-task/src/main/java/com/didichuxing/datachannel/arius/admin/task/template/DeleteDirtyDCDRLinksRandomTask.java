@@ -6,10 +6,10 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCD
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRSingleTemplateMasterSlaveSwitchDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTasksDetail;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,7 +45,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
         LOGGER.info("class=DeleteDirtyDCDRLinksRandomTask||method=execute||msg=start");
 
         //获取失败的dcdr主从切换任务
-        List<OpTask> successDcdrSwitchTaskList = opTaskManager.getSuccessTaskByType(AriusOpTaskTypeEnum.TEMPLATE_DCDR.getType());
+        List<OpTask> successDcdrSwitchTaskList = opTaskManager.getSuccessTaskByType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
         if (CollectionUtils.isEmpty(successDcdrSwitchTaskList)) { return TaskResult.SUCCESS; }
 
         for (OpTask successDcdrSwitchTask : successDcdrSwitchTaskList) {

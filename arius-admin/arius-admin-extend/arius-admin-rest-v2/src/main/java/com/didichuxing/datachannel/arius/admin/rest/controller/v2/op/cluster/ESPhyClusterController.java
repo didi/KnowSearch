@@ -27,6 +27,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-23
+ */
 @RestController
 @RequestMapping({ V2_OP + "/cluster"})
 @Api(tags = "es物理集群集群接口(REST)")
@@ -54,7 +58,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "获取集群列表接口")
     public Result<List<ConsoleClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhyVOS(param));
+        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhys(param));
     }
 
     @PutMapping("/add")

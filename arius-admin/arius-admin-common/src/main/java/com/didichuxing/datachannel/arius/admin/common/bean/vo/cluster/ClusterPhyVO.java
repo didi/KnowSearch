@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 
 import io.swagger.annotations.ApiModel;
@@ -100,6 +101,17 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     @ApiModelProperty("活跃的分片数目")
     private Long                        activeShardNum;
 
+    @ApiModelProperty("IaaS平台类型")
+    private String                    iaas;
+
+    /**
+     * @see ClusterResourceTypeEnum
+     */
+    @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
+    private Integer                    resourceType;
+
+    @ApiModelProperty("gateway地址")
+    private String                    gatewayUrl;
     @Override
     public int compareTo(ClusterPhyVO o) {
         if (null == o) {

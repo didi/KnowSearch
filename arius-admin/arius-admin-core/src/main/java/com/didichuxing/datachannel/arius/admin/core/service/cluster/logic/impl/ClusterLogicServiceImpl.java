@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNorms
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -687,8 +687,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     private Result<Void> isIllegal(ESLogicClusterDTO param) {
-        ResourceLogicTypeEnum typeEnum = ResourceLogicTypeEnum.valueOf(param.getType());
-        if (ResourceLogicTypeEnum.UNKNOWN.equals(typeEnum)) {
+        ClusterResourceTypeEnum typeEnum = ClusterResourceTypeEnum.valueOf(param.getType());
+        if (ClusterResourceTypeEnum.UNKNOWN.equals(typeEnum)) {
             return Result.buildParamIllegal("新建逻辑集群提交内容中集群类型非法");
         }
 

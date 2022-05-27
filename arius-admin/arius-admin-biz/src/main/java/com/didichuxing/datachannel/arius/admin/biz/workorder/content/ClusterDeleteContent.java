@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ClusterDeleteContent extends ClusterOpBaseContent {
+public class ClusterDeleteContent extends ClusterBaseContent {
 
 }

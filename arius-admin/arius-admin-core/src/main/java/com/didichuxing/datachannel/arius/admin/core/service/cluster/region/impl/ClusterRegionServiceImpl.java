@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionBindEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionCreateEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionDeleteEvent;
@@ -363,7 +363,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                     return Result.buildFail(String.format("region %d 已经被非共享逻辑集群绑定",regionId));
                 }
 
-                if (!clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())) {
+                if (!clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode())) {
                     return Result.buildFail(String.format("region %d 已经被绑定,并且逻辑集群 %s 不是共享集群",
                             regionId, clusterLogic.getName()));
                 }
@@ -558,7 +558,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         Long logicClusterId = ListUtils.string2LongList(region.getLogicClusterIds()).get(0);
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
 
-        return !AriusObjUtils.isNull(clusterLogic) && clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode());
+        return !AriusObjUtils.isNull(clusterLogic) && clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode());
     }
 
     @Override

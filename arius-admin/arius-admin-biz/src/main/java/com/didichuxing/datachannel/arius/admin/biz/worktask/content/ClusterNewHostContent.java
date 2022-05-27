@@ -1,12 +1,18 @@
-package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
+package com.didichuxing.datachannel.arius.admin.biz.worktask.content;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-24
+ */
 @Data
 @NoArgsConstructor
-public class ClusterOpNewHostContent extends ClusterOpHostContent {
+public class ClusterNewHostContent extends ClusterHostContent {
     /**
      * 数据中心
      */
@@ -56,4 +62,17 @@ public class ClusterOpNewHostContent extends ClusterOpHostContent {
      * @see ResourceLogicLevelEnum
      */
     private Integer                 level;
+
+    /**
+     * 集群展示用属性标签，如「集群所属资源类型」等等
+     */
+    private String  tags;
+
+    private String                    platformType;
+
+    /**
+     * @see ClusterResourceTypeEnum
+     */
+    private Integer                    resourceType;
+
 }

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 
@@ -25,7 +25,7 @@ public class ClusterLogic extends BaseEntity implements StringResponsible, Compa
 
     /**
      * 类型
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      */
     private Integer type;
 

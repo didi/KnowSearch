@@ -31,28 +31,32 @@
         <result column="disk_usage"                 jdbcType="BIGINT" property="diskUsage"/>
         <result column="disk_usage_percent"         jdbcType="DECIMAL" property="diskUsagePercent"/>
         <result column="tags"                 jdbcType="VARCHAR" property="tags" />
+        <result column="platform_type"                       jdbcType="VARCHAR" property="platformType"/>
+        <result column="resource_type"                jdbcType="TINYINT" property="resourceType"/>
+        <result column="gateway_url"                jdbcType="VARCHAR" property="gatewayUrl"/>
     </resultMap>
 
     <sql id="Base_Column_List">
        id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`, password, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time, run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags
+        es_version, `level`, `password`, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time,
+           run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags,platform_type,resource_type,gateway_url
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into es_data_source
+        insert into es_cluster_phy_info
         ( cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent, `tags`)
+        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent, `tags`,platform_type,resource_type)
         values
         (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type}, #{dataCenter},#{imageName},#{idc},
         #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health}, #{password}, #{activeShardNum}, #{diskTotal}, #{diskUsage}, #{diskUsagePercent},
-         #{tags})
+         #{tags},#{platformType},#{resourceType})
     </insert>
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO">
-        update es_data_source
+        update es_cluster_phy_info
         <trim prefix="set" prefixOverrides=",">
-            <if test="readAddress != null">,read_address = #{readAddress}</if>
+            <if test="readAddress != null">read_address = #{readAddress}</if>
             <if test="writeAddress != null">,write_address = #{writeAddress}</if>
             <if test="httpAddress != null">,http_address = #{httpAddress}</if>
             <if test="httpWriteAddress != null">,http_write_address = #{httpWriteAddress}</if>
@@ -79,18 +83,19 @@
             <if test="diskUsage != null">, disk_usage = #{diskUsage}</if>
             <if test="diskUsagePercent != null">, disk_usage_percent = #{diskUsagePercent}</if>
             <if test="tags != null">, `tags` = #{tags}</if>
+            <if test="gatewayUrl != null">, gateway_url = #{gatewayUrl}</if>
         </trim>
         where id = #{id} and is_active = 1;
     </update>
 
     <update id="updatePluginIdsById">
-        update es_data_source
+        update es_cluster_phy_info
         set plug_ids = #{plugIds}
         where id = #{clusterId} and is_active = 1;
     </update>
 
     <delete id="delete" parameterType="integer">
-        update es_data_source
+        update es_cluster_phy_info
         set is_active = 0 where id = #{clusterId};
     </delete>
 
@@ -99,7 +104,7 @@
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_data_source
+        from es_cluster_phy_info
         <trim prefix="where" prefixOverrides="and">
             <if test="id != null">and id = #{id}</if>
             <if test="cluster != null">and cluster = #{cluster}</if>
@@ -117,7 +122,7 @@
     <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_data_source
+        from es_cluster_phy_info
         where is_active = 1
         <if test="cluster != null">  and  cluster LIKE CONCAT(#{cluster},'%')</if>
         <if test="esVersion != null">and  es_version = #{esVersion}</if>
@@ -131,7 +136,7 @@
             resultType="long">
         select
         count(1)
-        from es_data_source
+        from es_cluster_phy_info
         where is_active = 1
         <if test="cluster != null">  and  cluster LIKE CONCAT(#{cluster}, '%')</if>
         <if test="esVersion != null">and  es_version = #{esVersion}</if>
@@ -142,21 +147,21 @@
     <select id="getById" parameterType="integer" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_data_source
+        from es_cluster_phy_info
         where id = #{clusterId} and is_active = 1;
     </select>
 
     <select id="getByName" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_data_source
+        from es_cluster_phy_info
         where cluster = #{clusterName} and is_active = 1;
     </select>
 
     <select id="listByNames" parameterType="list" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_data_source
+        from es_cluster_phy_info
         where is_active = 1 and cluster in
         <foreach collection="list" separator="," item="item" close=");" open="(">
             #{item}
@@ -167,18 +172,18 @@
     <select id="listAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_data_source where is_active = 1;
+        from es_cluster_phy_info where is_active = 1;
     </select>
 
     <select id="listAllName" resultType="String">
         select cluster
-        from es_data_source where is_active = 1;
+        from es_cluster_phy_info where is_active = 1;
     </select>
 
     <select id="listByIds" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_data_source
+        from es_cluster_phy_info
         where
         <choose>
             <when test="ids != null and ids.size > 0">

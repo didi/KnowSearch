@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 import static com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum.CN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_PHY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum.PRIVATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PRIVATE;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManag
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
@@ -52,10 +51,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.*;
@@ -103,8 +99,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private static final String                              NODE_NOT_EXISTS_TIPS          = "集群缺少类型为%s的节点";
 
     private static final String                              IP_DUPLICATE_TIPS             = "集群ip:%s重复, 请重新输入";
-
-    private static final Map<String/*cluster*/, Triple<Long/*diskUsage*/, Long/*diskTotal*/, Double/*diskUsagePercent*/>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps.newConcurrentMap();
+    /**
+     * Map< cluster , Triple< diskUsage , diskTotal , diskUsagePercent >>
+     */
+    private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps.newConcurrentMap();
 
     @Autowired
     private ESTemplateService                                esTemplateService;
@@ -262,6 +260,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
+    @Deprecated
     public Result<Void> releaseRacks(String cluster, String racks, int retryCount) {
         if (!isClusterExists(cluster)) {
             return Result.buildNotExist("集群不存在");
@@ -310,9 +309,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildFail(String.join(",", errMsgList));
     }
 
-    // @Cacheable(cacheNames = CACHE_GLOBAL_NAME, key = "#currentAppId + '@' + 'getConsoleClusterPhyVOS'")
     @Override
-    public List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ClusterPhyDTO param, Integer currentAppId) {
+    @Deprecated
+    public List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentAppId) {
 
         List<ClusterPhy> esClusterPhies = clusterPhyService.listClustersByCondt(param);
 
@@ -320,17 +319,17 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ClusterPhyDTO param) {
+    public List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param) {
 
         List<ClusterPhy> phyClusters = clusterPhyService.listClustersByCondt(param);
-        List<ConsoleClusterPhyVO> consoleClusterPhyVOS = ConvertUtil.list2List(phyClusters, ConsoleClusterPhyVO.class);
+        List<ConsoleClusterPhyVO> consoleClusterPhys = ConvertUtil.list2List(phyClusters, ConsoleClusterPhyVO.class);
 
-        consoleClusterPhyVOS.parallelStream()
+        consoleClusterPhys.parallelStream()
                 .forEach(this::buildClusterRole);
 
-        Collections.sort(consoleClusterPhyVOS);
+        Collections.sort(consoleClusterPhys);
 
-        return consoleClusterPhyVOS;
+        return consoleClusterPhys;
     }
 
 
@@ -425,19 +424,31 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Tuple<Long, String>> clusterJoin(ClusterJoinDTO param, String operator) {
+    public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator) {
         try {
-            Result<Void> checkResult = validCheckAndInitForClusterJoin(param, operator);
-            if (checkResult.failed())  { return Result.buildFail(checkResult.getMessage()); }
+            
+            Result<Void> checkResult = checkClusterJoin(param, operator);
+            if (checkResult.failed()) {
+                return Result.buildFail(checkResult.getMessage());
+            }
+            String esClientHttpAddressesStr = clusterRoleHostService
+                .buildESClientHttpAddressesStr(param.getRoleClusterHosts());
 
-            Result<Tuple<Long, String>> doClusterJoinResult = doClusterJoin(param, operator);
-            if (doClusterJoinResult.success()) {
-                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), param.getAppId()));
-                
-                postProcessingForClusterJoin(param, doClusterJoinResult.getData(), operator);
+            Result<Void> initResult = initClusterJoin(param, operator, esClientHttpAddressesStr);
+            if (initResult.failed()) {
+                return Result.buildFail(initResult.getMessage());
             }
 
-            return doClusterJoinResult;
+            // 1.保存物理集群信息(集群、角色、节点)
+            Result<ClusterPhyVO> saveClusterResult = saveClusterPhy(param, operator);
+            if (saveClusterResult.failed()) {
+                throw new AdminOperateException(saveClusterResult.getMessage());
+            } else {
+                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), param.getAppId()));
+                postProcessingForClusterJoin(param, operator);
+            }
+
+            return saveClusterResult;
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||logicCluster={}||clusterPhy={}||errMsg={}", param.getLogicCluster(),
                 param.getCluster(), e.getMessage());
@@ -485,7 +496,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         // 构建defaults和persistent的配置信息，transient中的配置信息并非是动态配置的内容
-        Map<String, Object> clusterConfigMap = new HashMap<>();
+        Map<String, Object> clusterConfigMap = new HashMap<>(16);
         clusterConfigMap.putAll(ConvertUtil.directFlatObject(clusterSetting.getDefaults()));
         clusterConfigMap.putAll(ConvertUtil.directFlatObject(clusterSetting.getPersistentObj()));
 
@@ -649,7 +660,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public PaginationResult<ConsoleClusterPhyVO> pageGetConsoleClusterPhyVOS(ClusterPhyConditionDTO condition, Integer appId) {
+    public PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId) {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
         if (baseHandle instanceof ClusterPhyPageSearchHandle) {
             ClusterPhyPageSearchHandle handle =   (ClusterPhyPageSearchHandle) baseHandle;
@@ -774,18 +785,18 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public void buildClusterRole(ConsoleClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos) {
         try {
-            List<ESClusterRoleVO> roleClusterVOS = ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleVO.class);
+            List<ESClusterRoleVO> roleClusters = ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleVO.class);
 
-            List<Long> roleClusterIds = roleClusterVOS.stream().map(ESClusterRoleVO::getId).collect( Collectors.toList());
+            List<Long> roleClusterIds = roleClusters.stream().map(ESClusterRoleVO::getId).collect( Collectors.toList());
             Map<Long, List<ClusterRoleHost>> roleIdsMap = clusterRoleHostService.getByRoleClusterIds(roleClusterIds);
 
-            for (ESClusterRoleVO esClusterRoleVO : roleClusterVOS) {
+            for (ESClusterRoleVO esClusterRoleVO : roleClusters) {
                 List<ClusterRoleHost> clusterRoleHosts = roleIdsMap.get(esClusterRoleVO.getId());
-                List<ESClusterRoleHostVO> esClusterRoleHostVOS = ConvertUtil.list2List(clusterRoleHosts, ESClusterRoleHostVO.class);
-                esClusterRoleVO.setEsClusterRoleHostVO(esClusterRoleHostVOS);
+                List<ESClusterRoleHostVO> esClusterRoleHosts = ConvertUtil.list2List(clusterRoleHosts, ESClusterRoleHostVO.class);
+                esClusterRoleVO.setEsClusterRoleHostVO(esClusterRoleHosts);
             }
 
-            cluster.setEsClusterRoleVOS(roleClusterVOS);
+            cluster.setEsClusterRoleVOS(roleClusters);
         } catch (Exception e) {
             LOGGER.warn("class=ClusterPhyManagerImpl||method=buildClusterRole||logicClusterId={}", cluster.getId(), e);
         }
@@ -955,6 +966,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * @return 满足条件的rack列表
      */
     @Override
+    @Deprecated
     public Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhyName, String clusterLogicName, String templateSize) {
         //将传入的数据大小转化为字节数的单位,获取逻辑集群信息
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
@@ -981,6 +993,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(canCreateTemplateRegionLists);
     }
 
+    @Override
+    public Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId) {
+        ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
+        clusterPhyDTO.setId(param.getId());
+        clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
+        ClusterPhy oldCluster = clusterPhyService.getClusterById(param.getId());
+        Result<Boolean> result = clusterPhyService.editCluster(clusterPhyDTO, operator);
+        if (result.failed() || !result.getData()) {
+            return Result.buildFail("编辑gateway失败！");
+        }
+        ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());
+        //todo 这里需要记录操作记录
+        return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
+    }
 
 
     /**************************************** private method ***************************************************/
@@ -991,7 +1017,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * @return
      */
     private boolean setTemplateSettingSingleType(String cluster, String template) {
-        Map<String, String> setting = new HashMap<>();
+        Map<String, String> setting = new HashMap<>(2);
         setting.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
         try {
             return esTemplateService.syncUpsertSetting(cluster, template, setting, 3);
@@ -1055,7 +1081,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             clusterLogicType = clusterLogicById.getType();
         }
 
-        if (!ResourceLogicTypeEnum.isExist(clusterLogicType)) {
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
             return Result.buildParamIllegal("逻辑集群类型非法");
         }
 
@@ -1107,14 +1133,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private List<ConsoleClusterPhyVO> buildConsoleClusterPhy(List<ClusterPhy> phyClusters, Integer currentAppId) {
 
-        List<ConsoleClusterPhyVO> consoleClusterPhyVOS = ConvertUtil.list2List(phyClusters, ConsoleClusterPhyVO.class);
+        List<ConsoleClusterPhyVO> consoleClusterPhys = ConvertUtil.list2List(phyClusters, ConsoleClusterPhyVO.class);
 
-        consoleClusterPhyVOS.parallelStream()
+        consoleClusterPhys.parallelStream()
             .forEach(consoleClusterPhyVO -> buildPhyCluster(consoleClusterPhyVO, currentAppId));
 
-        Collections.sort(consoleClusterPhyVOS);
+        Collections.sort(consoleClusterPhys);
 
-        return consoleClusterPhyVOS;
+        return consoleClusterPhys;
     }
 
     /**
@@ -1151,7 +1177,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * 3. 物理集群责任人
      */
     private void buildWithOtherInfo(ConsoleClusterPhyVO cluster, Integer currentAppId) {
-        cluster.setGatewayAddress(esGatewayClient.getGatewayAddress());
 
         if (appService.isSuperApp(currentAppId)) {
             cluster.setCurrentAppAuth(AppClusterLogicAuthEnum.ALL.getCode());
@@ -1207,78 +1232,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return clusterLogic;
     }
 
-    private Result<Tuple<Long/*逻辑集群id*/, String/*物理集群名称*/>> doClusterJoin(ClusterJoinDTO param, String operator) throws AdminOperateException {
-        Tuple<Long, String> clusterLogicIdAndClusterPhyNameTuple = new Tuple<>();
 
-        // 1.保存物理集群信息(集群、角色、节点)
-        Result<Void> saveClusterResult = saveClusterPhyInfo(param, operator);
-        if (saveClusterResult.failed()) {
-            throw new AdminOperateException(saveClusterResult.getMessage());
-        }
-        clusterLogicIdAndClusterPhyNameTuple.setV2(param.getCluster());
-
-        //如果没有携带逻辑集群，则不操作region的绑定以及后续步骤
-        if (StringUtils.isBlank(param.getLogicCluster())) {
-            return Result.buildSucc(clusterLogicIdAndClusterPhyNameTuple);
-        }
-
-        // 2.创建region信息
-        List<Long> regionIds = Lists.newArrayList();
-        for (String racks : param.getRegionRacks()) {
-            //过滤掉regionRacks中的cold节点，不允许绑定到region中
-            racks = filterColdRackFromRegionRacks(racks);
-
-            if (StringUtils.isBlank(racks)) {
-                continue;
-            }
-            Result<Long> createPayClusterRegionResult = clusterRegionService.createPhyClusterRegion(param.getCluster(),
-                racks, null, operator);
-            if (createPayClusterRegionResult.failed()) {
-                throw new AdminOperateException(createPayClusterRegionResult.getMessage());
-            }
-
-            if (createPayClusterRegionResult.success()) {
-                regionIds.add(createPayClusterRegionResult.getData());
-            }
-        }
-
-        // 3.保存逻辑集群信息
-        Result<Long> saveClusterLogicResult = saveClusterLogic(param, operator);
-        if (saveClusterLogicResult.failed()) {
-            throw new AdminOperateException(saveClusterLogicResult.getMessage());
-        }
-
-        // 4.绑定Region
-        Long clusterLogicId = saveClusterLogicResult.getData();
-        for (Long regionId : regionIds) {
-            Result<Void> bindRegionResult = clusterRegionService.bindRegion(regionId, clusterLogicId, null, operator);
-            if (bindRegionResult.failed()) {
-                throw new AdminOperateException(bindRegionResult.getMessage());
-            }
-        }
-
-        clusterLogicIdAndClusterPhyNameTuple.setV1(clusterLogicId);
-
-        return Result.buildSucc(clusterLogicIdAndClusterPhyNameTuple);
-    }
-
-    //过滤rack中的cold节点信息
-    private String filterColdRackFromRegionRacks(String racks) {
-        List<String> rackList = RackUtils.racks2List(racks);
-        if(CollectionUtils.isEmpty(rackList)) {
-            return null;
-        }
-
-        rackList.removeIf(AdminConstant.DEFAULT_COLD_RACK::equals);
-        return RackUtils.list2Racks(rackList);
-    }
-
-    private Result<Void> saveClusterPhyInfo(ClusterJoinDTO param, String operator) {
+    private Result<ClusterPhyVO> saveClusterPhy(ClusterJoinDTO param, String operator) {
         //保存集群信息
         ClusterPhyDTO clusterDTO    =  buildClusterPhy(param, operator);
         Result<Boolean> addClusterRet =  clusterPhyService.createCluster(clusterDTO, operator);
         if (addClusterRet.failed()) { return Result.buildFrom(addClusterRet);}
-        return Result.buildSucc();
+        return Result.buildSucc(ConvertUtil.obj2Obj(clusterDTO, ClusterPhyVO.class));
     }
 
     private ClusterPhyDTO buildClusterPhy(ClusterJoinDTO param, String operator) {
@@ -1287,7 +1247,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         String clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
 
         clusterDTO.setDesc(param.getPhyClusterDesc());
-        clusterDTO.setDataCenter(CN.getCode());
+        clusterDTO.setDataCenter(param.getDataCenter());
         clusterDTO.setHttpAddress(clientAddress);
         clusterDTO.setHttpWriteAddress(clientAddress);
         clusterDTO.setIdc(DEFAULT_CLUSTER_IDC);
@@ -1301,37 +1261,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
         return clusterDTO;
     }
-
-    private Result<Long> saveClusterLogic(ClusterJoinDTO param, String operator) {
-        ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
-        esLogicClusterDTO.setAppId(param.getAppId());
-        esLogicClusterDTO.setResponsible(param.getResponsible());
-        esLogicClusterDTO.setName(param.getLogicCluster());
-        esLogicClusterDTO.setDataCenter(CN.getCode());
-        esLogicClusterDTO.setType(PRIVATE.getCode());
-        esLogicClusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
-
-        Long dataNodeNumber = param.getRoleClusterHosts().stream().filter(hosts -> DATA_NODE.getCode() == hosts.getRole()).count();
-
-        esLogicClusterDTO.setDataNodeNu(dataNodeNumber.intValue());
-        esLogicClusterDTO.setLibraDepartmentId("");
-        esLogicClusterDTO.setLibraDepartment("");
-        esLogicClusterDTO.setMemo(param.getPhyClusterDesc());
-
-        Result<Long> result = clusterLogicService.createClusterLogic(esLogicClusterDTO);
-        if (result.failed()) {
-            return Result.buildFail("逻辑集群创建失败");
-        }
-
-        return result;
-    }
-
     /**
-     * @param param
-     * @param operator
-     * @return
+     * 集群接入参数校验
+     *
+     * @param param    参数
+     * @param operator 操作人
+     * @return {@link Result}<{@link Void}>
      */
-    private Result<Void> validCheckAndInitForClusterJoin(ClusterJoinDTO param, String operator) {
+    private Result<Void> checkClusterJoin(ClusterJoinDTO param, String operator) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("参数为空");
         }
@@ -1345,8 +1282,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal("非支持的集群类型");
         }
 
-        if (!ESClusterResourceTypeEnum.validCode(clusterTags.getResourceType())) {
-            return Result.buildParamIllegal("非支持的集群所属资源类型");
+        if (!ClusterResourceTypeEnum.isExist(param.getResourceType())) {
+            return Result.buildParamIllegal("非支持的集群资源类型");
         }
 
         if (ESClusterCreateSourceEnum.ES_IMPORT != ESClusterCreateSourceEnum.valueOf(clusterTags.getCreateSource())) {
@@ -1357,6 +1294,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal("非支持的接入规则");
         }
 
+        return checkClusterNodes(param);
+    }
+
+    private Result<Void> checkClusterNodes(ClusterJoinDTO param) {
         List<ESClusterRoleHostDTO> roleClusterHosts = param.getRoleClusterHosts();
         if (CollectionUtils.isEmpty(roleClusterHosts)) {
             return Result.buildParamIllegal("集群节点信息为空");
@@ -1371,34 +1312,47 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal("接入集群中端口号存在异常" + wrongPortSet);
         }
 
-        Set<Integer> roleForNode = roleClusterHosts.stream().map(ESClusterRoleHostDTO::getRole)
-            .collect(Collectors.toSet());
+        if (ESClusterImportRuleEnum.FULL_IMPORT.getCode() == param.getImportRule()) {
+            Set<Integer> roleForNode = roleClusterHosts.stream().map(ESClusterRoleHostDTO::getRole)
+                .collect(Collectors.toSet());
 
-        if (!roleForNode.contains(MASTER_NODE.getCode())) {
-            return Result.buildParamIllegal(String.format(NODE_NOT_EXISTS_TIPS, MASTER_NODE.getDesc()));
-        }
+            if (!roleForNode.contains(MASTER_NODE.getCode())) {
+                return Result.buildParamIllegal(String.format(NODE_NOT_EXISTS_TIPS, MASTER_NODE.getDesc()));
+            }
 
-        Map<Integer, List<String>> role2IpsMap = ConvertUtil.list2MapOfList(roleClusterHosts,
-            ESClusterRoleHostDTO::getRole, ESClusterRoleHostDTO::getIp);
+            Map<Integer, List<String>> role2IpsMap = ConvertUtil.list2MapOfList(roleClusterHosts,
+                ESClusterRoleHostDTO::getRole, ESClusterRoleHostDTO::getIp);
 
-        List<String> masterIps = role2IpsMap.get(MASTER_NODE.getCode());
-        if (masterIps.size() < JOIN_MASTER_NODE_MIN_NUMBER) {
-            return Result.buildParamIllegal(String.format("集群%s的masternode角色节点个数要求大于等于1，且不重复", param.getCluster()));
-        }
+            List<String> masterIps = role2IpsMap.get(MASTER_NODE.getCode());
+            if (masterIps.size() < JOIN_MASTER_NODE_MIN_NUMBER) {
+                return Result.buildParamIllegal(String.format("集群%s的masternode角色节点个数要求大于等于1，且不重复", param.getCluster()));
+            }
 
-        String duplicateIpForMaster = ClusterUtils.getDuplicateIp(masterIps);
-        if (!AriusObjUtils.isBlack(duplicateIpForMaster)) {
-            return Result.buildParamIllegal(String.format(IP_DUPLICATE_TIPS, duplicateIpForMaster));
-        }
+            String duplicateIpForMaster = ClusterUtils.getDuplicateIp(masterIps);
+            if (!AriusObjUtils.isBlack(duplicateIpForMaster)) {
+                return Result.buildParamIllegal(String.format(IP_DUPLICATE_TIPS, duplicateIpForMaster));
+            }
 
-        String duplicateIpForClient = ClusterUtils.getDuplicateIp(role2IpsMap.get(CLIENT_NODE.getCode()));
-        if (!AriusObjUtils.isBlack(duplicateIpForClient)) {
-            return Result.buildParamIllegal(String.format(IP_DUPLICATE_TIPS, duplicateIpForClient));
-        }
+            String duplicateIpForClient = ClusterUtils.getDuplicateIp(role2IpsMap.get(CLIENT_NODE.getCode()));
+            if (!AriusObjUtils.isBlack(duplicateIpForClient)) {
+                return Result.buildParamIllegal(String.format(IP_DUPLICATE_TIPS, duplicateIpForClient));
+            }
 
-        String duplicateIpForData = ClusterUtils.getDuplicateIp(role2IpsMap.get(DATA_NODE.getCode()));
-        if (!AriusObjUtils.isBlack(duplicateIpForData)) {
-            return Result.buildParamIllegal(String.format(IP_DUPLICATE_TIPS, duplicateIpForData));
+            String duplicateIpForData = ClusterUtils.getDuplicateIp(role2IpsMap.get(DATA_NODE.getCode()));
+            if (!AriusObjUtils.isBlack(duplicateIpForData)) {
+                return Result.buildParamIllegal(String.format(IP_DUPLICATE_TIPS, duplicateIpForData));
+            }
+        } else {
+
+            List<String> ips = roleClusterHosts.stream().map(ESClusterRoleHostDTO::getIp).collect(Collectors.toList());
+            if (ips.size() < JOIN_MASTER_NODE_MIN_NUMBER) {
+                return Result.buildParamIllegal(String.format("集群%s的节点个数要求大于等于1，且不重复", param.getCluster()));
+            }
+
+            String duplicateIpForMaster = ClusterUtils.getDuplicateIp(ips);
+            if (!AriusObjUtils.isBlack(duplicateIpForMaster)) {
+                return Result.buildParamIllegal(String.format(IP_DUPLICATE_TIPS, duplicateIpForMaster));
+            }
         }
 
         if (clusterPhyService.isClusterExists(param.getCluster())) {
@@ -1422,11 +1376,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (sameClusterResult.failed()) {
             return Result.buildParamIllegal("禁止同时接入超过两个不同集群节点");
         }
-        //获取设置rack
-        Result<Void> rackSetResult = initRackValueForClusterJoin(param, esClientHttpAddressesStr);
-        if (rackSetResult.failed()) {
-            return rackSetResult;
-        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> initClusterJoin(ClusterJoinDTO param, String operator, String esClientHttpAddressesStr) {
         //获取设置es版本
         Result<Void> esVersionSetResult = initESVersionForClusterJoin(param, esClientHttpAddressesStr);
         if (esVersionSetResult.failed()) {
@@ -1478,24 +1431,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal(String.format("%s无法获取es版本", esClientHttpAddressesStr));
         }
         param.setEsVersion(esVersion);
-        return Result.buildSucc();
-    }
-
-    /**
-     * 初始化rack信息
-     * @param param ClusterJoinDTO
-     * @param esClientHttpAddressesStr  http连接地址
-     * @return
-     */
-    private Result<Void> initRackValueForClusterJoin(ClusterJoinDTO param, String esClientHttpAddressesStr) {
-        if(CollectionUtils.isEmpty(param.getRegionRacks())) {
-            Result<Set<String>> rackSetResult = esClusterService.getClusterRackByHttpAddress(esClientHttpAddressesStr,param.getPassword());
-            if (rackSetResult.failed()) {
-                return Result.buildFail(rackSetResult.getMessage());
-            } else {
-                param.setRegionRacks(new ArrayList<>(rackSetResult.getData()));
-            }
-        }
         return Result.buildSucc();
     }
 
@@ -1597,8 +1532,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return triple;
     }
 
-    private void postProcessingForClusterJoin(ClusterJoinDTO param,
-                                              Tuple<Long, String> clusterLogicIdAndClusterPhyIdTuple, String operator) {
+    private void postProcessingForClusterJoin(ClusterJoinDTO param, String operator) {
         esOpClient.connect(param.getCluster());
 
         if (ESClusterImportRuleEnum.AUTO_IMPORT == ESClusterImportRuleEnum.valueOf(param.getImportRule())) {
@@ -1611,11 +1545,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         updateClusterHealth(param.getCluster(), AriusUser.SYSTEM.getDesc());
-
-        Long clusterLogicId = clusterLogicIdAndClusterPhyIdTuple.getV1();
-        if (null != clusterLogicId) {
-            clusterLogicManager.updateClusterLogicHealth(clusterLogicId);
-        }
 
         operateRecordService.save(ModuleEnum.ES_CLUSTER_JOIN, OperationEnum.ADD, param.getCluster(),
             param.getPhyClusterDesc(), operator);

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
-public enum WorkTaskStatusEnum {
+public enum OpTaskStatusEnum {
                                 /**执行成功*/
                                 SUCCESS("success", "执行成功"),
 
@@ -16,7 +16,7 @@ public enum WorkTaskStatusEnum {
 
                                 UNKNOWN("unknown", "unknown");
 
-    WorkTaskStatusEnum(String status, String value) {
+    OpTaskStatusEnum(String status, String value) {
         this.status = status;
         this.value = value;
     }
@@ -33,17 +33,17 @@ public enum WorkTaskStatusEnum {
         return value;
     }
 
-    public static WorkTaskStatusEnum valueOfStatus(String status) {
+    public static OpTaskStatusEnum valueOfStatus(String status) {
         if (status == null) {
-            return WorkTaskStatusEnum.UNKNOWN;
+            return OpTaskStatusEnum.UNKNOWN;
         }
-        for (WorkTaskStatusEnum statusEnum : WorkTaskStatusEnum.values()) {
+        for (OpTaskStatusEnum statusEnum : OpTaskStatusEnum.values()) {
             if (status.equals(statusEnum.getStatus())) {
                 return statusEnum;
             }
         }
 
-        return WorkTaskStatusEnum.UNKNOWN;
+        return OpTaskStatusEnum.UNKNOWN;
     }
 
 }

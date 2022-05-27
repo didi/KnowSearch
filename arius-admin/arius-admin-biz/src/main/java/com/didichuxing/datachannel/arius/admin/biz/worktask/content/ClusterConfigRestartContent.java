@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.workorder.content.clusterOpRestart;
+package com.didichuxing.datachannel.arius.admin.biz.worktask.content;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class ClusterOpConfigRestartContent extends ClusterOpRestartContent {
+public class ClusterConfigRestartContent extends ClusterRestartContent {
     /**
      * Es配置操作: 1.新增 2.编辑 3.删除
      * @see EsConfigActionEnum

@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
+package com.didichuxing.datachannel.arius.admin.biz.worktask.content;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
 import lombok.Data;
@@ -8,10 +8,13 @@ import java.util.List;
 
 /**
  * 弹性云的集群扩缩容操作
+ *
+ * @author ohushenglin_v
+ * @date 2022-05-24
  */
 @Data
 @NoArgsConstructor
-public class ClusterOpIndecreaseDockerContent extends ClusterOpBaseContent {
+public class ClusterIndecreaseDockerContent extends ClusterBaseContent {
     /**
      * 物理集群id
      */

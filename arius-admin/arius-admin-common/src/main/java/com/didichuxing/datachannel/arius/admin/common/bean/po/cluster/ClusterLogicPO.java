@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 
@@ -25,7 +25,7 @@ public class ClusterLogicPO extends BasePO implements DigitResponsible {
 
     /**
      * 类型
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      */
     private Integer type;
 

@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
  * @author d06679
  * @date 2020/12/21
  */
-public interface WorkTaskHandler extends BaseHandle {
+public interface OpTaskHandler extends BaseHandle {
 
     /**
      * 创建一个任务
@@ -19,8 +19,8 @@ public interface WorkTaskHandler extends BaseHandle {
      * @return result
      */
     Result<OpTask> addTask(OpTask opTask);
-    
-    /**存在联合国关闭任务
+
+    /**
      * 判断一个任务是否存在，参数待定
      *
      @param key key
@@ -28,14 +28,14 @@ public interface WorkTaskHandler extends BaseHandle {
      @return boolean
      */
     boolean existUnClosedTask(String key, Integer type);
-    
-    /**过程
+
+    /**
      * 处理任务
-     * @param opTask 任务
+     * @param opTask     任务
+     * @param step       处理状态
+     * @param status     状态
+     * @param expandData 扩展数据
      * @return result
-     @param step 一步
-     @param status 状态
-     @param expandData 扩展数据
      */
     Result<Void> process(OpTask opTask, Integer step, String status, String expandData);
 
