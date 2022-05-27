@@ -337,6 +337,18 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     }
 
     /**
+     * 根据物理模板状态获取模板列表
+     * @param logicId 逻辑模板id
+     * @param status 状态 1 常规    -1 删除中     -2 已删除
+     * @return list
+     */
+    @Override
+    public List<IndexTemplatePhy> getTemplateByLogicIdAndStatus(Integer logicId, Integer status) {
+        return ConvertUtil.list2List(indexTemplatePhyDAO.getByLogicIdAndStatus(logicId, status),
+            IndexTemplatePhy.class);
+    }
+
+    /**
      * 获取状态正常的模板列表
      *
      * @param cluster 集群

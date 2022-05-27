@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -188,6 +189,7 @@ public interface ClusterLogicManager {
      * @param type
      * @return
      */
+    @Deprecated
     Result<List<ConsoleClusterVO>> getAppLogicClusterInfoByType(Integer appId, Integer type);
 
     /**
