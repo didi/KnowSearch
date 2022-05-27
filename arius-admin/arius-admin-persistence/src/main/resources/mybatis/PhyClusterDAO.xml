@@ -119,29 +119,52 @@
         </trim>
     </select>
 
-    <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
+    <select id="pagingByCondition" resultMap="BaseResultMap"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO">
         select
         <include refid="Base_Column_List"/>
         from es_cluster_phy_info
         where is_active = 1
-        <if test="cluster != null">  and  cluster LIKE CONCAT(#{cluster},'%')</if>
-        <if test="esVersion != null">and  es_version = #{esVersion}</if>
-        <if test="health != null">   and  health = #{health}</if>
-        order by ${sortTerm} ${sortType}
+        <if test="id != null">and id = #{id}</if>
+        <if test="desc != null">and desc LIKE CONCAT('%',#{desc},'%')</if>
+        <if test="cluster != null">and cluster LIKE CONCAT('%',#{cluster},'%')</if>
+        <if test="esVersion != null">and es_version = #{esVersion}</if>
+        <if test="health != null">and health = #{health}</if>
+        <if test="activeShardNum != null">and active_shard_num = #{activeShardNum}</if>
+        <if test="platformType != null">and platform_type = #{platformType}</if>
+        <if test="resourceType != null">and resource_type = #{resourceType}</if>
+        <if test="clusterNames != null and clusterNames.size() > 0">
+            and cluster in
+            <foreach collection="clusterNames" separator="," item="item" close=")" open="(">
+                #{item}
+            </foreach>
+        </if>
+        <if test="sortTerm != null">
+            order by ${sortTerm} ${sortType}
+        </if>
         limit #{from}, #{size}
     </select>
 
-    <select id="getTotalHitByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
-            resultType="long">
+    <select id="getTotalHitByCondition" resultType="long"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO">
         select
         count(1)
         from es_cluster_phy_info
         where is_active = 1
-        <if test="cluster != null">  and  cluster LIKE CONCAT(#{cluster}, '%')</if>
-        <if test="esVersion != null">and  es_version = #{esVersion}</if>
-        <if test="health != null">   and  health = #{health}</if>
+        <if test="id != null">and id = #{id}</if>
+        <if test="desc != null">and desc LIKE CONCAT('%',#{desc},'%')</if>
+        <if test="cluster != null">and cluster LIKE CONCAT('%',#{cluster},'%')</if>
+        <if test="esVersion != null">and es_version = #{esVersion}</if>
+        <if test="health != null">and health = #{health}</if>
         <if test="activeShardNum != null">and active_shard_num = #{activeShardNum}</if>
+        <if test="platformType != null">and platform_type = #{platformType}</if>
+        <if test="resourceType != null">and resource_type = #{resourceType}</if>
+        <if test="clusterNames != null and clusterNames.size() > 0">
+            and cluster in
+            <foreach collection="clusterNames" separator="," item="item" close=")" open="(">
+                #{item}
+            </foreach>
+        </if>
     </select>
 
     <select id="getById" parameterType="integer" resultMap="BaseResultMap">

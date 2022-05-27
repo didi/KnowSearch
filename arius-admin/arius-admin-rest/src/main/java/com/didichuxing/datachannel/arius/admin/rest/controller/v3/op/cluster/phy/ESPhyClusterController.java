@@ -160,8 +160,8 @@ public class ESPhyClusterController {
 
     @PostMapping("/page")
     @ResponseBody
-    @ApiOperation(value = "条件获取物理集群列表")
-    public PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(HttpServletRequest request,
+    @ApiOperation(value = "按条件分页获取物理集群列表")
+    public PaginationResult<ClusterPhyVO> pageGetClusterPhys(HttpServletRequest request,
                                                                          @RequestBody ClusterPhyConditionDTO condition) {
         return clusterPhyManager.pageGetClusterPhys(condition, HttpRequestUtils.getAppId(request));
     }
