@@ -77,11 +77,11 @@ public class DruidDbConfig {
         //org.apache.ibatis.logging.stdout.StdOutImpl.class 只能打印到控制台
         //org.apache.ibatis.logging.slf4j.Slf4jImpl.class 打印到具体的文件中
         mc.setLogImpl(org.apache.ibatis.logging.slf4j.Slf4jImpl.class);
-        //mc.setLogImpl(org.apache.ibatis.logging.stdout.StdOutImpl.class);
         bean.setConfiguration(mc);
         //添加分页插件，不加这个，分页不生效
         bean.setPlugins(paginationInterceptor());
-        return bean.getObject(); // 设置mybatis的xml所在位置
+        // 设置mybatis的xml所在位置
+        return bean.getObject();
     }
     
     @Bean({"adminSqlSessionTemplate"})
