@@ -86,7 +86,7 @@ public interface ESUserDAO {
      * 获取es user 获取config
      *
      * @param esUser ES用户
-     * @return {@code ESUserConfigPO}
+     * @return {@code ESUserPO}
      */
     ESUserPO getByESUserConfig(@Param("esUser") int esUser);
     
@@ -109,7 +109,7 @@ public interface ESUserDAO {
     /**
      * 获取es user 的全部配置
      *
-     * @return {@code List<ESUserConfigPO>}
+     * @return {@code List<ESUserPO>}
      */
     List<ESUserPO> listConfig();
 

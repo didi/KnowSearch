@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didiglobal.logi.security.common.po.ProjectPO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -62,7 +62,7 @@ public interface ESUserManager {
      *
      * @param appDTO    dto
      * @param projectId {@link ProjectPO#getId()}
-     * @param operator  操作人 {@link AdminConstant#SUPER_USER_NAME}
+     * @param operator  操作人 {@link AuthConstant#SUPER_USER_NAME}
      * @return 成功 true  失败 false
      */
     Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator);
@@ -79,7 +79,7 @@ public interface ESUserManager {
      * 更新 es user config
      *
      * @param configDTO configdto
-     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
+     * @param operator 操作人 {@link AuthConstant#SUPER_USER_NAME}
      * @return {@code Result<Void>}
      */
     Result<Void> updateESUserConfig(ESUserConfigDTO configDTO, String operator);
@@ -88,7 +88,7 @@ public interface ESUserManager {
      * 编辑es user
      *
      * @param esUserDTO
-     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
+     * @param operator 操作人 {@link AuthConstant#SUPER_USER_NAME}
      * @return {@code Result<Void>}
      */
     Result<Void> editESUser(ESUserDTO esUserDTO, String operator);
@@ -98,7 +98,7 @@ public interface ESUserManager {
      *
      * @param esUser ES用户
      * @param projectId {@link ProjectPO#getId()}
-     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
+     * @param operator 操作人 {@link AuthConstant#SUPER_USER_NAME}
      * @return {@code Result<Void>}
      */
     Result<Void> deleteESUserByProject(int esUser, int projectId, String operator);
@@ -107,7 +107,7 @@ public interface ESUserManager {
      * 删除项目下所有的es user
      *
      * @param projectId {@link ProjectPO#getId()}
-     * @param operator 操作人 {@link AdminConstant#SUPER_USER_NAME}
+     * @param operator 操作人 {@link AuthConstant#SUPER_USER_NAME}
      * @return {@code Result<Void>}
      */
     Result<Void> deleteAllESUserByProject(int projectId, String operator);
@@ -174,5 +174,11 @@ public interface ESUserManager {
      */
     Result<List<ConsoleESUserVO>> list();
     
+    /**
+     * 获取没有代码、因
+     *
+     * @param request 请求
+     * @return {@code Result<List<ConsoleESUserWithVerifyCodeVO>>}
+     */
     Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request);
 }

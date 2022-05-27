@@ -156,8 +156,6 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator) {
         //校验项目是否存在
-    
-        //校验项目是否存在
         if (!projectService.checkProjectExist(projectId)) {
             return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
         }
