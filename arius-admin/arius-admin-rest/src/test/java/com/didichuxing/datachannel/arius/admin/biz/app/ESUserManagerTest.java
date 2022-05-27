@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -30,20 +31,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class ESUserManagerTest extends AriusAdminApplicationTest {
     
     @Autowired
-    private ESUserManager esUserManagerImplUnderTest;
+    private ESUserManager     esUserManagerImplUnderTest;
     @Autowired
-    private ESUserDAO     esUserDAO;
-
+    private ESUserDAO         esUserDAO;
+    
     
     @Test
     public void testListESUsersByAllProject() {
         // Setup
         final ArrayList<Integer> projectIds = Lists.newArrayList(1593);
-    
+        
         // Run the test
         final List<Integer> userProjectIds = esUserManagerImplUnderTest.listESUsers().getData().stream()
                 .map(ESUser::getProjectId).distinct().collect(Collectors.toList());
-    
+        
         // Verify the results
         assertThat(userProjectIds).isEqualTo(projectIds);
     }
@@ -57,8 +58,6 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         // Verify the results
         assertThat(result.getData()).hasSize(1);
     }
-    
- 
     
     @Test
     void testGetESUsersMap() {
@@ -86,13 +85,11 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         appDTO.setSearchType(1);
         appDTO.setDataCenter("cn");
         appDTO.setProjectId(1595);
-        final Integer count = esUserDAO.maxById();
-    
+        
         // Run the test
         final Result<Integer> result = esUserManagerImplUnderTest.registerESUser(appDTO, 1595, "admin");
-        
-        // Verify the results
-        assertThat(result.getData()).isEqualTo(count + 1);
+        final Integer count = esUserDAO.maxById();
+        Assertions.assertEquals(result.getData(), count);
     }
     
     @Test
@@ -209,7 +206,7 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         final ConsoleESUserDTO consoleESUserDTO = new ConsoleESUserDTO(0, "memo", "dataCenter");
         
         // Run the test
-        final Result<Void> result = esUserManagerImplUnderTest.update(1, "admin" , consoleESUserDTO);
+        final Result<Void> result = esUserManagerImplUnderTest.update(1, "admin", consoleESUserDTO);
         
         // Verify the results
     }

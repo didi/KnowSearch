@@ -79,9 +79,9 @@
 	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
 		<!--@mbg.generated-->
 		insert into arius_es_user
-		(id, is_root, memo, query_threshold, verify_code, cluster, responsible, search_type, data_center, project_id,
+		( is_root, memo, query_threshold, verify_code, cluster, responsible, search_type, data_center, project_id,
 		 is_default_display)
-		values (#{id}, #{isRoot}, #{memo}, #{queryThreshold}, #{verifyCode}, #{cluster}, #{responsible}, #{searchType},
+		values ( #{isRoot}, #{memo}, #{queryThreshold}, #{verifyCode}, #{cluster}, #{responsible}, #{searchType},
 		        #{dataCenter}, #{projectId}, #{defaultDisplay})
 	</insert>
 	

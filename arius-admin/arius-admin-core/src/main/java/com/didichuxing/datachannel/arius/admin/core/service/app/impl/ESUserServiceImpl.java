@@ -41,23 +41,22 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2021-04-28
  */
 @Service
+@Transactional
 public class ESUserServiceImpl implements ESUserService {
 
-    private static final ILog          LOGGER                      = LogFactory.getLog(ESUserServiceImpl.class);
-
-    private static final Integer       VERIFY_CODE_LENGTH          = 15;
-
-    private static final Integer       APP_QUERY_THRESHOLD_DEFAULT = 100;
-
-    private static final String APP_NOT_EXIST = "es user 不存在";
+    private static final ILog LOGGER = LogFactory.getLog(ESUserServiceImpl.class);
+    
+    private static final Integer VERIFY_CODE_LENGTH = 15;
+    
+    private static final Integer APP_QUERY_THRESHOLD_DEFAULT = 100;
+    
+    private static final String ES_USER_NOT_EXIST = "es user 不存在";
 
     @Autowired
     private ESUserDAO esUserDAO;
- 
-
-   
-
-    private final Cache<String, List<?>>   appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
+    
+    private final Cache<String, List<?>> appListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
+            .maximumSize(100).build();
 
 
     /**
@@ -264,7 +263,7 @@ public class ESUserServiceImpl implements ESUserService {
 
          ESUserPO oldESUser = esUserDAO.getByESUser(configDTO.getEsUser());
         if (oldESUser == null) {
-            return new Tuple<>(Result.buildNotExist(APP_NOT_EXIST), null);
+            return new Tuple<>(Result.buildNotExist(ES_USER_NOT_EXIST), null);
         }
 
         ESUserPO oldConfigPO = esUserDAO.getByESUser(configDTO.getEsUser());
@@ -327,7 +326,7 @@ public class ESUserServiceImpl implements ESUserService {
         final ESUserPO esUser = esUserDAO.getByESUser(esUserName);
     
         if (esUser == null) {
-            return Result.buildNotExist(APP_NOT_EXIST);
+            return Result.buildNotExist(ES_USER_NOT_EXIST);
         }
 
         if (StringUtils.isBlank(verifyCode) || !esUser.getVerifyCode().equals(verifyCode)) {
@@ -376,7 +375,7 @@ public class ESUserServiceImpl implements ESUserService {
                 return Result.buildParamIllegal(String.format("es user [%s] 不存在", appDTO.getId()));
             }
             if (AriusObjUtils.isNull(oldESUser)) {
-                return Result.buildNotExist(APP_NOT_EXIST);
+                return Result.buildNotExist(ES_USER_NOT_EXIST);
             }
             //判断当前es user 在同一个项目中
             if (Objects.nonNull(oldESUser) && !Objects.equals(oldESUser.getProjectId(), appDTO.getProjectId())) {
