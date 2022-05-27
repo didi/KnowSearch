@@ -54,6 +54,9 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
     @ApiModelProperty("服务等级,为1，2，3")
     private Integer      level;
 
+    @ApiModelProperty("逻辑集群")
+    private String       cluster;
+
     @Override
     public int compareTo(ConsoleTemplateVO o) {
         if (null == o) {

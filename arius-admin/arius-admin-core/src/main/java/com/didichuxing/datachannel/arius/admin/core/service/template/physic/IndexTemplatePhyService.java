@@ -121,6 +121,14 @@ public interface IndexTemplatePhyService {
 
     /**
      * 根据物理模板状态获取模板列表
+     * @param logicId 逻辑模板id
+     * @param status 状态 1 常规    -1 删除中     -2 已删除
+     * @return list
+     */
+    List<IndexTemplatePhy> getTemplateByLogicIdAndStatus(Integer logicId, Integer status);
+
+    /**
+     * 根据物理模板状态获取模板列表
      * @param cluster 集群
      * @return list
      */
