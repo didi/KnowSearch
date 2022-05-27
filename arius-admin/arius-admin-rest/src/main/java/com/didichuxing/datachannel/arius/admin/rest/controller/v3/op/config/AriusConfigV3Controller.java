@@ -62,14 +62,14 @@ public class AriusConfigV3Controller {
         return ariusConfigInfoService.delConfig(id, HttpRequestUtils.getOperator(request));
     }
 
-    @PutMapping("/add")
+    @PostMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建配置接口" )
     public Result<Integer> addConfig(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
         return ariusConfigInfoService.addConfig(param, HttpRequestUtils.getOperator(request));
     }
 
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑配置接口" )
     public Result<Void> editConfig(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
