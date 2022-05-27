@@ -98,10 +98,7 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<List<ESUser>> listESUsersByProjectId(Integer projectId, String operator) {
-        //校验项目是否存在
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
-        }
+       
     
         ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
        
@@ -155,10 +152,6 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator) {
-        //校验项目是否存在
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
-        }
         
     
         final Tuple</*创建的es user*/Result<Integer>,/*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService.registerESUser(appDTO, operator);
@@ -264,11 +257,6 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteESUserByProject(int esUser, int projectId, String operator) {
-        //校验项目是否存在
-         //校验项目是否存在
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
-        }
         
         //校验当前项目下所有的es user
         final List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
@@ -304,10 +292,7 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteAllESUserByProject(int projectId, String operator) {
-         //校验项目是否存在
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
-        }
+        
         final Tuple<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
         if (resultListTuple.getV1().success()) {
             operateRecordService.save(ES_USER, DELETE, projectId, String.format("删除项目[%s]下的所有es user", projectId),
@@ -379,13 +364,6 @@ public class ESUserManagerImpl implements ESUserManager {
     
     @Override
     public Result<Void> update(Integer projectId, String userName, ConsoleESUserDTO consoleESUserDTO) {
-       
-       
-        //校验项目中是否包含该用户
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
-        }
-        
         //校验当前操作者是否为超级用户
         if (AuthConstant.SUPER_USER_NAME.equals(userName)) {
          return Result.buildFail("当前用户不是管理员账号");
