@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,7 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({ V3 + "/es-user/" })
 @Api(tags = "应用关联es user (REST)")
 public class ESUserV3Controller {
-    
+    private static final String GET_USER_APPID_LIST_TICKET      = "xTc59aY72";
+    private static final String GET_USER_APPID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
     @Autowired
     private ESUserManager esUserManager;
     
@@ -55,11 +57,21 @@ public class ESUserV3Controller {
     
     @GetMapping("/get-no-code-login")
     @ResponseBody
-    @ApiOperation(value = "查询用户可以免密登陆的APP接口", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
+    @ApiOperation(value = "查询用户可以免密登陆的es user接口", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true) })
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request) {
-        return esUserManager.getNoCodeESUser(request);
+           String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
+        if (!GET_USER_APPID_LIST_TICKET.equals(ticket)) {
+            return Result.buildParamIllegal("ticket错误");
+        }
+        final String operator = HttpRequestUtil.getOperator(request);
+        final Integer projectId = HttpRequestUtil.getProjectId(request);
+        if (Objects.isNull(projectId)){
+            return Result.buildParamIllegal("未设置项目");
+        }
+       
+        return esUserManager.getNoCodeESUser(projectId,operator);
     }
     
     @GetMapping()

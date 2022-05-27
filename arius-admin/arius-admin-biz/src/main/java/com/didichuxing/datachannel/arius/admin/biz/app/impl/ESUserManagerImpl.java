@@ -29,18 +29,15 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.enums.ResultCode;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -59,8 +56,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ESUserManagerImpl implements ESUserManager {
     private static final ILog LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
-    private static final String GET_USER_APPID_LIST_TICKET      = "xTc59aY72";
-    private static final String GET_USER_APPID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
+    
     @Autowired
     private ProjectService       projectService;
     @Autowired
@@ -396,24 +392,13 @@ public class ESUserManagerImpl implements ESUserManager {
     }
     
     /**
-     *
-     * @param request
+     * @param projectId
+     * @param operator
      * @return
      */
     @Override
-    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request) {
-          String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
-        if (!GET_USER_APPID_LIST_TICKET.equals(ticket)) {
-            return Result.buildParamIllegal("ticket错误");
-        }
-        final String operator = HttpRequestUtil.getOperator(request);
-        final Integer projectId = HttpRequestUtil.getProjectId(request);
-        if (Objects.isNull(projectId)){
-            return Result.buildParamIllegal("未设置项目");
-        }
-        if (projectService.checkProjectExist(projectId)){
-              return Result.buildParamIllegal("项目不存在");
-        }
+    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator) {
+       
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
         if (projectService.getProjectDetailByProjectId(projectId).getUserList().stream().noneMatch(user->StringUtils.equals(user.getUserName(),operator))||StringUtils.equals(AuthConstant.SUPER_USER_NAME,operator)){
             return Result.buildParamIllegal("权限不足");

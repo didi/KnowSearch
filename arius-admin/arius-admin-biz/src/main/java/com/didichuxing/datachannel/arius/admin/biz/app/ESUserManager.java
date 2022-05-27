@@ -15,7 +15,6 @@ import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * es user 操作
@@ -175,10 +174,12 @@ public interface ESUserManager {
     Result<List<ConsoleESUserVO>> list();
     
     /**
-     * 获取没有代码、因
+     * 获取没有
      *
-     * @param request 请求
+     * @param projectId
+     * @param operator
      * @return {@code Result<List<ConsoleESUserWithVerifyCodeVO>>}
      */
-    Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request);
+    Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator);
+    
 }
