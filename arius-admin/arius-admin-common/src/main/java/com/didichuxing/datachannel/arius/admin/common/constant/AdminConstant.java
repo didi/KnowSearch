@@ -159,14 +159,6 @@ public class AdminConstant {
      */
     public static final Integer MAX_BIND_PORT_VALUE                          =   65535;
     public static final Integer MIN_BIND_PORT_VALUE                          =   1;
-    /**
-     * 超级项目
-     */
-    public static final Integer SUPER_PROJECT_ID = 1593;
-    /**
-     * 超级用户
-     */
-    public static final Integer SUPER_USER_ID    = 1;
-    public static final String SUPER_USER_NAME    = "admin";
+
 
 }

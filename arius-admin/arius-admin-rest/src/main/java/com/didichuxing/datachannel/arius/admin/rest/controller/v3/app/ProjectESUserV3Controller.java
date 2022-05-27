@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -60,10 +60,10 @@ public class ProjectESUserV3Controller {
 	@ApiOperation(value = "管理员获取所有项目的es user")
 	public Result<List<ESUser>> listESUserByALLProject(HttpServletRequest request) {
 		final String operator = HttpRequestUtil.getOperator(request);
-		if (!operator.equals(AdminConstant.SUPER_USER_NAME)) {
+		if (!operator.equals(AuthConstant.SUPER_USER_NAME)) {
 			return Result.buildFail("当前用户权限不足");
 		}
-		return esUserManager.listESUsersByAllProject();
+		return esUserManager.listESUsers();
 	}
 	
 	@GetMapping("")

@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConf
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -360,7 +361,7 @@ public class ESUserServiceImpl implements ESUserService {
             return validateAppFieldIsNullResult;
         }
         //todo 暂定校验超级用户 user name
-        if (!appDTO.getResponsible().equals(AdminConstant.SUPER_USER_NAME)) {
+        if (!appDTO.getResponsible().equals(AuthConstant.SUPER_USER_NAME)) {
             return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
         }
         ESUserPO oldESUser = esUserDAO.getByESUser(appDTO.getId());

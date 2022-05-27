@@ -31,7 +31,7 @@ public interface ESUserManager {
      * {@link ProjectPO#getId()} 去获取全量的es user
      * @return 返回es user 列表
      */
-    Result<List<ESUser>> listESUsersByAllProject();
+    Result<List<ESUser>> listESUsers();
     
     /**
      * 通过项目id获取es user 列表

@@ -41,7 +41,7 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         final ArrayList<Integer> projectIds = Lists.newArrayList(1593);
     
         // Run the test
-        final List<Integer> userProjectIds = esUserManagerImplUnderTest.listESUsersByAllProject().getData().stream()
+        final List<Integer> userProjectIds = esUserManagerImplUnderTest.listESUsers().getData().stream()
                 .map(ESUser::getProjectId).distinct().collect(Collectors.toList());
     
         // Verify the results

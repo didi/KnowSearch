@@ -18,7 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserConfigPO
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserDeleteEvent;
@@ -75,7 +75,7 @@ public class ESUserManagerImpl implements ESUserManager {
      * @return 返回app列表
      */
     @Override
-    public Result<List<ESUser>> listESUsersByAllProject() {
+    public Result<List<ESUser>> listESUsers() {
         //获取全部项目id
         final List<ProjectBriefVO> briefVOList = projectService.getProjectBriefList();
         final List<Integer> projectIds = briefVOList.stream().map(ProjectBriefVO::getId)
@@ -110,7 +110,7 @@ public class ESUserManagerImpl implements ESUserManager {
         //确定当前操作者属于该项目成员
         if (Objects.nonNull(projectId) && projectVO.getUserList().stream().map(UserBriefVO::getUserName)
                 .noneMatch(userName -> StringUtils.equals(userName, operator))||!StringUtils.equals(operator,
-                AdminConstant.SUPER_USER_NAME)) {
+                AuthConstant.SUPER_USER_NAME)) {
             return Result.buildFail(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
         }
         final List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
@@ -136,7 +136,7 @@ public class ESUserManagerImpl implements ESUserManager {
    
     @Override
     public Result<Map<Integer, List<ESUser>>> getESUsersMap() {
-        final Result<List<ESUser>> listResult = this.listESUsersByAllProject();
+        final Result<List<ESUser>> listResult = this.listESUsers();
         if (listResult.failed()){
             return Result.buildFail();
         }
@@ -393,7 +393,7 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         
         //校验当前操作者是否为超级用户
-        if (AdminConstant.SUPER_USER_NAME.equals(userName)) {
+        if (AuthConstant.SUPER_USER_NAME.equals(userName)) {
          return Result.buildFail("当前用户不是管理员账号");
         }
         //校验es user 是否存在于该项目下
@@ -416,7 +416,7 @@ public class ESUserManagerImpl implements ESUserManager {
     
     @Override
     public Result<List<ConsoleESUserVO>> list() {
-        Result<List<ESUser>> result = listESUsersByAllProject();
+        Result<List<ESUser>> result = listESUsers();
         if (result.failed()) {
             return Result.buildFail();
         }
@@ -443,7 +443,7 @@ public class ESUserManagerImpl implements ESUserManager {
               return Result.buildParamIllegal("项目不存在");
         }
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (projectService.getProjectDetailByProjectId(projectId).getUserList().stream().noneMatch(user->StringUtils.equals(user.getUserName(),operator))||StringUtils.equals(AdminConstant.SUPER_USER_NAME,operator)){
+        if (projectService.getProjectDetailByProjectId(projectId).getUserList().stream().noneMatch(user->StringUtils.equals(user.getUserName(),operator))||StringUtils.equals(AuthConstant.SUPER_USER_NAME,operator)){
             return Result.buildParamIllegal("权限不足");
         }
         List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));

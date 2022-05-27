@@ -55,6 +55,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeS
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
@@ -374,7 +375,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<List<String>> getAppLogicOrPhysicClusterNames(Integer projectId) {
-        if (AdminConstant.SUPER_PROJECT_ID.equals(projectId)) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildSucc(esClusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
         }
         List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(projectId);
@@ -558,7 +559,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         //超级用户对所有模板都是管理权限
-        if (AdminConstant.SUPER_PROJECT_ID.equals(projectId) && !AppClusterLogicAuthEnum.OWN.getCode().equals(authType)) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId) && !AppClusterLogicAuthEnum.OWN.getCode().equals(authType)) {
             return Lists.newArrayList();
         }
 
@@ -568,7 +569,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         switch (AppClusterLogicAuthEnum.valueOf(authType)) {
             case OWN:
-                if (AdminConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
                     return clusterLogicService.listAllClusterLogics();
                 } else {
                     return clusterLogicService.getOwnedClusterLogicListByAppId(projectId);
@@ -746,7 +747,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             if (logicClusterVO == null || projectIdForAuthJudge == null) {
                 return;
             }
-            if (AdminConstant.SUPER_PROJECT_ID.equals(projectIdForAuthJudge)) {
+            if (AuthConstant.SUPER_PROJECT_ID.equals(projectIdForAuthJudge)) {
                 logicClusterVO.setAuthType(   AppClusterLogicAuthEnum.OWN.getCode());
                 logicClusterVO.setPermissions(AppClusterLogicAuthEnum.OWN.getDesc());
                 return;
