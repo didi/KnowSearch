@@ -2,14 +2,6 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.lo
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -77,7 +69,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "获取逻辑集群概览信息接口")
     @ApiImplicitParam(type = "Long", name = "clusterLogicId", value = "逻辑集群ID", required = true)
     public Result<ConsoleClusterVO> get(HttpServletRequest request, @PathVariable Long clusterLogicId) {
-        return Result.buildSucc(clusterLogicManager.getConsoleCluster(clusterLogicId, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterLogicManager.getConsoleCluster(clusterLogicId, HttpRequestUtil.getProjectId(request)));
     }
 
     @GetMapping("/{logicClusterId}/{templateSize}/sizeCheck")
