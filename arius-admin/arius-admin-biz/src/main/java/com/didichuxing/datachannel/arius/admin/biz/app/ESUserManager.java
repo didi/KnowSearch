@@ -151,11 +151,13 @@ public interface ESUserManager {
     
     /**
      * 编辑APP接口
-     * @param request    request
-     * @param consoleESUserDTO     consoleESUserDTO
+     *
+     * @param projectId
+     * @param userName
+     * @param consoleESUserDTO consoleESUserDTO
      * @return Result<Void>
      */
-    Result<Void> update(HttpServletRequest request, ConsoleESUserDTO consoleESUserDTO);
+    Result<Void> update(Integer projectId,String userName, ConsoleESUserDTO consoleESUserDTO);
     
     /**
      * 获取
@@ -172,5 +174,5 @@ public interface ESUserManager {
      */
     Result<List<ConsoleESUserVO>> list();
     
-    Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request);
+    Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request);
 }

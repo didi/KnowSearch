@@ -381,12 +381,9 @@ public class ESUserManagerImpl implements ESUserManager {
     }
     
     @Override
-    public Result<Void> update(HttpServletRequest request, ConsoleESUserDTO consoleESUserDTO) {
+    public Result<Void> update(Integer projectId, String userName, ConsoleESUserDTO consoleESUserDTO) {
        
-        //获取项目id
-        Integer projectId = HttpRequestUtil.getProjectId(request);
-        //获取操作用户
-        String userName = HttpRequestUtil.getOperator(request);
+       
         //校验项目中是否包含该用户
         if (!projectService.checkProjectExist(projectId)) {
             return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(), ResultCode.PROJECT_NOT_EXISTS.getMessage());
@@ -429,7 +426,7 @@ public class ESUserManagerImpl implements ESUserManager {
      * @return
      */
     @Override
-    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request) {
+    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request) {
           String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
         if (!GET_USER_APPID_LIST_TICKET.equals(ticket)) {
             return Result.buildParamIllegal("ticket错误");

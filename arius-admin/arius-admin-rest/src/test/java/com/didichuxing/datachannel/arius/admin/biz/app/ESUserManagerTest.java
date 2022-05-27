@@ -209,7 +209,7 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         final ConsoleESUserDTO consoleESUserDTO = new ConsoleESUserDTO(0, "memo", "dataCenter");
         
         // Run the test
-        final Result<Void> result = esUserManagerImplUnderTest.update(request, consoleESUserDTO);
+        final Result<Void> result = esUserManagerImplUnderTest.update(, request, , consoleESUserDTO);
         
         // Verify the results
     }
