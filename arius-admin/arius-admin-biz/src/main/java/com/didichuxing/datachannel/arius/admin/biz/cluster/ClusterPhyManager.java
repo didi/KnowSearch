@@ -1,10 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -19,6 +14,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -79,18 +77,18 @@ public interface ClusterPhyManager {
      * 构建客户端需要的数据
      *
      * @param clusterPhyList  集群列表源数据
-     * @param appId           当前项目
+     * @param projectId           当前项目
      * @return
      */
-    List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId);
+    List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer projectId);
 
     /**
      * 获取单个物理集群overView信息
      * @param clusterId 物理集群id
-     * @param currentAppId 当前登录项目
+     * @param currentProjectId 当前登录项目
      * @return 物理集群信息
      */
-    ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentAppId);
+    ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentProjectId);
 
     /**
      * 获取物理集群节点划分信息
@@ -172,11 +170,11 @@ public interface ClusterPhyManager {
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
-     * @param appId      appId
+     * @param projectId      projectId
      * @param templateId 模板id
      * @return {@link Result}<{@link List}<{@link String}>>
      */
-    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId);
+    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId);
 
     /**
      * 获取物理集群节点名称列表
@@ -351,5 +349,5 @@ public interface ClusterPhyManager {
      */
     Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
 
-    Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId);
+    Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer projectId);
 }

@@ -36,7 +36,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateAddEvent||appid={}||template={}",
                     addEvent.getLogicWithPhysical().getProjectId(), templatePhysical.getName());
 
-                securityService.saveAppPhysicalTemplateAuth(templatePhysical,
+                securityService.saveProjectPhysicalTemplateAuth(templatePhysical,
                     addEvent.getLogicWithPhysical().getProjectId(), ProjectTemplateAuthEnum.OWN.getCode(), 20);
                 return;
             }
@@ -48,7 +48,7 @@ public class PhysicalTemplateAddOrDeleteEventListener implements ApplicationList
                 LOGGER.info("class=PhysicalTemplateAddOrDeleteEventListener||method=onApplicationEvent||event=PhysicalTemplateDeleteEvent||appid={}||template={}",
                     deleteEvent.getLogicWithPhysical().getProjectId(), templatePhysical.getName());
 
-                securityService.deleteAppPhysicalTemplateAuth(templatePhysical,
+                securityService.deleteProjectPhysicalTemplateAuth(templatePhysical,
                     deleteEvent.getLogicWithPhysical().getProjectId(), ProjectTemplateAuthEnum.OWN.getCode(), 20);
             }
         } catch (Exception e) {

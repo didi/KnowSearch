@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
@@ -70,7 +70,7 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
 		}
 
 		ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
-		resourceLogicDTO.setAppId(workOrder.getSubmitorAppid());
+		resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
 		resourceLogicDTO.setDataCenter(EnvUtil.getDC().getCode());
 		return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.CHECK);
 	}
@@ -106,7 +106,7 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
         LogicClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterDeleteContent.class);
         try {
-            Result<Void> deleteLogicClusterResult = clusterLogicManager.deleteLogicCluster(content.getId(), workOrder.getSubmitor(), workOrder.getSubmitorAppid());
+            Result<Void> deleteLogicClusterResult = clusterLogicManager.deleteLogicCluster(content.getId(), workOrder.getSubmitor(), workOrder.getSubmitorProjectId());
             if (deleteLogicClusterResult.success()){
                 projectClusterLogicAuthService.deleteLogicClusterAuthByLogicClusterId(content.getId());
             }
@@ -128,7 +128,7 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
 	}
 
 	@Override
-	public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+	public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
 		return getOPList();
 	}
 

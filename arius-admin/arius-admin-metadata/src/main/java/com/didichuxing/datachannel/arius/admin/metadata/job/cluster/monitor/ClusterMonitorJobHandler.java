@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsCells;
@@ -22,7 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
@@ -34,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.Ar
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
@@ -47,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +68,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private AppService               appService;
+    private ProjectService projectService;
 
     @Autowired
     private ESClusterService         esClusterService;
@@ -497,8 +495,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
      * 获取应用数量
      */
     private int calcAppNu() {
-        List<App> queryApps = appService.listApps();
-        return CollectionUtils.isEmpty(queryApps) ? 0 : queryApps.size();
+        return projectService.getProjectBriefList().size();
     }
 
     private void handleSaveClusterHealthToDB(ClusterPhy clusterPhy, ESClusterHealthResponse esClusterHealthResponse) {

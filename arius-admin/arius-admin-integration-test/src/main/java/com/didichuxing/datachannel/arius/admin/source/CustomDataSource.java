@@ -59,7 +59,7 @@ public class CustomDataSource {
         String clusterName = getRandomClusterName();
         ClusterJoinDTO param = new ClusterJoinDTO();
         param.setType(4);
-        param.setAppId(appid);
+        param.setProjectId(appid);
         param.setCluster(clusterName);
         param.setDivide(true);
         param.setEsVersion("7.6.2");
@@ -99,7 +99,7 @@ public class CustomDataSource {
         Map<String, Object> contentObj = new HashMap<>();
         workOrderDTO.setContentObj(contentObj);
         workOrderDTO.setSubmitor(operator);
-        workOrderDTO.setSubmitorAppid(appid);
+        workOrderDTO.setSubmitorProjectid(appid);
         workOrderDTO.setDescription("testtest");
         workOrderDTO.setType(type);
         return workOrderDTO;

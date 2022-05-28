@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
@@ -103,7 +103,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
             LogicClusterPlugOperationContent.class);
 
         ProjectClusterLogicAuthEnum logicClusterAuthEnum = projectClusterLogicAuthService
-            .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), content.getLogicClusterId());
+            .getLogicClusterAuthEnum(workOrder.getSubmitorProjectId(), content.getLogicClusterId());
 
         switch (logicClusterAuthEnum) {
             case OWN:
@@ -150,7 +150,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 

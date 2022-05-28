@@ -34,6 +34,6 @@ public class AppEditEventListener implements ApplicationListener<AppEditEvent> {
 
         LOGGER.info("class=AppEditEventListener||method=onApplicationEvent||appId={}||event=AppEditEvent", srcApp.getId());
 
-        securityService.editAppVerifyCode(tgtApp.getId(), tgtApp.getVerifyCode(), 20);
+        securityService.editProjectVerifyCode(tgtApp.getId(), tgtApp.getVerifyCode(), 20);
     }
 }

@@ -1,22 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_IDC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.JOIN_MASTER_NODE_MIN_NUMBER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_PHY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterPhyAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
@@ -31,9 +21,18 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.Templat
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTags;
@@ -43,25 +42,44 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -78,10 +96,28 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 /**
  *
@@ -154,7 +190,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ClusterContextManager                            clusterContextManager;
 
     @Autowired
-    private AppService                                       appService;
+    private ProjectService projectService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -332,13 +368,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
 
     @Override
-    public List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId) {
+    public List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer projectId) {
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             return Lists.newArrayList();
         }
 
         // 获取项目对集群列表的权限信息
-        List<ProjectClusterPhyAuth> projectClusterPhyAuthList = projectClusterPhyAuthManager.getByClusterPhyListAndAppIdFromCache(appId, clusterPhyList);
+        List<ProjectClusterPhyAuth> projectClusterPhyAuthList = projectClusterPhyAuthManager.getByClusterPhyListAndAppIdFromCache(
+                projectId, clusterPhyList);
         Map<String, Integer>    clusterPhyName2AuthTypeMap = ConvertUtil.list2Map(projectClusterPhyAuthList, ProjectClusterPhyAuth::getClusterPhyName, ProjectClusterPhyAuth::getType);
 
         List<ConsoleClusterPhyVO> consoleClusterPhyVOList = ConvertUtil.list2List(clusterPhyList, ConsoleClusterPhyVO.class);
@@ -351,12 +388,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> {
             FUTURE_UTIL.runnableTask(() -> {
                 ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContext(consoleClusterPhyVO.getCluster());
-                consoleClusterPhyVO.setBelongAppIds(  null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectIds()   : null);
+                consoleClusterPhyVO.setBelongProjectIds(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectIds()   : null);
                 consoleClusterPhyVO.setBelongAppNames(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectNames() : null);
 
                 // 兼容旧版本
-                consoleClusterPhyVO.setBelongAppId((null != clusterPhyContext &&
-                        CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectIds())) ?
+                consoleClusterPhyVO.setBelongProjectId((null != clusterPhyContext &&
+                                                        CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectIds())) ?
                         clusterPhyContext.getAssociatedProjectIds().get(0) : null);
                 // 兼容旧版本
                 consoleClusterPhyVO.setBelongAppName(null != clusterPhyContext &&
@@ -385,7 +422,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentAppId) {
+    public ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentProjectId) {
         // 获取基本信息
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterId);
         if(clusterPhy == null) {
@@ -394,7 +431,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         ConsoleClusterPhyVO consoleClusterPhyVO = ConvertUtil.obj2Obj(clusterPhy, ConsoleClusterPhyVO.class);
 
         // 构建overView信息
-        buildWithOtherInfo(consoleClusterPhyVO, currentAppId);
+        buildWithOtherInfo(consoleClusterPhyVO, currentProjectId);
         buildPhyClusterStatics(consoleClusterPhyVO);
         buildClusterRole(consoleClusterPhyVO);
         return consoleClusterPhyVO;
@@ -442,7 +479,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (saveClusterResult.failed()) {
                 throw new AdminOperateException(saveClusterResult.getMessage());
             } else {
-                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), param.getAppId()));
+                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), param.getProjectId()));
                 postProcessingForClusterJoin(param, operator);
             }
 
@@ -522,7 +559,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public List<String> getAppClusterPhyNames(Integer appId) {
-        if(appService.isSuperApp(appId)){
+        if(AuthConstant.SUPER_PROJECT_ID.equals(appId)){
             //超级appId返回所有的集群
             List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
             return phyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
@@ -541,8 +578,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId) {
-        List<String> clusterPhyNameList = getAppClusterPhyNames(appId);
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId) {
+        List<String> clusterPhyNameList = getAppClusterPhyNames(projectId);
         // No permission, cut branches and return
         if (CollectionUtils.isEmpty(clusterPhyNameList)) { return Result.buildSucc();}
 
@@ -671,13 +708,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer appId, Integer authType) {
-        App app = appService.getAppById(appId);
-        if (!appService.isAppExists(app)) {
+    public List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer projectId, Integer authType) {
+        if (!projectService.checkProjectExist(projectId)) {
             return Lists.newArrayList();
         }
 
-        boolean isSuperApp = appService.isSuperApp(app);
+        boolean isSuperApp = AuthConstant.SUPER_PROJECT_ID.equals(projectId);
         //超级用户对所有模板都是管理权限
         if (isSuperApp && !AppClusterPhyAuthEnum.OWN.getCode().equals(authType)) {
             return Lists.newArrayList();
@@ -692,18 +728,18 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 if (isSuperApp) {
                     return clusterPhyService.listAllClusters();
                 } else {
-                    return getAppOwnAuthClusterPhyList(appId);
+                    return getAppOwnAuthClusterPhyList(projectId);
                 }
             case ACCESS:
-                return getAppAccessClusterPhyList(appId);
+                return getAppAccessClusterPhyList(projectId);
 
             case NO_PERMISSIONS:
-                List<Integer> appOwnAuthClusterPhyIdList = getAppOwnAuthClusterPhyList(appId)
+                List<Integer> appOwnAuthClusterPhyIdList = getAppOwnAuthClusterPhyList(projectId)
                                                             .stream()
                                                             .map(ClusterPhy::getId)
                                                             .collect(Collectors.toList());
 
-                List<Integer> appAccessAuthClusterPhyIdList = getAppAccessClusterPhyList(appId)
+                List<Integer> appAccessAuthClusterPhyIdList = getAppAccessClusterPhyList(projectId)
                                                                 .stream()
                                                                 .map(ClusterPhy::getId)
                                                                 .collect(Collectors.toList());
@@ -875,8 +911,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Boolean> deleteClusterExit(String clusterPhyName, Integer appId, String operator) {
-        if  (!appService.isSuperApp(appId)) {
+    public Result<Boolean> deleteClusterExit(String clusterPhyName, Integer projectId, String operator) {
+        if  (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildFail("无权限删除集群");
         }
 
@@ -885,18 +921,18 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildSucc(true);
         }
 
-        return deleteClusterInfo(clusterPhy.getId(), operator, appId);
+        return deleteClusterInfo(clusterPhy.getId(), operator, projectId);
     }
 
     @Override
     public void buildBelongAppIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO) {
         ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContextCache(consoleClusterPhyVO.getCluster());
-        consoleClusterPhyVO.setBelongAppIds(  null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectIds()   : null);
+        consoleClusterPhyVO.setBelongProjectIds(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectIds()   : null);
         consoleClusterPhyVO.setBelongAppNames(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectNames() : null);
 
         // 兼容旧版本
-        consoleClusterPhyVO.setBelongAppId((null != clusterPhyContext &&
-                CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectIds())) ?
+        consoleClusterPhyVO.setBelongProjectId((null != clusterPhyContext &&
+                                                CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectIds())) ?
                 clusterPhyContext.getAssociatedProjectIds().get(0) : null);
         // 兼容旧版本
         consoleClusterPhyVO.setBelongAppName(null != clusterPhyContext &&
@@ -992,7 +1028,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId) {
+    public Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer projectId) {
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setId(param.getId());
         clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
@@ -1174,12 +1210,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * 2. 关联App的权限信息
      * 3. 物理集群责任人
      */
-    private void buildWithOtherInfo(ConsoleClusterPhyVO cluster, Integer currentAppId) {
+    private void buildWithOtherInfo(ConsoleClusterPhyVO cluster, Integer currentProjectId) {
 
-        if (appService.isSuperApp(currentAppId)) {
-            cluster.setCurrentAppAuth(ProjectClusterLogicAuthEnum.ALL.getCode());
-        }
-
+       
         //获取物理集群绑定的逻辑集群
         ClusterLogic clusterLogic = getClusterLogicByClusterPhyName(cluster.getCluster());
         if(clusterLogic == null) {
@@ -1187,19 +1220,19 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         //TODO:  公共模块依赖, 一个物理集群对应多个逻辑集群的情况该归属哪个appId
-        cluster.setBelongAppIds(Lists.newArrayList(clusterLogic.getProjectId()));
+        cluster.setBelongProjectIds(Lists.newArrayList(clusterLogic.getProjectId()));
         cluster.setResponsible(clusterLogic.getResponsible());
-
-        App app = appService.getAppById(clusterLogic.getProjectId());
-        if (!AriusObjUtils.isNull(app)) {
-            cluster.setBelongAppNames(Lists.newArrayList(app.getName()));
+    
+        ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(clusterLogic.getProjectId());
+        if (!AriusObjUtils.isNull(briefVO)) {
+            cluster.setBelongAppNames(Lists.newArrayList(briefVO.getProjectName()));
         }
 
         //TODO:  公共模块依赖, auth table中 加type字段标识是逻辑集群还是物理集群
-        ProjectClusterLogicAuthEnum logicClusterAuthEnum = projectClusterLogicAuthService.getLogicClusterAuthEnum(currentAppId, clusterLogic.getId());
+        ProjectClusterLogicAuthEnum logicClusterAuthEnum = projectClusterLogicAuthService.getLogicClusterAuthEnum(currentProjectId, clusterLogic.getId());
         cluster.setCurrentAppAuth(logicClusterAuthEnum.getCode());
 
-        if (appService.isSuperApp(currentAppId)) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(currentProjectId)) {
             cluster.setCurrentAppAuth(ProjectClusterLogicAuthEnum.ALL.getCode());
         }
     }

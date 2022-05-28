@@ -1,21 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -31,20 +15,27 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTem
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ThirdpartAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdPartTemplateLogicWithMasterTemplateResourceVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -53,8 +44,21 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class CommonManagerImpl implements CommonManager {
@@ -63,7 +67,8 @@ public class CommonManagerImpl implements CommonManager {
     public static final int MAX_LOGIC_ID_NUM = 200;
 
     @Autowired
-    private AppService appService;
+    private ProjectService projectService;
+
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -129,17 +134,17 @@ public class CommonManagerImpl implements CommonManager {
         return Result.buildSucc(
                 ConvertUtil.obj2Obj(clusterLogicService.getClusterLogicByRack(cluster, rack), ThirdPartLogicClusterVO.class));
     }
-
+    
+    /**
+     * @Override public Result<List<ThirdpartAppVO>> listApp() { return
+     * Result.buildSucc(ConvertUtil.list2List(appService.listApps(), ThirdpartAppVO.class)); }
+     **/
+    /**
     @Override
-    public Result<List<ThirdpartAppVO>> listApp() {
-        return Result.buildSucc(ConvertUtil.list2List(appService.listApps(), ThirdpartAppVO.class));
-    }
-
-    @Override
-    public Result<Void> verifyApp(HttpServletRequest request,  Integer appId, String appSecret) throws UnsupportedEncodingException {
+    public Result<Void> verifyApp(HttpServletRequest request, Integer projectId, String appSecret) throws UnsupportedEncodingException {
         appSecret = URLDecoder.decode(appSecret, "UTF-8");
-        return appService.verifyAppCode(appId, appSecret);
-    }
+        return appService.verifyAppCode(projectId, appSecret);
+    }**/
 
     @Override
     public Result<List<ThirdPartClusterVO>> listDataCluster() {
@@ -269,11 +274,11 @@ public class CommonManagerImpl implements CommonManager {
         return Result.buildSucc(ConvertUtil.obj2Obj( indexTemplatePhyService.getTemplateById(physicalId),
                 ThirdpartTemplatePhysicalVO.class));
     }
-
+/**
     @Override
-    public Result<List<ThirdpartTemplateLogicVO>> listLogicByAppIdAuthDataCenter(Integer appId, String auth, String dataCenter) {
+    public Result<List<ThirdpartTemplateLogicVO>> listLogicByAppIdAuthDataCenter(Integer projectId, String auth, String dataCenter) {
 
-        App app = appService.getAppById(appId);
+        App app = appService.getAppById(projectId);
 
         if (app == null) {
             return Result.buildParamIllegal("appId非法");
@@ -284,7 +289,7 @@ public class CommonManagerImpl implements CommonManager {
                     .buildSucc(ConvertUtil.list2List(indexTemplateService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
         }
 
-        List<ProjectTemplateAuth> templateAuths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(appId);
+        List<ProjectTemplateAuth> templateAuths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(projectId);
         if (CollectionUtils.isEmpty(templateAuths)) {
             return Result.buildSucc(Lists.newArrayList());
         }
@@ -326,4 +331,5 @@ public class CommonManagerImpl implements CommonManager {
 
         return Result.buildSucc(ConvertUtil.list2List(templateLogics, ThirdpartTemplateLogicVO.class));
     }
+    **/
 }

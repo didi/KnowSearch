@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandle
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateAuthContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
@@ -21,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
 import java.util.Map;
 import lombok.NoArgsConstructor;
@@ -68,7 +68,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getRDOrOPList();
     }
 
@@ -114,7 +114,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("管理责任人为空");
         }
 
-        List<ProjectTemplateAuth> auths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(workOrder.getSubmitorAppid());
+        List<ProjectTemplateAuth> auths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(workOrder.getSubmitorProjectId());
         Map<Integer, ProjectTemplateAuth> logicId2AppTemplateAuthMap = ConvertUtil.list2Map(auths,
             ProjectTemplateAuth::getTemplateId);
         ProjectTemplateAuth templateAuth = logicId2AppTemplateAuthMap.get(content.getId());
@@ -173,7 +173,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
         if (authEnum.equals(ProjectTemplateAuthEnum.OWN)) {
             // 逻辑模板移交
-            return Result.buildFrom(indexTemplateService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorAppid(),
+            return Result.buildFrom(indexTemplateService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorProjectId(),
                     content.getResponsible(), workOrder.getSubmitor()));
         } else {
             // 对于索引的工单任务，若没有集群权限，则添加所在集群的访问权限
@@ -186,17 +186,17 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
                 return Result.buildFail(String.format("找不到模板%s所属的逻辑集群", logicTemplateId));
             }
             ProjectClusterLogicAuthEnum logicClusterAuthEnum = logicClusterAuthService
-                .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), clusterLogic.getId());
+                .getLogicClusterAuthEnum(workOrder.getSubmitorProjectId(), clusterLogic.getId());
 
             // 没有集群权限则添加访问权限
             if (logicClusterAuthEnum == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
-                logicClusterAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorAppid(), clusterLogic
+                logicClusterAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorProjectId(), clusterLogic
 								.getId(),
                     ProjectClusterLogicAuthEnum.ACCESS, workOrder.getSubmitor(), workOrder.getSubmitor());
             }
 
             // 逻辑模板权限设置
-            Result<Void> result = logicTemplateAuthService.ensureSetLogicTemplateAuth(workOrder.getSubmitorAppid(),
+            Result<Void> result = logicTemplateAuthService.ensureSetLogicTemplateAuth(workOrder.getSubmitorProjectId(),
                 logicTemplateId, authEnum, workOrder.getSubmitor(), workOrder.getSubmitor());
 
             return Result.buildFrom(result);

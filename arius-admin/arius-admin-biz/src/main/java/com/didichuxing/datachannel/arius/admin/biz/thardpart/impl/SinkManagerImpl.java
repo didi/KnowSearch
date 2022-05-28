@@ -3,37 +3,42 @@ package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.SinkManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.SinkSdkAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.SinkSdkESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkIDCTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplatePhysicalDeployVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class SinkManagerImpl implements SinkManager {
@@ -42,7 +47,9 @@ public class SinkManagerImpl implements SinkManager {
     private static final String         FLINK_GET_APP_TICKET_NAME = "X-ARIUS-FLINK-TICKET";
 
     @Autowired
-    private AppService appService;
+    private ProjectService projectService;
+    @Autowired
+    private ESUserService esUserService;
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
@@ -57,21 +64,23 @@ public class SinkManagerImpl implements SinkManager {
     private TemplateSrvManager templateSrvManager;
 
     @Override
-    public Result<SinkSdkAppVO> listApp(HttpServletRequest request, Integer appId) {
+    public Result<SinkSdkESUserVO> listApp(HttpServletRequest request, Integer projectId) {
         String ticket = request.getHeader(FLINK_GET_APP_TICKET_NAME);
         if (!FLINK_GET_APP_TICKET.equals(ticket)) {
             return Result.buildParamIllegal("ticket错误");
         }
 
-        App app = appService.getAppById(appId);
-        if (app == null) {
+      
+        if (projectService.checkProjectExist(projectId)) {
             return Result.buildNotExist("应用不存在");
         }
 
         Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
-
-        return Result.buildSucc(buildAppAuthInfo(app, projectLogicTemplateAuthService.getTemplateAuthsByProjectId(appId),
+        ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
+    
+        return Result.buildSucc(buildESUserAuthInfo(esUser, projectLogicTemplateAuthService.getTemplateAuthsByProjectId(
+                        projectId),
                 templateId2IndexTemplateLogicMap, ""));
     }
 
@@ -208,12 +217,12 @@ public class SinkManagerImpl implements SinkManager {
         return templateSrvManager.getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
     }
 
-    private SinkSdkAppVO buildAppAuthInfo(App app, List<ProjectTemplateAuth> projectTemplateAuths,
-                                          Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
-                                          String defaultRIndices) {
-        SinkSdkAppVO appVO = ConvertUtil.obj2Obj(app, SinkSdkAppVO.class);
+    private SinkSdkESUserVO buildESUserAuthInfo(ESUser esUser, List<ProjectTemplateAuth> projectTemplateAuths,
+                                                Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
+                                                String defaultRIndices) {
+        SinkSdkESUserVO appVO = ConvertUtil.obj2Obj(esUser, SinkSdkESUserVO.class);
 
-        if (app.getIsRoot().equals(AdminConstant.YES)) {
+        if (esUser.getIsRoot().equals(AdminConstant.YES)) {
             appVO.setIndexExp( Lists.newArrayList("*"));
             appVO.setWIndexExp(Lists.newArrayList("*"));
         } else {
@@ -232,8 +241,8 @@ public class SinkManagerImpl implements SinkManager {
                     .map(auth -> templateId2IndexTemplateLogicMap.get(auth.getTemplateId()).getExpression())
                     .collect(Collectors.toList()));
 
-            if (StringUtils.isNotBlank(app.getIndexExp())) {
-                rIndexExpressSet.addAll(Lists.newArrayList(app.getIndexExp().split(",")));
+            if (StringUtils.isNotBlank(esUser.getIndexExp())) {
+                rIndexExpressSet.addAll(Lists.newArrayList(esUser.getIndexExp().split(",")));
             }
 
             rIndexExpressSet.addAll(Arrays.asList(defaultRIndices.split(",")));

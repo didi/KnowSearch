@@ -10,18 +10,16 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderInfoDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -31,13 +29,19 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
+import com.didiglobal.logi.security.common.entity.dept.Dept;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.DeptService;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,13 +63,16 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     private HandleFactory        handleFactory;
 
     @Autowired
-    private AppService           appService;
+    private ProjectService projectService;
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private WorkOrderDAO orderDao;
-
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private DeptService deptService;
+
+
 
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
@@ -119,8 +126,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public int insert(WorkOrderPO orderPO) {
         try {
-            if (orderPO.getApproverAppId() == null) {
-                orderPO.setApproverAppId(AdminConstant.DEFAULT_APP_ID);
+            if (orderPO.getApproverProjectId() == null) {
+                orderPO.setApproverProjectId(AdminConstant.DEFAULT_APP_ID);
             }
             orderDao.insert(orderPO);
             return orderPO.getId().intValue();
@@ -225,7 +232,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public List<WorkOrderPO> getApprovalList(String approver) {
         try {
-            if (!ariusUserInfoService.isOPByDomainAccount(approver)) {
+            //是用户 但不是管理员
+            if (!AuthConstant.SUPER_USER_NAME.equals(approver) && Objects.nonNull(userService.getUserBriefByUserName(approver))) {
                 return orderDao.listByApproverAndStatus(approver, null);
             }
             return orderDao.list();
@@ -240,7 +248,15 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public List<WorkOrderPO> getPassApprovalList(String approver) {
         try {
-            if (!ariusUserInfoService.isOPByDomainAccount(approver)) {
+            /**
+             *  AriusUserInfoPO userInfoPO = ariusUserInfoDAO.getByDomainAccount(domainAccount);
+             *         if (userInfoPO == null) {
+             *             return false;
+             *         }
+             *         return AriusUserRoleEnum.getUserRoleEnum(userInfoPO.getRole()).equals(AriusUserRoleEnum.OP);
+             *         当前审批人只有管理员
+             */
+            if (AuthConstant.SUPER_USER_NAME.equals(approver)) {
                 return orderDao.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
             }
             return orderDao.listByStatus(OrderStatusEnum.PASSED.getCode());
@@ -262,8 +278,15 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 "class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=get wait order list failed!",
                 userName, e);
         }
-
-        if (ariusUserInfoService.isOPByDomainAccount(userName) || ariusUserInfoService.isRDByDomainAccount(userName)) {
+        /**
+         *    AriusUserInfoPO userInfoPO = ariusUserInfoDAO.getByDomainAccount(domainAccount);
+         *         if (userInfoPO == null) {
+         *             return false;
+         *         }
+         *         return AriusUserRoleEnum.getUserRoleEnum(userInfoPO.getRole()).equals(AriusUserRoleEnum.RD);
+         */
+        //AriusUserRoleEnum.RD AriusUserRoleEnum.OP
+        if (AuthConstant.SUPER_USER_NAME.equals(userName)) {
             return orderList;
         } else {
             orderList = handleOrderList(userName, orderList);
@@ -286,8 +309,13 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         detailBaseDTO.setStatus(orderPO.getStatus());
         detailBaseDTO.setType(orderPO.getType());
         detailBaseDTO.setTitle(orderPO.getTitle());
-        detailBaseDTO.setApplicantAppId(orderPO.getApplicantAppId());
-        detailBaseDTO.setAppDeptName("");
+        detailBaseDTO.setApplicantProjectId(orderPO.getApplicantProjectId());
+        UserBriefVO userBriefVO = userService.getUserBriefByUserName(orderPO.getApplicant());
+        Map<Integer, Dept> map = deptService.getAllDeptMap();
+        if (Objects.nonNull(userBriefVO) && map.containsKey(userBriefVO.getDeptId())) {
+            detailBaseDTO.setAppDeptName(map.get(userBriefVO.getDeptId()).getDeptName());
+        
+        }
 
         WorkOrderTypeEnum typeEnum = WorkOrderTypeEnum.valueOfName(orderPO.getType());
         if (WorkOrderTypeEnum.UNKNOWN.equals(typeEnum)) {
@@ -304,7 +332,10 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 "class=WorkOrderManagerImpl||method=getBaseDetail||extensions={}||msg=get order detail failed!",
                 orderPO.getExtensions(), e);
         }
-        detailBaseDTO.setApplicant(ariusUserInfoService.getByDomainAccount(orderPO.getApplicant()));
+        //
+        //projectService.getProjectDetailByProjectId(orderPO.getApplicantProjectId()).getProjectCode()
+        UserBriefVO briefVO = userService.getUserBriefByUserName(orderPO.getApplicant());
+        detailBaseDTO.setApplicant(briefVO);
         return detailBaseDTO;
     }
 
@@ -344,17 +375,17 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             return Result.buildNotExist("工单类型不存在");
         }
 
-        if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(workOrderDTO.getSubmitor()))) {
+        if (AriusObjUtils.isNull(userService.getUserBriefByUserName(workOrderDTO.getSubmitor()))) {
             return Result.buildParamIllegal("提交人非法");
         }
 
         if (!WorkOrderTypeEnum.APP_CREATE.getName().equals(workOrderDTO.getType())) {
-            if (AriusObjUtils.isNull(workOrderDTO.getSubmitorAppid())) {
-                return Result.buildParamIllegal("提交APPID为空");
+            if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectid())) {
+                return Result.buildParamIllegal("提交projectID为空");
             }
-            if (APP_ID_TO_CREATE != workOrderDTO.getSubmitorAppid()
-                && !appService.isAppExists(workOrderDTO.getSubmitorAppid())) {
-                return Result.buildNotExist("提交appId不存在");
+            if (APP_ID_TO_CREATE != workOrderDTO.getSubmitorProjectid()
+                && !projectService.checkProjectExist(workOrderDTO.getSubmitorProjectid())) {
+                return Result.buildNotExist("提交projectId不存在");
             }
         }
 
@@ -419,7 +450,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         workOrder.setId(orderPO.getId());
         workOrder.setTitle(orderPO.getTitle());
         workOrder.setSubmitor(orderPO.getApplicant());
-        workOrder.setSubmitorAppid(orderPO.getApplicantAppId());
+        workOrder.setSubmitorProjectId(orderPO.getApplicantProjectId());
         workOrder.setType(orderPO.getType());
         workOrder.setOpinion(processDTO.getComment());
         //合并两Json属性
@@ -436,10 +467,10 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         baseVO.setType(orderInfoDetail.getType());
         baseVO.setStatus(orderInfoDetail.getStatus());
         baseVO.setAppDeptName(orderInfoDetail.getAppDeptName());
-        baseVO.setApplicant(ConvertUtil.obj2Obj(orderInfoDetail.getApplicant(), AriusUserInfoVO.class));
-        baseVO.setApplicantAppId(orderInfoDetail.getApplicantAppId());
-        baseVO.setApplicantAppName(getApplicantAppName(orderInfoDetail.getApplicantAppId()));
-        baseVO.setApproverList(ConvertUtil.list2List(orderInfoDetail.getApproverList(), AriusUserInfoVO.class));
+        baseVO.setApplicant(orderInfoDetail.getApplicant());
+        baseVO.setApplicantAppId(orderInfoDetail.getApplicantProjectId());
+        baseVO.setApplicantAppName(getApplicantAppName(orderInfoDetail.getApplicantProjectId()));
+        baseVO.setApproverList(orderInfoDetail.getApproverList());
         baseVO.setFinishTime(orderInfoDetail.getFinishTime());
         baseVO.setCreateTime(orderInfoDetail.getCreateTime());
         baseVO.setTitle(orderInfoDetail.getTitle());
@@ -460,10 +491,10 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                     return false;
                 }
 
-                List<AriusUserInfo> ariusUserInfos = handler.getApproverList(abstractOrderDetail);
+                List<UserBriefVO> ariusUserInfos = handler.getApproverList(abstractOrderDetail);
 
-                for (AriusUserInfo ariusUserInfo : ariusUserInfos) {
-                    if (userName.equals(ariusUserInfo.getDomainAccount())) {
+                for (UserBriefVO userBriefVO : ariusUserInfos) {
+                    if (userName.equals(userBriefVO.getUserName())) {
                         return true;
                     }
                 }
@@ -476,10 +507,10 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return orderList;
     }
 
-    private String getApplicantAppName(Integer applicantAppId) {
-        App app = appService.getAppById(applicantAppId);
-        if (null != app) {
-            return app.getName();
+    private String getApplicantAppName(Integer applicantProjectId) {
+        ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(applicantProjectId);
+        if (null != briefVO) {
+            return briefVO.getProjectName();
         }
 
         return null;

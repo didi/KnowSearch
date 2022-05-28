@@ -10,7 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
@@ -20,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +63,7 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 
@@ -125,7 +125,7 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             LogicClusterIndecreaseContent.class);
 
         ProjectClusterLogicAuthEnum logicClusterAuthEnum = projectClusterLogicAuthService
-            .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), content.getLogicClusterId());
+            .getLogicClusterAuthEnum(workOrder.getSubmitorProjectId(), content.getLogicClusterId());
 
         switch (logicClusterAuthEnum) {
             case ALL:
@@ -171,7 +171,7 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
                                                                                            + JSON.toJSONString(content),
             approver);
 
-        List<String> administrators = getOPList().stream().map(AriusUserInfo::getName).collect(
+        List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(
                 Collectors.toList());
         return Result.buildSuccWithMsg(String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
     }

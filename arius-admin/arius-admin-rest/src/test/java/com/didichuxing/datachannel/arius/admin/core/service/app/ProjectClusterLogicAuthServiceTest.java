@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.UserBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -178,6 +178,6 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         clusterLogic.setId(appClusterLogicAuth.getLogicClusterId());
         clusterLogic.setProjectId(appClusterLogicAuth.getAppId());
         Mockito.when(clusterLogicService.getClusterLogicById(Mockito.anyLong())).thenReturn(clusterLogic);
-        Mockito.when(ariusUserInfoService.getByDomainAccount(Mockito.any())).thenReturn(new AriusUserInfo());
+        Mockito.when(ariusUserInfoService.getByDomainAccount(Mockito.any())).thenReturn(new UserBriefVO());
     }
 }

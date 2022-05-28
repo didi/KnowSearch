@@ -1,10 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.Date;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,17 +43,17 @@ public class OrderInfoDetail {
     /**
      * 申请人
      */
-    private AriusUserInfo       applicant;
+    private UserBriefVO applicant;
 
     /**
      * 申请人appId
      */
-    private Integer             applicantAppId;
+    private Integer applicantProjectId;
 
     /**
      * 审批人信息
      */
-    private List<AriusUserInfo> approverList;
+    private List<UserBriefVO> approverList;
 
     /**
      * 任务完成时间

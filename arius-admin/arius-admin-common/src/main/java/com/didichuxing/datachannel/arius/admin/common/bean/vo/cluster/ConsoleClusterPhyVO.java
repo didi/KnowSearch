@@ -23,11 +23,11 @@ import java.util.List;
 @ApiModel("控制台物理集群信息")
 public class ConsoleClusterPhyVO extends ClusterPhyVO {
 
-    @ApiModelProperty("归属项目(App)Id列表")
-    private List<Integer> belongAppIds;
+    @ApiModelProperty("归属项目(Project)Id列表")
+    private List<Integer> belongProjectIds;
 
 	@ApiModelProperty("归属项目(App)Id, 保留兼容客户端")
-    private Integer       belongAppId;
+    private Integer belongProjectId;
 
     @ApiModelProperty("归属项目名称列表")
     private List<String>  belongAppNames;

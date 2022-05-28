@@ -18,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceC
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
@@ -43,6 +42,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLo
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;
@@ -124,7 +124,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getRDOrOPList();
     }
 
@@ -171,13 +171,13 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         }
 
         // 集群权限检查
-        if (!logicClusterAuthService.canCreateLogicTemplate(workOrder.getSubmitorAppid(), content.getResourceId())) {
+        if (!logicClusterAuthService.canCreateLogicTemplate(workOrder.getSubmitorProjectId(), content.getResourceId())) {
             return Result.buildFail(
-                    String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", workOrder.getSubmitorAppid(), content.getResourceId()));
+                    String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", workOrder.getSubmitorProjectId(), content.getResourceId()));
         }
 
         Result<Void> checkBaseInfoResult = indexTemplateService
-                .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorAppid()), OperationEnum.ADD);
+                .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorProjectId()), OperationEnum.ADD);
         if (checkBaseInfoResult.failed()) {
             return checkBaseInfoResult;
         }
@@ -240,7 +240,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
         //校验模板参数类型
         Result<Void> checkBaseInfoResult = indexTemplateService
-                .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorAppid()), OperationEnum.ADD);
+                .validateTemplate(buildTemplateLogicDTO(content, workOrder.getSubmitorProjectId()), OperationEnum.ADD);
         if (checkBaseInfoResult.failed()) {
             return checkBaseInfoResult;
         }
@@ -259,7 +259,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         TemplateCreateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
                 TemplateCreateContent.class);
 
-        IndexTemplateDTO logicDTO = buildTemplateLogicDTO(content, workOrder.getSubmitorAppid());
+        IndexTemplateDTO logicDTO = buildTemplateLogicDTO(content, workOrder.getSubmitorProjectId());
 
         logicDTO.setPhysicalInfos(Lists.newArrayList(buildTemplatePhysicalDTO(content, logicDTO)));
         logicDTO.setShardNum(fetchMaxShardNum(logicDTO.getPhysicalInfos()));

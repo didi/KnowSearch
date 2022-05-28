@@ -21,7 +21,7 @@ admin.thread.size.op: 20
 #gateway相关配置
 es.gateway.url: 10.190.32.30,10.190.44.150,10.190.42.122
 es.gateway.port: 8200
-es.appid: 1
+es.user: 1
 es.password: azAWiJhxkho33ac
 scroll.timeout: 60s
 

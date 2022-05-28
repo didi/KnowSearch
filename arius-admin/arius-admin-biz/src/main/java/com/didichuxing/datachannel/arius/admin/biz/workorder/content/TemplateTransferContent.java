@@ -22,12 +22,12 @@ public class TemplateTransferContent extends BaseContent {
     /**
      * 目标APPID
      */
-    private Integer sourceAppId;
+    private Integer sourceProjectId;
 
     /**
      * 目标APPID
      */
-    private Integer tgtAppId;
+    private Integer tgtProjectId;
 
     /**
      * 目标责任人

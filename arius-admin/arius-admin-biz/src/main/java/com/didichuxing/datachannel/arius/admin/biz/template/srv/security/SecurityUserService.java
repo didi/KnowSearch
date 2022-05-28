@@ -13,11 +13,11 @@ public interface SecurityUserService {
      * @param cluster 集群
      * @param userName 用户
      * @param roleName 角色名字
-     * @param appId appid
+     * @param projectId appid
      * @param retryCount  重试次数
      * @return result
      */
-    Result<Boolean> appendUserRoles(String cluster, String userName, String roleName, Integer appId,
+    Result<Boolean> appendUserRoles(String cluster, String userName, String roleName, Integer projectId,
                            int retryCount) throws ESOperateException;
 
     /**
@@ -36,10 +36,10 @@ public interface SecurityUserService {
      * @param cluster 集群
      * @param userName 用户
      * @param roleName 权限
-     * @param appId appid
+     * @param projectId appid
      * @return result
      */
-    Result<Boolean> ensureUserHasAuth(String cluster, String userName, String roleName, Integer appId);
+    Result<Boolean> ensureUserHasAuth(String cluster, String userName, String roleName, Integer projectId);
 
     /**
      * 修改密码

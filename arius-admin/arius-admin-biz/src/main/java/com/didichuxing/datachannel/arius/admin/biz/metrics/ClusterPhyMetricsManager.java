@@ -31,30 +31,30 @@ public interface ClusterPhyMetricsManager {
     /**
      * 获取指定类型的指标
      * @param userName 账号
-     * @param appId appId
+     * @param projectId projectId
      * @param param 物理集群指标
      * @param metricsTypeEnum 指标处理器类型
      * @return result
      */
-    <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer appId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
+    <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
 
     /**
      * 获取物理集群多个节点的指标信息
      * @param param 物理集群指标
-     * @param appId appId
+     * @param projectId projectId
      * @param userName 账号
      * @param metricsTypeEnum 指标处理器类型
      * @return result
      */
-    Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer appId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
+    Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
     
     /**
      * 获取物理集群中的索引列表
      * @param clusterPhyName 物理集群名称
-     * @param appId 应用程序id
+     * @param projectId 应用程序id
      * @return {@code Result<List<String>>}
      */
-    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId);
+    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId);
     
     /**
      * 获取用户配置指标
@@ -74,14 +74,14 @@ public interface ClusterPhyMetricsManager {
      */
     Result<Integer> updateUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName);
     
-    /**获取集群体育任务细节
+    /**
      * 获取物理集群中的索引列表
      @param clusterPhyName 集群phy名称
      @param node 节点
      @param startTime 开始时间
      @param endTime 结束时间
-     @param appId 应用程序id
+     @param projectId 应用程序id
      @return {@code Result<List<ESClusterTaskDetailVO>>}
      */
-    Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer appId);
+    Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer projectId);
 }

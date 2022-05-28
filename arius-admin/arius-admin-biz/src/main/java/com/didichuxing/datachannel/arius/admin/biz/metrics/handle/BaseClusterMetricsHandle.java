@@ -13,10 +13,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.Variou
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.entity.user.User;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
     protected static final Integer MIN_TOP_NUM = 5;
     
     @Autowired
-    private AppService             appService;
+    private ProjectService projectService;
     
     @Autowired
     private UserService userService;
@@ -44,13 +44,13 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
     /**
      * 获取物理集群节点、节点任务、模板或者节点任务的指标信息
      * @param userName 账号
-     * @param appId appId
+     * @param projectId projectId
      * @param param 物理集群指标信息
      * @return 对应视图板块下的时序指标信息列表
      */
-    public Result<List<VariousLineChartMetricsVO>> getClusterPhyRelatedCurveMetrics(MetricsClusterPhyDTO param, Integer appId, String userName) {
+    public Result<List<VariousLineChartMetricsVO>> getClusterPhyRelatedCurveMetrics(MetricsClusterPhyDTO param, Integer projectId, String userName) {
         //1. verification
-        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, appId, userName);
+        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, projectId, userName);
         if (checkParamResult.failed()) {
             LOGGER.warn("class=ClusterBaseMetricsHandle||method=getClusterPhyMetrics||msg=check param fail");
             return Result.buildFrom(checkParamResult);
@@ -74,13 +74,13 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
     /**
      * 获取当前时刻集群的整体指标,其中包含非曲线数据，例如集群总览视图指标
      * @param param 物理集群指标信息
-     * @param appId appId
+     * @param projectId projectId
      * @param userName 账号类型
      * @return 当前时刻下的集群整体指标
      */
-    public Result<MetricsVO> getOtherClusterPhyRelatedMetricsVO(MetricsClusterPhyDTO param, Integer appId, String userName) {
+    public Result<MetricsVO> getOtherClusterPhyRelatedMetricsVO(MetricsClusterPhyDTO param, Integer projectId, String userName) {
         //1. verification
-        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, appId, userName);
+        Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, projectId, userName);
         if (checkParamResult.failed()) {
             LOGGER.warn("class=ClusterBaseMetricsHandle||method=getMetricsVO||msg=check param fail");
             return Result.buildFrom(checkParamResult);
@@ -92,9 +92,9 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
         return Result.buildSucc(buildClusterPhyMetricsVO(param));
     }
 
-    private Result<Void> checkParamForClusterPhyMetrics(MetricsClusterPhyDTO param, Integer appId,
+    private Result<Void> checkParamForClusterPhyMetrics(MetricsClusterPhyDTO param, Integer projectId,
                                                         String userName) {
-        Result<Void> checkCommonParam = checkCommonParam(param, appId, userName);
+        Result<Void> checkCommonParam = checkCommonParam(param, projectId, userName);
         if (checkCommonParam.failed()) {
             return checkCommonParam;
         }
@@ -107,21 +107,21 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
         return Result.buildSucc();
     }
 
-    private Result<Void> checkCommonParam(MetricsClusterPhyDTO param, Integer appId, String userName) {
+    private Result<Void> checkCommonParam(MetricsClusterPhyDTO param, Integer projectId, String userName) {
         if (null == param) {
             return Result.buildParamIllegal("param is empty");
         }
 
-        if (null == appId) {
-            return Result.buildParamIllegal("appId is empty");
+        if (null == projectId) {
+            return Result.buildParamIllegal("projectId is empty");
         }
         final User user = userService.getUserByUserName(userName);
         if (Objects.isNull(user)) {
             return Result.buildParamIllegal("user info is empty");
         }
 
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal(String.format("There is no appId:%s", appId));
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
         }
 
         return Result.buildSucc();

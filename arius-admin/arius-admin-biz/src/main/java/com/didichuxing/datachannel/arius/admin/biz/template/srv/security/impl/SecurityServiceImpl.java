@@ -15,11 +15,12 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SecurityRoleAuthE
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
@@ -43,7 +44,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
 
     private static final String AUTH_TYPE_NOT_EXISTS_TIPS = "authType[%d]不存在";
 
-    private static final String APP_ID_NOT_EXISTS_TIPS = "appId[%d]不存在";
+    private static final String PROJECT_ID_NOT_EXISTS_TIPS = "projectId[%d]不存在";
 
     @Autowired
     private SecurityUserService securityUserService;
@@ -52,13 +53,15 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     private SecurityRoleService securityRoleService;
 
     @Autowired
-    private AppService                  appService;
+    private ProjectService projectService;
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
     private ClusterPhyService clusterPhyService;
+    @Autowired
+    private ESUserService esUserService;
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -68,14 +71,14 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     /**
      * 为逻辑模板创建APP的指定权限
      *
-     * @param appId           APPID
+     * @param projectId           APPID
      * @param logicTemplateId 逻辑模板
      * @param authType        权限
      * @param retryCount      重试次数
      * @return result
      */
     @Override
-    public Result<Void> saveAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount) {
+    public Result<Void> saveAppLogicTemplateAuth(Integer projectId, Integer logicTemplateId, Integer authType, int retryCount) {
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
@@ -84,28 +87,30 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             return Result.buildNotExist("逻辑模板没有部署物理模板:" + logicTemplateId);
         }
 
-        if (!appService.isAppExists(appId)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||appId={}||msg=appId not exist", appId);
-            return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
+        if (!projectService.checkProjectExist(projectId)) {
+            LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||appId={}||msg=appId not exist",
+                    projectId);
+            return Result.buildNotExist(String.format(PROJECT_ID_NOT_EXISTS_TIPS, projectId));
         }
 
         ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
         if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||authType={}||msg=authType not exist", appId);
+            LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||authType={}||msg=authType not exist",
+                    projectId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
 
         List<String> failMsgs = Lists.newArrayList();
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
-                Result<Void> result = doSaveAppPhysicalTemplateAuth(templatePhysical, appId, authType, retryCount);
+                Result<Void> result = doSaveProjectPhysicalTemplateAuth(templatePhysical, projectId, authType, retryCount);
                 if (result.failed()) {
                     failMsgs.add("[" + templatePhysical.getId() + "]" + result.getMessage());
                 }
             } catch (Exception e) {
                 failMsgs.add(e.getMessage());
                 LOGGER.error("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||cluster={}||appId={}||authType={}||errMsg={}",
-                    templatePhysical.getCluster(), appId, authType, e.getMessage(), e);
+                    templatePhysical.getCluster(), projectId, authType, e.getMessage(), e);
             }
         }
 
@@ -119,44 +124,46 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     /**
      * 为逻辑模板删除APP的指定权限
      *
-     * @param appId           APPID
+     * @param projectId           APPID
      * @param logicTemplateId 逻辑模板
      * @param authType        权限
      * @param retryCount      重试次数
      * @return result
      */
     @Override
-    public Result<Void> deleteAppLogicTemplateAuth(Integer appId, Integer logicTemplateId, Integer authType, int retryCount) {
+    public Result<Void> deleteProjectLogicTemplateAuth(Integer projectId, Integer logicTemplateId, Integer authType, int retryCount) {
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=deleteAppLogicTemplateAuth||logicTemplateId={}||msg=no physical template",
+            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||logicTemplateId={}||msg=no physical template",
                 logicTemplateId);
             return Result.buildNotExist("逻辑模板没有部署物理模板:" + logicTemplateId);
         }
 
-        if (!appService.isAppExists(appId)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=deleteAppLogicTemplateAuth||appId={}||msg=appId not exist", appId);
-            return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
+        if (!projectService.checkProjectExist(projectId)) {
+            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||appId={}||msg=appId not exist",
+                    projectId);
+            return Result.buildNotExist(String.format(PROJECT_ID_NOT_EXISTS_TIPS, projectId));
         }
 
         ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
         if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=deleteAppLogicTemplateAuth||authType={}||msg=authType not exist", appId);
+            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||authType={}||msg=authType not exist",
+                    projectId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
 
         List<String> failMsgs = Lists.newArrayList();
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
-                Result<Void> result = doDeleteAppPhysicalTemplateAuth(templatePhysical, appId, authType, retryCount);
+                Result<Void> result = doDeleteProjectPhysicalTemplateAuth(templatePhysical, projectId, authType, retryCount);
                 if (result.failed()) {
                     failMsgs.add("[" + templatePhysical.getId() + "]" + result.getMessage());
                 }
             } catch (Exception e) {
                 failMsgs.add(e.getMessage());
-                LOGGER.error("class=SecurityServiceImpl||method=deleteAppLogicTemplateAuth||cluster={}||appId={}||authType={}||errMsg={}",
-                    templatePhysical.getCluster(), appId, authType, e.getMessage(), e);
+                LOGGER.error("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||cluster={}||appId={}||authType={}||errMsg={}",
+                    templatePhysical.getCluster(), projectId, authType, e.getMessage(), e);
             }
         }
 
@@ -171,22 +178,22 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      * 修改逻辑模板的APPID
      *
      * @param logicTemplateId 逻辑模板
-     * @param srcAppId        源APP
-     * @param tgtAppId        现APP
+     * @param srcProjectId        源APP
+     * @param tgtProjectId        现APP
      * @param retryCount      重试次数
      * @return result
      */
     @Override
-    public Result<Void> editLogicTemplateOwnApp(Integer logicTemplateId, Integer srcAppId, Integer tgtAppId, int retryCount) {
-        Result<Void> deleteResult = deleteAppLogicTemplateAuth(srcAppId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
+    public Result<Void> editLogicTemplateOwnProject(Integer logicTemplateId, Integer srcProjectId, Integer tgtProjectId, int retryCount) {
+        Result<Void> deleteResult = deleteProjectLogicTemplateAuth(srcProjectId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
             retryCount);
-        LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnApp||logicTemplateId={}||srcAppid={}||tgtAppid={}||msg={}",
-            logicTemplateId, srcAppId, tgtAppId, deleteResult.getMessage());
+        LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnProject||logicTemplateId={}||srcAppid={}||tgtAppid={}||msg={}",
+            logicTemplateId, srcProjectId, tgtProjectId, deleteResult.getMessage());
 
-        Result<Void> saveResult = saveAppLogicTemplateAuth(tgtAppId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
+        Result<Void> saveResult = saveAppLogicTemplateAuth(tgtProjectId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
             retryCount);
-        LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnApp||logicTemplateId={}||srcAppid={}||tgtAppid={}||msg={}",
-            logicTemplateId, srcAppId, tgtAppId, saveResult.getMessage());
+        LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnProject||logicTemplateId={}||srcProjectId={}||tgtProjectId={}||msg={}",
+            logicTemplateId, srcProjectId, tgtProjectId, saveResult.getMessage());
 
         return saveResult;
     }
@@ -195,75 +202,84 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      * 为物理模板创建APP的管理权限
      *
      * @param templatePhysical 模板信息
-     * @param appId            APPID
+     * @param projectId            APPID
      * @param authType         权限
      * @param retryCount       重试次数
      * @return result
      */
     @Override
-    public Result<Void> saveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                                    int retryCount) throws ESOperateException {
-        if (!appService.isAppExists(appId)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=saveAppPhysicalTemplateAuth||appId={}||msg=appId not exist", appId);
-            return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
+    public Result<Void> saveProjectPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer projectId, Integer authType,
+                                                        int retryCount) throws ESOperateException {
+        if (!projectService.checkProjectExist(projectId)) {
+            LOGGER.warn("class=SecurityServiceImpl||method=saveProjectPhysicalTemplateAuth||projectId={}||msg=projectId not exist",
+                    projectId);
+            return Result.buildNotExist(String.format(PROJECT_ID_NOT_EXISTS_TIPS, projectId));
         }
 
         ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
         if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=saveAppPhysicalTemplateAuth||authType={}||msg=authType not exist", appId);
+            LOGGER.warn("class=SecurityServiceImpl||method=saveProjectPhysicalTemplateAuth||authType={}||msg=authType not exist",
+                    projectId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
 
         if (templatePhysical == null) {
-            LOGGER.warn("class=SecurityServiceImpl||method=saveAppPhysicalTemplateAuth||msg=templatePhysical is null", appId);
+            LOGGER.warn("class=SecurityServiceImpl||method=saveProjectPhysicalTemplateAuth||msg=templatePhysical is null",
+                    projectId);
             return Result.buildNotExist("templatePhysical为空");
         }
 
-        return doSaveAppPhysicalTemplateAuth(templatePhysical, appId, retryCount, retryCount);
+        return doSaveProjectPhysicalTemplateAuth(templatePhysical, projectId, retryCount, retryCount);
     }
 
     /**
      * 删除物理模板的APP管理权限
      *
      * @param templatePhysical 模板信息
-     * @param appId            APPID
+     * @param projectId            APPID
      * @param authType         权限
      * @param retryCount       重试次数
      * @return result
      */
     @Override
-    public Result<Void> deleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                                      int retryCount) throws ESOperateException {
+    public Result<Void> deleteProjectPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer projectId, Integer authType,
+                                                          int retryCount) throws ESOperateException {
 
-        if (!appService.isAppExists(appId)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=deleteAppPhysicalTemplateAuth||appId={}||msg=appId not exist", appId);
-            return Result.buildNotExist(String.format(APP_ID_NOT_EXISTS_TIPS, appId));
+        if (!projectService.checkProjectExist(projectId)) {
+            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectPhysicalTemplateAuth||projectId={}||msg=projectId not exist",
+                    projectId);
+            return Result.buildNotExist(String.format(PROJECT_ID_NOT_EXISTS_TIPS, projectId));
         }
 
         ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);
         if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=deleteAppPhysicalTemplateAuth||authType={}||msg=authType not exist", appId);
+            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectPhysicalTemplateAuth||authType={}||msg"
+                        + "=authType "
+                        + "not exist",
+                    projectId);
             return Result.buildNotExist(String.format(AUTH_TYPE_NOT_EXISTS_TIPS, authType));
         }
 
         if (templatePhysical == null) {
-            LOGGER.warn("class=SecurityServiceImpl||method=deleteAppPhysicalTemplateAuth||msg=templatePhysical is null", appId);
+            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectPhysicalTemplateAuth||msg=templatePhysical is "
+                        + "null",
+                    projectId);
             return Result.buildNotExist("templatePhysical为空");
         }
 
-        return doDeleteAppPhysicalTemplateAuth(templatePhysical, appId, retryCount, retryCount);
+        return doDeleteProjectPhysicalTemplateAuth(templatePhysical, projectId, retryCount, retryCount);
     }
 
     /**
      * APP密码修改
      *
-     * @param appId      APPID
+     * @param projectId      APPID
      * @param verifyCode 校验码
      * @param retryCount 重试次数
      * @return result
      */
     @Override
-    public Result<Void> editAppVerifyCode(Integer appId, String verifyCode, int retryCount) {
+    public Result<Void> editProjectVerifyCode(Integer projectId, String verifyCode, int retryCount) {
         List<ClusterPhy> clusters = clusterPhyService.listAllClusters();
 
         List<String> failMsgs = Lists.newArrayList();
@@ -273,14 +289,17 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             }
 
             try {
-                Result<Boolean> result = securityUserService.changePasswordIfExist(cluster.getCluster(), getUserName(appId),
+                Result<Boolean> result = securityUserService.changePasswordIfExist(cluster.getCluster(), getUserName(
+                                projectId),
                     verifyCode, retryCount);
                 if (result.failed()) {
                     failMsgs.add(result.getMessage());
                 }
             } catch (Exception e) {
                 failMsgs.add(e.getMessage());
-                LOGGER.error("class=SecurityServiceImpl||method=editAppVerifyCode||cluster={}||appId={}||errMsg={}", cluster, appId,
+                LOGGER.error("class=SecurityServiceImpl||method=editProjectVerifyCode||cluster={}||projectId={}||errMsg={}",
+                        cluster,
+                        projectId,
                     e.getMessage(), e);
             }
         }
@@ -323,7 +342,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     private void doCheckMeta(IndexTemplatePhy templatePhysical) {
         IndexTemplate templateLogic = indexTemplateService
             .getLogicTemplateWithPhysicalsById(templatePhysical.getLogicId());
-        checkTemplateOwnApp(templatePhysical, templateLogic.getProjectId());
+        checkTemplateOwnProject(templatePhysical, templateLogic.getProjectId());
 
         List<ProjectTemplateAuth> templateAuths = projectLogicTemplateAuthService
             .getTemplateAuthsByLogicTemplateId(templateLogic.getId());
@@ -344,15 +363,15 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         }
     }
 
-    private void checkTemplateOwnApp(IndexTemplatePhy templatePhysical, Integer appId) {
+    private void checkTemplateOwnProject(IndexTemplatePhy templatePhysical, Integer projectId) {
         String roleName = getRoleName(templatePhysical, ProjectTemplateAuthEnum.OWN.getCode());
         securityRoleService.ensureRoleExist(templatePhysical.getCluster(), roleName, templatePhysical.getExpression(),
             getRolePrivilegeSet(ProjectTemplateAuthEnum.OWN.getCode()));
-        securityUserService.ensureUserHasAuth(templatePhysical.getCluster(), getUserName(appId), roleName, appId);
+        securityUserService.ensureUserHasAuth(templatePhysical.getCluster(), getUserName(projectId), roleName, projectId);
     }
 
-    private Result<Void> doSaveAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                                       int retryCount) throws ESOperateException {
+    private Result<Void> doSaveProjectPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer projectId, Integer authType,
+                                                           int retryCount) throws ESOperateException {
 
         if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
             return Result.buildFail("[" + templatePhysical.getCluster() + "]不支持安全特性");
@@ -365,23 +384,25 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         }
         Result<Boolean> createRoleResult = securityRoleService.createRoleIfAbsent(templatePhysical.getCluster(), roleName,
             templatePhysical.getExpression(), getRolePrivilegeSet(authType), retryCount);
-        LOGGER.info("class=SecurityServiceImpl||method=doSaveAppPhysicalTemplateAuth||cluster={}||roleName={}||msg={}",
+        LOGGER.info("class=SecurityServiceImpl||method=doSaveProjectPhysicalTemplateAuth||cluster={}||roleName={}||msg"
+                    + "={}",
             templatePhysical.getCluster(), roleName, createRoleResult.getMessage());
         if (createRoleResult.failed()) {
             return Result.buildFrom(createRoleResult);
         }
 
-        Result<Boolean> saveUserResult = securityUserService.appendUserRoles(templatePhysical.getCluster(), getUserName(appId),
-            roleName, appId, retryCount);
-        LOGGER.info("class=SecurityServiceImpl||method=doSaveAppPhysicalTemplateAuth||cluster={}||roleName={}||appid={}||msg={}",
-            templatePhysical.getCluster(), roleName, appId, saveUserResult.getMessage());
+        Result<Boolean> saveUserResult = securityUserService.appendUserRoles(templatePhysical.getCluster(), getUserName(projectId),
+            roleName, projectId, retryCount);
+        LOGGER.info("class=SecurityServiceImpl||method=doSaveProjectPhysicalTemplateAuth||cluster={}||roleName"
+                    + "={}||projectId={}||msg={}",
+            templatePhysical.getCluster(), roleName, projectId, saveUserResult.getMessage());
 
         return Result.buildFrom(saveUserResult);
 
     }
 
-    private Result<Void> doDeleteAppPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer appId, Integer authType,
-                                                         int retryCount) throws ESOperateException {
+    private Result<Void> doDeleteProjectPhysicalTemplateAuth(IndexTemplatePhy templatePhysical, Integer projectId, Integer authType,
+                                                             int retryCount) throws ESOperateException {
         if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
             return Result.buildFail("[" + templatePhysical.getCluster() + "]不支持安全特性");
         }
@@ -391,17 +412,18 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
             return Result.buildFail("权限类型非法");
         }
 
-        Result<Boolean> saveUserResult = securityUserService.deleteUserRoles(templatePhysical.getCluster(), getUserName(appId),
+        Result<Boolean> saveUserResult = securityUserService.deleteUserRoles(templatePhysical.getCluster(), getUserName(projectId),
             roleName, retryCount);
 
-        LOGGER.info("class=SecurityServiceImpl||method=doDeleteAppPhysicalTemplateAuth||cluster={}||roleName={}||appid={}||msg={}",
-            templatePhysical.getCluster(), roleName, appId, saveUserResult.getMessage());
+        LOGGER.info("class=SecurityServiceImpl||method=doDeleteProjectPhysicalTemplateAuth||cluster={}||roleName"
+                    + "={}||projectId={}||msg={}",
+            templatePhysical.getCluster(), roleName, projectId, saveUserResult.getMessage());
 
         return Result.buildFrom(saveUserResult);
     }
 
-    private String getUserName(Integer appId) {
-        return "user_" + appId;
+    private String getUserName(Integer projectId) {
+        return "user_" + esUserService.getDefaultESUserByProject(projectId).getId();
     }
 
     private String getRoleName(IndexTemplatePhy template, Integer authType) {

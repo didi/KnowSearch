@@ -42,13 +42,16 @@ public interface ClusterLogicManager {
      */
     ConsoleClusterVO buildOpClusterVO(ClusterLogic clusterLogic, Integer appIdForAuthJudge);
 
+  
     /**
      * 获取逻辑集群所有访问的APP
      *
      * @param logicClusterId 逻辑集群ID
      * @return
      */
+      /**
     Result<List<ConsoleAppVO>> getAccessAppsOfLogicCluster(Long logicClusterId);
+    **/
 
     /**
      * 获取APP拥有的集群列表

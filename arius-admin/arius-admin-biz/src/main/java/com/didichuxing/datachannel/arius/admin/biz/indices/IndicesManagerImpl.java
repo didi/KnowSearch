@@ -4,42 +4,33 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndicesPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
-import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -49,7 +40,14 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiInde
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -58,9 +56,9 @@ import com.google.common.collect.Lists;
 @Component
 public class IndicesManagerImpl implements IndicesManager {
     private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
-    public static final int RETRY_COUNT = 3;
+    public static final int            RETRY_COUNT = 3;
     @Autowired
-    private AppService            appService;
+    private             ProjectService projectService;
 
     @Autowired
     private ESIndexCatService     esIndexCatService;
@@ -83,11 +81,11 @@ public class IndicesManagerImpl implements IndicesManager {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Override
-    public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(IndicesConditionDTO condition, Integer appId) {
+    public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(IndicesConditionDTO condition, Integer projectId) {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.INDICES.getPageSearchType());
         if (baseHandle instanceof IndicesPageSearchHandle) {
             IndicesPageSearchHandle handle = (IndicesPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, null, appId);
+            return handle.doPageHandle(condition, null, projectId);
         }
 
         LOGGER.warn("class=TemplateLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the TemplateLogicPageSearchHandle");
@@ -96,9 +94,9 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> batchDeleteIndex(List<IndicesClearDTO> params, Integer appId, String operator) {
+    public Result<Boolean> batchDeleteIndex(List<IndicesClearDTO> params, Integer projectId, String operator) {
         for (IndicesClearDTO param : params) {
-            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), appId);
+            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), projectId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }
@@ -130,9 +128,9 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> batchUpdateIndexStatus(List<IndicesOpenOrCloseDTO> params, boolean indexNewStatus, Integer appId, String operator) {
+    public Result<Boolean> batchUpdateIndexStatus(List<IndicesOpenOrCloseDTO> params, boolean indexNewStatus, Integer projectId, String operator) {
         for (IndicesOpenOrCloseDTO param : params) {
-            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), appId);
+            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), projectId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }
@@ -198,9 +196,9 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> batchEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId,
+    public Result<Boolean> batchEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId,
                                                       String operator) {
-        Result<Boolean> checkResult = checkEditIndexBlockSetting(params, appId);
+        Result<Boolean> checkResult = checkEditIndexBlockSetting(params, projectId);
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -241,8 +239,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexMappingVO> getIndexMapping(String clusterPhyName, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, appId);
+    public Result<IndexMappingVO> getIndexMapping(String clusterPhyName, String indexName, Integer projectId) {
+        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -258,8 +256,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexSettingVO> getIndexSetting(String clusterPhyName, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, appId);
+    public Result<IndexSettingVO> getIndexSetting(String clusterPhyName, String indexName, Integer projectId) {
+        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -286,8 +284,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String clusterPhyName, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, appId);
+    public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String clusterPhyName, String indexName, Integer projectId) {
+        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -299,10 +297,11 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexCatCellVO> getIndexCatInfo(String clusterPhyName, String indexName, Integer appId) {
+    public Result<IndexCatCellVO> getIndexCatInfo(String clusterPhyName, String indexName, Integer projectId) {
         //1.建立单个索引查询的查询条件信息
         IndicesConditionDTO indicesConditionDTO = buildOneIndicesConditionDTO(clusterPhyName, indexName);
-        PaginationResult<IndexCatCellVO> indexCatCellVOPaginationResult = pageGetIndexCatInfoVO(indicesConditionDTO, appId);
+        PaginationResult<IndexCatCellVO> indexCatCellVOPaginationResult = pageGetIndexCatInfoVO(indicesConditionDTO,
+                projectId);
         if (indexCatCellVOPaginationResult.failed()) {
             return Result.buildFail("获取单个索引详情信息失败");
         }
@@ -317,9 +316,9 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     /***************************************************private**********************************************************/
-    private Result<Void> basicCheckParam(String cluster, String index, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", appId));
+    private Result<Void> basicCheckParam(String cluster, String index, Integer projectId) {
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", projectId));
         }
 
         if (!clusterPhyManager.isClusterExists(cluster)) {
@@ -333,9 +332,9 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> checkEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId) {
+    private Result<Boolean> checkEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId) {
         for (IndicesBlockSettingDTO param : params) {
-            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), appId);
+            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), projectId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }

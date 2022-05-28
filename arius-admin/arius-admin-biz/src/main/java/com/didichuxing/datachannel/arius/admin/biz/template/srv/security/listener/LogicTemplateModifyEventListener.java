@@ -35,7 +35,7 @@ public class LogicTemplateModifyEventListener implements ApplicationListener<Log
             "class=LogicTemplateModifyEventListener||method=onApplicationEvent||event=LogicTemplateModifyEvent||srcAppid={}||tgtAppid={}||templateId={}",
             oldTemplate.getProjectId(), newTemplate.getProjectId(), newTemplate.getId());
 
-        securityService.editLogicTemplateOwnApp(newTemplate.getId(), oldTemplate.getProjectId(), newTemplate.getProjectId(),
+        securityService.editLogicTemplateOwnProject(newTemplate.getId(), oldTemplate.getProjectId(), newTemplate.getProjectId(),
             20);
     }
 }

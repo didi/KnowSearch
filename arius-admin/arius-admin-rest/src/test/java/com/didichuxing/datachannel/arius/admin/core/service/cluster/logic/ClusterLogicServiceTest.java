@@ -175,7 +175,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         esLogicClusterDTO.setResponsible("");
         Assertions.assertEquals(Result.buildParamIllegal("责任人为空").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        esLogicClusterDTO.setAppId(null);
+        esLogicClusterDTO.setProjectId(null);
         Assertions.assertEquals(Result.buildParamIllegal("应用ID为空").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
         esLogicClusterDTO.setName("");
@@ -239,7 +239,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         Assertions.assertTrue(
-                clusterLogicService.getOwnedClusterLogicListByAppId(esLogicClusterDTO.getAppId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
+                clusterLogicService.getOwnedClusterLogicListByAppId(esLogicClusterDTO.getProjectId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
     }
 
     @Test

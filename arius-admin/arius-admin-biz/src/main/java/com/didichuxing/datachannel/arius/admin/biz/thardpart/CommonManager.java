@@ -11,10 +11,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdPart
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateVO;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 public interface CommonManager {
 
@@ -49,17 +48,18 @@ public interface CommonManager {
      * 获取app列表,包含APP全部元信息
      * @return
      */
-    Result<List<ThirdpartAppVO>> listApp();
-
+    /**
+     Result<List<ThirdpartAppVO>> listApp();
+     **/
     /**
      * 验证APP校验码接口
      * @param request
-     * @param appId
+     * @param projectId
      * @param appSecret
      * @return
      * @throws UnsupportedEncodingException
      */
-    Result<Void> verifyApp(HttpServletRequest request, Integer appId, String appSecret) throws UnsupportedEncodingException;
+    //Result<Void> verifyApp(HttpServletRequest request, Integer projectId, String appSecret) throws UnsupportedEncodingException;
 
     /**
      * 获取物理集群列表接口
@@ -133,5 +133,5 @@ public interface CommonManager {
      * @param dataCenter
      * @return
      */
-    Result<List<ThirdpartTemplateLogicVO>> listLogicByAppIdAuthDataCenter(Integer appId, String auth, String dataCenter);
+    //Result<List<ThirdpartTemplateLogicVO>> listLogicByAppIdAuthDataCenter(Integer appId, String auth, String dataCenter);
 }

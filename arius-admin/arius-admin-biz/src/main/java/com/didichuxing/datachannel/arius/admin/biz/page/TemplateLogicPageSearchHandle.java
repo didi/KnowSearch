@@ -16,12 +16,12 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +40,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     private static final ILog LOGGER = LogFactory.getLog(TemplateLogicPageSearchHandle.class);
 
     @Autowired
-    private AppService                  appService;
+    private ProjectService projectService;
 
     @Autowired
     private ProjectLogicTemplateAuthManager projectLogicTemplateAuthManager;
@@ -64,7 +64,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer projectId) {
-        if (!appService.isAppExists(projectId)) {
+        if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);

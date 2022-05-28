@@ -91,7 +91,7 @@ public class LogicClusterInfoSource {
         logicClusterDeleteContent.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
         workOrderDTO.setContentObj(logicClusterDeleteContent);
         workOrderDTO.setType("logicClusterDelete");
-        workOrderDTO.setSubmitorAppid(1);
+        workOrderDTO.setSubmitorProjectid(1);
         Result<AriusWorkOrderInfoSubmittedVO> result2 = NormalOrderControllerMethod.submit("logicClusterDelete", workOrderDTO);
         Assertions.assertTrue(result2.success());
 

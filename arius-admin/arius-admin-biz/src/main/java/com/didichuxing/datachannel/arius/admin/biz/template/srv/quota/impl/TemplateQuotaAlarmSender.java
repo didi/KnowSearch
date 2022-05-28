@@ -1,15 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
@@ -19,13 +9,20 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateN
 import com.didichuxing.datachannel.arius.admin.common.event.quota.TemplateQuotaEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateNotifyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
+import com.didiglobal.logi.security.service.ProjectService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
 /**
  * @author d06679
@@ -42,7 +39,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
     private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private AppService                         appService;
+    private ProjectService projectService;
 
     @Autowired
     private TemplateQuotaManager               templateQuotaManager;
@@ -84,14 +81,14 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
 
         LogicTemplateQuotaUsage templateQuotaUsage = event.getTemplateQuotaUsage();
         IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(templateQuotaUsage.getLogicId());
-        App app = appService.getAppById(templateLogic.getProjectId());
+      
 
-        if (!templateQuotaManager.enableClt(templateLogic.getId())) {
+        if (!templateQuotaManager.enableClt(templateLogic.getId())||!projectService.checkProjectExist(templateLogic.getProjectId())) {
             return;
         }
 
         // 防疲劳
-        if (!canNotify(event, templateLogic, app)) {
+        if (!canNotify(event, templateLogic, templateLogic.getProjectId())) {
             LOGGER.info("class=TemplateQuotaAlarmSender||method=onApplicationEvent||logicId={}||msg=anti-fatigue", templateLogic.getId());
             return;
         }
@@ -105,7 +102,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
     /**************************************** private method ****************************************************/
     //提醒的疲劳度控制
     //控制规则：一个模板一天之内超过80%最多提醒一次，超过85%最多提醒两次，超过90%最多提醒三次，超过95%最多提醒四次
-    private boolean canNotify(TemplateQuotaEvent event, IndexTemplate templateLogic, App app) {
+    private boolean canNotify(TemplateQuotaEvent event, IndexTemplate templateLogic, Integer projectId ) {
         LogicTemplateQuotaUsage templateQuotaUsage = event.getTemplateQuotaUsage();
 
         Integer logicTemplateId = templateLogic.getId();
@@ -138,7 +135,7 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
 
         if (CollectionUtils.isEmpty(templateNotifyESPOList)) {
             templateNotifyDAO.insertTemplateNotifyESPO(
-                new TemplateNotifyESPO(logicTemplateId, app.getId(), templateName, zeroDate, usageRatio, 1));
+                new TemplateNotifyESPO(logicTemplateId, projectId, templateName, zeroDate, usageRatio, 1));
             return true;
         } else {
             TemplateNotifyESPO templateNotifyESPO = templateNotifyESPOList.get(0);

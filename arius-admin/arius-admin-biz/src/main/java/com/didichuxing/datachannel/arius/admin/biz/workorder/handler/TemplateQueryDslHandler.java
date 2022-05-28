@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateQueryDslOrderDetail;
@@ -19,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateQue
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsls;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +58,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getRDOrOPList();
     }
 
@@ -130,7 +130,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
         Map<Integer, ProjectTemplateAuth> appId2AppTemplateAuthMap = ConvertUtil.list2Map(projectTemplateAuths,
             ProjectTemplateAuth::getProjectId);
 
-        if (appId2AppTemplateAuthMap.containsKey(workOrder.getSubmitorAppid())) {
+        if (appId2AppTemplateAuthMap.containsKey(workOrder.getSubmitorProjectId())) {
             return Result.buildSucc();
         }
 
@@ -167,7 +167,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
         dslInfos.add(dslInfo);
 
         // 修改模板quota及保存时长信息
-        AuditDsls auditDsls = new AuditDsls(workOrder.getSubmitorAppid(), workOrder.getSubmitor(), dslInfos);
+        AuditDsls auditDsls = new AuditDsls(workOrder.getSubmitorProjectId(), workOrder.getSubmitor(), dslInfos);
         Result<String> result = dslStatisService.auditDsl(auditDsls);
 
         return Result.buildFrom(result);

@@ -1,18 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.security.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityUserService;
-import com.didiglobal.logi.elasticsearch.client.request.security.SecurityUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESSecurityUserDAO;
+import com.didiglobal.logi.elasticsearch.client.request.security.SecurityUser;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author didi
@@ -25,8 +24,9 @@ public class SecurityUserServiceImpl implements SecurityUserService {
     @Autowired
     private ESSecurityUserDAO esSecurityUserDAO;
 
+  
     @Autowired
-    private AppService        appService;
+    private ESUserService esUserService;
 
     /**
      * 为用户添加角色
@@ -35,12 +35,12 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @param cluster    集群
      * @param userName   用户
      * @param roleName   角色名字
-     * @param appId      appid
+     * @param projectId      appid
      * @param retryCount 重试次数
      * @return result
      */
     @Override
-    public Result<Boolean> appendUserRoles(String cluster, String userName, String roleName, Integer appId,
+    public Result<Boolean> appendUserRoles(String cluster, String userName, String roleName, Integer projectId,
                                   int retryCount) throws ESOperateException {
         SecurityUser securityUser = esSecurityUserDAO.getByName(cluster, userName);
 
@@ -49,7 +49,7 @@ public class SecurityUserServiceImpl implements SecurityUserService {
             securityUser.setRoles(Lists.newArrayList());
         }
 
-        securityUser.setPassword(appService.getAppById(appId).getVerifyCode());
+        securityUser.setPassword(esUserService.getDefaultESUserByProject(projectId).getVerifyCode());
         securityUser.getRoles().add(roleName);
 
         LOGGER.info("class=SecurityUserServiceImpl||method=appendUserRoles||cluster={}||userName={}||roleName={}", cluster, userName, roleName);
@@ -92,15 +92,15 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @param cluster  集群
      * @param userName 用户
      * @param roleName 权限
-     * @param appId appid
+     * @param projectId appid
      * @return result
      */
     @Override
-    public Result<Boolean> ensureUserHasAuth(String cluster, String userName, String roleName, Integer appId) {
+    public Result<Boolean> ensureUserHasAuth(String cluster, String userName, String roleName, Integer projectId) {
         try {
             SecurityUser securityUser = esSecurityUserDAO.getByName(cluster, userName);
             if (securityUser == null || !securityUser.getRoles().contains(roleName)) {
-                Result<Boolean> result = appendUserRoles(cluster, userName, roleName, appId, 3);
+                Result<Boolean> result = appendUserRoles(cluster, userName, roleName, projectId, 3);
                 LOGGER.info("class=SecurityUserServiceImpl||method=ensureUserHasAuth||cluster={}||userName={}||roleName={}||result={}",
                         cluster, userName, roleName, result.getMessage());
                 return result;

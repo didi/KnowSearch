@@ -8,30 +8,29 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -42,7 +41,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     private static final ILog          LOGGER = LogFactory.getLog(ClusterLogicPageSearchHandle.class);
 
     @Autowired
-    private AppService                 appService;
+    private ProjectService projectService;
 
     @Autowired
     private ClusterLogicService        clusterLogicService;
@@ -60,7 +59,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
 
     @Override
     protected Result<Boolean> validCheckForAppId(Integer projectId) {
-        if (!appService.isAppExists(projectId)) {
+        if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);
@@ -85,8 +84,8 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
                 return Result.buildParamIllegal("逻辑集群类型不存在");
             }
 
-            if (null != clusterLogicConditionDTO.getAppId()
-                    && !appService.isAppExists(clusterLogicConditionDTO.getAppId())) {
+            if (null != clusterLogicConditionDTO.getProjectId()
+                    && !projectService.checkProjectExist(clusterLogicConditionDTO.getProjectId())) {
                 return Result.buildParamIllegal("逻辑集群所属项目不存在");
             }
 
@@ -221,10 +220,10 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         }
 
         //分页查询条件中仅存在项目Id
-        if (null != condition.getAppId()) {
+        if (null != condition.getProjectId()) {
             appAuthClusterLogicList = appAuthClusterLogicList
                     .stream()
-                    .filter(r -> r.getProjectId().equals(condition.getAppId()))
+                    .filter(r -> r.getProjectId().equals(condition.getProjectId()))
                     .collect(Collectors.toList());
         }
         meetConditionClusterLogicList.addAll(appAuthClusterLogicList);
@@ -266,9 +265,10 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     }
 
     private void setAppName(ConsoleClusterVO consoleClusterVO) {
-        App app = appService.getAppById(consoleClusterVO.getProjectId());
-        if (null != app && !AriusObjUtils.isBlack(app.getName())) {
-            consoleClusterVO.setAppName(app.getName());
+        ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+                consoleClusterVO.getProjectId());
+        if (null != briefVO && !AriusObjUtils.isBlack(briefVO.getProjectName())) {
+            consoleClusterVO.setAppName(briefVO.getProjectName());
         }
     }
 

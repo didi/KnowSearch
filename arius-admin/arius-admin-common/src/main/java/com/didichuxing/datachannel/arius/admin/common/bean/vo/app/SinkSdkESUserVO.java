@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "应用信息（包含权限）")
-public class SinkSdkAppVO extends BaseVO {
+public class SinkSdkESUserVO extends BaseVO {
 
     @ApiModelProperty("应用ID")
     private Integer      id;

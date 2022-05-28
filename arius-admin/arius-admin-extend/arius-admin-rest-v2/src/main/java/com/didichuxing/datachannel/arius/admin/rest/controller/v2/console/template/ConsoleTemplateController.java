@@ -13,7 +13,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -33,12 +32,13 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -76,7 +76,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     public static final int MIN_PERCENT = -99;
 
     @Autowired
-    private AppService               appService;
+    private ProjectService projectService;
 
     @Autowired
     private TemplateQuotaManager     templateQuotaManager;
@@ -99,14 +99,14 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @GetMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取索引列表", notes = "包含权限、集群信息、权限信息；")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
-    public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "appId", required = false) Integer appId,
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
+    public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "projectId", required = false) Integer projectId,
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
-        App app = appService.getAppById(appId);
-        if (null == app) {
+        
+        if (!projectService.checkProjectExist(projectId)) {
             return Result.buildNotExist(APP_IS_NOT_EXIST);
         }
-        return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(appId));
+        return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
 
     @GetMapping("/get")
@@ -202,7 +202,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @PutMapping("/clearInfo")
     @ResponseBody
     @ApiOperation(value = "清理索引信息接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name =HttpRequestUtil.PROJECT_ID, value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
                                             @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
         Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
@@ -242,7 +242,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @DeleteMapping("/deleteInfo")
     @ResponseBody
     @ApiOperation(value = "下线索引信息接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true),
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value
+            = "应用ID",
+            required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<Void> deleteTemplate(HttpServletRequest request,
                                  @RequestParam("logicId") Integer logicId) throws AdminOperateException {
@@ -256,16 +258,15 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @GetMapping("/indices/list")
     @ResponseBody
     @ApiOperation(value = "获取App Id所有模板的索引" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
     public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(HttpServletRequest request,
-                                                                        @RequestParam("appId") Integer appId) {
+                                                                        @RequestParam("projectId") Integer projectId) {
 
-        App app = appService.getAppById(appId);
-        if (null == app) {
-            return Result.buildNotExist("应用不存在");
+       if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildNotExist(APP_IS_NOT_EXIST);
         }
 
-        return indexTemplateService.getLogicTemplatesByAppId(appId);
+        return indexTemplateService.getLogicTemplatesByAppId(projectId);
     }
 
     @GetMapping("/cyclicalRoll")
@@ -374,13 +375,13 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     /**
      * 获取App名称
      *
-     * @param appId App Id
+     * @param projectId App Id
      * @return
      */
-    private String getAppName(Integer appId) {
-        App app = appService.getAppById(appId);
-        if (app != null) {
-            return app.getName();
+    private String getAppName(Integer projectId) {
+        ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
+        if (projectBriefVO != null) {
+            return projectBriefVO.getProjectName();
         }
 
         return StringUtils.EMPTY;

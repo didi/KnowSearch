@@ -42,7 +42,7 @@ public class WorkOrder extends BaseEntity {
     /**
      * 提交人appid
      */
-    private Integer submitorAppid;
+    private Integer submitorProjectId;
 
     /**
      * 数据中心

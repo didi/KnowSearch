@@ -314,7 +314,7 @@ public class CustomDataSource {
     public static ESLogicClusterDTO esLogicClusterDTOFactory() {
         ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
         esLogicClusterDTO.setName("wpkTest");
-        esLogicClusterDTO.setAppId(123);
+        esLogicClusterDTO.setProjectId(123);
         esLogicClusterDTO.setResponsible("wpk");
         esLogicClusterDTO.setType(ClusterResourceTypeEnum.EXCLUSIVE.getCode());
         esLogicClusterDTO.setQuota(3d);

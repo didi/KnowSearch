@@ -30,7 +30,7 @@ public class WorkOrderDTO extends BaseDTO {
     private String  submitor;
 
     @ApiModelProperty("提交APPID")
-    private Integer submitorAppid;
+    private Integer submitorProjectid;
 
     @ApiModelProperty("数据中心")
     private String  dataCenter;

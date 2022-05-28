@@ -3,18 +3,20 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUserRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +36,9 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     private WorkOrderManager workOrderManager;
 
     @Autowired
-    private AriusUserInfoService   ariusUserInfoService;
+    private ProjectService  projectService;
+    @Autowired
+    private UserService userService;
 
     @Autowired
     protected OperateRecordService operateRecordService;
@@ -118,7 +122,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     protected Result<Void> doProcessDisagree(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
         orderPO.setApprover(processDTO.getAssignee());
-        orderPO.setApproverAppId(processDTO.getAssigneeAppid());
+        orderPO.setApproverProjectId(processDTO.getAssigneeAppid());
         orderPO.setOpinion(processDTO.getComment());
         orderPO.setStatus(OrderStatusEnum.REFUSED.getCode());
 
@@ -194,21 +198,20 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     protected abstract Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException;
 
-    protected List<AriusUserInfo> getRDOrOPList() {
-        return ariusUserInfoService
-            .listByRoles(Arrays.asList(AriusUserRoleEnum.OP.getRole(), AriusUserRoleEnum.RD.getRole()));
+    protected List<UserBriefVO> getRDOrOPList() {
+        return  Collections.singletonList(userService.getUserBriefByUserName(AuthConstant.SUPER_USER_NAME));
     }
 
-    protected List<AriusUserInfo> getOPList() {
-        return ariusUserInfoService.listByRoles(Collections.singletonList(AriusUserRoleEnum.OP.getRole()));
+    protected List<UserBriefVO> getOPList() {
+        return  Collections.singletonList(userService.getUserBriefByUserName(AuthConstant.SUPER_USER_NAME));
     }
 
     protected boolean isRDOrOP(String userName) {
-        return ariusUserInfoService.isOPByDomainAccount(userName) || ariusUserInfoService.isRDByDomainAccount(userName);
+        return AuthConstant.SUPER_USER_NAME.equals(userName);
     }
 
     protected boolean isOP(String userName) {
-        return ariusUserInfoService.isOPByDomainAccount(userName);
+        return AuthConstant.SUPER_USER_NAME.equals(userName);
     }
 
     /*************************************** privete method ************************************/
@@ -226,7 +229,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
         orderPo.setType(workOrder.getType());
         orderPo.setTitle(workOrder.getTitle());
         orderPo.setStatus(OrderStatusEnum.WAIT_DEAL.getCode());
-        orderPo.setApplicantAppId(workOrder.getSubmitorAppid());
+        orderPo.setApplicantProjectId(workOrder.getSubmitorProjectId());
         return orderPo;
     }
 

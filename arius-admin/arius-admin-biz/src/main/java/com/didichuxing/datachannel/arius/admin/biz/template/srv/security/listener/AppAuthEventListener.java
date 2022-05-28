@@ -62,7 +62,7 @@ public class AppAuthEventListener implements ApplicationListener<ProjectAuthEven
             LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthDeleteEvent||appid={}||template={}||authType={}",
                 projectTemplateAuth.getProjectId(), projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType());
 
-            securityService.deleteAppLogicTemplateAuth(projectTemplateAuth.getProjectId(),
+            securityService.deleteProjectLogicTemplateAuth(projectTemplateAuth.getProjectId(),
                 projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType(), 20);
         }
 
