@@ -1,13 +1,15 @@
 # 变更：metrics_config -》user_metrics_config_info
 create table user_metrics_config_info
 (
-    id             bigint auto_increment
+    id          bigint auto_increment
         primary key,
-    user_name     varchar(255)                      not null comment '用户账号',
-    metric_info    text                                null comment '指标看板的配置',
-    create_time    timestamp default CURRENT_TIMESTAMP null,
-    update_time    timestamp default CURRENT_TIMESTAMP null
-)ENGINE=InnoDB AUTO_INCREMENT=1592 DEFAULT CHARSET=utf8 comment '用户关联到指标的配置信息表';
+    user_name   varchar(255)                        not null comment '用户账号',
+    metric_info text                                null comment '指标看板的配置',
+    create_time timestamp default CURRENT_TIMESTAMP null,
+    update_time timestamp default CURRENT_TIMESTAMP null
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 1592
+  DEFAULT CHARSET = utf8 comment '用户关联到指标的配置信息表';
 
 
 #变更index_template_info app_id /* appid */ 变更为 project_id
@@ -32,7 +34,7 @@ create table index_template_info2
     expression        varchar(100)                 default ''                not null comment '索引表达式',
     `desc`            varchar(500)                 default ''                not null comment '索引描述',
     quota             decimal(10, 3)               default -1.000            not null comment '规格',
-    project_id            int(10)                      default -1                not null comment 'project_id',
+    project_id        int(10)                      default -1                not null comment 'project_id',
     ingest_pipeline   varchar(512)                 default ''                not null comment 'ingest_pipeline',
     block_read        tinyint(1) unsigned zerofill default 0                 not null comment '是否禁读，0：否，1：是',
     block_write       tinyint(1) unsigned zerofill default 0                 not null comment '是否禁写，0：否，1：是',
@@ -67,7 +69,7 @@ create table project_template_info
 (
     id              bigint unsigned auto_increment comment '主键自增'
         primary key,
-    project_id           int(10)      default -1                not null comment '项目id',
+    project_id      int(10)      default -1                not null comment '项目id',
     template        varchar(100) default ''                not null comment '模板名称, 不能关联模板id 模板会跨集群迁移，id会变',
     type            int(10)      default -1                not null comment '项目id的权限 1 读写 2 读 -1 未知',
     responsible_ids varchar(100) default ''                not null comment '责任人id列表',
@@ -98,7 +100,7 @@ create table project_logi_cluster_auth
 (
     id               bigint unsigned auto_increment comment '主键自增'
         primary key,
-    project_id           int(10)         default -1                not null comment '用户账号',
+    project_id       int(10)         default -1                not null comment '用户账号',
     logic_cluster_id bigint unsigned default 0                 not null comment '逻辑集群id',
     type             int(10)         default -1                not null comment '权限类型，0-超管，1-配置管理，2-访问，-1-无权限',
     responsible      varchar(100)    default ''                not null comment '责任人id列表',
@@ -130,7 +132,7 @@ create table arius_resource_logic
         primary key,
     name          varchar(128)  default ''                not null comment '资源名称',
     type          tinyint       default 2                 not null comment '资源类型 1 共享公共资源 2 独享资源',
-    project_id        int(10)       default -1                not null comment '资源所属的project_id ',
+    project_id    int(10)       default -1                not null comment '资源所属的project_id ',
     data_center   varchar(20)   default ''                not null comment '数据中心 cn/us01',
     responsible   varchar(128)  default ''                not null comment '资源责任人',
     department_id varchar(128)  default ''                not null comment '部门id',
@@ -149,24 +151,24 @@ create index idx_name
     on arius_resource_logic (name);
 
 
-#work_order 变更：approver_app_id 变更为 approver_project_id applicant->applicant_user_name applicant_app_id 变更为
-# applicant_project_id approver->approver_user_name
+#work_order 变更：approver_app_id 变更为 approver_project_id aapplicant_app_id 变更为
+# applicant_project_id
 create table arius_work_order_info
 (
-    id               bigint unsigned auto_increment comment 'id'
+    id                   bigint unsigned auto_increment comment 'id'
         primary key,
-    type             varchar(25)  default 'unknown'         not null comment 'appcreate 创建app,clustercreate 创建集群,clusterindecrease 集群扩缩溶,clusteroffline 集群下线,clusterupdate 集群修改,templateauth 索引申请,templatecreate 索引创建,templateindecrease 索引扩容,templatequerydsl 查询语句创建,templatetransfer 索引转让,querydsllimitedit 查询语句编辑,responsiblegovern 员工离职,unhealthytemplategovern 不健康索引处理',
-    title            varchar(64)  default ''                not null comment '标题',
+    type                 varchar(25)  default 'unknown'         not null comment 'appcreate 创建app,clustercreate 创建集群,clusterindecrease 集群扩缩溶,clusteroffline 集群下线,clusterupdate 集群修改,templateauth 索引申请,templatecreate 索引创建,templateindecrease 索引扩容,templatequerydsl 查询语句创建,templatetransfer 索引转让,querydsllimitedit 查询语句编辑,responsiblegovern 员工离职,unhealthytemplategovern 不健康索引处理',
+    title                varchar(64)  default ''                not null comment '标题',
     approver_project_id  int(16)      default -1                not null comment '审批人projectId',
-    applicant_user_name        varchar(64)  default ''                not null comment '申请人用户id',
-    extensions       text                                   null comment '拓展字段',
-    description      text                                   null comment '备注信息',
-    approver_user_name         varchar(64)  default ''                not null comment '审批人用户id',
-    finish_time      timestamp    default CURRENT_TIMESTAMP not null comment '结束时间',
-    opinion          varchar(256) default ''                not null comment '审批信息',
-    status           int(16)      default 0                 not null comment '工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消',
-    create_time      timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
-    update_time      timestamp    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修
+    applicant            varchar(64)  default ''                not null comment '申请人用户id',
+    extensions           text                                   null comment '拓展字段',
+    description          text                                   null comment '备注信息',
+    approver             varchar(64)  default ''                not null comment '审批人用户id',
+    finish_time          timestamp    default CURRENT_TIMESTAMP not null comment '结束时间',
+    opinion              varchar(256) default ''                not null comment '审批信息',
+    status               int(16)      default 0                 not null comment '工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消',
+    create_time          timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time          timestamp    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修
 改时间',
     applicant_project_id int(16)      default -1                not null comment '申请人projectid'
 )
@@ -198,8 +200,9 @@ create table arius_es_user
 )
     comment 'es操作用户表' charset = utf8;
 
-create table project_arius_es_config(
-        id                      bigint(10) unsigned auto_increment comment 'project id'
+create table project_arius_es_config
+(
+    id bigint(10) unsigned auto_increment comment 'project id'
         primary key,
 
 )
