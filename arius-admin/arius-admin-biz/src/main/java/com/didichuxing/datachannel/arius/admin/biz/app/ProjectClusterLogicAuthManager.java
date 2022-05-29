@@ -17,5 +17,5 @@ public interface ProjectClusterLogicAuthManager {
      * @param clusterLogicList         逻辑集群信息列表
      * @return
      */
-    List<AppClusterLogicAuth> getByClusterLogicListAndAppId(Integer appId, List<ClusterLogic> clusterLogicList);
+    List<AppClusterLogicAuth> getByClusterLogicListAndProjectId(Integer appId, List<ClusterLogic> clusterLogicList);
 }

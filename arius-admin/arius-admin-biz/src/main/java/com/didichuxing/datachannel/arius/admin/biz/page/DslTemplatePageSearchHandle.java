@@ -33,7 +33,7 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     private DslTemplateService dslTemplateService;
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }

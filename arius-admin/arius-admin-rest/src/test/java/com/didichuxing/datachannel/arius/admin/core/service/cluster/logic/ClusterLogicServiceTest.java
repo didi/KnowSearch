@@ -239,7 +239,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         Assertions.assertTrue(
-                clusterLogicService.getOwnedClusterLogicListByAppId(esLogicClusterDTO.getProjectId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
+                clusterLogicService.getOwnedClusterLogicListByProjectId(esLogicClusterDTO.getProjectId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
     }
 
     @Test

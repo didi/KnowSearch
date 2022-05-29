@@ -334,24 +334,24 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     /**
      * 查询指定app所创建的逻辑集群
      *
-     * @param appId APPID
+     * @param projectId APPID
      * @return list
      */
     @Override
-    public List<ClusterLogic> getOwnedClusterLogicListByAppId(Integer appId) {
-        return ConvertUtil.list2List(logicClusterDAO.listByAppId(appId), ClusterLogic.class);
+    public List<ClusterLogic> getOwnedClusterLogicListByProjectId(Integer projectId) {
+        return ConvertUtil.list2List(logicClusterDAO.listByAppId(projectId), ClusterLogic.class);
     }
 
     @Override
-    public List<Long> getHasAuthClusterLogicIdsByAppId(Integer appId){
-        if (appId == null) {
+    public List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId){
+        if (projectId == null) {
             LOGGER.error(
                     "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByAppId||errMsg=获取有权限逻辑集群时appId为null");
             return new ArrayList<>();
         }
 
         // 获取有权限的逻辑集群id
-        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(appId).stream()
+        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
                 .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
 
         return new ArrayList<>(hasAuthLogicClusterIds);
@@ -364,7 +364,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      * @return 逻辑集群列表
      */
     @Override
-    public List<ClusterLogic> getHasAuthClusterLogicsByAppId(Integer projectId) {
+    public List<ClusterLogic> getHasAuthClusterLogicsByProjectId(Integer projectId) {
         if (projectId == null) {
             LOGGER.error(
                 "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByAppId||errMsg=获取有权限逻辑集群时appId为null");

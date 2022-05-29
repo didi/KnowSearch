@@ -32,7 +32,7 @@ public class OrderDetailBaseVO extends BaseVO {
     private String                appDeptName;
 
     @ApiModelProperty(value = "申请人使用的appid")
-    private Integer               applicantAppId;
+    private Integer applicantProjectId;
 
     @ApiModelProperty(value = "申请人使用的项目名称")
     private String                applicantAppName;

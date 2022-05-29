@@ -51,9 +51,9 @@ public class AppLogicClusterAuthController {
     @GetMapping("/appAuths")
     @ResponseBody
     @ApiOperation(value = "获取APP的所有逻辑集群权限接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<List<AppLogicClusterAuthVO>> getLogicClusterAuths(@RequestParam("appId") Integer appId) {
-        return Result.buildSucc(ConvertUtil.list2List(authService.getAllLogicClusterAuths(appId), AppLogicClusterAuthVO.class));
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
+    public Result<List<AppLogicClusterAuthVO>> getLogicClusterAuths(@RequestParam("projectId") Integer projectId) {
+        return Result.buildSucc(ConvertUtil.list2List(authService.getAllLogicClusterAuths(projectId), AppLogicClusterAuthVO.class));
     }
 
     @GetMapping("/clusterAuths")
@@ -93,7 +93,7 @@ public class AppLogicClusterAuthController {
 
         if (appClusterLogicAuth.getLogicClusterId() != null) {
             List<IndexTemplate> templatesInLogicCluster = indexTemplateService.getHasAuthTemplatesInLogicCluster(
-                    appClusterLogicAuth.getAppId(), appClusterLogicAuth.getLogicClusterId());
+                    appClusterLogicAuth.getProjectId(), appClusterLogicAuth.getLogicClusterId());
             if (!templatesInLogicCluster.isEmpty()) {
                 return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");
             }

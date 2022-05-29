@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -23,7 +23,7 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
     private TemplatePhyStatisManager templatePhyStatisManager;
 
     /**
-     * 根据模板Id获取[startDate, endDate]的appid访问统计信息
+     * 根据模板Id获取[startDate, endDate]的projectId访问统计信息
      *
      * @param logicTemplateId 逻辑索引模板ID
      * @param startDate 开始时刻
@@ -31,8 +31,8 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
      * @return
      */
     @GetMapping(path = "/appInfosByDateRange.do")
-    @ApiOperation(value = "根据模板Id获取[startDate, endDate(毫秒)]的appid访问统计信息" )
-    public Result<List<AppIdTemplateAccessCountVO>> getAccessAppInfos(
+    @ApiOperation(value = "根据模板Id获取[startDate, endDate(毫秒)]的projectId访问统计信息" )
+    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(
             @ApiParam(name="templateId", value="逻辑索引模板ID", required = true)
             @RequestParam(value = "templateId")    int logicTemplateId,
 
@@ -45,7 +45,7 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
     }
 
     /**
-     * 根据模板名称获取最近days天的appid访问统计信息
+     * 根据模板名称获取最近days天的projectId访问统计信息
      *
      * @param logicTemplateId 逻辑索引模板ID
      * @param days 最近多少天

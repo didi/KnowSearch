@@ -65,7 +65,7 @@ public class ESLogicClusterController {
     public Result<ConsoleClusterVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
                                                         HttpServletRequest request) {
         return Result.buildSucc(
-            clusterLogicManager.getConsoleClusterVOByIdAndAppId(resourceId, HttpRequestUtil.getProjectId(request)));
+            clusterLogicManager.getConsoleClusterVOByIdAndProjectId(resourceId, HttpRequestUtil.getProjectId(request)));
     }
 
     @DeleteMapping("/resource/del")

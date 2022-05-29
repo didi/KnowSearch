@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
@@ -155,7 +153,7 @@ public interface ClusterLogicManager {
     /**
      * 根据逻辑集群Id和appId创建逻辑集群信息
      */
-    ConsoleClusterVO getConsoleClusterVOByIdAndAppId(Long clusterLogicId, Integer projectId);
+    ConsoleClusterVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId);
 
     Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId);
 

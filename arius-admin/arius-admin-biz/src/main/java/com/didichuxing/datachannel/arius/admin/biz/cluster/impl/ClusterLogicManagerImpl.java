@@ -340,7 +340,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer projectId) {
-        List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByAppId(
+        List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByProjectId(
                 projectId), ConsoleClusterVO.class);
         for(ConsoleClusterVO consoleClusterVO : list) {
             List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(consoleClusterVO.getId());
@@ -366,7 +366,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         
 
-        return Result.buildSucc(batchBuildOpClusterVOs(clusterLogicService.getHasAuthClusterLogicsByAppId(projectId),
+        return Result.buildSucc(batchBuildOpClusterVOs(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId),
                 projectId));
     }
 
@@ -375,7 +375,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildSucc(esClusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
         }
-        List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(projectId);
+        List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId);
         return Result.buildSucc(appAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));
     }
 
@@ -488,7 +488,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
 	@Override
-    public ConsoleClusterVO getConsoleClusterVOByIdAndAppId(Long clusterLogicId, Integer projectId) {
+    public ConsoleClusterVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId) {
         if(AriusObjUtils.isNull(clusterLogicId)){return null;}
 
         //这里必须clusterLogicManager为了走spring全局缓存
@@ -569,13 +569,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
                     return clusterLogicService.listAllClusterLogics();
                 } else {
-                    return clusterLogicService.getOwnedClusterLogicListByAppId(projectId);
+                    return clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
                 }
             case ACCESS:
                 return getAppAccessClusterLogicList(projectId);
 
             case NO_PERMISSIONS:
-                List<Long> appOwnAuthClusterLogicIdList = clusterLogicService.getOwnedClusterLogicListByAppId(projectId)
+                List<Long> appOwnAuthClusterLogicIdList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId)
                         .stream()
                         .map(ClusterLogic::getId)
                         .collect(Collectors.toList());

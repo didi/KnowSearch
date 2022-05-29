@@ -107,19 +107,19 @@ public interface ClusterLogicService {
 
     /**
      * 查询指定app所创建（作为owner）的逻辑集群
-     * @param appId APP ID
+     * @param projectId project ID
      * @return 逻辑集群列表
      */
-    List<ClusterLogic> getOwnedClusterLogicListByAppId(Integer appId);
+    List<ClusterLogic> getOwnedClusterLogicListByProjectId(Integer projectId);
 
     /**
      * 查询指定app有权限的逻辑集群（包括ALL、OWN、ACCESS）
-     * @param appId APP ID
+     * @param projectId project ID
      * @return 逻辑集群列表
      */
-    List<ClusterLogic> getHasAuthClusterLogicsByAppId(Integer appId);
+    List<ClusterLogic> getHasAuthClusterLogicsByProjectId(Integer projectId);
 
-    List<Long> getHasAuthClusterLogicIdsByAppId(Integer appId);
+    List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId);
 
     /**
      * 判断逻辑集群是否存在
@@ -183,12 +183,12 @@ public interface ClusterLogicService {
     /**
      * 转移逻辑集群
      * @param clusterLogicId       逻辑集群Id
-     * @param targetAppId          项目Id
+     * @param targetProjectId          项目Id
      * @param targetResponsible    目标负责人
      * @param submitor             提交人
      * @return
      */
-    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetAppId, String targetResponsible, String submitor);
+    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible, String submitor);
 
     /**
      * 模糊分页查询物理集群列表信息，仅获取部分属性

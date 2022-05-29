@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisMan
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateValueRecordVO;
@@ -227,10 +227,10 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     }
 
     @Override
-    public Result<List<AppIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
+    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
                 templateSattisService.getAccessAppInfos(logicTemplateId, startDate, endDate).getData(),
-                AppIdTemplateAccessCountVO.class));
+                ProjectIdTemplateAccessCountVO.class));
     }
 
     @Override

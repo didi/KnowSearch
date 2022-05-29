@@ -76,7 +76,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
                                                   String responsible, String operator) {
         // 参数检查
         if (projectId == null) {
-            return Result.buildParamIllegal("未指定appId");
+            return Result.buildParamIllegal("未指定projectId");
         }
 
         if (logicClusterId == null) {
@@ -224,7 +224,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         List<AppClusterLogicAuth> authDTOs = ConvertUtil.list2List(authPOs, AppClusterLogicAuth.class);
 
         // 从逻辑集群表获取APP作为owner的集群
-        List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(projectId);
+        List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
         authDTOs.addAll(clusterLogicList
                         .stream()
                         .map(clusterLogic -> buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.OWN))
@@ -379,7 +379,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
 
         AppClusterLogicAuth appClusterLogicAuth = new AppClusterLogicAuth();
-        appClusterLogicAuth.setAppId(projectId);
+        appClusterLogicAuth.setProjectId(projectId);
         appClusterLogicAuth.setLogicClusterId(clusterLogicId);
         appClusterLogicAuth.setType(projectClusterLogicAuthEnum.getCode());
         return appClusterLogicAuth;
@@ -523,7 +523,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
         AppClusterLogicAuth appLogicClusterAuth = new AppClusterLogicAuth();
         appLogicClusterAuth.setId(null);
-        appLogicClusterAuth.setAppId(clusterLogic.getProjectId());
+        appLogicClusterAuth.setProjectId(clusterLogic.getProjectId());
         appLogicClusterAuth.setLogicClusterId(clusterLogic.getId());
         appLogicClusterAuth.setType(projectClusterLogicAuthEnum.getCode());
         appLogicClusterAuth.setResponsible(clusterLogic.getResponsible());

@@ -58,7 +58,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
     private static final FutureUtil<Void> futureUtilForClusterNum      = FutureUtil.init("futureUtilForClusterNum",10,10,100);
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
@@ -160,7 +160,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         }
 
         //获取项目对集群列表的权限信息
-        List<AppClusterLogicAuth> appClusterLogicAuthList = projectClusterLogicAuthManager.getByClusterLogicListAndAppId(appId, clusterLogicList);
+        List<AppClusterLogicAuth> appClusterLogicAuthList = projectClusterLogicAuthManager.getByClusterLogicListAndProjectId(appId, clusterLogicList);
         Map<Long, AppClusterLogicAuth> clusterLogicId2AppClusterLogicAuthMap = ConvertUtil.list2Map(appClusterLogicAuthList,
                 AppClusterLogicAuth::getLogicClusterId);
 

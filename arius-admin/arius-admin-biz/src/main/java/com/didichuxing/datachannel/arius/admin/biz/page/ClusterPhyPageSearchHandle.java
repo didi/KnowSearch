@@ -51,7 +51,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyPageSearchHandle",20, 40, 100);
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
@@ -95,7 +95,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
         ClusterPhyConditionDTO condition = buildClusterPhyConditionDTO(pageDTO);
         
         // 1. 获取管理/读写/读/无权限的物理集群信息
-        List<ClusterPhy> appAuthClusterPhyList = clusterPhyManager.getClusterPhyByAppIdAndAuthType(projectId, condition.getAuthType());
+        List<ClusterPhy> appAuthClusterPhyList = clusterPhyManager.getClusterPhyByProjectIdAndAuthType(projectId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthClusterPhyList)) {
             return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
@@ -118,7 +118,7 @@ public class ClusterPhyPageSearchHandle extends BasePageSearchHandle<ConsoleClus
         fuzzyAndLimitConsoleClusterPhyVOList.forEach(consoleClusterPhyVO -> consoleClusterPhyVO.setCurrentAppAuth(condition.getAuthType()));
 
         // 7.设置物理集群的所属项目和所属AppId
-        fuzzyAndLimitConsoleClusterPhyVOList.forEach(consoleClusterPhyVO -> clusterPhyManager.buildBelongAppIdsAndNames(consoleClusterPhyVO));
+        fuzzyAndLimitConsoleClusterPhyVOList.forEach(consoleClusterPhyVO -> clusterPhyManager.buildBelongProjectIdsAndNames(consoleClusterPhyVO));
 
         // 8. 设置集群角色信息
         List<Integer> clusterIds = fuzzyAndLimitConsoleClusterPhyVOList.stream().map(ConsoleClusterPhyVO::getId).collect(Collectors.toList());

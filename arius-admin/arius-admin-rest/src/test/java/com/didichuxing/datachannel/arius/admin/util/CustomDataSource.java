@@ -383,7 +383,7 @@ public class CustomDataSource {
     public static AppClusterLogicAuth appClusterLogicAuthSource() {
         AppClusterLogicAuth appClusterLogicAuth = new AppClusterLogicAuth();
         appClusterLogicAuth.setLogicClusterId(1L);
-        appClusterLogicAuth.setAppId(1);
+        appClusterLogicAuth.setProjectId(1);
         appClusterLogicAuth.setId(1L);
         appClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.ACCESS.getCode());
         appClusterLogicAuth.setResponsible("admin");

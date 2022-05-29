@@ -75,7 +75,7 @@ public class ResourceExtendManager implements ResourceExtend {
 			resourceDTOS.add(resourceDTO);
 		}
 		//校验项目绑定逻辑集群
-		List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByAppId(projectId);
+		List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
 		if (CollectionUtils.isNotEmpty(clusterLogics)) {
 			ResourceDTO resourceDTO = new ResourceDTO();
 			resourceDTO.setResourceName((ProjectResourceEnum.PROJECT_CLUSTER_LOGIC.getDesc()));

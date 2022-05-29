@@ -345,11 +345,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Deprecated
-    public List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentAppId) {
+    public List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentProjectId) {
 
         List<ClusterPhy> esClusterPhies = clusterPhyService.listClustersByCondt(param);
 
-        return buildConsoleClusterPhy(esClusterPhies, currentAppId);
+        return buildConsoleClusterPhy(esClusterPhies, currentProjectId);
     }
 
     @Override
@@ -374,7 +374,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         // 获取项目对集群列表的权限信息
-        List<ProjectClusterPhyAuth> projectClusterPhyAuthList = projectClusterPhyAuthManager.getByClusterPhyListAndAppIdFromCache(
+        List<ProjectClusterPhyAuth> projectClusterPhyAuthList = projectClusterPhyAuthManager.getByClusterPhyListAndProjectIdFromCache(
                 projectId, clusterPhyList);
         Map<String, Integer>    clusterPhyName2AuthTypeMap = ConvertUtil.list2Map(projectClusterPhyAuthList, ProjectClusterPhyAuth::getClusterPhyName, ProjectClusterPhyAuth::getType);
 
@@ -383,7 +383,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         //1. 设置单个集群权限
         consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> consoleClusterPhyVO.setCurrentAppAuth(clusterPhyName2AuthTypeMap.get(consoleClusterPhyVO.getCluster())));
 
-        //2.设置物理集群的所属项目和所属AppId
+        //2.设置物理集群的所属项目和所属projectId
         long timeForBuildClusterAppInfo = System.currentTimeMillis();
         consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> {
             FUTURE_UTIL.runnableTask(() -> {
@@ -403,7 +403,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         });
         FUTURE_UTIL.waitExecute();
 
-        LOGGER.info("class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=time to build clusters belongAppIds and AppName is {} ms",
+        LOGGER.info("class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=time to build clusters "
+                    + "belongProjectIds and AppName is {} ms",
                 System.currentTimeMillis() - timeForBuildClusterAppInfo);
 
         List<Integer> clusterIds = consoleClusterPhyVOList.stream().map(ConsoleClusterPhyVO::getId).collect(Collectors.toList());
@@ -415,7 +416,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             FUTURE_UTIL.runnableTask(() -> buildClusterRole(consoleClusterPhyVO, roleListMap.get(consoleClusterPhyVO.getId().longValue())));
         }
         FUTURE_UTIL.waitExecute();
-        LOGGER.info("class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=consumed build cluster belongAppIds and AppName time is {} ms",
+        LOGGER.info("class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=consumed build cluster belongProjectIds and AppName time is {} ms",
                 System.currentTimeMillis() - timeForBuildClusterDiskInfo);
 
         return consoleClusterPhyVOList;
@@ -558,13 +559,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> getAppClusterPhyNames(Integer appId) {
-        if(AuthConstant.SUPER_PROJECT_ID.equals(appId)){
+    public List<String> getAppClusterPhyNames(Integer projectId) {
+        if(AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
             //超级appId返回所有的集群
             List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
             return phyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
         }
-        List<Long> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicIdsByAppId(appId);
+        List<Long> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicIdsByProjectId(projectId);
         Set<String> names = new HashSet<>();
         for (Long logicClusterId : appAuthLogicClusters) {
             ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContextCache(logicClusterId);
@@ -619,10 +620,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> getAppNodeNames(Integer appId) {
+    public List<String> getAppNodeNames(Integer projectId) {
         List<String> appAuthNodeNames = Lists.newCopyOnWriteArrayList();
 
-        List<String> appClusterPhyNames = getAppClusterPhyNames(appId);
+        List<String> appClusterPhyNames = getAppClusterPhyNames(projectId);
         appClusterPhyNames
             .forEach(clusterPhyName -> appAuthNodeNames.addAll(esClusterNodeService.syncGetNodeNames(clusterPhyName)));
 
@@ -631,7 +632,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer appId) {
+    public Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer projectId) {
         ClusterPhy clusterPhy  = clusterPhyService.getClusterById(clusterPhyId);
         if (null == clusterPhy) {
             return Result.buildFail(String.format("物理集群Id[%s]不存在", clusterPhyId));
@@ -673,33 +674,33 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail("删除物理集群失败");
         }
 
-        SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), appId));
+        SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), projectId));
 
         return Result.buildSucc(true);
     }
 
     @Override
-    public Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer appId) {
+    public Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer projectId) {
         Result<Boolean> result = clusterPhyService.createCluster(param, operator);
 
         if (result.success()) {
-            SpringTool.publish(new ClusterPhyEvent(param.getCluster(), appId));
+            SpringTool.publish(new ClusterPhyEvent(param.getCluster(), projectId));
             operateRecordService.save(ModuleEnum.CLUSTER, OperationEnum.ADD, param.getCluster(), null, operator);
         }
         return result;
     }
 
     @Override
-    public Result<Boolean> editCluster(ClusterPhyDTO param, String operator, Integer appId) {
+    public Result<Boolean> editCluster(ClusterPhyDTO param, String operator, Integer projectId) {
         return clusterPhyService.editCluster(param, operator);
     }
 
     @Override
-    public PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId) {
+    public PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId) {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
         if (baseHandle instanceof ClusterPhyPageSearchHandle) {
             ClusterPhyPageSearchHandle handle =   (ClusterPhyPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, condition.getAuthType(), appId);
+            return handle.doPageHandle(condition, condition.getAuthType(), projectId);
         }
 
         LOGGER.warn("class=ClusterPhyManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterPhyPageSearchHandle");
@@ -708,7 +709,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer projectId, Integer authType) {
+    public List<ClusterPhy> getClusterPhyByProjectIdAndAuthType(Integer projectId, Integer authType) {
         if (!projectService.checkProjectExist(projectId)) {
             return Lists.newArrayList();
         }
@@ -757,8 +758,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<ClusterPhy> getAppAccessClusterPhyList(Integer appId) {
-        List<ProjectClusterPhyAuth> appAccessClusterPhyAuths = projectClusterPhyAuthManager.getAppAccessClusterPhyAuths(appId);
+    public List<ClusterPhy> getAppAccessClusterPhyList(Integer projectId) {
+        List<ProjectClusterPhyAuth> appAccessClusterPhyAuths = projectClusterPhyAuthManager.getAppAccessClusterPhyAuths(
+                projectId);
         return appAccessClusterPhyAuths
                                 .stream()
                                 .map(r -> clusterPhyService.getClusterByName(r.getClusterPhyName()))
@@ -766,10 +768,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer appId) {
+    public List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer projectId) {
         List<ClusterPhy> appAuthClusterPhyList = Lists.newArrayList();
 
-        List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
+        List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
         if (CollectionUtils.isEmpty(clusterLogicList)) {
             return appAuthClusterPhyList;
         }
@@ -925,7 +927,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public void buildBelongAppIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO) {
+    public void buildBelongProjectIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO) {
         ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContextCache(consoleClusterPhyVO.getCluster());
         consoleClusterPhyVO.setBelongProjectIds(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectIds()   : null);
         consoleClusterPhyVO.setBelongAppNames(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectNames() : null);

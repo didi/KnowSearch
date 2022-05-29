@@ -22,9 +22,9 @@ public abstract class BasePageSearchHandle<T> implements BaseHandle {
      * @return            PaginationResult<T>
      */
     public PaginationResult<T> doPageHandle(PageDTO pageDTO, Integer authType, Integer projectId) {
-        Result<Boolean> validCheckForAppIdResult = validCheckForAppId(projectId);
-        if (validCheckForAppIdResult.failed()) {
-            return PaginationResult.buildParamIllegal(validCheckForAppIdResult.getMessage());
+        Result<Boolean> validCheckForProjectIdResult = validCheckForProjectId(projectId);
+        if (validCheckForProjectIdResult.failed()) {
+            return PaginationResult.buildParamIllegal(validCheckForProjectIdResult.getMessage());
         }
 
         Result<Boolean> validCheckForConditionResult = validCheckForCondition(pageDTO, projectId);
@@ -50,7 +50,7 @@ public abstract class BasePageSearchHandle<T> implements BaseHandle {
      * @param projectId 项目
      * @return Result<Boolean>
      */
-    protected abstract Result<Boolean> validCheckForAppId(Integer projectId);
+    protected abstract Result<Boolean> validCheckForProjectId(Integer projectId);
 
     /**
      * 校验模糊查询的实体参数合法性

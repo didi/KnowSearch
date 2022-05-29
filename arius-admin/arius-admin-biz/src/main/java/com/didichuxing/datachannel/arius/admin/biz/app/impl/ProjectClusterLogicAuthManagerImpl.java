@@ -27,7 +27,7 @@ public class ProjectClusterLogicAuthManagerImpl implements ProjectClusterLogicAu
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Override
-    public List<AppClusterLogicAuth> getByClusterLogicListAndAppId(Integer projectId, List<ClusterLogic> clusterLogicList) {
+    public List<AppClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId, List<ClusterLogic> clusterLogicList) {
         List<AppClusterLogicAuth> appClusterLogicAuthList = Lists.newArrayList();
         if (CollectionUtils.isEmpty(clusterLogicList)) {
             return appClusterLogicAuthList;

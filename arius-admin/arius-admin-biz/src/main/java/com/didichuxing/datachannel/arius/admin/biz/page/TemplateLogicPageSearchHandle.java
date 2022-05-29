@@ -63,7 +63,7 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL = FutureUtil.init("RESOURCE_BUILD_FUTURE_UTIL",10,10,100);
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }

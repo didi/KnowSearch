@@ -468,7 +468,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         baseVO.setStatus(orderInfoDetail.getStatus());
         baseVO.setAppDeptName(orderInfoDetail.getAppDeptName());
         baseVO.setApplicant(orderInfoDetail.getApplicant());
-        baseVO.setApplicantAppId(orderInfoDetail.getApplicantProjectId());
+        baseVO.setApplicantProjectId(orderInfoDetail.getApplicantProjectId());
         baseVO.setApplicantAppName(getApplicantAppName(orderInfoDetail.getApplicantProjectId()));
         baseVO.setApproverList(orderInfoDetail.getApproverList());
         baseVO.setFinishTime(orderInfoDetail.getFinishTime());

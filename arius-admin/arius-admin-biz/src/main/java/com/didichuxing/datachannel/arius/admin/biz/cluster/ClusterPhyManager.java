@@ -60,11 +60,11 @@ public interface ClusterPhyManager {
 
     /**
      * 获取控制台物理集群信息列表(ZH有使用)
-     * @param currentAppId 当前登录项目
+     * @param currentProjectId 当前登录项目
      * @param param         查询参数
      * @return 物理集群列表
      */
-    List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentAppId);
+    List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentProjectId);
 
     /**
      * 获取控制台物理集群信息列表
@@ -163,10 +163,10 @@ public interface ClusterPhyManager {
     /**
      * 获取APP有管理、读写、读权限的物理集群名称列表
      *
-     * @param appId appId
+     * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNames(Integer appId);
+    List<String> getAppClusterPhyNames(Integer projectId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
@@ -191,69 +191,69 @@ public interface ClusterPhyManager {
 
     /**
      * 获取APP可查看的物理集群节点名称列表
-     * @param appId appId
+     * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppNodeNames(Integer appId);
+    List<String> getAppNodeNames(Integer projectId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
      * @param clusterPhyId 物理集群ID
      * @param operator     操作人
-     * @param appId        appId
+     * @param projectId        projectId
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer appId);
+    Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer projectId);
 
     /**
      * 添加集群
      *
      * @param param    参数
      * @param operator 操作人
-     * @param appId    appId
+     * @param projectId    projectId
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer appId);
+    Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer projectId);
 
     /**
      * 编辑集群
      *
      * @param param    参数
      * @param operator 操作人
-     * @param appId    appId
+     * @param projectId    projectId
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> editCluster(ClusterPhyDTO param, String operator, Integer appId);
+    Result<Boolean> editCluster(ClusterPhyDTO param, String operator, Integer projectId);
 
     /**
      * 条件组合、分页查询
      * @param condition
-     * @param appId
+     * @param projectId
      * @return
      */
-    PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId);
+    PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId);
 
     /**
      * 获取项目下指定权限的物理集群列表
-     * @param appId
+     * @param projectId
      * @param authType
      * @return
      */
-    List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer appId, Integer authType);
+    List<ClusterPhy> getClusterPhyByProjectIdAndAuthType(Integer projectId, Integer authType);
 
     /**
      * 获取项目下有管理权限的物理集群列表
-     * @param appId
+     * @param projectId
      * @return
      */
-    List<ClusterPhy> getAppAccessClusterPhyList(Integer appId);
+    List<ClusterPhy> getAppAccessClusterPhyList(Integer projectId);
 
     /**
      * 获取项目下有访问权限的物理集群列表
-     * @param appId
+     * @param projectId
      * @return
      */
-    List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer appId);
+    List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer projectId);
 
     /**
      * 构建物理集群角色信息
@@ -304,17 +304,17 @@ public interface ClusterPhyManager {
     /**
      * 删除存在集群
      * @param clusterPhyName
-     * @param appId
+     * @param projectId
      * @param operator
      * @return
      */
-    Result<Boolean> deleteClusterExit(String clusterPhyName, Integer appId, String operator);
+    Result<Boolean> deleteClusterExit(String clusterPhyName, Integer projectId, String operator);
 
     /**
-     * 构建物理集群所属项目和所属的appId的信息
+     * 构建物理集群所属项目和所属的project Id的信息
      * @param consoleClusterPhyVO 物理集群看板视图
      */
-    void buildBelongAppIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO);
+    void buildBelongProjectIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO);
 
     /**
      *  根据逻辑集群类型和已选中的物理集群名称筛选出es版本一致的物理集群名称列表

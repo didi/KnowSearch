@@ -508,7 +508,7 @@ public class AppServiceImpl implements AppService {
         // 筛选出权限大于指定值的app
         List<Integer> appIds = auths.stream().filter(appLogicClusterAuth -> ProjectClusterLogicAuthEnum
             .valueOf(appLogicClusterAuth.getType()).higherOrEqual(logicClusterAuth))
-            .map(AppClusterLogicAuth::getAppId).collect(Collectors.toList());
+            .map(AppClusterLogicAuth::getProjectId).collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(appIds)) {
             return new ArrayList<>();
@@ -647,7 +647,7 @@ public class AppServiceImpl implements AppService {
     }
 
     private boolean hasOwnLogicCluster(int appId) {
-        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
+        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(appId);
         return CollectionUtils.isNotEmpty(clusterLogics);
     }
 

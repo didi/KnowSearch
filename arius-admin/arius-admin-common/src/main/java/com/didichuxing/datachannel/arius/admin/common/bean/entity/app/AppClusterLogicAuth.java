@@ -19,7 +19,7 @@ public class AppClusterLogicAuth extends BaseEntity implements StringResponsible
     /**
      * 应用ID
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 逻辑集群ID

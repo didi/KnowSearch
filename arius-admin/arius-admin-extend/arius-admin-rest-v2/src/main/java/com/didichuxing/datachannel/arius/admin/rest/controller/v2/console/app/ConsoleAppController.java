@@ -67,9 +67,9 @@ public class ConsoleAppController {
     @GetMapping("/get")
     @ResponseBody
     @ApiOperation(value = "获取APP详情接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<ConsoleAppVO> get(@RequestParam("appId") Integer appId) {
-        return appManager.get(appId);
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
+    public Result<ConsoleAppVO> get(@RequestParam("projectId") Integer projectId) {
+        return appManager.get(projectId);
     }
 
 }

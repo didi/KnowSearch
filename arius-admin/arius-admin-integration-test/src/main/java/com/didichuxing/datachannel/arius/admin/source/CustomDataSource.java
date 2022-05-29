@@ -124,7 +124,7 @@ public class CustomDataSource {
     public static WorkOrderProcessDTO getWorkOrderProcessDTO(Long orderId) {
         WorkOrderProcessDTO workOrderProcessDTO = new WorkOrderProcessDTO();
         workOrderProcessDTO.setAssignee(operator);
-        workOrderProcessDTO.setAssigneeAppid(appid);
+        workOrderProcessDTO.setAssigneeProjectId(appid);
         workOrderProcessDTO.setComment("testtest");
         workOrderProcessDTO.setOrderId(orderId);
         workOrderProcessDTO.setCheckAuthority(false);

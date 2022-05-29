@@ -71,8 +71,6 @@ public class ESLogicClusterRegionTest extends BaseLogicClusterInfoTest {
         dto.setDataNodeNu(0);
         dto.setConfigJson("");
         dto.setId(logicClusterInfo.getLogicClusterId());
-        dto.setLibraDepartment("");
-        dto.setLibraDepartmentId("");
         dto.setQuota(0D);
         dto.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
 

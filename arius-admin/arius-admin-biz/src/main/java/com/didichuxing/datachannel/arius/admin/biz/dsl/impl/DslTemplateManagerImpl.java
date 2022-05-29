@@ -37,36 +37,36 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     private HandleFactory handleFactory;
 
     @Override
-    public Result<Boolean> updateDslTemplateQueryLimit(Integer appId, List<String> dslTemplateMd5List, Double queryLimit) {
+    public Result<Boolean> updateDslTemplateQueryLimit(Integer projectId, List<String> dslTemplateMd5List, Double queryLimit) {
         if(CollectionUtils.isEmpty(dslTemplateMd5List)) {
             return Result.build(true);
         }
-        return Result.buildSucc(dslTemplateService.updateDslTemplateQueryLimit(appId, dslTemplateMd5List, queryLimit));
+        return Result.buildSucc(dslTemplateService.updateDslTemplateQueryLimit(projectId, dslTemplateMd5List, queryLimit));
     }
 
     @Override
-    public Result<Boolean> changeDslTemplateStatus(Integer appId, String dslTemplateMd5) {
+    public Result<Boolean> changeDslTemplateStatus(Integer projectId, String dslTemplateMd5) {
         if(StringUtils.isEmpty(dslTemplateMd5)) {
             return Result.build(true);
         }
-        return Result.buildSucc(dslTemplateService.updateDslTemplateStatus(appId, dslTemplateMd5));
+        return Result.buildSucc(dslTemplateService.updateDslTemplateStatus(projectId, dslTemplateMd5));
     }
 
     @Override
-    public Result<DslTemplateVO> getDslTemplateDetail(Integer appId, String dslTemplateMd5) {
+    public Result<DslTemplateVO> getDslTemplateDetail(Integer projectId, String dslTemplateMd5) {
         if(StringUtils.isEmpty(dslTemplateMd5)) {
             return Result.buildSucc();
         }
-        DslTemplatePO dslTemplatePO = dslTemplateService.getDslTemplateDetail(appId, dslTemplateMd5);
+        DslTemplatePO dslTemplatePO = dslTemplateService.getDslTemplateDetail(projectId, dslTemplateMd5);
         return Result.buildSucc(ConvertUtil.obj2Obj(dslTemplatePO, DslTemplateVO.class));
     }
 
     @Override
-    public PaginationResult<DslTemplateVO> getDslTemplatePage(Integer appId, DslTemplateConditionDTO queryDTO) {
+    public PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(DSL_TEMPLATE.getPageSearchType());
         if (baseHandle instanceof DslTemplatePageSearchHandle) {
             DslTemplatePageSearchHandle handle = (DslTemplatePageSearchHandle) baseHandle;
-            return handle.doPageHandle(queryDTO, null, appId);
+            return handle.doPageHandle(queryDTO, null, projectId);
         }
 
         LOGGER.warn("class=DslTemplateManagerImpl||method=getDslTemplatePage||msg=failed to get the DslTemplatePageSearchHandle");

@@ -40,7 +40,7 @@ public class WorkOrder extends BaseEntity {
     private String  submitor;
 
     /**
-     * 提交人appid
+     * 提交人projectid
      */
     private Integer submitorProjectId;
 

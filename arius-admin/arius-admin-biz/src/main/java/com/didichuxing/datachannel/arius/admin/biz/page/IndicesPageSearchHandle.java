@@ -101,7 +101,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
     }
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }

@@ -49,9 +49,9 @@ public class AppOpController {
     @GetMapping("/get")
     @ResponseBody
     @ApiOperation(value = "获取APP接口", notes = "获取指定app,包含APP全部元信息")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<AppVO> get(@RequestParam("appId") Integer appId) {
-        return Result.buildSucc(ConvertUtil.obj2Obj(appService.getAppById(appId), AppVO.class));
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
+    public Result<AppVO> get(@RequestParam("projectId") Integer projectId) {
+        return Result.buildSucc(ConvertUtil.obj2Obj(appService.getAppById(projectId), AppVO.class));
     }
 
     @PostMapping("/add")
@@ -64,8 +64,8 @@ public class AppOpController {
     @DeleteMapping("/delete")
     @ResponseBody
     @ApiOperation(value = "删除APP接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<Void> delete(HttpServletRequest request, @RequestParam("appId") Integer appId) {
-        return appService.deleteAppById(appId, HttpRequestUtil.getOperator(request));
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
+    public Result<Void> delete(HttpServletRequest request, @RequestParam("projectId") Integer projectId) {
+        return appService.deleteAppById(projectId, HttpRequestUtil.getOperator(request));
     }
 }

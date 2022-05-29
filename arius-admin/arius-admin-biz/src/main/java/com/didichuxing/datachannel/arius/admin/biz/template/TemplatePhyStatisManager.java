@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PhysicalTempla
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateValueRecordVO;
@@ -81,7 +81,7 @@ public interface TemplatePhyStatisManager {
      * @param endDate 结束时刻
      * @return list
      */
-    Result<List<AppIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate);
+    Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate);
 
     /**
      * 根据模板id获取模板的基本统计信息

@@ -52,7 +52,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
     private TemplateSrvManager templateSrvManager;
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer projectId) {
+    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }

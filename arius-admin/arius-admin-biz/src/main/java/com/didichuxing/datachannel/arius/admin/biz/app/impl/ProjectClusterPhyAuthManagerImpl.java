@@ -78,8 +78,8 @@ public class ProjectClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthMa
     }
 
     @Override
-    public List<ProjectClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId,
-                                                                            List<ClusterPhy> clusterPhyList) {
+    public List<ProjectClusterPhyAuth> getByClusterPhyListAndProjectIdFromCache(Integer appId,
+                                                                                List<ClusterPhy> clusterPhyList) {
         if (null == appId || CollectionUtils.isEmpty(clusterPhyList)) { return Lists.newArrayList();}
         
         List<ProjectClusterPhyAuth> projectClusterPhyAuthList = APP_ID_2_APP_CLUSTER_PHY_AUTH_LIST_MAP.get(appId);
@@ -154,7 +154,7 @@ public class ProjectClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthMa
         List<AppClusterLogicAuth> appClusterLogicAuthList= projectClusterLogicAuthService.list();
         // 注意这里的key appId@clusterLogiId
         Map<String, AppClusterLogicAuth> key2AppClusterLogicAuthMap = ConvertUtil.list2Map(appClusterLogicAuthList,
-                                                a -> a.getAppId() + "@" + a.getLogicClusterId());
+                                                a -> a.getProjectId() + "@" + a.getLogicClusterId());
 
         for (ESUser esUser : esUsers) {
             // 超级es user，有最高权限
@@ -252,7 +252,7 @@ public class ProjectClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthMa
 
         AppClusterLogicAuth appLogicClusterAuth = new AppClusterLogicAuth();
         appLogicClusterAuth.setId(null);
-        appLogicClusterAuth.setAppId(clusterLogic.getProjectId());
+        appLogicClusterAuth.setProjectId(clusterLogic.getProjectId());
         appLogicClusterAuth.setLogicClusterId(clusterLogic.getId());
         appLogicClusterAuth.setType(projectClusterLogicAuthEnum.getCode());
         appLogicClusterAuth.setResponsible(clusterLogic.getResponsible());

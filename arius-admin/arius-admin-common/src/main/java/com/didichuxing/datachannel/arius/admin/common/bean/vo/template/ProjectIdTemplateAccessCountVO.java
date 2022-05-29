@@ -22,7 +22,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Accessors(chain = true)
 @ApiModel(value = "AppIdTemplateAccessCountVO", description = "appid访问索引模板级别次数")
-public class AppIdTemplateAccessCountVO {
+public class ProjectIdTemplateAccessCountVO {
 
     @ApiModelProperty("索引模板主键")
     private Integer templateId;
@@ -37,12 +37,12 @@ public class AppIdTemplateAccessCountVO {
     private String clusterName;
 
     @ApiModelProperty("应用账号")
-    private Integer appId;
+    private Integer projectId;
     /**
      * 访问索引模板次数，为@accessDetailInfo 访问索引明细的总次数
      */
     @ApiModelProperty("访问索引模板次数")
-    private Long count;
+    private Long    count;
     /**
      *访问索引名称明细数据,key不能是.开头，否则写入es失败
      */

@@ -16,7 +16,7 @@ public interface ProjectClusterPhyAuthManager {
      * @param clusterPhyList           物理集群信息列表
      * @return                         List<ProjectClusterPhyAuth>
      */
-    List<ProjectClusterPhyAuth> getByClusterPhyListAndAppIdFromCache(Integer appId, List<ClusterPhy> clusterPhyList);
+    List<ProjectClusterPhyAuth> getByClusterPhyListAndProjectIdFromCache(Integer appId, List<ClusterPhy> clusterPhyList);
 
 
     /**

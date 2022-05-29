@@ -138,11 +138,11 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             TemplateTransferContent.class);
 
         if (AriusObjUtils.isNull(content.getSourceProjectId())) {
-            return Result.buildParamIllegal("原appId为空");
+            return Result.buildParamIllegal("原projectId为空");
         }
 
         if (AriusObjUtils.isNull(content.getTgtProjectId())) {
-            return Result.buildParamIllegal("目标appId为空");
+            return Result.buildParamIllegal("目标projectId为空");
         }
 
         if (content.getTgtProjectId().equals(content.getSourceProjectId())) {
