@@ -99,6 +99,17 @@ public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleCluste
 
     @ApiModelProperty("集群健康状态")
     private Integer                      health;
+    
+     @ApiModelProperty("磁盘使用率")
+    private Double                       diskUsagePercent;
+
+    @ApiModelProperty("磁盘总量")
+    private Long                         diskTotal;
+
+    @ApiModelProperty("磁盘使用量")
+    private Long                         diskUsage;
+    
+    
 
     @Override
     public int compareTo(ConsoleClusterVO o) {

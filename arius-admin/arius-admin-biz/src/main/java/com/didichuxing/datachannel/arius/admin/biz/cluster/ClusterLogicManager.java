@@ -166,7 +166,7 @@ public interface ClusterLogicManager {
      * @param appId
      * @return
      */
-    PaginationResult<ConsoleClusterVO> pageGetConsoleClusterVOS(ClusterLogicConditionDTO condition, Integer appId);
+    PaginationResult<ConsoleClusterVO> selectPage(ClusterLogicConditionDTO condition, Integer appId);
 
     /**
      * 获取项目下指定权限类型的逻辑集群列表
@@ -206,4 +206,13 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<Void> checkTemplateDataSizeValidForCreate(Long logicClusterId, String templateSize);
+    
+    /**
+     * 获取我的集群下索引和模板的数量
+     * @param clusterId
+     * @param operator
+     * @param appId
+     * @return
+     */
+    Result<Void> indexTemplateCount(Long clusterId, String operator, Integer appId);
 }

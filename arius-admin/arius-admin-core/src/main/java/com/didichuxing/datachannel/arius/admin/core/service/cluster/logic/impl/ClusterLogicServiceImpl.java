@@ -735,8 +735,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             param.setConfigJson("");
         }
 
-        if (!AriusObjUtils.isNull(param.getDataNodeNu())) {
-            param.setQuota((double) param.getDataNodeNu());
+        if (!AriusObjUtils.isNull(param.getDataNodeNum())) {
+            param.setQuota((double) param.getDataNodeNum());
         }
 
         if (AriusObjUtils.isNull(param.getDataCenter())) {
