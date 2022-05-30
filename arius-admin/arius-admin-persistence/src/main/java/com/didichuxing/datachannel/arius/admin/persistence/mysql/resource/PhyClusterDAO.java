@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.resource;
 import java.util.List;
 import java.util.Set;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -25,26 +26,17 @@ public interface PhyClusterDAO {
 
     /**
      * 分页查询物理集群信息
-     * @param cluster   集群名称
-     * @param health    健康状态
-     * @param esVersion 集群版本
-     * @param from  from
-     * @param size  size
-     * @param sortTerm  排序字段名
-     * @param sortType  排序方式
+     * @param conditionDTO   查询条件
      * @return  物理集群列表
      */
-    List<ClusterPhyPO> pagingByCondition(@Param("cluster") String cluster, @Param("health") Integer health,
-                                         @Param("esVersion") String esVersion, @Param("from") Long from,
-                                         @Param("size") Long size,
-                                         @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+    List<ClusterPhyPO> pagingByCondition(ClusterPhyConditionDTO conditionDTO);
 
     /**
      * 跟据查询条件获取物理集群总量
-     * @param param     查询条件
+     * @param conditionDTO     查询条件
      * @return  集群数量
      */
-    long getTotalHitByCondition(ClusterPhyPO param);
+    long getTotalHitByCondition(ClusterPhyConditionDTO conditionDTO);
 
     /**
      * insert

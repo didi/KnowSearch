@@ -12,6 +12,8 @@ public interface ClusterRegionDAO {
 
     ClusterRegionPO getByName(String regionName);
 
+    ClusterRegionPO getByLogicClusterId(Long logicClusterId);
+
     List<ClusterRegionPO> listByLogicClusterId(Long logicClusterId);
 
     List<ClusterRegionPO> getByPhyClusterName(String phyClusterName);

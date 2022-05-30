@@ -130,10 +130,4 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster);
     }
 
-    @PutMapping("")
-    @ResponseBody
-    @ApiOperation(value = "创建逻辑模板")
-    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody TemplateCreateDTO createContent) {
-        return Result.buildSucc();
-    }
 }

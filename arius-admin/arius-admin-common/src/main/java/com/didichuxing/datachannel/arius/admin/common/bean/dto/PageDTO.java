@@ -21,4 +21,7 @@ public class PageDTO extends BaseDTO{
     @ApiModelProperty("当前页数量")
     private Long size;
 
+    @ApiModelProperty("查询数据开始下标，自动计算")
+    private Long from;
+
 }

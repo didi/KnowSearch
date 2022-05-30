@@ -8,6 +8,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
+import java.util.stream.Collectors;
+
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterPhyAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -26,7 +28,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
@@ -53,7 +54,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
@@ -76,7 +76,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
@@ -101,7 +100,6 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -110,7 +108,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -295,56 +292,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Deprecated
-    public Result<Void> releaseRacks(String cluster, String racks, int retryCount) {
-        if (!isClusterExists(cluster)) {
-            return Result.buildNotExist("集群不存在");
-        }
-
-        Set<String> racksToRelease = Sets.newHashSet(racks.split(AdminConstant.RACK_COMMA));
-
-        // 获取分配到要释放的rack上的物理模板
-        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getNormalTemplateByClusterAndRack(cluster,
-            racksToRelease);
-
-        // 没有模板被分配在要释放的rack上
-        if (CollectionUtils.isEmpty(templatePhysicals)) {
-            return Result.buildSucc();
-        }
-
-        List<String> errMsgList = Lists.newArrayList();
-        // 遍历模板，修改模板的rack设置
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-            // 去掉要释放的rack后的剩余racks
-            String tgtRack = RackUtils.removeRacks(templatePhysical.getRack(), racksToRelease);
-
-            LOGGER.info("class=ClusterPhyManagerImpl||method=releaseRack||template={}||srcRack={}||tgtRack={}", templatePhysical.getName(),
-                templatePhysical.getRack(), tgtRack);
-
-            try {
-                // 修改模板
-                Result<Void> result = templatePhyManager.editTemplateRackWithoutCheck(templatePhysical.getId(), tgtRack,
-                    AriusUser.SYSTEM.getDesc(), retryCount);
-
-                if (result.failed()) {
-                    errMsgList.add(templatePhysical.getName() + "失败：" + result.getMessage() + ";");
-                }
-
-            } catch (Exception e) {
-                errMsgList.add(templatePhysical.getName() + "失败：" + e.getMessage() + ";");
-                LOGGER.warn("class=ClusterPhyManagerImpl||method=releaseRack||template={}||srcRack={}||tgtRack={}||errMsg={}",
-                    templatePhysical.getName(), templatePhysical.getRack(), tgtRack, e.getMessage(), e);
-            }
-        }
-
-        if (CollectionUtils.isEmpty(errMsgList)) {
-            return Result.buildSucc();
-        }
-
-        return Result.buildFail(String.join(",", errMsgList));
-    }
-
-    @Override
-    @Deprecated
     public List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentProjectId) {
 
         List<ClusterPhy> esClusterPhies = clusterPhyService.listClustersByCondt(param);
@@ -368,58 +315,28 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
 
     @Override
-    public List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer projectId) {
+    public List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer projectId) {
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             return Lists.newArrayList();
         }
 
-        // 获取项目对集群列表的权限信息
-        List<ProjectClusterPhyAuth> projectClusterPhyAuthList = projectClusterPhyAuthManager.getByClusterPhyListAndProjectIdFromCache(
-                projectId, clusterPhyList);
-        Map<String, Integer>    clusterPhyName2AuthTypeMap = ConvertUtil.list2Map(projectClusterPhyAuthList, ProjectClusterPhyAuth::getClusterPhyName, ProjectClusterPhyAuth::getType);
+        List<ClusterPhyVO> clusterPhyVOList = ConvertUtil.list2List(clusterPhyList, ClusterPhyVO.class);
 
-        List<ConsoleClusterPhyVO> consoleClusterPhyVOList = ConvertUtil.list2List(clusterPhyList, ConsoleClusterPhyVO.class);
-
-        //1. 设置单个集群权限
-        consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> consoleClusterPhyVO.setCurrentAppAuth(clusterPhyName2AuthTypeMap.get(consoleClusterPhyVO.getCluster())));
-
-        //2.设置物理集群的所属项目和所属projectId
-        long timeForBuildClusterAppInfo = System.currentTimeMillis();
-        consoleClusterPhyVOList.forEach(consoleClusterPhyVO -> {
-            FUTURE_UTIL.runnableTask(() -> {
-                ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContext(consoleClusterPhyVO.getCluster());
-                consoleClusterPhyVO.setBelongProjectIds(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectIds()   : null);
-                consoleClusterPhyVO.setBelongAppNames(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectNames() : null);
-
-                // 兼容旧版本
-                consoleClusterPhyVO.setBelongProjectId((null != clusterPhyContext &&
-                                                        CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectIds())) ?
-                        clusterPhyContext.getAssociatedProjectIds().get(0) : null);
-                // 兼容旧版本
-                consoleClusterPhyVO.setBelongAppName(null != clusterPhyContext &&
-                        CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectNames()) ?
-                        clusterPhyContext.getAssociatedProjectNames().get(0) : null);
-            });
-        });
-        FUTURE_UTIL.waitExecute();
-
-        LOGGER.info("class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=time to build clusters "
-                    + "belongProjectIds and AppName is {} ms",
-                System.currentTimeMillis() - timeForBuildClusterAppInfo);
-
-        List<Integer> clusterIds = consoleClusterPhyVOList.stream().map(ConsoleClusterPhyVO::getId).collect(Collectors.toList());
+        List<Integer> clusterIds = clusterPhyVOList.stream().map(ClusterPhyVO::getId).collect(Collectors.toList());
         Map<Long, List<ClusterRoleInfo>> roleListMap = clusterRoleService.getAllRoleClusterByClusterIds(clusterIds);
 
         //3. 设置集群基本统计信息：磁盘使用信息
         long timeForBuildClusterDiskInfo = System.currentTimeMillis();
-        for (ConsoleClusterPhyVO consoleClusterPhyVO : consoleClusterPhyVOList) {
-            FUTURE_UTIL.runnableTask(() -> buildClusterRole(consoleClusterPhyVO, roleListMap.get(consoleClusterPhyVO.getId().longValue())));
+        for (ClusterPhyVO consoleClusterPhyVO : clusterPhyVOList) {
+            FUTURE_UTIL.runnableTask(
+                () -> buildClusterRole(consoleClusterPhyVO, roleListMap.get(consoleClusterPhyVO.getId().longValue())));
         }
         FUTURE_UTIL.waitExecute();
-        LOGGER.info("class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=consumed build cluster belongProjectIds and AppName time is {} ms",
-                System.currentTimeMillis() - timeForBuildClusterDiskInfo);
+        LOGGER.info(
+            "class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=consumed build cluster belongAppIds and AppName time is {} ms",
+            System.currentTimeMillis() - timeForBuildClusterDiskInfo);
 
-        return consoleClusterPhyVOList;
+        return clusterPhyVOList;
     }
 
     @Override
@@ -696,11 +613,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public PaginationResult<ConsoleClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId) {
-        BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
+    public PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId) {
+        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
         if (baseHandle instanceof ClusterPhyPageSearchHandle) {
-            ClusterPhyPageSearchHandle handle =   (ClusterPhyPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, condition.getAuthType(), projectId);
+            ClusterPhyPageSearchHandle pageSearchHandle = (ClusterPhyPageSearchHandle) baseHandle;
+            return pageSearchHandle.selectPage(condition, projectId);
         }
 
         LOGGER.warn("class=ClusterPhyManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterPhyPageSearchHandle");
@@ -709,10 +626,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
+    @Deprecated
     public List<ClusterPhy> getClusterPhyByProjectIdAndAuthType(Integer projectId, Integer authType) {
-        if (!projectService.checkProjectExist(projectId)) {
+            if (!projectService.checkProjectExist(projectId)) {
             return Lists.newArrayList();
         }
+        
 
         boolean isSuperApp = AuthConstant.SUPER_PROJECT_ID.equals(projectId);
         //超级用户对所有模板都是管理权限
@@ -808,7 +727,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public void buildClusterRole(ConsoleClusterPhyVO cluster) {
+    public void buildClusterRole(ClusterPhyVO cluster) {
         try {
             List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(cluster.getId());
 
@@ -819,7 +738,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public void buildClusterRole(ConsoleClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos) {
+    public void buildClusterRole(ClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos) {
         try {
             List<ESClusterRoleVO> roleClusters = ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleVO.class);
 

@@ -517,6 +517,15 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         return ConvertUtil.list2List(clusterRegionPOS, ClusterRegion.class);
     }
 
+    @Override
+    public ClusterRegion getRegionByLogicClusterId(Long logicClusterId) {
+        if (logicClusterId == null) {
+            return null;
+        }
+        ClusterRegionPO clusterRegionPO = clusterRegionDAO.getByLogicClusterId(logicClusterId);
+        return ConvertUtil.obj2Obj(clusterRegionPO, ClusterRegion.class);
+    }
+
     /**
      * 获取物理下的region
      * @param phyClusterName 物理集群名
