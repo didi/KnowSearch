@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
@@ -19,18 +19,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserW
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @AutoConfigureMockMvc
 class ESUserV3ControllerTest extends AriusAdminApplicationTest {
@@ -372,7 +366,7 @@ class ESUserV3ControllerTest extends AriusAdminApplicationTest {
     @Test
     void testUpdate2() throws Exception {
         // Setup
-        when(mockEsUserManager.updateESUserConfig(new ESUserConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
+        when(mockEsUserManager.updateESUserConfig(new ProjectConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
                 Result.buildFail(null));
         
         // Run the test
@@ -388,7 +382,7 @@ class ESUserV3ControllerTest extends AriusAdminApplicationTest {
     @Test
     void testUpdate2_ESUserManagerReturnsNoItem() throws Exception {
         // Setup
-        when(mockEsUserManager.updateESUserConfig(new ESUserConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
+        when(mockEsUserManager.updateESUserConfig(new ProjectConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
                 Result.buildSucc());
         
         // Run the test
@@ -404,7 +398,7 @@ class ESUserV3ControllerTest extends AriusAdminApplicationTest {
     @Test
     void testUpdate2_ESUserManagerReturnsFailure() throws Exception {
         // Setup
-        when(mockEsUserManager.updateESUserConfig(new ESUserConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
+        when(mockEsUserManager.updateESUserConfig(new ProjectConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
                 Result.buildFail());
         
         // Run the test

@@ -7,10 +7,9 @@ import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.ob
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -54,8 +53,6 @@ public class ESUserServiceImpl implements ESUserService {
     @Autowired
     private ESUserDAO esUserDAO;
     
-    private final Cache<String, List<?>> esUserListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
-            .maximumSize(100).build();
 
 
     /**
@@ -102,15 +99,7 @@ public class ESUserServiceImpl implements ESUserService {
         }
         
         boolean succ = (esUserDAO.insert(param) == 1);
-        if (succ) {
-            // 默认配置
-            if (initConfig(param.getId()).failed()) {
-                LOGGER.warn("class=ESUserServiceImpl||method=registerESUser||esUser={}||projectId={}||msg=initConfig "
-                            + "fail",
-                        param.getId(),esUserDTO.getProjectId());
-            }
-        
-        }
+       
 
         return new Tuple<>(Result.build(succ, param.getId()),param);
     }
@@ -173,90 +162,12 @@ public class ESUserServiceImpl implements ESUserService {
         return esUserDAO.countByProjectId(projectId);
     }
     
-    /**
-     * 初始化APP配置
-     *
-     * @param esUserName
-     * @return 成功 true  失败false
-     */
-    @Override
-    public Result<Void> initConfig(Integer esUserName) {
-        ESUserPO param = new ESUserPO();
-        param.setId(esUserName);
-        param.setDslAnalyzeEnable(AdminConstant.YES);
-        param.setIsSourceSeparated(AdminConstant.NO);
-        param.setAggrAnalyzeEnable(AdminConstant.YES);
-        param.setAnalyzeResponseEnable(AdminConstant.YES);
+   
 
-        return Result.build(esUserDAO.updateConfig(param) == 1);
-    }
 
-    /**
-     * 获取es user id配置信息
-     *
-     * @param esUserName
-     * @return 配置信息
-     */
-    @Override
-    public ESUserConfig getESUserConfig(int esUserName) {
-        final ESUserPO oldEsUser = esUserDAO.getByESUser(esUserName);
-        if (oldEsUser == null) {
-            LOGGER.warn("class=ESUserServiceImpl||method=getESUserConfig||esUserName={}||msg=es username not exist!",
-                    esUserName);
-            return null;
-        }
-    
-        ESUserPO oldConfigPO = esUserDAO.getByESUserConfig(esUserName);
-        if (oldConfigPO == null) {
-            initConfig(esUserName);
-            oldConfigPO = esUserDAO.getByESUser(esUserName);
-        
-        }
-
-        return obj2Obj(oldConfigPO, ESUserConfig.class);
-    }
-
-    /**
-     * 获取所有应用的配置
-     *
-     * @return list
-     */
-    @Override
-    public List<ESUserConfig> listConfig(List<Integer> projectIds) {
-        return ConvertUtil.list2List(esUserDAO.listConfig(projectIds), ESUserConfig.class);
-    }
 
    
-    /**
-     * 修改APP配置
-     *
-     * @param configDTO 配置信息
-     * @param operator  操作人
-     * @return 成功 true  失败  false
-     * <p>
-     * NotExistException APP不存在 IllegalArgumentException 参数不合理
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Tuple<Result<Void>, ESUserPO> updateESUserConfig(ESUserConfigDTO configDTO, String operator) {
-        Result<Void> checkResult = checkConfigParam(configDTO);
-        if (checkResult.failed()) {
-            LOGGER.warn("class=ESUserServiceImpl||method=updateESUserConfig||msg={}||msg=check fail!", checkResult.getMessage());
-            return new Tuple<>(checkResult, null);
-        }
 
-         ESUserPO oldESUser = esUserDAO.getByESUser(configDTO.getId());
-        if (oldESUser == null) {
-            return new Tuple<>(Result.buildNotExist(ES_USER_NOT_EXIST), null);
-        }
-
-        ESUserPO oldConfigPO = esUserDAO.getByESUser(configDTO.getId());
-
-        boolean succ = (1 == esUserDAO.updateConfig(obj2Obj(configDTO, ESUserPO.class)));
-        
-
-        return new Tuple<>(Result.build(succ),oldConfigPO);
-    }
 
 
 
@@ -431,28 +342,6 @@ public class ESUserServiceImpl implements ESUserService {
 
 
 
-    private Result<Void> checkConfigParam(ESUserConfigDTO configDTO) {
-        if (configDTO == null) {
-            return Result.buildParamIllegal("配置信息为空");
-        }
-        if (configDTO.getId() == null) {
-            return Result.buildParamIllegal("应用ID为空");
-        }
-        if (configDTO.getAnalyzeResponseEnable() != null && !yesOrNo(configDTO.getAnalyzeResponseEnable())) {
-            return Result.buildParamIllegal("解析响应结果开关非法");
-        }
-        if (configDTO.getDslAnalyzeEnable() != null && !yesOrNo(configDTO.getDslAnalyzeEnable())) {
-            return Result.buildParamIllegal("DSL分析开关非法");
-        }
-        if (configDTO.getAggrAnalyzeEnable() != null && !yesOrNo(configDTO.getAggrAnalyzeEnable())) {
-            return Result.buildParamIllegal("聚合分析开关非法");
-        }
-        if (configDTO.getIsSourceSeparated() != null && !yesOrNo(configDTO.getIsSourceSeparated())) {
-            return Result.buildParamIllegal("索引存储分离开关非法");
-        }
-
-        return Result.buildSucc();
-    }
 
   
     private Result<Void> validateAppFieldIsNull(ESUserDTO appDTO) {

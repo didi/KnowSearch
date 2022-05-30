@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
@@ -117,7 +117,7 @@ public class ESUserV3Controller {
     @PutMapping("/config")
     @ResponseBody
     @ApiOperation(value = "编辑es user配置", notes = "支持修改数据中心、备注")
-    public Result<Void> update(HttpServletRequest request, @RequestBody ESUserConfigDTO configDTO) {
+    public Result<Void> update(HttpServletRequest request, @RequestBody ProjectConfigDTO configDTO) {
         //获取操作用户
         String userName = HttpRequestUtil.getOperator(request);
         return esUserManager.updateESUserConfig(configDTO, userName);

@@ -2,10 +2,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.app;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import java.util.List;
@@ -71,39 +69,10 @@ public interface ESUserService {
      */
     int countByProjectId(int projectId);
     
-    /**
-     * 初始化es user配置
-     * @param esUserName es user name
-     * @return 成功 true  失败false
-     *
-     */
-    Result<Void> initConfig(Integer esUserName);
-    
-    /**
-     * 获取app id配置信息
-     *
-     * @param esUserName APP ID
-     * @return 配置信息
-     */
-    ESUserConfig getESUserConfig(int esUserName);
-    
-    /**
-     * listConfig
-     *
-     * @return List<App>
-     */
-    List<ESUserConfig> listConfig(List<Integer> projectIds);
-    
 
     
-    /**
-     * 修改APP配置
-     *
-     * @param configDTO 配置信息
-     * @param operator  操作人
-     * @return 成功 true  失败  false
-     */
-    Tuple<Result<Void>, ESUserPO> updateESUserConfig(ESUserConfigDTO configDTO, String operator);
+    
+
     
 
     

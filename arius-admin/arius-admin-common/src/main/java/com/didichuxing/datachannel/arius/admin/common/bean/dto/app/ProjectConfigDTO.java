@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "应用配置信息")
-public class ESUserConfigDTO extends BaseDTO {
+public class ProjectConfigDTO extends BaseDTO {
 
     
-    @ApiModelProperty("es user")
-    private Integer id;
+    @ApiModelProperty("project id")
+    private Integer projectId;
 
     @ApiModelProperty("gateway返回结果解析开关")
     private Integer analyzeResponseEnable;
@@ -34,5 +34,9 @@ public class ESUserConfigDTO extends BaseDTO {
 
     @ApiModelProperty("是否索引存储分离，1为分离，0为不分离，默认为0")
     private Integer isSourceSeparated;
+    /**
+     * 慢查询时间
+     */
+    private Integer slowQueryTimes;
 
 }

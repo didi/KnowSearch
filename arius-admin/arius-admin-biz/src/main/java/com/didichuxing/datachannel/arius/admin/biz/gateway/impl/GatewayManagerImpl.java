@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateP
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
@@ -166,15 +166,15 @@ public class GatewayManagerImpl implements GatewayManager {
         }
     }
     
-    private List<ESUserConfig> listESUserConfig() {
+    private List<ProjectConfig> listESUserConfig() {
         final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
                 .collect(Collectors.toList());
         return esUserService.listConfig(projectIds);
     }
     
-    private List<ESUserConfig> listESUserConfigWithCache() {
+    private List<ProjectConfig> listESUserConfigWithCache() {
         try {
-            return (List<ESUserConfig>) projectESUserListCache.get("listESUserConfig", this::listESUserConfig);
+            return (List<ProjectConfig>) projectESUserListCache.get("listESUserConfig", this::listESUserConfig);
         } catch (ExecutionException e) {
             return listESUserConfig();
         }
@@ -214,9 +214,9 @@ public class GatewayManagerImpl implements GatewayManager {
         }
 
         // 查询出所有的配置
-        List<ESUserConfig> esUserConfigs =listESUserConfigWithCache();
-        Map<Integer/*es user*/, ESUserConfig> esUser2ESUserConfigMap = ConvertUtil.list2Map(esUserConfigs,
-                ESUserConfig::getId);
+        List<ProjectConfig> projectConfigs =listESUserConfigWithCache();
+        Map<Integer/*es user*/, ProjectConfig> esUser2ESUserConfigMap = ConvertUtil.list2Map(projectConfigs,
+                ProjectConfig::getId);
 
         String defaultIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
                 APP_DEFAULT_READ_AUTH_INDICES, "");
@@ -379,7 +379,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     private GatewayESUserVO buildESUserVO(
             ESUser esUser, Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap,
-            Map<Integer, ESUserConfig> esUser2ESUserConfigMap,
+            Map<Integer, ProjectConfig> esUser2ESUserConfigMap,
             Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
             String defaultReadPermissionIndexes, Map<Integer, List<String>> aliasMap) {
 
@@ -426,7 +426,7 @@ public class GatewayManagerImpl implements GatewayManager {
             gatewayESUserVO.setWIndexExp(writePermissionIndexExpressions);
         }
 
-        ESUserConfig config = esUser2ESUserConfigMap.get(esUser.getId());
+        ProjectConfig config = esUser2ESUserConfigMap.get(esUser.getId());
         if (config != null) {
             gatewayESUserVO.setDslAnalyzeEnable(config.getDslAnalyzeEnable());
             gatewayESUserVO.setAggrAnalyzeEnable(config.getAggrAnalyzeEnable());

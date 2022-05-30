@@ -9,11 +9,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
@@ -152,24 +151,7 @@ public class ESUserManagerImpl implements ESUserManager {
     }
  
     
-    /**
-     * 更新 es user config
-     *
-     * @param configDTO configdto
-     * @param operator  操作人或角色
-     * @return {@code Result<Void>}
-     */
-    @Override
-    public Result<Void> updateESUserConfig(ESUserConfigDTO configDTO, String operator) {
-        //只有success时候会存在tuple._2不为null
-        final Tuple<Result<Void>, ESUserPO> tuple = esUserService.updateESUserConfig(configDTO, operator);
-        if (tuple.getV1().success()) {
-            operateRecordService.save(APP_CONFIG, EDIT, configDTO.getId(),
-                    AriusObjUtils.findChangedWithClear(tuple.getV2(), configDTO), operator);
-        }
-        return tuple.getV1();
-    }
-    
+
    
     
     /**
@@ -268,7 +250,7 @@ public class ESUserManagerImpl implements ESUserManager {
      * @return 配置信息
      */
     @Override
-    public ESUserConfig getESUserConfig(int esUserName) {
+    public ProjectConfig getESUserConfig(int esUserName) {
         
         return esUserService.getESUserConfig(esUserName);
     }

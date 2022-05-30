@@ -83,36 +83,10 @@ public interface ESUserDAO {
     
     Integer maxById();
     
-    /**
-     * 获取es user 获取config
-     *
-     * @param esUser ES用户
-     * @return {@code ESUserPO}
-     */
-    ESUserPO getByESUserConfig(@Param("esUser") int esUser);
+
     
-    /**
-     * 新增es config
-     *
-     * @param param 入参
-     * @return int
-     */
-    int insertConfig(ESUserPO param);
+
     
-    /**
-     * 更新es config
-     *
-     * @param param 入参
-     * @return int
-     */
-    int updateConfig(ESUserPO param);
-    
-    /**
-     * 获取es user 的全部配置
-     *
-     * @return {@code List<ESUserPO>}
-     */
-    List<ESUserPO> listConfig(@Param("projectIds")List<Integer> projectIds);
     
     /**
      * 通过项目id获取默认的es user

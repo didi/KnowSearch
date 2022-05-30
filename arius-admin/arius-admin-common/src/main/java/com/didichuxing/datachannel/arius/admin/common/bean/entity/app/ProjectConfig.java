@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESUserConfig extends BaseEntity {
+public class ProjectConfig extends BaseEntity {
 
 
 
@@ -42,5 +42,9 @@ public class ESUserConfig extends BaseEntity {
      * 是否索引存储分离，1为分离，0为不分离，默认为0
      */
     private Integer isSourceSeparated;
+    /**
+     * 慢查询时间
+     */
+    private Integer slowQueryTimes;
 
 }

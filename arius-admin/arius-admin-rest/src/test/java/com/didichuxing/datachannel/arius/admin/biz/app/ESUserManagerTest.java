@@ -2,26 +2,20 @@ package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUserConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserDAO;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletRequest;
 
 public class ESUserManagerTest extends AriusAdminApplicationTest {
     
@@ -107,10 +101,10 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
     @Test
     void testGetESUserConfig() {
         // Setup
-        final ESUserConfig expectedResult = new ESUserConfig(0, 0, 0, 0, 0);
+        final ProjectConfig expectedResult = new ProjectConfig(0, 0, 0, 0, 0);
         
         // Run the test
-        final ESUserConfig result = esUserManagerImplUnderTest.getESUserConfig(0);
+        final ProjectConfig result = esUserManagerImplUnderTest.getESUserConfig(0);
         
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);

@@ -20,10 +20,6 @@
 		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
 		<result column="project_id" jdbcType="BIGINT" property="projectId"/>
 		<result column="is_default_display" jdbcType="TINYINT" property="defaultDisplay"/>
-		<result column="dsl_analyze_enable" jdbcType="INTEGER" property="dslAnalyzeEnable"/>
-		<result column="aggr_analyze_enable" jdbcType="INTEGER" property="aggrAnalyzeEnable"/>
-		<result column="is_source_separated" jdbcType="TINYINT" property="isSourceSeparated"/>
-		<result column="analyze_response_enable" jdbcType="TINYINT" property="analyzeResponseEnable"/>
 	</resultMap>
 	
 	<sql id="Base_Column_List">
@@ -194,60 +190,13 @@
 		from arius_es_user
 	</select>
 	
-	<!--es user config 配置-->
-	<sql id="Base_Column_List_ES_Config">
-		id,
-		dsl_analyze_enable,
-		aggr_analyze_enable,
-		is_source_separated,
-		analyze_response_enable,
-		create_time,
-		update_time
-	</sql>
-	<select id="getByESUserConfig" parameterType="integer" resultMap="BaseResultMap">
-		select
-		<include refid="Base_Column_List_ES_Config"/>
-		from arius_es_user
-		where id = #{esUser}
-	</select>
-	
-	<select id="listConfig" resultMap="BaseResultMap">
-		select
-		<include refid="Base_Column_List_ES_Config"/>
-		from arius_es_user
-		where is_active = 1
-			and project_id in
-		<foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-			#{projectId}
-		</foreach>
-	</select>
 
 	
 	
-	<insert id="insertConfig" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
-	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		insert into arius_es_user
-		(id, dsl_analyze_enable, aggr_analyze_enable, is_source_separated, analyze_response_enable)
-		values (#{id}, #{dslAnalyzeEnable}, #{aggrAnalyzeEnable}, #{isSourceSeparated}, #{aggrAnalyzeEnable})
-	</insert>
+
 	
-	<update id="updateConfig" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO">
-		update arius_es_user
-		<trim prefix="set" prefixOverrides=",">
-			<if test="dslAnalyzeEnable != null">
-				,dsl_analyze_enable = #{dslAnalyzeEnable}
-			</if>
-			<if test="aggrAnalyzeEnable != null">
-				, aggr_analyze_enable = #{aggrAnalyzeEnable}
-			</if>
-			<if test="isSourceSeparated != null">
-				, is_source_separated = #{isSourceSeparated}
-			</if>
-			<if test="analyzeResponseEnable != null">
-				, analyze_response_enable = #{analyzeResponseEnable}
-			</if>
-		</trim>
-		where id = #{id}
-			and is_active = 1
-	</update>
+	
+
+	
+
 </mapper>
