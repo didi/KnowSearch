@@ -16,8 +16,8 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
 @Component
-public class TemplateAppIdChangedListener implements ApplicationListener<LogicTemplateModifyEvent> {
-    private static final ILog           LOGGER = LogFactory.getLog(TemplateAppIdChangedListener.class);
+public class TemplateProjectIdChangedListener implements ApplicationListener<LogicTemplateModifyEvent> {
+    private static final ILog           LOGGER = LogFactory.getLog(TemplateProjectIdChangedListener.class);
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
@@ -31,7 +31,7 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
             return;
         }
 
-        //在模板的appid发生变更的时候，处理权限问题
+        //在模板的projectId发生变更的时候，处理权限问题
         handleTemplateProjectId(logicTemplateEvent.getOldTemplate(), logicTemplateEvent.getNewTemplate());
     }
 
@@ -41,7 +41,7 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
 
         if (!EnvUtil.isOnline()) {
             LOGGER.info(
-                "class=LogicTemplateModifyEventListener||method=handleTemplateAppid||oldIndexTemplate={}||newIndexTemplate={}",
+                "class=LogicTemplateModifyEventListener||method=handleTemplateProjectId||oldIndexTemplate={}||newIndexTemplate={}",
                 JSON.toJSONString(oldIndexTemplate), JSON.toJSONString(newIndexTemplate));
         }
 
@@ -52,13 +52,13 @@ public class TemplateAppIdChangedListener implements ApplicationListener<LogicTe
             return;
         }
 
-        //如果模板的appid发生变更了，代表模板的管理权限发生变更，但是原appid还要拥有模板的读写权限
-        //给原appid赋予索引的读写权限
+        //如果模板的projectid发生变更了，代表模板的管理权限发生变更，但是原projectid还要拥有模板的读写权限
+        //给原projectid赋予索引的读写权限
         Result<Void> result = projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getProjectId(),
             logicTemplateId, ProjectTemplateAuthEnum.RW, oldIndexTemplate.getResponsible(), AriusUser.SYSTEM.getDesc());
 
         if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=LogicTemplateModifyEventListener||method=handleTemplateAppid||result={}",
+            LOGGER.info("class=LogicTemplateModifyEventListener||method=handleTemplateProjectId||result={}",
                 result.success());
         }
     }

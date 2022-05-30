@@ -112,7 +112,7 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         ClusterLogicConditionDTO condition = buildClusterLogicConditionDTO(pageDTO);
 
         //1. 获取管理/访问/无权限的逻辑集群信息
-        List<ClusterLogic> appAuthClusterLogicList = clusterLogicManager.getClusterLogicByAppIdAndAuthType(projectId, condition.getAuthType());
+        List<ClusterLogic> appAuthClusterLogicList = clusterLogicManager.getClusterLogicByProjectIdAndAuthType(projectId, condition.getAuthType());
         if (CollectionUtils.isEmpty(appAuthClusterLogicList)) {
             return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
         }
@@ -154,13 +154,13 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         return PaginationResult.buildSucc(consoleClusterPhyVOList, totalHit, pageDTO.getPage(), pageDTO.getSize());
     }
 
-    private List<ConsoleClusterVO> doBuildWithoutAuthType(List<ClusterLogic> clusterLogicList, Integer appId) {
+    private List<ConsoleClusterVO> doBuildWithoutAuthType(List<ClusterLogic> clusterLogicList, Integer projectId) {
         if (CollectionUtils.isEmpty(clusterLogicList)) {
             return Lists.newArrayList();
         }
 
         //获取项目对集群列表的权限信息
-        List<AppClusterLogicAuth> appClusterLogicAuthList = projectClusterLogicAuthManager.getByClusterLogicListAndProjectId(appId, clusterLogicList);
+        List<AppClusterLogicAuth> appClusterLogicAuthList = projectClusterLogicAuthManager.getByClusterLogicListAndProjectId(projectId, clusterLogicList);
         Map<Long, AppClusterLogicAuth> clusterLogicId2AppClusterLogicAuthMap = ConvertUtil.list2Map(appClusterLogicAuthList,
                 AppClusterLogicAuth::getLogicClusterId);
 

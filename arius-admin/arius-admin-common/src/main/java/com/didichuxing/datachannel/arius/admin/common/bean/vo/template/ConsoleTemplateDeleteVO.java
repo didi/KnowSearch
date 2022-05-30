@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
@@ -31,6 +32,6 @@ public class ConsoleTemplateDeleteVO extends BaseVO {
      * 最近一段时间有访问的app
      */
     @ApiModelProperty("访问应用列表")
-    private List<ConsoleAppVO> accessApps;
+    private List<ProjectBriefVO> accessApps;
 
 }

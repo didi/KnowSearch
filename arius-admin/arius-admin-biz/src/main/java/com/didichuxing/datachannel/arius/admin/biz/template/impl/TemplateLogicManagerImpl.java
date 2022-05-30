@@ -201,7 +201,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     @Override
     public List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) {
-        Result<Map<Integer, Long>> result = templateSattisService.getTemplateAccessAppIds(logicId, 7);
+        Result<Map<Integer, Long>> result = templateSattisService.getTemplateAccessProjectIds(logicId, 7);
         if (result.failed()) {
             throw new AmsRemoteException("获取访问模板的project列表失败");
         }

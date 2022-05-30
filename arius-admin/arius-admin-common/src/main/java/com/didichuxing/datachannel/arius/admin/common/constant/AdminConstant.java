@@ -122,10 +122,7 @@ public class AdminConstant {
 
     public static final Integer      DEFAULT_SHARD_NUM                       = 1;
 
-    /**
-     * 默认APP ID
-     */
-    public static final Integer      DEFAULT_APP_ID                          = 1;
+    
 
     /**
      * 数据最短保存时长

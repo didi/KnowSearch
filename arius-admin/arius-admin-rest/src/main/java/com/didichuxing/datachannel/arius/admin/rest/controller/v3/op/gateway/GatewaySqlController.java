@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.gateway;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_APP_ID;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,6 +39,6 @@ public class GatewaySqlController {
     @ResponseBody
     @ApiOperation(value = "根据sql语句解释")
     public Result<String> sqlExplain(@RequestBody String sql) {
-        return gatewayManager.sqlExplain(sql, DEFAULT_APP_ID);
+        return gatewayManager.sqlExplain(sql, AuthConstant.SUPER_PROJECT_ID);
     }
 }

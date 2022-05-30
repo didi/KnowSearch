@@ -34,11 +34,11 @@ public interface ClusterLogicManager {
     /**
      * 构建运维页面的逻辑集群VO
      * @param clusterLogic    逻辑集群
-     * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
+     * @param projectIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
      *                          ，为null则权限为运维人员权限（管理权限）
      * @return
      */
-    ConsoleClusterVO buildOpClusterVO(ClusterLogic clusterLogic, Integer appIdForAuthJudge);
+    ConsoleClusterVO buildOpClusterVO(ClusterLogic clusterLogic, Integer projectIdForAuthJudge);
 
   
     /**
@@ -151,7 +151,7 @@ public interface ClusterLogicManager {
     Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator);
 
     /**
-     * 根据逻辑集群Id和appId创建逻辑集群信息
+     * 根据逻辑集群Id和projectId创建逻辑集群信息
      */
     ConsoleClusterVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId);
 
@@ -171,11 +171,11 @@ public interface ClusterLogicManager {
 
     /**
      * 获取项目下指定权限类型的逻辑集群列表
-     * @param appId           项目
+     * @param projectId           项目
      * @param authType        权限类型
      * @return
      */
-    List<ClusterLogic> getClusterLogicByAppIdAndAuthType(Integer appId, Integer authType);
+    List<ClusterLogic> getClusterLogicByProjectIdAndAuthType(Integer projectId, Integer authType);
 
     /**
      * 获取项目可访问逻辑集群列表

@@ -423,17 +423,17 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         List<ConsoleTemplateVO> result = new ArrayList<>();
 
-        Integer appId = HttpRequestUtil.getProjectId(request, AdminConstant.DEFAULT_APP_ID);
+        Integer projectId = HttpRequestUtil.getProjectId(request, AuthConstant.SUPER_PROJECT_ID);
         List<IndexTemplateLogicAggregate> aggregates =templateLogicManager.getLogicClusterTemplatesAggregate(clusterId,
-                appId);
+                projectId);
         if (CollectionUtils.isNotEmpty(aggregates)) {
             for (IndexTemplateLogicAggregate aggregate : aggregates) {
                 result.add(templateLogicManager.fetchConsoleTemplate((aggregate)));
             }
         }
 
-        LOGGER.info("class=ConsoleClusterController||method=getClusterLogicTemplates||clusterId={}||appId={}",
-                clusterId, appId);
+        LOGGER.info("class=ConsoleClusterController||method=getClusterLogicTemplates||clusterId={}||projectId={}",
+                clusterId, projectId);
 
         return Result.buildSucc(result);
     }
@@ -549,7 +549,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public List<ClusterLogic> getClusterLogicByAppIdAndAuthType(Integer projectId, Integer authType) {
+    public List<ClusterLogic> getClusterLogicByProjectIdAndAuthType(Integer projectId, Integer authType) {
         final ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
         if (Objects.isNull(projectBriefVO)) {
             return Lists.newArrayList();

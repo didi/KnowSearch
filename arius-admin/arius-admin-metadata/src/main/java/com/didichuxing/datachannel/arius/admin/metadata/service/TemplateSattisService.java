@@ -117,7 +117,7 @@ public class TemplateSattisService {
      * @return appid列表
      */
     
-    public Result<Map<Integer, Long>> getTemplateAccessAppIds(Integer logicTemplateId, int days) {
+    public Result<Map<Integer, Long>> getTemplateAccessProjectIds(Integer logicTemplateId, int days) {
         List<AppIdTemplateAccessCountPO> accessCountPos = appIdTemplateAccessESDAO.getAccessAppidsInfoByTemplateId(logicTemplateId, days);
         if(CollectionUtils.isEmpty(accessCountPos)){
             return Result.buildSucc();

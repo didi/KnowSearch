@@ -234,7 +234,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
 
         consoleTemplateDeleteVO.setAccessApps(
-            ConvertUtil.list2List(templateLogicManager.getLogicTemplateProjectAccess(logicId), ConsoleAppVO.class));
+           templateLogicManager.getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateDeleteVO);
     }

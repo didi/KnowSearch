@@ -1,23 +1,30 @@
 package com.didichuxing.datachannel.arius.admin;
 
 import com.alibaba.fastjson.JSON;
-import okhttp3.*;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class AriusClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(AriusClient.class);
     private static final MediaType JSON_TYPE = MediaType.get("application/json; charset=utf-8");
     private static String prefix;
-    private static String user = "admin";
-    private static String app = "";
+    private static String user      = "admin";
+    private static String projectId = "";
 
     public static String postForFileForm(String path, String fileFormKey, File fileFormValue, Map<String, Object> params) throws IOException {
         RequestBody fileBody = RequestBody.create(MediaType.parse("multipart/form-data"), fileFormValue);
@@ -31,8 +38,8 @@ public class AriusClient {
         Request request = new Request.Builder()
                 .url(prefix + path)
                 .post(builder.build())
-                .addHeader("X-SSO-USER", user)
-                .addHeader("X-ARIUS-APP-ID", app)
+                .addHeader(HttpRequestUtil.USER, user)
+                .addHeader(HttpRequestUtil.PROJECT_ID, projectId)
                 .build();
 
         OkHttpClient client = new OkHttpClient.Builder().readTimeout(1200000, TimeUnit.MILLISECONDS).build();
@@ -57,10 +64,10 @@ public class AriusClient {
         builder.url(prefix + path)
                 .method(method, body);
         if (!StringUtils.isBlank(user)) {
-            builder.addHeader("X-SSO-USER", user);
+            builder.addHeader(HttpRequestUtil.USER, user);
         }
-        if (!StringUtils.isBlank(app)) {
-            builder.addHeader("X-ARIUS-APP-ID", app);
+        if (!StringUtils.isBlank(projectId)) {
+            builder.addHeader(HttpRequestUtil.PROJECT_ID, projectId);
         }
         return builder.build();
     }
@@ -183,11 +190,11 @@ public class AriusClient {
         AriusClient.user = user;
     }
 
-    public static String getApp() {
-        return app;
+    public static String getProjectId() {
+        return projectId;
     }
 
-    public static void setApp(String app) {
-        AriusClient.app = app;
+    public static void setProjectId(String projectId) {
+        AriusClient.projectId = projectId;
     }
 }

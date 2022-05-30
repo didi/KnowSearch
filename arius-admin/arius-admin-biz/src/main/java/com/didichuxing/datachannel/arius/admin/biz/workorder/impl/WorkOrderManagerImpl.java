@@ -127,7 +127,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public int insert(WorkOrderPO orderPO) {
         try {
             if (orderPO.getApproverProjectId() == null) {
-                orderPO.setApproverProjectId(AdminConstant.DEFAULT_APP_ID);
+                orderPO.setApproverProjectId(AuthConstant.SUPER_PROJECT_ID);
             }
             orderDao.insert(orderPO);
             return orderPO.getId().intValue();
