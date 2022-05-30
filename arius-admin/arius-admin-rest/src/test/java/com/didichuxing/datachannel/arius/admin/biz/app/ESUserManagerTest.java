@@ -32,7 +32,7 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
     @Test
     public void testListESUsersByAllProject() {
         // Setup
-        final ArrayList<Integer> projectIds = Lists.newArrayList(1593);
+        final ArrayList<Integer> projectIds = Lists.newArrayList(1595);
         
         // Run the test
         final List<Integer> userProjectIds = esUserManagerImplUnderTest.listESUsers().getData().stream()

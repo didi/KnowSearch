@@ -327,6 +327,6 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         String targetResponsible = "test";
         Assertions.assertTrue(clusterLogicService
                 .transferClusterLogic(id, targetAppId, targetResponsible, OPERATOR).success());
-        Assertions.assertEquals(targetAppId, logicClusterDAO.getById(id).getAppId());
+        Assertions.assertEquals(targetAppId, logicClusterDAO.getById(id).getProjectId());
     }
 }

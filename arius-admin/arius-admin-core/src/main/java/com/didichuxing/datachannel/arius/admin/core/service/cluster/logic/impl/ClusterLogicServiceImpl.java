@@ -332,21 +332,21 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     /**
-     * 查询指定app所创建的逻辑集群
+     * 查询指定project所创建的逻辑集群
      *
-     * @param projectId APPID
+     * @param projectId project
      * @return list
      */
     @Override
     public List<ClusterLogic> getOwnedClusterLogicListByProjectId(Integer projectId) {
-        return ConvertUtil.list2List(logicClusterDAO.listByAppId(projectId), ClusterLogic.class);
+        return ConvertUtil.list2List(logicClusterDAO.listByProjectId(projectId), ClusterLogic.class);
     }
 
     @Override
     public List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId){
         if (projectId == null) {
             LOGGER.error(
-                    "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByAppId||errMsg=获取有权限逻辑集群时appId为null");
+                    "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByProjectId||errMsg=获取有权限逻辑集群时projectId为null");
             return new ArrayList<>();
         }
 
@@ -367,7 +367,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     public List<ClusterLogic> getHasAuthClusterLogicsByProjectId(Integer projectId) {
         if (projectId == null) {
             LOGGER.error(
-                "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByAppId||errMsg=获取有权限逻辑集群时appId为null");
+                "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByProjectId||errMsg=获取有权限逻辑集群时projectId为null");
             return new ArrayList<>();
         }
 
@@ -380,12 +380,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             ? logicClusterDAO.listByIds(hasAuthLogicClusterIds)
             : new ArrayList<>();
 
-        // 获取作为owner的集群, 这里权限管控逻辑参看 getClusterLogicByAppIdAndAuthType
+        // 获取作为owner的集群, 这里权限管控逻辑参看 getClusterLogicByProjectIdAndAuthType
         List<ClusterLogicPO> ownedLogicClusters;
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             ownedLogicClusters = logicClusterDAO.listAll();
         } else {
-            ownedLogicClusters = logicClusterDAO.listByAppId(projectId);
+            ownedLogicClusters = logicClusterDAO.listByProjectId(projectId);
         }
 
         // 综合

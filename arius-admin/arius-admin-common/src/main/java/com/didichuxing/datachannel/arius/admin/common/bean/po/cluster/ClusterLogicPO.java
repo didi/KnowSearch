@@ -30,9 +30,9 @@ public class ClusterLogicPO extends BasePO implements DigitResponsible {
     private Integer type;
 
     /**
-     * 所属APPID
+     * 所属projectID
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 数据中心
@@ -50,19 +50,12 @@ public class ClusterLogicPO extends BasePO implements DigitResponsible {
     private Integer  dataNodeNu;
 
     /**
-     * 责任人，id列表，英文逗号分隔
+     * 责任人
      */
+    @Deprecated
     private String  responsible;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartment;
 
     /**
      * 备注

@@ -510,10 +510,10 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     /**
      * 获取模板具体的物理索引
      *
-     * @param projectId appId
+     * @param projectId projectId
      */
     @Override
-    public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer projectId) {
+    public Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(Integer projectId) {
         List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(projectId);
         if (CollectionUtils.isEmpty(projectTemplateAuths)) {
             return Result.buildSucc();
@@ -537,7 +537,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             }
         });
 
-        LOGGER.info("class=TemplateLogicServiceImpl||method=getAllTemplateIndicesByAppid||appId={}||indicesList={}",
+        LOGGER.info("class=TemplateLogicServiceImpl||method=getAllTemplateIndicesByProjectId||projectId={}||indicesList={}",
                 projectId, JSON.toJSONString(indicesClusterTupleList));
 
         return Result.buildSucc(indicesClusterTupleList);
@@ -547,15 +547,15 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * 模板移交
      *
      * @param logicId        模板id
-     * @param tgtAppId       appid
+     * @param tgtProjectId       projectId
      * @param tgtResponsible 责任人
      * @param operator       操作人
      * @return Result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
-                                        String operator) throws AdminOperateException {
+    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtProjectId, String tgtResponsible,
+                                              String operator) throws AdminOperateException {
 
         IndexTemplate templateLogic = getLogicTemplateById(logicId);
         if (templateLogic == null) {
@@ -564,7 +564,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         IndexTemplateDTO logicDTO = new IndexTemplateDTO();
         logicDTO.setId(logicId);
-        logicDTO.setProjectId(tgtAppId);
+        logicDTO.setProjectId(tgtProjectId);
         logicDTO.setResponsible(tgtResponsible);
 
         return editTemplate(logicDTO, operator);
@@ -693,8 +693,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplate> getHasAuthTemplatesInLogicCluster(Integer appId, Long logicClusterId) {
-        if (appId == null || logicClusterId == null) {
+    public List<IndexTemplate> getHasAuthTemplatesInLogicCluster(Integer projectId, Long logicClusterId) {
+        if (projectId == null || logicClusterId == null) {
             return new ArrayList<>();
         }
 
@@ -703,7 +703,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             logicClusterId);
 
         // 获取app的模板权限记录
-        List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(appId);
+        List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(projectId);
         Set<Integer> hasAuthTemplateIds = projectTemplateAuths.stream().map(ProjectTemplateAuth::getTemplateId)
             .collect(Collectors.toSet());
 

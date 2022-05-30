@@ -32,13 +32,13 @@ public interface LogicClusterDAO {
 
     ClusterLogicPO getLastCommon();
 
-    List<ClusterLogicPO> listByAppId(Integer appId);
+    List<ClusterLogicPO> listByProjectId(@Param("projectId") Integer projectId);
 
     List<ClusterLogicPO> listAll();
 
     List<ClusterLogicPO> listByResponsible(String responsible);
 
-    List<ClusterLogicPO> pagingByCondition(@Param("name") String name,  @Param("appId") Integer appId,
+    List<ClusterLogicPO> pagingByCondition(@Param("name") String name,  @Param("projectId") Integer projectId,
                                            @Param("type") Integer type, @Param("health") Integer health,
                                            @Param("from") Long from,    @Param("size") Long size,
                                            @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);

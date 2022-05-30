@@ -137,7 +137,7 @@ public class ESUserServiceImpl implements ESUserService {
     /**
      * 删除APP
      *
-     * @param esUser APPID
+     * @param esUser
      * @return 成功 true  失败 false
      */
     @Override
@@ -176,7 +176,7 @@ public class ESUserServiceImpl implements ESUserService {
     /**
      * 初始化APP配置
      *
-     * @param esUserName APPID
+     * @param esUserName
      * @return 成功 true  失败false
      */
     @Override
@@ -192,9 +192,9 @@ public class ESUserServiceImpl implements ESUserService {
     }
 
     /**
-     * 获取appid配置信息
+     * 获取es user id配置信息
      *
-     * @param esUserName APPID
+     * @param esUserName
      * @return 配置信息
      */
     @Override
@@ -259,8 +259,8 @@ public class ESUserServiceImpl implements ESUserService {
     }
 
     /**
-     * 校验appid是否存在
-     * @param esUserName 应用id
+     * 校验es user是否存在
+     * @param esUserName es user
      * @return true/false
      */
     @Override
@@ -268,10 +268,7 @@ public class ESUserServiceImpl implements ESUserService {
         return esUserDAO.getByESUser(esUserName) != null;
     }
 
-    @Override
-    public boolean isESUserExists(ESUser esUser) {
-        return esUser != null;
-    }
+   
 
     @Override
     public boolean isSuperESUser(Integer esUserName) {
@@ -287,7 +284,7 @@ public class ESUserServiceImpl implements ESUserService {
     /**
      * 指定id查询
      *
-     * @param esUser appID
+     * @param esUser esuer
      * @return app  如果不存在返回null
      */
     @Override
@@ -301,7 +298,7 @@ public class ESUserServiceImpl implements ESUserService {
     /**
      * 校验验证码
      *
-     * @param esUserName     app
+     * @param esUserName     esuser
      * @param verifyCode 验证码
      * @return result
      */

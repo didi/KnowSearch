@@ -125,8 +125,8 @@ create index idx_status
 create index idx_type
     on project_logi_cluster_auth (type);
 
-#arius_resource_logic app_id 变更为 project_id
-create table arius_resource_logic
+#arius_resource_logic变更project_arius_resource_logic app_id 变更为 project_id
+create table project_arius_resource_logic
 (
     id            bigint unsigned auto_increment comment '主键自增'
         primary key,
@@ -135,8 +135,6 @@ create table arius_resource_logic
     project_id    int(10)       default -1                not null comment '资源所属的project_id ',
     data_center   varchar(20)   default ''                not null comment '数据中心 cn/us01',
     responsible   varchar(128)  default ''                not null comment '资源责任人',
-    department_id varchar(128)  default ''                not null comment '部门id',
-    department    varchar(128)  default ''                not null comment '部门',
     memo          varchar(512)  default ''                not null comment '资源备注',
     quota         decimal(8, 2) default 1.00              not null comment '资源的大小',
     level         tinyint       default 1                 not null comment '服务等级 1 normal 2 important 3 vip ',
@@ -148,7 +146,7 @@ create table arius_resource_logic
     comment '逻辑资源信息' charset = utf8;
 
 create index idx_name
-    on arius_resource_logic (name);
+    on project_arius_resource_logic (name);
 
 
 #work_order 变更：approver_app_id 变更为 approver_project_id aapplicant_app_id 变更为

@@ -6,15 +6,15 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhy
 /**
  * Created by linyunan on 2021-10-15
  */
-public interface AppClusterPhyAuthService {
+public interface ProjectClusterPhyAuthService {
 
     /**
      * 构建项目对物理集群的权限信息
-     * @param appId                  项目
+     * @param projectId                  项目
      * @param clusterPhyName         物理集群名称
      * @param appClusterPhyAuthEnum  权限点
      * @return
      */
-    ProjectClusterPhyAuth buildClusterPhyAuth(Integer appId, String clusterPhyName,
+    ProjectClusterPhyAuth buildClusterPhyAuth(Integer projectId, String clusterPhyName,
                                               AppClusterPhyAuthEnum appClusterPhyAuthEnum);
 }

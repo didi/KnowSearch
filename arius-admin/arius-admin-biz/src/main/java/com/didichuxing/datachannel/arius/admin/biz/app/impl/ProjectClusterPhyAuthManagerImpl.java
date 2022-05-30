@@ -31,7 +31,7 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleTh
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterPhyAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterPhyAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
@@ -53,7 +53,7 @@ public class ProjectClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthMa
     private ESUserService esUserService;
 
     @Autowired
-    private AppClusterPhyAuthService   appClusterPhyAuthService;
+    private ProjectClusterPhyAuthService projectClusterPhyAuthService;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
@@ -122,7 +122,7 @@ public class ProjectClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthMa
         
         for (List<String> clusterPhyList : clusterPhyLists) {
             clusterPhyList.forEach(clusterPhy -> {
-                ProjectClusterPhyAuth projectClusterPhyAuth = appClusterPhyAuthService.buildClusterPhyAuth(projectId, clusterPhy,
+                ProjectClusterPhyAuth projectClusterPhyAuth = projectClusterPhyAuthService.buildClusterPhyAuth(projectId, clusterPhy,
                                                       AppClusterPhyAuthEnum.ACCESS);
                 appAccessClusterPhyAuthList.add(projectClusterPhyAuth);
             });

@@ -5,17 +5,17 @@ import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterPhyAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterPhyAuthService;
 
 /**
  * Created by linyunan on 2021-10-15
  */
 @Service
-public class AppClusterPhyAuthServiceImpl implements AppClusterPhyAuthService {
+public class ProjectClusterPhyAuthServiceImpl implements ProjectClusterPhyAuthService {
 
     @Override
-    public ProjectClusterPhyAuth buildClusterPhyAuth(Integer appId, String clusterPhyName, AppClusterPhyAuthEnum appClusterPhyAuthEnum) {
-        if (null == appClusterPhyAuthEnum || null == appId || AriusObjUtils.isBlack(clusterPhyName)) {
+    public ProjectClusterPhyAuth buildClusterPhyAuth(Integer projectId, String clusterPhyName, AppClusterPhyAuthEnum appClusterPhyAuthEnum) {
+        if (null == appClusterPhyAuthEnum || null == projectId || AriusObjUtils.isBlack(clusterPhyName)) {
             return null;
         }
 
@@ -24,7 +24,7 @@ public class AppClusterPhyAuthServiceImpl implements AppClusterPhyAuthService {
         }
 
         ProjectClusterPhyAuth projectClusterPhyAuth = new ProjectClusterPhyAuth();
-        projectClusterPhyAuth.setProjectId(appId);
+        projectClusterPhyAuth.setProjectId(projectId);
         projectClusterPhyAuth.setClusterPhyName(clusterPhyName);
         projectClusterPhyAuth.setType(appClusterPhyAuthEnum.getCode());
         return projectClusterPhyAuth;

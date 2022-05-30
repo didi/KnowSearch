@@ -266,7 +266,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             return Result.buildNotExist(APP_IS_NOT_EXIST);
         }
 
-        return indexTemplateService.getLogicTemplatesByAppId(projectId);
+        return indexTemplateService.getLogicTemplatesByProjectId(projectId);
     }
 
     @GetMapping("/cyclicalRoll")

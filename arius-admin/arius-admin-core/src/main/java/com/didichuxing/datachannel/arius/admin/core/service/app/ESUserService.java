@@ -21,7 +21,7 @@ public interface ESUserService {
     /**
      * 指定id查询
      *
-     * @param esUser appID
+     * @param esUser
      * @return app  如果不存在返回null
      */
     ESUser getEsUserById(Integer esUser);
@@ -56,7 +56,7 @@ public interface ESUserService {
     /**
      * 删除APP
      *
-     * @param esUser APPID
+     * @param esUser esuser
      * @return 成功 true  失败 false
      */
     Tuple<Result<Void>, ESUserPO> deleteESUserById(int esUser);
@@ -112,16 +112,10 @@ public interface ESUserService {
      */
     boolean isESUserExists(Integer esUserName);
     
-    /**
-     * 判断app是否存在
-     *
-     * @param esUser app
-     * @return true or false
-     */
-    boolean isESUserExists(ESUser esUser);
+
     
     /**
-     * 根据appId判断是否为超级app
+     * 根据esuser判断是否为超级app
      * @param esUserName  esUserName
      * @return true or false
      */

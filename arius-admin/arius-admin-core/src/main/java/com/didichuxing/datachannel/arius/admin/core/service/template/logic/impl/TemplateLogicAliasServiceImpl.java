@@ -170,7 +170,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
     @Transactional
     public Result aliasSwitch(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO) throws ESOperateException {
         //检查别名
-        Result result = aliasChecked(aliasSwitchDTO.getAliasName(), aliasSwitchDTO.getAppId(), null);
+        Result result = aliasChecked(aliasSwitchDTO.getAliasName(), aliasSwitchDTO.getProjectId(), null);
         if (result != null && result.failed()) {
             return result;
         }
@@ -178,7 +178,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
         List<Integer> deleteAliasList = new ArrayList<>();
         Set<Integer> logicIdList = new HashSet<>();
         List<PutAliasNode> nodes;
-        List<IndexTemplatePO> indexIndexTemplatePOS = indexTemplateDAO.listByProjectId(aliasSwitchDTO.getAppId());
+        List<IndexTemplatePO> indexIndexTemplatePOS = indexTemplateDAO.listByProjectId(aliasSwitchDTO.getProjectId());
         //检查索引
         if (CollectionUtils.isEmpty(aliasSwitchDTO.getAddAliasIndices()) && CollectionUtils.isEmpty(aliasSwitchDTO.getDelAliasIndices())) {
             return Result.buildFail("操作的索引名称不能为空！");
@@ -280,14 +280,14 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
     }
 
     /**
-     * 检查别名是否基于appId唯一，检查模板是否已经拥有该别名，检查别名是否和索引模板互为前缀
+     * 检查别名是否基于projectId唯一，检查模板是否已经拥有该别名，检查别名是否和索引模板互为前缀
      *
      * @param name
-     * @param appId
+     * @param projectId
      * @param logicId
      * @return
      */
-    private Result aliasChecked(String name, Integer appId, Integer logicId) {
+    private Result aliasChecked(String name, Integer projectId, Integer logicId) {
         if (StringUtils.isBlank(name)) {
             return Result.buildFail("别名名称不能为空");
         }
@@ -329,17 +329,17 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
                 return Result.buildFail("别名不能和索引模板互为前缀！");
             }
             List<IndexTemplatePO> indexTemplatePOS = poList.stream().filter(po -> logicIds.contains(po.getId())).collect(Collectors.toList());
-            Set<Integer> appIds = new HashSet<>();
-            if (null != appId) {
-                appIds.add(appId);
+            Set<Integer> projectIds = new HashSet<>();
+            if (null != projectId) {
+                projectIds.add(projectId);
             }
             if (CollectionUtils.isNotEmpty(indexTemplatePOS)) {
-                appIds.addAll(indexTemplatePOS.stream().map(IndexTemplatePO::getProjectId).collect(Collectors.toSet()));
+                projectIds.addAll(indexTemplatePOS.stream().map(IndexTemplatePO::getProjectId).collect(Collectors.toSet()));
             } else if (CollectionUtils.isEmpty(indexTemplatePOS) && CollectionUtils.isNotEmpty(logicIds)) {
                 return Result.buildFail("索引模板不存在！");
             }
-            if (appIds.size() > 1) {
-                //别名已经被其他appId占用了
+            if (projectIds.size() > 1) {
+                //别名已经被其他projectId占用了
                 return Result.buildFail("别名已被占用！");
             }
         }

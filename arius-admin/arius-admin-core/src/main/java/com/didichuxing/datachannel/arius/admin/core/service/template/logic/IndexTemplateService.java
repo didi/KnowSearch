@@ -175,7 +175,7 @@ public interface IndexTemplateService {
     Map<Integer, IndexTemplate> getLogicTemplatesMapByIds(List<Integer> logicTemplateIds);
 
     /**
-     * 根据appId查询模板
+     * 根据projectId查询模板
      * @param projectId projectId
      * @return list
      */
@@ -193,18 +193,18 @@ public interface IndexTemplateService {
      * @param projectId projectId
      * @return result
      */
-    Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer projectId);
+    Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(Integer projectId);
 
     /**
      * 模板移交
      * @param logicId 模板id
-     * @param tgtAppId appid
+     * @param tgtProjectId projectId
      * @param tgtResponsible 责任人
      * @param operator 操作人
      * @return Result
      * @throws AdminOperateException
      */
-    Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
+    Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtProjectId, String tgtResponsible,
                                        String operator) throws AdminOperateException;
 
     /**
@@ -253,11 +253,11 @@ public interface IndexTemplateService {
 
     /**
      * 获取APP在指定逻辑集群下有权限的逻辑模板.
-     * @param appId APP的id
+     * @param projectId project的id
      * @param logicClusterId 逻辑集群ID
      * @return list
      */
-    List<IndexTemplate> getHasAuthTemplatesInLogicCluster(Integer appId, Long logicClusterId);
+    List<IndexTemplate> getHasAuthTemplatesInLogicCluster(Integer projectId, Long logicClusterId);
 
     /**
      * 获取所有的逻辑模板列表信息（带有逻辑集群和物理模板）
