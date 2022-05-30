@@ -19,7 +19,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusHos
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 
 /**
- * Created by linyunan on 2021-09-14
+ * @author linyunan
+ * @date 2021-09-14
  */
 @Component
 public class ZeusCollectManagerImpl implements ZeusCollectManager {
@@ -29,8 +30,10 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
 
     @Autowired
     private ClusterPhyService                                           clusterPhyService;
-
-    private final Map<String/*clusterPhyName*/, Integer/*clientCount*/> clusterPhyName2ClientCountMap = new ConcurrentHashMap<>();
+    /**
+     * Map<clusterPhyName, clientCount>
+     */
+    private final Map<String, Integer> clusterPhyName2ClientCountMap = new ConcurrentHashMap<>();
 
     @Override
     public synchronized Result<Boolean> updateHttpAddressFromZeus(ESZeusHostInfoDTO esZeusHostInfoDTO) {
@@ -69,7 +72,7 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
 
             if (clusterPhyName2ClientCountMap.get(esZeusHostInfoDTO.getClusterPhyName()) >= 0) {
                 buildESClusterDTOFromZeus(clusterDTO, clusterPhy, esZeusHostInfoDTO);
-                clusterPhyManager.editCluster(clusterDTO, null, null);
+                clusterPhyManager.editCluster(clusterDTO, null);
                 clusterPhyName2ClientCountMapAddOne(esZeusHostInfoDTO.getClusterPhyName());
             }
         }
@@ -77,7 +80,7 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
         if (MASTER_NODE.getDesc().equals(esZeusHostInfoDTO.getRole()) &&
 				null == clusterPhyName2ClientCountMap.get(esZeusHostInfoDTO.getClusterPhyName())) {
             buildESClusterDTOFromZeus(clusterDTO, clusterPhy, esZeusHostInfoDTO);
-            clusterPhyManager.editCluster(clusterDTO, null, null);
+            clusterPhyManager.editCluster(clusterDTO, null);
         }
         return Result.buildSucc();
     }

@@ -100,12 +100,12 @@ public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
     public void listPhysicClusterRolesTest() {
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         Integer id = clusterDAO.getByName(esClusterDTO.getCluster()).getId();
-        Assertions.assertTrue(CollectionUtils.isEmpty(clusterPhyManager.clusterRolesByClusterId(id + 1)));
+        Assertions.assertTrue(CollectionUtils.isEmpty(clusterPhyManager.listClusterRolesByClusterId(id + 1)));
         ClusterRoleInfo clusterRoleInfo = new ClusterRoleInfo();
         clusterRoleInfo.setRole("wpk");
         Mockito.when(clusterRoleService.getAllRoleClusterByClusterId(Mockito.any()))
             .thenReturn(Collections.singletonList(clusterRoleInfo));
-        Assertions.assertTrue(clusterPhyManager.clusterRolesByClusterId(id).stream()
+        Assertions.assertTrue(clusterPhyManager.listClusterRolesByClusterId(id).stream()
             .anyMatch(esRoleCluster1 -> esRoleCluster1.getRole().equals(clusterRoleInfo.getRole())));
     }
 }

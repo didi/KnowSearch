@@ -326,7 +326,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (saveClusterResult.failed()) {
                 throw new AdminOperateException(saveClusterResult.getMessage());
             } else {
-                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), param.getAppId()));
+                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
                 postProcessingForClusterJoin(param, operator);
             }
 
@@ -478,7 +478,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer appId) {
+    public Result<Boolean> deleteCluster(Integer clusterPhyId, String operator) {
         ClusterPhy clusterPhy  = clusterPhyService.getClusterById(clusterPhyId);
         if (null == clusterPhy) {
             return Result.buildFail(String.format("物理集群Id[%s]不存在", clusterPhyId));
@@ -499,11 +499,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 throw new AdminOperateException(String.format("删除集群[%s]角色信息失败", clusterPhy.getCluster()));
             }
 
-            Result<Boolean> deleteClusterResult  = clusterPhyService.deleteClusterById(clusterPhyId, operator);
-            if (deleteClusterResult.failed()) {
-                throw new AdminOperateException(String.format("删除集群[%s]信息失败", clusterPhy.getCluster()));
-            }
-
             List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
             if(!AriusObjUtils.isEmptyList(clusterRegionList)) {
                 // 该物理集群有Region才删除
@@ -511,6 +506,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 if (deletePhyClusterRegionResult.failed()) {
                     throw new AdminOperateException(String.format("删除集群[%s]Region新失败", clusterPhy.getCluster()));
                 }
+            }
+
+            Result<Boolean> deleteClusterResult  = clusterPhyService.deleteClusterById(clusterPhyId, operator);
+            if (deleteClusterResult.failed()) {
+                throw new AdminOperateException(String.format("删除集群[%s]信息失败", clusterPhy.getCluster()));
             }
         } catch (AdminOperateException e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterInfo||clusterName={}||errMsg={}||e={}",
@@ -520,7 +520,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail("删除物理集群失败");
         }
 
-        SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), appId));
+        SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
 
         return Result.buildSucc(true);
     }
@@ -530,14 +530,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         Result<Boolean> result = clusterPhyService.createCluster(param, operator);
 
         if (result.success()) {
-            SpringTool.publish(new ClusterPhyEvent(param.getCluster(), appId));
+            SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
             operateRecordService.save(ModuleEnum.CLUSTER, OperationEnum.ADD, param.getCluster(), null, operator);
         }
         return result;
     }
 
     @Override
-    public Result<Boolean> editCluster(ClusterPhyDTO param, String operator, Integer appId) {
+    public Result<Boolean> editCluster(ClusterPhyDTO param, String operator) {
+        //todo 这里需要记录操作记录hsl
         return clusterPhyService.editCluster(param, operator);
     }
 
@@ -775,7 +776,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildSucc(true);
         }
 
-        return deleteClusterInfo(clusterPhy.getId(), operator, appId);
+        return deleteCluster(clusterPhy.getId(), operator);
     }
 
     @Override
@@ -882,7 +883,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId) {
+    public Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator) {
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setId(param.getId());
         clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
@@ -892,11 +893,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail("编辑gateway失败！");
         }
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());
-        //todo 这里需要记录操作记录
+        //todo 这里需要记录操作记录hsl
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
     }
     @Override
-    public List<ClusterRoleInfo> clusterRolesByClusterId(Integer clusterId){
+    public List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId){
         return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 

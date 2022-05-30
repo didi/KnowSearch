@@ -6,6 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -707,6 +708,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         if (null == param.getDiskUsagePercent()) {
             param.setDiskUsagePercent(0D);
+        }
+
+        if (null == param.getPlatformType()) {
+            param.setPlatformType("");
+        }
+        if (null == param.getResourceType()) {
+            param.setResourceType(ClusterResourceTypeEnum.UNKNOWN.getCode());
+        }
+        if (null == param.getGatewayUrl()) {
+            param.setGatewayUrl("");
         }
     }
 

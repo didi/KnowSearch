@@ -184,10 +184,9 @@ public interface ClusterPhyManager {
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
      * @param clusterPhyId 物理集群ID
      * @param operator     操作人
-     * @param appId        appId
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer appId);
+    Result<Boolean> deleteCluster(Integer clusterPhyId, String operator);
 
     /**
      * 添加集群
@@ -204,10 +203,9 @@ public interface ClusterPhyManager {
      *
      * @param param    参数
      * @param operator 操作人
-     * @param appId    appId
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> editCluster(ClusterPhyDTO param, String operator, Integer appId);
+    Result<Boolean> editCluster(ClusterPhyDTO param, String operator);
 
     /**
      * 条件组合、分页查询
@@ -338,10 +336,9 @@ public interface ClusterPhyManager {
      *
      * @param param    参数
      * @param operator 操作人
-     * @param appId    应用程序id
      * @return {@link Result}<{@link ClusterPhyVO}>
      */
-    Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId);
+    Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator);
 
     /**
      * 根据集群ID获取物理集群角色
@@ -349,5 +346,5 @@ public interface ClusterPhyManager {
      * @param clusterId 集群id
      * @return {@link List}<{@link ClusterRoleInfo}>
      */
-    List<ClusterRoleInfo> clusterRolesByClusterId(Integer clusterId);
+    List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
 }

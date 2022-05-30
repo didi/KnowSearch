@@ -19,7 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -62,7 +61,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "根据物理集群ID获取全部角色列表", notes = "")
     public Result<List<ESClusterRoleVO>> roleList(@PathVariable Integer clusterId) {
-        List<ClusterRoleInfo> clusterRoleInfos = clusterPhyManager.clusterRolesByClusterId(clusterId);
+        List<ClusterRoleInfo> clusterRoleInfos = clusterPhyManager.listClusterRolesByClusterId(clusterId);
 
         if (AriusObjUtils.isNull(clusterRoleInfos)) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
@@ -90,16 +89,6 @@ public class ESPhyClusterController {
     @ApiOperation(value = "接入集群", notes = "支持多类型集群加入")
     public Result<ClusterPhyVO> joinCluster(HttpServletRequest request, @RequestBody ClusterJoinDTO param) {
         return clusterPhyManager.joinCluster(param, HttpRequestUtils.getOperator(request));
-    }
-
-    @PostMapping("/join/{templateSrvId}/checkTemplateService")
-    @ResponseBody
-    @ApiOperation(value = "集群接入的时候校验是否可以开启指定索引服务")
-    @Deprecated
-    public Result<Boolean> addTemplateSrvId(HttpServletRequest request,
-                                            @RequestBody ClusterJoinDTO clusterJoinDTO,
-                                            @PathVariable("templateSrvId") String templateSrvId) {
-        return clusterPhyManager.checkTemplateServiceWhenJoin(clusterJoinDTO, templateSrvId, HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("/{clusterId}/regions")
@@ -203,6 +192,21 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "更新物理集群的gateway" )
     public Result<ClusterPhyVO> updateClusterGateway(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.updateClusterGateway(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
+        return clusterPhyManager.updateClusterGateway(param, HttpRequestUtils.getOperator(request));
     }
+
+    @PutMapping("")
+    @ResponseBody
+    @ApiOperation(value = "编辑集群接口" )
+    public Result<Boolean> edit(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
+        return clusterPhyManager.editCluster(param, HttpRequestUtils.getOperator(request));
+    }
+
+    @DeleteMapping("{clusterPhyId}")
+    @ResponseBody
+    @ApiOperation(value = "删除物理集群" )
+    public Result<Boolean> delete(HttpServletRequest request, @PathVariable("clusterPhyId") Integer clusterId) {
+        return clusterPhyManager.deleteCluster(clusterId, HttpRequestUtils.getOperator(request));
+    }
+
 }
