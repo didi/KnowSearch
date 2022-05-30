@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
@@ -203,4 +204,6 @@ public interface ClusterLogicService {
     Long fuzzyClusterLogicHitByCondition(ClusterLogicConditionDTO param);
 
     List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList);
+
+    ClusterLogicDiskUsedInfoPO getDiskInfo(Long id);
 }

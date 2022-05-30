@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_PHY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.RESOURCE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
@@ -19,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
@@ -527,8 +529,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public PaginationResult<ConsoleClusterVO> selectPage(ClusterLogicConditionDTO condition, Integer appId) {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_LOGIC.getPageSearchType());
         if (baseHandle instanceof ClusterLogicPageSearchHandle) {
-            ClusterLogicPageSearchHandle handle = (ClusterLogicPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, condition.getAuthType(), appId);
+            ClusterLogicPageSearchHandle pageSearchHandle = (ClusterLogicPageSearchHandle) baseHandle;
+            return pageSearchHandle.selectPage(condition, appId);
         }
         
         LOGGER.warn(

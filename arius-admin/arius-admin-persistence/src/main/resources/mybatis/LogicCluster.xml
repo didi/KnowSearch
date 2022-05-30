@@ -17,11 +17,12 @@
         <result column="config_json" jdbcType="VARCHAR" property="configJson"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
-        <result column="health"                     jdbcType="TINYINT" property="health"/>
+        <result column="health" jdbcType="TINYINT" property="health"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, `name`, `type`, app_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json, create_time, update_time, health
+        id
+        , `name`, `type`, app_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json, create_time, update_time, health
     </sql>
 
     <select id="listByCondition"
@@ -37,7 +38,7 @@
             <if test="level != null">and `level` = #{level}</if>
             <if test="appId != null">and app_id = #{appId}</if>
             <if test="dataCenter != null">and data_center = #{dataCenter}</if>
-            <if test="health != null">    and health = #{health}</if>
+            <if test="health != null">and health = #{health}</if>
         </trim>
         order by id desc
     </select>
@@ -46,9 +47,10 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into arius_resource_logic
-        (`name`, `type`, app_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json,health)
-        values
-        (#{name}, #{type}, #{appId}, #{dataCenter}, #{responsible}, #{libraDepartmentId}, #{libraDepartment}, #{memo}, #{quota}, #{level}, #{configJson}, #{health})
+        (`name`, `type`, app_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json,
+         health)
+        values (#{name}, #{type}, #{appId}, #{dataCenter}, #{responsible}, #{libraDepartmentId}, #{libraDepartment},
+                #{memo}, #{quota}, #{level}, #{configJson}, #{health})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">
@@ -70,7 +72,8 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        delete from arius_resource_logic
+        delete
+        from arius_resource_logic
         where id = #{resourceId}
     </delete>
 
@@ -95,7 +98,8 @@
         where
         <choose>
             <when test="ids != null and ids.size > 0">
-                id in <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+                id in
+                <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
             </when>
             <otherwise>
                 1=0
@@ -136,16 +140,21 @@
         or responsible like concat('%,', #{responsible},',%')
     </select>
 
-    <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
+    <select id="pagingByCondition" resultMap="BaseResultMap"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO">
         select
         <include refid="Base_Column_List"/>
         from arius_resource_logic
         where id > 0
-        <if test="name != null">  and  `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="appId != null"> and  app_id = #{appId}</if>
-        <if test="health != null">and  health = #{health}</if>
-        <if test="type != null">  and  type = #{type}</if>
-        order by  ${sortTerm}  ${sortType}
+        <if test="id != null">and id = #{id}</if>
+        <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
+        <if test="appId != null">and app_id = #{appId}</if>
+        <if test="health != null">and health = #{health}</if>
+        <if test="type != null">and type = #{type}</if>
+        <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
+        <if test="sortTerm != null">
+            order by ${sortTerm} ${sortType}
+        </if>
         limit #{from}, #{size}
     </select>
 
@@ -156,10 +165,10 @@
         count(1)
         from arius_resource_logic
         where id > 0
-        <if test="name != null">  and  `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="appId != null"> and  app_id = #{appId}</if>
-        <if test="health != null">and  health = #{health}</if>
-        <if test="type != null">  and  type = #{type}</if>
+        <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
+        <if test="appId != null">and app_id = #{appId}</if>
+        <if test="health != null">and health = #{health}</if>
+        <if test="type != null">and type = #{type}</if>
     </select>
 
 </mapper>
