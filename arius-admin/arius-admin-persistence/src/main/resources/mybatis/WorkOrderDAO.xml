@@ -31,8 +31,8 @@
     type,title, applicant, applicant_project_id, description, extensions,approver_project_id
     )
     values (
-    #{type},#{title}, #{applicant}, #{applicantAppId}, #{description},#{extensions},
-    #{approverAppId}
+    #{type},#{title}, #{applicant}, #{applicantProjectId}, #{description},#{extensions},
+    #{approverProjectId}
     )
   </insert>
 
