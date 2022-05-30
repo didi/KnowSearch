@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -53,18 +52,10 @@ public interface ClusterPhyManager {
 
     /**
      * 获取控制台物理集群信息列表(ZH有使用)
-     * @param currentAppId 当前登录项目
-     * @param param         查询参数
-     * @return 物理集群列表
-     */
-    List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param, Integer currentAppId);
-
-    /**
-     * 获取控制台物理集群信息列表
      * @param param 查询参数
      * @return 物理集群列表
      */
-    List<ConsoleClusterPhyVO> getConsoleClusterPhys(ClusterPhyDTO param);
+    List<ClusterPhyVO> getClusterPhys(ClusterPhyDTO param);
 
     /**
      * 构建客户端需要的数据
@@ -81,7 +72,7 @@ public interface ClusterPhyManager {
      * @param currentAppId 当前登录项目
      * @return 物理集群信息
      */
-    ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentAppId);
+    ClusterPhyVO getClusterPhyOverview(Integer clusterId, Integer currentAppId);
 
     /**
      * 获取物理集群节点划分信息
@@ -180,7 +171,7 @@ public interface ClusterPhyManager {
      * 构建单个物理集群统计信息
      * @param cluster 集群
      */
-    void buildPhyClusterStatics(ConsoleClusterPhyVO cluster);
+    void buildPhyClusterStatics(ClusterPhyVO cluster);
 
     /**
      * 获取APP可查看的物理集群节点名称列表
@@ -239,7 +230,7 @@ public interface ClusterPhyManager {
      * @param appId
      * @return
      */
-    List<ClusterPhy> getAppAccessClusterPhyList(Integer appId);
+    List<ClusterPhy> getClusterPhysByAppId(Integer appId);
 
     /**
      * 获取项目下有访问权限的物理集群列表
@@ -351,4 +342,12 @@ public interface ClusterPhyManager {
      * @return {@link Result}<{@link ClusterPhyVO}>
      */
     Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator, Integer appId);
+
+    /**
+     * 根据集群ID获取物理集群角色
+     *
+     * @param clusterId 集群id
+     * @return {@link List}<{@link ClusterRoleInfo}>
+     */
+    List<ClusterRoleInfo> clusterRolesByClusterId(Integer clusterId);
 }

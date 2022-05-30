@@ -1,21 +1,29 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 
 public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
@@ -23,8 +31,15 @@ public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
     @Autowired
     private ClusterPhyManager clusterPhyManager;
 
-    @Autowired
+    @MockBean
     private ClusterPhyService clusterPhyService;
+
+    @Autowired
+    private PhyClusterDAO clusterDAO;
+
+    @MockBean
+    private ClusterRoleService clusterRoleService;
+    
 
     // @Test
     public void getClusterPhyRegionInfosTest() {
@@ -80,4 +95,17 @@ public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
          Assertions.assertTrue(rest.getData().getBizData().stream()
              .anyMatch(clusterPhy -> clusterPhy.getCluster().equals(CustomDataSource.PHY_CLUSTER_NAME)));
      }
+
+    @Test
+    public void listPhysicClusterRolesTest() {
+        ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
+        Integer id = clusterDAO.getByName(esClusterDTO.getCluster()).getId();
+        Assertions.assertTrue(CollectionUtils.isEmpty(clusterPhyManager.clusterRolesByClusterId(id + 1)));
+        ClusterRoleInfo clusterRoleInfo = new ClusterRoleInfo();
+        clusterRoleInfo.setRole("wpk");
+        Mockito.when(clusterRoleService.getAllRoleClusterByClusterId(Mockito.any()))
+            .thenReturn(Collections.singletonList(clusterRoleInfo));
+        Assertions.assertTrue(clusterPhyManager.clusterRolesByClusterId(id).stream()
+            .anyMatch(esRoleCluster1 -> esRoleCluster1.getRole().equals(clusterRoleInfo.getRole())));
+    }
 }

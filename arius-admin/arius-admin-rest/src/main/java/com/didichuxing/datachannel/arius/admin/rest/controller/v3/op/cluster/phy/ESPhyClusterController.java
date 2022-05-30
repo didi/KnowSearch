@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -13,7 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -47,9 +44,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 public class ESPhyClusterController {
 
     @Autowired
-    private ClusterPhyService esClusterPhyService;
-
-    @Autowired
     private ClusterPhyManager clusterPhyManager;
 
     @Autowired
@@ -68,7 +62,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "根据物理集群ID获取全部角色列表", notes = "")
     public Result<List<ESClusterRoleVO>> roleList(@PathVariable Integer clusterId) {
-        List<ClusterRoleInfo> clusterRoleInfos = esClusterPhyService.listPhysicClusterRoles(clusterId);
+        List<ClusterRoleInfo> clusterRoleInfos = clusterPhyManager.clusterRolesByClusterId(clusterId);
 
         if (AriusObjUtils.isNull(clusterRoleInfos)) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
@@ -170,8 +164,8 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "获取物理集群概览信息接口")
     @ApiImplicitParam(type = "Integer", name = "clusterPhyId", value = "物理集群ID", required = true)
-    public Result<ConsoleClusterPhyVO> overview(@PathVariable("clusterPhyId") Integer clusterId, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhy(clusterId, HttpRequestUtils.getAppId(request)));
+    public Result<ClusterPhyVO> overview(@PathVariable("clusterPhyId") Integer clusterId, HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.getClusterPhyOverview(clusterId, HttpRequestUtils.getAppId(request)));
     }
 
     @GetMapping("/{clusterLogicType}/{clusterName}/version/list")

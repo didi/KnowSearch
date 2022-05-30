@@ -53,6 +53,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 @Service
 public class ClusterRegionServiceImpl implements ClusterRegionService {
     private static final ILog       LOGGER           = LogFactory.getLog(ClusterRegionServiceImpl.class);
@@ -586,6 +590,21 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     @Override
     public boolean isExistByRegionId(Integer regionId) {
         return null != clusterRegionDAO.getById(regionId.longValue());
+    }
+
+    @Override
+    public List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIds) {
+        Set<Long> ids = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(clusterLogicIds)) {
+            ids.addAll(clusterLogicIds);
+        }
+
+        List<ClusterRegionPO> clusterRegionPOS = clusterRegionDAO.listAll()
+                .stream()
+                .filter(clusterRegionPO -> ListUtils.string2LongList(clusterRegionPO.getLogicClusterIds()).stream().anyMatch(ids::contains))
+                .collect(Collectors.toList());
+
+        return ConvertUtil.list2List(clusterRegionPOS, ClusterRegion.class);
     }
 
     /***************************************** private method ****************************************************/

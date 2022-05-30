@@ -7,8 +7,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 public interface ClusterRegionService {
     /**
      * 通过Rack ID删除Rack
@@ -237,4 +240,7 @@ public interface ClusterRegionService {
      * @return          false or true
      */
     boolean isExistByRegionId(Integer regionId);
+
+
+    List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
 }

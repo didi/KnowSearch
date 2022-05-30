@@ -373,8 +373,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public ClusterPhy getClusterById(Integer phyClusterId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
-        ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
-        return clusterPhy;
+        return ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
     }
 
     /**
@@ -419,11 +418,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         return esClusterService.syncPutRemoteCluster(cluster, remoteCluster,
             genTcpAddr(remoteClusterPhy.getHttpWriteAddress(), 9300), 3);
-    }
-
-    @Override
-    public List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId) {
-        return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
     @Override
