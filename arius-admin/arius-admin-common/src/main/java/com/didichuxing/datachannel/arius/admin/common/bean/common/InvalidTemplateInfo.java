@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class InvalidTemplateInfo {
 
     private Integer logicId;

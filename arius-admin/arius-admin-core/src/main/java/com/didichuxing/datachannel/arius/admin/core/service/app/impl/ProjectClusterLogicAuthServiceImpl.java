@@ -1,39 +1,36 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectLogicClusterAuthDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * APP 逻辑集群权限服务
@@ -58,8 +55,6 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
     
 
-    @Autowired
-    private ResponsibleConvertTool responsibleConvertTool;
 
     /**
      * 设置APP对某逻辑集群的权限.
@@ -192,7 +187,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         boolean succeed = 1 == logicClusterAuthDAO.delete(authId);
         if (succeed) {
             SpringTool.publish(new ProjectLogicClusterAuthDeleteEvent(this,
-                responsibleConvertTool.obj2Obj(oldAuthPO, AppClusterLogicAuth.class)));
+                ConvertUtil.obj2Obj(oldAuthPO, AppClusterLogicAuth.class)));
 
             operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.DELETE, oldAuthPO.getId(),
                 StringUtils.EMPTY, operator);
@@ -351,13 +346,13 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      */
     @Override
     public Result<Void> addLogicClusterAuthWithoutCheck(AppLogicClusterAuthDTO authDTO, String operator) {
-        ProjectClusterLogicAuthPO authPO = responsibleConvertTool.obj2Obj(authDTO, ProjectClusterLogicAuthPO.class);
+        ProjectClusterLogicAuthPO authPO = ConvertUtil.obj2Obj(authDTO, ProjectClusterLogicAuthPO.class);
 
         boolean succeed = 1 == logicClusterAuthDAO.insert(authPO);
         if (succeed) {
             // 发送消息
             SpringTool.publish(new ProjectLogicClusterAuthAddEvent(this,
-                responsibleConvertTool.obj2Obj(authPO, AppClusterLogicAuth.class)));
+                ConvertUtil.obj2Obj(authPO, AppClusterLogicAuth.class)));
 
             // 记录操作
             operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.ADD, authPO.getId(),
@@ -539,11 +534,11 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
     private Result<Void> updateLogicClusterAuthWithoutCheck(AppLogicClusterAuthDTO authDTO, String operator) {
 
         ProjectClusterLogicAuthPO oldAuthPO = logicClusterAuthDAO.getById(authDTO.getId());
-        ProjectClusterLogicAuthPO newAuthPO = responsibleConvertTool.obj2Obj(authDTO, ProjectClusterLogicAuthPO.class);
+        ProjectClusterLogicAuthPO newAuthPO = ConvertUtil.obj2Obj(authDTO, ProjectClusterLogicAuthPO.class);
         boolean succeed = 1 == logicClusterAuthDAO.update(newAuthPO);
         if (succeed) {
             SpringTool.publish(new ProjectLogicClusterAuthEditEvent(this,
-                responsibleConvertTool.obj2Obj(oldAuthPO, AppClusterLogicAuth.class), responsibleConvertTool
+                ConvertUtil.obj2Obj(oldAuthPO, AppClusterLogicAuth.class), ConvertUtil
                     .obj2Obj(logicClusterAuthDAO.getById(authDTO.getId()), AppClusterLogicAuth.class)));
 
             operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.EDIT, oldAuthPO.getId(),

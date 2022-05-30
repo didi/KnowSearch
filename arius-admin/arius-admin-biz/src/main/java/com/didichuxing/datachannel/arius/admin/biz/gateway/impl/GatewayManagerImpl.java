@@ -113,7 +113,7 @@ public class GatewayManagerImpl implements GatewayManager {
     @Autowired
     private    TemplateLogicAliasService templateLogicAliasService;
     
-    private final Cache<String, List<?>> projectESUserListCache = CacheBuilder.newBuilder()
+    private final Cache<String, Object> projectESUserListCache = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
     @Override
     public Result<Void> heartbeat(GatewayHeartbeat heartbeat) {
@@ -147,6 +147,17 @@ public class GatewayManagerImpl implements GatewayManager {
         return esUserService.listESUsers(projectIds);
     }
     
+    private Map<Integer, String> listProject() {
+        return projectService.getProjectBriefList().stream()
+                .collect(Collectors.toMap(ProjectBriefVO::getId, ProjectBriefVO::getProjectName));
+    }
+    private Map<Integer, String> listProjectWithCache() {
+        try {
+            return (Map<Integer, String>) projectESUserListCache.get("listProject", this::listProject);
+        } catch (ExecutionException e) {
+            return listProject();
+        }
+    }
     private List<ESUser> listESUserWithCache() {
         try {
             return (List<ESUser>) projectESUserListCache.get("listESUsers", this::listESUsers);
@@ -181,6 +192,8 @@ public class GatewayManagerImpl implements GatewayManager {
         List<ESUser> esUsers = listESUserWithCache();
         final Map<Integer/*projectId*/, /*es user*/List<Integer>> projectIdEsUsersMap = esUsers.stream().collect(
                 Collectors.groupingBy(ESUser::getProjectId, Collectors.mapping(ESUser::getId, Collectors.toList())));
+        final Map<Integer/*projectId*/, String/*projectName*/> projectId2ProjectNameMap = listProjectWithCache();
+        
         
         
     
@@ -188,12 +201,15 @@ public class GatewayManagerImpl implements GatewayManager {
         Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> projectId2ProjectTemplateAuthsMap =
                 projectLogicTemplateAuthService.getAllProjectTemplateAuths();
         Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap=Maps.newHashMap();
+        Map<Integer/*es user*/,String/*projectName*/> esUser2ProjectNameMap=Maps.newHashMap();
         //转换
         for (Entry<Integer, List<Integer>> projectIdESUsersEntry : projectIdEsUsersMap.entrySet()) {
             final Integer projectId = projectIdESUsersEntry.getKey();
             final Collection<ProjectTemplateAuth> projectTemplateAuths = projectId2ProjectTemplateAuthsMap.get(
                     projectId);
             projectIdESUsersEntry.getValue().forEach(esuser->esUser2ProjectTemplateAuthsMap.put(esuser,projectTemplateAuths));
+            final String projectName = projectId2ProjectNameMap.get(projectId);
+            projectIdESUsersEntry.getValue().forEach(esuser->esUser2ProjectNameMap.put(esuser,projectName));
     
         }
 
@@ -209,16 +225,21 @@ public class GatewayManagerImpl implements GatewayManager {
                 .getAllLogicTemplatesMap();
 
         Map<Integer/*logicId*/, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
-
+        
         List<GatewayESUserVO> appVOS = esUsers.parallelStream().map(user -> {
             try {
-                return buildESUserVO(user, esUser2ProjectTemplateAuthsMap, esUser2ESUserConfigMap,templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
+                final GatewayESUserVO gatewayESUserVO = buildESUserVO(user, esUser2ProjectTemplateAuthsMap,
+                        esUser2ESUserConfigMap, templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
+                final Integer esUser = gatewayESUserVO.getId();
+                if (esUser2ProjectNameMap.containsKey(esUser)) {
+                    gatewayESUserVO.setName(esUser2ProjectNameMap.get(esUser));
+                }
+                return gatewayESUserVO;
             } catch (Exception e) {
                 LOGGER.warn("class=GatewayManagerImpl||method=listApp||errMsg={}||stackTrace={}", e.getMessage(), JSON.toJSONString(e.getStackTrace()), e);
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-
         return Result.buildSucc(appVOS);
     }
 

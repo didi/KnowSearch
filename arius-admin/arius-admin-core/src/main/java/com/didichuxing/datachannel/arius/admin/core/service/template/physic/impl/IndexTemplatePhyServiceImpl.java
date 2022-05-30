@@ -24,7 +24,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
-import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -86,8 +85,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     @Autowired
     private ESTemplateService                              esTemplateService;
 
-    @Autowired
-    private ResponsibleConvertTool                         responsibleConvertTool;
+    
 
     @Autowired
     private IndexTemplateService indexTemplateService;

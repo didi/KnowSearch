@@ -12,22 +12,14 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -61,7 +53,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
@@ -92,6 +83,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
@@ -116,8 +116,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Autowired
     private ProjectService projectService;
 
-    @Autowired
-    private ResponsibleConvertTool      responsibleConvertTool;
+    
 
     @Autowired
     private ESIndexService              esIndexService;
@@ -147,8 +146,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplate> getLogicTemplates(IndexTemplateDTO param) {
-        return responsibleConvertTool.list2List(
-            indexTemplateDAO.listByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class)),
+        return ConvertUtil.list2List(
+            indexTemplateDAO.listByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class)),
             IndexTemplate.class);
     }
 
@@ -160,8 +159,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplate> fuzzyLogicTemplatesByCondition(IndexTemplateDTO param) {
-        return responsibleConvertTool.list2List(
-            indexTemplateDAO.likeByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class)),
+        return ConvertUtil.list2List(
+            indexTemplateDAO.likeByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class)),
             IndexTemplate.class);
     }
 
@@ -172,7 +171,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
-            indexTemplatePOS = indexTemplateDAO.pagingByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class),
+            indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
                     (param.getPage() - 1) * param.getSize(), param.getSize(),
                     sortTerm, sortType);
         } catch (Exception e) {
@@ -180,26 +179,26 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 e.getMessage(), e);
         }
 
-        return responsibleConvertTool.list2List(indexTemplatePOS, IndexTemplate.class);
+        return ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class);
     }
 
     @Override
     public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
-            indexTemplatePOS = indexTemplateDAO.pagingByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class),
+            indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
                     (param.getPage() - 1) * param.getSize(), param.getSize(),
                     SortConstant.ID, SortConstant.DESC);
         } catch (Exception e) {
             LOGGER.error("class=IndexTemplateServiceImpl||method=pagingGetTemplateSrvByCondition||err={}", e.getMessage(), e);
         }
-        return responsibleConvertTool.list2List(indexTemplatePOS, IndexTemplate.class);
+        return ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class);
     }
 
     @Override
     public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {
         return indexTemplateDAO
-            .getTotalHitByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class));
+            .getTotalHitByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class));
     }
 
     /**
@@ -210,7 +209,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplate> getLogicTemplateByName(String templateName) {
-        return responsibleConvertTool.list2List(indexTemplateDAO.listByName(templateName),
+        return ConvertUtil.list2List(indexTemplateDAO.listByName(templateName),
             IndexTemplate.class);
     }
 
@@ -222,7 +221,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public IndexTemplate getLogicTemplateById(Integer logicTemplateId) {
-        return responsibleConvertTool.obj2Obj(indexTemplateDAO.getById(logicTemplateId), IndexTemplate.class);
+        return ConvertUtil.obj2Obj(indexTemplateDAO.getById(logicTemplateId), IndexTemplate.class);
     }
 
     /**
@@ -337,7 +336,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public Result<Void> addTemplateWithoutCheck(IndexTemplateDTO param) throws AdminOperateException {
-        IndexTemplatePO templatePO = responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class);
+        IndexTemplatePO templatePO = ConvertUtil.obj2Obj(param, IndexTemplatePO.class);
         boolean succ;
         try {
             succ = (1 == indexTemplateDAO.insert(templatePO));
@@ -358,7 +357,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public IndexTemplateConfig getTemplateConfig(Integer logicTemplateId) {
-        return responsibleConvertTool.obj2Obj(indexTemplateConfigDAO.getByLogicId(logicTemplateId),
+        return ConvertUtil.obj2Obj(indexTemplateConfigDAO.getByLogicId(logicTemplateId),
             IndexTemplateConfig.class);
     }
 
@@ -384,7 +383,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         boolean succ = 1 == indexTemplateConfigDAO
-            .update(responsibleConvertTool.obj2Obj(configDTO, TemplateConfigPO.class));
+            .update(ConvertUtil.obj2Obj(configDTO, TemplateConfigPO.class));
 
         return Result.build(succ);
     }
@@ -469,7 +468,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             return new ArrayList<>();
         }
 
-        return responsibleConvertTool.list2List(indexTemplateDAO.listByIds(logicTemplateIds),
+        return ConvertUtil.list2List(indexTemplateDAO.listByIds(logicTemplateIds),
             IndexTemplate.class);
     }
 
@@ -487,7 +486,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplate> getProjectLogicTemplatesByProjectId(Integer projectId) {
-        return responsibleConvertTool.list2List(indexTemplateDAO.listByProjectId(projectId), IndexTemplate.class);
+        return ConvertUtil.list2List(indexTemplateDAO.listByProjectId(projectId), IndexTemplate.class);
     }
 
     /**
@@ -589,7 +588,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplate> getAllLogicTemplates() {
-        return responsibleConvertTool.list2List(indexTemplateDAO.listAll(), IndexTemplate.class);
+        return ConvertUtil.list2List(indexTemplateDAO.listAll(), IndexTemplate.class);
     }
 
     @Override
@@ -620,7 +619,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplate> getTemplateByResponsibleId(Long responsibleId) {
-        return responsibleConvertTool.list2List(indexTemplateDAO.likeByResponsible(String.valueOf(responsibleId)),
+        return ConvertUtil.list2List(indexTemplateDAO.likeByResponsible(String.valueOf(responsibleId)),
             IndexTemplate.class);
     }
 
@@ -937,12 +936,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             }
         }
         IndexTemplatePO oldPO = indexTemplateDAO.getById(dto.getLogicId());
-        IndexTemplatePO editTemplate = responsibleConvertTool.obj2Obj(dto, IndexTemplatePO.class);
+        IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(dto, IndexTemplatePO.class);
         editTemplate.setId(dto.getLogicId());
         editTemplate.setWriteRateLimit(dto.getAdjustRateLimit());
         int update = indexTemplateDAO.update(editTemplate);
         if (update > 0) {
-            IndexTemplateDTO param = responsibleConvertTool.obj2Obj(editTemplate, IndexTemplateDTO.class);
+            IndexTemplateDTO param = ConvertUtil.obj2Obj(editTemplate, IndexTemplateDTO.class);
             param.setId(dto.getLogicId());
             // 将修改同步到物理模板
             Result editPhyResult = indexTemplatePhyService.editTemplateFromLogic(param, AriusUser.SYSTEM.getDesc());
@@ -950,7 +949,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 return Result.buildFail("修改限流，修改物理模板失败");
             }
             operateRecordService.save(TEMPLATE, EDIT, dto.getLogicId(), String.format("数据库写入限流值修改%s->%s", dto.getCurRateLimit(), dto.getAdjustRateLimit()), dto.getSubmitor());
-            SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplate.class), getLogicTemplateById(oldPO.getId())));
+            SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class), getLogicTemplateById(oldPO.getId())));
             return Result.buildSucc();
         }
         return Result.buildFail();
@@ -1006,7 +1005,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         List<IndexTemplateWithPhyTemplates> indexTemplateCombinePhysicalTemplates = Lists.newArrayListWithCapacity(logicTemplates.size());
 
         for (IndexTemplatePO logicTemplate : logicTemplates) {
-            IndexTemplateWithPhyTemplates logicWithPhysical = responsibleConvertTool.obj2Obj(logicTemplate,
+            IndexTemplateWithPhyTemplates logicWithPhysical = ConvertUtil.obj2Obj(logicTemplate,
                 IndexTemplateWithPhyTemplates.class);
             logicWithPhysical
                 .setPhysicals(Lists.newArrayList(logicId2PhysicalTemplatesMapping.get(logicTemplate.getId())));
@@ -1224,7 +1223,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         IndexTemplatePO oldPO = indexTemplateDAO.getById(param.getId());
-        IndexTemplatePO editTemplate = responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class);
+        IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(param, IndexTemplatePO.class);
         if ("".equals(editTemplate.getResponsible())) {
             editTemplate.setResponsible(null);
         }
@@ -1243,7 +1242,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, param.getId(), JSON.toJSONString(
                     new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), AriusObjUtils.findChangedWithClear(oldPO, editTemplate))), operator);
 
-            SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplate.class)
+            SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class)
                     , getLogicTemplateById(oldPO.getId())));
         }
 

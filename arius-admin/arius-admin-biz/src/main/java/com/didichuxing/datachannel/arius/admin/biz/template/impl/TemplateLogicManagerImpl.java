@@ -58,7 +58,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
@@ -125,8 +124,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private ESUserService esUserService;
 
-    @Autowired
-    private ResponsibleConvertTool      responsibleConvertTool;
+
 
     @Autowired
     private TemplatePhyManager          templatePhyManager;
@@ -183,7 +181,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             Integer templateId = templateLabel.getIndexTemplateId();
 
             IndexTemplate indexTemplate = logicTemplatesMappings.get(templateId);
-            IndexTemplateWithLabels logicWithLabel = responsibleConvertTool.obj2Obj(indexTemplate,
+            IndexTemplateWithLabels logicWithLabel = ConvertUtil.obj2Obj(indexTemplate,
                     IndexTemplateWithLabels.class);
             if (logicWithLabel != null) {
                 logicWithLabel.setLabels(templateLabel.getLabels());

@@ -5,6 +5,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant.arius;
  * @author zengqiao_cn@163.com
  * @date 19/4/15
  */
+@Deprecated
 public enum AriusUserRoleEnum {
     /**
      * 未知角色

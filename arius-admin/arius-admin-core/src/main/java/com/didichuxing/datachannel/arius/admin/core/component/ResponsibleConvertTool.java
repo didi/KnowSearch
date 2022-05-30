@@ -18,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
  * 获取平台数据时,目标类是entity,会将责任人解码;Service层对外输出的类都必须是entity
  */
 @Component
+@Deprecated
 public class ResponsibleConvertTool {
 
     @Autowired
