@@ -12,6 +12,7 @@ import java.util.List;
  * @author linyunan
  * @date 2021-04-28
  */
+@Deprecated
 public interface AppManager {
     /**
      * 登陆APP接口

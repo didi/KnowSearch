@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(V3_OP + "/app")
 @Api(tags = "APP相关接口(REST)")
+@Deprecated
 public class AppV3Controller {
 
     @Autowired

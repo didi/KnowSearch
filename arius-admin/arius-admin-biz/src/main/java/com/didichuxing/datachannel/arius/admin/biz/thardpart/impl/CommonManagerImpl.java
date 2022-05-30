@@ -100,10 +100,7 @@ public class CommonManagerImpl implements CommonManager {
     @Autowired
     private TemplateSrvManager templateSrvManager;
 
-    @Override
-    public Result<Void> addOperateRecord(OperateRecordDTO param) {
-        return operateRecordService.save(param);
-    }
+    
 
     @Override
     public Result<List<ThirdPartLogicClusterVO>> listLogicCluster() {

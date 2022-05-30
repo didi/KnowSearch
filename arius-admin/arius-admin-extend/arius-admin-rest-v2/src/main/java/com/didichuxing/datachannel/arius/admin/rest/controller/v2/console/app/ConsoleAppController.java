@@ -28,6 +28,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(V2_CONSOLE + "/app")
 @Api(tags = "Console-用户侧APP相关接口(REST)")
+@Deprecated
 public class ConsoleAppController {
 
     @Autowired

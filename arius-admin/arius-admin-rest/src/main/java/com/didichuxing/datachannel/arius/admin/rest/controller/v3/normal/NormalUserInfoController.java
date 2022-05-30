@@ -28,6 +28,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(V3_NORMAL + "/user")
 @Api(tags = "用户信息接口(REST)")
+@Deprecated
 public class NormalUserInfoController {
 
     @Autowired

@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.thardpart;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ThirdpartAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
@@ -13,16 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.Thirdpart
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateVO;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
 public interface CommonManager {
 
-    /**
-     * 保存操作记录接口
-     * @param param
-     * @return
-     */
-    Result<Void> addOperateRecord(OperateRecordDTO param);
 
     /**
      * 获取逻辑集群列表

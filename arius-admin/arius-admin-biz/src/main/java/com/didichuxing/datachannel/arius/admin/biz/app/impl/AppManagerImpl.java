@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @date 2021-04-28
  */
 @Component
+@Deprecated
 public class AppManagerImpl implements AppManager {
 
     private static final String GET_USER_APPID_LIST_TICKET = "xTc59aY72";
