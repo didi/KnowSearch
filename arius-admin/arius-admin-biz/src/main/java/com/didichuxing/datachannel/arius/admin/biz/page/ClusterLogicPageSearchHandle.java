@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
@@ -160,19 +160,20 @@ public class ClusterLogicPageSearchHandle extends BasePageSearchHandle<ConsoleCl
         }
 
         //获取项目对集群列表的权限信息
-        List<AppClusterLogicAuth> appClusterLogicAuthList = projectClusterLogicAuthManager.getByClusterLogicListAndProjectId(projectId, clusterLogicList);
-        Map<Long, AppClusterLogicAuth> clusterLogicId2AppClusterLogicAuthMap = ConvertUtil.list2Map(appClusterLogicAuthList,
-                AppClusterLogicAuth::getLogicClusterId);
+        List<ProjectClusterLogicAuth> projectClusterLogicAuthList = projectClusterLogicAuthManager.getByClusterLogicListAndProjectId(projectId, clusterLogicList);
+        Map<Long, ProjectClusterLogicAuth> clusterLogicId2AppClusterLogicAuthMap = ConvertUtil.list2Map(
+		        projectClusterLogicAuthList,
+                ProjectClusterLogicAuth::getLogicClusterId);
 
         List<ConsoleClusterVO> consoleClusterVOList = ConvertUtil.list2List(clusterLogicList, ConsoleClusterVO.class);
         //1. 设置权限
         for (ConsoleClusterVO consoleClusterVO : consoleClusterVOList) {
-            AppClusterLogicAuth appClusterLogicAuth = clusterLogicId2AppClusterLogicAuthMap.get(consoleClusterVO.getId());
-            if (appClusterLogicAuth == null) {
+            ProjectClusterLogicAuth projectClusterLogicAuth = clusterLogicId2AppClusterLogicAuthMap.get(consoleClusterVO.getId());
+            if (projectClusterLogicAuth == null) {
                 continue;
             }
-            consoleClusterVO.setAuthType(appClusterLogicAuth.getType());
-            consoleClusterVO.setAuthId(appClusterLogicAuth.getId());
+            consoleClusterVO.setAuthType(projectClusterLogicAuth.getType());
+            consoleClusterVO.setAuthId(projectClusterLogicAuth.getId());
         }
 
         //2. 设置基本信息

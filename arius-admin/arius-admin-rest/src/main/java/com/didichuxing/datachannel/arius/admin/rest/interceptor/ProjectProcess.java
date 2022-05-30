@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchType
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didiglobal.logi.security.common.Result;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import java.util.Objects;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
@@ -32,10 +33,10 @@ public class ProjectProcess implements ResponseBodyAdvice {
 
         String requestPath = request.getURI().getPath();
 		
-       //如何是创建项目的接口会一并创建appid
+       //如何是创建项目的接口会一并创建projectid
         if (requestPath.endsWith(PROJECT_END) && body instanceof com.didiglobal.logi.security.common.Result) {
             Object data = ((Result<?>) body).getData();
-            if (data instanceof ProjectVO) {
+            if (Objects.nonNull(data) && data instanceof ProjectVO) {
                 //通过RequestContextHolder获取request
                 ESUserDTO esUserDTO = new ESUserDTO();
                 esUserDTO.setIsRoot(0);

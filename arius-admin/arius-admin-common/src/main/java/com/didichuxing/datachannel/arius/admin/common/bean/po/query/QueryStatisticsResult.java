@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.query;
 
 import com.google.common.collect.Maps;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -16,6 +15,7 @@ import java.util.Map;
  * 查询统计子任务结果
  *
  */
+@Deprecated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

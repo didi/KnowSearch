@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,13 +16,13 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "应用逻辑集群权限信息")
 @AllArgsConstructor
 @NoArgsConstructor
-public class AppLogicClusterAuthVO extends BaseDTO {
+public class ProjectLogicClusterAuthVO extends BaseDTO {
 
     @ApiModelProperty("ID")
     private Long id;
 
     @ApiModelProperty("应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("逻辑集群ID")
     private Long logicClusterId;

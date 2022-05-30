@@ -109,7 +109,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
                 }
             } catch (Exception e) {
                 failMsgs.add(e.getMessage());
-                LOGGER.error("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||cluster={}||appId={}||authType={}||errMsg={}",
+                LOGGER.error("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||cluster={}||projectId={}||authType={}||errMsg={}",
                     templatePhysical.getCluster(), projectId, authType, e.getMessage(), e);
             }
         }
@@ -141,7 +141,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         }
 
         if (!projectService.checkProjectExist(projectId)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||appId={}||msg=appId not exist",
+            LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||projectId={}||msg=projectId not exist",
                     projectId);
             return Result.buildNotExist(String.format(PROJECT_ID_NOT_EXISTS_TIPS, projectId));
         }
@@ -162,7 +162,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
                 }
             } catch (Exception e) {
                 failMsgs.add(e.getMessage());
-                LOGGER.error("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||cluster={}||appId={}||authType={}||errMsg={}",
+                LOGGER.error("class=SecurityServiceImpl||method=deleteProjectLogicTemplateAuth||cluster={}||projectId={}||authType={}||errMsg={}",
                     templatePhysical.getCluster(), projectId, authType, e.getMessage(), e);
             }
         }
@@ -187,7 +187,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     public Result<Void> editLogicTemplateOwnProject(Integer logicTemplateId, Integer srcProjectId, Integer tgtProjectId, int retryCount) {
         Result<Void> deleteResult = deleteProjectLogicTemplateAuth(srcProjectId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
             retryCount);
-        LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnProject||logicTemplateId={}||srcAppid={}||tgtAppid={}||msg={}",
+        LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnProject||logicTemplateId={}||srcProjectId={}||tgtProjectId={}||msg={}",
             logicTemplateId, srcProjectId, tgtProjectId, deleteResult.getMessage());
 
         Result<Void> saveResult = saveProjectLogicTemplateAuth(tgtProjectId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),

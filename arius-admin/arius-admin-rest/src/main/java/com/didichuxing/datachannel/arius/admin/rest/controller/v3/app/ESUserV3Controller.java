@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
@@ -39,8 +38,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({ V3 + "/es-user" })
 @Api(tags = "应用关联es user (REST)")
 public class ESUserV3Controller {
-    private static final String        GET_USER_APPID_LIST_TICKET      = "xTc59aY72";
-    private static final String        GET_USER_APPID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
+    private static final String        GET_USER_PROJECT_ID_LIST_TICKET      = "xTc59aY72";
+    private static final String        GET_USER_PROJECT_ID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
     @Autowired
     private              ESUserManager esUserManager;
     
@@ -61,8 +60,8 @@ public class ESUserV3Controller {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true) })
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request) {
-        String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
-        if (!GET_USER_APPID_LIST_TICKET.equals(ticket)) {
+        String ticket = request.getHeader(GET_USER_PROJECT_ID_LIST_TICKET_NAME);
+        if (!GET_USER_PROJECT_ID_LIST_TICKET.equals(ticket)) {
             return Result.buildParamIllegal("ticket错误");
         }
         final String operator = HttpRequestUtil.getOperator(request);
@@ -114,14 +113,7 @@ public class ESUserV3Controller {
         return esUserManager.editESUser(esUserDTO, userName);
     }
     
-    @PutMapping("/config")
-    @ResponseBody
-    @ApiOperation(value = "编辑es user配置", notes = "支持修改数据中心、备注")
-    public Result<Void> update(HttpServletRequest request, @RequestBody ProjectConfigDTO configDTO) {
-        //获取操作用户
-        String userName = HttpRequestUtil.getOperator(request);
-        return esUserManager.updateESUserConfig(configDTO, userName);
-    }
+    
     
     @GetMapping("/{esUser}")
     @ResponseBody

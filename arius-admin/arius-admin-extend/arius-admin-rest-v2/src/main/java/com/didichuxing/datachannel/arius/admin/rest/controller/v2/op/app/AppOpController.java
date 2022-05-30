@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(V2_OP + "/app")
 @Api(tags = "OP-运维侧APP接口(REST)")
+@Deprecated
 public class AppOpController {
 
     @Autowired

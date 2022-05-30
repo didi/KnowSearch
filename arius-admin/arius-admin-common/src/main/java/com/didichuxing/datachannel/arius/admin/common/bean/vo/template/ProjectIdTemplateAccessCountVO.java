@@ -2,12 +2,11 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -15,7 +14,7 @@ import java.util.Map;
  * @date: Create on 2019/2/27 下午2:19
  * @modified By D10865
  *
- * appid访问索引模板级别次数
+ * projectid访问索引模板级别次数
  */
 @Data
 @AllArgsConstructor

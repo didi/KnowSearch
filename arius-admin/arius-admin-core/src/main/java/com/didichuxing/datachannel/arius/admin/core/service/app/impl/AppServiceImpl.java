@@ -11,16 +11,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.event.app.AppAddEvent;
@@ -32,9 +32,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppUserInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
@@ -504,11 +504,11 @@ public class AppServiceImpl implements AppService {
         }
 
         // 获取集群的全部权限点，然后筛选
-        List<AppClusterLogicAuth> auths = logicClusterAuthService.getLogicClusterAuths(logicClusterId, null);
+        List<ProjectClusterLogicAuth> auths = logicClusterAuthService.getLogicClusterAuths(logicClusterId, null);
         // 筛选出权限大于指定值的app
         List<Integer> appIds = auths.stream().filter(appLogicClusterAuth -> ProjectClusterLogicAuthEnum
             .valueOf(appLogicClusterAuth.getType()).higherOrEqual(logicClusterAuth))
-            .map(AppClusterLogicAuth::getProjectId).collect(Collectors.toList());
+            .map(ProjectClusterLogicAuth::getProjectId).collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(appIds)) {
             return new ArrayList<>();

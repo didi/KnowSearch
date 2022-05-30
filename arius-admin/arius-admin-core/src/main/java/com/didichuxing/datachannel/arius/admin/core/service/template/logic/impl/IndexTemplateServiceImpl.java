@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
@@ -684,7 +684,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         // 获取有权限的集群id
         Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
-            .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
+            .map(ProjectClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
 
         // 获取集群下的模板
         return getLogicTemplateWithClusterAndMasterTemplateByClusters(hasAuthLogicClusterIds).stream()

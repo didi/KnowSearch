@@ -13,11 +13,12 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
  */
 public interface ProjectConfigManager {
         /**
-     * 获取esUserName配置信息
-     * @param projectId projectId
-     * @return 配置信息
-     */
-    ProjectConfig get(int projectId);
+         * 获取esUserName配置信息
+         *
+         * @param projectId projectId
+         * @return 配置信息
+         */
+    Result<ProjectConfig> get(int projectId);
     
         /**
      * 更新 es user config
@@ -27,4 +28,12 @@ public interface ProjectConfigManager {
      * @return {@code Result<Void>}
      */
     Result<Void> updateProjectConfig(ProjectConfigDTO configDTO, String operator);
+           /**
+     * 更新 es user config
+     *
+     * @param configDTO configdto
+     * @param operator 操作人 {@link AuthConstant#SUPER_USER_NAME}
+     * @return {@code Result<Void>}
+     */
+    Result<Void> initProjectConfig(ProjectConfigDTO configDTO, String operator);
 }

@@ -134,7 +134,7 @@ public class LoginServiceImpl implements LoginService {
 
         //添加到threadLocal 里面
         GlobalParams.CURRENT_USER.set(operator);
-        GlobalParams.CURRENT_APPID.set(appId);
+        GlobalParams.CURRENT_PROJECT_ID.set(appId);
 
         return Boolean.TRUE;
     }

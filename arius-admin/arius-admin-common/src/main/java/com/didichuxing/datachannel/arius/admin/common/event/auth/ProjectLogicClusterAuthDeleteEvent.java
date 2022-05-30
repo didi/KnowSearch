@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.auth;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 
 /**
  * App逻辑集群删除事件
@@ -8,14 +8,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
  * @date 2020/09/19
  */
 public class ProjectLogicClusterAuthDeleteEvent extends ProjectAuthEvent {
-    private AppClusterLogicAuth logicClusterAuth;
+    private ProjectClusterLogicAuth logicClusterAuth;
 
-    public ProjectLogicClusterAuthDeleteEvent(Object source, AppClusterLogicAuth appClusterLogicAuth) {
+    public ProjectLogicClusterAuthDeleteEvent(Object source, ProjectClusterLogicAuth projectClusterLogicAuth) {
         super(source);
-        this.logicClusterAuth = appClusterLogicAuth;
+        this.logicClusterAuth = projectClusterLogicAuth;
     }
 
-    public AppClusterLogicAuth getLogicClusterAuth() {
+    public ProjectClusterLogicAuth getLogicClusterAuth() {
         return logicClusterAuth;
     }
 }

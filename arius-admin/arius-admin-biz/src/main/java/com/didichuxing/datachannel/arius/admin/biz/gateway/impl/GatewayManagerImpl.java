@@ -36,6 +36,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
@@ -112,6 +113,8 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Autowired
     private    TemplateLogicAliasService templateLogicAliasService;
+    @Autowired
+    private ProjectConfigService projectConfigService;
     
     private final Cache<String, Object> projectESUserListCache = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
@@ -166,17 +169,16 @@ public class GatewayManagerImpl implements GatewayManager {
         }
     }
     
-    private List<ProjectConfig> listESUserConfig() {
-        final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
-                .collect(Collectors.toList());
-        return esUserService.listConfig(projectIds);
+    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfig() {
+       
+        return projectConfigService.projectId2ProjectConfigMap();
     }
     
-    private List<ProjectConfig> listESUserConfigWithCache() {
+    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfigWithCache() {
         try {
-            return (List<ProjectConfig>) projectESUserListCache.get("listESUserConfig", this::listESUserConfig);
+            return (Map<Integer/*projectId*/, ProjectConfig>) projectESUserListCache.get("listProjectConfig", this::listProjectConfig);
         } catch (ExecutionException e) {
-            return listESUserConfig();
+            return listProjectConfig();
         }
     }
    
@@ -193,15 +195,14 @@ public class GatewayManagerImpl implements GatewayManager {
         final Map<Integer/*projectId*/, /*es user*/List<Integer>> projectIdEsUsersMap = esUsers.stream().collect(
                 Collectors.groupingBy(ESUser::getProjectId, Collectors.mapping(ESUser::getId, Collectors.toList())));
         final Map<Integer/*projectId*/, String/*projectName*/> projectId2ProjectNameMap = listProjectWithCache();
-        
-        
-        
+        Map<Integer/*projectId*/, ProjectConfig> projectId2ProjectConfigMap = listProjectConfigWithCache();
     
         // 查询出所有的权限
         Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> projectId2ProjectTemplateAuthsMap =
                 projectLogicTemplateAuthService.getAllProjectTemplateAuths();
         Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap=Maps.newHashMap();
         Map<Integer/*es user*/,String/*projectName*/> esUser2ProjectNameMap=Maps.newHashMap();
+        Map<Integer/*es user*/, ProjectConfig> esUser2ESUserConfigMap = Maps.newHashMap();
         //转换
         for (Entry<Integer, List<Integer>> projectIdESUsersEntry : projectIdEsUsersMap.entrySet()) {
             final Integer projectId = projectIdESUsersEntry.getKey();
@@ -209,15 +210,10 @@ public class GatewayManagerImpl implements GatewayManager {
                     projectId);
             projectIdESUsersEntry.getValue().forEach(esuser->esUser2ProjectTemplateAuthsMap.put(esuser,projectTemplateAuths));
             final String projectName = projectId2ProjectNameMap.get(projectId);
-            projectIdESUsersEntry.getValue().forEach(esuser->esUser2ProjectNameMap.put(esuser,projectName));
-    
+            projectIdESUsersEntry.getValue().forEach(esuser -> esUser2ProjectNameMap.put(esuser, projectName));
+            ProjectConfig projectConfig = projectId2ProjectConfigMap.get(projectId);
+            projectIdESUsersEntry.getValue().forEach(esuser -> esUser2ESUserConfigMap.put(esuser,projectConfig ));
         }
-
-        // 查询出所有的配置
-        List<ProjectConfig> projectConfigs =listESUserConfigWithCache();
-        Map<Integer/*es user*/, ProjectConfig> esUser2ESUserConfigMap = ConvertUtil.list2Map(projectConfigs,
-                ProjectConfig::getId);
-
         String defaultIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
                 APP_DEFAULT_READ_AUTH_INDICES, "");
 

@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -380,14 +380,14 @@ public class CustomDataSource {
         return list;
     }
 
-    public static AppClusterLogicAuth appClusterLogicAuthSource() {
-        AppClusterLogicAuth appClusterLogicAuth = new AppClusterLogicAuth();
-        appClusterLogicAuth.setLogicClusterId(1L);
-        appClusterLogicAuth.setProjectId(1);
-        appClusterLogicAuth.setId(1L);
-        appClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.ACCESS.getCode());
-        appClusterLogicAuth.setResponsible("admin");
-        return appClusterLogicAuth;
+    public static ProjectClusterLogicAuth appClusterLogicAuthSource() {
+        ProjectClusterLogicAuth projectClusterLogicAuth = new ProjectClusterLogicAuth();
+        projectClusterLogicAuth.setLogicClusterId(1L);
+        projectClusterLogicAuth.setProjectId(1);
+        projectClusterLogicAuth.setId(1L);
+        projectClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.ACCESS.getCode());
+        projectClusterLogicAuth.setResponsible("admin");
+        return projectClusterLogicAuth;
     }
 
     public static ProjectTemplateAuth appTemplateAuthSource() {
@@ -439,10 +439,10 @@ public class CustomDataSource {
         return list;
     }
 
-    public static List<AppClusterLogicAuth> getAppClusterLogicAuthList() {
-        List<AppClusterLogicAuth> list = new ArrayList<>();
+    public static List<ProjectClusterLogicAuth> getAppClusterLogicAuthList() {
+        List<ProjectClusterLogicAuth> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++) {
-            AppClusterLogicAuth po = CustomDataSource.appClusterLogicAuthSource();
+            ProjectClusterLogicAuth po = CustomDataSource.appClusterLogicAuthSource();
             po.setId((long) i);
             po.setLogicClusterId((long) i);
             list.add(po);

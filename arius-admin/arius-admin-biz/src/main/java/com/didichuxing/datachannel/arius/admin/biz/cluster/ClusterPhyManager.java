@@ -185,7 +185,7 @@ public interface ClusterPhyManager {
      * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppNodeNames(Integer projectId);
+    List<String> getProjectNodeNames(Integer projectId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)

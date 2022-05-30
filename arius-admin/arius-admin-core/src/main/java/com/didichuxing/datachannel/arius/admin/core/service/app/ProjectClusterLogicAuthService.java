@@ -2,13 +2,12 @@ package com.didichuxing.datachannel.arius.admin.core.service.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-
 import java.util.List;
 
 /**
- * APP逻辑集群权限管理服务
+ * project逻辑集群权限管理服务
  * @author wangshu
  * @date 2020/09/17
  */
@@ -57,7 +56,7 @@ public interface ProjectClusterLogicAuthService {
      * @param authId 权限点ID
      * @return
      */
-    AppClusterLogicAuth getLogicClusterAuthById(Long authId);
+    ProjectClusterLogicAuth getLogicClusterAuthById(Long authId);
 
     /**
      * 获取指定 项目对指定逻辑集群的权限.
@@ -72,21 +71,21 @@ public interface ProjectClusterLogicAuthService {
      * @param projectId           项目
      * @param logicClusterId 逻辑集群ID
      */
-    AppClusterLogicAuth getLogicClusterAuth(Integer projectId, Long logicClusterId);
+    ProjectClusterLogicAuth getLogicClusterAuth(Integer projectId, Long logicClusterId);
 
     /**
      * 获取指定 项目所有权限点
      * @param projectId  项目
      * @return
      */
-    List<AppClusterLogicAuth> getAllLogicClusterAuths(Integer projectId);
+    List<ProjectClusterLogicAuth> getAllLogicClusterAuths(Integer projectId);
 
     /**
      * 访问权限
      * @param projectId  项目
      * @return
      */
-    List<AppClusterLogicAuth> getLogicClusterAccessAuths(Integer projectId);
+    List<ProjectClusterLogicAuth> getLogicClusterAccessAuths(Integer projectId);
 
     /**
      * 获取指定逻辑集群指定类型的权限点
@@ -94,7 +93,7 @@ public interface ProjectClusterLogicAuthService {
      * @param clusterAuthType 逻辑集群权限类型，为null则不筛选权限类型，返回改逻辑集群的全部权限点
      * @return
      */
-    List<AppClusterLogicAuth> getLogicClusterAuths(Long logicClusterId, ProjectClusterLogicAuthEnum clusterAuthType);
+    List<ProjectClusterLogicAuth> getLogicClusterAuths(Long logicClusterId, ProjectClusterLogicAuthEnum clusterAuthType);
 
     /**
      * 判断 项目是否有在指定逻辑集群下创建索引的权限
@@ -119,12 +118,12 @@ public interface ProjectClusterLogicAuthService {
      * @param projectClusterLogicAuthEnum 权限点
      * @return
      */
-    AppClusterLogicAuth buildClusterLogicAuth(Integer projectId, Long clusterLogicId,
-                                              ProjectClusterLogicAuthEnum projectClusterLogicAuthEnum);
+    ProjectClusterLogicAuth buildClusterLogicAuth(Integer projectId, Long clusterLogicId,
+                                                  ProjectClusterLogicAuthEnum projectClusterLogicAuthEnum);
 
     /**
      * 获取全量权限信息
      * @return
      */
-    List<AppClusterLogicAuth> list();
+    List<ProjectClusterLogicAuth> list();
 }

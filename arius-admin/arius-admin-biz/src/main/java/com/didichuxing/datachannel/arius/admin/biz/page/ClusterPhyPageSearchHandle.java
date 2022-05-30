@@ -1,14 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -18,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
@@ -25,7 +17,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -37,8 +34,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
     private static final ILog        LOGGER = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
 
-    @Autowired
-    private ProjectService projectService;
+    
 
     @Autowired
     private ClusterPhyService        clusterPhyService;
@@ -50,7 +46,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     private ClusterPhyManager        clusterPhyManager;
 
     @Override
-    protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer appId) {
+    protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
 
         Integer status = condition.getHealth();
         if (null != status && !ClusterHealthEnum.isExitByCode(status)) {

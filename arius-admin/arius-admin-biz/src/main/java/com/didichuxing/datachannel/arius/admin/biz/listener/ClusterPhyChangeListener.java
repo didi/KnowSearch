@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyEvent;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
 /**
  * @author linyunan
@@ -35,7 +34,7 @@ public class ClusterPhyChangeListener implements ApplicationListener<ClusterPhyE
         } catch (RuntimeException e) {
             LOGGER.error(
                 "class=ClusterPhyChangeListener||method=onApplicationEvent||appId={}||clusterPhyName={}||ErrorMsg={}",
-                event.getAppId(), event.getClusterPhyName(), e.getMessage());
+                event.getProjectId(), event.getClusterPhyName(), e.getMessage());
         }
     }
 }

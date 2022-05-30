@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -83,7 +83,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
 
         // 获取已经存在的权限，可能来自于权限表（id不为null）和创建信息表（id为null）
-        AppClusterLogicAuth oldAuth = getLogicClusterAuth(projectId, logicClusterId);
+        ProjectClusterLogicAuth oldAuth = getLogicClusterAuth(projectId, logicClusterId);
 
         if (oldAuth == null || oldAuth.getType().equals(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode())) {
             // 之前无权限
@@ -110,7 +110,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
     }
 
-    private Result<Void> deleteAuth(ProjectClusterLogicAuthEnum auth, String responsible, String operator, AppClusterLogicAuth oldAuth) {
+    private Result<Void> deleteAuth(ProjectClusterLogicAuthEnum auth, String responsible, String operator, ProjectClusterLogicAuth oldAuth) {
         if (auth == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
             return deleteLogicClusterAuthById(oldAuth.getId(), operator);
         }
@@ -187,7 +187,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         boolean succeed = 1 == logicClusterAuthDAO.delete(authId);
         if (succeed) {
             SpringTool.publish(new ProjectLogicClusterAuthDeleteEvent(this,
-                ConvertUtil.obj2Obj(oldAuthPO, AppClusterLogicAuth.class)));
+                ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class)));
 
             operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.DELETE, oldAuthPO.getId(),
                 StringUtils.EMPTY, operator);
@@ -208,7 +208,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @return
      */
     @Override
-    public List<AppClusterLogicAuth> getAllLogicClusterAuths(Integer projectId) {
+    public List<ProjectClusterLogicAuth> getAllLogicClusterAuths(Integer projectId) {
 
         if (projectId == null) {
             return new ArrayList<>();
@@ -216,7 +216,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 权限表
         List<ProjectClusterLogicAuthPO> authPOs = logicClusterAuthDAO.listByProjectId(projectId);
-        List<AppClusterLogicAuth> authDTOs = ConvertUtil.list2List(authPOs, AppClusterLogicAuth.class);
+        List<ProjectClusterLogicAuth> authDTOs = ConvertUtil.list2List(authPOs, ProjectClusterLogicAuth.class);
 
         // 从逻辑集群表获取APP作为owner的集群
         List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
@@ -229,8 +229,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
     }
 
     @Override
-    public List<AppClusterLogicAuth> getLogicClusterAccessAuths(Integer projectId) {
-        return ConvertUtil.list2List(logicClusterAuthDAO.listWithAccessByProjectId(projectId), AppClusterLogicAuth.class);
+    public List<ProjectClusterLogicAuth> getLogicClusterAccessAuths(Integer projectId) {
+        return ConvertUtil.list2List(logicClusterAuthDAO.listWithAccessByProjectId(projectId), ProjectClusterLogicAuth.class);
     }
 
     /**
@@ -239,8 +239,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @return
      */
     @Override
-    public AppClusterLogicAuth getLogicClusterAuthById(Long authId) {
-        return ConvertUtil.obj2Obj(logicClusterAuthDAO.getById(authId), AppClusterLogicAuth.class);
+    public ProjectClusterLogicAuth getLogicClusterAuthById(Long authId) {
+        return ConvertUtil.obj2Obj(logicClusterAuthDAO.getById(authId), ProjectClusterLogicAuth.class);
     }
 
     /**
@@ -254,7 +254,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             return ProjectClusterLogicAuthEnum.NO_PERMISSIONS;
         }
 
-        AppClusterLogicAuth auth = getLogicClusterAuth(projectId, logicClusterId);
+        ProjectClusterLogicAuth auth = getLogicClusterAuth(projectId, logicClusterId);
         return auth == null ? ProjectClusterLogicAuthEnum.NO_PERMISSIONS
             : ProjectClusterLogicAuthEnum.valueOf(auth.getType());
     }
@@ -266,7 +266,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @param logicClusterId 逻辑集群ID
      */
     @Override
-    public AppClusterLogicAuth getLogicClusterAuth(Integer projectId, Long logicClusterId) {
+    public ProjectClusterLogicAuth getLogicClusterAuth(Integer projectId, Long logicClusterId) {
         if (projectId == null || logicClusterId == null) {
             return null;
         }
@@ -289,7 +289,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 选择权限高的构建AppLogicClusterAuthDTO，优先取权限表中的记录
         return authFromAuthRecord.higherOrEqual(authFromCreateRecord)
-            ? ConvertUtil.obj2Obj(authPO, AppClusterLogicAuth.class)
+            ? ConvertUtil.obj2Obj(authPO, ProjectClusterLogicAuth.class)
             : buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.OWN);
 
     }
@@ -301,8 +301,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @return
      */
     @Override
-    public List<AppClusterLogicAuth> getLogicClusterAuths(Long logicClusterId,
-                                                             ProjectClusterLogicAuthEnum clusterAuthType) {
+    public List<ProjectClusterLogicAuth> getLogicClusterAuths(Long logicClusterId,
+                                                              ProjectClusterLogicAuthEnum clusterAuthType) {
 
         ProjectClusterLogicAuthPO queryParams = new ProjectClusterLogicAuthPO();
         if (logicClusterId != null) {
@@ -315,7 +315,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 权限表
         List<ProjectClusterLogicAuthPO> authPOs = logicClusterAuthDAO.listByCondition(queryParams);
-        List<AppClusterLogicAuth>  authDTOS = ConvertUtil.list2List(authPOs, AppClusterLogicAuth.class);
+        List<ProjectClusterLogicAuth>  authDTOS = ConvertUtil.list2List(authPOs, ProjectClusterLogicAuth.class);
 
         // 从逻辑集群表获取APP作为owner的集群
         if (logicClusterId != null && clusterAuthType == ProjectClusterLogicAuthEnum.OWN) {
@@ -352,7 +352,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         if (succeed) {
             // 发送消息
             SpringTool.publish(new ProjectLogicClusterAuthAddEvent(this,
-                ConvertUtil.obj2Obj(authPO, AppClusterLogicAuth.class)));
+                ConvertUtil.obj2Obj(authPO, ProjectClusterLogicAuth.class)));
 
             // 记录操作
             operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.ADD, authPO.getId(),
@@ -363,8 +363,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
     }
 
     @Override
-    public AppClusterLogicAuth buildClusterLogicAuth(Integer projectId, Long clusterLogicId,
-                                                     ProjectClusterLogicAuthEnum projectClusterLogicAuthEnum) {
+    public ProjectClusterLogicAuth buildClusterLogicAuth(Integer projectId, Long clusterLogicId,
+                                                         ProjectClusterLogicAuthEnum projectClusterLogicAuthEnum) {
         if (null == projectClusterLogicAuthEnum || null == projectId || null == clusterLogicId) {
             return null;
         }
@@ -373,16 +373,16 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             return null;
         }
 
-        AppClusterLogicAuth appClusterLogicAuth = new AppClusterLogicAuth();
-        appClusterLogicAuth.setProjectId(projectId);
-        appClusterLogicAuth.setLogicClusterId(clusterLogicId);
-        appClusterLogicAuth.setType(projectClusterLogicAuthEnum.getCode());
-        return appClusterLogicAuth;
+        ProjectClusterLogicAuth projectClusterLogicAuth = new ProjectClusterLogicAuth();
+        projectClusterLogicAuth.setProjectId(projectId);
+        projectClusterLogicAuth.setLogicClusterId(clusterLogicId);
+        projectClusterLogicAuth.setType(projectClusterLogicAuthEnum.getCode());
+        return projectClusterLogicAuth;
     }
 
     @Override
-    public List<AppClusterLogicAuth> list() {
-        return  ConvertUtil.list2List(logicClusterAuthDAO.listByCondition(null), AppClusterLogicAuth.class);
+    public List<ProjectClusterLogicAuth> list() {
+        return  ConvertUtil.list2List(logicClusterAuthDAO.listByCondition(null), ProjectClusterLogicAuth.class);
     }
 
     /**************************************** private method ****************************************************/
@@ -512,11 +512,11 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * 由逻辑集群记录构建owner APP的权限数据
      * @param clusterLogic 逻辑集群记录
      */
-    private AppClusterLogicAuth buildLogicClusterAuth(ClusterLogic clusterLogic, ProjectClusterLogicAuthEnum projectClusterLogicAuthEnum) {
+    private ProjectClusterLogicAuth buildLogicClusterAuth(ClusterLogic clusterLogic, ProjectClusterLogicAuthEnum projectClusterLogicAuthEnum) {
         if (clusterLogic == null) {
             return null;
         }
-        AppClusterLogicAuth appLogicClusterAuth = new AppClusterLogicAuth();
+        ProjectClusterLogicAuth appLogicClusterAuth = new ProjectClusterLogicAuth();
         appLogicClusterAuth.setId(null);
         appLogicClusterAuth.setProjectId(clusterLogic.getProjectId());
         appLogicClusterAuth.setLogicClusterId(clusterLogic.getId());
@@ -538,8 +538,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         boolean succeed = 1 == logicClusterAuthDAO.update(newAuthPO);
         if (succeed) {
             SpringTool.publish(new ProjectLogicClusterAuthEditEvent(this,
-                ConvertUtil.obj2Obj(oldAuthPO, AppClusterLogicAuth.class), ConvertUtil
-                    .obj2Obj(logicClusterAuthDAO.getById(authDTO.getId()), AppClusterLogicAuth.class)));
+                ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class), ConvertUtil
+                    .obj2Obj(logicClusterAuthDAO.getById(authDTO.getId()), ProjectClusterLogicAuth.class)));
 
             operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.EDIT, oldAuthPO.getId(),
                 JSON.toJSONString(newAuthPO), operator);

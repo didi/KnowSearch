@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
@@ -77,7 +77,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterStaticsService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -120,8 +119,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private ESIndexService                esIndexService;
 
-    @Autowired
-    private ESClusterStaticsService       esClusterStaticsService;
+    
 
     @Autowired
     private ClusterPhyService             esClusterPhyService;
@@ -600,7 +598,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public List<ClusterLogic> getProjectAccessClusterLogicList(Integer projectId) {
         List<Long> clusterLogicIdList = projectClusterLogicAuthService.getLogicClusterAccessAuths(projectId)
                                         .stream()
-                                        .map(AppClusterLogicAuth::getLogicClusterId)
+                                        .map(ProjectClusterLogicAuth::getLogicClusterId)
                                         .collect(Collectors.toList());
 
         return clusterLogicService.getClusterLogicListByIds(clusterLogicIdList);
@@ -749,7 +747,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 return;
             }
 
-            AppClusterLogicAuth auth = projectClusterLogicAuthService.getLogicClusterAuth(projectIdForAuthJudge,
+            ProjectClusterLogicAuth auth = projectClusterLogicAuthService.getLogicClusterAuth(projectIdForAuthJudge,
                     logicClusterVO.getId());
 
             if (auth == null) {

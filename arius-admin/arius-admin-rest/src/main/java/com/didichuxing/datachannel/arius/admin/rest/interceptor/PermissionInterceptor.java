@@ -69,7 +69,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         GlobalParams.CURRENT_USER.remove();
-        GlobalParams.CURRENT_APPID.remove();
+        GlobalParams.CURRENT_PROJECT_ID.remove();
     }
 
     /**

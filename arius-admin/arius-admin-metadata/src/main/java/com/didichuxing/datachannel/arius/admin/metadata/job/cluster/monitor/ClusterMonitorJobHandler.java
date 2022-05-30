@@ -137,7 +137,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
 
         final Map<String, Integer> clusterPhyName2TemplateCountMap = indexTemplatePhyService.getClusterTemplateCountMap();
 
-        int appIdCount = calcAppNu();
+        int projectIdCount = calcAppNu();
 
         Map<ClusterPhy, ESClusterHealthResponse> clusterHealthResponseMap = Maps.newConcurrentMap();
         int clusterSize = monitorCluster.size();
@@ -150,7 +150,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                         if (EnvUtil.getDC().getCode().equals(dataSource.getDataCenter())) {
                             ESClusterHealthResponse clusterHealthResponse = esClusterService.syncGetClusterHealth(dataSource.getCluster());
                             List<ESClusterStats> esClusterStatusList = buildEsClusterStatusWithPercentiles(clusterSize, dataSource,
-                                    clusterPhyName2TemplateCountMap, appIdCount, clusterHealthResponse);
+                                    clusterPhyName2TemplateCountMap, projectIdCount, clusterHealthResponse);
 
                             monitorMetricsSender.sendClusterStats(esClusterStatusList);
                             buildAndSendTaskStats(timestamp, dataSource);

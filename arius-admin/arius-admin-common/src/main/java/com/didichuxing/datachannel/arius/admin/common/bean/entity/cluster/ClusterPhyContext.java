@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +19,7 @@ public class ClusterPhyContext {
 
     private String       clusterName;
 
-    /*****************************************appId***********************************/
+    /*****************************************projectid***********************************/
     private List<String> associatedProjectNames;
 
     private List<Integer> associatedProjectIds;

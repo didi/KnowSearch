@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.thardpart;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
@@ -118,12 +117,6 @@ public interface CommonManager {
      */
     Result<ThirdpartTemplatePhysicalVO> getPhysicalTemplateById(Long physicalId);
 
-    /**
-     * 获取授权的模板列表接口
-     * @param appId
-     * @param auth
-     * @param dataCenter
-     * @return
-     */
+   
     //Result<List<ThirdpartTemplateLogicVO>> listLogicByAppIdAuthDataCenter(Integer appId, String auth, String dataCenter);
 }

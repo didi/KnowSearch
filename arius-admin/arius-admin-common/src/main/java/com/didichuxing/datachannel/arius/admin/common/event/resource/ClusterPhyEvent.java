@@ -7,12 +7,12 @@ public class ClusterPhyEvent extends ClusterEvent {
 
     private String  clusterPhyName;
 
-    private Integer appId;
+    private Integer projectId;
 
-    public ClusterPhyEvent(String clusterPhyName, Integer appId) {
+    public ClusterPhyEvent(String clusterPhyName, Integer projectId) {
         super(clusterPhyName);
         this.clusterPhyName = clusterPhyName;
-        this.appId = appId;
+        this.projectId = projectId;
     }
 
     public String getClusterPhyName() {
@@ -23,11 +23,11 @@ public class ClusterPhyEvent extends ClusterEvent {
         this.clusterPhyName = clusterPhyName;
     }
 
-    public Integer getAppId() {
-        return appId;
+    public Integer getProjectId() {
+        return projectId;
     }
 
-    public void setAppId(Integer appId) {
-        this.appId = appId;
+    public void setProjectId(Integer projectId) {
+        this.projectId = projectId;
     }
 }

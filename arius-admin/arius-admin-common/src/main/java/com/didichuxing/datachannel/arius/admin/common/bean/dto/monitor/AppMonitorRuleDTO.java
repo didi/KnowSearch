@@ -3,14 +3,13 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
-
+@Deprecated
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

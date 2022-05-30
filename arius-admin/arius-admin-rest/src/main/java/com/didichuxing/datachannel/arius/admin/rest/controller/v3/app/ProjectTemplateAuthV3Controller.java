@@ -38,8 +38,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping({V3 + "/app/auth/template" })
-@Api(tags = "App模板权限接口(REST)")
-public class AppTemplateAuthV3Controller {
+@Api(tags = "project模板权限接口(REST)")
+public class ProjectTemplateAuthV3Controller {
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
@@ -50,11 +50,11 @@ public class AppTemplateAuthV3Controller {
     @Autowired
     private ProjectLogicTemplateAuthManager projectLogicTemplateAuthManager;
 
-    @GetMapping("/{appId}")
+    @GetMapping("/{projectId}")
     @ResponseBody
-    @ApiOperation(value = "获取APP权限接口" )
+    @ApiOperation(value = "获取project权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
-    public Result<List<AppTemplateAuthVO>> getAppTemplateAuths(@PathVariable("appId") Integer projectId) {
+    public Result<List<AppTemplateAuthVO>> getAppTemplateAuths(@PathVariable("projectId") Integer projectId) {
         List<AppTemplateAuthVO> templateAuths = ConvertUtil
             .list2List(projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(projectId), AppTemplateAuthVO.class);
 
@@ -65,21 +65,21 @@ public class AppTemplateAuthV3Controller {
 
     @PostMapping("")
     @ResponseBody
-    @ApiOperation(value = "增加APP权限接口" )
+    @ApiOperation(value = "增加project权限接口" )
     public Result<Void> addTemplateAuth(HttpServletRequest request, @RequestBody ProjectTemplateAuthDTO authDTO) {
         return projectLogicTemplateAuthService.addTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("")
     @ResponseBody
-    @ApiOperation(value = "更新APP权限接口" )
+    @ApiOperation(value = "更新project权限接口" )
     public Result<Void> updateTemplateAuth(HttpServletRequest request, @RequestBody ProjectTemplateAuthDTO authDTO) {
         return projectLogicTemplateAuthManager.updateTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/{authId}")
     @ResponseBody
-    @ApiOperation(value = "删除APP权限接口" )
+    @ApiOperation(value = "删除project权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "authId", value = "权限ID", required = true) })
     public Result<Void> deleteTemplateAuth(HttpServletRequest request, @PathVariable("authId") Long authId) {
         return projectLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtil.getOperator(request));

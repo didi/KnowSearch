@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
@@ -352,7 +352,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         // 获取有权限的逻辑集群id
         Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
-                .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
+                .map(ProjectClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
 
         return new ArrayList<>(hasAuthLogicClusterIds);
     }
@@ -373,7 +373,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         // 获取有权限的逻辑集群id
         Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
-            .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
+            .map(ProjectClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
 
         // 批量获取有权限的集群
         List<ClusterLogicPO> hasAuthLogicClusters = !hasAuthLogicClusterIds.isEmpty()

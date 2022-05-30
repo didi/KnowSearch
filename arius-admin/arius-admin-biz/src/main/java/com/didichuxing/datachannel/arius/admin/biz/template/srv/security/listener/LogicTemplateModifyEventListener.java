@@ -1,14 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.security.listener;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.security.SecurityService;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
 @Component
 public class LogicTemplateModifyEventListener implements ApplicationListener<LogicTemplateModifyEvent> {
@@ -32,7 +31,7 @@ public class LogicTemplateModifyEventListener implements ApplicationListener<Log
         }
 
         LOGGER.info(
-            "class=LogicTemplateModifyEventListener||method=onApplicationEvent||event=LogicTemplateModifyEvent||srcAppid={}||tgtAppid={}||templateId={}",
+            "class=LogicTemplateModifyEventListener||method=onApplicationEvent||event=LogicTemplateModifyEvent||srcProjectId={}||tgtProjectId={}||templateId={}",
             oldTemplate.getProjectId(), newTemplate.getProjectId(), newTemplate.getId());
 
         securityService.editLogicTemplateOwnProject(newTemplate.getId(), oldTemplate.getProjectId(), newTemplate.getProjectId(),

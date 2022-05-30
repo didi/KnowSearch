@@ -24,17 +24,11 @@ public interface ProjectConfigService {
      */
     List<ProjectConfig> listConfig(List<Integer> projectIds);
     
-    /**
-     * 初始化project id配置
-     * @param projectId projectId
-     * @return 成功 true  失败false
-     *
-     */
-    Result<Void> initConfig(Integer projectId);
+
     
     Map<Integer, ProjectConfig> projectId2ProjectConfigMap();
     
-    Tuple<Result<Void>, ProjectConfigPO> updateProjectConfig(ProjectConfigDTO configDTO, String operator);
+    Tuple<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator);
     
     Integer deleteByProjectId(int projectId);
     

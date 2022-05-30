@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +29,7 @@ public class ClusterLogic extends BaseEntity implements StringResponsible, Compa
     private Integer type;
 
     /**
-     * 所属APP ID
+     * 所属project ID
      */
     private Integer projectId;
 

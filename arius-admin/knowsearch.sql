@@ -198,14 +198,15 @@ create table project_arius_config
 (
     project_id              bigint(10) unsigned auto_increment comment 'project id'
         primary key,
-    analyze_response_enable tinyint    default 1                 not null comment '响应结果解析开关 默认是0：关闭，1：开启',
-    is_source_separated     tinyint    default 0                 not null comment '是否是索引处分分离的 0 不是 1 是',
-    aggr_analyze_enable     tinyint    default 1                 not null comment '1 生效 0 不生效',
-    dsl_analyze_enable      tinyint(2) default 1                 not null comment '1为生效dsl分析查询限流值，0不生效dsl分析查询限流值',
-    slow_query_times        int(10)    default 100               not null comment '慢查询耗时',
-    is_active               tinyint(2) default 1                 not null comment '1为可用，0不可用',
-    create_time             timestamp  default CURRENT_TIMESTAMP not null comment '创建时间',
-    update_time             timestamp  default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间'
+    analyze_response_enable tinyint       default 1                 not null comment '响应结果解析开关 默认是0：关闭，1：开启',
+    is_source_separated     tinyint       default 0                 not null comment '是否是索引处分分离的 0 不是 1 是',
+    aggr_analyze_enable     tinyint       default 1                 not null comment '1 生效 0 不生效',
+    dsl_analyze_enable      tinyint(2)    default 1                 not null comment '1为生效dsl分析查询限流值，0不生效dsl分析查询限流值',
+    slow_query_times        int(10)       default 100               not null comment '慢查询耗时',
+    is_active               tinyint(2)    default 1                 not null comment '1为可用，0不可用',
+    memo                    varchar(1000) default ''                not null comment '备注',
+    create_time             timestamp     default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time             timestamp     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间'
 
 
 ) comment '项目配置' charset = utf8;

@@ -84,10 +84,7 @@ public class InterfaceConstant {
      */
     public static final String KAFKA_CONSUME_DETAILS = "/api/v1/third-part/{physicalClusterId}/consumers/{consumerGroup}/topics/{topicName}/consume-details";
 
-    /**
-     * 创建kafkaappid
-     */
-    public static final String KAFKA_CREATE_APPID           = "/api/v1/appIds/appId";
+    
 
     /**
      * 获取应用Topic信息

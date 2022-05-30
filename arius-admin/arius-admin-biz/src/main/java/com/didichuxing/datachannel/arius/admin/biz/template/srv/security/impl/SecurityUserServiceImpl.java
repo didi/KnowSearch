@@ -35,7 +35,7 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @param cluster    集群
      * @param userName   用户
      * @param roleName   角色名字
-     * @param projectId      appid
+     * @param projectId      ProjectId
      * @param retryCount 重试次数
      * @return result
      */
@@ -92,7 +92,7 @@ public class SecurityUserServiceImpl implements SecurityUserService {
      * @param cluster  集群
      * @param userName 用户
      * @param roleName 权限
-     * @param projectId appid
+     * @param projectId projectId
      * @return result
      */
     @Override

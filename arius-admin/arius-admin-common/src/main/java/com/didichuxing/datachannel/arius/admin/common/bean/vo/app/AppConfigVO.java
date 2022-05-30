@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -15,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 @ApiModel(description = "应用配置信息")
 public class AppConfigVO extends BaseVO {
 

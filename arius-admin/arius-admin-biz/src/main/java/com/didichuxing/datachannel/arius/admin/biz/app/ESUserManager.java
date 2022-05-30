@@ -1,10 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;

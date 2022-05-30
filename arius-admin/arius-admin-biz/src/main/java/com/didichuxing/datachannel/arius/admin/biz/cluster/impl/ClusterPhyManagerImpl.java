@@ -8,10 +8,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
-import java.util.stream.Collectors;
-
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterPhyAuthManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -30,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
@@ -56,6 +53,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
@@ -110,6 +108,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -480,7 +479,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public List<String> getAppClusterPhyNames(Integer projectId) {
         if(AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
-            //超级appId返回所有的集群
+            //超级projectId返回所有的集群
             List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
             return phyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
         }
@@ -539,7 +538,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> getAppNodeNames(Integer projectId) {
+    public List<String> getProjectNodeNames(Integer projectId) {
         List<String> appAuthNodeNames = Lists.newCopyOnWriteArrayList();
 
         List<String> appClusterPhyNames = getAppClusterPhyNames(projectId);
@@ -851,15 +850,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public void buildBelongProjectIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO) {
         ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContextCache(consoleClusterPhyVO.getCluster());
         consoleClusterPhyVO.setBelongProjectIds(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectIds()   : null);
-        consoleClusterPhyVO.setBelongAppNames(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectNames() : null);
+        consoleClusterPhyVO.setBelongProjectNames(null != clusterPhyContext ? clusterPhyContext.getAssociatedProjectNames() : null);
 
         // 兼容旧版本
         consoleClusterPhyVO.setBelongProjectId((null != clusterPhyContext &&
                                                 CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectIds())) ?
                 clusterPhyContext.getAssociatedProjectIds().get(0) : null);
         // 兼容旧版本
-        consoleClusterPhyVO.setBelongAppName(null != clusterPhyContext &&
-                CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectNames()) ?
+        consoleClusterPhyVO.setBelongProjectName(null != clusterPhyContext &&
+                                                 CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedProjectNames()) ?
                 clusterPhyContext.getAssociatedProjectNames().get(0) : null);
     }
 
@@ -1148,7 +1147,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     
         ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(clusterLogic.getProjectId());
         if (!AriusObjUtils.isNull(briefVO)) {
-            cluster.setBelongAppNames(Lists.newArrayList(briefVO.getProjectName()));
+            cluster.setBelongProjectNames(Lists.newArrayList(briefVO.getProjectName()));
         }
 
         //TODO:  公共模块依赖, auth table中 加type字段标识是逻辑集群还是物理集群

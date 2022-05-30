@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.auth;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 
 /**
  * App逻辑集群权限编辑事件
@@ -8,20 +8,20 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
  * @date 2020/09/19
  */
 public class ProjectLogicClusterAuthEditEvent extends ProjectAuthEvent {
-    private AppClusterLogicAuth srcAuth;
-    private AppClusterLogicAuth tgtAuth;
+    private ProjectClusterLogicAuth srcAuth;
+    private ProjectClusterLogicAuth tgtAuth;
 
-    public ProjectLogicClusterAuthEditEvent(Object source, AppClusterLogicAuth srcAuth, AppClusterLogicAuth tgtAuth) {
+    public ProjectLogicClusterAuthEditEvent(Object source, ProjectClusterLogicAuth srcAuth, ProjectClusterLogicAuth tgtAuth) {
         super(source);
         this.srcAuth = srcAuth;
         this.tgtAuth = tgtAuth;
     }
 
-    public AppClusterLogicAuth getSrcAuth() {
+    public ProjectClusterLogicAuth getSrcAuth() {
         return srcAuth;
     }
 
-    public AppClusterLogicAuth getTgtAuth() {
+    public ProjectClusterLogicAuth getTgtAuth() {
         return tgtAuth;
     }
 }

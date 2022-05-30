@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.auth;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 
 /**
  * App逻辑集群权限增加事件
@@ -8,9 +8,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppCluster
  * @date 2020/09/19
  */
 public class ProjectLogicClusterAuthAddEvent extends ProjectAuthEvent {
-    private AppClusterLogicAuth clusterAuth;
+    private ProjectClusterLogicAuth clusterAuth;
 
-    public ProjectLogicClusterAuthAddEvent(Object source, AppClusterLogicAuth logicClusterAuth) {
+    public ProjectLogicClusterAuthAddEvent(Object source, ProjectClusterLogicAuth logicClusterAuth) {
         super(source);
         this.clusterAuth = logicClusterAuth;
     }
@@ -19,7 +19,7 @@ public class ProjectLogicClusterAuthAddEvent extends ProjectAuthEvent {
      * 获取App逻辑权限
      * @return
      */
-    public AppClusterLogicAuth getClusterAuth() {
+    public ProjectClusterLogicAuth getClusterAuth() {
         return this.clusterAuth;
     }
 }

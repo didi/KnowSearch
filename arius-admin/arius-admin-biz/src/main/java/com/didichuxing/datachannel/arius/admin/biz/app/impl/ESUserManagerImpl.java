@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.APP_CONFIG;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.ES_USER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
@@ -9,10 +8,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
@@ -243,17 +240,6 @@ public class ESUserManagerImpl implements ESUserManager {
         return resultListTuple.getV1();
     }
     
-    /**
-     * 获取esUserName配置信息
-     *
-     * @param esUserName esUserName
-     * @return 配置信息
-     */
-    @Override
-    public ProjectConfig getESUserConfig(int esUserName) {
-        
-        return esUserService.getESUserConfig(esUserName);
-    }
 
 
     

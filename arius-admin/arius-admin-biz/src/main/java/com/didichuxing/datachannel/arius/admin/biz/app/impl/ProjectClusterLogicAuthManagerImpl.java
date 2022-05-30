@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterLogicAuthManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
@@ -27,39 +27,39 @@ public class ProjectClusterLogicAuthManagerImpl implements ProjectClusterLogicAu
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Override
-    public List<AppClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId, List<ClusterLogic> clusterLogicList) {
-        List<AppClusterLogicAuth> appClusterLogicAuthList = Lists.newArrayList();
+    public List<ProjectClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId, List<ClusterLogic> clusterLogicList) {
+        List<ProjectClusterLogicAuth> projectClusterLogicAuthList = Lists.newArrayList();
         if (CollectionUtils.isEmpty(clusterLogicList)) {
-            return appClusterLogicAuthList;
+            return projectClusterLogicAuthList;
         }
 
         if (!projectService.checkProjectExist(projectId)) {
-            appClusterLogicAuthList = clusterLogicList
+            projectClusterLogicAuthList = clusterLogicList
                     .stream()
                     .map(r -> projectClusterLogicAuthService.buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.NO_PERMISSIONS))
                     .collect(Collectors.toList());
-            return appClusterLogicAuthList;
+            return projectClusterLogicAuthList;
         }
 
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            appClusterLogicAuthList = clusterLogicList
+            projectClusterLogicAuthList = clusterLogicList
                     .stream()
                     .map(r -> projectClusterLogicAuthService.buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.OWN))
                     .collect(Collectors.toList());
-            return appClusterLogicAuthList;
+            return projectClusterLogicAuthList;
         }
 
-        appClusterLogicAuthList = clusterLogicList
+        projectClusterLogicAuthList = clusterLogicList
                             .stream()
                             .map(clusterLogic -> projectClusterLogicAuthService.getLogicClusterAuth(projectId, clusterLogic.getId()))
                             .collect(Collectors.toList());
 
         //处理无权限
-        for (AppClusterLogicAuth appClusterLogicAuth : appClusterLogicAuthList) {
-            if (null == appClusterLogicAuth.getType()) {
-                appClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
+        for (ProjectClusterLogicAuth projectClusterLogicAuth : projectClusterLogicAuthList) {
+            if (null == projectClusterLogicAuth.getType()) {
+                projectClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
             }
         }
-        return appClusterLogicAuthList;
+        return projectClusterLogicAuthList;
     }
 }

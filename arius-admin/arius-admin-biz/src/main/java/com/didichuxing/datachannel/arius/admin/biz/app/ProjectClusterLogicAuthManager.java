@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import java.util.List;
 
 /**
  * Created by linyunan on 2021-10-17
@@ -17,5 +16,5 @@ public interface ProjectClusterLogicAuthManager {
      * @param clusterLogicList         逻辑集群信息列表
      * @return
      */
-    List<AppClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId, List<ClusterLogic> clusterLogicList);
+    List<ProjectClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId, List<ClusterLogic> clusterLogicList);
 }

@@ -20,12 +20,12 @@ public class TemplateTransferContent extends BaseContent {
     private String  name;
 
     /**
-     * 目标APPID
+     * 目标ProjectId
      */
     private Integer sourceProjectId;
 
     /**
-     * 目标APPID
+     * 目标ProjectId
      */
     private Integer tgtProjectId;
 

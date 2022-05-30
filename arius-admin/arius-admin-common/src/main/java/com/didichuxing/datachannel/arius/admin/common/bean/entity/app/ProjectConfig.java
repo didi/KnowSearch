@@ -19,9 +19,9 @@ public class ProjectConfig extends BaseEntity {
 
 
     /**
-     * es user
+     * projectId
      */
-    private Integer id;
+    private Integer projectId;
 
     /**
      * gateway返回结果解析开关
