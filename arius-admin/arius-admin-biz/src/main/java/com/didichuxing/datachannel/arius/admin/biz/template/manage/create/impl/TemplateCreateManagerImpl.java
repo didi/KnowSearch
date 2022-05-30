@@ -118,10 +118,10 @@ public class TemplateCreateManagerImpl implements TemplateCreateManager {
         return Result.buildSucc();
     }
 
-    private IndexTemplateDTO buildTemplateDTO(TemplateCreateDTO param, Integer appId) {
+    private IndexTemplateDTO buildTemplateDTO(TemplateCreateDTO param, Integer projectId) {
         IndexTemplateDTO indexTemplateDTO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
 
-        indexTemplateDTO.setAppId(appId);
+        indexTemplateDTO.setProjectId(projectId);
 
         buildCyclicalRoll(indexTemplateDTO, param);
         buildShardNum(indexTemplateDTO, param);

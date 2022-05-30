@@ -8,6 +8,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterPhyAuthManager;

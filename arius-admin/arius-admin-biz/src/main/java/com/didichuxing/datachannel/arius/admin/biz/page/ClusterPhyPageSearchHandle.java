@@ -75,7 +75,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
         // 1. 获取管理/读写/读/无权限的物理集群信息
         List<String> clusterNames = new ArrayList<>();
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(projectId);
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
             //项目下的有管理权限逻辑集群会关联多个物理集群
             clusterLogicList.stream().map(ClusterLogic::getId).map(clusterContextManager::getClusterLogicContextCache)
                 .map(ClusterLogicContext::getAssociatedClusterPhyNames).forEach(clusterNames::addAll);
