@@ -59,17 +59,6 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         assertThat(result.getData()).hasSize(1);
     }
     
-    @Test
-    void testGetESUsersMap() {
-        // Setup
-        final Result<Map<Integer, List<ESUser>>> expectedResult = Result.buildFail(new HashMap<>());
-        
-        // Run the test
-        final Result<Map<Integer, List<ESUser>>> result = esUserManagerImplUnderTest.getESUsersMap();
-        
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
     
     @Test
     void testRegisterESUser() {
@@ -92,28 +81,8 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(result.getData(), count);
     }
     
-    @Test
-    void testGetProjectName() {
-        // Setup
-        final Result<String> expectedResult = Result.buildSucc("superApp");
-        
-        // Run the test
-        final Result<String> result = esUserManagerImplUnderTest.getProjectName(13);
-        
-        // Verify the results
-        assertThat(result.getData()).isEqualTo("superApp");
-    }
-    
-    @Test
-    void testUpdateESUserConfig() {
-        // Setup
-        final ESUserConfigDTO configDTO = new ESUserConfigDTO(0, 0, 0, 0, 0);
-        
-        // Run the test
-        final Result<Void> result = esUserManagerImplUnderTest.updateESUserConfig(configDTO, "operator");
-        
-        // Verify the results
-    }
+   
+   
     
     @Test
     void testEditESUser() {
@@ -157,38 +126,9 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         assertThat(result).isEqualTo(expectedResult);
     }
     
-    @Test
-    void testIsESUserExists1() {
-        // Setup
-        // Run the test
-        final boolean result = esUserManagerImplUnderTest.isESUserExists(0);
-        
-        // Verify the results
-        assertThat(result).isFalse();
-    }
-    
-    @Test
-    void testIsESUserExists2() {
-        // Setup
-        final ESUser esUser = new ESUser(0, "name", 0, "verifyCode", "departmentId", "department", "responsible",
-                "memo", 0, 0, "cluster", 0, "dataCenter", 0, false, "ip", "indexExp");
-        
-        // Run the test
-        final boolean result = esUserManagerImplUnderTest.isESUserExists(esUser);
-        
-        // Verify the results
-        assertThat(result).isFalse();
-    }
-    
-    @Test
-    void testIsSuperESUser() {
-        // Setup
-        // Run the test
-        final boolean result = esUserManagerImplUnderTest.isSuperESUser(0);
-        
-        // Verify the results
-        assertThat(result).isFalse();
-    }
+
+   
+   
     
     @Test
     void testVerifyAppCode() {

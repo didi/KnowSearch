@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@Deprecated
 public class AppCreateContent extends BaseContent {
 
     /**

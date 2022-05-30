@@ -49,12 +49,7 @@ public interface ESUserManager {
      */
     Result<Void> validateESUser(ESUserDTO esUserDTO, OperationEnum operation);
     
-    /**
-     * 查询app详细信息
-     *
-     * @return 返回app构成的map，key为projectId, value为esusers
-     */
-    Result<Map</*projectId*/Integer, List<ESUser>>> getESUsersMap();
+
     
     /**
      * 新建APP
@@ -65,14 +60,7 @@ public interface ESUserManager {
      * @return 成功 true  失败 false
      */
     Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator);
-    
-    /**
-     * 指定es user查询应用的名称
-     *
-     * @param esUser es user
-     * @return {@link ProjectPO#getProjectName()}
-     */
-    Result</*projectName*/String> getProjectName(Integer esUser);
+
     
     /**
      * 更新 es user config
@@ -117,27 +105,9 @@ public interface ESUserManager {
      * @return 配置信息
      */
     ESUserConfig getESUserConfig(int esUserName);
-        /**
-     * 校验app id是否存在
-     * @param esUserName 应用id
-     * @return true/false
-     */
-    boolean isESUserExists(Integer esUserName);
 
-    /**
-     * 判断app是否存在
-     *
-     * @param esUser app
-     * @return true or false
-     */
-    boolean isESUserExists(ESUser esUser);
 
-    /**
-     * 根据es user name 判断是否为root es user
-     * @param esUserName  esUserName
-     * @return       true or false
-     */
-    boolean isSuperESUser(Integer esUserName);
+
 
     
     /**

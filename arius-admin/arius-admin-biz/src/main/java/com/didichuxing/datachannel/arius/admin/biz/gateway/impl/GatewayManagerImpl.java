@@ -57,6 +57,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -177,12 +178,24 @@ public class GatewayManagerImpl implements GatewayManager {
         }
 
         // 查询出所有的应用
+        List<ESUser> esUsers = listESUserWithCache();
+        final Map<Integer/*projectId*/, /*es user*/List<Integer>> projectIdEsUsersMap = esUsers.stream().collect(
+                Collectors.groupingBy(ESUser::getProjectId, Collectors.mapping(ESUser::getId, Collectors.toList())));
         
-        List<ESUser> apps = listESUserWithCache();
-
+        
+    
         // 查询出所有的权限
         Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> projectId2ProjectTemplateAuthsMap =
                 projectLogicTemplateAuthService.getAllProjectTemplateAuths();
+        Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap=Maps.newHashMap();
+        //转换
+        for (Entry<Integer, List<Integer>> projectIdESUsersEntry : projectIdEsUsersMap.entrySet()) {
+            final Integer projectId = projectIdESUsersEntry.getKey();
+            final Collection<ProjectTemplateAuth> projectTemplateAuths = projectId2ProjectTemplateAuthsMap.get(
+                    projectId);
+            projectIdESUsersEntry.getValue().forEach(esuser->esUser2ProjectTemplateAuthsMap.put(esuser,projectTemplateAuths));
+    
+        }
 
         // 查询出所有的配置
         List<ESUserConfig> esUserConfigs =listESUserConfigWithCache();
@@ -192,14 +205,14 @@ public class GatewayManagerImpl implements GatewayManager {
         String defaultIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
                 APP_DEFAULT_READ_AUTH_INDICES, "");
 
-        Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
+        Map<Integer/*id*/, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
 
-        Map<Integer, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
+        Map<Integer/*logicId*/, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
 
-        List<GatewayESUserVO> appVOS = apps.parallelStream().map(app -> {
+        List<GatewayESUserVO> appVOS = esUsers.parallelStream().map(user -> {
             try {
-                return buildAppVO(app, projectId2ProjectTemplateAuthsMap, esUser2ESUserConfigMap,templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
+                return buildESUserVO(user, esUser2ProjectTemplateAuthsMap, esUser2ESUserConfigMap,templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
             } catch (Exception e) {
                 LOGGER.warn("class=GatewayManagerImpl||method=listApp||errMsg={}||stackTrace={}", e.getMessage(), JSON.toJSONString(e.getStackTrace()), e);
             }
@@ -343,8 +356,8 @@ public class GatewayManagerImpl implements GatewayManager {
         return deployVO;
     }
 
-    private GatewayESUserVO buildAppVO(
-            ESUser esUser, Map<Integer, Collection<ProjectTemplateAuth>> projectId2AppTemplateAuthsMap,
+    private GatewayESUserVO buildESUserVO(
+            ESUser esUser, Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap,
             Map<Integer, ESUserConfig> esUser2ESUserConfigMap,
             Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
             String defaultReadPermissionIndexes, Map<Integer, List<String>> aliasMap) {
@@ -374,13 +387,13 @@ public class GatewayManagerImpl implements GatewayManager {
             }
             readPermissionIndexExpressions.addAll( Arrays.asList(defaultReadPermissionIndexes.split(",")));
             //判断key 是否属于该项目下的es user
-            if (projectId2AppTemplateAuthsMap.containsKey(esUser.getProjectId())) {
+            if (esUser2ProjectTemplateAuthsMap.containsKey(esUser.getId())) {
                 //获取该项目下的es user
                 Collection<ProjectTemplateAuth> templateAuthCollection =
-                        projectId2AppTemplateAuthsMap.get(esUser.getProjectId());
+                        esUser2ProjectTemplateAuthsMap.get(esUser.getId());
                 if (!templateAuthCollection.isEmpty()) {
                     //todo 判断项目侧的索引权限
-                    fetchPermissionIndexExpressions(esUser.getProjectId(), templateAuthCollection,
+                    fetchPermissionIndexExpressions(esUser.getId(), templateAuthCollection,
                         templateId2IndexTemplateLogicMap,aliasMap, readPermissionIndexExpressions,writePermissionIndexExpressions);
                 } else {
                     LOGGER.warn("class=GatewayManagerImpl||method=buildAppVO||esUser={}||msg=esUser has no permission.",
@@ -407,13 +420,14 @@ public class GatewayManagerImpl implements GatewayManager {
 
     /**
      * 获取当前项目所有读写权限索引列表
-     * @param projectId projectId
+     * @param esUserId es user
      * @param projectTemplateAuthCollection project模板权限集合
      * @param templateId2IndexTemplateLogicMap  模板Id跟模板详情映射
      * @param indexExpressions  当前esUser读权限列表
      * @param writeExpressions  当前esUser写权限列表
      */
-    private void fetchPermissionIndexExpressions(Integer projectId, Collection<ProjectTemplateAuth> projectTemplateAuthCollection,
+    private void fetchPermissionIndexExpressions(Integer esUserId,
+                                                 Collection<ProjectTemplateAuth> projectTemplateAuthCollection,
                                                  Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
                                                  Map<Integer, List<String>> aliasMap,
                                                  List<String> indexExpressions, List<String> writeExpressions) {
@@ -424,7 +438,7 @@ public class GatewayManagerImpl implements GatewayManager {
                 try {
                     expression = templateId2IndexTemplateLogicMap.get(auth.getTemplateId()).getExpression();
                 } catch (Exception e) {
-                    LOGGER.warn("class=GatewayManagerImpl||method=fetchPermissionIndexExpressions||projectId={}||templateId={}||msg=template not exists.", projectId, auth.getTemplateId());
+                    LOGGER.warn("class=GatewayManagerImpl||method=fetchPermissionIndexExpressions||projectId={}||templateId={}||msg=template not exists.", esUserId, auth.getTemplateId());
                     return;
                 }
                 indexExpressions.add(expression);

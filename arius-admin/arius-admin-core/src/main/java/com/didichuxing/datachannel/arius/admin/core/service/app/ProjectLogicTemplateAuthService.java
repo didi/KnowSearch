@@ -101,7 +101,7 @@ public interface ProjectLogicTemplateAuthService {
      * 获取所有project 的权限
      * @return map, key为APP ID, value为权限点信息
      */
-    Map<Integer, Collection<ProjectTemplateAuth>> getAllProjectTemplateAuths();
+    Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> getAllProjectTemplateAuths();
 
     /**
      * 获取当前projectId对逻辑索引的权限

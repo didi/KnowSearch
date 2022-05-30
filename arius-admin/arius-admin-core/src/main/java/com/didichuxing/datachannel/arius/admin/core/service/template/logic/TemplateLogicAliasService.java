@@ -54,7 +54,7 @@ public interface TemplateLogicAliasService {
      *
      * @return
      */
-    Map<Integer, List<String>> listAliasMap();
+    Map<Integer/*logicId*/, List<String>/*aliasNames*/> listAliasMap();
 
     /**
      * 从缓存中获取平台所有索引别名

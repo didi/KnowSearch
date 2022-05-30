@@ -21,7 +21,7 @@ public class ESUserConfigDTO extends BaseDTO {
 
     
     @ApiModelProperty("es user")
-    private Integer esUser;
+    private Integer id;
 
     @ApiModelProperty("gateway返回结果解析开关")
     private Integer analyzeResponseEnable;

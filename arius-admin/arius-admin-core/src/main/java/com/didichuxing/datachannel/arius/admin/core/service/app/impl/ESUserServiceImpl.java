@@ -29,7 +29,6 @@ import com.google.common.cache.CacheBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,12 +245,12 @@ public class ESUserServiceImpl implements ESUserService {
             return new Tuple<>(checkResult, null);
         }
 
-         ESUserPO oldESUser = esUserDAO.getByESUser(configDTO.getEsUser());
+         ESUserPO oldESUser = esUserDAO.getByESUser(configDTO.getId());
         if (oldESUser == null) {
             return new Tuple<>(Result.buildNotExist(ES_USER_NOT_EXIST), null);
         }
 
-        ESUserPO oldConfigPO = esUserDAO.getByESUser(configDTO.getEsUser());
+        ESUserPO oldConfigPO = esUserDAO.getByESUser(configDTO.getId());
 
         boolean succ = (1 == esUserDAO.updateConfig(obj2Obj(configDTO, ESUserPO.class)));
         
@@ -459,7 +458,7 @@ public class ESUserServiceImpl implements ESUserService {
         if (configDTO == null) {
             return Result.buildParamIllegal("配置信息为空");
         }
-        if (configDTO.getEsUser() == null) {
+        if (configDTO.getId() == null) {
             return Result.buildParamIllegal("应用ID为空");
         }
         if (configDTO.getAnalyzeResponseEnable() != null && !yesOrNo(configDTO.getAnalyzeResponseEnable())) {

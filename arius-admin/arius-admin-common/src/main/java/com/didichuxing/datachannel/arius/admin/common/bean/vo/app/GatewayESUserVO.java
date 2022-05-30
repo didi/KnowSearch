@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "应用信息（包含权限）")
 public class GatewayESUserVO extends BaseVO {
 
-    @ApiModelProperty("应用ID")
+    @ApiModelProperty("es user")
     private Integer      id;
 
     @ApiModelProperty("应用名称")

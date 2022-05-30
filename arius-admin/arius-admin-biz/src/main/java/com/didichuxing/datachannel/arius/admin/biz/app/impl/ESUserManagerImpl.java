@@ -35,7 +35,6 @@ import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -126,17 +125,7 @@ public class ESUserManagerImpl implements ESUserManager {
     }
     
    
-    @Override
-    public Result<Map<Integer, List<ESUser>>> getESUsersMap() {
-        final Result<List<ESUser>> listResult = this.listESUsers();
-        if (listResult.failed()){
-            return Result.buildFail();
-        }
-        final Map<Integer, List<ESUser>> projectIdESUsersMap = listResult.getData()
-                .stream()
-                .collect(Collectors.groupingBy(ESUser::getProjectId));
-        return Result.buildSucc(projectIdESUsersMap);
-    }
+    
     
     /**
      * 新建APP
@@ -161,22 +150,7 @@ public class ESUserManagerImpl implements ESUserManager {
 
         return resultESUserPOTuple.getV1();
     }
-    
-    /**
-     * 指定es user查询应用的名称
-     *
-     * @param esUser appID
-     * @return app的名称，不存在则返回null
-     */
-    @Override
-    public Result<String> getProjectName(Integer esUser) {
-        final ESUser user = esUserService.getEsUserById(esUser);
-        if (Objects.isNull(esUser)) {
-            return Result.buildNotExist(String.format("es user:[%s]不存在，无法找到指定的项目", esUser));
-        }
-        final String projectName = projectService.getProjectDetailByProjectId(user.getProjectId()).getProjectName();
-        return Result.buildSucc(projectName);
-    }
+ 
     
     /**
      * 更新 es user config
@@ -190,7 +164,7 @@ public class ESUserManagerImpl implements ESUserManager {
         //只有success时候会存在tuple._2不为null
         final Tuple<Result<Void>, ESUserPO> tuple = esUserService.updateESUserConfig(configDTO, operator);
         if (tuple.getV1().success()) {
-            operateRecordService.save(APP_CONFIG, EDIT, configDTO.getEsUser(),
+            operateRecordService.save(APP_CONFIG, EDIT, configDTO.getId(),
                     AriusObjUtils.findChangedWithClear(tuple.getV2(), configDTO), operator);
         }
         return tuple.getV1();
@@ -312,39 +286,8 @@ public class ESUserManagerImpl implements ESUserManager {
         
         return esUserService.getESUserConfig(esUserName);
     }
-    
-    /**
-     * 校验app id是否存在
-     *
-     * @param esUserName 应用id
-     * @return true/false
-     */
-    @Override
-    public boolean isESUserExists(Integer esUserName) {
-        return esUserService.isESUserExists(esUserName);
-    }
-    
-    /**
-     * 判断app是否存在
-     *
-     * @param esUser app
-     * @return true or false
-     */
-    @Override
-    public boolean isESUserExists(ESUser esUser) {
-        return esUserService.isESUserExists(esUser);
-    }
-    
-    /**
-     * 根据appId判断是否为超级app
-     *
-     * @param esUserName esUserName
-     * @return true or false
-     */
-    @Override
-    public boolean isSuperESUser(Integer esUserName) {
-        return esUserService.isSuperESUser(esUserName);
-    }
+
+
     
     /**
      * 校验验证码

@@ -26,6 +26,7 @@ import java.util.List;
  * @date 2019/4/29
  */
 @Service("appCreateHandler")
+@Deprecated
 public class AppCreateHandler extends BaseWorkOrderHandler {
 
     @Autowired

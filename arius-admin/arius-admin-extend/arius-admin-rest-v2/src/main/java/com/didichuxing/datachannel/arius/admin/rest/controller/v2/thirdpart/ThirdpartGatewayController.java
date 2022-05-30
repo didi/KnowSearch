@@ -59,7 +59,7 @@ public class ThirdpartGatewayController {
 
     @GetMapping("/listApp")
     @ResponseBody
-    @ApiOperation(value = "获取APP列表接口", notes = "获取app列表,包含APP全部元信息")
+    @ApiOperation(value = "获取APP列表接口", notes = "获取es user列表,包含es user全部元信息")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-GATEWAY-TICKET", value = "接口ticket", required = true) })
     public Result<List<GatewayESUserVO>> listApp(HttpServletRequest request) {
         return gatewayManager.listProject(request);
