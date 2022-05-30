@@ -13,8 +13,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSe
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
@@ -73,13 +71,6 @@ public interface ClusterPhyManager {
      * @return 物理集群信息
      */
     ClusterPhyVO getClusterPhyOverview(Integer clusterId, Integer currentAppId);
-
-    /**
-     * 获取物理集群节点划分信息
-     * @param clusterPyhId  物理集群ID
-     * @return 集群节点信息
-     */
-    Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
 
     /**
      * 获取逻辑集群可关联region的物理集群名称列表
@@ -293,12 +284,6 @@ public interface ClusterPhyManager {
     Result<Boolean> deleteClusterExit(String clusterPhyName, Integer appId, String operator);
 
     /**
-     * 构建物理集群所属项目和所属的appId的信息
-     * @param consoleClusterPhyVO 物理集群看板视图
-     */
-    void buildBelongAppIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO);
-
-    /**
      *  根据逻辑集群类型和已选中的物理集群名称筛选出es版本一致的物理集群名称列表
      *  @param hasSelectedClusterNameWhenBind 用户在新建逻辑集群阶段已选择的物理集群名称
      *  @param clusterLogicType 逻辑集群类型
@@ -312,15 +297,6 @@ public interface ClusterPhyManager {
      * @return 同版本的物理集群名称列表
      */
     Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId);
-
-    /**
-     * 为一个正在接入的物理集群校验是否可以添加索引服务
-     * @param clusterJoinDTO 物理集群接入DTO
-     * @param strId 索引服务id
-     * @param operator 操作人员
-     * @return 校验结果
-     */
-    Result<Boolean> checkTemplateServiceWhenJoin(ClusterJoinDTO clusterJoinDTO, String strId, String operator);
 
     /**
      * 根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表

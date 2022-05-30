@@ -118,6 +118,8 @@
             <if test="esVersion != null">and es_version = #{esVersion}</if>
             <if test="health != null">and health = #{health}</if>
             <if test="activeShardNum != null">and active_shard_num = #{activeShardNum}</if>
+            <if test="platformType != null">and platform_type = #{platformType}</if>
+            <if test="resourceType != null">and resource_type = #{resourceType}</if>
             and is_active = 1;
         </trim>
     </select>

@@ -39,35 +39,7 @@ public class ClusterPhyManagerTest extends AriusAdminApplicationTest {
 
     @MockBean
     private ClusterRoleService clusterRoleService;
-    
 
-    // @Test
-    public void getClusterPhyRegionInfosTest() {
-        String clusterName = "dc-test";
-        ClusterPhy clusterphy = clusterPhyService.getClusterByName(clusterName);
-        Result<List<ESClusterRoleHostVO>> clusterPhyRegionInfos = clusterPhyManager.getClusterPhyRegionInfos(clusterphy.getId());
-        Assertions.assertTrue(clusterPhyRegionInfos.success());
-        List<ESClusterRoleHostVO> esClusterRoleHostVOS = clusterPhyRegionInfos.getData();
-        List<String> masterRegion = Lists.newArrayList();
-        List<String> clientRegion = Lists.newArrayList();
-        List<String> dataRegion = Lists.newArrayList();
-        esClusterRoleHostVOS.forEach(esClusterRoleHostVO -> {
-            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getCode())) {
-                dataRegion.add(esClusterRoleHostVO.getClusterLogicNames());
-            }
-            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.MASTER_NODE.getCode())) {
-                masterRegion.add(esClusterRoleHostVO.getClusterLogicNames());
-            }
-            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.CLIENT_NODE.getCode())) {
-                clientRegion.add(esClusterRoleHostVO.getClusterLogicNames());
-            }
-
-        });
-        Assertions.assertTrue(masterRegion.isEmpty() || null == masterRegion.get(0));
-        Assertions.assertTrue(clientRegion.isEmpty());
-        Assertions.assertFalse(dataRegion.isEmpty());
-        Assertions.assertEquals(dataRegion.get(0), clusterName);
-    }
 
     @Test
      public void getTemplateSameVersionClusterNamesByTemplateIdTest() {

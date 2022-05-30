@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_PHY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
 
 import java.util.*;
@@ -286,22 +287,52 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(Integer clusterLogicType, Long clusterLogicId) {
-        return clusterContextManager.getCanBeAssociatedClustersPhys(clusterLogicType, clusterLogicId);
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
+            return Result.buildParamIllegal("集群资源类型非法");
+        }
+        List<String> clusters = Lists.newArrayList();
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        List<ClusterRegion> logicClusterRegions = clusterRegionService.listLogicClusterRegions(clusterLogic.getId());
+        if (CollectionUtils.isNotEmpty(logicClusterRegions)) {
+            return Result.buildSucc(clusters);
+        }
+        return listCanBeAssociatedClustersPhys(clusterLogicType);
     }
 
     @Override
     public Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType) {
-        return clusterContextManager.getCanBeAssociatedClustersPhys(clusterLogicType, null);
-    }
-
-    @Override
-    public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(Integer clusterId) {
-        ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterId);
-        if (AriusObjUtils.isNull(clusterPhy)) {
-            return Result.buildFail(String.format("集群[%s]不存在", clusterId));
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
+            return Result.buildParamIllegal("集群资源类型非法");
         }
-        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
-        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
+
+        List<String> clusters = Lists.newArrayList();
+        ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
+        clusterPhyDTO.setResourceType(clusterLogicType);
+        List<ClusterPhy> list = clusterPhyService.listClustersByCondt(clusterPhyDTO);
+
+        if (PUBLIC.getCode() == clusterLogicType) {
+            //共享
+            clusters = list.stream().map(ClusterPhy::getCluster).collect(Collectors.toList());
+        } else if (EXCLUSIVE.getCode() == clusterLogicType) {
+            //独享，需要查询是否有未绑定的region和节点
+            clusters = list.stream().filter(cluster -> {
+                List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(cluster.getCluster());
+                if (regions.stream().anyMatch(region -> !clusterRegionService.isRegionBound(region))) {
+                    return true;
+                }
+                List<ClusterRoleHost> roleHostList = clusterRoleHostService
+                    .getByRoleAndClusterId(Long.valueOf(cluster.getId()), DATA_NODE.getDesc());
+                return roleHostList.stream().anyMatch(node -> node.getRegionId() == -1);
+            }).map(ClusterPhy::getCluster).collect(Collectors.toList());
+        } else if (PRIVATE.getCode() == clusterLogicType) {
+            //独立，未绑定逻辑集群
+            clusters = list.stream().filter(cluster -> {
+                Set<Long> logicIds = clusterRegionService.getLogicClusterIdByPhyClusterId(cluster.getId());
+                return CollectionUtils.isEmpty(logicIds);
+            }).map(ClusterPhy::getCluster).collect(Collectors.toList());
+        }
+
+        return Result.buildSucc(clusters);
     }
 
     @Override
@@ -780,22 +811,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public void buildBelongAppIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO) {
-        ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContextCache(consoleClusterPhyVO.getCluster());
-        consoleClusterPhyVO.setBelongAppIds(  null != clusterPhyContext ? clusterPhyContext.getAssociatedAppIds()   : null);
-        consoleClusterPhyVO.setBelongAppNames(null != clusterPhyContext ? clusterPhyContext.getAssociatedAppNames() : null);
-
-        // 兼容旧版本
-        consoleClusterPhyVO.setBelongAppId((null != clusterPhyContext &&
-                CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedAppIds())) ?
-                clusterPhyContext.getAssociatedAppIds().get(0) : null);
-        // 兼容旧版本
-        consoleClusterPhyVO.setBelongAppName(null != clusterPhyContext &&
-                CollectionUtils.isNotEmpty(clusterPhyContext.getAssociatedAppNames()) ?
-                clusterPhyContext.getAssociatedAppNames().get(0) : null);
-    }
-
-    @Override
     public Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType,/*用户在新建逻辑集群阶段已选择的物理集群名称*/String hasSelectedClusterNameWhenBind) {
         //获取可以绑定的物理集群名称列表
         Result<List<String>> canBeAssociatedClustersPhyNamesResult = validLogicAndReturnPhyNamesWhenBindPhy(null, clusterLogicType);
@@ -829,21 +844,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         //根据已绑定的物理集群的版本进行筛选
         String hasSelectedPhyClusterName = clusterLogicRackInfos.get(0).getPhyClusterName();
         return Result.buildSucc(getPhyClusterNameWithSameEsVersion(hasSelectedPhyClusterName, canBeAssociatedClustersPhyNamesResult.getData()));
-    }
-
-    @Override
-    public Result<Boolean> checkTemplateServiceWhenJoin(ClusterJoinDTO clusterJoinDTO, String strId, String operator) {
-        if (AriusObjUtils.isNull(clusterJoinDTO)) {
-            return Result.buildFail("接入集群不存在");
-        }
-
-        //从指定接入物理集群中获取可以使用的httpAddress
-        String httpAddresses = buildClusterReadAndWriteAddressWhenJoin(clusterJoinDTO);
-        if (StringUtils.isBlank(httpAddresses)) {
-            return Result.buildFail("接入集群中可连接信息为空");
-        }
-
-        return templateSrvManager.checkTemplateSrvWhenJoin(httpAddresses, clusterJoinDTO.getPassword(), strId);
     }
 
     /**
