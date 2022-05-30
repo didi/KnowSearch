@@ -33,7 +33,11 @@ public interface ClusterRegionService {
      * @param logicClusterId 逻辑集群ID
      * @return 已经被绑定到指定逻辑集群的region
      */
+    @Deprecated
+    //todo: logic cluster set to key
     List<ClusterRegion> listLogicClusterRegions(Long logicClusterId);
+
+    ClusterRegion getRegionByLogicClusterId(Long logicClusterId);
 
     /**
      * 获取物理集群下的region

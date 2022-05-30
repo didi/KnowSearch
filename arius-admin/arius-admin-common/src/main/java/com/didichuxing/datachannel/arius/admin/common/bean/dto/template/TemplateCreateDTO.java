@@ -57,6 +57,6 @@ public class TemplateCreateDTO extends BaseDTO {
     @ApiModelProperty("settings信息")
     private String settings;
 
-    @ApiModelProperty("模板服务等级")
+    @ApiModelProperty("业务等级")
     private Integer level;
 }
