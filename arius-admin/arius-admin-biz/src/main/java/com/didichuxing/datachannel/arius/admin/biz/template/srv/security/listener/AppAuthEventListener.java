@@ -35,7 +35,7 @@ public class AppAuthEventListener implements ApplicationListener<ProjectAuthEven
             LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthAddEvent||appid={}||template={}||authType={}",
                 projectTemplateAuth.getProjectId(), projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType());
 
-            securityService.saveAppLogicTemplateAuth(projectTemplateAuth.getProjectId(),
+            securityService.saveProjectLogicTemplateAuth(projectTemplateAuth.getProjectId(),
                 projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType(), 20);
             return;
         }
@@ -49,7 +49,7 @@ public class AppAuthEventListener implements ApplicationListener<ProjectAuthEven
                 tgtAuth.getProjectId(), tgtAuth.getTemplateId(), tgtAuth.getType());
 
             if (!srcAuth.getType().equals(tgtAuth.getType())) {
-                securityService.saveAppLogicTemplateAuth(tgtAuth.getProjectId(), tgtAuth.getTemplateId(),
+                securityService.saveProjectLogicTemplateAuth(tgtAuth.getProjectId(), tgtAuth.getTemplateId(),
                     tgtAuth.getType(), 20);
             }
             return;

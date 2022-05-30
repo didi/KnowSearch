@@ -25,7 +25,7 @@ public class IndexTemplatePO extends BasePO implements DigitResponsible {
     private String  name;
 
     /**
-     * appid
+     * projectId
      */
     private Integer projectId;
 

@@ -301,10 +301,10 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
     /**
      * 根据工单内容构建逻辑模板DTO
      * @param content 工单内容
-     * @param submitorAppid appid
+     * @param submitorProjectId submitorProjectId
      * @return dto
      */
-    private IndexTemplateDTO buildTemplateLogicDTO(TemplateCreateContent content, Integer submitorAppid) {
+    private IndexTemplateDTO buildTemplateLogicDTO(TemplateCreateContent content, Integer submitorProjectId) {
         IndexTemplateDTO logicDTO = ConvertUtil.obj2Obj(content, IndexTemplateDTO.class);
 
         handleIndexTemplateLogic(content, logicDTO);
@@ -327,7 +327,7 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
         logicDTO.setQuota(quotaTool.getQuotaCountByDisk(NodeSpecifyEnum.DOCKER.getCode(), content.getDiskQuota() * 1.2,
                 TEMPLATE_QUOTA_MIN));
-        logicDTO.setProjectId(submitorAppid);
+        logicDTO.setProjectId(submitorProjectId);
         return logicDTO;
     }
 

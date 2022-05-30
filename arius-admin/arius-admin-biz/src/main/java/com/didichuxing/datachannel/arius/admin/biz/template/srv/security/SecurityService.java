@@ -17,7 +17,7 @@ public interface SecurityService {
      * @param retryCount 重试次数
      * @return result
      */
-    Result<Void> saveAppLogicTemplateAuth(Integer projectId, Integer logicTemplateId, Integer authType, int retryCount);
+    Result<Void> saveProjectLogicTemplateAuth(Integer projectId, Integer logicTemplateId, Integer authType, int retryCount);
 
     /**
      * 为逻辑模板删除APP的指定权限

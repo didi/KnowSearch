@@ -71,14 +71,14 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     /**
      * 为逻辑模板创建APP的指定权限
      *
-     * @param projectId           APPID
+     * @param projectId           projectId
      * @param logicTemplateId 逻辑模板
      * @param authType        权限
      * @param retryCount      重试次数
      * @return result
      */
     @Override
-    public Result<Void> saveAppLogicTemplateAuth(Integer projectId, Integer logicTemplateId, Integer authType, int retryCount) {
+    public Result<Void> saveProjectLogicTemplateAuth(Integer projectId, Integer logicTemplateId, Integer authType, int retryCount) {
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
 
         if (CollectionUtils.isEmpty(templatePhysicals)) {
@@ -88,7 +88,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         }
 
         if (!projectService.checkProjectExist(projectId)) {
-            LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||appId={}||msg=appId not exist",
+            LOGGER.warn("class=SecurityServiceImpl||method=newAppLogicTemplateAuth||projectId={}||msg=projectId not exist",
                     projectId);
             return Result.buildNotExist(String.format(PROJECT_ID_NOT_EXISTS_TIPS, projectId));
         }
@@ -124,7 +124,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     /**
      * 为逻辑模板删除APP的指定权限
      *
-     * @param projectId           APPID
+     * @param projectId           projectId
      * @param logicTemplateId 逻辑模板
      * @param authType        权限
      * @param retryCount      重试次数
@@ -175,7 +175,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     }
 
     /**
-     * 修改逻辑模板的APPID
+     * 修改逻辑模板的projectId
      *
      * @param logicTemplateId 逻辑模板
      * @param srcProjectId        源APP
@@ -190,7 +190,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnProject||logicTemplateId={}||srcAppid={}||tgtAppid={}||msg={}",
             logicTemplateId, srcProjectId, tgtProjectId, deleteResult.getMessage());
 
-        Result<Void> saveResult = saveAppLogicTemplateAuth(tgtProjectId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
+        Result<Void> saveResult = saveProjectLogicTemplateAuth(tgtProjectId, logicTemplateId, ProjectTemplateAuthEnum.OWN.getCode(),
             retryCount);
         LOGGER.info("class=SecurityServiceImpl||method=editLogicTemplateOwnProject||logicTemplateId={}||srcProjectId={}||tgtProjectId={}||msg={}",
             logicTemplateId, srcProjectId, tgtProjectId, saveResult.getMessage());
@@ -202,7 +202,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      * 为物理模板创建APP的管理权限
      *
      * @param templatePhysical 模板信息
-     * @param projectId            APPID
+     * @param projectId            projectId
      * @param authType         权限
      * @param retryCount       重试次数
      * @return result
@@ -236,7 +236,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      * 删除物理模板的APP管理权限
      *
      * @param templatePhysical 模板信息
-     * @param projectId            APPID
+     * @param projectId            projectId
      * @param authType         权限
      * @param retryCount       重试次数
      * @return result

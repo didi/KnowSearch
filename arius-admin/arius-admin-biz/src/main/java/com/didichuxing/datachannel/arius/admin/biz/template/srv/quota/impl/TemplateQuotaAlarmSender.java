@@ -156,9 +156,6 @@ public class TemplateQuotaAlarmSender implements ApplicationListener<TemplateQuo
         return false;
     }
 
-    private String genSmsContent(IndexTemplate templateLogic, App app) {
-        return "【Arius服务中心通知】你的appId[" + app.getId() + "]所负责的索引[" + templateLogic.getName() + "]资源利用率已经超过配额的" + RATIO_95
-               + "%，请及时处理";
-    }
+   
 
 }
