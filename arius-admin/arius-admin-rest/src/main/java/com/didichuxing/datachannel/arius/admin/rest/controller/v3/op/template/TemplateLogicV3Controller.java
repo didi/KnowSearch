@@ -7,9 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.NewTemplateCreateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -126,10 +124,4 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getAppId(request));
     }
 
-    @PutMapping("")
-    @ResponseBody
-    @ApiOperation(value = "创建逻辑模板")
-    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody TemplateCreateDTO createContent) {
-        return Result.buildSucc();
-    }
 }
