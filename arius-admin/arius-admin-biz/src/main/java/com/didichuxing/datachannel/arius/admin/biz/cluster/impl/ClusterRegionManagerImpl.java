@@ -223,7 +223,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(String clusterName) {
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName) {
         List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(clusterName);
         if (CollectionUtils.isEmpty(clusterRegions)) { return Result.buildSucc();}
 
@@ -240,6 +240,22 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
         return Result.buildSucc(clusterRegionWithNodeInfoVOS.stream().filter(r -> !AriusObjUtils.isBlank(r.getName())).distinct().collect(Collectors.toList()));
+    }
+
+    @Override
+    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName) {
+        Result<List<ClusterRegionWithNodeInfoVO>> ret = listClusterRegionWithNodeInfoByClusterName(clusterName);
+        if (ret.failed()) { return Result.buildFrom(ret);}
+
+        List<ClusterRegionWithNodeInfoVO> data = ret.getData();
+        if (CollectionUtils.isEmpty(data)) { return Result.buildSucc();}
+
+        // 过滤空region
+        List<ClusterRegionVO> validClusterRegionVOList = data.stream()
+                .filter(r -> Objects.nonNull(r) && !AriusObjUtils.isBlank(r.getNodeNames()))
+                .collect(Collectors.toList());
+
+        return Result.buildSucc(validClusterRegionVOList);
     }
 
     /***************************************** private method ****************************************************/
