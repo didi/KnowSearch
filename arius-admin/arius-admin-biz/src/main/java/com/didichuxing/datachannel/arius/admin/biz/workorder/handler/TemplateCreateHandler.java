@@ -55,6 +55,8 @@ import org.springframework.stereotype.Service;
  * @author d06679
  * @date 2019/4/29
  */
+//todo: 0.3删除
+@Deprecated
 @Service("templateCreateHandler")
 public class TemplateCreateHandler extends BaseWorkOrderHandler {
 
