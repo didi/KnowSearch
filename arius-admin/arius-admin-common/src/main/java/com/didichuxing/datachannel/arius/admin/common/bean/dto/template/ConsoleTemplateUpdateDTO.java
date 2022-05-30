@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,8 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author d06679
+ * @author d06679, chengxiang
  * @date 2019/3/29
+ * @update 2022/5/26
  */
 @Data
 @NoArgsConstructor
@@ -19,23 +19,11 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "模板修改信息")
 public class ConsoleTemplateUpdateDTO extends BaseDTO {
 
-    @ApiModelProperty("索引ID")
+    @ApiModelProperty("模板ID")
     private Integer id;
 
-    /**
-     * @see DataTypeEnum
-     */
     @ApiModelProperty("数据类型（0:系统 1:日志；2:用户上报；3:RDS；6：离线导入）")
     private Integer dataType;
-
-    @ApiModelProperty("shard数量")
-    private Integer shardNum;
-
-    @ApiModelProperty("成本部门ID")
-    private String  libraDepartmentId;
-
-    @ApiModelProperty("成本部门名称")
-    private String  libraDepartment;
 
     @ApiModelProperty("责任人")
     private String  responsible;
