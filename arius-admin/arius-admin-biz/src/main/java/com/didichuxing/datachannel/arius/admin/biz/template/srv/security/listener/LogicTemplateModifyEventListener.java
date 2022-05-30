@@ -19,7 +19,7 @@ public class LogicTemplateModifyEventListener implements ApplicationListener<Log
     private SecurityService    securityService;
 
     /**
-     * 处理逻辑模板APPID发生变更时，对应权限的变更.
+     * 处理逻辑模板projectId发生变更时，对应权限的变更.
      *
      * @param event the event to respond to
      */

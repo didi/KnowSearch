@@ -105,21 +105,7 @@ public interface ESUserService {
      */
     Tuple<Result<Void>, ESUserPO> updateESUserConfig(ESUserConfigDTO configDTO, String operator);
     
-    /**
-     * 校验app id是否存在
-     * @param esUserName 应用id
-     * @return true/false
-     */
-    boolean isESUserExists(Integer esUserName);
-    
 
-    
-    /**
-     * 根据esuser判断是否为超级app
-     * @param esUserName  esUserName
-     * @return true or false
-     */
-    boolean isSuperESUser(Integer esUserName);
     
     /**
      * 校验验证码

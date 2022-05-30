@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "应用信息")
+@ApiModel(description = "es user 信息")
 public class ESUserDTO extends BaseDTO {
 
     @ApiModelProperty("es user name")

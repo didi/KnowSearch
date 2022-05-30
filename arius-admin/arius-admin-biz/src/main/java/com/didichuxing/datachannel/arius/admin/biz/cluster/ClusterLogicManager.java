@@ -42,7 +42,7 @@ public interface ClusterLogicManager {
 
   
     /**
-     * 获取逻辑集群所有访问的APP
+     * 获取逻辑集群所有访问的project
      *
      * @param logicClusterId 逻辑集群ID
      * @return
@@ -56,14 +56,14 @@ public interface ClusterLogicManager {
      * @param projectId
      * @return
      */
-    Result<List<ConsoleClusterVO>> getAppLogicClusters(Integer projectId);
+    Result<List<ConsoleClusterVO>> getProjectLogicClusters(Integer projectId);
 
     /**
-     * 获取APP拥有的逻辑集群或者物理集群名称列表
+     * 获取project拥有的逻辑集群或者物理集群名称列表
      * @param projectId 应用id
      * @return
      */
-    Result<List<String>> getAppLogicOrPhysicClusterNames(Integer projectId);
+    Result<List<String>> getProjectLogicOrPhysicClusterNames(Integer projectId);
 
     /**
      * 获取项目下的逻辑集群信息
@@ -71,7 +71,7 @@ public interface ClusterLogicManager {
      * @param projectId 项目id
      * @return
      */
-    Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer projectId);
+    Result<List<ConsoleClusterVO>> getProjectLogicClusterInfo(Integer projectId);
 
     /**
      * 获取平台所有的集群列表
@@ -86,7 +86,7 @@ public interface ClusterLogicManager {
      * @param projectId
      * @return
      */
-    Result<ConsoleClusterVO> getAppLogicClusters(Long clusterId, Integer projectId);
+    Result<ConsoleClusterVO> getProjectLogicClusters(Long clusterId, Integer projectId);
 
     /**
      * 获取逻辑集群所有逻辑模板列表
@@ -182,7 +182,7 @@ public interface ClusterLogicManager {
      * @param projectId  项目
      * @return
      */
-    List<ClusterLogic> getAppAccessClusterLogicList(Integer projectId);
+    List<ClusterLogic> getProjectAccessClusterLogicList(Integer projectId);
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
@@ -191,7 +191,7 @@ public interface ClusterLogicManager {
      * @return
      */
     @Deprecated
-    Result<List<ConsoleClusterVO>> getAppLogicClusterInfoByType(Integer projectId, Integer type);
+    Result<List<ConsoleClusterVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type);
 
     /**
      * 更新逻辑集群状态

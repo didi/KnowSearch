@@ -2,6 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
@@ -24,10 +26,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 public class ESUserManagerTest extends AriusAdminApplicationTest {
     
     @Autowired
-    private ESUserManager     esUserManagerImplUnderTest;
+    private ESUserManager esUserManagerImplUnderTest;
     @Autowired
-    private ESUserDAO         esUserDAO;
-    
+    private ESUserDAO     esUserDAO;
     
     @Test
     public void testListESUsersByAllProject() {
@@ -52,7 +53,6 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         assertThat(result.getData()).hasSize(1);
     }
     
-    
     @Test
     void testRegisterESUser() {
         // Setup
@@ -73,9 +73,6 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         final Integer count = esUserDAO.maxById();
         Assertions.assertEquals(result.getData(), count);
     }
-    
-   
-   
     
     @Test
     void testEditESUser() {
@@ -119,27 +116,11 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         assertThat(result).isEqualTo(expectedResult);
     }
     
-
-   
-   
-    
     @Test
     void testVerifyAppCode() {
         // Setup
         // Run the test
         final Result<Void> result = esUserManagerImplUnderTest.verifyAppCode(0, "verifyCode");
-        
-        // Verify the results
-    }
-    
-    @Test
-    void testUpdate() {
-        // Setup
-        final HttpServletRequest request = new MockHttpServletRequest();
-        final ConsoleESUserDTO consoleESUserDTO = new ConsoleESUserDTO(0, "memo", "dataCenter");
-        
-        // Run the test
-        final Result<Void> result = esUserManagerImplUnderTest.update(1, "admin", consoleESUserDTO);
         
         // Verify the results
     }
@@ -157,16 +138,7 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         assertThat(result).isEqualTo(expectedResult);
     }
     
-    @Test
-    void testList() {
-        // Setup
-        final Result<List<ConsoleESUserVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new ConsoleESUserVO(0, "memo", 0, "dataCenter")));
-        
-        // Run the test
-        final Result<List<ConsoleESUserVO>> result = esUserManagerImplUnderTest.list();
-        
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
+    
+    
+    
 }

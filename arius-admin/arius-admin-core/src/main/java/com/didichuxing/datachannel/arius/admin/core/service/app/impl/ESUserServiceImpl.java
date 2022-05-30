@@ -258,27 +258,7 @@ public class ESUserServiceImpl implements ESUserService {
         return new Tuple<>(Result.build(succ),oldConfigPO);
     }
 
-    /**
-     * 校验es user是否存在
-     * @param esUserName es user
-     * @return true/false
-     */
-    @Override
-    public boolean isESUserExists(Integer esUserName) {
-        return esUserDAO.getByESUser(esUserName) != null;
-    }
 
-   
-
-    @Override
-    public boolean isSuperESUser(Integer esUserName) {
-        ESUser appById = getEsUserById(esUserName);
-        if (AriusObjUtils.isNull(appById)) {
-            return false;
-        }
-
-        return appById.getIsRoot() == 1;
-    }
 
 
     /**

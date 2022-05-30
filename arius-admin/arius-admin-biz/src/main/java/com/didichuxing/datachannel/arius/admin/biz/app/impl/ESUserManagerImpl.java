@@ -173,29 +173,15 @@ public class ESUserManagerImpl implements ESUserManager {
    
     
     /**
-     * 编辑应用程序
-     *  此处移植的是AppServiceImpl#editAppWithoutCheck
-     *           原始逻辑
-     *           <blockquote><pre>
-     *                 AppPO oldPO = appDAO.getById(appDTO.getId());
-     *                   AppPO param = responsibleConvertTool.obj2Obj(appDTO, AppPO.class);
-     *
-     *                   boolean succeed = (appDAO.update(param) == 1);
-     *                   if (succeed) {
-     *                       operateRecordService.save(APP, EDIT, appDTO.getId(), AriusObjUtils.findChangedWithClear(oldPO, param), operator);
-     *                       appUserInfoService.recordAppidAndUser(appDTO.getId(), appDTO.getResponsible());
-     *                       SpringTool.publish(new AppEditEvent(this, responsibleConvertTool.obj2Obj(oldPO, App.class),
-     *                               responsibleConvertTool.obj2Obj(appDAO.getById(param.getId()), App.class)));
-     *                   }
-     *                   return Result.build(succeed);
-     *           </pre></blockquote>
-     *
-     * @param esUserDTO   应用dto
+     * @param esUserDTO   es user dto
      * @param operator 操作人或角色
      * @return {@code Result<Void>}
      */
     @Override
     public Result<Void> editESUser(ESUserDTO esUserDTO, String operator) {
+        if (projectService.checkProjectExist(esUserDTO.getProjectId())){
+             return Result.buildFail("应用不存在");
+        }
         Result<Void> checkResult = this.validateESUser(esUserDTO, EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkResult.getMessage());
@@ -301,39 +287,14 @@ public class ESUserManagerImpl implements ESUserManager {
         return esUserService.verifyAppCode(esUserName,verifyCode);
     }
     
-    @Override
-    public Result<Void> update(Integer projectId, String userName, ConsoleESUserDTO consoleESUserDTO) {
-        //校验当前操作者是否为超级用户
-        if (AuthConstant.SUPER_USER_NAME.equals(userName)) {
-         return Result.buildFail("当前用户不是管理员账号");
-        }
-        //校验es user 是否存在于该项目下
-        ESUser user = esUserService.getEsUserById(consoleESUserDTO.getId());
-        if (Objects.isNull(user)){
-            return Result.buildParamIllegal(String.format("es user [%s]不存在", consoleESUserDTO.getId()));
-        }
-        if (user.getProjectId().equals(projectId)){
-             return Result.buildParamIllegal(String.format("当前项目[%s]下不存在es user [%s]",
-                     projectId,consoleESUserDTO.getId()));
-        }
-    
-        return this.editESUser(ConvertUtil.obj2Obj(consoleESUserDTO, ESUserDTO.class),userName);
-    }
+   
     
     @Override
     public Result<ConsoleESUserVO> get(Integer esUser) {
         return Result.buildSucc(ConvertUtil.obj2Obj(esUserService.getEsUserById(esUser), ConsoleESUserVO.class));
     }
     
-    @Override
-    public Result<List<ConsoleESUserVO>> list() {
-        Result<List<ESUser>> result = listESUsers();
-        if (result.failed()) {
-            return Result.buildFail();
-        }
-        return Result.buildSucc(ConvertUtil.list2List(result.getData(), ConsoleESUserVO.class));
-    }
-    
+   
     /**
      * @param projectId
      * @param operator

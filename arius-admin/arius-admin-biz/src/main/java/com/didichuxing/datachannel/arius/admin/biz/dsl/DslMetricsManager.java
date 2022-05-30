@@ -15,7 +15,7 @@ public interface DslMetricsManager {
      * @param endDate 结束时刻
      * @return list
      */
-    Result<List<DslTemplateVO>> getDSLMetricsInfoByAppId(Integer projectId, Long startDate, Long endDate);
+    Result<List<DslTemplateVO>> getDSLMetricsInfoByProjectId(Integer projectId, Long startDate, Long endDate);
 
     /**
      * 获取批量dslMetrics接口

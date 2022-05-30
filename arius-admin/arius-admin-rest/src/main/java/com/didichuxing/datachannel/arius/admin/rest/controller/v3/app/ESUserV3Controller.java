@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
@@ -36,18 +36,19 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 0.3
  */
 @RestController
-@RequestMapping({ V3 + "/es-user/" })
+@RequestMapping({ V3 + "/es-user" })
 @Api(tags = "应用关联es user (REST)")
 public class ESUserV3Controller {
-    private static final String GET_USER_APPID_LIST_TICKET      = "xTc59aY72";
-    private static final String GET_USER_APPID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
+    private static final String        GET_USER_APPID_LIST_TICKET      = "xTc59aY72";
+    private static final String        GET_USER_APPID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
     @Autowired
-    private ESUserManager esUserManager;
+    private              ESUserManager esUserManager;
     
-    @PostMapping("{projectId}")
+    @PostMapping("/{projectId}")
     @ResponseBody
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
+     @ApiOperation(value = "新增es user")
     public Result<Integer> createESUerByProject(HttpServletRequest request,
                                                 @PathVariable("projectId") Integer projectId,
                                                 @RequestBody ESUserDTO appDTO) {
@@ -60,17 +61,17 @@ public class ESUserV3Controller {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true) })
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request) {
-           String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
+        String ticket = request.getHeader(GET_USER_APPID_LIST_TICKET_NAME);
         if (!GET_USER_APPID_LIST_TICKET.equals(ticket)) {
             return Result.buildParamIllegal("ticket错误");
         }
         final String operator = HttpRequestUtil.getOperator(request);
         final Integer projectId = HttpRequestUtil.getProjectId(request);
-        if (Objects.isNull(projectId)){
+        if (Objects.isNull(projectId)) {
             return Result.buildParamIllegal("未设置项目");
         }
-       
-        return esUserManager.getNoCodeESUser(projectId,operator);
+        
+        return esUserManager.getNoCodeESUser(projectId, operator);
     }
     
     @GetMapping()
@@ -81,7 +82,7 @@ public class ESUserV3Controller {
                 HttpRequestUtil.getOperator(request));
     }
     
-    @DeleteMapping("{projectId}/{esUser}")
+    @DeleteMapping("/{projectId}/{esUser}")
     @ResponseBody
     @ApiOperation(value = "删除项目下指定的es user")
     @ApiImplicitParams({
@@ -89,30 +90,37 @@ public class ESUserV3Controller {
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "esUser", value = "es user", required = true) })
     public Result<Void> deleteESUserByProject(HttpServletRequest request, @PathVariable("projectId") Integer projectId,
                                               @PathVariable("esUser") Integer esUserName) {
-      
+        
         return esUserManager.deleteESUserByProject(esUserName, projectId, HttpRequestUtil.getOperator(request));
     }
     
-    @DeleteMapping("{projectId}")
+    @DeleteMapping("/{projectId}")
     @ResponseBody
     @ApiOperation(value = "删除项目下全部的es user")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
     public Result<Void> deleteAllESUserByProject(HttpServletRequest request,
                                                  @PathVariable("projectId") Integer projectId) {
-       
+        
         return esUserManager.deleteAllESUserByProject(projectId, HttpRequestUtil.getOperator(request));
     }
     
     @PutMapping("")
     @ResponseBody
-    @ApiOperation(value = "编辑APP接口", notes = "支持修改数据中心、备注")
-    public Result<Void> update(HttpServletRequest request, @RequestBody ConsoleESUserDTO appDTO) {
-        //获取项目id
-        Integer projectId = HttpRequestUtil.getProjectId(request);
+    @ApiOperation(value = "编辑es user接口", notes = "支持修改数据中心、备注")
+    public Result<Void> update(HttpServletRequest request, @RequestBody ESUserDTO esUserDTO) {
         //获取操作用户
         String userName = HttpRequestUtil.getOperator(request);
-        return esUserManager.update(projectId, userName, appDTO);
+        return esUserManager.editESUser(esUserDTO, userName);
+    }
+    
+    @PutMapping("/config")
+    @ResponseBody
+    @ApiOperation(value = "编辑es user配置", notes = "支持修改数据中心、备注")
+    public Result<Void> update(HttpServletRequest request, @RequestBody ESUserConfigDTO configDTO) {
+        //获取操作用户
+        String userName = HttpRequestUtil.getOperator(request);
+        return esUserManager.updateESUserConfig(configDTO, userName);
     }
     
     @GetMapping("/{esUser}")

@@ -143,7 +143,7 @@ public interface TemplateLogicManager {
     /**
      * 根据项目获取有管理\读写\读权限的逻辑模版
      */
-    List<String> getTemplateLogicNames(Integer appId);
+    List<String> getTemplateLogicNames(Integer projectId);
 
     Result<Void> editTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException;
 
@@ -152,10 +152,10 @@ public interface TemplateLogicManager {
     /**
      * 模糊（精确）/分页查询模板列表接口
      * @param condition  查询条件
-     * @param appId      项目
+     * @param projectId      项目
      * @return
      */
-    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer appId);
+    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId);
 
     /**
      * 校验创建模板名称是否合法

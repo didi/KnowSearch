@@ -41,7 +41,7 @@ public class DslMetricsController {
                                                    @RequestParam(value = "startDate") Long startDate,
                                                    @RequestParam(value = "endDate") Long endDate, HttpServletRequest request) {
         appId = appId == null ? HttpRequestUtil.getProjectId(request) : appId;
-        return dslMetricsManager.getDSLMetricsInfoByAppId(appId, startDate, endDate);
+        return dslMetricsManager.getDSLMetricsInfoByProjectId(appId, startDate, endDate);
     }
 
     @GetMapping(path = "/detail.do")

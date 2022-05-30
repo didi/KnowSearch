@@ -52,7 +52,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterT
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
@@ -339,7 +338,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer projectId) {
+    public Result<List<ConsoleClusterVO>> getProjectLogicClusterInfo(Integer projectId) {
         List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByProjectId(
                 projectId), ConsoleClusterVO.class);
         for(ConsoleClusterVO consoleClusterVO : list) {
@@ -356,7 +355,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @return
      */
     @Override
-    public Result<List<ConsoleClusterVO>> getAppLogicClusters(Integer projectId) {
+    public Result<List<ConsoleClusterVO>> getProjectLogicClusters(Integer projectId) {
     
         try {
             projectService.getProjectDetailByProjectId(projectId);
@@ -371,7 +370,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<String>> getAppLogicOrPhysicClusterNames(Integer projectId) {
+    public Result<List<String>> getProjectLogicOrPhysicClusterNames(Integer projectId) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildSucc(esClusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
         }
@@ -403,7 +402,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @return
      */
     @Override
-    public Result<ConsoleClusterVO> getAppLogicClusters(Long clusterId, Integer projectId) {
+    public Result<ConsoleClusterVO> getProjectLogicClusters(Long clusterId, Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId);
         if (clusterLogic == null) {
             return Result.buildNotExist("集群不存在");
@@ -572,7 +571,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                     return clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
                 }
             case ACCESS:
-                return getAppAccessClusterLogicList(projectId);
+                return getProjectAccessClusterLogicList(projectId);
 
             case NO_PERMISSIONS:
                 List<Long> appOwnAuthClusterLogicIdList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId)
@@ -580,7 +579,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                         .map(ClusterLogic::getId)
                         .collect(Collectors.toList());
 
-                List<Long> appAccessAuthClusterLogicIdList = getAppAccessClusterLogicList(projectId)
+                List<Long> appAccessAuthClusterLogicIdList = getProjectAccessClusterLogicList(projectId)
                         .stream()
                         .map(ClusterLogic::getId)
                         .collect(Collectors.toList());
@@ -598,7 +597,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public List<ClusterLogic> getAppAccessClusterLogicList(Integer projectId) {
+    public List<ClusterLogic> getProjectAccessClusterLogicList(Integer projectId) {
         List<Long> clusterLogicIdList = projectClusterLogicAuthService.getLogicClusterAccessAuths(projectId)
                                         .stream()
                                         .map(AppClusterLogicAuth::getLogicClusterId)
@@ -681,7 +680,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<ConsoleClusterVO>> getAppLogicClusterInfoByType(Integer projectId, Integer type) {
+    public Result<List<ConsoleClusterVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type) {
         ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
         logicClusterDTO.setProjectId(projectId);
         logicClusterDTO.setType(type);

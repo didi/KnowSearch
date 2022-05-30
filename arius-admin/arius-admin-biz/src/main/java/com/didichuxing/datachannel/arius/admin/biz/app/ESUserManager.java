@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ConsoleESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
@@ -117,15 +116,7 @@ public interface ESUserManager {
      */
     Result<Void> verifyAppCode(Integer esUserName, String verifyCode);
     
-    /**
-     * 编辑APP接口
-     *
-     * @param projectId
-     * @param userName
-     * @param consoleESUserDTO consoleESUserDTO
-     * @return Result<Void>
-     */
-    Result<Void> update(Integer projectId,String userName, ConsoleESUserDTO consoleESUserDTO);
+
     
     /**
      * 获取
@@ -134,13 +125,7 @@ public interface ESUserManager {
      * @return {@code Result<ConsoleESUserVO>}
      */
     Result<ConsoleESUserVO> get(Integer esUser);
-    
-    /**
-     * 列表
-     *
-     * @return {@code Result<List<ConsoleESUserVO>>}
-     */
-    Result<List<ConsoleESUserVO>> list();
+
     
     /**
      * 获取没有
