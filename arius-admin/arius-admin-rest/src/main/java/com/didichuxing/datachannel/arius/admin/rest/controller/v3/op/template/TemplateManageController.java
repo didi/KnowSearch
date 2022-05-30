@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.manage.create.TemplateCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateCreateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,7 @@ public class TemplateManageController {
     @PutMapping("/createTemplate")
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
-    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody TemplateCreateDTO param) {
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) {
         return templateCreateManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
     }
 }

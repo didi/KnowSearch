@@ -42,6 +42,7 @@ import com.didiglobal.logi.log.LogFactory;
  * @author d06679
  * @date 2019-08-04
  */
+@Deprecated
 @Service
 public class TemplateActionImpl implements TemplateAction {
 

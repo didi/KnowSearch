@@ -445,7 +445,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                                            List<IndexTemplatePhyDTO> physicalInfos) throws AdminOperateException {
         for (IndexTemplatePhyDTO param : physicalInfos) {
             param.setLogicId(logicId);
-            param.setPhysicalInfos(physicalInfos);
+            //param.setPhysicalInfos(physicalInfos);
             Result<Long> result = addTemplateWithoutCheck(param);
             if (result.failed()) {
                 result.setMessage(result.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());

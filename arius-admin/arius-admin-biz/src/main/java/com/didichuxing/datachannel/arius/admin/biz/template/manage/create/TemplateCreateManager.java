@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.manage.create;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateCreateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 
 /**
  * @author chengxiang
@@ -15,5 +15,5 @@ public interface TemplateCreateManager {
      * @param operator 操作者
      * @return
      */
-    Result<Void> create(TemplateCreateDTO param, String operator, Integer appId);
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId);
 }

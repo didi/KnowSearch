@@ -111,6 +111,7 @@ public class IndexTemplatePhyDTO extends BaseDTO {
     @ApiModelProperty("写入限流值")
     private Integer                        writeRateLimit;
 
+    //todo: delete this annoying field
     @ApiModelProperty("物理模板列表")
     private List<IndexTemplatePhyDTO> physicalInfos;
 
