@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
@@ -88,7 +89,7 @@ public class ESUserManagerImpl implements ESUserManager {
      * @return
      */
     @Override
-    public Result<List<ESUser>> listESUsersByProjectId(Integer projectId, String operator) {
+    public Result<List<ESUserVO>> listESUsersByProjectId(Integer projectId, String operator) {
        
     
         ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
@@ -104,7 +105,7 @@ public class ESUserManagerImpl implements ESUserManager {
             user.setName(projectVO.getProjectName());
         
         }
-        return Result.buildSucc(users);
+        return Result.buildSucc(ConvertUtil.list2List(users,ESUserVO.class));
     }
     
     /**

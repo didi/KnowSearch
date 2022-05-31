@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didiglobal.logi.security.common.po.ProjectPO;
@@ -32,10 +33,10 @@ public interface ESUserManager {
      * 通过项目id获取es user 列表
      *
      * @param projectId {@link ProjectPO#getId()}
-     * @param operator 操作者属于{@link ProjectVO#getUserList()}
+     * @param operator  操作者属于{@link ProjectVO#getUserList()}
      * @return {@code List<ESUser>}
      */
-    Result<List<ESUser>> listESUsersByProjectId(Integer projectId, String operator);
+    Result<List<ESUserVO>> listESUsersByProjectId(Integer projectId, String operator);
     
     /**
      * 验证APP参数是否合法

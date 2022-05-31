@@ -5,16 +5,15 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +73,7 @@ public class ESUserV3Controller {
     @GetMapping()
     @ResponseBody
     @ApiOperation(value = "获取项目下的es user")
-    public Result<List<ESUser>> listESUserByProjectId(HttpServletRequest request) {
+    public Result<List<ESUserVO>> listESUserByProjectId(HttpServletRequest request) {
         return esUserManager.listESUsersByProjectId(HttpRequestUtil.getProjectId(request),
                 HttpRequestUtil.getOperator(request));
     }
