@@ -27,7 +27,7 @@ public class ConsoleIndexController {
 
     @GetMapping("/mapping/get")
     @ResponseBody
-    @ApiOperation(value = "获取索引的mapping信息" )
+    @ApiOperation(value = "获取索引的mapping信息【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "String", name = "index", value = "索引名称", required = true) })
     public Result<String> indexMapping(@RequestParam("cluster") String cluster, @RequestParam("index") String index) {

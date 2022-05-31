@@ -29,7 +29,7 @@ public class DslMetricsController {
     private DslMetricsManager dslMetricsManager;
 
     @GetMapping(path = "/listByAppid.do")
-    @ApiOperation(value = "根据appid获取dsl的指标信息", notes = "根据appid获取dsl的指标信息", httpMethod = "GET")
+    @ApiOperation(value = "根据appid获取dsl的指标信息【三方接口】",tags = "【三方接口】", notes = "根据appid获取dsl的指标信息", httpMethod = "GET")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "appId", value = "应用账号", required = false, example = "1"),
             @ApiImplicitParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000"),
@@ -43,7 +43,7 @@ public class DslMetricsController {
     }
 
     @GetMapping(path = "/detail.do")
-    @ApiOperation(value = "根据appid和模板名称获取dsl的指标信息", notes = "根据appid获取dsl的指标信息", httpMethod = "GET")
+    @ApiOperation(value = "根据appid和模板名称获取dsl的指标信息【三方接口】",tags = "【三方接口】", notes = "根据appid获取dsl的指标信息", httpMethod = "GET")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "appId", value = "应用账号", required = false, example = "1"),
             @ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5", required = true, example = "V2_EA317B2029682DB83A191CBD797A66FE"),
