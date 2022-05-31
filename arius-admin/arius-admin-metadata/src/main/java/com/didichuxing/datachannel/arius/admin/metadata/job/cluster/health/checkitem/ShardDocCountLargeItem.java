@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 /**
  * 检查每个索引的shard文档数是否大多, 每个shard的文档数不能大于5000万条
  */

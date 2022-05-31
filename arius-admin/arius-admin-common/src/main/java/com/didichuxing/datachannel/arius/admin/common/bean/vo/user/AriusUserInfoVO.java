@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "用户信息")
+@Deprecated
 public class AriusUserInfoVO extends BaseVO {
 
     @ApiModelProperty(value = "角色权限 -1:未知 0:普通, 1:平台运营角色(RD) 2:OP角色")

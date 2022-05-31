@@ -45,7 +45,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
+import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.log.ILog;
@@ -116,7 +116,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @param operator  操作人
      * @return 成功 true 失败 false
      * <p>
-     * NotExistException
      * 集群不存在
      */
     @Override
@@ -135,9 +134,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @param operator 操作人
      * @return 成功 true 失败 false
      * <p>
-     * DuplicateException
-     * 集群已经存在(用名字校验)
-     * IllegalArgumentException
      * 参数不合理
      */
     @Override
@@ -167,7 +163,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * <p>
      * IllegalArgumentException
      * 参数不合理
-     * NotExistException
      * 集群不存在
      */
     @Override
@@ -413,7 +408,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         }
 
         if (esClusterService.hasSettingExist(cluster,
-            String.format(ESOperateContant.REMOTE_CLUSTER_FORMAT, remoteCluster))) {
+            String.format(ESOperateConstant.REMOTE_CLUSTER_FORMAT, remoteCluster))) {
             return true;
         }
 

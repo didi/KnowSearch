@@ -83,8 +83,7 @@ public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        LogicClusterPluginContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            LogicClusterPluginContent.class);
+      
         return Result.buildSucc();
     }
 

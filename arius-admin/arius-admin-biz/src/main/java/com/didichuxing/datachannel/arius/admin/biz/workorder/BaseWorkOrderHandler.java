@@ -14,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +32,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     @Autowired
     private WorkOrderManager workOrderManager;
 
-    @Autowired
-    private ProjectService  projectService;
+   
     @Autowired
     private UserService userService;
 

@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.BLOCKS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.DEFAULTS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDEX;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.READ;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.WRITE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.BLOCKS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DEFAULTS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.READ;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.WRITE;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

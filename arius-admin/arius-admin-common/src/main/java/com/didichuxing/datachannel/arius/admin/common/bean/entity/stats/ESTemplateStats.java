@@ -15,6 +15,7 @@ import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.mo
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "集群模板中的统计信息")
+@Deprecated
 public class ESTemplateStats extends BaseESPO {
     /**
      * 统计的时间戳，单位：毫秒

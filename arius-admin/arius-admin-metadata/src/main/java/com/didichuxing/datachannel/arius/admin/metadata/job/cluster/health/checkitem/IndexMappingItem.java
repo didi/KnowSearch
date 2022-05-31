@@ -14,7 +14,7 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.Templa
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 public class IndexMappingItem extends AbstractCheckerItem {
     private int templateNum    = 0;
 

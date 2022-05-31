@@ -43,7 +43,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.UserService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,8 +63,7 @@ import org.springframework.stereotype.Service;
 public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     protected static final ILog  LOGGER = LogFactory.getLog(ClusterOpIndecreaseHandler.class);
 
-    @Autowired
-    private UserService  userService;
+    
 
     @Autowired
     private ClusterPhyService esClusterPhyService;

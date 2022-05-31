@@ -5,6 +5,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant.arius;
  *
  * Created by d06679 on 2017/7/14.
  */
+@Deprecated
 public enum AriusUserStatusEnum {
 
                                  NORMAL(1, "normal"),

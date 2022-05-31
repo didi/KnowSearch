@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class IndexTemplateWithAlias extends IndexTemplate {
 
     private List<IndexTemplateAlias> aliases;

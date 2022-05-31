@@ -112,7 +112,7 @@ public class DslMetricsESDAO extends BaseESDAO {
     public DslMetricsPO getMaxAppidTemplateQpsInfoByAppidTemplateMd5(DslBase dslBase) {
         if(null == dslBase){return null;}
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_KEY, dslBase.getAppid(), dslBase.getDslTemplateMd5());
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_KEY, dslBase.getProjectId(), dslBase.getDslTemplateMd5());
         String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
         return gatewayClient.performRequestAndTakeFirst(realIndexName, typeName, dsl, DslMetricsPO.class);
     }

@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.AppTemplateAuthVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectTemplateAuthVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -53,9 +53,9 @@ public class ProjectTemplateAuthController {
     @ResponseBody
     @ApiOperation(value = "获取APP权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
-    public Result<List<AppTemplateAuthVO>> getAppTemplateAuths(@RequestParam("projectId") Integer projectId) {
-        List<AppTemplateAuthVO> templateAuths = ConvertUtil
-            .list2List(projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(projectId), AppTemplateAuthVO.class);
+    public Result<List<ProjectTemplateAuthVO>> getAppTemplateAuths(@RequestParam("projectId") Integer projectId) {
+        List<ProjectTemplateAuthVO> templateAuths = ConvertUtil
+            .list2List(projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(projectId), ProjectTemplateAuthVO.class);
 
         fillTemplateAuthVO(templateAuths);
 
@@ -97,19 +97,19 @@ public class ProjectTemplateAuthController {
      * 给AppTemplateAuthVO设置所属逻辑集群ID、name，逻辑模板name
      * @param templateAuths 模板权限列表
      */
-    private void fillTemplateAuthVO(List<AppTemplateAuthVO> templateAuths) {
+    private void fillTemplateAuthVO(List<ProjectTemplateAuthVO> templateAuths) {
         if (CollectionUtils.isEmpty(templateAuths)) {
             return;
         }
 
         // 涉及的逻辑模板id
-        List<Integer> templateIds = templateAuths.stream().map(AppTemplateAuthVO::getTemplateId)
+        List<Integer> templateIds = templateAuths.stream().map(ProjectTemplateAuthVO::getTemplateId)
             .collect(Collectors.toList());
 
         Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> logicTemplateMap = indexTemplateService
             .getLogicTemplatesWithClusterAndMasterTemplateMap(new HashSet<>(templateIds));
 
-        for (AppTemplateAuthVO authVO : templateAuths) {
+        for (ProjectTemplateAuthVO authVO : templateAuths) {
             Integer templateId = authVO.getTemplateId();
             IndexTemplateLogicWithClusterAndMasterTemplate logicTemplate = logicTemplateMap.get(templateId);
             if (logicTemplate != null) {

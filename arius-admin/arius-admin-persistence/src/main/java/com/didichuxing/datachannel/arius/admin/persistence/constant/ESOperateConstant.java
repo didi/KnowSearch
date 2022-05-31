@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.persistence.constant;
 
-public class ESOperateContant {
+public class ESOperateConstant {
 
-    private ESOperateContant() {
+    private ESOperateConstant() {
     }
 
     /**

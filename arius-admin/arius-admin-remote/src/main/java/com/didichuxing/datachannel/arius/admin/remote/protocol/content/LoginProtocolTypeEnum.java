@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
  * @author linyunan
  * @date 2021-04-26
  */
+@Deprecated
 public enum LoginProtocolTypeEnum {
                               /**
                                * 默认校验方式, 与DB校验

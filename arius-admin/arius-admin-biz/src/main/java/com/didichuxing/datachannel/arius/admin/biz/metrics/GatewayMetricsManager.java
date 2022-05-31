@@ -52,7 +52,7 @@ public interface GatewayMetricsManager {
     /**
      * 获取gateway项目纬度指标信息
      */
-    Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(GatewayAppDTO dto);
+    Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(GatewayProjectDTO dto);
 
     /**
      * 获取gatewayDSL模版查询指标信息

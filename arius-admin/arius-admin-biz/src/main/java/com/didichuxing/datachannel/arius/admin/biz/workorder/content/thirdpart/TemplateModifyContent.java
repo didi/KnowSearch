@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@Deprecated
 public class TemplateModifyContent extends BaseContent {
 
     private Integer id;

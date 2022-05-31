@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_BLOCK_SETTING;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfo
 /**
  * Created by linyunan on 2021-06-22
  */
+@Deprecated
 public interface AriusUserInfoManager {
 
 	/**

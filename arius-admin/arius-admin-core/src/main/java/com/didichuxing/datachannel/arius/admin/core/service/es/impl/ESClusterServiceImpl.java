@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
-import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
+import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -110,7 +110,7 @@ public class ESClusterServiceImpl implements ESClusterService {
                                         Integer retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("syncPutRemoteCluster", retryCount,
             () -> esClusterDAO.putPersistentRemoteClusters(cluster,
-                String.format(ESOperateContant.REMOTE_CLUSTER_FORMAT, remoteCluster), tcpAddresses));
+                String.format(ESOperateConstant.REMOTE_CLUSTER_FORMAT, remoteCluster), tcpAddresses));
     }
 
     /**

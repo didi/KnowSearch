@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "APP登录信息")
+@Deprecated
 public class ConsoleAppLoginDTO extends BaseDTO {
 
     @ApiModelProperty("APPID")

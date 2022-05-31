@@ -5,6 +5,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po;
  * @author d06679
  * @date 2019/3/18
  */
+@Deprecated
 public interface DigitResponsible {
 
     String getResponsible();

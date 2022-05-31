@@ -127,14 +127,14 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
 
         List<ProjectTemplateAuth> projectTemplateAuths = projectLogicTemplateAuthService
             .getTemplateAuthsByLogicTemplateId(content.getId());
-        Map<Integer, ProjectTemplateAuth> appId2AppTemplateAuthMap = ConvertUtil.list2Map(projectTemplateAuths,
+        Map<Integer, ProjectTemplateAuth> projectId2ProjectTemplateAuthMap = ConvertUtil.list2Map(projectTemplateAuths,
             ProjectTemplateAuth::getProjectId);
 
-        if (appId2AppTemplateAuthMap.containsKey(workOrder.getSubmitorProjectId())) {
+        if (projectId2ProjectTemplateAuthMap.containsKey(workOrder.getSubmitorProjectId())) {
             return Result.buildSucc();
         }
 
-        return Result.buildParamIllegal("当前APP无该索引访问访问权限，请先申请查询权限");
+        return Result.buildParamIllegal("当前project无该索引访问访问权限，请先申请查询权限");
     }
 
     /**

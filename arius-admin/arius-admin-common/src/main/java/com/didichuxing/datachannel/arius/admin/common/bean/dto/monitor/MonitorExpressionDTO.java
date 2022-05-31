@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class MonitorExpressionDTO extends BaseDTO {
     @ApiModelProperty(value = "操作符")
     private String optr;

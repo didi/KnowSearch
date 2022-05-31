@@ -175,7 +175,8 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         // 集群权限检查
         if (!logicClusterAuthService.canCreateLogicTemplate(workOrder.getSubmitorProjectId(), content.getResourceId())) {
             return Result.buildFail(
-                    String.format("APP[%s]没有在逻辑集群[%s]下创建模板的权限", workOrder.getSubmitorProjectId(), content.getResourceId()));
+                    String.format("Project[%s]没有在逻辑集群[%s]下创建模板的权限", workOrder.getSubmitorProjectId(),
+                            content.getResourceId()));
         }
 
         Result<Void> checkBaseInfoResult = indexTemplateService

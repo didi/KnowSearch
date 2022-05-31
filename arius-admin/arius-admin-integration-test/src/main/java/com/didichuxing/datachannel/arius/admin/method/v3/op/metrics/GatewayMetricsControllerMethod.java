@@ -68,7 +68,7 @@ public class GatewayMetricsControllerMethod {
         return JSON.parseObject(AriusClient.post(path, param), new TypeReference<Result<List<VariousLineChartMetricsVO>>>(){});
     }
 
-    public static Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(GatewayAppDTO param) throws IOException {
+    public static Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(GatewayProjectDTO param) throws IOException {
         String path = String.format("%s/app", GatewayMetrics);
         return JSON.parseObject(AriusClient.post(path, param), new TypeReference<Result<List<VariousLineChartMetricsVO>>>(){});
     }

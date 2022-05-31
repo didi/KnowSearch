@@ -22,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,8 +34,7 @@ import org.springframework.stereotype.Service;
 @Deprecated
 public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
 
-    @Autowired
-    private ProjectService projectService;
+   
 
     @Autowired
     private ClusterPhyService esClusterPhyService;

@@ -5,7 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayAppDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
@@ -99,7 +99,7 @@ public class GatewayMetricsController {
 
     @PostMapping("/app")
     @ApiModelProperty(value = "获取gateway项目指标信息")
-    public Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(@RequestBody GatewayAppDTO dto) {
+    public Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(@RequestBody GatewayProjectDTO dto) {
         validateParam(dto);
         return gatewayMetricsManager.getGatewayAppMetrics(dto);
     }

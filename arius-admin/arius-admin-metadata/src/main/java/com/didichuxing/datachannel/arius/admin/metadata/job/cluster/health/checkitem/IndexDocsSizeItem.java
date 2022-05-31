@@ -15,7 +15,7 @@ import com.didiglobal.logi.elasticsearch.client.response.model.indices.Store;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 /**
  * 检查索引平均每条记录的大小
  */

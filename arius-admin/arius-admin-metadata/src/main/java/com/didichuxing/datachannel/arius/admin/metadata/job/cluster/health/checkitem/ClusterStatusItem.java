@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 @NoArgsConstructor
 public class ClusterStatusItem extends AbstractCheckerItem {
 

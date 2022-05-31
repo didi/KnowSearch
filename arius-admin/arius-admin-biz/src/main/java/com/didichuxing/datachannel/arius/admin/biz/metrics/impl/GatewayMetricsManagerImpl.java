@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayAppDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
@@ -303,7 +303,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(GatewayAppDTO dto) {
+    public Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(GatewayProjectDTO dto) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
         List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
         Long startTime = dto.getStartTime();
@@ -319,17 +319,17 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
             dto.getMetricsTypes().removeAll(commonMetrics);
             dto.getMetricsTypes().add(COMMON);
         }
-        if (StringUtils.isNotBlank(dto.getAppId())) {
+        if (StringUtils.isNotBlank(dto.getProjectId())) {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (COMMON.equals(metricsType)) {
-                    List<VariousLineChartMetrics> list = gatewayMetricsService.getAppCommonMetricsByAppId(startTime, endTime, commonMetrics, dto.getAppId());
+                    List<VariousLineChartMetrics> list = gatewayMetricsService.getAppCommonMetricsByAppId(startTime, endTime, commonMetrics, dto.getProjectId());
                     result.addAll(list);
                 } else if (GatewayMetricsTypeEnum.QUERY_APP_COUNT.getType().equals(metricsType)) {
-                    VariousLineChartMetrics appCountMetrics = gatewayMetricsService.getAppCountMetricsByAppId(startTime, endTime,dto.getAppId());
+                    VariousLineChartMetrics appCountMetrics = gatewayMetricsService.getAppCountMetricsByAppId(startTime, endTime,dto.getProjectId());
                     result.add(appCountMetrics);
                 }
             });
-            nameList.add(dto.getAppId());
+            nameList.add(dto.getProjectId());
         } else {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (COMMON.equals(metricsType)) {

@@ -104,7 +104,7 @@ public class DslTemplateESDAO extends BaseESDAO {
             item = new DslTemplatePO();
             item.setCheckMode(dslCheckMode.getCheckMode());
             item.setAriusModifyTime(ariusModifyTime);
-            item.setAppid(dslCheckMode.getAppid());
+            item.setAppid(dslCheckMode.getProjectId());
             item.setDslTemplateMd5(dslCheckMode.getDslTemplateMd5());
 
             list.add(item);
@@ -130,7 +130,7 @@ public class DslTemplateESDAO extends BaseESDAO {
             // 强制设置查询限流值设置为 true
             item.setForceSetQueryLimit(true);
             item.setAriusModifyTime(ariusModifyTime);
-            item.setAppid(dslQueryLimit.getAppid());
+            item.setAppid(dslQueryLimit.getProjectId());
             item.setDslTemplateMd5(dslQueryLimit.getDslTemplateMd5());
 
             list.add(item);
@@ -148,7 +148,7 @@ public class DslTemplateESDAO extends BaseESDAO {
     public Map<String, DslTemplatePO> getDslTemplateByKeys(List<? extends DslBase> dslBases) {
         Map<String, DslTemplatePO> result = Maps.newHashMap();
         for (DslBase dslBase : dslBases) {
-            result.put(dslBase.getAppidDslTemplateMd5(), getDslTemplateByKey(dslBase.getAppid(), dslBase.getDslTemplateMd5()));
+            result.put(dslBase.getAppidDslTemplateMd5(), getDslTemplateByKey(dslBase.getProjectId(), dslBase.getDslTemplateMd5()));
         }
         return result;
     }

@@ -9,7 +9,7 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealth
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Deprecated
 public class PendingTaskNumItem extends AbstractCheckerItem {
     private long pendingTaskNum = 0;
 

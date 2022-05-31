@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "登录信息")
+@Deprecated
 public class LoginDTO extends BaseDTO {
 
     @ApiModelProperty("账号")

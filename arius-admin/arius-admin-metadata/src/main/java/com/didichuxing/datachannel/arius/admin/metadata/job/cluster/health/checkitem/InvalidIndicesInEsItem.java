@@ -11,7 +11,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNode
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 public class InvalidIndicesInEsItem extends AbstractCheckerItem {
     private Integer indicesNum = 0;
 

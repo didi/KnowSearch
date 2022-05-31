@@ -18,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
@@ -57,7 +56,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
 
     private static final Logger  LOGGER           = LoggerFactory.getLogger(WorkOrderManagerImpl.class);
 
-    private static final int     APP_ID_TO_CREATE = -99;
+    private static final int PROJECT_ID_TO_CREATE = -99;
 
     @Autowired
     private HandleFactory        handleFactory;
@@ -378,15 +377,13 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         if (AriusObjUtils.isNull(userService.getUserBriefByUserName(workOrderDTO.getSubmitor()))) {
             return Result.buildParamIllegal("提交人非法");
         }
-
-        if (!WorkOrderTypeEnum.APP_CREATE.getName().equals(workOrderDTO.getType())) {
-            if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectid())) {
-                return Result.buildParamIllegal("提交projectID为空");
-            }
-            if (APP_ID_TO_CREATE != workOrderDTO.getSubmitorProjectid()
-                && !projectService.checkProjectExist(workOrderDTO.getSubmitorProjectid())) {
-                return Result.buildNotExist("提交projectId不存在");
-            }
+    
+        if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectid())) {
+            return Result.buildParamIllegal("提交projectID为空");
+        }
+        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectid() && !projectService.checkProjectExist(
+                workOrderDTO.getSubmitorProjectid())) {
+            return Result.buildNotExist("提交projectId不存在");
         }
 
         return Result.buildSucc();

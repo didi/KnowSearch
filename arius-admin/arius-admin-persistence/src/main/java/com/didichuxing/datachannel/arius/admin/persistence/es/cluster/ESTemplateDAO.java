@@ -20,7 +20,7 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.Templa
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679

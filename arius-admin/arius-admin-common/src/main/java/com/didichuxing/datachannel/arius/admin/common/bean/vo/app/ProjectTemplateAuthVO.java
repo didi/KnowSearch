@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "应用权限信息")
-public class AppTemplateAuthVO extends BaseVO {
+public class ProjectTemplateAuthVO extends BaseVO {
     @ApiModelProperty("ID")
     private Long id;
 
     @ApiModelProperty("应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("模板ID")
     private Integer templateId;

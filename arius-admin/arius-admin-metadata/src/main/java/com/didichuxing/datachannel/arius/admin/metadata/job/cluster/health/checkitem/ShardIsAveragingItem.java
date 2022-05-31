@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 /**
  * 检查每个索引的shard是否分配均匀
  * 索引的在某个节点上shard的个数大于该索引所有sharad除以索引所在索引节点的平均值时为不平均分布

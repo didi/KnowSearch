@@ -13,9 +13,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AppAuthEventListener implements ApplicationListener<ProjectAuthEvent> {
+public class ProjectAuthEventListener implements ApplicationListener<ProjectAuthEvent> {
 
-    private static final ILog LOGGER = LogFactory.getLog(AppAuthEventListener.class);
+    private static final ILog LOGGER = LogFactory.getLog(ProjectAuthEventListener.class);
 
     @Autowired
     private SecurityService   securityService;
@@ -31,7 +31,7 @@ public class AppAuthEventListener implements ApplicationListener<ProjectAuthEven
             ProjectTemplateAuthAddEvent projectTemplateAuthAddEvent = (ProjectTemplateAuthAddEvent) event;
             ProjectTemplateAuth projectTemplateAuth = projectTemplateAuthAddEvent.getAppTemplateAuth();
 
-            LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthAddEvent||projectId={}||template={}||authType={}",
+            LOGGER.info("class=ProjectAuthEventListener||method=onApplicationEvent||event=AppAuthAddEvent||projectId={}||template={}||authType={}",
                 projectTemplateAuth.getProjectId(), projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType());
 
             securityService.saveProjectLogicTemplateAuth(projectTemplateAuth.getProjectId(),
@@ -44,7 +44,7 @@ public class AppAuthEventListener implements ApplicationListener<ProjectAuthEven
             ProjectTemplateAuth srcAuth = projectTemplateAuthEditEvent.getSrcAuth();
             ProjectTemplateAuth tgtAuth = projectTemplateAuthEditEvent.getTgtAuth();
 
-            LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthEditEvent||projectId={}||template={}||authType={}",
+            LOGGER.info("class=ProjectAuthEventListener||method=onApplicationEvent||event=AppAuthEditEvent||projectId={}||template={}||authType={}",
                 tgtAuth.getProjectId(), tgtAuth.getTemplateId(), tgtAuth.getType());
 
             if (!srcAuth.getType().equals(tgtAuth.getType())) {
@@ -58,7 +58,7 @@ public class AppAuthEventListener implements ApplicationListener<ProjectAuthEven
             ProjectTemplateAuthDeleteEvent appTemplateAuthDeleteEvent = (ProjectTemplateAuthDeleteEvent) event;
             ProjectTemplateAuth projectTemplateAuth = appTemplateAuthDeleteEvent.getAppTemplateAuth();
 
-            LOGGER.info("class=AppAuthEventListener||method=onApplicationEvent||event=AppAuthDeleteEvent||projectId={}||template={}||authType={}",
+            LOGGER.info("class=ProjectAuthEventListener||method=onApplicationEvent||event=AppAuthDeleteEvent||projectId={}||template={}||authType={}",
                 projectTemplateAuth.getProjectId(), projectTemplateAuth.getTemplateId(), projectTemplateAuth.getType());
 
             securityService.deleteProjectLogicTemplateAuth(projectTemplateAuth.getProjectId(),

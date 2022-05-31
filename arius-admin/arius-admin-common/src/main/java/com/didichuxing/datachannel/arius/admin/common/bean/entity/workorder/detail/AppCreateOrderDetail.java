@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class AppCreateOrderDetail extends AbstractOrderDetail {
     /**
      * appId

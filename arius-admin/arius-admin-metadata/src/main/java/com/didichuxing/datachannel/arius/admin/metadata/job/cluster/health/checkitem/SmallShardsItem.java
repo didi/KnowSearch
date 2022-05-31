@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 @NoArgsConstructor
 public class SmallShardsItem extends AbstractCheckerItem {
     private int indicesNum;

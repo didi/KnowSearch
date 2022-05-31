@@ -12,7 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 /**
  * 检查每个节点shard个数是否过多
  */

@@ -132,7 +132,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
             QueryDslLimitEditContent.class);
 
         DslQueryLimit dslQueryLimit = new DslQueryLimit();
-        dslQueryLimit.setAppid(workOrder.getSubmitorProjectId());
+        dslQueryLimit.setProjectId(workOrder.getSubmitorProjectId());
         dslQueryLimit.setQueryLimit(content.getQueryLimit());
         dslQueryLimit.setDslTemplateMd5(content.getDslTemplateMd5());
 

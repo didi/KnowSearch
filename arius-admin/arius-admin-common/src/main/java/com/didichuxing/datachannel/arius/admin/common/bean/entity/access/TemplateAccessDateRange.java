@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Deprecated
 public class TemplateAccessDateRange {
 
     /**

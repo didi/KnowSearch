@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Deprecated
 @NoArgsConstructor
 public class UnassignedShardsItem extends AbstractCheckerItem {
     private long unassignedShardsNum;

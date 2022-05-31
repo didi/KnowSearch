@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-
+@Deprecated
 /**
  * 检查每个索引模板，对于有过期时间的模板，是否有过期的索引未删除
  */

@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.health.Abstr
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 public class EmptyIndicesItem extends AbstractCheckerItem {
 
     private int tempalteNu = 0;

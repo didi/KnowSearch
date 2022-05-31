@@ -312,9 +312,6 @@ public class AppServiceImpl implements AppService {
      * @param operator  操作人
      * @return 成功 true  失败  false
      * <p>
-     * NotExistException
-     * APP不存在
-     * IllegalArgumentException
      * 参数不合理
      */
     @Override

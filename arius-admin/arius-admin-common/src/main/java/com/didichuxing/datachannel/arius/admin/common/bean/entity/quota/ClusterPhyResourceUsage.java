@@ -14,6 +14,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class ClusterPhyResourceUsage implements Serializable {
     /**
      * 物理集群名称

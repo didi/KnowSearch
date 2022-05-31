@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

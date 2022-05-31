@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "gateway项目查询")
-public class GatewayAppDTO extends GatewayMetricsDTO {
+public class GatewayProjectDTO extends GatewayMetricsDTO {
 
     @ApiModelProperty("项目Id")
-    private String appId;
+    private String projectId;
 
     @ApiModelProperty("top数字")
     private Integer topNu;

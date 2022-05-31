@@ -87,7 +87,7 @@ public class GatewayMetricsTest extends BaseContextTest {
 
     @Test
     public void getGatewayAppMetricsTest() throws IOException {
-        GatewayAppDTO param = new GatewayAppDTO();
+        GatewayProjectDTO param = new GatewayProjectDTO();
         CustomDataSource.setGatewayMetricsDTO(param);
         param.setTopNu(5);
         param.setMetricsTypes(CustomDataSource.getRandomGatewayAppMetrics());

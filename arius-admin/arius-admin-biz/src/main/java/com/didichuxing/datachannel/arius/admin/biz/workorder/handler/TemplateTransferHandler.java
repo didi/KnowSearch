@@ -188,7 +188,8 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
 
         if (result.success()) {
             operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), JSON.toJSONString(
-                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), "模板从 appId:" + content.getSourceProjectId() + "转移到 appId:" + content.getTgtProjectId())), approver);
+                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(),
+                            "模板从 projectId:" + content.getSourceProjectId() + "转移到 projectId:" + content.getTgtProjectId())), approver);
         }
 
         return Result.buildFrom(result);
