@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "逻辑集群状态信息")
+@Deprecated
 public class ConsoleClusterOfflineInfoVO {
     private long        id;
 

@@ -193,8 +193,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO
             .setIndices(indexTemplatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId()));
-        consoleTemplateClearVO.setAccessApps(
-            ConvertUtil.list2List(templateLogicManager.getLogicTemplateProjectAccess(logicId), ConsoleAppVO.class));
+        consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateClearVO);
     }

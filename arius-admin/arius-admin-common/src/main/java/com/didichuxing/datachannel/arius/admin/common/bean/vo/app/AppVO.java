@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "应用信息")
+@Deprecated
 public class AppVO extends BaseVO {
 
     @ApiModelProperty("应用ID")
