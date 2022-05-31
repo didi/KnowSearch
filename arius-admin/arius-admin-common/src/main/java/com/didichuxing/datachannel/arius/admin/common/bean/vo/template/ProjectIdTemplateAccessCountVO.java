@@ -20,7 +20,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
-@ApiModel(value = "AppIdTemplateAccessCountVO", description = "appid访问索引模板级别次数")
+@ApiModel(value = "ProjectIdTemplateAccessCountVO", description = "projectId访问索引模板级别次数")
 public class ProjectIdTemplateAccessCountVO {
 
     @ApiModelProperty("索引模板主键")

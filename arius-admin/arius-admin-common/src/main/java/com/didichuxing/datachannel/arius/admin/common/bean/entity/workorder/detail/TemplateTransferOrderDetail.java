@@ -11,14 +11,14 @@ public class TemplateTransferOrderDetail extends AbstractOrderDetail {
     private Integer id;
 
     /**
-     * 目标APPID
+     * 目标ProjectId
      */
-    private Integer sourceAppId;
+    private Integer sourceProjectId;
 
     /**
-     * 目标APPID
+     * 目标ProjectId
      */
-    private Integer tgtAppId;
+    private Integer tgtProjectId;
 
     /**
      * 名字

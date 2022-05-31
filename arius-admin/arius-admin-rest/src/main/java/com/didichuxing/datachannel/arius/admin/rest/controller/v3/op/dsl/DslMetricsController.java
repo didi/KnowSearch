@@ -30,40 +30,40 @@ public class DslMetricsController {
     @Autowired
     private DslMetricsManager dslMetricsManager;
 
-    @GetMapping(path = "/listByAppid.do")
-    @ApiOperation(value = "根据appid获取dsl的指标信息", notes = "根据appid获取dsl的指标信息", httpMethod = "GET")
+    @GetMapping(path = "/project.do")
+    @ApiOperation(value = "根据projectId获取dsl的指标信息", notes = "根据projectId获取dsl的指标信息", httpMethod = "GET")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "appId", value = "应用账号", required = false, example = "1"),
+            @ApiImplicitParam(name = "projectId", value = "应用账号", required = false, example = "1"),
             @ApiImplicitParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000"),
             @ApiImplicitParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000")
     })
-    public Result<List<DslTemplateVO>> listByAppid(@RequestParam(value = "appId", required = false) Integer appId,
-                                                   @RequestParam(value = "startDate") Long startDate,
-                                                   @RequestParam(value = "endDate") Long endDate, HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtil.getProjectId(request) : appId;
-        return dslMetricsManager.getDSLMetricsInfoByProjectId(appId, startDate, endDate);
+    public Result<List<DslTemplateVO>> listByProjectId(@RequestParam(value = "projectId", required = false) Integer projectId,
+                                                       @RequestParam(value = "startDate") Long startDate,
+                                                       @RequestParam(value = "endDate") Long endDate, HttpServletRequest request) {
+        projectId = projectId == null ? HttpRequestUtil.getProjectId(request) : projectId;
+        return dslMetricsManager.getDSLMetricsInfoByProjectId(projectId, startDate, endDate);
     }
 
     @GetMapping(path = "/detail.do")
-    @ApiOperation(value = "根据appid和模板名称获取dsl的指标信息", notes = "根据appid获取dsl的指标信息", httpMethod = "GET")
+    @ApiOperation(value = "根据projectId和模板名称获取dsl的指标信息", notes = "根据projectId获取dsl的指标信息", httpMethod = "GET")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "appId", value = "应用账号", required = false, example = "1"),
+            @ApiImplicitParam(name = "projectId", value = "应用账号", required = false, example = "1"),
             @ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5", required = true, example = "V2_EA317B2029682DB83A191CBD797A66FE"),
             @ApiImplicitParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000"),
             @ApiImplicitParam(name = "endDate", value = "结束时刻", required = true, example = "1550246399999")
     })
-    public Result<List<DslMetricsVO>> getDetailMetrics(@RequestParam(value = "appId", required = false) Integer appId,
+    public Result<List<DslMetricsVO>> getDetailMetrics(@RequestParam(value = "projectId", required = false) Integer projectId,
                                                        @RequestParam(value = "dslTemplateMd5") String dslTemplateMd5,
                                                        @RequestParam(value = "startDate") Long startDate, @RequestParam(value = "endDate") Long endDate,
                                                        HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtil.getProjectId(request) : appId;
-        return dslMetricsManager.getDetailMetrics(appId, dslTemplateMd5, startDate, endDate);
+        projectId = projectId == null ? HttpRequestUtil.getProjectId(request) : projectId;
+        return dslMetricsManager.getDetailMetrics(projectId, dslTemplateMd5, startDate, endDate);
     }
 
-    @GetMapping(path = "/listByCondition.do")
+    @GetMapping(path = "/condition.do")
     @ApiOperation(value = "根据查询条件获取查询模板数据", notes = "根据查询条件获取查询模板数据", httpMethod = "GET")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "appId", value = "应用账号", required = false, example = "1"),
+            @ApiImplicitParam(name = "projectId", value = "应用账号", required = false, example = "1"),
             @ApiImplicitParam(name = "searchKeyword", value = "查询关键字（如果是模糊查询则后面带上*）", required = false, example = "dos_order*"),
             @ApiImplicitParam(name = "dslTag", value = "危害标签", required = false, example = "dslTag"),
             @ApiImplicitParam(name = "sortInfo", value = "排序信息", required = false, example = ""),
@@ -72,15 +72,15 @@ public class DslMetricsController {
             @ApiImplicitParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000"),
             @ApiImplicitParam(name = "endDate", value = "结束时刻", required = true, example = "1550246399999")
     })
-    public Result<SearchDslTemplateResponseVO> searchTemplate(@RequestParam(value = "appId", required = false) Integer appId,
+    public Result<SearchDslTemplateResponseVO> searchTemplate(@RequestParam(value = "projectId", required = false) Integer projectId,
                                                               @RequestParam(value = "searchKeyword", required = false) String searchKeyword,
                                                               @RequestParam(value = "dslTag", required = false) String dslTag,
                                                               @RequestParam(value = "sortInfo", required = false) String sortInfo,
                                                               @RequestParam(value = "from") Long from, @RequestParam(value = "size") Long size,
                                                               @RequestParam(value = "startDate") Long startDate, @RequestParam(value = "endDate") Long endDate,
                                                               HttpServletRequest request) {
-        appId = appId == null ? HttpRequestUtil.getProjectId(request) : appId;
-        return dslMetricsManager.getDslTemplateByCondition(appId, searchKeyword, dslTag, sortInfo, from, size,
+        projectId = projectId == null ? HttpRequestUtil.getProjectId(request) : projectId;
+        return dslMetricsManager.getDslTemplateByCondition(projectId, searchKeyword, dslTag, sortInfo, from, size,
             startDate, endDate);
     }
 }

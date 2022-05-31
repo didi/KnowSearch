@@ -1,16 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.AppManager;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayOverviewDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiGatewayNodesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
@@ -26,6 +25,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayMetricsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -54,7 +55,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     private GatewayManager gatewayManager;
 
     @Autowired
-    private AppManager appManager;
+    private ProjectService projectService;
 
     @Autowired
     private TemplateLogicManager templateLogicManager;
@@ -340,8 +341,11 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                     result.add(appCountMetrics);
                 }
             });
-            // 获取所有appId
-            nameList.addAll(appManager.listIds().getData());
+            // 获取所有projectid
+            List<String> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
+                    .map(String::valueOf)
+                    .collect(Collectors.toList());
+            nameList.addAll(projectIds);
         }
         fillSortData(result, rawMetricsTypes, nameList, startTime, endTime, dto.getTopNu() == 0 ? 1 : dto.getTopNu());
 

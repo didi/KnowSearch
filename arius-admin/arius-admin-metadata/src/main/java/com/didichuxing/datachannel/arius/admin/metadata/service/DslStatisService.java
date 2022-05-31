@@ -45,10 +45,10 @@ public class DslStatisService {
             return Result.build(ResultType.ILLEGAL_PARAMS);
         }
 
-        Integer appid = auditDsls.getAppid();
+        Integer projectId = auditDsls.getProjectId();
 
         List<DslTemplatePO> dslTemplatePOList = Lists.newArrayList();
-        boolean auditResult = auditDsl(appid, auditDsls.getDslInfos(), dslTemplatePOList);
+        boolean auditResult = auditDsl(projectId, auditDsls.getDslInfos(), dslTemplatePOList);
         if (!auditResult) {
             return Result.build(ResultType.FAIL);
         }
@@ -59,7 +59,7 @@ public class DslStatisService {
         if (operatorResult) {
             for (DslTemplatePO dslTemplatePo : dslTemplatePOList) {
                 OperateRecordDTO operateRecord = buildDslSettingOperatorRecord(
-                        String.format("%d_%s", appid, dslTemplatePo.getDslTemplateMd5()), OperationEnum.EDIT.getCode(), auditDsls.getUserName(),
+                        String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()), OperationEnum.EDIT.getCode(), auditDsls.getUserName(),
                         String.format("checkMode->%s", dslTemplatePo.getCheckMode()));
                 operateRecordService.save(operateRecord);
             }

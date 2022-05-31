@@ -35,8 +35,8 @@ public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {
     }
 
     @Override
-    public Result<Long> getSearchCountByAppId(String dataCenter, Long appId, Long startDate,
-            Long endDate) {
+    public Result<Long> getSearchCountByProjectId(String dataCenter, Long appId, Long startDate,
+                                                  Long endDate) {
         return gatewayJoinLogService.getSearchCountByAppid(appId, startDate, endDate);
     }
 

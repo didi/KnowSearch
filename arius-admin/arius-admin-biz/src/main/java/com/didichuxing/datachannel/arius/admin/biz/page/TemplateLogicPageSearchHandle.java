@@ -203,10 +203,10 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
         return consoleTemplateVOList;
     }
 
-    private TemplateConditionDTO buildInitTemplateConditionDTO(PageDTO pageDTO, Integer appId) {
+    private TemplateConditionDTO buildInitTemplateConditionDTO(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof TemplateConditionDTO) {
             TemplateConditionDTO condition = (TemplateConditionDTO) pageDTO;
-            condition.setProjectId(appId);
+            condition.setProjectId(projectId);
             return condition;
         }
         return null;

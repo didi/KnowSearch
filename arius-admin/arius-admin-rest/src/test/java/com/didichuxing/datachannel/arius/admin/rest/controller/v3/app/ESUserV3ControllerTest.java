@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -165,9 +166,7 @@ class ESUserV3ControllerTest extends AriusAdminApplicationTest {
     void testListESUserByProjectId() throws Exception {
         // Setup
         // Configure ESUserManager.listESUsersByProjectId(...).
-        final Result<List<ESUser>> listResult = Result.buildFail(Arrays.asList(
-                new ESUser(0, "name", 0, "verifyCode", "departmentId", "department", "responsible", "memo", 0, 0,
-                        "cluster", 0, "dataCenter", 0, false, "ip", "indexExp")));
+        final Result<List<ESUserVO>> listResult = Result.buildFail();
         when(mockEsUserManager.listESUsersByProjectId(0, "operator")).thenReturn(listResult);
         
         // Run the test
@@ -197,7 +196,7 @@ class ESUserV3ControllerTest extends AriusAdminApplicationTest {
     void testListESUserByProjectId_ESUserManagerReturnsNoItems() throws Exception {
         // Setup
         // Configure ESUserManager.listESUsersByProjectId(...).
-        final Result<List<ESUser>> listResult = Result.buildFail(Collections.emptyList());
+        final Result<List<ESUserVO>> listResult = Result.buildFail(Collections.emptyList());
         when(mockEsUserManager.listESUsersByProjectId(0, "operator")).thenReturn(listResult);
         
         // Run the test
@@ -213,7 +212,7 @@ class ESUserV3ControllerTest extends AriusAdminApplicationTest {
     void testListESUserByProjectId_ESUserManagerReturnsFailure() throws Exception {
         // Setup
         // Configure ESUserManager.listESUsersByProjectId(...).
-        final Result<List<ESUser>> listResult = Result.buildFail();
+        final Result<List<ESUserVO>> listResult = Result.buildFail();
         when(mockEsUserManager.listESUsersByProjectId(0, "operator")).thenReturn(listResult);
         
         // Run the test

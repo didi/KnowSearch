@@ -1085,14 +1085,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     /**
      * 构建物理集群详情
      * @param phyClusters 物理集群元数据信息
-     * @param currentAppId 当前登录项目
+     * @param currentProjectId 当前登录项目
      */
-    private List<ConsoleClusterPhyVO> buildConsoleClusterPhy(List<ClusterPhy> phyClusters, Integer currentAppId) {
+    private List<ConsoleClusterPhyVO> buildConsoleClusterPhy(List<ClusterPhy> phyClusters, Integer currentProjectId) {
 
         List<ConsoleClusterPhyVO> consoleClusterPhys = ConvertUtil.list2List(phyClusters, ConsoleClusterPhyVO.class);
 
         consoleClusterPhys.parallelStream()
-            .forEach(consoleClusterPhyVO -> buildPhyCluster(consoleClusterPhyVO, currentAppId));
+            .forEach(consoleClusterPhyVO -> buildPhyCluster(consoleClusterPhyVO, currentProjectId));
 
         Collections.sort(consoleClusterPhys);
 
@@ -1104,12 +1104,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * @param consoleClusterPhyVO 物理集群元数据信息
      * @return
      */
-    private void buildPhyCluster(ConsoleClusterPhyVO consoleClusterPhyVO, Integer currentAppId) {
+    private void buildPhyCluster(ConsoleClusterPhyVO consoleClusterPhyVO, Integer currentProjectId) {
         if (!AriusObjUtils.isNull(consoleClusterPhyVO)) {
             buildPhyClusterStatics(consoleClusterPhyVO);
             buildPhyClusterTemplateSrv(consoleClusterPhyVO);
             buildClusterRole(consoleClusterPhyVO);
-            buildWithOtherInfo(consoleClusterPhyVO, currentAppId);
+            buildWithOtherInfo(consoleClusterPhyVO, currentProjectId);
         }
     }
 

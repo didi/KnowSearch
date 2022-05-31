@@ -46,7 +46,7 @@ public class OrderInfoDetail {
     private UserBriefVO applicant;
 
     /**
-     * 申请人appId
+     * 申请人ProjectId
      */
     private Integer applicantProjectId;
 

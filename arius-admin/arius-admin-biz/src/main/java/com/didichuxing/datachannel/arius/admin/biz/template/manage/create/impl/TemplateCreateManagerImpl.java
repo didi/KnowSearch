@@ -56,13 +56,13 @@ public class TemplateCreateManagerImpl implements TemplateCreateManager {
     private TemplateAction templateAction;
 
     @Override
-    public Result<Void> create(TemplateCreateDTO param, String operator, Integer appId) {
+    public Result<Void> create(TemplateCreateDTO param, String operator, Integer projectId) {
         Result<Void> validParamResult = validateParam(param);
         if (validParamResult.failed()) {
             return validParamResult;
         }
 
-        IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, appId);
+        IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, projectId);
         try {
             Result<Integer> createResult = templateAction.createWithAutoDistributeResource(indexTemplateDTO, operator);
             if (createResult.success()) {
