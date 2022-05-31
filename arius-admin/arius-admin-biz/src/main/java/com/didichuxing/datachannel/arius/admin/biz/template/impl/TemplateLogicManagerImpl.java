@@ -577,6 +577,16 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
+    public Result<Void> newEditTemplate(IndexTemplateDTO param, String operator) {
+        try {
+            return indexTemplateService.editTemplateInfoTODB(param);
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=newEditTemplate||msg=fail to editTemplate");
+        }
+        return Result.buildFail("编辑模板失败");
+    }
+
+    @Override
     public Result<Void> delTemplate(Integer logicTemplateId, String operator)
             throws AdminOperateException {
         return indexTemplateService.delTemplate(logicTemplateId, operator);

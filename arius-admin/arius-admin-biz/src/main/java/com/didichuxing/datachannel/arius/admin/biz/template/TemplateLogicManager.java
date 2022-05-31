@@ -145,7 +145,11 @@ public interface TemplateLogicManager {
      */
     List<String> getTemplateLogicNames(Integer appId);
 
+    @Deprecated
+    //todo: 下线并重命名方法
     Result<Void> editTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException;
+
+    Result<Void> newEditTemplate(IndexTemplateDTO param, String operator);
 
     Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
 
