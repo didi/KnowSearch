@@ -71,7 +71,7 @@ public class SwaggerConfiguration {
         final Parameter user = new ParameterBuilder().name(HttpRequestUtil.USER).description("操作人")
                 .modelRef(new ModelRef("string")).parameterType("header").required(true).defaultValue("").build();
         final Parameter userId = new ParameterBuilder().name(HttpRequestUtil.USER_ID).description("操作人id")
-                .modelRef(new ModelRef("integer")).parameterType("header").required(false).defaultValue("").build();
+                .modelRef(new ModelRef("integer")).parameterType("header").required(false).build();
         final Parameter projectId = new ParameterBuilder().name(HttpRequestUtil.PROJECT_ID)
                 .description("项目id:在项目创建后，各个接口都需要带此header").modelRef(new ModelRef("integer")).parameterType("header")
                 .required(false).defaultValue("").build();
