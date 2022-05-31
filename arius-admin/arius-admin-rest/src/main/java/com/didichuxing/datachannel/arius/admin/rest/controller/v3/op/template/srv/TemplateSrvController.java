@@ -29,7 +29,7 @@ public class TemplateSrvController {
 
     @PostMapping("/page")
     @ResponseBody
-    @ApiOperation(value = "分页模糊查询模板服务")
+    @ApiOperation(value = "分页查询模板服务列表")
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(@RequestBody TemplateQueryDTO condition) {
         return templateSrvManager.pageGetTemplateWithSrv(condition);
     }
