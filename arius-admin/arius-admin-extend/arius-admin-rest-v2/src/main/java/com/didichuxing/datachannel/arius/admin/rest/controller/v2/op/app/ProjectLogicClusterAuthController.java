@@ -1,6 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v3.app;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.app;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectLogicClusterAuthDTO;
@@ -36,9 +37,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/09/20
  */
 @RestController
-@RequestMapping({ V3 + "/app/auth/cluster" })
-@Api(tags = "App逻辑集群权限接口(REST)")
-public class AppLogicClusterAuthV3Controller {
+@RequestMapping({ V2_OP + "/app/auth", V3_OP + "/app/auth/cluster" })
+@Api(tags = "OP-运维侧App逻辑集群权限接口(REST)")
+@Deprecated
+public class ProjectLogicClusterAuthController {
 
     @Autowired
     private ProjectClusterLogicAuthService authService;
@@ -46,7 +48,7 @@ public class AppLogicClusterAuthV3Controller {
     @Autowired
     private IndexTemplateService indexTemplateService;
 
-    @GetMapping("/app-auths")
+    @GetMapping("/appAuths")
     @ResponseBody
     @ApiOperation(value = "获取project的所有逻辑集群权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
@@ -54,18 +56,18 @@ public class AppLogicClusterAuthV3Controller {
         return Result.buildSucc(ConvertUtil.list2List(authService.getAllLogicClusterAuths(projectId), ProjectLogicClusterAuthVO.class));
     }
 
-    @GetMapping("/cluster-auths")
+    @GetMapping("/clusterAuths")
     @ResponseBody
-    @ApiOperation(value = "获取project权限接口" )
+    @ApiOperation(value = "获取APP权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicClusterId", value = "逻辑集群ID", required = true) })
-    public Result<List<ProjectLogicClusterAuthVO>> getAuthsByLogicClusterId(@RequestParam("logicClusterId") Long logicClusterId) {
+    public Result<List<ProjectLogicClusterAuthVO>> getClusterAuths(@RequestParam("logicClusterId") Long logicClusterId) {
         return Result.buildSucc(
-                ConvertUtil.list2List(authService.getLogicClusterAuths(logicClusterId, null), ProjectLogicClusterAuthVO.class));
+            ConvertUtil.list2List(authService.getLogicClusterAuths(logicClusterId, null), ProjectLogicClusterAuthVO.class));
     }
 
     @PostMapping("")
     @ResponseBody
-    @ApiOperation(value = "增加project逻辑集群权限接口" )
+    @ApiOperation(value = "增加APP逻辑集群权限接口" )
     public Result<Void> createLogicClusterAuth(HttpServletRequest request, @RequestBody ProjectLogicClusterAuthDTO authDTO) {
         return authService.addLogicClusterAuth(authDTO, HttpRequestUtil.getOperator(request));
     }
@@ -81,19 +83,20 @@ public class AppLogicClusterAuthV3Controller {
 
     @DeleteMapping("/{authId}")
     @ResponseBody
-    @ApiOperation(value = "删除APP逻辑集群权限接口")
-    public Result<Void> deleteLogicClusterAuth(HttpServletRequest request,
-                                               @PathVariable(value = "authId") Long authId) {
+    @ApiOperation(value = "删除project逻辑集群权限接口" )
+    public Result<Void> deleteLogicClusterAuth(HttpServletRequest request, @PathVariable(value = "authId") Long authId) {
 
         ProjectClusterLogicAuth projectClusterLogicAuth = authService.getLogicClusterAuthById(authId);
         if (projectClusterLogicAuth == null) {
             return Result.buildNotExist("权限不存在");
         }
 
-        List<IndexTemplate> templatesInLogicCluster = indexTemplateService
-            .getHasAuthTemplatesInLogicCluster(projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId());
-        if (!templatesInLogicCluster.isEmpty()) {
-            return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");
+        if (projectClusterLogicAuth.getLogicClusterId() != null) {
+            List<IndexTemplate> templatesInLogicCluster = indexTemplateService.getHasAuthTemplatesInLogicCluster(
+                    projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId());
+            if (!templatesInLogicCluster.isEmpty()) {
+                return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");
+            }
         }
 
         return authService.deleteLogicClusterAuthById(authId, HttpRequestUtil.getOperator(request));

@@ -36,9 +36,9 @@ public class ConsoleClusterController {
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取APP拥有的集群列表" )
+    @ApiOperation(value = "获取project拥有的集群列表" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
-    public Result<List<ConsoleClusterVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
+    public Result<List<ConsoleClusterVO>> getProjectLogicClusters(@RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(projectId);
     }
 
@@ -55,8 +55,8 @@ public class ConsoleClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "集群ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value =
                                  "PROJECT ID", required = true) })
-    public Result<ConsoleClusterVO> getAppLogicClusters(@RequestParam("clusterId") Long clusterId,
-                                                        @RequestParam("projectId") Integer projectId) {
+    public Result<ConsoleClusterVO> getProjectLogicClusters(@RequestParam("clusterId") Long clusterId,
+                                                            @RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(clusterId, projectId);
     }
 
