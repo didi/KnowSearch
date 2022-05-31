@@ -10,6 +10,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -32,9 +33,9 @@ public class ProjectProcess implements ResponseBodyAdvice {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
 
         String requestPath = request.getURI().getPath();
-		
-       //如何是创建项目的接口会一并创建projectid
-        if (requestPath.endsWith(PROJECT_END) && body instanceof com.didiglobal.logi.security.common.Result) {
+    
+        //如何是创建项目的接口会一并创建projectid
+        if (requestPath.endsWith(PROJECT_END) && body instanceof com.didiglobal.logi.security.common.Result&&HttpMethod.POST.equals(request.getMethod())) {
             Object data = ((Result<?>) body).getData();
             if (Objects.nonNull(data) && data instanceof ProjectVO) {
                 //通过RequestContextHolder获取request
@@ -50,6 +51,8 @@ public class ProjectProcess implements ResponseBodyAdvice {
         
             return body;
         }
+        //删除项目的时候需要一并删除项目的配置
+        //if (&&HttpMethod.DELETE.equals(request.getMethod()))
         return body;
     }
 }
