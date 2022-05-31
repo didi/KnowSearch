@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "es user 信息（包含验证码）")
 public class ConsoleESUserWithVerifyCodeVO extends BaseVO {
 
-    @ApiModelProperty("应用ID")
+    @ApiModelProperty("es user ")
     private Integer id;
 
     @ApiModelProperty("应用名称")
@@ -29,9 +29,11 @@ public class ConsoleESUserWithVerifyCodeVO extends BaseVO {
     private String  verifyCode;
 
     @ApiModelProperty("部门ID")
+    @Deprecated
     private String  departmentId;
 
     @ApiModelProperty("部门名称")
+    @Deprecated
     private String  department;
 
     @ApiModelProperty("责任人")

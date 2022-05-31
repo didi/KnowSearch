@@ -18,6 +18,7 @@ import java.util.List;
  * @date 2019/5/20
  */
 @Service
+@Deprecated
 public class AppUserInfoServiceImpl implements AppUserInfoService {
 
     private static final ILog LOGGER = LogFactory.getLog(AppUserInfoServiceImpl.class);

@@ -52,7 +52,7 @@ public class ProjectConfigV3Controller {
 	
 	@GetMapping
 	@ResponseBody
-	@ApiOperation(value = "获取", notes = "")
+	@ApiOperation(value = "获取项目配置", notes = "")
 	public Result<ProjectConfig> get(HttpServletRequest request) {
 		//获取操作用户
 		Integer projectId = HttpRequestUtil.getProjectId(request);

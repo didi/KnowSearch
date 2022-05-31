@@ -62,6 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2021-04-28
  */
 @Service
+@Deprecated
 public class AppServiceImpl implements AppService {
 
     private static final ILog          LOGGER                      = LogFactory.getLog(AppServiceImpl.class);
