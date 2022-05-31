@@ -19,7 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateCapacityVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
@@ -37,7 +36,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.enums.ResultCode;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.exception.CodeMsg;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
@@ -71,7 +72,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
 
     private static final String INDEX_NOT_EXISTS_TIPS = "索引不存在";
-    private static final String APP_IS_NOT_EXIST = "应用不存在";
+ 
     public static final int MAX_PERCENT = 10000;
     public static final int MIN_PERCENT = -99;
 
@@ -104,7 +105,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
         
         if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildNotExist(APP_IS_NOT_EXIST);
+            return Result.build(ResultCode.USER_ACCOUNT_NOT_EXIST.getCode(),
+                    ResultCode.USER_ACCOUNT_NOT_EXIST.getMessage());
         }
         return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
@@ -258,11 +260,11 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取App Id所有模板的索引" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
-    public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(HttpServletRequest request,
-                                                                        @RequestParam("projectId") Integer projectId) {
+    public Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(HttpServletRequest request,
+                                                                            @RequestParam("projectId") Integer projectId) {
 
        if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildNotExist(APP_IS_NOT_EXIST);
+            return Result.build(ResultCode.USER_ACCOUNT_NOT_EXIST.getCode(),ResultCode.USER_ACCOUNT_NOT_EXIST.getMessage());
         }
 
         return indexTemplateService.getLogicTemplatesByProjectId(projectId);
