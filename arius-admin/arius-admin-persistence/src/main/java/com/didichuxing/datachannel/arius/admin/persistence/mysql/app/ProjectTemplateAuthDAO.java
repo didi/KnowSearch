@@ -35,9 +35,9 @@ public interface ProjectTemplateAuthDAO {
     ProjectTemplateAuthPO getByProjectIdAndTemplateId(@Param("projectId") Integer projectId,
                                                       @Param("templateId") String templateId);
 
-    ProjectTemplateAuthPO getByAppIdAndTemplateIdAndType(@Param("projectId") Integer projectId,
-                                                         @Param("templateId") String templateId,
-                                                         @Param("type") Integer type);
+    ProjectTemplateAuthPO getByProjectIdAndTemplateIdAndType(@Param("projectId") Integer projectId,
+                                                             @Param("templateId") String templateId,
+                                                             @Param("type") Integer type);
 
     List<ProjectTemplateAuthPO> listByLogicTemplateId(String logicTemplateId);
 

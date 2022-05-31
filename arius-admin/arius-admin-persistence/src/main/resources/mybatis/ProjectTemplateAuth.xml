@@ -87,7 +87,7 @@
         where project_id = #{projectId} and template = #{templateId} and (`type` = 2 or `type` = 3) and status = 1
     </select>
 
-    <select id="getByAppIdAndTemplateIdAndType" resultMap="BaseResultMap">
+    <select id="getByProjectIdAndTemplateIdAndType" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from project_template_info

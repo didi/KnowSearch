@@ -286,7 +286,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
     /**
      * 获取模板具体的别名
      *
-     * @param projectId appId
+     * @param projectId projectId
      */
     @Override
     public Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId) {

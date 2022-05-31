@@ -30,7 +30,7 @@ public class ThirdPartLogicClusterVO extends BaseVO {
     private Integer type;
 
     @ApiModelProperty("所属应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("数据中心")
     private String  dataCenter;

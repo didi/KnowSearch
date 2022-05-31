@@ -15,5 +15,5 @@ public interface TemplateCreateManager {
      * @param operator 操作者
      * @return
      */
-    Result<Void> create(TemplateCreateDTO param, String operator, Integer appId);
+    Result<Void> create(TemplateCreateDTO param, String operator, Integer projectId);
 }

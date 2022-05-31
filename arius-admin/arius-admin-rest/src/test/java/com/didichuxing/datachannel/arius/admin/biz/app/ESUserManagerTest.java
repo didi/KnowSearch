@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserDAO;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
     void testListESUsersByProjectId() {
         // Setup
         // Run the test
-        final Result<List<ESUser>> result = esUserManagerImplUnderTest.listESUsersByProjectId(1593, "admin");
+        final Result<List<ESUserVO>> result = esUserManagerImplUnderTest.listESUsersByProjectId(1593, "admin");
         
         // Verify the results
         assertThat(result.getData()).hasSize(1);

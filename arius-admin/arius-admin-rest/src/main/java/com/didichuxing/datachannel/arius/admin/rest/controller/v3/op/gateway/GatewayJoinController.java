@@ -21,8 +21,8 @@ public class GatewayJoinController {
     @Autowired
     private GatewayJoinLogManager gatewayJoinManager;
 
-    @GetMapping(path = "/error/listByProjectId.do")
-    @ApiOperation(value = "获取appid的错误gateway请求日志", notes = "获取projectId的错误gateway请求日志", httpMethod = "GET")
+    @GetMapping(path = "/error/project.do")
+    @ApiOperation(value = "获取projectid的错误gateway请求日志", notes = "获取projectId的错误gateway请求日志", httpMethod = "GET")
     public Result<List<GatewayJoinVO>> getGatewayErrorList(@ApiParam(name = "projectId", value = "应用账号", required = false, example = "1") @RequestParam(value = "projectId", required = false) Long projectId,
                                                            @ApiParam(name = "dataCenter", value = "数据中心", required = true, example = "cn") @RequestParam(value = "dataCenter") String dataCenter,
                                                            @ApiParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000") @RequestParam(value = "startDate") Long startDate,
@@ -30,8 +30,8 @@ public class GatewayJoinController {
         return gatewayJoinManager.getGatewayErrorList(projectId, startDate, endDate);
     }
 
-    @GetMapping(path = "/slow/listByProjectId.do")
-    @ApiOperation(value = "获取appid的慢查gateway请求日志", notes = "获取projectId的慢查gateway请求日志", httpMethod = "GET")
+    @GetMapping(path = "/slow/project.do")
+    @ApiOperation(value = "获取projectId的慢查gateway请求日志", notes = "获取projectId的慢查gateway请求日志", httpMethod = "GET")
     public Result<List<GatewayJoinVO>> getGatewaySlowList(@ApiParam(name = "projectId", value = "应用账号", required = false, example = "1") @RequestParam(value = "projectId", required = false) Long projectId,
                                                           @ApiParam(name = "dataCenter", value = "数据中心", required = true, example = "cn") @RequestParam(value = "dataCenter") String dataCenter,
                                                           @ApiParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000") @RequestParam(value = "startDate") Long startDate,
@@ -39,12 +39,12 @@ public class GatewayJoinController {
         return gatewayJoinManager.getGatewaySlowList(projectId, startDate, endDate);
     }
 
-    @GetMapping(path = "/query/countByProjectId.do")
-    @ApiOperation(value = "获取appid的查询次数", notes = "获取projectId的查询次数", httpMethod = "GET")
-    public Result<Long> getSearchCountByAppid(@ApiParam(name = "projectId", value = "应用账号", required = false, example = "1") @RequestParam(value = "projectId", required = true) Long projectId,
-                                              @ApiParam(name = "dataCenter", value = "数据中心", required = true, example = "cn") @RequestParam(value = "dataCenter") String dataCenter,
-                                              @ApiParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000") @RequestParam(value = "startDate") Long startDate,
-                                              @ApiParam(name = "endDate", value = "结束时刻", required = true, example = "1550246399999") @RequestParam(value = "endDate") Long endDate) {
-        return gatewayJoinManager.getSearchCountByAppId(dataCenter, projectId, startDate, endDate);
+    @GetMapping(path = "/query/count-project.do")
+    @ApiOperation(value = "获取projectId的查询次数", notes = "获取projectId的查询次数", httpMethod = "GET")
+    public Result<Long> getSearchCountByProjectId(@ApiParam(name = "projectId", value = "应用账号", required = false, example = "1") @RequestParam(value = "projectId", required = true) Long projectId,
+                                                  @ApiParam(name = "dataCenter", value = "数据中心", required = true, example = "cn") @RequestParam(value = "dataCenter") String dataCenter,
+                                                  @ApiParam(name = "startDate", value = "开始时刻", required = true, example = "1550160000000") @RequestParam(value = "startDate") Long startDate,
+                                                  @ApiParam(name = "endDate", value = "结束时刻", required = true, example = "1550246399999") @RequestParam(value = "endDate") Long endDate) {
+        return gatewayJoinManager.getSearchCountByProjectId(dataCenter, projectId, startDate, endDate);
     }
 }

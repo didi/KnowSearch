@@ -114,7 +114,7 @@ public class ESGatewayClient {
         String[] passwords = StringUtils.splitByWholeSeparatorPreserveAllTokens(password, COMMA);
 
         if (esUsers == null || passwords == null || esUsers.length != passwords.length) {
-            throw new AriusGatewayException("please check cn gateway appid,password");
+            throw new AriusGatewayException("please check cn gateway es user,password");
         }
 
         // 构建认证信息的header

@@ -114,7 +114,7 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
     /**
      * 验证用户是否有该工单权限
-     * 要求只有集群所属的appId才能操作
+     * 要求只有集群所属的projectId才能操作
      *
      * @param workOrder 工单内容
      * @return result
@@ -132,10 +132,10 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             case OWN:
                 return Result.buildSucc();
             case ACCESS:
-                return Result.buildParamIllegal("您的appid无该集群的扩缩容权限");
+                return Result.buildParamIllegal("您的projectId无该集群的扩缩容权限");
             case NO_PERMISSIONS:
             default:
-                return Result.buildParamIllegal("您的appid无该集群的相关权限");
+                return Result.buildParamIllegal("您的projectId无该集群的相关权限");
         }
     }
 

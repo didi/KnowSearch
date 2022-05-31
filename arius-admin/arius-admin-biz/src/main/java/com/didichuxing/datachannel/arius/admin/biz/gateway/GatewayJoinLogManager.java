@@ -34,7 +34,7 @@ public interface GatewayJoinLogManager {
      * @param endDate
      * @return
      */
-    Result<Long> getSearchCountByAppId(String dataCenter, Long appId, Long startDate, Long endDate);
+    Result<Long> getSearchCountByProjectId(String dataCenter, Long appId, Long startDate, Long endDate);
 
     /**
      * 获取GatewaySlowList

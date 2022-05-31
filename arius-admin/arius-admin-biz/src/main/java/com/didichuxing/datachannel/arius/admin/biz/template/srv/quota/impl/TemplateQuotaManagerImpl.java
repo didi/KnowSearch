@@ -238,7 +238,7 @@ public class TemplateQuotaManagerImpl extends BaseTemplateSrv implements Templat
             return false;
         }
 
-        // appid黑名单控制
+        // projectId黑名单控制
         Set<String> disableAppIdSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
             QUOTA_DYNAMIC_LIMIT_BLACK_APP_IDS, "none", ",");
         if (disableAppIdSet.contains(String.valueOf(templateLogicWithPhysical.getProjectId()))
