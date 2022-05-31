@@ -78,7 +78,6 @@ public class ESLogicClusterController {
     @PutMapping("/resource/add")
     @ResponseBody
     @ApiOperation(value = "新建带有region信息的逻辑集群接口" )
-
     public Result<Long> createLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.addLogicCluster(param, HttpRequestUtils.getOperator(request),
             HttpRequestUtils.getAppId(request));
@@ -92,13 +91,13 @@ public class ESLogicClusterController {
         return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("/logic/cluster/nodes")
-    @ResponseBody
-    @ApiOperation(value = "获取指定逻辑集群列表接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
-
-    public Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(@RequestParam(value = "clusterId") Long clusterId) {
-        return Result.buildSucc(clusterNodeManager
-            .convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
-    }
+//    @GetMapping("/logic/cluster/nodes")
+//    @ResponseBody
+//    @ApiOperation(value = "获取指定逻辑集群列表接口" )
+//    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
+//
+//    public Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(@RequestParam(value = "clusterId") Long clusterId) {
+//        return Result.buildSucc(clusterNodeManager
+//            .convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
+//    }
 }

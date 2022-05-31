@@ -1,18 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
@@ -22,6 +23,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
+/**
+ * @description: 逻辑集群manager
+ * @author gyp
+ * @date 2022/5/31 16:26
+ * @version 1.0
+ */
 public interface ClusterLogicManager {
 
     /**
@@ -29,7 +36,7 @@ public interface ClusterLogicManager {
      * @param logicClusters     逻辑集群列表
      * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
      *                          ，为null则权限为运维人员权限（管理权限）
-     * @return
+     * @return 逻辑集群VO
      */
     List<ConsoleClusterVO> batchBuildOpClusterVOs(List<ClusterLogic> logicClusters, Integer appIdForAuthJudge);
 
@@ -52,7 +59,7 @@ public interface ClusterLogicManager {
 
     /**
      * 获取APP拥有的集群列表
-     * @param appId
+     * @param appId appId
      * @return
      */
     Result<List<ConsoleClusterVO>> getAppLogicClusters(Integer appId);
@@ -95,19 +102,6 @@ public interface ClusterLogicManager {
      */
     Result<List<ConsoleTemplateVO>> getClusterLogicTemplates(HttpServletRequest request, Long clusterId);
 
-    /**
-     * 获取指定逻辑集群datanode的规格接口
-     * @param clusterId
-     * @return
-     */
-    Result<Set<ESClusterNodeSepcVO>> getLogicClusterDataNodeSpec(Long clusterId);
-
-    /**
-     * 获取指定罗集群节点列表接口
-     * @param clusterId
-     * @return
-     */
-    Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(Long clusterId);
 
     /**
      * 获取当前集群支持的套餐列表
@@ -126,14 +120,16 @@ public interface ClusterLogicManager {
 
     /**
      * 获取逻辑集群分派的物理集群列表
-     *
-     * @param logicClusterId 逻辑集群ID
+     * @param logicClusterId
      * @return
      */
     List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
 
     /**
      * 获取所有逻辑集群列表接口
+     * @param param
+     * @param appId
+     * @return
      */
     List<ConsoleClusterVO> getConsoleClusterVOS(ESLogicClusterDTO param, Integer appId);
 
@@ -146,18 +142,46 @@ public interface ClusterLogicManager {
 
     /**
      * 新建逻辑集群, 关联 logicCluster 关联 region
+     * @param param 集群信息
+     * @param operator 操作人
+     * @return 成功或失败
      */
     Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator);
 
     /**
-     * 根据逻辑集群Id和appId创建逻辑集群信息
+     *  根据逻辑集群Id和appId创建逻辑集群信息
+     * @param clusterLogicId 集群id
+     * @param appId appId
+     * @return 集群详情
      */
     ConsoleClusterVO getConsoleClusterVOByIdAndAppId(Long clusterLogicId, Integer appId);
 
+    /**
+     *  新建带有region信息的逻辑集群
+     * @param param 逻辑集群信息
+     * @param operator 操作人
+     * @param appId appId
+     * @return id
+     */
     Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator, Integer appId);
 
+    /**
+     *
+     * @param logicClusterId 逻辑集群id
+     * @param operator 操作人
+     * @param appId appId
+     * @return 成功或者失败
+     * @throws AdminOperateException
+     */
     Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer appId) throws AdminOperateException;
 
+    /**
+     *  修改逻辑集群信息
+     * @param param 逻辑集群dto
+     * @param operator 操作人
+     * @param appId appId
+     * @return 成功或者失败
+     */
     Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer appId);
 
     /**
@@ -200,19 +224,19 @@ public interface ClusterLogicManager {
     boolean updateClusterLogicHealth(Long clusterLogicId);
 
     /**
-     * 校验模板大小资源是否充足
-     * @param logicClusterId 逻辑集群id
-     * @param templateSize 模板新建的时候设置的数据大小
-     * @return
-     */
-    Result<Void> checkTemplateDataSizeValidForCreate(Long logicClusterId, String templateSize);
-    
-    /**
      * 获取我的集群下索引和模板的数量
      * @param clusterId
      * @param operator
      * @param appId
      * @return
      */
-    Result<Void> indexTemplateCount(Long clusterId, String operator, Integer appId);
+    Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator, Integer appId);
+
+    /**
+     * 逻辑集群下的节点信息分页查询
+     * @param convertClusterLogicNodes 节点列表
+     * @param condition 分页参数
+     * @return PaginationResult
+     */
+    PaginationResult<ESClusterRoleHostVO> nodesPage(List<ESClusterRoleHostVO> convertClusterLogicNodes, ClusterLogicNodeConditionDTO condition);
 }

@@ -4,15 +4,15 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.NodeSpecifyEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.quota.Resource;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -20,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -31,7 +30,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +69,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
      * 物理集群节点转换
      *
      * @param clusterNodes       物理集群节点
-     * @return
+     * @return List<ESClusterRoleHostVO> 节点信息列表
      */
     @Override
     public List<ESClusterRoleHostVO> convertClusterLogicNodes(List<ClusterRoleHost> clusterNodes) {
@@ -99,7 +97,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
             result.add(nodeVO);
         }
-
+//        rowBounds(condition.getPage().intValue(),condition.getSize(),result);
+//        PaginationResult.buildSucc(consoleClusterVOS, totalHit, condition.getPage(), condition.getSize());
         return result;
     }
 
@@ -334,7 +333,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     /**
      * 获取Rack名称与集群Rack映射关系
      * @param clusterRacks 集群Rack列表
-     * @return
+     * @return Map<String, ClusterLogicRackInfo>
      */
     private Map<String, ClusterLogicRackInfo> getRack2ClusterRacks(List<ClusterLogicRackInfo> clusterRacks) {
         Map<String, ClusterLogicRackInfo> rack2ClusterRacks = new HashMap<>(1);
@@ -352,7 +351,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
      *
      * @param logicClusterRacks 所有集群Racks
      * @param logicClusters     逻辑集群列表
-     * @return
+     * @return Multimap<String, ClusterLogic>
      */
     private Multimap<String, ClusterLogic> getRack2LogicClusterMappings(List<ClusterLogicRackInfo> logicClusterRacks,
                                                                         List<ClusterLogic> logicClusters) {
@@ -377,7 +376,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
      * 创建集群Rack分隔符
      * @param cluster 集群名称
      * @param rack Rack
-     * @return
+     * @return clusterRackKey
      */
     private String createClusterRackKey(String cluster, String rack) {
         StringBuilder builder = new StringBuilder();
@@ -394,7 +393,6 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return builder.toString();
     }
 
-    @Nullable
     private Result<Boolean> baseCheckParamValid(ClusterRegionWithNodeInfoDTO param) {
         if (null == param) {
             return Result.buildFail("参数为空");
