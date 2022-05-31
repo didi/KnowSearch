@@ -9,16 +9,23 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
+import static com.didiglobal.logi.security.common.constant.Constants.API_PREFIX;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.enums.ResultCode;
+import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.LoginService;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +43,8 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
     @Autowired
     private LoginService loginService;
+    @Autowired
+    private ProjectService projectService;
 
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
@@ -50,6 +59,16 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
         if (hasNoInterceptor(request)) {
             return true;
+        }
+        //排除admin中接口中含有/logi-security 之后，对于原本属于admin中的接口进行header设置，保证项目视角到存在header
+        if (!request.getServletPath().startsWith(API_PREFIX)) {
+            final Integer projectId = HttpRequestUtil.getProjectId(request);
+            if (Objects.isNull(projectId) ) {
+                 throw new OperateForbiddenException(String.format("请携带项目信息,HTTP_HEADER_KEY:%s",
+                         HttpRequestUtil.PROJECT_ID));
+            } if (!projectService.checkProjectExist(projectId)) {
+                throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
+            }
         }
 
         String classRequestMappingValue = null;

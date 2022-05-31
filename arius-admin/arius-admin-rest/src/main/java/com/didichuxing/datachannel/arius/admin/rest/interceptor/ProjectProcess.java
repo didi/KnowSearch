@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isNumeric;
+import static com.didiglobal.logi.security.common.constant.Constants.API_PREFIX;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
@@ -27,49 +26,52 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 public class ProjectProcess implements ResponseBodyAdvice {
     
     @Autowired
-    private ESUserService        esUserService;
+    private              ESUserService        esUserService;
     @Autowired
-    private ProjectConfigService projectConfigService;
-    private static final String PROJECT_END = "project";
-
+    private              ProjectConfigService projectConfigService;
+    private static final String               PROJECT_END = "project";
+    
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
         return true;
     }
-
-    @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-
-        String requestPath = request.getURI().getPath();
     
-        //如何是创建项目的接口会一并创建projectid
-        if (requestPath.endsWith(PROJECT_END) && HttpMethod.POST.equals(request.getMethod())
-            && body instanceof com.didiglobal.logi.security.common.Result) {
-            Object data = ((Result<?>) body).getData();
-            if (Objects.nonNull(data) &&((Result<?>) body).successed()&& data instanceof ProjectVO) {
-                //通过RequestContextHolder获取request
-                ESUserDTO esUserDTO = new ESUserDTO();
-                esUserDTO.setIsRoot(0);
-                esUserDTO.setSearchType(AppSearchTypeEnum.TEMPLATE.getCode());
-                esUserDTO.setVerifyCode(RandomStringUtils.randomAlphabetic(7));
-                esUserDTO.setResponsible(AuthConstant.SUPER_USER_NAME);
-                esUserDTO.setMemo(((ProjectVO) data).getProjectName()+"项目默认的es user");
-                esUserDTO.setProjectId(((ProjectVO) data).getId());
-                esUserService.registerESUser(esUserDTO, AuthConstant.SUPER_USER_NAME);
+    @Override
+    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
+                                  Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        
+        String requestPath = request.getURI().getPath();
+        
+        if (requestPath.startsWith(API_PREFIX)) {
+            //如何是创建项目的接口会一并创建projectid
+            if (requestPath.endsWith(PROJECT_END) && HttpMethod.POST.equals(request.getMethod())
+                && body instanceof com.didiglobal.logi.security.common.Result) {
+                Object data = ((Result<?>) body).getData();
+                if (Objects.nonNull(data) && ((Result<?>) body).successed() && data instanceof ProjectVO) {
+                    //通过RequestContextHolder获取request
+                    ESUserDTO esUserDTO = new ESUserDTO();
+                    esUserDTO.setIsRoot(0);
+                    esUserDTO.setSearchType(AppSearchTypeEnum.TEMPLATE.getCode());
+                    esUserDTO.setVerifyCode(RandomStringUtils.randomAlphabetic(7));
+                    esUserDTO.setResponsible(AuthConstant.SUPER_USER_NAME);
+                    esUserDTO.setMemo(((ProjectVO) data).getProjectName() + "项目默认的es user");
+                    esUserDTO.setProjectId(((ProjectVO) data).getId());
+                    esUserService.registerESUser(esUserDTO, AuthConstant.SUPER_USER_NAME);
+                }
+                
             }
-        
-            return body;
+            String[] prefix = StringUtils.split(requestPath, "/");
+            String projectId = prefix[prefix.length - 1];
+            //删除项目的时候需要一并删除项目的配置
+            if (requestPath.contains(PROJECT_END) && HttpMethod.DELETE.equals(request.getMethod())
+                && body instanceof com.didiglobal.logi.security.common.Result && ((Result<?>) body).successed()
+                && StringUtils.isNumeric(projectId)) {
+                Optional.ofNullable(prefix[prefix.length - 1]).map(Integer::parseInt)
+                        .ifPresent(projectConfigService::deleteByProjectId);
+                
+            }
         }
-        String[] prefix = StringUtils.split(requestPath,"/");
-        String projectId = prefix[prefix.length - 1];
-        //删除项目的时候需要一并删除项目的配置
-        if (requestPath.contains(PROJECT_END) && HttpMethod.DELETE.equals(request.getMethod())
-            && body instanceof com.didiglobal.logi.security.common.Result && ((Result<?>) body).successed()
-            && StringUtils.isNumeric(projectId)) {
-            Optional.ofNullable(prefix[prefix.length - 1]).map(Integer::parseInt)
-                    .ifPresent(projectConfigService::deleteByProjectId);
         
-        }
         return body;
     }
 }
