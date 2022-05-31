@@ -31,6 +31,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -46,6 +47,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.ArrayListMultimap;
@@ -693,10 +695,9 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (param.getProjectId() != null && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("应用ID非法");
         }
-    
-        if (projectService.getProjectDetailByProjectId(param.getProjectId()).getUserList().stream()
-                .map(UserBriefVO::getUserName)
-                .noneMatch(username -> StringUtils.equals(username, param.getResponsible()))) {
+        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(param.getProjectId());
+        if (!CommonUtils.isUserNameBelongProjectMember(param.getResponsible(), projectVO)
+            || !CommonUtils.isUserNameBelongProjectResponsible(param.getResponsible(), projectVO)) {
             return Result.buildParamIllegal("责任人非法");
         }
         return Result.buildSucc();

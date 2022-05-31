@@ -2,16 +2,17 @@ package com.didichuxing.datachannel.arius.admin.core.service.app;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectLogicClusterAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectLogicClusterAuthDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserService;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Transactional(timeout = 1000)
 @Rollback
@@ -37,9 +36,11 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
 
     @MockBean
     private ProjectService  projectService;
+    @MockBean
+    private UserService userService;
 
 
-    final static String OPERATOR = "wpk";
+    final static String OPERATOR = "admin";
 
     @Test
     public void ensureSetLogicClusterAuthTest() {
@@ -162,7 +163,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).failed());
         mockRuleSet();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).success());
-        //Mockito.when(ariusUserInfoService.getByDomainAccount(Mockito.any())).thenReturn(null);
+        Mockito.when(userService.getUserBriefByUserName(Mockito.any())).thenReturn(null);
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).failed());
         Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(false);
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).failed());

@@ -194,7 +194,7 @@ public interface TemplateLogicManager {
     Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId);
 
     /**
-     * 校验指定appId能否对指定的逻辑模板进行操作
+     * 校验指定projectId能否对指定的逻辑模板进行操作
      * @param logicId 逻辑模板id
      * @param projectId projectId
      * @return result

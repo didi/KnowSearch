@@ -273,7 +273,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
     /**
      * APP密码修改
      *
-     * @param projectId      APPID
+     * @param projectId      projectId
      * @param verifyCode 校验码
      * @param retryCount 重试次数
      * @return result

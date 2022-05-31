@@ -98,17 +98,7 @@ public class ESUserManagerTest extends AriusAdminApplicationTest {
         // Verify the results
     }
     
-    @Test
-    void testGetESUserConfig() {
-        // Setup
-        final ProjectConfig expectedResult = new ProjectConfig(0, 0, 0, 0, 0);
-        
-        // Run the test
-        final ProjectConfig result = esUserManagerImplUnderTest.getESUserConfig(0);
-        
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
+ 
     
     @Test
     void testVerifyAppCode() {

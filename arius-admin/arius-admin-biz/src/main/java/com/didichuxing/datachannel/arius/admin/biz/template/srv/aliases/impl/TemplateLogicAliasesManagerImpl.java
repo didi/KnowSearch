@@ -286,13 +286,14 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
     /**
      * 获取模板具体的别名
      *
-     * @param appId appId
+     * @param projectId appId
      */
     @Override
-    public Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByAppid(Integer appId) {
+    public Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId) {
         List<Tuple<String, String>> aliases = new ArrayList<>();
 
-        List<ProjectTemplateAuth> projectTemplateAuths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(appId);
+        List<ProjectTemplateAuth> projectTemplateAuths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(
+                projectId);
         if (CollectionUtils.isEmpty(projectTemplateAuths)) {
             return Result.build(true);
         }

@@ -334,7 +334,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         FUTURE_UTIL.waitExecute();
         LOGGER.info(
-            "class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=consumed build cluster belongAppIds and AppName time is {} ms",
+            "class=ClusterPhyManagerImpl||method=buildClusterInfo||msg=consumed build cluster belongProjectIds and AppName time is {} ms",
             System.currentTimeMillis() - timeForBuildClusterDiskInfo);
 
         return clusterPhyVOList;

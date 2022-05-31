@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTem
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplateAuthAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplateAuthDeleteEvent;
@@ -424,10 +425,11 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         }
        
         // 校验责任人是否合法
-        if (!AriusObjUtils.isNull(authDTO.getResponsible())
-                &&  projectService.getProjectDetailByProjectId(authDTO.getProjectId()).getUserList().stream()
-                .map(UserBriefVO::getUserName)
-                .noneMatch(username->StringUtils.equals(username,authDTO.getResponsible()))) {
+        if (!AriusObjUtils.isNull(authDTO.getResponsible()) && (
+                !CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),
+                        projectService.getProjectDetailByProjectId(authDTO.getProjectId()))
+                || !CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),
+                        projectService.getProjectDetailByProjectId(authDTO.getProjectId())))) {
             return Result.buildParamIllegal("责任人非法");
         }
 

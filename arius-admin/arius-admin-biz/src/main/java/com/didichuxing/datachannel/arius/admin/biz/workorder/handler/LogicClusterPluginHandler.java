@@ -69,10 +69,10 @@ public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
             case ALL:
                 return Result.buildSucc();
             case ACCESS:
-                return Result.buildParamIllegal("您的appid无该集群的管理权限进行插件安装");
+                return Result.buildParamIllegal("您的projectId无该集群的管理权限进行插件安装");
             case NO_PERMISSIONS:
             default:
-                return Result.buildParamIllegal("您的appid无该集群的相关权限");
+                return Result.buildParamIllegal("您的projectId无该集群的相关权限");
         }
     }
 

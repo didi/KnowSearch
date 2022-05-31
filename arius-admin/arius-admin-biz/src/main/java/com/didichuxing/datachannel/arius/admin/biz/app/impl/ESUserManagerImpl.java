@@ -19,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
@@ -95,9 +96,8 @@ public class ESUserManagerImpl implements ESUserManager {
        
         
         //确定当前操作者属于该项目成员
-        if (Objects.nonNull(projectId) && projectVO.getUserList().stream().map(UserBriefVO::getUserName)
-                .noneMatch(userName -> StringUtils.equals(userName, operator))||!StringUtils.equals(operator,
-                AuthConstant.SUPER_USER_NAME)) {
+        if (Objects.nonNull(projectId) &&(!StringUtils.equals(operator,
+                AuthConstant.SUPER_USER_NAME) ||! CommonUtils.isUserNameBelongProjectMember(operator,projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(operator,projectVO))) {
             return Result.buildFail(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
         }
         final List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));

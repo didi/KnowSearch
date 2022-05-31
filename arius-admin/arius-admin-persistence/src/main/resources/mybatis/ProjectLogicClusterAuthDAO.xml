@@ -68,14 +68,14 @@
         select
         <include refid="Base_Column_List"/>
         from project_logi_cluster_auth
-        where project_id = #{appId} and (`type` != -1) and status = 1
+        where project_id = #{projectId} and (`type` != -1) and status = 1
     </select>
 
     <select id="listWithAccessByProjectId" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from project_logi_cluster_auth
-        where project_id = #{appId} and (`type` = 2) and status = 1
+        where project_id = #{projectId} and (`type` = 2) and status = 1
     </select>
 
     <select id="getByProjectIdAndLogicClusterId" parameterType="map" resultMap="BaseResultMap">

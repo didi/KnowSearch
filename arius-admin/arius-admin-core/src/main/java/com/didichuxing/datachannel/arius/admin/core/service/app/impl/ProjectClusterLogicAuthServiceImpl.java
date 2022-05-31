@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClu
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -23,6 +24,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectLogicClusterAuthDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
@@ -483,10 +485,9 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
     
         final Integer projectId = authDTO.getProjectId();
-        
+        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
         // 校验责任人是否合法
-        if (!AuthConstant.SUPER_USER_NAME.equals(authDTO.getResponsible())||projectService.getProjectDetailByProjectId(projectId).getUserList()
-                .stream().map(UserBriefVO::getUserName).noneMatch(username->StringUtils.equals(authDTO.getResponsible(),username))) {
+        if (!StringUtils.equals(authDTO.getResponsible(),AuthConstant.SUPER_USER_NAME) || !CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO)) {
             return Result.buildParamIllegal("责任人非法");
         }
         return Result.buildSucc();
