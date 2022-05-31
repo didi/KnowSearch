@@ -10,7 +10,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -32,8 +34,10 @@ public class ProjectConfigManagerImpl implements ProjectConfigManager {
 	 * @param projectId@return 配置信息
 	 */
 	@Override
-	public Result<ProjectConfig> get(int projectId) {
-		return Result.buildSucc(projectConfigService.getProjectConfig(projectId));
+	public Result<ProjectConfigVo> get(int projectId) {
+		final ProjectConfigVo projectConfigVo = ConvertUtil.obj2Obj(projectConfigService.getProjectConfig(projectId),
+				ProjectConfigVo.class);
+		return Result.buildSucc(projectConfigVo);
 	}
 	
 	/**

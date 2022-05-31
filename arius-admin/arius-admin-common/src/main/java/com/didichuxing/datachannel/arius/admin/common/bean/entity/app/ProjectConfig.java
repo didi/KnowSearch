@@ -46,5 +46,9 @@ public class ProjectConfig extends BaseEntity {
      * 慢查询时间
      */
     private Integer slowQueryTimes;
+    /**
+     * 备注
+     */
+    private String memo;
 
 }

@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.app.ProjectConfigManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -53,8 +54,8 @@ public class ProjectConfigV3Controller {
 	@GetMapping
 	@ResponseBody
 	@ApiOperation(value = "获取项目配置", notes = "")
-	public Result<ProjectConfig> get(HttpServletRequest request) {
-		//获取操作用户
+	public Result<ProjectConfigVo> get(HttpServletRequest request) {
+		//获取操作用户慢查询耗时：ms
 		Integer projectId = HttpRequestUtil.getProjectId(request);
 		return projectConfigManager.get(projectId);
 	}
