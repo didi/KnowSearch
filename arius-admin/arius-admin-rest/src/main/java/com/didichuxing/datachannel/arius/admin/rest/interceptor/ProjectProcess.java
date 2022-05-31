@@ -1,13 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
+import static org.apache.commons.lang3.StringUtils.isNumeric;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didiglobal.logi.security.common.Result;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -19,9 +25,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 @ControllerAdvice
 public class ProjectProcess implements ResponseBodyAdvice {
-
+    
     @Autowired
-    private ESUserService esUserService;
+    private ESUserService        esUserService;
+    @Autowired
+    private ProjectConfigService projectConfigService;
     private static final String PROJECT_END = "project";
 
     @Override
@@ -35,9 +43,10 @@ public class ProjectProcess implements ResponseBodyAdvice {
         String requestPath = request.getURI().getPath();
     
         //如何是创建项目的接口会一并创建projectid
-        if (requestPath.endsWith(PROJECT_END) && body instanceof com.didiglobal.logi.security.common.Result&&HttpMethod.POST.equals(request.getMethod())) {
+        if (requestPath.endsWith(PROJECT_END) && HttpMethod.POST.equals(request.getMethod())
+            && body instanceof com.didiglobal.logi.security.common.Result) {
             Object data = ((Result<?>) body).getData();
-            if (Objects.nonNull(data) && data instanceof ProjectVO) {
+            if (Objects.nonNull(data) &&((Result<?>) body).successed()&& data instanceof ProjectVO) {
                 //通过RequestContextHolder获取request
                 ESUserDTO esUserDTO = new ESUserDTO();
                 esUserDTO.setIsRoot(0);
@@ -51,8 +60,16 @@ public class ProjectProcess implements ResponseBodyAdvice {
         
             return body;
         }
+        String[] prefix = StringUtils.split(requestPath,"/");
+        String projectId = prefix[prefix.length - 1];
         //删除项目的时候需要一并删除项目的配置
-        //if (&&HttpMethod.DELETE.equals(request.getMethod()))
+        if (requestPath.contains(PROJECT_END) && HttpMethod.DELETE.equals(request.getMethod())
+            && body instanceof com.didiglobal.logi.security.common.Result && ((Result<?>) body).successed()
+            && StringUtils.isNumeric(projectId)) {
+            Optional.ofNullable(prefix[prefix.length - 1]).map(Integer::parseInt)
+                    .ifPresent(projectConfigService::deleteByProjectId);
+        
+        }
         return body;
     }
 }

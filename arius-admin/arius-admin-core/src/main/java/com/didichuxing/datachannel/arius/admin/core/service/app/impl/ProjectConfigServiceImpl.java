@@ -112,11 +112,13 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 	
 	/**
 	 * @param projectId
-	 * @return
 	 */
 	@Override
-	public Integer deleteByProjectId(int projectId) {
-		return projectConfigDAO.deleteByProjectId(projectId);
+	@Transactional(rollbackFor = Exception.class)
+	public void deleteByProjectId(int projectId) {
+		if (projectConfigDAO.checkProjectConfigByProjectId(projectId)){
+		 	projectConfigDAO.deleteByProjectId(projectId);
+		}
 	}
 	
 	private Result<Void> checkConfigParam(ProjectConfigDTO configDTO) {

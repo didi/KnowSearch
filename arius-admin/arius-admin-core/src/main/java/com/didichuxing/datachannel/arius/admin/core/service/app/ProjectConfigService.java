@@ -30,6 +30,6 @@ public interface ProjectConfigService {
     
     Tuple<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator);
     
-    Integer deleteByProjectId(int projectId);
+    void deleteByProjectId(int projectId);
     
 }
