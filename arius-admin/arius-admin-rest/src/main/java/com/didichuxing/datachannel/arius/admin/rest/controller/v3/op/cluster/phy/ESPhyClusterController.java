@@ -151,14 +151,14 @@ public class ESPhyClusterController {
     @GetMapping("/{clusterPhyName}/nodes")
     @ResponseBody
     @ApiOperation(value = "根据projectId获取物理集群下的节点名称")
-    public Result<List<String>> getAppClusterPhyNodeNames(@PathVariable String clusterPhyName) {
+    public Result<List<String>> getProjectClusterPhyNodeNames(@PathVariable String clusterPhyName) {
         return Result.buildSucc(clusterPhyManager.getAppClusterPhyNodeNames(clusterPhyName));
     }
 
     @GetMapping("/node/names")
     @ResponseBody
     @ApiOperation(value = "根据projectId获取物理集群下的节点名称")
-    public Result<List<String>> getAppNodeNames(HttpServletRequest request) {
+    public Result<List<String>> getProjectNodeNames(HttpServletRequest request) {
         return Result.buildSucc(clusterPhyManager.getProjectNodeNames(HttpRequestUtil.getProjectId(request)));
     }
 
