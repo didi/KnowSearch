@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectLogicClusterAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import java.util.List;
@@ -31,7 +31,7 @@ public interface ProjectClusterLogicAuthService {
      * @param operator 操作者
      * @return
      */
-    Result<Void> addLogicClusterAuth(AppLogicClusterAuthDTO logicClusterAuth, String operator);
+    Result<Void> addLogicClusterAuth(ProjectLogicClusterAuthDTO logicClusterAuth, String operator);
 
     /**
      * 新增 项目逻辑集群权限
@@ -39,7 +39,7 @@ public interface ProjectClusterLogicAuthService {
      * @param operator 操作者
      * @return
      */
-    Result<Void> updateLogicClusterAuth(AppLogicClusterAuthDTO logicClusterAuth, String operator);
+    Result<Void> updateLogicClusterAuth(ProjectLogicClusterAuthDTO logicClusterAuth, String operator);
 
     /**
      * 删除 项目逻辑集群权限
@@ -109,7 +109,7 @@ public interface ProjectClusterLogicAuthService {
      * @param operator 操作人
      * @return result
      */
-    Result<Void> addLogicClusterAuthWithoutCheck(AppLogicClusterAuthDTO authDTO, String operator);
+    Result<Void> addLogicClusterAuthWithoutCheck(ProjectLogicClusterAuthDTO authDTO, String operator);
 
     /**
      * 构建项目对物理集群的权限信息

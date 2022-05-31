@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,8 +61,9 @@ public class ESUserV3Controller {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true) })
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request) {
-        String ticket = request.getHeader(GET_USER_PROJECT_ID_LIST_TICKET_NAME);
-        if (!GET_USER_PROJECT_ID_LIST_TICKET.equals(ticket)) {
+        String ticket = HttpRequestUtil.getHeaderValue(GET_USER_PROJECT_ID_LIST_TICKET_NAME);
+    
+        if (!StringUtils.equals(GET_USER_PROJECT_ID_LIST_TICKET, ticket)) {
             return Result.buildParamIllegal("ticket错误");
         }
         final String operator = HttpRequestUtil.getOperator(request);

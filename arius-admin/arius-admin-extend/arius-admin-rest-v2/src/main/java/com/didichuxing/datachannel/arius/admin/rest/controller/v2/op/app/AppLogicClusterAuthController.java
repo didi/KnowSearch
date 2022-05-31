@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectLogicClusterAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectLogicClusterAuthVO;
@@ -68,7 +68,7 @@ public class AppLogicClusterAuthController {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "增加APP逻辑集群权限接口" )
-    public Result<Void> createLogicClusterAuth(HttpServletRequest request, @RequestBody AppLogicClusterAuthDTO authDTO) {
+    public Result<Void> createLogicClusterAuth(HttpServletRequest request, @RequestBody ProjectLogicClusterAuthDTO authDTO) {
         return authService.addLogicClusterAuth(authDTO, HttpRequestUtil.getOperator(request));
     }
 
@@ -76,7 +76,7 @@ public class AppLogicClusterAuthController {
     @ResponseBody
     @ApiOperation(value = "更新APP逻辑集群权限接口" )
     public Result<Void> modifyLogicClusterAuth(HttpServletRequest request, @PathVariable(value = "authId") Long authId,
-                                         @RequestBody AppLogicClusterAuthDTO authDTO) {
+                                         @RequestBody ProjectLogicClusterAuthDTO authDTO) {
         authDTO.setId(authId);
         return authService.updateLogicClusterAuth(authDTO, HttpRequestUtil.getOperator(request));
     }

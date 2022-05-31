@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.remote.employee.EmployeeHandle;
  * @date 2021-05-17
  */
 @Component
+@Deprecated
 public class DefaultEmployeeHandle implements EmployeeHandle {
 
     @Autowired

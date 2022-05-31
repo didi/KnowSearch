@@ -19,6 +19,7 @@ import com.didiglobal.logi.log.LogFactory;
  * @date 2021-05-17
  */
 @Service
+@Deprecated
 public class EmployeeServiceImpl implements EmployeeService {
 
     private static final ILog LOGGER = LogFactory.getLog(EmployeeServiceImpl.class);

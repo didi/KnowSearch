@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "应用逻辑集群权限信息")
 @AllArgsConstructor
 @NoArgsConstructor
-public class AppLogicClusterAuthDTO extends BaseDTO {
+public class ProjectLogicClusterAuthDTO extends BaseDTO {
 
     @ApiModelProperty("ID")
     private Long id;

@@ -1,7 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -10,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectLogicClusterAuthDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import com.didiglobal.logi.security.service.ProjectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -34,17 +36,15 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
     private ClusterLogicService clusterLogicService;
 
     @MockBean
-    private AppService appService;
+    private ProjectService  projectService;
 
-    @MockBean
-    private AriusUserInfoService ariusUserInfoService;
 
     final static String OPERATOR = "wpk";
 
     @Test
     public void ensureSetLogicClusterAuthTest() {
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
-        Assertions.assertEquals("参数错误:未指定appId，请检查后再提交！",
+        Assertions.assertEquals("参数错误:未指定projectId，请检查后再提交！",
                 projectClusterLogicAuthService.ensureSetLogicClusterAuth(null, null, null, null, null).getMessage());
         Assertions.assertEquals("参数错误:未指定逻辑集群ID，请检查后再提交！",
                 projectClusterLogicAuthService.ensureSetLogicClusterAuth(projectClusterLogicAuth.getProjectId(), null, null, null, null).getMessage());
@@ -75,7 +75,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
         Assertions.assertTrue(projectClusterLogicAuthService.getAllLogicClusterAuths(projectClusterLogicAuth.getProjectId())
                 .stream()
                 .map(ProjectClusterLogicAuth::getLogicClusterId)
@@ -89,7 +89,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
         Assertions.assertTrue(projectClusterLogicAuthService.canCreateLogicTemplate(projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId()));
     }
 
@@ -98,7 +98,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
         List<ProjectClusterLogicAuth> allLogicClusterAuths = projectClusterLogicAuthService.getAllLogicClusterAuths(
 		        projectClusterLogicAuth.getProjectId());
         Assertions.assertTrue(allLogicClusterAuths.stream().map(ProjectClusterLogicAuth::getResponsible).anyMatch(s -> s.equals(
@@ -124,7 +124,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
         List<ProjectClusterLogicAuth> allLogicClusterAuths = projectClusterLogicAuthService.getLogicClusterAccessAuths(
 		        projectClusterLogicAuth.getProjectId());
         Assertions.assertTrue(allLogicClusterAuths.stream().map(ProjectClusterLogicAuth::getResponsible).anyMatch(s -> s.equals(
@@ -138,7 +138,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
                 projectClusterLogicAuthService.getLogicClusterAuthEnum(projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId()));
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
         Assertions.assertEquals(ProjectClusterLogicAuthEnum.valueOf(projectClusterLogicAuth.getType()),
                 projectClusterLogicAuthService.getLogicClusterAuthEnum(projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId()));
     }
@@ -148,7 +148,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
         ProjectClusterLogicAuth logicClusterAuth = projectClusterLogicAuthService.getLogicClusterAuth(
 		        projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId());
         Assertions.assertEquals(logicClusterAuth.getProjectId(),
@@ -158,16 +158,16 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
     @Test
     public void addLogicClusterAuthTest() {
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
-        AppLogicClusterAuthDTO appLogicClusterAuthDTO = ConvertUtil.obj2Obj(projectClusterLogicAuth, AppLogicClusterAuthDTO.class);
-        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(appLogicClusterAuthDTO, OPERATOR).failed());
+        ProjectLogicClusterAuthDTO projectLogicClusterAuthDTO = ConvertUtil.obj2Obj(projectClusterLogicAuth, ProjectLogicClusterAuthDTO.class);
+        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).failed());
         mockRuleSet();
-        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(appLogicClusterAuthDTO, OPERATOR).success());
+        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).success());
         //Mockito.when(ariusUserInfoService.getByDomainAccount(Mockito.any())).thenReturn(null);
-        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(appLogicClusterAuthDTO, OPERATOR).failed());
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(false);
-        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(appLogicClusterAuthDTO, OPERATOR).failed());
+        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).failed());
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(false);
+        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).failed());
         Mockito.when(clusterLogicService.getClusterLogicById(Mockito.anyLong())).thenReturn(null);
-        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(appLogicClusterAuthDTO, OPERATOR).failed());
+        Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuth(projectLogicClusterAuthDTO, OPERATOR).failed());
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
         Assertions.assertTrue(projectClusterLogicAuthService.addLogicClusterAuthWithoutCheck(ConvertUtil.obj2Obj(
 		        projectClusterLogicAuth,
-                AppLogicClusterAuthDTO.class), OPERATOR).success());
+                ProjectLogicClusterAuthDTO.class), OPERATOR).success());
         ProjectClusterLogicAuth logicClusterAuth = projectClusterLogicAuthService.getLogicClusterAuth(
 		        projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId());
         // 删除mock的插入数据
@@ -186,7 +186,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
 
     private void mockRuleSet() {
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(true);
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
         ClusterLogic clusterLogic = new ClusterLogic();
         clusterLogic.setId(projectClusterLogicAuth.getLogicClusterId());
         clusterLogic.setProjectId(projectClusterLogicAuth.getProjectId());

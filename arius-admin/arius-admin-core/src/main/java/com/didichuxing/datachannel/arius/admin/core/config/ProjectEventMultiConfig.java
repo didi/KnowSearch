@@ -14,7 +14,7 @@ import org.springframework.context.event.SimpleApplicationEventMulticaster;
  * @date 2019/5/24
  */
 @Configuration
-public class AppEventMultiConfig {
+public class ProjectEventMultiConfig {
 
     @Bean
     public ApplicationEventMulticaster applicationEventMulticaster(AriusOpThreadPool ariusOpThreadPool) {

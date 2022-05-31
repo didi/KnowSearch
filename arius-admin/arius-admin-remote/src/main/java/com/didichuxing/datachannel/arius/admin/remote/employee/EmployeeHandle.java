@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
  * @author linyunan
  * @date 2021-05-14
  */
+@Deprecated
 public interface EmployeeHandle extends BaseHandle {
     /**
      * 根据域账号获取员工信息

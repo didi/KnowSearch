@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppLogicClusterAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectLogicClusterAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO;
@@ -104,7 +104,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         if (auth != null
             && ProjectClusterLogicAuthEnum.valueOf(auth.getCode()).higher(ProjectClusterLogicAuthEnum.OWN)) {
             return addLogicClusterAuth(
-                new AppLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode(), responsible), operator);
+                new ProjectLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode(), responsible), operator);
         } else {
             return Result.buildFail("不支持对集群owner的权限进行修改");
         }
@@ -116,7 +116,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
 
         // 期望更新权限信息
-        AppLogicClusterAuthDTO newAuthDTO = new AppLogicClusterAuthDTO(oldAuth.getId(), null, null,
+        ProjectLogicClusterAuthDTO newAuthDTO = new ProjectLogicClusterAuthDTO(oldAuth.getId(), null, null,
             auth == null ? null : auth.getCode(), StringUtils.isBlank(responsible) ? null : responsible);
         return updateLogicClusterAuth(newAuthDTO, operator);
     }
@@ -129,7 +129,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 新增
         return addLogicClusterAuth(
-            new AppLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode(), responsible), operator);
+            new ProjectLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode(), responsible), operator);
     }
 
     /**
@@ -138,7 +138,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @return
      */
     @Override
-    public Result<Void> addLogicClusterAuth(AppLogicClusterAuthDTO logicClusterAuth, String operator) {
+    public Result<Void> addLogicClusterAuth(ProjectLogicClusterAuthDTO logicClusterAuth, String operator) {
 
         Result<Void> checkResult = validateLogicClusterAuth(logicClusterAuth, OperationEnum.ADD);
         if (checkResult.failed()) {
@@ -156,7 +156,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @return
      */
     @Override
-    public Result<Void> updateLogicClusterAuth(AppLogicClusterAuthDTO logicClusterAuth, String operator) {
+    public Result<Void> updateLogicClusterAuth(ProjectLogicClusterAuthDTO logicClusterAuth, String operator) {
         // 只支持修改权限类型和责任人
         logicClusterAuth.setProjectId(null);
         logicClusterAuth.setLogicClusterId(null);
@@ -345,7 +345,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @return result
      */
     @Override
-    public Result<Void> addLogicClusterAuthWithoutCheck(AppLogicClusterAuthDTO authDTO, String operator) {
+    public Result<Void> addLogicClusterAuthWithoutCheck(ProjectLogicClusterAuthDTO authDTO, String operator) {
         ProjectClusterLogicAuthPO authPO = ConvertUtil.obj2Obj(authDTO, ProjectClusterLogicAuthPO.class);
 
         boolean succeed = 1 == logicClusterAuthDAO.insert(authPO);
@@ -392,7 +392,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @param operation 操作
      * @return result
      */
-    private Result<Void> validateLogicClusterAuth(AppLogicClusterAuthDTO authDTO, OperationEnum operation) {
+    private Result<Void> validateLogicClusterAuth(ProjectLogicClusterAuthDTO authDTO, OperationEnum operation) {
         if (!EnvUtil.isOnline()) {
             LOGGER.info("class=AppAuthServiceImpl||method=validateTemplateAuth||authDTO={}||operator={}",
                 JSON.toJSONString(authDTO), operation);
@@ -427,7 +427,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         return Result.buildSucc();
     }
 
-    private Result<Void> handleEdit(AppLogicClusterAuthDTO authDTO) {
+    private Result<Void> handleEdit(ProjectLogicClusterAuthDTO authDTO) {
         // 更新权限检查
         if (AriusObjUtils.isNull(authDTO.getId())) {
             return Result.buildParamIllegal("权限ID为空");
@@ -439,7 +439,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         return Result.buildSucc();
     }
 
-    private Result<Void> handleAdd(AppLogicClusterAuthDTO authDTO, Integer projectId, Long logicClusterId, ProjectClusterLogicAuthEnum authEnum) {
+    private Result<Void> handleAdd(ProjectLogicClusterAuthDTO authDTO, Integer projectId, Long logicClusterId, ProjectClusterLogicAuthEnum authEnum) {
         // 新增权限检查
         Result<Void> judgeResult = validateProjectIdIsNull(projectId, logicClusterId);
         if (judgeResult.failed()) {
@@ -471,7 +471,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         return Result.buildSucc();
     }
 
-    private Result<Void> isIllegal(AppLogicClusterAuthDTO authDTO, ProjectClusterLogicAuthEnum authEnum) {
+    private Result<Void> isIllegal(ProjectLogicClusterAuthDTO authDTO, ProjectClusterLogicAuthEnum authEnum) {
         if (ProjectClusterLogicAuthEnum.NO_PERMISSIONS == authEnum) {
             // 不应该走到这一步，防御编码
             return Result.buildParamIllegal("无权限无需添加");
@@ -531,7 +531,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @param operator 操作人
      * @return result
      */
-    private Result<Void> updateLogicClusterAuthWithoutCheck(AppLogicClusterAuthDTO authDTO, String operator) {
+    private Result<Void> updateLogicClusterAuthWithoutCheck(ProjectLogicClusterAuthDTO authDTO, String operator) {
 
         ProjectClusterLogicAuthPO oldAuthPO = logicClusterAuthDAO.getById(authDTO.getId());
         ProjectClusterLogicAuthPO newAuthPO = ConvertUtil.obj2Obj(authDTO, ProjectClusterLogicAuthPO.class);

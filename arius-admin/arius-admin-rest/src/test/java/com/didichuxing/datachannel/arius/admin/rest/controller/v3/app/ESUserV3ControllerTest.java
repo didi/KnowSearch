@@ -363,53 +363,11 @@ class ESUserV3ControllerTest extends AriusAdminApplicationTest {
         assertThat(response.getContentAsString()).isEqualTo("expectedResponse");
     }
     
-    @Test
-    void testUpdate2() throws Exception {
-        // Setup
-        when(mockEsUserManager.updateESUserConfig(new ProjectConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
-                Result.buildFail(null));
-        
-        // Run the test
-        final MockHttpServletResponse response = mockMvc.perform(
-                put("/es-user/config").content("content").contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
-        
-        // Verify the results
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo("expectedResponse");
-    }
+
     
-    @Test
-    void testUpdate2_ESUserManagerReturnsNoItem() throws Exception {
-        // Setup
-        when(mockEsUserManager.updateESUserConfig(new ProjectConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
-                Result.buildSucc());
-        
-        // Run the test
-        final MockHttpServletResponse response = mockMvc.perform(
-                put("/es-user/config").content("content").contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
-        
-        // Verify the results
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo("");
-    }
+ 
     
-    @Test
-    void testUpdate2_ESUserManagerReturnsFailure() throws Exception {
-        // Setup
-        when(mockEsUserManager.updateESUserConfig(new ProjectConfigDTO(0, 0, 0, 0, 0), "operator")).thenReturn(
-                Result.buildFail());
-        
-        // Run the test
-        final MockHttpServletResponse response = mockMvc.perform(
-                put("/es-user/config").content("content").contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
-        
-        // Verify the results
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo("expectedResponse");
-    }
+    
     
     @Test
     void testGet() throws Exception {

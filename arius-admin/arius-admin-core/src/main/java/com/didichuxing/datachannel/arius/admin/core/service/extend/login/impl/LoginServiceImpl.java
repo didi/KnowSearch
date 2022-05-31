@@ -46,6 +46,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
  */
 @Service("oldLoginService")
 @NoArgsConstructor
+@Deprecated
 public class LoginServiceImpl implements LoginService {
 
     private static final Logger  LOGGER                  = LoggerFactory.getLogger(LoginServiceImpl.class);

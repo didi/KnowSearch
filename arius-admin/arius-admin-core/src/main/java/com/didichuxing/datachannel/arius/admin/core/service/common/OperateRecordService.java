@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
  * @version 1.0
  * @date 2022/5/10
  */
+@Deprecated
 public interface OperateRecordService {
 
     /**
