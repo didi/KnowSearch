@@ -68,10 +68,6 @@ public class ESUserV3Controller {
         }
         final String operator = HttpRequestUtil.getOperator(request);
         final Integer projectId = HttpRequestUtil.getProjectId(request);
-        if (Objects.isNull(projectId)) {
-            return Result.buildParamIllegal("未设置项目");
-        }
-        
         return esUserManager.getNoCodeESUser(projectId, operator);
     }
     

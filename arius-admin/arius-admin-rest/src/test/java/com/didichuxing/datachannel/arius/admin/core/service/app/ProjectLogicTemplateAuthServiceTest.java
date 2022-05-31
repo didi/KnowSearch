@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.app;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
@@ -12,11 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTempla
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectTemplateAuthDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -202,11 +198,11 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         ClusterLogic clusterLogic = new ClusterLogic();
         clusterLogic.setId(1L);
         indexTemplateLogicWithClusterAndMasterTemplate.setLogicCluster(clusterLogic);
-         ProjectVO = new ProjectVO();
-        app.setId(1);
-        app.setIsRoot(0);
-        Map<Integer, App> appMap = new HashMap<>();
-        appMap.put(app.getId(),app);
+         //ProjectVO projectVO= new ProjectVO();
+        //projectVO.setId(1);
+        //app.setIsRoot(0);
+        //Map<Integer, App> appMap = new HashMap<>();
+        //appMap.put(app.getId(),app);
 
         // 创建mock规则
         Mockito.when(indexTemplateService.getAllLogicTemplates()).thenReturn(Collections.singletonList(indexTemplate));
@@ -214,10 +210,10 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         Mockito.when(indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(Mockito.anyInt())).thenReturn(indexTemplateLogicWithClusterAndMasterTemplate);
         Mockito.when(logicClusterAuthService.getLogicClusterAuthEnum(Mockito.anyInt(), Mockito.anyLong())).thenReturn(
                 ProjectClusterLogicAuthEnum.OWN);
-        Mockito.when(projectService.getProjectDetailByProjectId(Mockito.anyInt())).thenReturn(app);
-        Mockito.when(appService.isSuperApp(Mockito.anyInt())).thenReturn(false);
+        //Mockito.when(projectService.getProjectDetailByProjectId(Mockito.anyInt())).thenReturn(app);
+        //Mockito.when(appService.isSuperApp(Mockito.anyInt())).thenReturn(false);
         Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(appService.getAppsMap()).thenReturn(appMap);
+        //Mockito.when(appService.getAppsMap()).thenReturn(appMap);
 
         // 创建插入的mock数据
         Assertions.assertTrue(

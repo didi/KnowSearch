@@ -28,7 +28,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Collections;
 import java.util.List;
@@ -272,7 +271,9 @@ public class ESUserManagerImpl implements ESUserManager {
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator) {
        
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (projectService.getProjectDetailByProjectId(projectId).getUserList().stream().noneMatch(user->StringUtils.equals(user.getUserName(),operator))||StringUtils.equals(AuthConstant.SUPER_USER_NAME,operator)){
+        if (CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
+            || CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || StringUtils.equals(
+                AuthConstant.SUPER_USER_NAME, operator)) {
             return Result.buildParamIllegal("权限不足");
         }
         List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
