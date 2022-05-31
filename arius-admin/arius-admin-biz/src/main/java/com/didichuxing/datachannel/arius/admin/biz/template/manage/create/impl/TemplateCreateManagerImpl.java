@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.manage.create.impl;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.manage.create.TemplateCreateManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.manage.mapping.MappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.manage.mapping.TemplateMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
@@ -57,7 +57,7 @@ public class TemplateCreateManagerImpl implements TemplateCreateManager {
     private TemplateLogicManager templateLogicManager;
 
     @Autowired
-    private MappingManager mappingManager;
+    private TemplateMappingManager templateMappingManager;
 
     @Override
     public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) {
@@ -105,7 +105,7 @@ public class TemplateCreateManagerImpl implements TemplateCreateManager {
         }
 
         if (param.getMapping() != null) {
-            Result<Void> validMappingResult = mappingManager.validMapping(param.getMapping());
+            Result<Void> validMappingResult = templateMappingManager.validMapping(param.getMapping());
             if (validMappingResult.failed()) {
                 return validMappingResult;
             }
@@ -122,6 +122,8 @@ public class TemplateCreateManagerImpl implements TemplateCreateManager {
         IndexTemplateDTO indexTemplateDTO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
 
         indexTemplateDTO.setAppId(appId);
+        //todo: 移除quota 后删掉这行
+        indexTemplateDTO.setQuota(param.getDiskSize());
 
         buildCyclicalRoll(indexTemplateDTO, param);
         buildShardNum(indexTemplateDTO, param);
@@ -143,7 +145,7 @@ public class TemplateCreateManagerImpl implements TemplateCreateManager {
                 indexTemplateDTO.setDateFormat(AdminConstant.YY_MM_DATE_FORMAT);
             } else {
                 //每天的数据增量大于200G或者保存时长小于30天 按天存储
-                double incrementPerDay = param.getQuota() / param.getExpireTime();
+                double incrementPerDay = param.getDiskSize() / param.getExpireTime();
                 if (incrementPerDay >= 200.0 || param.getExpireTime() <= 30) {
                     if (StringUtils.isNotBlank(param.getDateField()) && !AdminConstant.MM_DD_DATE_FORMAT.equals(param.getDateField())) {
                         indexTemplateDTO.setDateFormat(AdminConstant.YY_MM_DD_DATE_FORMAT);
@@ -201,13 +203,13 @@ public class TemplateCreateManagerImpl implements TemplateCreateManager {
 
             if (TemplateUtils.isSaveByDay(indexTemplateDTO.getDateFormat())) {
                 // 按天滚动
-                indexTemplateDTO.setShardNum(genShardNumBySize(param.getQuota() / expireTime));
+                indexTemplateDTO.setShardNum(genShardNumBySize(param.getDiskSize() / expireTime));
             } else {
                 // 按月滚动
-                indexTemplateDTO.setShardNum(genShardNumBySize((param.getQuota() / expireTime) * 30));
+                indexTemplateDTO.setShardNum(genShardNumBySize((param.getDiskSize() / expireTime) * 30));
             }
         } else {
-            indexTemplateDTO.setShardNum(genShardNumBySize(param.getQuota()));
+            indexTemplateDTO.setShardNum(genShardNumBySize(param.getDiskSize()));
         }
     }
 

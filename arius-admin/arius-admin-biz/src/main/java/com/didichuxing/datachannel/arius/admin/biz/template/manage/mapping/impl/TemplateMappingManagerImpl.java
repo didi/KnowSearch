@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.manage.mapping.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.manage.mapping.MappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.manage.mapping.TemplateMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
  * @date 2022/5/27
  */
 @Service
-public class MappingManagerImpl implements MappingManager {
+public class TemplateMappingManagerImpl implements TemplateMappingManager {
 
     //todo: 整合原有mapping 相关代码
     @Override

@@ -130,4 +130,7 @@ public class IndexTemplateDTO extends PageDTO {
 
     @ApiModelProperty("regionId")
     private Integer                   regionId;
+
+    @ApiModelProperty("可用磁盘容量")
+    private Double diskSize;
 }

@@ -13,6 +13,7 @@ public interface TemplateCreateManager {
      * 创建模板
      * @param param 模板信息
      * @param operator 操作者
+     * @param appId 应用id
      * @return
      */
     Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId);

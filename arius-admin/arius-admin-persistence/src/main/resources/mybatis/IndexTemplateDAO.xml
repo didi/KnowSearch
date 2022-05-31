@@ -33,6 +33,7 @@
         <result column="level" jdbcType="TINYINT" property="level"/>
         <result column="open_srv" jdbcType="VARCHAR" property="openSrv"/>
         <result column="region_id" jdbcType="INTEGER" property="regionId"/>
+        <result column="disk_size" jdbcType="DECIMAL" property="diskSize"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -115,12 +116,12 @@
         insert into index_template_info
         (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, app_id, ingest_pipeline, resource_id, `level`, region_id)
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline, resource_id, `level`, region_id, disk_size)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
          #{libraDepartmentId}, #{libraDepartment}, #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
          #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{appId}, #{ingestPipeline}, #{resourceId}, #{level}
-        ,#{regionId})
+        ,#{regionId}, #{diskSize})
     </insert>
 
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
