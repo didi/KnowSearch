@@ -161,6 +161,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         for (ESClusterRoleHostPO nodePO : nodesFromEs) {
             if (nodePOFromDbMap.containsKey(nodePO.getKey())) {
                 nodePO.setId(nodePOFromDbMap.get(nodePO.getKey()).getId());
+                nodePO.setRegionId(nodePOFromDbMap.get(nodePO.getKey()).getRegionId());
                 LOGGER.info(
                     "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||nodeName={}||id={}||msg=node has exist!",
                     nodePO.getNodeSet(), nodePO.getId());
@@ -626,6 +627,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
 
         nodePO.setStatus(ONLINE.getCode());
+        nodePO.setRegionId(-1);
         nodePO.setRole(getRoleFromNodeSettings(clusterNodeInfo));
 
         return nodePO;

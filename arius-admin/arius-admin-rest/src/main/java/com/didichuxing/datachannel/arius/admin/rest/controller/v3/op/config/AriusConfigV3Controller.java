@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.config;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2017/10/23
  */
 @RestController
-@RequestMapping(V3_OP + "/config")
+@RequestMapping(V3 + "/config")
 @Api(tags = "运维配置接口(REST)")
 public class AriusConfigV3Controller {
 

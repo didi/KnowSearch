@@ -42,7 +42,6 @@ public class AriusAdminApplicationTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         // 获取 springboot server 监听的端口号
         // port = applicationContext.getWebServer().getPort();
