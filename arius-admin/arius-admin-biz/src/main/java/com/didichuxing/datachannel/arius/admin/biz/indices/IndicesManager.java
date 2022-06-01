@@ -4,10 +4,8 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
@@ -24,7 +22,14 @@ public interface IndicesManager {
      * @param appId         项目
      * @return              List<IndexCatInfoVO>
      */
-    PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(IndicesConditionDTO condition, Integer appId);
+    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer appId);
+
+    /**
+     * 创建索引
+     * @param indexCreateDTO
+     * @return
+     */
+    Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO);
 
     /**
      * 删除索引
@@ -33,7 +38,7 @@ public interface IndicesManager {
      * @param operator   操作人
      * @return           Boolean
      */
-    Result<Boolean> batchDeleteIndex(List<IndicesClearDTO> params, Integer appId, String operator);
+    Result<Void> deleteIndex(List<IndicesClearDTO> params, Integer appId, String operator);
 
     /**
      * 关闭索引

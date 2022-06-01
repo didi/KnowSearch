@@ -10,20 +10,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.page.IndicesPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
@@ -72,6 +75,9 @@ public class IndicesManagerImpl implements IndicesManager {
     private ClusterPhyManager     clusterPhyManager;
 
     @Autowired
+    private ClusterLogicManager clusterLogicManager;
+
+    @Autowired
     private OperateRecordService operateRecordService;
 
     @Autowired
@@ -83,10 +89,10 @@ public class IndicesManagerImpl implements IndicesManager {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Override
-    public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(IndicesConditionDTO condition, Integer appId) {
-        BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.INDICES.getPageSearchType());
-        if (baseHandle instanceof IndicesPageSearchHandle) {
-            IndicesPageSearchHandle handle = (IndicesPageSearchHandle) baseHandle;
+    public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer appId) {
+        BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.INDEX.getPageSearchType());
+        if (baseHandle instanceof IndexPageSearchHandle) {
+            IndexPageSearchHandle handle = (IndexPageSearchHandle) baseHandle;
             return handle.doPageHandle(condition, null, appId);
         }
 
@@ -96,7 +102,24 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> batchDeleteIndex(List<IndicesClearDTO> params, Integer appId, String operator) {
+    public Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO) {
+        String cluster = indexCreateDTO.getCluster();
+        if (null != indexCreateDTO.getResourceId()) {
+            List<ClusterPhy> clusterPhyList = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(indexCreateDTO.getResourceId());
+            cluster = clusterPhyList.get(0).getCluster();
+        }
+
+        try {
+            esIndexService.syncCreateIndex(cluster, indexCreateDTO.getIndex(), indexCreateDTO.getMapping(), indexCreateDTO.getSetting(), RETRY_COUNT);
+        } catch (Exception e) {
+            LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}" + indexCreateDTO.getIndex(), e);
+            return Result.buildFail();
+        }
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> deleteIndex(List<IndicesClearDTO> params, Integer appId, String operator) {
         for (IndicesClearDTO param : params) {
             Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), appId);
             if (ret.failed()) {
@@ -126,7 +149,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
         //索引删除完毕添加延迟时间, 防止refresh操作没及时生成segment, 就立马触发查询
         sleep(1000L);
-        return Result.buildSucc(true);
+        return Result.buildSucc();
     }
 
     @Override
@@ -301,8 +324,8 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<IndexCatCellVO> getIndexCatInfo(String clusterPhyName, String indexName, Integer appId) {
         //1.建立单个索引查询的查询条件信息
-        IndicesConditionDTO indicesConditionDTO = buildOneIndicesConditionDTO(clusterPhyName, indexName);
-        PaginationResult<IndexCatCellVO> indexCatCellVOPaginationResult = pageGetIndexCatInfoVO(indicesConditionDTO, appId);
+        IndexQueryDTO indexQueryDTO = buildOneIndicesConditionDTO(clusterPhyName, indexName);
+        PaginationResult<IndexCatCellVO> indexCatCellVOPaginationResult = pageGetIndex(indexQueryDTO, appId);
         if (indexCatCellVOPaginationResult.failed()) {
             return Result.buildFail("获取单个索引详情信息失败");
         }
@@ -348,14 +371,14 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc();
     }
 
-    private IndicesConditionDTO buildOneIndicesConditionDTO(String clusterPhyName, String indexName) {
-        IndicesConditionDTO indicesConditionDTO = new IndicesConditionDTO();
-        indicesConditionDTO.setIndex(indexName);
-        indicesConditionDTO.setClusterPhyName(Arrays.asList(clusterPhyName));
-        indicesConditionDTO.setSortTerm(DEFAULT_SORT_TERM);
-        indicesConditionDTO.setPage(1L);
-        indicesConditionDTO.setSize(1L);
-        return indicesConditionDTO;
+    private IndexQueryDTO buildOneIndicesConditionDTO(String clusterPhyName, String indexName) {
+        IndexQueryDTO indexQueryDTO = new IndexQueryDTO();
+        indexQueryDTO.setIndex(indexName);
+        indexQueryDTO.setCluster(Arrays.asList(clusterPhyName));
+        indexQueryDTO.setSortTerm(DEFAULT_SORT_TERM);
+        indexQueryDTO.setPage(1L);
+        indexQueryDTO.setSize(1L);
+        return indexQueryDTO;
     }
 
     private boolean filterPrimaryShard(IndexShardInfo indexShardInfo) {

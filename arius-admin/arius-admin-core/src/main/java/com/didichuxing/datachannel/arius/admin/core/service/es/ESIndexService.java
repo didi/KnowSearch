@@ -25,10 +25,12 @@ public interface ESIndexService {
      * @param cluster 集群名称
      * @param indexName 索引名称
      * @param retryCount 重试次数
+     * @param mapping mapping
+     * @param setting setting
      * @return
      * @throws ESOperateException
      */
-    boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException;
+    boolean syncCreateIndex(String cluster, String indexName, String mapping, String setting, int retryCount) throws ESOperateException;
 
     /**
      * 同步删除索引

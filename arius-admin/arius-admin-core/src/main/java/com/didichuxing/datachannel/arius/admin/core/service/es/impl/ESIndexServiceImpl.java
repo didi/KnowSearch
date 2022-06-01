@@ -54,8 +54,8 @@ public class ESIndexServiceImpl implements ESIndexService {
     private ESIndexDAO        esIndexDAO;
 
     @Override
-    public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
-        return createIndexInner(cluster, indexName, retryCount);
+    public boolean syncCreateIndex(String cluster, String indexName, String mapping, String setting, int retryCount) throws ESOperateException {
+        return createIndexInner(cluster, indexName, mapping, setting, retryCount);
     }
 
     @Override
@@ -593,9 +593,9 @@ public class ESIndexServiceImpl implements ESIndexService {
         return true;
     }
 
-    private boolean createIndexInner(String cluster, String indexName, int retryCount) throws ESOperateException {
+    private boolean createIndexInner(String cluster, String indexName, String mapping, String setting, int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("createIndex", retryCount,
-            () -> esIndexDAO.createIndex(cluster, indexName));
+            () -> esIndexDAO.createIndex(cluster, indexName, mapping, setting));
     }
 
     private boolean deleteIndexInner(String cluster, String indexName, int retryCount) throws ESOperateException {

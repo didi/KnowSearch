@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -27,9 +27,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 public class ESIndicesControllerMethod {
     public static final String ESIndices = V3 +  "/indices";
 
-    public static PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(IndicesConditionDTO indicesConditionDTO) throws IOException {
+    public static PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(IndexQueryDTO indexQueryDTO) throws IOException {
         String path = String.format("%s/page", ESIndices);
-        return JSON.parseObject(AriusClient.post(path, indicesConditionDTO), new TypeReference<PaginationResult<IndexCatCellVO>>(){});
+        return JSON.parseObject(AriusClient.post(path, indexQueryDTO), new TypeReference<PaginationResult<IndexCatCellVO>>(){});
     }
 
     public static PaginationResult<IndexCatCellVO> getIndexCatInfoVO(String clusterPhyName, String indexName) throws IOException {

@@ -3,6 +3,8 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -34,6 +36,7 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingC
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
@@ -62,15 +65,24 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName 索引名字
      * @return result
      */
-    public boolean createIndex(String cluster, String indexName) {
+    public boolean createIndex(String cluster, String indexName, String mapping, String setting) {
         if (exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=createIndex||index already exist||cluster={}||indexName={}", cluster, indexName);
             return true;
         }
 
+        IndexConfig indexConfig = new IndexConfig();
+        if (null != mapping) {
+            indexConfig.setMappings(AriusIndexMappingConfigUtils.parseMappingConfig(mapping).getData());
+        }
+
+        if (null != setting) {
+            indexConfig.setSettings(AriusIndexTemplateSetting.flat(JSON.parseObject(setting)));
+        }
+
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
-            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).execute()
+            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } else {

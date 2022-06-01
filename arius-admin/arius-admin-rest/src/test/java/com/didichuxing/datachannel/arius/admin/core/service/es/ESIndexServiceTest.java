@@ -36,8 +36,6 @@ public class ESIndexServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void syncCreateIndexTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.createIndex(CustomDataSource.PHY_CLUSTER_NAME, "test")).thenReturn(true);
-        Assertions.assertTrue(esIndexService.syncCreateIndex(CustomDataSource.PHY_CLUSTER_NAME, "test", 1));
     }
 
     @Test

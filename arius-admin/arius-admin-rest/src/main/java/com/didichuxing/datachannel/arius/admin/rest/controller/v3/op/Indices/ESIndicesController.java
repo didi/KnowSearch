@@ -7,7 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -32,6 +32,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(V3 + "/indices")
 @Api(tags = "Console-索引管理接口(REST)")
+@Deprecated
 public class ESIndicesController {
     @Autowired
     private IndicesManager indicesManager;
@@ -39,8 +40,8 @@ public class ESIndicesController {
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "分页获取索引列表信息", notes = "携带可读可写标志位")
-    public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(HttpServletRequest request, @RequestBody IndicesConditionDTO condition) {
-        return indicesManager.pageGetIndexCatInfoVO(condition, HttpRequestUtils.getAppId(request));
+    public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(HttpServletRequest request, @RequestBody IndexQueryDTO condition) {
+        return indicesManager.pageGetIndex(condition, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/select")
@@ -53,8 +54,8 @@ public class ESIndicesController {
     @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "批量删除索引")
-    public Result<Boolean> delete(@RequestBody List<IndicesClearDTO> params, HttpServletRequest request) {
-        return indicesManager.batchDeleteIndex(params, HttpRequestUtils.getAppId(request),
+    public Result<Void> delete(@RequestBody List<IndicesClearDTO> params, HttpServletRequest request) {
+        return indicesManager.deleteIndex(params, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
     }
 

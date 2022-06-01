@@ -29,7 +29,7 @@ public class IndexCatCellVO extends BaseVO {
     @ApiModelProperty("分区状态")
     private String  status;
 
-    @ApiModelProperty("分区名字")
+    @ApiModelProperty("索引名字")
     private String  index;
 
     @ApiModelProperty("分区shard个数")

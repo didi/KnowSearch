@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -27,13 +27,13 @@ public class ESIndicesTest extends BasePhyClusterInfoTest{
 
     @Test
     public void pageGetIndexCatInfoVOTest() throws IOException {
-        IndicesConditionDTO indicesConditionDTO = new IndicesConditionDTO();
-        indicesConditionDTO.setClusterPhyName(Lists.newArrayList(phyClusterInfo.getPhyClusterName()));
-        indicesConditionDTO.setOrderByDesc(false);
-        indicesConditionDTO.setPage(1L);
-        indicesConditionDTO.setSize(10L);
+        IndexQueryDTO indexQueryDTO = new IndexQueryDTO();
+        indexQueryDTO.setClusterPhyName(Lists.newArrayList(phyClusterInfo.getPhyClusterName()));
+        indexQueryDTO.setOrderByDesc(false);
+        indexQueryDTO.setPage(1L);
+        indexQueryDTO.setSize(10L);
 
-        PaginationResult<IndexCatCellVO> result = ESIndicesControllerMethod.pageGetIndexCatInfoVO(indicesConditionDTO);
+        PaginationResult<IndexCatCellVO> result = ESIndicesControllerMethod.pageGetIndexCatInfoVO(indexQueryDTO);
         Assert.assertTrue(result.success());
     }
 

@@ -18,8 +18,14 @@ import lombok.NoArgsConstructor;
 public class IndexCatCellWithCreateInfoDTO extends IndexCatCellDTO {
 
     @ApiModelProperty("逻辑集群Id")
-    private Integer resourceId;
+    private Long resourceId;
+
+    @ApiModelProperty("物理集群")
+    private String cluster;
 
     @ApiModelProperty("mapping")
     private String mapping;
+
+    @ApiModelProperty("setting")
+    private String setting;
 }
