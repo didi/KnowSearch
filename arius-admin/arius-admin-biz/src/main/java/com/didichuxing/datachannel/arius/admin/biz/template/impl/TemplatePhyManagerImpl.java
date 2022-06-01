@@ -15,6 +15,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_INDEX_INCLUDE_RACK;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
@@ -1093,7 +1094,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (result.success()) {
             mappings = (MappingConfig) result.getData();
         }
-        Map<String, String> settingsMap = getSettingsMap(param.getCluster(), param.getRack(), param.getShard(), param.getShardRouting(), param.getSettings());
+        Map<String, String> settingsMap = getSettingsMap(param.getShard(), param.getSettings());
         boolean ret;
         if (null != mappings || null != param.getSettings()) {
             ret = esTemplateService.syncCreate(settingsMap, param.getCluster(), param.getName(), logic.getExpression(), mappings, 0);
@@ -1105,19 +1106,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
     }
 
-    private Map<String, String> getSettingsMap(String cluster, String rack, Integer shard, Integer shardRouting, AriusIndexTemplateSetting settings) {
+    private Map<String, String> getSettingsMap(Integer shard, String settings) {
         Map<String, String> settingsMap = new HashMap<>();
-        if (StringUtils.isNotBlank(rack)) {
-            settingsMap.put(TEMPLATE_INDEX_INCLUDE_RACK, rack);
-        }
         if (shard != null && shard > 0) {
             settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
         }
         settingsMap.put(SINGLE_TYPE, "true");
 
-        //这里设置自定义分词器、副本数量、translog是否异步
         if (null != settings) {
-            settingsMap.putAll(settings.toJSON());
+            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSONObject.parseObject(settings)));
         }
         return settingsMap;
     }

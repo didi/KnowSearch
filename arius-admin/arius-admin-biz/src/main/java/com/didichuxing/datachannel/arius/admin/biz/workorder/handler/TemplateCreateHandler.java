@@ -385,15 +385,12 @@ public class TemplateCreateHandler extends BaseWorkOrderHandler {
         AriusIndexTemplateSetting settings = new AriusIndexTemplateSetting();
         if (StringUtils.isNotBlank(content.getCustomerAnalysis())) {
             settings.setAnalysis(JSON.parseObject(content.getCustomerAnalysis()));
-            physicalDTO.setSettings(settings);
         }
         if (content.isCancelCopy()) {
             settings.setReplicasNum(0);
-            physicalDTO.setSettings(settings);
         }
         if (content.isAsyncTranslog()) {
             settings.setTranslogDurability(AriusIndexTemplateSetting.ASYNC);
-            physicalDTO.setSettings(settings);
         }
         if (StringUtils.isNotBlank(content.getDynamicTemplates())
                 || StringUtils.isNotBlank(content.getMapping())) {

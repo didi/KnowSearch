@@ -23,7 +23,7 @@ public class IndexTemplateWithCreateInfoDTO extends IndexTemplateDTO {
     @ApiModelProperty("mapping")
     private String mapping;
 
-    @ApiModelProperty("settings信息")
-    private String settings;
+    @ApiModelProperty("setting信息")
+    private String setting;
 
 }

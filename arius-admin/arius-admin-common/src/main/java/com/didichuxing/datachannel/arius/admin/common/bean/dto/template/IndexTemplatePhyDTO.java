@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import io.swagger.annotations.ApiModel;
@@ -97,7 +98,7 @@ public class IndexTemplatePhyDTO extends BaseDTO {
      * }
      */
     @ApiModelProperty("索引模板自定义settings")
-    private AriusIndexTemplateSetting settings;
+    private String settings;
     
     @ApiModelProperty("逻辑集群ID")
     private Long                           resourceId;

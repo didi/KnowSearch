@@ -51,11 +51,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tem
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.TemplateCreateEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -1060,17 +1058,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             indexTemplateDTO.setHotTime(-1);
         }
 
-        //todo: set setting here
-        indexTemplatePhyDTO.setSettings(new AriusIndexTemplateSetting());
+        if (StringUtils.isNotBlank(param.getSetting())) {
+            indexTemplatePhyDTO.setSettings(param.getSetting());
+        } else {
+            indexTemplatePhyDTO.setSettings("{}");
+        }
 
         if (StringUtils.isNotBlank(param.getMapping())) {
             AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
             ariusTypeProperty.setTypeName(DEFAULT_INDEX_MAPPING_TYPE);
-            if (StringUtils.isBlank(param.getMapping())) {
-                param.setMapping("{}");
-            }
             ariusTypeProperty.setProperties(JSON.parseObject(param.getMapping()));
             indexTemplatePhyDTO.setMappings(ariusTypeProperty.toMappingJSON().getJSONObject(DEFAULT_INDEX_MAPPING_TYPE).toJSONString());
+        } else {
+            indexTemplatePhyDTO.setMappings("{}");
         }
 
         indexTemplateDTO.setPhysicalInfos(Lists.newArrayList(indexTemplatePhyDTO));
