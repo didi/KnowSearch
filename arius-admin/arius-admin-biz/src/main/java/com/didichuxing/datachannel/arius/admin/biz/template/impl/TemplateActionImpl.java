@@ -233,6 +233,7 @@ public class TemplateActionImpl implements TemplateAction {
         return distributedRackResult;
     }
 
+    @Deprecated
     private Result<Integer> handleCreateWithAutoDistributeResource(IndexTemplateDTO logicDTO, String operator) throws AdminOperateException {
         int indexDefaultWriterSetFlags = -1;
         for (IndexTemplatePhyDTO physicalDTO : logicDTO.getPhysicalInfos()) {
@@ -263,7 +264,8 @@ public class TemplateActionImpl implements TemplateAction {
             return Result.buildFail("集群空闲资源不足");
         }
 
-        return templateLogicManager.createLogicTemplate(logicDTO, operator);
+        return Result.buildFail("deprecated");
+        //return templateLogicManager.createLogicTemplate(logicDTO, operator);
     }
 
     private void handleIndexTemplatePhysical(IndexTemplatePhyDTO physicalDTO) {

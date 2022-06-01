@@ -59,9 +59,11 @@ public class IndexTemplateDTO extends PageDTO {
     @ApiModelProperty("时间字段格式")
     private String                    dateFieldFormat;
 
+    @Deprecated
     @ApiModelProperty("主键字段")
     private String                    idField;
 
+    @Deprecated
     @ApiModelProperty("routing字段")
     private String                    routingField;
 

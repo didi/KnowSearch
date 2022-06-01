@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,24 +65,14 @@ public interface TemplateLogicManager {
     IndexTemplateWithLabels getLabelByLogicId(Integer logicId);
 
     /**
-     * 新建逻辑模板 无参数校验
-     *
-     * @param param    模板信息
-     * @param operator 操作人
-     * @return result
-     */
-    @Transactional(rollbackFor = Exception.class)
-    Result<Integer> addTemplateWithoutCheck(IndexTemplateDTO param, String operator) throws AdminOperateException;
-
-    /**
      * 新建逻辑模板
      * @param param 模板信息
      * @param operator 操作人
+     * @param appId appId
      * @return result
-     * @throws AdminOperateException 操作es失败 或者保存物理模板信息失败
      */
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    Result<Integer> createLogicTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException;
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId);
 
     /**
      * 获取所有逻辑模板聚合

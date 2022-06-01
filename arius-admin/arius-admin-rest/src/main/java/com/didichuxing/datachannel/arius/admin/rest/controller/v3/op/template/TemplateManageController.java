@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.manage.create.TemplateCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
@@ -25,16 +24,13 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 public class TemplateManageController {
 
     @Autowired
-    private TemplateCreateManager templateCreateManager;
-
-    @Autowired
     private TemplateLogicManager templateLogicManager;
 
     @PutMapping("/createTemplate")
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
     public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) {
-        return templateCreateManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
+        return templateLogicManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/edit")
