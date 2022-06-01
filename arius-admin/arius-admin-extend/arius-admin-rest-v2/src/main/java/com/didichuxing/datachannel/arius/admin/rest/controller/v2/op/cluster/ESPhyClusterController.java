@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,8 +58,8 @@ public class ESPhyClusterController {
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取集群列表接口")
-    public Result<List<ConsoleClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhys(param));
+    public Result<List<ClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.getClusterPhys(param));
     }
 
     @PutMapping("/add")
@@ -72,9 +73,9 @@ public class ESPhyClusterController {
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑集群接口" )
-
+    @Deprecated
     public Result<Boolean> edit(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.editCluster(param, HttpRequestUtils.getOperator(request),HttpRequestUtils.getAppId(request));
+        return clusterPhyManager.editCluster(param, HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/collectClusterNodeSettings")

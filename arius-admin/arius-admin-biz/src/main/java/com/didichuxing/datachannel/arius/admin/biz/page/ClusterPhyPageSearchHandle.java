@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,7 +49,8 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     private ClusterLogicService clusterLogicService;
     @Autowired
     private ClusterPhyManager        clusterPhyManager;
-
+    @Autowired
+    private  ClusterRegionService clusterRegionService;
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer appId) {
 
@@ -71,14 +74,15 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Override
     protected void initCondition(ClusterPhyConditionDTO condition, Integer appId) {
         boolean isSuperApp = appService.isSuperApp(appId);
-        // 1. 获取管理/读写/读/无权限的物理集群信息
         List<String> clusterNames = new ArrayList<>();
         if (!isSuperApp) {
+            // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
             List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
             //项目下的有管理权限逻辑集群会关联多个物理集群
-            clusterLogicList.stream().map(ClusterLogic::getId).map(clusterContextManager::getClusterLogicContextCache)
-                .map(ClusterLogicContext::getAssociatedClusterPhyNames).forEach(clusterNames::addAll);
-            clusterNames = clusterNames.stream().distinct().collect(Collectors.toList());
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
+                clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
+            clusterNames = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
+                .collect(Collectors.toList());
         }
         condition.setClusterNames(clusterNames);
         String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
