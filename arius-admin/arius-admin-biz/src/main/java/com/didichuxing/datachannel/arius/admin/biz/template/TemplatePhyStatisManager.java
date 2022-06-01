@@ -75,7 +75,7 @@ public interface TemplatePhyStatisManager {
     Result<TemplateStatsInfoVO> getTemplateBaseStatisticalInfoByLogicTemplateId(Long logicTemplateId);
 
     /**
-     * 根据模板Id获取[startDate, endDate]的appid访问统计信息
+     * 根据模板Id获取[startDate, endDate]的projectid访问统计信息
      * @param logicTemplateId 逻辑索引模板ID
      * @param startDate 开始时刻
      * @param endDate 结束时刻

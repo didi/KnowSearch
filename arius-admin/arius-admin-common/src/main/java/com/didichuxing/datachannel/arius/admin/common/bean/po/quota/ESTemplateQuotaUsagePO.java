@@ -34,7 +34,7 @@ public class ESTemplateQuotaUsagePO extends BaseESPO {
 
     private Double       quota;
 
-    private Integer      appId;
+    private Integer projectId;
 
     /**
      * 逻辑资源
