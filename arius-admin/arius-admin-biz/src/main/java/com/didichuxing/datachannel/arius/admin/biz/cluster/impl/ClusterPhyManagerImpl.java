@@ -117,9 +117,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplateSrvManager                               templateSrvManager;
-
-    @Autowired
     private TemplatePhyMappingManager                        templatePhyMappingManager;
 
     @Autowired
