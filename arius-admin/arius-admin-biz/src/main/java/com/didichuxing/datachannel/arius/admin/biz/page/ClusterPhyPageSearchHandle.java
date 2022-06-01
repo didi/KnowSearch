@@ -6,8 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.ArrayList;
@@ -43,9 +44,9 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Autowired
     private ClusterLogicService clusterLogicService;
     @Autowired
-    private ClusterPhyManager        clusterPhyManager;
+    private ClusterPhyManager    clusterPhyManager;
     @Autowired
-    private  ClusterRegionService clusterRegionService;
+    private ClusterRegionService clusterRegionService;
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
 
@@ -67,7 +68,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     }
     
     @Override
-    protected void initCondition(ClusterPhyConditionDTO condition, Integer appId) {
+    protected void initCondition(ClusterPhyConditionDTO condition, Integer projectId) {
         List<String> clusterNames = new ArrayList<>();
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表

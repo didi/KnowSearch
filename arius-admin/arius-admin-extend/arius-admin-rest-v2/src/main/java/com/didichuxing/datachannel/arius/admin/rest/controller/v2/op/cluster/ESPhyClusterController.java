@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.Templa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -77,7 +77,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "编辑集群接口" )
     @Deprecated
     public Result<Boolean> edit(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.editCluster(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+        return clusterPhyManager.editCluster(param, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("/collectClusterNodeSettings")
