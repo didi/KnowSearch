@@ -61,15 +61,12 @@ public class CustomDataSource {
         param.setType(4);
         param.setAppId(appid);
         param.setCluster(clusterName);
-        param.setDivide(true);
         param.setEsVersion("7.6.2");
         param.setPhyClusterDesc("");
-        param.setRegionRacks(new ArrayList<>());
         param.setPassword("");
         param.setResponsible(operator);
-        param.setTemplateSrvs(TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode() + "");
         param.setImportRule(ESClusterImportRuleEnum.AUTO_IMPORT.getCode());
-        param.setTags("{\"resourceType\":3, \"createSource\":0}");
+        param.setTags("\"createSource\":0}");
         List<ESClusterRoleHostDTO> list = new ArrayList<>();
         for(int i = 1; i <= 3; i++) {
             ESClusterRoleHostDTO esClusterRoleHostDTO = getESRoleClusterHostDTO();

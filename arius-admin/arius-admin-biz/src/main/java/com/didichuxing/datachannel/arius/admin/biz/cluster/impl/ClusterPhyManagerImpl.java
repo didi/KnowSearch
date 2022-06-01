@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,9 +116,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
-
-    @Autowired
-    private TemplateSrvManager                               templateSrvManager;
 
     @Autowired
     private TemplatePhyMappingManager                        templatePhyMappingManager;
@@ -363,7 +361,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
             return saveClusterResult;
         } catch (Exception e) {
-            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||logicCluster={}||clusterPhy={}||errMsg={}", param.getLogicCluster(),
+            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
                 param.getCluster(), e.getMessage());
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1084,7 +1082,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         String clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
 
         clusterDTO.setDesc(param.getPhyClusterDesc());
-        clusterDTO.setDataCenter(param.getDataCenter());
+        if (StringUtils.isBlank(clusterDTO.getDataCenter())) {
+            clusterDTO.setDataCenter(DataCenterEnum.CN.getCode());
+        }
+        if (null == clusterDTO.getType()) {
+            clusterDTO.setType(ESClusterTypeEnum.ES_HOST.getCode());
+        }
         clusterDTO.setHttpAddress(clientAddress);
         clusterDTO.setHttpWriteAddress(clientAddress);
         clusterDTO.setIdc(DEFAULT_CLUSTER_IDC);
@@ -1194,11 +1197,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         if (clusterPhyService.isClusterExists(param.getCluster())) {
             return Result.buildParamIllegal(String.format("物理集群名称:%s已存在", param.getCluster()));
-        }
-
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(param.getLogicCluster());
-        if (!AriusObjUtils.isNull(clusterLogic)) {
-            return Result.buildParamIllegal(String.format("逻辑集群名称:%s已存在", param.getLogicCluster()));
         }
 
         String esClientHttpAddressesStr = clusterRoleHostService.buildESClientHttpAddressesStr(roleClusterHosts);

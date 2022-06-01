@@ -38,14 +38,14 @@ public class AppOpController {
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取APP列表接口", notes = "获取APP列表,包含APP全部元信息")
+    @ApiOperation(value = "获取APP列表接口【三方接口】",tags = "【三方接口】", notes = "获取APP列表,包含APP全部元信息")
     public Result<List<AppVO>> list() {
         return Result.buildSucc(ConvertUtil.list2List(appService.listApps(), AppVO.class));
     }
 
     @GetMapping("/get")
     @ResponseBody
-    @ApiOperation(value = "获取APP接口", notes = "获取指定app,包含APP全部元信息")
+    @ApiOperation(value = "获取APP接口【三方接口】",tags = "【三方接口】", notes = "获取指定app,包含APP全部元信息")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
     public Result<AppVO> get(@RequestParam("appId") Integer appId) {
         return Result.buildSucc(ConvertUtil.obj2Obj(appService.getAppById(appId), AppVO.class));
@@ -53,14 +53,14 @@ public class AppOpController {
 
     @PostMapping("/add")
     @ResponseBody
-    @ApiOperation(value = "新建APP接口" )
+    @ApiOperation(value = "新建APP接口【三方接口】",tags = "【三方接口】" )
     public Result<Integer> add(HttpServletRequest request, @RequestBody AppDTO appDTO) {
         return appService.registerApp(appDTO, HttpRequestUtils.getOperator(request));
     }
 
     @DeleteMapping("/delete")
     @ResponseBody
-    @ApiOperation(value = "删除APP接口" )
+    @ApiOperation(value = "删除APP接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
     public Result<Void> delete(HttpServletRequest request, @RequestParam("appId") Integer appId) {
         return appService.deleteAppById(appId, HttpRequestUtils.getOperator(request));

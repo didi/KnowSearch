@@ -43,7 +43,7 @@ public class TemplatePhysicalController {
      */
     @PostMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取物理模板列表接口")
+    @ApiOperation(value = "获取物理模板列表接口【三方接口】",tags = "【三方接口】")
     public Result<List<ConsoleTemplatePhyVO>> list(@RequestBody IndexTemplatePhyDTO param,
                                                    HttpServletRequest request) {
         return Result.buildSucc(templatePhyManager.getConsoleTemplatePhyVOS(param, HttpRequestUtils.getAppId(request)));
