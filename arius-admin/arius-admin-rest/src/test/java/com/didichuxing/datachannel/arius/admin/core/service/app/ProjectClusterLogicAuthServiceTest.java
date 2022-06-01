@@ -6,9 +6,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClu
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectLogicClusterAuthDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import java.util.List;
@@ -33,8 +35,11 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
 
     @MockBean
     private ClusterLogicService clusterLogicService;
+    @Autowired
+    private RoleTool roleTool;
+    
 
-    @MockBean
+    @Autowired
     private ProjectService  projectService;
     @MockBean
     private UserService userService;
@@ -49,7 +54,7 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
                 projectClusterLogicAuthService.ensureSetLogicClusterAuth(null, null, null, null, null).getMessage());
         Assertions.assertEquals("参数错误:未指定逻辑集群ID，请检查后再提交！",
                 projectClusterLogicAuthService.ensureSetLogicClusterAuth(projectClusterLogicAuth.getProjectId(), null, null, null, null).getMessage());
-        Long logicClusterId = 173L;
+        Long logicClusterId = 897L;
         Assertions.assertEquals("参数错误:未指定操作人，请检查后再提交！",
                 projectClusterLogicAuthService.ensureSetLogicClusterAuth(projectClusterLogicAuth.getProjectId(), logicClusterId, null, null, null).getMessage());
         mockRuleSet();
@@ -57,10 +62,10 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
                 logicClusterId, ProjectClusterLogicAuthEnum.ALL, projectClusterLogicAuth.getResponsible(), OPERATOR).failed());
         ClusterLogic clusterLogic = new ClusterLogic();
         clusterLogic.setId(projectClusterLogicAuth.getLogicClusterId());
-        clusterLogic.setProjectId(projectClusterLogicAuth.getProjectId() + 1);
+        clusterLogic.setProjectId(projectClusterLogicAuth.getProjectId() - 2);
         Mockito.when(clusterLogicService.getClusterLogicById(Mockito.anyLong())).thenReturn(clusterLogic);
         Assertions.assertTrue(projectClusterLogicAuthService.ensureSetLogicClusterAuth(projectClusterLogicAuth.getProjectId(),
-                logicClusterId, ProjectClusterLogicAuthEnum.ACCESS, projectClusterLogicAuth.getResponsible(), OPERATOR).success());
+                logicClusterId, ProjectClusterLogicAuthEnum.OWN, projectClusterLogicAuth.getResponsible(), OPERATOR).success());
         Assertions.assertFalse(projectClusterLogicAuthService.ensureSetLogicClusterAuth(projectClusterLogicAuth.getProjectId(),
                 logicClusterId, ProjectClusterLogicAuthEnum.ALL, projectClusterLogicAuth.getResponsible(), OPERATOR).success());
         Assertions.assertEquals(ProjectClusterLogicAuthEnum.ACCESS.getCode(),
@@ -187,11 +192,11 @@ public class ProjectClusterLogicAuthServiceTest extends AriusAdminApplicationTes
 
     private void mockRuleSet() {
         ProjectClusterLogicAuth projectClusterLogicAuth = CustomDataSource.appClusterLogicAuthSource();
-        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
+        //Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
         ClusterLogic clusterLogic = new ClusterLogic();
         clusterLogic.setId(projectClusterLogicAuth.getLogicClusterId());
         clusterLogic.setProjectId(projectClusterLogicAuth.getProjectId());
         Mockito.when(clusterLogicService.getClusterLogicById(Mockito.anyLong())).thenReturn(clusterLogic);
-        //Mockito.when(ariusUserInfoService.getByDomainAccount(Mockito.any())).thenReturn(new UserBriefVO());
+        Mockito.when(userService.getUserBriefByUserName(Mockito.any())).thenReturn(new UserBriefVO());
     }
 }

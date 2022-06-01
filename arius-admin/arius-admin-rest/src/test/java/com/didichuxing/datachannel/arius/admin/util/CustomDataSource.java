@@ -382,9 +382,9 @@ public class CustomDataSource {
 
     public static ProjectClusterLogicAuth appClusterLogicAuthSource() {
         ProjectClusterLogicAuth projectClusterLogicAuth = new ProjectClusterLogicAuth();
-        projectClusterLogicAuth.setLogicClusterId(1L);
-        projectClusterLogicAuth.setProjectId(1595);
-        projectClusterLogicAuth.setId(1L);
+        projectClusterLogicAuth.setLogicClusterId(897L);
+        projectClusterLogicAuth.setProjectId(1593);
+        projectClusterLogicAuth.setId(451L);
         projectClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.ACCESS.getCode());
         projectClusterLogicAuth.setResponsible("admin");
         return projectClusterLogicAuth;

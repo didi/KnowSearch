@@ -24,5 +24,5 @@ public final class AuthConstant {
     /**
      * 管理角色id
      */
-    public static final Integer ADMIN_ROLE_ID = 1;
+    public static final Integer ADMIN_ROLE_ID = 1597;
 }

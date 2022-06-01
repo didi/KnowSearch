@@ -284,8 +284,8 @@ public class ESUserManagerImpl implements ESUserManager {
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator) {
        
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
-            || CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator)) {
+        if (!CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
+            || !CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || !roleTool.isAdmin(operator)) {
             return Result.buildParamIllegal("权限不足");
         }
         List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));

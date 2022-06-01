@@ -30,6 +30,7 @@ import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -488,7 +489,10 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
     
         final Integer projectId = authDTO.getProjectId();
-        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
+        final ProjectVO projectVO = Optional.ofNullable(projectId)
+                .filter(projectService::checkProjectExist)
+                .map(projectService::getProjectDetailByProjectId)
+                .orElse(new ProjectVO());
         // 校验责任人是否合法
         if (!roleTool.isAdmin(authDTO.getResponsible()) || !CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),
                 projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO)) {

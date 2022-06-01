@@ -1352,9 +1352,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 && !DataCenterEnum.validate(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心非法");
         }
-        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(param.getProjectId());
         if (param.getProjectId() != null
-                && Objects.isNull(projectVO)) {
+                && projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用不存在");
         }
         if (param.getDataType() != null
