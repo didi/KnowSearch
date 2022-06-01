@@ -57,14 +57,14 @@ public class ESPhyClusterController {
 
     @PostMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取集群列表接口")
+    @ApiOperation(value = "获取集群列表接口【三方接口】",tags = "【三方接口】")
     public Result<List<ClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
         return Result.buildSucc(clusterPhyManager.getClusterPhys(param));
     }
 
     @PutMapping("/add")
     @ResponseBody
-    @ApiOperation(value = "新建集群接口" )
+    @ApiOperation(value = "新建集群接口【三方接口】",tags = "【三方接口】" )
 
     public Result<Boolean> add(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
         return clusterPhyManager.addCluster(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
@@ -80,7 +80,7 @@ public class ESPhyClusterController {
 
     @PostMapping("/collectClusterNodeSettings")
     @ResponseBody
-    @ApiOperation(value = "采集集群节点配置信息接口" )
+    @ApiOperation(value = "采集集群节点配置信息接口【三方接口】",tags = "【三方接口】" )
 
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) {
@@ -89,7 +89,7 @@ public class ESPhyClusterController {
 
     @PostMapping("/node/list")
     @ResponseBody
-    @ApiOperation(value = "获取集群节点列表接口" )
+    @ApiOperation(value = "获取集群节点列表接口【三方接口】",tags = "【三方接口】" )
 
     public Result<List<ESClusterRoleHostVO>> nodeList(@RequestBody ESClusterRoleHostDTO param) {
         return Result
@@ -98,7 +98,7 @@ public class ESPhyClusterController {
 
     @GetMapping("/node/getByCluster")
     @ResponseBody
-    @ApiOperation(value = "根据集群获取集群节点列表接口" )
+    @ApiOperation(value = "根据集群获取集群节点列表接口【三方接口】",tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
 
     public Result<List<ESClusterRoleHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
