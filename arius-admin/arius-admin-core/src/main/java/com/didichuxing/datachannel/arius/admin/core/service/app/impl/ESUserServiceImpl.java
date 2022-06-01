@@ -1,18 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -23,12 +20,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -228,10 +222,7 @@ public class ESUserServiceImpl implements ESUserService {
         if (validateAppFieldIsNullResult.failed()) {
             return validateAppFieldIsNullResult;
         }
-        //todo 暂定校验超级用户 user name
-        if (!appDTO.getResponsible().equals(AuthConstant.SUPER_USER_NAME)) {
-            return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
-        }
+       
         ESUserPO oldESUser = esUserDAO.getByESUser(appDTO.getId());
         if (Objects.nonNull(oldESUser)){
             if (Objects.isNull(appDTO.getProjectId())) {

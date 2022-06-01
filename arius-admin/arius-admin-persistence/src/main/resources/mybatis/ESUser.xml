@@ -103,7 +103,7 @@
 			and id = #{esUser}
 	</select>
 	
-	<select id="listByProjectId" parameterType="string" resultMap="BaseResultMap">
+	<select id="listByProjectId" parameterType="integer" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List"/>
 		from arius_es_user
@@ -163,12 +163,12 @@
 		set is_active = 0
 		where id = #{esUser}
 	</update>
-	<update id="deleteByProjectId">
+
+		<update id="deleteByProjectId" parameterType="integer">
 		update arius_es_user
 		set is_active = 0
-		where id = #{projectId}
+		where project_id = #{projectId}
 	</update>
-	
 	<select id="listByResponsible" parameterType="string" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List"/>

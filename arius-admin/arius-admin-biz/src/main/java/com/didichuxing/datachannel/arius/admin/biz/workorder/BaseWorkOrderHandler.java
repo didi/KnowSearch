@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -38,6 +39,8 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
 
     @Autowired
     protected OperateRecordService operateRecordService;
+    @Autowired
+    private RoleTool roleTool;
 
     /**
      * 创建一个工单
@@ -202,7 +205,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @return
      */
     protected List<UserBriefVO> getRDOrOPList() {
-        return  Collections.singletonList(userService.getUserBriefByUserName(AuthConstant.SUPER_USER_NAME));
+        return  roleTool.adminList();
     }
     
     /**
@@ -213,7 +216,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @return {@link List}<{@link UserBriefVO}>
      */
     protected List<UserBriefVO> getOPList() {
-        return  Collections.singletonList(userService.getUserBriefByUserName(AuthConstant.SUPER_USER_NAME));
+        return  roleTool.adminList();
     }
     
     /**
@@ -225,7 +228,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @return boolean
      */
     protected boolean isRDOrOP(String userName) {
-        return AuthConstant.SUPER_USER_NAME.equals(userName);
+        return roleTool.isAdmin(userName);
     }
     
     /**
@@ -237,7 +240,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @return boolean
      */
     protected boolean isOP(String userName) {
-        return AuthConstant.SUPER_USER_NAME.equals(userName);
+        return roleTool.isAdmin(userName);
     }
 
     /*************************************** privete method ************************************/

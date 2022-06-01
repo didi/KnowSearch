@@ -27,6 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
 import com.didiglobal.logi.security.common.entity.dept.Dept;
@@ -70,6 +71,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     private WorkOrderDAO orderDao;
     @Autowired
     private DeptService deptService;
+    @Autowired
+    private RoleTool roleTool;
 
 
 
@@ -232,7 +235,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public List<WorkOrderPO> getApprovalList(String approver) {
         try {
             //是用户 但不是管理员
-            if (!AuthConstant.SUPER_USER_NAME.equals(approver) && Objects.nonNull(userService.getUserBriefByUserName(approver))) {
+            if (!roleTool.isAdmin(approver) && Objects.nonNull(userService.getUserBriefByUserName(approver))) {
                 return orderDao.listByApproverAndStatus(approver, null);
             }
             return orderDao.list();
@@ -255,7 +258,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
              *         return AriusUserRoleEnum.getUserRoleEnum(userInfoPO.getRole()).equals(AriusUserRoleEnum.OP);
              *         当前审批人只有管理员
              */
-            if (AuthConstant.SUPER_USER_NAME.equals(approver)) {
+            if (roleTool.isAdmin(approver)) {
                 return orderDao.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
             }
             return orderDao.listByStatus(OrderStatusEnum.PASSED.getCode());
@@ -285,7 +288,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
          *         return AriusUserRoleEnum.getUserRoleEnum(userInfoPO.getRole()).equals(AriusUserRoleEnum.RD);
          */
         //AriusUserRoleEnum.RD AriusUserRoleEnum.OP
-        if (AuthConstant.SUPER_USER_NAME.equals(userName)) {
+        if (roleTool.isAdmin(userName)) {
             return orderList;
         } else {
             orderList = handleOrderList(userName, orderList);

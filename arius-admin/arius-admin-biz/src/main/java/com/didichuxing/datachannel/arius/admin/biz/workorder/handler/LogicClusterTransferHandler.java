@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -30,6 +31,8 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private RoleTool roleTool;
 
   
 
@@ -64,7 +67,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("负责人为空");
         }
        
-        if (!AuthConstant.SUPER_USER_NAME.equals(clusterLogicTransferContent.getTargetResponsible())) {
+        if (!roleTool.isAdmin(clusterLogicTransferContent.getTargetResponsible())) {
             return Result.buildParamIllegal("负责人非法");
         }
 

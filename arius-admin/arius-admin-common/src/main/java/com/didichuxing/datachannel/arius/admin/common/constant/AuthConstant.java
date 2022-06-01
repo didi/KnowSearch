@@ -21,4 +21,8 @@ public final class AuthConstant {
     public static final Integer SUPER_USER_ID    = 1;
     public static final String  SUPER_USER_NAME  = "admin";
     
+    /**
+     * 管理角色id
+     */
+    public static final Integer ADMIN_ROLE_ID = 1;
 }

@@ -12,13 +12,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -62,6 +62,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoleTool roleTool;
 
     @Autowired
     private ClusterContextManager clusterContextManager;
@@ -514,7 +516,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     private boolean isRDOrOP(String operator) {
-        return AuthConstant.SUPER_USER_NAME.equals(operator);
+        return roleTool.isAdmin(operator);
     }
 
     /**

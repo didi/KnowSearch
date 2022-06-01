@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin;
 
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +42,7 @@ public class AriusAdminApplicationTest {
 
     @BeforeEach
     public void setUp() {
+        initMocks(this);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         // 获取 springboot server 监听的端口号
         // port = applicationContext.getWebServer().getPort();

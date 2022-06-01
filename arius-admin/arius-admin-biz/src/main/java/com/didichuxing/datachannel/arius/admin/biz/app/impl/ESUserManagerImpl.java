@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -30,6 +31,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.RoleService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +61,8 @@ public class ESUserManagerImpl implements ESUserManager {
     private ESUserService        esUserService;
     @Autowired
     private OperateRecordService operateRecordService;
+    @Autowired
+    private RoleTool             roleTool;
     
     /**
      * 获取所有项目下全部的es user
@@ -95,9 +99,9 @@ public class ESUserManagerImpl implements ESUserManager {
         ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
        
         
-        //确定当前操作者属于该项目成员
-        if (Objects.nonNull(projectId) &&(!StringUtils.equals(operator,
-                AuthConstant.SUPER_USER_NAME) ||! CommonUtils.isUserNameBelongProjectMember(operator,projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(operator,projectVO))) {
+        //确定当前操作者属于该项目成员或者是管理员
+        if (Objects.nonNull(projectId) &&(!roleTool.isAdmin(operator)||! CommonUtils.isUserNameBelongProjectMember(operator,
+                projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(operator,projectVO))) {
             return Result.buildFail(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
         }
         final List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
@@ -133,7 +137,10 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator) {
-        
+         //暂定校验超级用户 user name
+        if (!roleTool.isAdmin(operator)) {
+            return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
+        }
     
         final Tuple</*创建的es user*/Result<Integer>,/*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService.registerESUser(appDTO, operator);
     
@@ -192,7 +199,9 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteESUserByProject(int esUser, int projectId, String operator) {
-        
+        if (roleTool.isAdmin(operator)){
+            return Result.buildFail("当前操作者权限不足,需要管理员权限");
+        }
         //校验当前项目下所有的es user
         final List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
         if (esUsers.size()==1){
@@ -227,6 +236,9 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteAllESUserByProject(int projectId, String operator) {
+        if (roleTool.isAdmin(operator)){
+            return Result.buildFail("当前操作者权限不足,需要管理员权限");
+        }
         
         final Tuple<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
         if (resultListTuple.getV1().success()) {
@@ -273,8 +285,7 @@ public class ESUserManagerImpl implements ESUserManager {
        
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
         if (CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
-            || CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || StringUtils.equals(
-                AuthConstant.SUPER_USER_NAME, operator)) {
+            || CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator)) {
             return Result.buildParamIllegal("权限不足");
         }
         List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));

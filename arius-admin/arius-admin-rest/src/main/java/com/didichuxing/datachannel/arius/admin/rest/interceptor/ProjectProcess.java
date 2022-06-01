@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 import static com.didiglobal.logi.security.common.constant.Constants.API_PREFIX;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didiglobal.logi.security.common.Result;
@@ -30,7 +30,8 @@ public class ProjectProcess implements ResponseBodyAdvice {
     @Autowired
     private              ProjectConfigService projectConfigService;
     private static final String               PROJECT_END = "project";
-    
+    @Autowired
+    private RoleTool roleTool;
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
         return true;
@@ -53,10 +54,9 @@ public class ProjectProcess implements ResponseBodyAdvice {
                     esUserDTO.setIsRoot(0);
                     esUserDTO.setSearchType(AppSearchTypeEnum.TEMPLATE.getCode());
                     esUserDTO.setVerifyCode(RandomStringUtils.randomAlphabetic(7));
-                    esUserDTO.setResponsible(AuthConstant.SUPER_USER_NAME);
                     esUserDTO.setMemo(((ProjectVO) data).getProjectName() + "项目默认的es user");
                     esUserDTO.setProjectId(((ProjectVO) data).getId());
-                    esUserService.registerESUser(esUserDTO, AuthConstant.SUPER_USER_NAME);
+                    esUserService.registerESUser(esUserDTO,roleTool.adminList().get(0).getUserName() );
                 }
                 
             }
