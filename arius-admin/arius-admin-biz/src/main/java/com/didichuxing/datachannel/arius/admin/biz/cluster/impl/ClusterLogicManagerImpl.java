@@ -224,7 +224,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         //依赖获取集群状态, 不能使用FutureUtil, 否则抛NPE
         buildClusterNodeInfo(consoleClusterVO);
         
-        consoleClusterVO.setAppName(projectService.getProjectDetailByProjectId(consoleClusterVO.getProjectId()).getProjectName());
+        consoleClusterVO.setAppName(projectService.getProjectBriefByProjectId(consoleClusterVO.getProjectId()).getProjectName());
 
         return consoleClusterVO;
     }
@@ -468,7 +468,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         futureUtil.runnableTask(() -> buildLogicClusterStatus(consoleClusterVO, clusterLogic))
                     .runnableTask(() -> buildOpLogicClusterPermission(consoleClusterVO, currentProjectId))
-                    .runnableTask(() -> consoleClusterVO.setAppName(projectService.getProjectDetailByProjectId(consoleClusterVO.getProjectId()).getProjectName()))
+                    .runnableTask(() -> consoleClusterVO.setAppName(projectService.getProjectBriefByProjectId(consoleClusterVO.getProjectId()).getProjectName()))
                     .runnableTask(() -> buildClusterNodeInfo(consoleClusterVO))
                     .waitExecute();
 

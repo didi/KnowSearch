@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Rollback
 class ProjectConfigServiceTest extends AriusAdminApplicationTest {
     
-    @Mock
-    private ProjectConfigDAO mockProjectConfigDAO;
+
     
-    @MockBean
+    @Autowired
     private ProjectConfigService projectConfigService;
     public static final int projectId=1;
     
@@ -71,14 +71,8 @@ class ProjectConfigServiceTest extends AriusAdminApplicationTest {
     
     @Test
     void testDeleteByProjectId() {
-        // Setup
-        when(mockProjectConfigDAO.checkProjectConfigByProjectId(Mockito.anyInt())).thenReturn(false);
-        when(mockProjectConfigDAO.deleteByProjectId(Mockito.anyInt())).thenReturn(0);
+
+        Assertions.assertDoesNotThrow(()->projectConfigService.deleteByProjectId(Mockito.anyInt()));
         
-        // Run the test
-        projectConfigService.deleteByProjectId(Mockito.anyInt());
-        
-        // Verify the results
-        when(mockProjectConfigDAO.deleteByProjectId(Mockito.anyInt())).thenReturn(0);
     }
 }
