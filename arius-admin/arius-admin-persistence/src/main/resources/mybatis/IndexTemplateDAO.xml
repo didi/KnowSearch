@@ -182,6 +182,7 @@
             <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
             <if test="openSrv != null">,open_srv = #{openSrv}</if>
             <if test="regionId != null">,region_id = #{regionId}</if>
+            <if test="diskSize != null">,disk_size = #{diskSize}</if>
         </trim>
         where id = #{id}
     </update>
