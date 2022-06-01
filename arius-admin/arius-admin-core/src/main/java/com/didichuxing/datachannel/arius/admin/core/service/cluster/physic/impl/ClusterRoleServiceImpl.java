@@ -114,7 +114,7 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
     @Override
     public Result<Void> updatePodByClusterIdAndRole(ClusterRoleInfo clusterRoleInfo) {
         ESClusterRolePO esClusterRolePo = ConvertUtil.obj2Obj(clusterRoleInfo, ESClusterRolePO.class);
-        boolean succ = (1 == roleClusterDAO.update(esClusterRolePo));
+        boolean succ = (roleClusterDAO.update(esClusterRolePo) != 0);
 
         return Result.build(succ);
     }
