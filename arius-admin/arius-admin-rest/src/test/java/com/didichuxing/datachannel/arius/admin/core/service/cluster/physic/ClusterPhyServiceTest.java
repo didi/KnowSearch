@@ -272,20 +272,6 @@ public class ClusterPhyServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void listPhysicClusterRolesTest() {
-        ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        esClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR);
-        Integer id = clusterDAO.getByName(esClusterDTO.getCluster()).getId();
-        Assertions.assertTrue(CollectionUtils.isEmpty(esClusterPhyService.listPhysicClusterRoles(id + 1)));
-        ClusterRoleInfo clusterRoleInfo = new ClusterRoleInfo();
-        clusterRoleInfo.setRole("wpk");
-        Mockito.when(clusterRoleService.getAllRoleClusterByClusterId(Mockito.any()))
-                .thenReturn(Collections.singletonList(clusterRoleInfo));
-        Assertions.assertTrue(esClusterPhyService.listPhysicClusterRoles(id).stream()
-                .anyMatch(esRoleCluster1 -> esRoleCluster1.getRole().equals(clusterRoleInfo.getRole())));
-    }
-
-    @Test
     public void getRoutingAllocationAwarenessAttributesTest() {
         String cluster = "logi-elasticsearch-7.6.0";
         Set<String> routingAllocationAwarenessAttributes = esClusterPhyService

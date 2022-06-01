@@ -6,6 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -373,8 +374,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public ClusterPhy getClusterById(Integer phyClusterId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
-        ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
-        return clusterPhy;
+        return ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
     }
 
     /**
@@ -419,11 +419,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         return esClusterService.syncPutRemoteCluster(cluster, remoteCluster,
             genTcpAddr(remoteClusterPhy.getHttpWriteAddress(), 9300), 3);
-    }
-
-    @Override
-    public List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId) {
-        return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
     @Override
@@ -713,6 +708,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         if (null == param.getDiskUsagePercent()) {
             param.setDiskUsagePercent(0D);
+        }
+
+        if (null == param.getPlatformType()) {
+            param.setPlatformType("");
+        }
+        if (null == param.getResourceType()) {
+            param.setResourceType(ClusterResourceTypeEnum.UNKNOWN.getCode());
+        }
+        if (null == param.getGatewayUrl()) {
+            param.setGatewayUrl("");
         }
     }
 

@@ -10,6 +10,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 public interface ClusterNodeManager {
     /**
      * 逻辑集群节点转换
@@ -59,4 +63,12 @@ public interface ClusterNodeManager {
      * @return                  Result<Boolean>
      */
     Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator);
+
+    /**
+     * 获取物理集群节点列表
+     *
+     * @param clusterId 集群id
+     * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
+     */
+    Result<List<ESClusterRoleHostVO>> listClusterPhyNode(Integer clusterId);
 }
