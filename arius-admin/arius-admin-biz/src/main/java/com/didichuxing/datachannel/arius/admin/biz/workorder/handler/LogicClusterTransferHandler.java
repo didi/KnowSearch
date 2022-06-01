@@ -9,11 +9,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterLogicTransferOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -30,6 +30,8 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private RoleTool roleTool;
 
   
 
@@ -59,14 +61,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         if (projectService.checkProjectExist(targetProjectId)) {
             return Result.buildParamIllegal("目标项目不存在");
         }
-
-        if (StringUtils.isBlank(clusterLogicTransferContent.getTargetResponsible())) {
-            return Result.buildParamIllegal("负责人为空");
-        }
-       
-        if (!AuthConstant.SUPER_USER_NAME.equals(clusterLogicTransferContent.getTargetResponsible())) {
-            return Result.buildParamIllegal("负责人非法");
-        }
+        
 
         Long clusterLogicId = clusterLogicTransferContent.getClusterLogicId();
         if (!clusterLogicService.isClusterLogicExists(clusterLogicId)) {

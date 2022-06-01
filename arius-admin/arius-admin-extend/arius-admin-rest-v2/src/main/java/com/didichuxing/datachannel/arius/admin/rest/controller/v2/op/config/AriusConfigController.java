@@ -45,7 +45,7 @@ public class AriusConfigController {
 
     @PostMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取配置列表接口" )
+    @ApiOperation(value = "获取配置列表接口【三方接口】",tags = "【三方接口】" )
     public Result<List<AriusConfigInfoVO>> list(@RequestBody AriusConfigInfoDTO param) {
         return Result
             .buildSucc(ConvertUtil.list2List(ariusConfigInfoService.queryByCondition(param), AriusConfigInfoVO.class));
@@ -76,7 +76,7 @@ public class AriusConfigController {
 
     @PostMapping("/edit")
     @ResponseBody
-    @ApiOperation(value = "编辑配置接口" )
+    @ApiOperation(value = "编辑配置接口【三方接口】",tags = "【三方接口】" )
     public Result<Void> edit(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
         return ariusConfigInfoService.editConfig(param, HttpRequestUtil.getOperator(request));
     }

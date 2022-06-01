@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -54,6 +55,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
     private OperateRecordService operateRecordService;
     @Autowired
     private ProjectService       projectService;
+    @Autowired
+    private RoleTool roleTool;
 
     
 
@@ -487,7 +490,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         final Integer projectId = authDTO.getProjectId();
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
         // 校验责任人是否合法
-        if (!StringUtils.equals(authDTO.getResponsible(),AuthConstant.SUPER_USER_NAME) || !CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO)) {
+        if (!roleTool.isAdmin(authDTO.getResponsible()) || !CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),
+                projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO)) {
             return Result.buildParamIllegal("责任人非法");
         }
         return Result.buildSucc();

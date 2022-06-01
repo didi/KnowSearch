@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -21,14 +23,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 @RestController
-@RequestMapping(V3_OP + "/phy/cluster/node")
+@RequestMapping({ V3_OP + "/phy/cluster/node", V3 + "/cluster/phy/node" })
 @Api(tags = "ES物理集群节点接口(REST)")
 public class ESPhyClusterNodeController {
 
     @Autowired
     private ClusterNodeManager clusterNodeManager;
 
+    @GetMapping("/{clusterId}")
+    @ResponseBody
+    @ApiOperation(value = "获取节点列表")
+    public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
+        return clusterNodeManager.listClusterPhyNode(clusterId);
+    }
     @GetMapping("/{clusterId}/region/")
     @ResponseBody
     @ApiOperation(value = "获取可划分至region的节点信息")

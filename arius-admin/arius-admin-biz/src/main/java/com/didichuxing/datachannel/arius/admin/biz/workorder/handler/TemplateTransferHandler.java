@@ -98,13 +98,9 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("应用id为空");
         }
 
-        if (AriusObjUtils.isNull(content.getTgtResponsible())) {
-            return Result.buildParamIllegal("责任人为空");
-        }
+
         
-        if (AriusObjUtils.isNull(userService.getUserBriefByUserName(content.getTgtResponsible()))) {
-            return Result.buildParamIllegal("责任人非法");
-        }
+
 
         if (AriusObjUtils.isNull(indexTemplateService.getLogicTemplateById(content.getId()))) {
             return Result.buildNotExist("索引不存在");

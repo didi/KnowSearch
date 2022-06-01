@@ -64,7 +64,7 @@ public interface TemplateLogicAliasesManager {
     Result<Void> deleteTemplateAliases(ConsoleLogicTemplateDeleteAliasesDTO deleteAliasesDTO, String operator);
 
     /**
-     * getAllTemplateAliasesByAppid
+     * getAllTemplateAliasesByProjectId
      * @param projectId
      * @return
      */

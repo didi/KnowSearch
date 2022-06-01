@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.Templa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -59,14 +59,14 @@ public class ESPhyClusterController {
 
     @PostMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取集群列表接口")
-    public Result<List<ConsoleClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getConsoleClusterPhys(param));
+    @ApiOperation(value = "获取集群列表接口【三方接口】",tags = "【三方接口】")
+    public Result<List<ClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.getClusterPhys(param));
     }
 
     @PutMapping("/add")
     @ResponseBody
-    @ApiOperation(value = "新建集群接口" )
+    @ApiOperation(value = "新建集群接口【三方接口】",tags = "【三方接口】" )
 
     public Result<Boolean> add(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
         return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
@@ -75,14 +75,14 @@ public class ESPhyClusterController {
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑集群接口" )
-
+    @Deprecated
     public Result<Boolean> edit(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.editCluster(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+        return clusterPhyManager.editCluster(param, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("/collectClusterNodeSettings")
     @ResponseBody
-    @ApiOperation(value = "采集集群节点配置信息接口" )
+    @ApiOperation(value = "采集集群节点配置信息接口【三方接口】",tags = "【三方接口】" )
 
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) {
@@ -91,7 +91,7 @@ public class ESPhyClusterController {
 
     @PostMapping("/node/list")
     @ResponseBody
-    @ApiOperation(value = "获取集群节点列表接口" )
+    @ApiOperation(value = "获取集群节点列表接口【三方接口】",tags = "【三方接口】" )
 
     public Result<List<ESClusterRoleHostVO>> nodeList(@RequestBody ESClusterRoleHostDTO param) {
         return Result
@@ -100,7 +100,7 @@ public class ESPhyClusterController {
 
     @GetMapping("/node/getByCluster")
     @ResponseBody
-    @ApiOperation(value = "根据集群获取集群节点列表接口" )
+    @ApiOperation(value = "根据集群获取集群节点列表接口【三方接口】",tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
 
     public Result<List<ESClusterRoleHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {

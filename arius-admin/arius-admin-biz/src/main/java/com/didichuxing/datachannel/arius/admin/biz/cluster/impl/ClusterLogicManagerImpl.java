@@ -80,8 +80,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.logi.security.common.enums.ResultCode;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
@@ -355,12 +354,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<List<ConsoleClusterVO>> getProjectLogicClusters(Integer projectId) {
     
-        try {
-            projectService.getProjectDetailByProjectId(projectId);
-        } catch (LogiSecurityException logiSecurityException) {
-            final String[] error = logiSecurityException.getMessage().split("-");
-            return Result.build(Integer.parseInt(error[0]), error[1]);
-        }
+       if (projectService.checkProjectExist(projectId)){
+           return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(),ResultCode.PROJECT_NOT_EXISTS.getMessage());
+       }
         
 
         return Result.buildSucc(batchBuildOpClusterVOs(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId),
@@ -386,7 +382,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         List<ClusterLogic> logicClusters = clusterLogicService.listAllClusterLogics();
         List<ConsoleClusterVO> consoleClusterVOS = ConvertUtil.list2List(logicClusters, ConsoleClusterVO.class);
-        if (projectId != null && CollectionUtils.isNotEmpty(consoleClusterVOS)) {
+        if (projectId != null &&projectService.checkProjectExist(projectId) && CollectionUtils.isNotEmpty(consoleClusterVOS)) {
             consoleClusterVOS.forEach(consoleClusterVO -> buildOpLogicClusterPermission(consoleClusterVO, projectId));
         }
         Collections.sort(consoleClusterVOS);
@@ -547,8 +543,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public List<ClusterLogic> getClusterLogicByProjectIdAndAuthType(Integer projectId, Integer authType) {
-        final ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
-        if (Objects.isNull(projectBriefVO)) {
+        if (projectService.checkProjectExist(projectId)) {
             return Lists.newArrayList();
         }
 

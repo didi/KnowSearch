@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
@@ -32,10 +33,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Created by linyunan on 2021-07-30
+ * @author linyunan
+ * @date 2021-07-30
  */
 @RestController()
-@RequestMapping(V3_OP + "/phy/cluster/metrics")
+@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/cluster/phy/metrics" })
 @Api(tags = "ES物理集群监控信息")
 public class ClusterPhyMetricsController {
 

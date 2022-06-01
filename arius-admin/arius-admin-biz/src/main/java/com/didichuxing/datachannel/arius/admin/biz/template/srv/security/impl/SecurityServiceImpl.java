@@ -20,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemp
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.enums.ResultCode;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -248,7 +249,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         if (!projectService.checkProjectExist(projectId)) {
             LOGGER.warn("class=SecurityServiceImpl||method=deleteProjectPhysicalTemplateAuth||projectId={}||msg=projectId not exist",
                     projectId);
-            return Result.buildNotExist(String.format(PROJECT_ID_NOT_EXISTS_TIPS, projectId));
+            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(),ResultCode.PROJECT_NOT_EXISTS.getMessage());
         }
 
         ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(authType);

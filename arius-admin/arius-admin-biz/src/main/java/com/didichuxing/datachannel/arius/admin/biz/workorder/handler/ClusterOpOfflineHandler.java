@@ -20,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
@@ -41,6 +42,8 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private OpTaskManager opTaskManager;
+    @Autowired
+    private RoleTool roleTool;
 
     /**
      * 工单是否自动审批
@@ -122,7 +125,7 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
     @Override
     protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
         //管理员能扩缩容
-        if (!AuthConstant.SUPER_PROJECT_ID.equals(workOrder.getSubmitor())) {
+        if (!roleTool.isAdmin(workOrder.getSubmitor())) {
             return Result.buildOpForBidden("非运维人员不能操作集群扩缩容！");
         }
 

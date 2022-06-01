@@ -6,8 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.ArrayList;
@@ -43,8 +44,9 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Autowired
     private ClusterLogicService clusterLogicService;
     @Autowired
-    private ClusterPhyManager        clusterPhyManager;
-
+    private ClusterPhyManager    clusterPhyManager;
+    @Autowired
+    private ClusterRegionService clusterRegionService;
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
 
@@ -67,15 +69,15 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     
     @Override
     protected void initCondition(ClusterPhyConditionDTO condition, Integer projectId) {
-        
-        // 1. 获取管理/读写/读/无权限的物理集群信息
         List<String> clusterNames = new ArrayList<>();
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
             List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
             //项目下的有管理权限逻辑集群会关联多个物理集群
-            clusterLogicList.stream().map(ClusterLogic::getId).map(clusterContextManager::getClusterLogicContextCache)
-                .map(ClusterLogicContext::getAssociatedClusterPhyNames).forEach(clusterNames::addAll);
-            clusterNames = clusterNames.stream().distinct().collect(Collectors.toList());
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
+                clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
+            clusterNames = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
+                .collect(Collectors.toList());
         }
         condition.setClusterNames(clusterNames);
         String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();

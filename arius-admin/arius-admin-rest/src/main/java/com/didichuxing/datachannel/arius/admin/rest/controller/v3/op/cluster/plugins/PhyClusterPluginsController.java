@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.plugins;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
@@ -23,12 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+
 /**
  * @author linyunan
  * @date 2021-03-15
  */
 @RestController
-@RequestMapping({V3_OP + "/cluster/phy/plugins"})
+@RequestMapping({ V3_OP + "/cluster/phy/plugins", V3 + "/cluster/phy/plugins" })
 @Api(tags = "ES物理集群插件接口")
 public class PhyClusterPluginsController {
 
@@ -38,7 +40,7 @@ public class PhyClusterPluginsController {
     @Autowired
     private ClusterPluginsManager clusterPluginsManager;
 
-    @GetMapping("/{cluster}/get")
+    @GetMapping("/{cluster}")
     @ResponseBody
     @ApiOperation(value = "获取ES集群插件列表")
     public Result<List<PluginVO>> pluginList(@PathVariable(value = "cluster") String cluster) {

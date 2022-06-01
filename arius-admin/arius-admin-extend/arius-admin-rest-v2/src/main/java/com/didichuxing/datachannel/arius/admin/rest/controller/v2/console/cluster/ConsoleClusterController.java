@@ -36,15 +36,15 @@ public class ConsoleClusterController {
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取project拥有的集群列表" )
+    @ApiOperation(value = "获取APP拥有的集群列表【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
-    public Result<List<ConsoleClusterVO>> getProjectLogicClusters(@RequestParam("projectId") Integer projectId) {
+    public Result<List<ConsoleClusterVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(projectId);
     }
 
     @GetMapping("/listAll")
     @ResponseBody
-    @ApiOperation(value = "获取平台所有的集群列表" )
+    @ApiOperation(value = "获取平台所有的集群列表【三方接口】",tags = "【三方接口】" )
     public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(@RequestParam(value = "projectId",required = false) Integer projectId) {
         return clusterLogicManager.getDataCenterLogicClusters(projectId);
     }
@@ -55,8 +55,8 @@ public class ConsoleClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "集群ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value =
                                  "PROJECT ID", required = true) })
-    public Result<ConsoleClusterVO> getProjectLogicClusters(@RequestParam("clusterId") Long clusterId,
-                                                            @RequestParam("projectId") Integer projectId) {
+    public Result<ConsoleClusterVO> getAppLogicClusters(@RequestParam("clusterId") Long clusterId,
+                                                        @RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(clusterId, projectId);
     }
 
@@ -72,7 +72,7 @@ public class ConsoleClusterController {
 
     @GetMapping("machinespec/list")
     @ResponseBody
-    @ApiOperation(value = "获取当前集群支持的套餐列表" )
+    @ApiOperation(value = "获取当前集群支持的套餐列表【三方接口】",tags = "【三方接口】" )
     public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
         return clusterLogicManager.listMachineSpec();
     }

@@ -19,12 +19,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpUpdateOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -46,6 +46,8 @@ import org.springframework.stereotype.Service;
 public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private RoleTool roleTool;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -98,7 +100,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
-        if (!AuthConstant.SUPER_USER_NAME.equals(workOrder.getSubmitor())) {
+        if (!roleTool.isAdmin(workOrder.getSubmitor())) {
             return Result.buildOpForBidden("非运维人员不能操作物理集群升级！");
         }
 

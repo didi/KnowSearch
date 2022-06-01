@@ -8,28 +8,47 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigP
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 项目config服务 project config 每个项目都会初始化一个项目配置
+ *
+ * @author shizeying
+ * @date 2022/06/01
+ * @see com.didiglobal.logi.security.common.vo.project.ProjectVO
+ */
 public interface ProjectConfigService {
     /**
-     * 获取porject id配置信息
+     * 获取项目config 获取project id配置信息
      *
-     * @param projectId APP ID
+     * @param projectId projectId
      * @return 配置信息
      */
     ProjectConfig getProjectConfig(int projectId);
     
-    /**
-     * listConfig
-     *
-     * @return List<App>
-     */
-    List<ProjectConfig> listConfig(List<Integer> projectIds);
-    
 
     
-    Map<Integer, ProjectConfig> projectId2ProjectConfigMap();
+    /**
+     * 项目id2下项目config地图
+     * <p>
+     * 项目id
+     *
+     * @return {@code Map<Integer, ProjectConfig>}
+     */
+    Map<Integer/*项目id*/, ProjectConfig> projectId2ProjectConfigMap();
     
+    /**
+     * 更新或初始化项目config 更新或初始化projectConfig
+     *
+     * @param configDTO configdto
+     * @param operator  操作人
+     * @return {@code Tuple<Result<Void>, ProjectConfigPO>}
+     */
     Tuple<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator);
     
+    /**
+     * 按项目id删除 通过项目id逻辑删除项目配置
+     *
+     * @param projectId 项目id
+     */
     void deleteByProjectId(int projectId);
     
 }

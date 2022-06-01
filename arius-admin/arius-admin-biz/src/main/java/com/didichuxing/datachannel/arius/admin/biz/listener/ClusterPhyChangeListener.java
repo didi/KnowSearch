@@ -33,8 +33,8 @@ public class ClusterPhyChangeListener implements ApplicationListener<ClusterPhyE
             clusterPhyManager.updateClusterHealth(event.getClusterPhyName(), AriusUser.SYSTEM.getDesc());
         } catch (RuntimeException e) {
             LOGGER.error(
-                "class=ClusterPhyChangeListener||method=onApplicationEvent||projectId={}||clusterPhyName={}||ErrorMsg={}",
-                event.getProjectId(), event.getClusterPhyName(), e.getMessage());
+                "class=ClusterPhyChangeListener||method=onApplicationEvent||operator={}||clusterPhyName={}||ErrorMsg={}",
+                event.getOperator(), event.getClusterPhyName(), e.getMessage());
         }
     }
 }

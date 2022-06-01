@@ -20,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -77,6 +78,8 @@ public class ESPluginServiceImpl implements ESPluginService {
     private FileStorageService fileStorageService;
 
     private static final String SEPARATOR = "-";
+    @Autowired
+    private RoleTool roleTool;
 
 
     /**
@@ -279,7 +282,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     private Result<Void> handleDelete(PluginDTO pluginDTO, String operator) {
-        if (!AuthConstant.SUPER_USER_NAME.equals(operator)) {
+        if (!roleTool.isAdmin(operator)) {
             return Result.buildFail("非运维人员不能删除插件");
         }
 

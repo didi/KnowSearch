@@ -30,7 +30,7 @@ public class TemplateLogicOpController {
 
     @PostMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取逻辑模板列表接口" )
+    @ApiOperation(value = "获取逻辑模板列表接口【三方接口】",tags = "【三方接口】" )
 
     public Result<List<OpLogicTemplateVO>> list(@RequestBody IndexTemplateDTO param) {
         return Result

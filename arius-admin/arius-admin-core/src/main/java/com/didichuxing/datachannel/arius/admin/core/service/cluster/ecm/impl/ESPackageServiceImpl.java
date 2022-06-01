@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
@@ -40,6 +41,8 @@ public class ESPackageServiceImpl implements ESPackageService {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoleTool roleTool;
 
     @Autowired
     private FileStorageService   fileStorageService;
@@ -150,7 +153,7 @@ public class ESPackageServiceImpl implements ESPackageService {
             return Result.buildParamIllegal("安装包为空");
         }
 
-        if (!AuthConstant.SUPER_USER_NAME.equals(operator)) {
+        if (!roleTool.isAdmin(operator)) {
             return Result.buildFail("非运维人员不能更新ES安装包!");
         }
 

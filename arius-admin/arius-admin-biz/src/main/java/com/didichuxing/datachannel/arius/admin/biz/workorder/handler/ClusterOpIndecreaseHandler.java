@@ -25,7 +25,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpIndecreaseDockerOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpIndecreaseHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -36,6 +35,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -63,7 +63,8 @@ import org.springframework.stereotype.Service;
 public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     protected static final ILog  LOGGER = LogFactory.getLog(ClusterOpIndecreaseHandler.class);
 
-    
+    @Autowired
+    private RoleTool roleTool;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -158,7 +159,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result validateConsoleAuth(WorkOrder workOrder) {
-        if (!AuthConstant.SUPER_USER_NAME.equals(workOrder.getSubmitor())) {
+        if (!roleTool.isAdmin(workOrder.getSubmitor())) {
             return Result.buildOpForBidden("非运维人员不能操作集群扩缩容！");
         }
 
