@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import io.swagger.annotations.ApiOperation;
  * @date 2020/09/20
  */
 @RestController
-@RequestMapping(V3_OP + "/phy/cluster/region")
+@RequestMapping({ V3_OP + "/phy/cluster/region", V3 + "/cluster/phy/region" })
 @Api(tags = "ES物理集群region接口(REST)")
 public class ESPhyClusterRegionController {
 

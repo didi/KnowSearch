@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
@@ -44,6 +45,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 @Component
 public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
@@ -301,6 +306,15 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return Result.buildSucc(true);
     }
 
+    @Override
+    public Result<List<ESClusterRoleHostVO>> listClusterPhyNode(Integer clusterId) {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterId);
+        if (AriusObjUtils.isNull(clusterPhy)) {
+            return Result.buildFail(String.format("集群[%s]不存在", clusterId));
+        }
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
+        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
+    }
     /**************************************** private method ***************************************************/
     private Result<Resource> getDataNodeSpecify() {
         return Result.buildSucc(NodeSpecifyEnum.DOCKER.getResource());

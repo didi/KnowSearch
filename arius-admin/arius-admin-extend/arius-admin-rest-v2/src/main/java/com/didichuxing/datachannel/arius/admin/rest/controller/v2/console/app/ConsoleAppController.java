@@ -35,14 +35,14 @@ public class ConsoleAppController {
 
     @PutMapping("/login")
     @ResponseBody
-    @ApiOperation(value = "登陆APP接口" )
+    @ApiOperation(value = "登陆APP接口【三方接口】",tags = "【三方接口】" )
     public Result<Void> login(HttpServletRequest request, @RequestBody ConsoleAppLoginDTO loginDTO) {
         return appManager.login(request, loginDTO);
     }
 
     @GetMapping("/getNoCodeLogin")
     @ResponseBody
-    @ApiOperation(value = "查询用户可以免密登陆的APP接口", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
+    @ApiOperation(value = "查询用户可以免密登陆的APP接口【三方接口】",tags = "【三方接口】", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "user", value = "用户名", required = true) })
     public Result<List<ConsoleAppWithVerifyCodeVO>> getNoCodeLogin(HttpServletRequest request,
@@ -52,21 +52,21 @@ public class ConsoleAppController {
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "APP列表接口" )
+    @ApiOperation(value = "APP列表接口【三方接口】",tags = "【三方接口】" )
     public Result<List<ConsoleAppVO>> list() {
         return appManager.list();
     }
 
     @PutMapping("/update")
     @ResponseBody
-    @ApiOperation(value = "编辑APP接口", notes = "支持修改责任人、部门信息、备注")
+    @ApiOperation(value = "编辑APP接口【三方接口】",tags = "【三方接口】", notes = "支持修改责任人、部门信息、备注")
     public Result<Void> update(HttpServletRequest request, @RequestBody ConsoleAppDTO appDTO) {
         return appManager.update(request, appDTO);
     }
 
     @GetMapping("/get")
     @ResponseBody
-    @ApiOperation(value = "获取APP详情接口" )
+    @ApiOperation(value = "获取APP详情接口【三方接口】",tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
     public Result<ConsoleAppVO> get(@RequestParam("appId") Integer appId) {
         return appManager.get(appId);

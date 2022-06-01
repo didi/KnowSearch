@@ -43,16 +43,19 @@
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
-            useGeneratedKeys="true"
-            keyColumn="id" keyProperty="id">
+            useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         insert into es_cluster_phy_info
-        ( cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`,  package_id, plug_ids, creator,ns_tree, template_srvs, run_mode, write_action, health,`password`, active_shard_num, disk_total, disk_usage ,disk_usage_percent, `tags`,platform_type,resource_type)
-        values
-        (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type}, #{dataCenter},#{imageName},#{idc},
-        #{esVersion}, #{level},  #{packageId}, #{plugIds}, #{creator},#{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction},#{health}, #{password}, #{activeShardNum}, #{diskTotal}, #{diskUsage}, #{diskUsagePercent},
-         #{tags},#{platformType},#{resourceType})
+        (cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,
+         image_name, idc, es_version, `level`, package_id, plug_ids, creator, ns_tree, template_srvs, run_mode,
+         write_action, health, `password`, active_shard_num, disk_total, disk_usage, disk_usage_percent, `tags`,
+         platform_type, resource_type, gateway_url)
+        values (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type},
+                #{dataCenter}, #{imageName}, #{idc}, #{esVersion}, #{level}, #{packageId}, #{plugIds}, #{creator},
+                #{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction}, #{health}, #{password}, #{activeShardNum},
+                #{diskTotal}, #{diskUsage}, #{diskUsagePercent}, #{tags}, #{platformType}, #{resourceType},
+                #{gatewayUrl})
     </insert>
+
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO">
         update es_cluster_phy_info
         <trim prefix="set" prefixOverrides=",">
@@ -115,6 +118,8 @@
             <if test="esVersion != null">and es_version = #{esVersion}</if>
             <if test="health != null">and health = #{health}</if>
             <if test="activeShardNum != null">and active_shard_num = #{activeShardNum}</if>
+            <if test="platformType != null">and platform_type = #{platformType}</if>
+            <if test="resourceType != null">and resource_type = #{resourceType}</if>
             and is_active = 1;
         </trim>
     </select>

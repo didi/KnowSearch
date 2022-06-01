@@ -34,7 +34,7 @@ public class ConsoleTemplateStatisController extends BaseConsoleTemplateControll
      * @return
      */
     @GetMapping(path = "/query.do")
-    @ApiOperation(value = "获取索引模板的统计信息" )
+    @ApiOperation(value = "获取索引模板的统计信息【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "logicTemplateId", value = "模板id", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "startDate", value = "查询开始时间，毫秒时间戳", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "endDate", value = "查询结束时间，毫秒时间戳", required = true) })
@@ -51,7 +51,7 @@ public class ConsoleTemplateStatisController extends BaseConsoleTemplateControll
      * @return
      */
     @GetMapping(path = "/statisInfo.do")
-    @ApiOperation(value = "根据模板id，查询模板的基本统计信息" )
+    @ApiOperation(value = "根据模板id，查询模板的基本统计信息【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "templateId", value = "模板id", required = true) })
     public Result<TemplateStatsInfoVO> getTemplateBaseStatisInfo(@RequestParam(value = "templateId") Long logicTemplateId) {
         return templatePhyStatisManager.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId);

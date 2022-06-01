@@ -828,7 +828,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
                 esClusterDTO.setId(ecmTask.getPhysicClusterId().intValue());
                 esClusterDTO.setHttpAddress(ListUtils.strList2String(clusterPhyAddress));
                 esClusterDTO.setHttpWriteAddress(ListUtils.strList2String(clusterPhyAddress));
-                clusterPhyManager.editCluster(esClusterDTO, AriusUser.SYSTEM.getDesc(), null);
+                clusterPhyManager.editCluster(esClusterDTO, AriusUser.SYSTEM.getDesc());
             }
         }
     }
