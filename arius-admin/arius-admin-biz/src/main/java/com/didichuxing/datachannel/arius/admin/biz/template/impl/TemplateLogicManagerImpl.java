@@ -516,7 +516,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         //超级项目对所有模板都是管理权限
-        //todo 由于用户会切换项目，那么应该需要加一个操作人校验的逻辑
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId) && !OWN.getCode().equals(authType)) {
             return Lists.newArrayList();
         }

@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -15,8 +14,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.UserService;
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +31,6 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     private WorkOrderManager workOrderManager;
 
    
-    @Autowired
-    private UserService userService;
 
     @Autowired
     protected OperateRecordService operateRecordService;
@@ -197,48 +192,18 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     protected abstract Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException;
     
-    /**
-     *   protected List<AriusUserInfo> getRDOrOPList() {
-     *         return ariusUserInfoService
-     *             .listByRoles(Arrays.asList(AriusUserRoleEnum.OP.getRole(), AriusUserRoleEnum.RD.getRole()));
-     *     }
-     * @return
-     */
     protected List<UserBriefVO> getRDOrOPList() {
         return  roleTool.adminList();
     }
-    
-    /**
-     * protected List<AriusUserInfo> getOPList() {
-     *         return ariusUserInfoService.listByRoles(Collections.singletonList(AriusUserRoleEnum.OP.getRole()));
-     *     }
-     *
-     * @return {@link List}<{@link UserBriefVO}>
-     */
+
     protected List<UserBriefVO> getOPList() {
         return  roleTool.adminList();
     }
     
-    /**
-     * protected boolean isRDOrOP(String userName) {
-     *         return ariusUserInfoService.isOPByDomainAccount(userName) || ariusUserInfoService.isRDByDomainAccount(userName);
-     *     }
-     *
-     * @param userName 用户名
-     * @return boolean
-     */
     protected boolean isRDOrOP(String userName) {
         return roleTool.isAdmin(userName);
     }
     
-    /**
-     * protected boolean isOP(String userName) {
-     *         return ariusUserInfoService.isOPByDomainAccount(userName);
-     *     }
-     *
-     * @param userName 用户名
-     * @return boolean
-     */
     protected boolean isOP(String userName) {
         return roleTool.isAdmin(userName);
     }

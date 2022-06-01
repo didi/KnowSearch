@@ -66,8 +66,8 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<String>> getDslMd5List(Integer appId, Long startTime, Long endTime) {
-        appId = appId != null ? appId : GlobalParams.CURRENT_PROJECT_ID.get();
+    public Result<List<String>> getDslMd5List(Integer projectId, Long startTime, Long endTime) {
+        projectId = projectId != null ? projectId : GlobalParams.CURRENT_PROJECT_ID.get();
         if (endTime == null) {
             endTime = System.currentTimeMillis();
         }
@@ -79,7 +79,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
             return Result.buildFail("时间跨度不要超过一周");
 
         }
-        return Result.buildSucc(gatewayMetricsService.getDslMd5List(startTime, endTime, appId));
+        return Result.buildSucc(gatewayMetricsService.getDslMd5List(startTime, endTime, projectId));
     }
 
     @Override

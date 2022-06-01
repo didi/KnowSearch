@@ -44,17 +44,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 		return obj2Obj(projectConfigDAO.getByProjectId(projectId), ProjectConfig.class);
 	}
 	
-	/**
-	 * listConfig
-	 *
-	 * @param projectIds
-	 * @return List<App>
-	 */
-	@Override
-	public List<ProjectConfig> listConfig(List<Integer> projectIds) {
-		return null;
-	}
-	
+
 
 	/**
 	 * @return

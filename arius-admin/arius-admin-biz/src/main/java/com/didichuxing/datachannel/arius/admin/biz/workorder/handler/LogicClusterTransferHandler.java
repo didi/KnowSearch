@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterLogicTransferOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -62,14 +61,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         if (projectService.checkProjectExist(targetProjectId)) {
             return Result.buildParamIllegal("目标项目不存在");
         }
-
-        if (StringUtils.isBlank(clusterLogicTransferContent.getTargetResponsible())) {
-            return Result.buildParamIllegal("负责人为空");
-        }
-       
-        if (!roleTool.isAdmin(clusterLogicTransferContent.getTargetResponsible())) {
-            return Result.buildParamIllegal("负责人非法");
-        }
+        
 
         Long clusterLogicId = clusterLogicTransferContent.getClusterLogicId();
         if (!clusterLogicService.isClusterLogicExists(clusterLogicId)) {

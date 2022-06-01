@@ -46,17 +46,7 @@ class ProjectConfigServiceTest extends AriusAdminApplicationTest {
         assertThat(result).isEqualTo(expectedResult);
     }
     
-    @Test
-    void testListConfig() {
-        // Setup
-        final List<ProjectConfig> expectedResult = Arrays.asList(new ProjectConfig(0, 0, 0, 0, 0, 0, "memo"));
-        
-        // Run the test
-        final List<ProjectConfig> result = projectConfigService.listConfig(Arrays.asList(0));
-        
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
+   
     
     @Test
     void testProjectId2ProjectConfigMap() {

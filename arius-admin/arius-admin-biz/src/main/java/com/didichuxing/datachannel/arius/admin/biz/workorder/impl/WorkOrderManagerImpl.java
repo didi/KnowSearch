@@ -250,14 +250,6 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public List<WorkOrderPO> getPassApprovalList(String approver) {
         try {
-            /**
-             *  AriusUserInfoPO userInfoPO = ariusUserInfoDAO.getByDomainAccount(domainAccount);
-             *         if (userInfoPO == null) {
-             *             return false;
-             *         }
-             *         return AriusUserRoleEnum.getUserRoleEnum(userInfoPO.getRole()).equals(AriusUserRoleEnum.OP);
-             *         当前审批人只有管理员
-             */
             if (roleTool.isAdmin(approver)) {
                 return orderDao.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
             }
@@ -280,14 +272,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 "class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=get wait order list failed!",
                 userName, e);
         }
-        /**
-         *    AriusUserInfoPO userInfoPO = ariusUserInfoDAO.getByDomainAccount(domainAccount);
-         *         if (userInfoPO == null) {
-         *             return false;
-         *         }
-         *         return AriusUserRoleEnum.getUserRoleEnum(userInfoPO.getRole()).equals(AriusUserRoleEnum.RD);
-         */
-        //AriusUserRoleEnum.RD AriusUserRoleEnum.OP
+        
         if (roleTool.isAdmin(userName)) {
             return orderList;
         } else {
@@ -334,8 +319,6 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 "class=WorkOrderManagerImpl||method=getBaseDetail||extensions={}||msg=get order detail failed!",
                 orderPO.getExtensions(), e);
         }
-        //
-        //projectService.getProjectDetailByProjectId(orderPO.getApplicantProjectId()).getProjectCode()
         UserBriefVO briefVO = userService.getUserBriefByUserName(orderPO.getApplicant());
         detailBaseDTO.setApplicant(briefVO);
         return detailBaseDTO;

@@ -24,13 +24,7 @@ public interface ProjectConfigService {
      */
     ProjectConfig getProjectConfig(int projectId);
     
-    /**
-     * 列表config 列表config listConfig
-     *
-     * @param projectIds 项目id
-     * @return List<App>
-     */
-    List<ProjectConfig> listConfig(List<Integer> projectIds);
+
     
     /**
      * 项目id2下项目config地图
