@@ -34,10 +34,10 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     private IndexCatESDAO indexCatESDAO;
 
     @Override
-    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(List<String> clusters, String index, String health,
+    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(List<String> clusters, String index, String health, Integer appId, Integer resourceId,
                                                                Long from, Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(clusters, index,
-            health, from, size, sortTerm, orderByDesc);
+            health, appId, resourceId, from, size, sortTerm, orderByDesc);
         if (null == hitTotal2catIndexInfoTuplePO) {
             return null;
         }
@@ -110,6 +110,8 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
             IndexCatCell indexCatCell = new IndexCatCell();
             indexCatCell.setKey(indexCatCellPO.getKey());
             indexCatCell.setCluster(indexCatCellPO.getCluster());
+            indexCatCell.setResourceId(String.valueOf(indexCatCellPO.getResourceId()));
+            indexCatCell.setAppId(String.valueOf(indexCatCellPO.getAppId()));
             indexCatCell.setIndex(indexCatCellPO.getIndex());
             indexCatCell.setStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getStoreSize() ,2));
             indexCatCell.setPriStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getPriStoreSize(), 2));

@@ -73,10 +73,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(List<String> clusters, String index, String health, Long from,
+    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(List<String> clusters, String index, String health, Integer appId, Integer resourceId,
+                                                             Long from,
                                                              Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(clusters, index, health);
+        String queryTermDsl =  buildQueryTermDsl(clusters, index, health, appId, resourceId);
         String sortType     =  buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
             queryTermDsl, sortTerm, sortType, from, size);
@@ -141,17 +142,23 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param health
      * @return
      */
-    private String buildQueryTermDsl(List<String> clusters, String index, String health) {
-        return "[" + buildTermCell(clusters, index, health) +"]";
+    private String buildQueryTermDsl(List<String> clusters, String index, String health, Integer appId, Integer resourceId) {
+        return "[" + buildTermCell(clusters, index, health, appId, resourceId) +"]";
     }
 
-    private String buildTermCell(List<String> clusters, String index, String health) {
+    private String buildTermCell(List<String> clusters, String index, String health, Integer appId, Integer resourceId) {
         List<String> termCellList = Lists.newArrayList();
         //get cluster dsl term
         termCellList.add(DSLSearchUtils.getTermCellsForExactSearch(clusters, "cluster"));
 
         //get index dsl term
         termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(index, "index"));
+
+        //get appId dsl term
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appId"));
+
+        //get resourceId dsl term
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(resourceId, "resourceId"));
 
         //get index status term
         if (IndexStatusEnum.isStatusExit(health)) {

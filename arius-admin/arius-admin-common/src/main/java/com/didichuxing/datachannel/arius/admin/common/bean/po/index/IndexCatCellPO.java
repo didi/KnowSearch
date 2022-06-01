@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IndexCatCellPO extends BaseESPO {
     private String  cluster;
+    private long    resourceId;
+    private Integer appId;
     private String  health;
     private String  status;
     private String  index;

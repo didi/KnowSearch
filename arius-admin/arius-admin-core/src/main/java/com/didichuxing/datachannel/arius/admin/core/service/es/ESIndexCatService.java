@@ -17,9 +17,11 @@ public interface ESIndexCatService {
      * @param size         当前页数量
      * @param sortTerm     排序字段
      * @param orderByDesc  降序标识
+     * @param appId        应用id
+     * @param resourceId   资源id
      * @return Tuple<Long, List<IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
-    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(List<String> clusters, String index, String health,
+    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(List<String> clusters, String index, String health, Integer appId, Integer resourceId,
                                                         Long from, Long size, String sortTerm, Boolean orderByDesc);
 
     /**
