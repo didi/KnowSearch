@@ -43,18 +43,6 @@ public class ClusterJoinDTO extends BaseDTO {
     @ApiModelProperty("描述")
     private String                     phyClusterDesc;
 
-    @ApiModelProperty("是否划分集群")
-    private Boolean                    divide;
-
-    @ApiModelProperty("Region Racks列表, value 为r1, r2、r3")
-    private List<String>               regionRacks;
-
-    @ApiModelProperty("逻辑集群名称")
-    private String                     logicCluster;
-
-    @ApiModelProperty("集群接入开启的索引服务")
-    private String                     templateSrvs;
-
     @ApiModelProperty("集群认证信息：'user:password'")
     private String                     password;
 
