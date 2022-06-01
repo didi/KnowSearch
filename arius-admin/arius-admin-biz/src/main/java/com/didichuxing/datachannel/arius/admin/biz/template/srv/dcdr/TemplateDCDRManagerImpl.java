@@ -187,7 +187,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, String rack, String operator) throws AdminOperateException {
+    public Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId, String operator) throws AdminOperateException {
         //1. 判断目标集群是否存在模板, 存在则需要删除, 避免copy失败，确保copy流程的执行来保证主从模板setting mapping等信息的一致性。
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(templateId);
         if (null == templateLogicWithPhysical) {return Result.buildParamIllegal(TEMPLATE_NO_EXIST);}
@@ -222,10 +222,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
         }
 
         // 3. 执行复制流程
-        TemplatePhysicalCopyDTO templatePhysicalCopyDTO = buildTemplatePhysicalCopyDTO(templateId, targetCluster, rack);
-        if (null == templatePhysicalCopyDTO) {
-            return Result.buildFail(TEMPLATE_NO_EXIST);
-        }
+        TemplatePhysicalCopyDTO templatePhysicalCopyDTO = buildTemplatePhysicalCopyDTO(templateId, targetCluster, regionId);
+        if (null == templatePhysicalCopyDTO) { return Result.buildFail(TEMPLATE_NO_EXIST);}
 
         Result<Void> copyTemplateResult = templatePhyManager.copyTemplate(templatePhysicalCopyDTO, operator);
         if (copyTemplateResult.failed()) {
@@ -1354,23 +1352,17 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
         return opTaskManager.processTask(processDTO);
     }
 
-    private TemplatePhysicalCopyDTO buildTemplatePhysicalCopyDTO(Integer templateId, String targetCluster, String rack) {
+    private TemplatePhysicalCopyDTO buildTemplatePhysicalCopyDTO(Integer templateId, String targetCluster, Integer regionId) {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(templateId);
 
         TemplatePhysicalCopyDTO templatePhysicalCopyDTO = new TemplatePhysicalCopyDTO();
         IndexTemplatePhy masterPhyTemplate = templateLogicWithPhysical.getMasterPhyTemplate();
-        if (null == masterPhyTemplate) {
-            return null;
-        }
+        if (null == masterPhyTemplate) { return null;}
 
         templatePhysicalCopyDTO.setCluster(targetCluster);
         templatePhysicalCopyDTO.setPhysicalId(masterPhyTemplate.getId());
-        if (Strings.isNullOrEmpty(rack)) {
-            templatePhysicalCopyDTO.setRack(masterPhyTemplate.getRack());
-        } else {
-            templatePhysicalCopyDTO.setRack(rack);
-        }
         templatePhysicalCopyDTO.setShard(masterPhyTemplate.getShard());
+        templatePhysicalCopyDTO.setRegionId(regionId);
         return templatePhysicalCopyDTO;
     }
 

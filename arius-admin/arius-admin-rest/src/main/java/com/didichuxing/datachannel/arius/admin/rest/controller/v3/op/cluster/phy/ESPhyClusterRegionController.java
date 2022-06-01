@@ -132,7 +132,7 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{clusterName}/dcdr")
     @ResponseBody
     @ApiOperation(value = "获取可分配至dcdr的物理集群名称获region列表", notes = "不包含空region")
-    public Result<List<ClusterRegionVO>> listClusterRegionByClusterName(@PathVariable String clusterName) {
+    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(@PathVariable String clusterName) {
         return clusterRegionManager.listNoEmptyClusterRegionByClusterName(clusterName);
     }
 

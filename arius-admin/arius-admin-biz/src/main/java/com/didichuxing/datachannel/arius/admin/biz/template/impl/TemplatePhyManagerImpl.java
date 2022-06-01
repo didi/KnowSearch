@@ -329,7 +329,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getPhysicalId());
         IndexTemplatePhyDTO tgtTemplateParam = ConvertUtil.obj2Obj(indexTemplatePhy, IndexTemplatePhyDTO.class);
         tgtTemplateParam.setCluster(param.getCluster());
-        tgtTemplateParam.setRack(param.getRack());
         tgtTemplateParam.setRole(SLAVE.getCode());
         tgtTemplateParam.setShard(param.getShard());
         tgtTemplateParam.setVersion(indexTemplatePhy.getVersion());
@@ -832,11 +831,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
         if (oldIndexTemplatePhy.getCluster().equals(param.getCluster())) {
             return Result.buildParamIllegal("目标集群不能与源集群相同");
-        }
-
-        if (StringUtils.isNotEmpty(param.getRack())
-                && !clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
-            return Result.buildNotExist("rack不存在");
         }
 
         if (param.getShard() < 1) {

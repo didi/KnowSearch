@@ -21,13 +21,13 @@ public interface TemplateDCDRManager {
      * 复制并且创建DCDR链路
      * @param templateId           模板ID
      * @param targetCluster       物理集群名称
-     * @param rack                rack信息
+     * @param regionId            regionId信息
      * @param operator            操作人
      * @return Result
      *
      @throws AdminOperateException 管理操作Exception
      */
-    Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, String rack,
+    Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId,
                                    String operator) throws AdminOperateException;
 
     /**
