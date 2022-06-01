@@ -36,7 +36,7 @@ public class ConsoleClusterController {
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取APP拥有的集群列表" )
+    @ApiOperation(value = "获取APP拥有的集群列表【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
     public Result<List<ConsoleClusterVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(projectId);
@@ -44,7 +44,7 @@ public class ConsoleClusterController {
 
     @GetMapping("/listAll")
     @ResponseBody
-    @ApiOperation(value = "获取平台所有的集群列表" )
+    @ApiOperation(value = "获取平台所有的集群列表【三方接口】",tags = "【三方接口】" )
     public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(@RequestParam(value = "projectId",required = false) Integer projectId) {
         return clusterLogicManager.getDataCenterLogicClusters(projectId);
     }
@@ -72,7 +72,7 @@ public class ConsoleClusterController {
 
     @GetMapping("machinespec/list")
     @ResponseBody
-    @ApiOperation(value = "获取当前集群支持的套餐列表" )
+    @ApiOperation(value = "获取当前集群支持的套餐列表【三方接口】",tags = "【三方接口】" )
     public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
         return clusterLogicManager.listMachineSpec();
     }

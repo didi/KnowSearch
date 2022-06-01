@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(V3_OP + "/phy/cluster/templateSrv")
 @Api(tags = "ES物理集群索引服务接口(REST)")
+@Deprecated
 public class ESPhyClusterTemplateSrvController {
 
     @Autowired

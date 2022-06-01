@@ -31,7 +31,7 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
      * @return
      */
     @GetMapping(path = "/appInfosByDateRange.do")
-    @ApiOperation(value = "根据模板Id获取[startDate, endDate(毫秒)]的projectId访问统计信息" )
+    @ApiOperation(value = "根据模板Id获取[startDate, endDate(毫秒)]的projectId访问统计信息【三方接口】",tags = "【三方接口】" )
     public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(
             @ApiParam(name="templateId", value="逻辑索引模板ID", required = true)
             @RequestParam(value = "templateId")    int logicTemplateId,
@@ -52,7 +52,7 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
      * @return
      */
     @GetMapping(path = "/project-ids.do")
-    @ApiOperation(value = "根据模板名称获取最近days天的projectId访问统计信息" )
+    @ApiOperation(value = "根据模板名称获取最近days天的projectId访问统计信息【三方接口】",tags = "【三方接口】" )
     public Result<Map<Integer, Long>> getAccessProjectIds(
             @ApiParam(name="templateId", value="逻辑索引模板ID", required = true)
             @RequestParam(value = "templateId")    int logicTemplateId,

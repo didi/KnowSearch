@@ -50,7 +50,7 @@ public class ESLogicClusterController {
 
     @PostMapping("/resource/list")
     @ResponseBody
-    @ApiOperation(value = "获取所有逻辑集群列表接口" )
+    @ApiOperation(value = "获取所有逻辑集群列表接口【三方接口】",tags = "【三方接口】" )
 
     public Result<List<ConsoleClusterVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
                                                                 HttpServletRequest request) {
@@ -59,7 +59,7 @@ public class ESLogicClusterController {
 
     @GetMapping("/resource/get")
     @ResponseBody
-    @ApiOperation(value = "获取指定逻辑集群接口" )
+    @ApiOperation(value = "获取指定逻辑集群接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
 
     public Result<ConsoleClusterVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
@@ -70,7 +70,7 @@ public class ESLogicClusterController {
 
     @DeleteMapping("/resource/del")
     @ResponseBody
-    @ApiOperation(value = "删除逻辑集群接口" )
+    @ApiOperation(value = "删除逻辑集群接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
 
     public Result<Void> deleteLogicClusterById(HttpServletRequest request,
@@ -81,7 +81,7 @@ public class ESLogicClusterController {
 
     @PutMapping("/resource/add")
     @ResponseBody
-    @ApiOperation(value = "新建带有region信息的逻辑集群接口" )
+    @ApiOperation(value = "新建带有region信息的逻辑集群接口【三方接口】",tags = "【三方接口】" )
 
     public Result<Long> createLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.addLogicCluster(param, HttpRequestUtil.getOperator(request),
@@ -90,7 +90,7 @@ public class ESLogicClusterController {
 
     @PostMapping("/resource/edit")
     @ResponseBody
-    @ApiOperation(value = "编辑逻辑集群接口" )
+    @ApiOperation(value = "编辑逻辑集群接口【三方接口】",tags = "【三方接口】" )
 
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.editLogicCluster(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
