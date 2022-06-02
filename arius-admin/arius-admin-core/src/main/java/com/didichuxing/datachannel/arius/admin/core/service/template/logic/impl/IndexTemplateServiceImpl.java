@@ -1401,8 +1401,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (AriusObjUtils.isNull(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心为空");
         }
-        if (AriusObjUtils.isNull(param.getQuota())) {
-            return Result.buildParamIllegal("Quota为空");
+        if (AriusObjUtils.isNull(param.getDiskSize())) {
+            return Result.buildParamIllegal("DiskSize为空");
         }
         if (AriusObjUtils.isNull(param.getWriteRateLimit())) {
             param.setWriteRateLimit(-1);
@@ -1412,6 +1412,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
         if(levelOfTemplateLower(param)) {
             return Result.buildParamIllegal("模板设置的服务等级低于所属逻辑集群的服务等级");
+        }
+        if (AriusObjUtils.isNull(clusterLogicService.getClusterLogicById(param.getResourceId()))) {
+            return Result.buildNotExist("逻辑集群不存在");
         }
 
         return Result.buildSucc();
