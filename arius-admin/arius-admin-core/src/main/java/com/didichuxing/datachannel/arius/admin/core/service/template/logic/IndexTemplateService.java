@@ -373,10 +373,4 @@ public interface IndexTemplateService {
 
     Result<Void> preCheckTemplateName(String templateName);
 
-    /**
-     * 获取指定regionId下的所有模板列表
-     * @param regionId  regionId
-     * @return    Result<List<IndexTemplatePO>>
-     */
-    Result<List<IndexTemplate>> listByRegionId(Integer regionId);
 }

@@ -116,4 +116,7 @@ public class IndexTemplatePhyDTO extends BaseDTO {
     @ApiModelProperty("物理模板列表")
     private List<IndexTemplatePhyDTO> physicalInfos;
 
+    @ApiModelProperty("regionId")
+    private Integer                   regionId;
+
 }

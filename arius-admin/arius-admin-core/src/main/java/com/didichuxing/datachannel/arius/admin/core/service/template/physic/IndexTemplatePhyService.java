@@ -8,6 +8,7 @@ import java.util.Set;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -289,4 +290,11 @@ public interface IndexTemplatePhyService {
      * @return result
      */
     Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation);
+
+    /**
+     * 获取指定regionId下的所有模板列表
+     * @param regionId  regionId
+     * @return    Result<List<IndexTemplatePhy>>
+     */
+    Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId);
 }

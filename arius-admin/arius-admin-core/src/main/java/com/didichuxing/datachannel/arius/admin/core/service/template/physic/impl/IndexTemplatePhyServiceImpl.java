@@ -732,6 +732,18 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
         return Result.buildSucc();
     }
 
+    @Override
+    public Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId) {
+        List<IndexTemplatePhyPO> indexTemplatePhyPOS;
+        try {
+            indexTemplatePhyPOS = indexTemplatePhyDAO.listByRegionId(regionId);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplatePhyServiceImpl||method=listAllByRegionId||errMsg={}", e);
+            return Result.buildFail(String.format("根据regionId获取模板列表失败, msg:%s", e.getMessage()));
+        }
+        return Result.buildSucc(ConvertUtil.list2List(indexTemplatePhyPOS, IndexTemplatePhy.class));
+    }
+
 
     /**************************************************** private method ****************************************************/
     private List<IndexTemplatePhyWithLogic> batchBuildTemplatePhysicalWithLogic(List<IndexTemplatePhyPO> indexTemplatePhyPOS) {
