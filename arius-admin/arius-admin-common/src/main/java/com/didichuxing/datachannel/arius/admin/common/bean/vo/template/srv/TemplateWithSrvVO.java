@@ -37,4 +37,10 @@ public class TemplateWithSrvVO extends BaseVO {
     @ApiModelProperty("DCDR主从位点差")
     private Long checkPointDiff;
 
+    @ApiModelProperty("数据保存时长 单位天")
+    private Integer expireTime;
+
+    @ApiModelProperty("热数据保存时长 单位天")
+    private Integer hotTime;
+
 }

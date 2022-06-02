@@ -94,24 +94,6 @@ public interface TemplatePhyManager {
                                          String operator) throws ESOperateException;
 
     /**
-     * 校验物理模板信息
-     *
-     * @param param     参数
-     * @param operation 操作
-     * @return result
-     */
-    Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation);
-
-    /**
-     * 批量校验物理模板信息
-     *
-     * @param params    参数
-     * @param operation 操作
-     * @return result
-     */
-    Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation);
-
-    /**
      * 批量新增物理模板
      *
      * @param logicId       逻辑模板id

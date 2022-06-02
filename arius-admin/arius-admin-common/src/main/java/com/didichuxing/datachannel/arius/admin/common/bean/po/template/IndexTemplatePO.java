@@ -156,8 +156,9 @@ public class IndexTemplatePO extends BasePO implements DigitResponsible {
      */
     private String openSrv;
 
-    /*
-     * regionId
+    /**
+     * 可用磁盘容量
      */
-    private Integer regionId;
+    private Double diskSize;
+
 }
