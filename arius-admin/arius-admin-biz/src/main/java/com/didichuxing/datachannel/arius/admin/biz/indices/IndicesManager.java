@@ -27,9 +27,10 @@ public interface IndicesManager {
     /**
      * 创建索引
      * @param indexCreateDTO
+     * @param appId
      * @return
      */
-    Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO);
+    Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO, Integer appId);
 
     /**
      * 删除索引

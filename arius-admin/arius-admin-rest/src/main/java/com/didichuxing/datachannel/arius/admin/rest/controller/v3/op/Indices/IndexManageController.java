@@ -3,11 +3,11 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.Indices;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,16 +43,15 @@ public class IndexManageController {
     @ResponseBody
     @ApiOperation(value = "创建索引")
     public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithCreateInfoDTO param) {
-        //return indexManager.createIndex(param, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+        return indexManager.createIndex(param, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "查询索引")
-    public Result<IndexCatCellDTO> getIndex(HttpServletRequest request, @RequestParam String indexName) {
-        //return indexManager.getIndex(indexName, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+    public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @RequestParam String clusterPhyName,
+                                            @RequestParam String indexName) {
+        return indexManager.getIndexCatInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @DeleteMapping("")
@@ -70,12 +69,12 @@ public class IndexManageController {
         return Result.buildFail();
     }
 
-    @GetMapping("/mapping")
+    @GetMapping("{clusterPhyName}/{indexName}/mapping")
     @ResponseBody
     @ApiOperation(value = "查询mapping")
-    public Result<String> getMapping(HttpServletRequest request, @RequestParam String indexName) {
-        //return indexManager.getMapping(indexName, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+    public Result<IndexMappingVO> getMapping(HttpServletRequest request, @PathVariable String clusterPhyName,
+                                             @PathVariable String indexName) {
+        return indexManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/setting")
@@ -86,27 +85,21 @@ public class IndexManageController {
         return Result.buildFail();
     }
 
-    @GetMapping("/setting")
+    @GetMapping("{clusterPhyName}/{indexName}/setting")
     @ResponseBody
     @ApiOperation(value = "查询setting")
-    public Result<String> getSetting(HttpServletRequest request, @RequestParam String indexName) {
-        //return indexManager.getSetting(indexName, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+    public Result<IndexSettingVO> getSetting(HttpServletRequest request, @PathVariable String clusterPhyName,
+                                             @PathVariable String indexName) {
+        return indexManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/blockRead")
+    @PutMapping("/block")
     @ResponseBody
-    @ApiOperation(value = "禁用读")
-    public Result<Void> blockRead(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
-        //return indexManager.blockRead(param, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
-    }
-
-    @PostMapping("/blockWrite")
-    @ResponseBody
-    @ApiOperation(value = "禁用写")
-    public Result<Void> blockWrite(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
-        return Result.buildFail();
+    @ApiOperation(value = "批量编辑索引阻塞设置")
+    public Result<Boolean> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
+                                                 HttpServletRequest request) {
+        return indexManager.batchEditIndexBlockSetting(params, HttpRequestUtils.getAppId(request),
+                HttpRequestUtils.getOperator(request));
     }
 
     @PostMapping("/alias")
@@ -125,12 +118,12 @@ public class IndexManageController {
         return Result.buildFail();
     }
 
-    @PostMapping("/close")
+    @PutMapping("/close")
     @ResponseBody
     @ApiOperation(value = "关闭索引")
-    public Result<Void> close(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
-        //return indexManager.close(param, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+    public Result<Boolean> close(HttpServletRequest request, @RequestBody List<IndicesOpenOrCloseDTO> params) {
+        return indexManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
+                HttpRequestUtils.getOperator(request));
     }
 
 }

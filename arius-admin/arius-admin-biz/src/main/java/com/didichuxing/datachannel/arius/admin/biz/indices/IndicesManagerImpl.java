@@ -16,7 +16,9 @@ import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -72,10 +74,13 @@ public class IndicesManagerImpl implements IndicesManager {
     private ESIndexService        esIndexService;
 
     @Autowired
-    private ClusterPhyManager     clusterPhyManager;
+    private ClusterLogicService clusterLogicService;
 
     @Autowired
     private ClusterLogicManager clusterLogicManager;
+
+    @Autowired
+    private ClusterPhyManager     clusterPhyManager;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -102,11 +107,17 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO) {
-        String cluster = indexCreateDTO.getCluster();
-        if (null != indexCreateDTO.getResourceId()) {
-            List<ClusterPhy> clusterPhyList = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(indexCreateDTO.getResourceId());
-            cluster = clusterPhyList.get(0).getCluster();
+    public Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO, Integer appId) {
+        String cluster;
+        if (appService.isSuperApp(appId)) {
+            cluster = indexCreateDTO.getCluster();
+        } else {
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
+            if (clusterLogic == null) {
+                return Result.buildFail("集群不存在");
+            }
+
+            cluster = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(clusterLogic.getId()).get(0).getCluster();
         }
 
         try {
