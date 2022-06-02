@@ -959,8 +959,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public Result<List<IndexTemplate>> listByRegionId(Integer regionId) {
-        List<Integer> logicTemplateIdList = indexTemplatePhyService.listByRegionId(regionId).getData().stream()
-                .map(IndexTemplatePhy::getLogicId).distinct().collect(Collectors.toList());
+        Result<List<IndexTemplatePhy>> phyListResult = indexTemplatePhyService.listByRegionId(regionId);
+        if (phyListResult.failed()) {
+            return Result.buildFail(phyListResult.getMessage());
+        }
+
+        List<Integer> logicTemplateIdList = phyListResult.getData().stream().map(IndexTemplatePhy::getLogicId).distinct().collect(Collectors.toList());
         List<IndexTemplate> logicTemplateList = logicTemplateIdList.stream().map(this::getLogicTemplateById).collect(Collectors.toList());
         return Result.buildSucc(logicTemplateList);
     }
