@@ -237,7 +237,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) {
         IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, appId);
         Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD);
@@ -245,7 +245,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return validLogicTemplateResult;
         }
 
-        Result<Void> validPhyTemplateResult = templatePhyManager.validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
+        Result<Void> validPhyTemplateResult = indexTemplatePhyService.validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
         if (validPhyTemplateResult.failed()) {
             return validPhyTemplateResult;
         }
@@ -267,7 +267,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
 
             operateRecordService.save(TEMPLATE, ADD, param.getId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")), operator);
-            SpringTool.publish(new TemplateCreateEvent(this, indexTemplateDTO));
         } catch (Exception e) {
             LOGGER.error("class=TemplateCreateManager||method=create||msg=create template failed", e);
             return Result.buildFail();
@@ -1049,7 +1048,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(param.getResourceId());
         indexTemplatePhyDTO.setCluster(clusterRegion.getPhyClusterName());
-        indexTemplateDTO.setRegionId(clusterRegion.getId().intValue());
+        indexTemplatePhyDTO.setRegionId(clusterRegion.getId().intValue());
 
         Integer clusterSettingHotDay = templateColdManager.fetchClusterDefaultHotDay(clusterRegion.getPhyClusterName());
         if (clusterSettingHotDay > 0) {

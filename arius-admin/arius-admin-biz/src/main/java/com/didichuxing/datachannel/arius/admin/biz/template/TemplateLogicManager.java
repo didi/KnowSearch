@@ -71,7 +71,7 @@ public interface TemplateLogicManager {
      * @param appId appId
      * @return result
      */
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Transactional(rollbackFor = Exception.class)
     Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId);
 
     /**

@@ -17,10 +17,11 @@
         <result column="config" jdbcType="VARCHAR" property="config"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="region_id" jdbcType="INTEGER" property="regionId"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, logic_id, `name`, expression, cluster, rack, shard, shard_routing, version, role, status, config, create_time, update_time
+        id, logic_id, `name`, expression, cluster, rack, shard, shard_routing, version, role, status, config, create_time, update_time, region_id
     </sql>
 
     <select id="listByCondition"
@@ -35,6 +36,7 @@
         <if test="name != null">and `name` = #{name}</if>
         <if test="cluster != null">and cluster = #{cluster}</if>
         <if test="role != null">and role = #{role}</if>
+        <if test="regionId != null">and region_id = #{regionId}</if>
         order by id desc
     </select>
 
@@ -43,10 +45,10 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into index_template_physical_info
-        (logic_id, `name`, expression, cluster, rack, shard, shard_routing, version, role, config)
+        (logic_id, `name`, expression, cluster, rack, shard, shard_routing, version, role, config, region_id)
         values
         (#{logicId}, #{name}, #{expression}, #{cluster},
-         #{rack}, #{shard}, #{shardRouting}, #{version}, #{role}, #{config})
+         #{rack}, #{shard}, #{shardRouting}, #{version}, #{role}, #{config}, #{regionId})
     </insert>
 
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
@@ -116,6 +118,7 @@
             <if test="version != null">,version = #{version}</if>
             <if test="role != null">,role = #{role}</if>
             <if test="config != null">,config = #{config}</if>
+            <if test="regionId != null">,region_id = #{regionId}</if>
         </trim>
         where id = #{id} and status > 0
     </update>
@@ -177,5 +180,12 @@
         delete from index_template_physical_info
         where `name` = #{name} and cluster = #{cluster} and status &lt; 0
     </delete>
+
+    <select id="listByRegionId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_physical_info
+        where region_id = #{regionId} and is_active = 1
+    </select>
 
 </mapper>
