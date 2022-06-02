@@ -237,7 +237,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) {
         IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, appId);
         Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD);
@@ -245,7 +245,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return validLogicTemplateResult;
         }
 
-        Result<Void> validPhyTemplateResult = templatePhyManager.validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
+        Result<Void> validPhyTemplateResult = indexTemplatePhyService.validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
         if (validPhyTemplateResult.failed()) {
             return validPhyTemplateResult;
         }

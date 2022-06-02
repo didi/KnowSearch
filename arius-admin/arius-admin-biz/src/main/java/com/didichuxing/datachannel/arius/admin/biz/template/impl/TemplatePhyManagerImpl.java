@@ -354,11 +354,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.buildSucWithTips("模板部署集群变更!请注意模板APP是否可以使用修改后的集群rack\n模板复制后请确认逻辑模板quota是否充足");
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> editTemplate(IndexTemplatePhyDTO param, String operator) throws ESOperateException {
-        Result<Void> checkResult = validateTemplate(param, EDIT);
+        Result<Void> checkResult = indexTemplatePhyService.validateTemplate(param, EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=editTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
@@ -392,52 +391,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         return Result.buildSucc(true);
-    }
-
-    @Override
-    public Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation) {
-        if (AriusObjUtils.isNull(param)) {
-            return Result.buildParamIllegal("物理模板参数为空");
-        }
-        if (operation == OperationEnum.ADD) {
-            Result<Void> result = handleValidateTemplateAdd(param);
-            if (result.failed()) {return result;}
-        } else if (operation == EDIT) {
-            Result<Void> result = handleValidateTemplateEdit(param);
-            if (result.failed()) {return result;}
-        }
-
-        Result<Void> result = handleValidateTemplate(param);
-        if (result.failed()) {return result;}
-
-        return Result.buildSucc();
-    }
-
-    @Override
-    public Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation) {
-        if (AriusObjUtils.isNull(params)) {
-            return Result.buildParamIllegal("物理模板信息为空");
-        }
-
-        Set<String> deployClusterSet = Sets.newTreeSet();
-        for (IndexTemplatePhyDTO param : params) {
-            Result<Void> checkResult = validateTemplate(param, operation);
-            if (checkResult.failed()) {
-                LOGGER.warn("class=TemplatePhyManagerImpl||method=validateTemplates||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
-                checkResult
-                        .setMessage(checkResult.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());
-                return checkResult;
-            }
-
-            if (deployClusterSet.contains(param.getCluster())) {
-                return Result.buildParamIllegal("部署集群重复");
-            } else {
-                deployClusterSet.add(param.getCluster());
-            }
-
-        }
-
-        return Result.buildSucc();
     }
 
     @Override
@@ -982,64 +935,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                     appIdFromLogicTemplate);
             consoleTemplatePhyVO.setAuthType(authEnum.getCode());
         }
-    }
-
-    private Result<Void> handleValidateTemplate(IndexTemplatePhyDTO param) {
-        if (param.getCluster() != null && !clusterPhyService.isClusterExists(param.getCluster())) {
-            return Result.buildParamIllegal("集群不存在");
-        }
-        if (StringUtils.isNotEmpty(param.getRack())) {
-            if (!clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
-                return Result.buildParamIllegal("集群rack不存在");
-            }
-        }
-        if (param.getShard() != null && param.getShard() < 1) {
-            return Result.buildParamIllegal("shard个数非法");
-        }
-        if (param.getRole() != null
-                && TemplateDeployRoleEnum.UNKNOWN.equals(TemplateDeployRoleEnum.valueOf(param.getRole()))) {
-            return Result.buildParamIllegal("模板角色非法");
-        }
-        if (param.getLogicId() != null && !Objects.equals(param.getLogicId(), NOT_CHECK)) {
-            IndexTemplate logic = indexTemplateService.getLogicTemplateById(param.getLogicId());
-            if (logic == null) {
-                return Result.buildNotExist("逻辑模板不存在");
-            }
-        }
-        return Result.buildSucc();
-    }
-
-    private Result<Void> handleValidateTemplateEdit(IndexTemplatePhyDTO param) {
-        if (AriusObjUtils.isNull(param.getId())) {
-            return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
-        }
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getId());
-        if (indexTemplatePhy == null) {
-            return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
-        }
-        return Result.buildSucc();
-    }
-
-    private Result<Void> handleValidateTemplateAdd(IndexTemplatePhyDTO param) {
-        if (AriusObjUtils.isNull(param.getLogicId())) {
-            return Result.buildParamIllegal("逻辑模板id为空");
-        }
-        if (AriusObjUtils.isNull(param.getCluster())) {
-            return Result.buildParamIllegal("集群为空");
-        }
-
-        if (AriusObjUtils.isNull(param.getShard())) {
-            return Result.buildParamIllegal("shard为空");
-        }
-        if (AriusObjUtils.isNull(param.getRole())) {
-            return Result.buildParamIllegal("模板角色为空");
-        }
-
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName());
-        if (indexTemplatePhy != null) {
-            return Result.buildDuplicate("物理模板已经存在");
-        }
-        return Result.buildSucc();
     }
 
     private Set<String> getFinalIndexSet(IndexTemplatePhyWithLogic physicalWithLogic, int days, IndexTemplate logicTemplate, List<String> indices) {
