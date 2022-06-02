@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_LOGIC;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
@@ -27,12 +29,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
@@ -44,6 +48,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -51,13 +57,17 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -69,8 +79,13 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -972,7 +987,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private IndexTemplateDTO buildTemplateDTO(IndexTemplateWithCreateInfoDTO param, Integer projectId) {
         IndexTemplateDTO indexTemplateDTO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
 
-        indexTemplateDTO.setAppId(projectId);
+        indexTemplateDTO.setProjectId(projectId);
 
         buildExtraField(indexTemplateDTO);
         buildCyclicalRoll(indexTemplateDTO, param);

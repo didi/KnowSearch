@@ -389,7 +389,6 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void listAllByRegionIdTest() {
-        Mockito.when(indexTemplateDAO.listByRegionId(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         Result<List<IndexTemplate>> ret = indexTemplateService.listByRegionId(100);
         if (ret.failed()) { Assertions.assertNull(ret.getMessage());}
         if (ret.success()) { Assertions.assertNull(ret.getData());}

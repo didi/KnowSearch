@@ -4,8 +4,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

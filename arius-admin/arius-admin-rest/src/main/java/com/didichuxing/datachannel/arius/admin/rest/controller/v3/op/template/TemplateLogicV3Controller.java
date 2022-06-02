@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
@@ -56,8 +55,7 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "模糊查询模板列表")
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(HttpServletRequest request,
                                                                          @RequestBody TemplateConditionDTO condition) {
-        return templateLogicManager.pageGetConsoleTemplateVOS(condition,
-                HttpRequestUtil.getProjectId(request));
+        return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{templateName}/nameCheck")
