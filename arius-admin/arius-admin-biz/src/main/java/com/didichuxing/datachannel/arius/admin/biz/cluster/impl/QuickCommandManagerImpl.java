@@ -43,12 +43,13 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Override
     public Result<List<Map>> nodeStateAnalysis(String cluster) {
-        List<Map> result = new ArrayList<>();
+
         DirectResponse directResponse = getDirectResponse(cluster, NODE_STATE.getMethod(), NODE_STATE.getUri());
         if (directResponse == null) {
             return null;
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            List<Map> result = new ArrayList<>();
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
             JSONObject nodes = (JSONObject) responseJson.get("nodes");
             nodes.keySet().forEach(key -> {
@@ -56,28 +57,26 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
                 nodeMap.put("node_name", key);
                 result.add(nodeMap);
             });
+            return Result.buildSucc(result);
         }
-        return Result.buildSucc(result);
+        return Result.buildFail();
     }
 
     @Override
     public Result<JSONArray> indicesDistribution(String cluster) {
-        JSONArray result = new JSONArray();
         DirectResponse directResponse = getDirectResponse(cluster, INDICES.getMethod(), INDICES.getUri());
         if (directResponse == null) {
             return null;
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONArray responseJson = JSONObject.parseArray(directResponse.getResponseContent());
-            result = responseJson;
+            return Result.buildSucc(responseJson);
         }
-        return Result.buildSucc(result);
-
+        return Result.buildFail();
     }
 
     @Override
     public Result<JSONArray> shardDistribution(String cluster) {
-        JSONArray result = new JSONArray();
         DirectResponse directResponse = getDirectResponse(cluster, SHARD.getMethod(), SHARD.getUri());
         if (directResponse == null) {
             return null;
@@ -85,72 +84,71 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONArray responseJson = JSONObject.parseArray(directResponse.getResponseContent());
             return Result.buildSucc(responseJson);
-//            result = responseJson;
         }
-        return Result.buildSucc(result);
+        return Result.buildFail();
     }
 
     @Override
     public Result<List<Map>> pendingTaskAnalysis(String cluster) {
-        List<Map> result = new ArrayList<>();
         DirectResponse directResponse = getDirectResponse(cluster, PENDING_TASK.getMethod(), PENDING_TASK.getUri());
         if (directResponse == null) {
             return null;
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            List<Map> result = new ArrayList<>();
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
             JSONArray tasks = responseJson.getJSONArray("tasks");
             for (int i = 0; i < tasks.size(); i++) {
                 JSONObject taskObject = (JSONObject) tasks.get(i);
                 result.add(buildTask(taskObject));
             }
+            return Result.buildSucc(result);
         }
-        return Result.buildSucc(result);
+        return Result.buildFail();
     }
 
     @Override
     public Result<List<Map>> taskMissionAnalysis(String cluster) {
-        List<Map> result = new ArrayList<>();
         DirectResponse directResponse = getDirectResponse(cluster, TASK_MISSION_ANALYSIS.getMethod(), TASK_MISSION_ANALYSIS.getUri());
         if (directResponse == null) {
             return null;
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            List<Map> result = new ArrayList<>();
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
             JSONObject nodes = responseJson.getJSONObject("nodes");
             nodes.keySet().forEach(key -> {
                 JSONObject node = (JSONObject) nodes.get(key);
                 result.add(buildTaskMission(node, key));
             });
+            Result.buildSucc(result);
         }
-        return Result.buildSucc(result);
+        return Result.buildFail();
     }
 
     @Override
     public Result<String> hotThreadAnalysis(String cluster) {
-        String result = "";
         DirectResponse directResponse = getDirectResponse(cluster, HOT_THREAD.getMethod(), HOT_THREAD.getUri());
         if (directResponse == null) {
             return null;
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-            result = directResponse.getResponseContent();
+            return Result.buildSucc(directResponse.getResponseContent());
         }
-        return Result.buildSucc(result);
+        return Result.buildFail();
     }
 
     @Override
     public Result<Map> shardAssignmentDescription(String cluster) {
-        Map result = new HashMap();
         DirectResponse directResponse = getDirectResponse(cluster, SHARD_ASSIGNMENT.getMethod(), SHARD_ASSIGNMENT.getUri());
         if (directResponse == null) {
             return null;
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
-            result = buildShardAssignment(responseJson);
+            return Result.buildSucc(buildShardAssignment(responseJson));
         }
-        return Result.buildSucc(result);
+        return Result.buildFail();
     }
 
     private Map buildShardAssignment(JSONObject responseJson) {
@@ -165,23 +163,55 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
             Map decisionMap = new HashMap();
             JSONObject decisionObject = decisionsArray.getJSONObject(i);
             decisionMap.put("node_name", decisionObject.get("node_name"));
-            decisionMap.put("deciders", decisionObject.get("deciders"));
+
+            JSONArray deciders = decisionObject.getJSONArray("deciders");
+            JSONObject decider = (JSONObject) deciders.get(0);
+
+            decisionMap.put("node_decide", decider.get("decider"));
+            decisionMap.put("explanation", decider.get("explanation"));
+
             decisions.add(decisionMap);
         }
-        map.put("current_state ", responseJson.get("current_state"));
+        map.put("decisions ", decisions);
         return map;
     }
 
     @Override
     public Result<Void> abnormalShardAllocationRetry(String cluster) {
-        return Result.buildSucc();
+        boolean result = false;
+        DirectResponse directResponse = getDirectResponse(cluster, ABNORMAL_SHARD_RETRY.getMethod(), ABNORMAL_SHARD_RETRY.getUri());
+        if (directResponse == null) {
+            return null;
+        }
+        if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
+            result = responseJson.getBoolean("acknowledged");
+        }
+        if (result) {
+            return Result.buildSucc();
+        } else {
+            return Result.buildFail();
+        }
     }
 
     @Override
     public Result<Void> clearFielddataMemory(String cluster) {
-        return Result.buildSucc();
+        Integer failed = 0;
+        DirectResponse directResponse = getDirectResponse(cluster, CLEAR_FIELDDATA_MEMORY.getMethod(), CLEAR_FIELDDATA_MEMORY.getUri());
+        if (directResponse == null) {
+            return null;
+        }
+        if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
+            JSONObject shards = responseJson.getJSONObject("_shards");
+            failed = shards.getInteger("failed");
+        }
+        if (failed == 0) {
+            return Result.buildSucc();
+        } else {
+            return Result.buildFail();
+        }
     }
-
 
     @Nullable
     private DirectResponse getDirectResponse(String cluster, String method, String uri) {
