@@ -965,7 +965,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         List<Integer> logicTemplateIdList = phyListResult.getData().stream().map(IndexTemplatePhy::getLogicId).distinct().collect(Collectors.toList());
-        List<IndexTemplate> logicTemplateList = logicTemplateIdList.stream().map(this::getLogicTemplateById).collect(Collectors.toList());
+        List<IndexTemplate> logicTemplateList = getLogicTemplatesByIds(logicTemplateIdList);
         return Result.buildSucc(logicTemplateList);
     }
 
