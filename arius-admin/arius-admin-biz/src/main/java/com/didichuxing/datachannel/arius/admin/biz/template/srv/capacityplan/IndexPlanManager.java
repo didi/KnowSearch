@@ -23,6 +23,7 @@ public interface IndexPlanManager {
      * 调整物理集群下，索引模版的shard个数配置
      * @param phyClusterName 物理集群名
      * @return boolean 是否成功
+     * todo: bugs in bank
      */
     Result<Void> adjustShardCountByPhyClusterName(String phyClusterName);
 

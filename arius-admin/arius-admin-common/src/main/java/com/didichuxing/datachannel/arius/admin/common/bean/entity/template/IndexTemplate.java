@@ -162,6 +162,11 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
      */
     private Integer regionId;
 
+    /**
+     * 可用磁盘容量
+     */
+    private Double diskSize;
+
     @Override
     public int compareTo(IndexTemplate o) {
         if (null == o) {

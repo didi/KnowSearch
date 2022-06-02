@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
  * @author d06679
  * @date 2019-08-02
  */
+@Deprecated
 @Service("defaultTemplateClusterDistributor")
 public class DefaultTemplateClusterDistributor implements TemplateClusterDistributor {
 

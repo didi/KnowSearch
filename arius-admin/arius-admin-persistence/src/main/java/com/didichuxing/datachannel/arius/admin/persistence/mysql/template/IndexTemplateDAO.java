@@ -52,5 +52,4 @@ public interface IndexTemplateDAO {
 
     List<String> listAllNames();
 
-    List<IndexTemplatePO> listByRegionId(Integer regionId);
 }

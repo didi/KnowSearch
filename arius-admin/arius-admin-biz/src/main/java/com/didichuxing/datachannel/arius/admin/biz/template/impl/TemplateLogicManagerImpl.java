@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
@@ -44,21 +44,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -73,18 +69,13 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -115,6 +106,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private ClusterPhyService           clusterPhyService;
+
+    @Autowired
+    private ClusterLogicService clusterLogicService;
+
+    @Autowired
+    private ClusterRegionService clusterRegionService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -232,118 +229,43 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return indexTemplateLogicWithLabels;
     }
 
-    /**
-     * 新建逻辑模板 无参数校验
-     *
-     * @param param    模板信息
-     * @param operator 操作人
-     * @return result
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Integer> addTemplateWithoutCheck(IndexTemplateDTO param,
-                                                   String operator) throws AdminOperateException {
-        initLogicParam(param);
+    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId) {
+        IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, projectId);
+        Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD);
+        if (validLogicTemplateResult.failed()) {
+            return validLogicTemplateResult;
+        }
 
-        // 初始化pipelineID
-        param.setIngestPipeline(param.getName());
+        Result<Void> validPhyTemplateResult = indexTemplatePhyService.validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
+        if (validPhyTemplateResult.failed()) {
+            return validPhyTemplateResult;
+        }
 
-        // 保存数据库
-        Result<Void> result = indexTemplateService.addTemplateWithoutCheck(param);
-        if (result.success()) {
-            Result<Void> addPhysicalResult = templatePhyManager.addTemplatesWithoutCheck(param.getId(),
-                    param.getPhysicalInfos());
-
-            if (addPhysicalResult.failed()) {
-                throw new AdminOperateException("新建物理模板失败");
+        try {
+            Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
+            if (save2DBResult.failed()) {
+                return save2DBResult;
             }
 
-            IndexTemplateConfig defaultTemplateConfig = getDefaultTemplateConfig(param.getId());
-            if (param.getDisableSourceFlags() != null) {
-                defaultTemplateConfig.setDisableSourceFlags(param.getDisableSourceFlags());
+            Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(), indexTemplateDTO.getPhysicalInfos());
+            if (save2PhyTemplateResult.failed()) {
+                return save2PhyTemplateResult;
             }
 
-            if(param.getDisableIndexRollover() != null) {
-                defaultTemplateConfig.setDisableIndexRollover(param.getDisableIndexRollover());
+            Result<Void> saveTemplateConfigResult = insertTemplateConfig(indexTemplateDTO);
+            if (saveTemplateConfigResult.failed()) {
+                return saveTemplateConfigResult;
             }
 
-            if (param.getPreCreateFlags() != null) {
-                defaultTemplateConfig.setPreCreateFlags(param.getPreCreateFlags());
-            }
-
-            if (param.getShardNum() != null) {
-                defaultTemplateConfig.setShardNum(param.getShardNum());
-            }
-
-            // 生成配置记录
-            insertTemplateConfig(defaultTemplateConfig);
-
-            // 记录操作记录
             operateRecordService.save(TEMPLATE, ADD, param.getId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")), operator);
-
-            SpringTool.publish(new LogicTemplateAddEvent(this, indexTemplateService.getLogicTemplateById(param.getId())));
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateCreateManager||method=create||msg=create template failed", e);
+            return Result.buildFail();
         }
 
-        return Result.build(result.success(), param.getId());
-    }
-
-    /**
-     * 新建逻辑模板
-     * @param param 模板信息
-     * @param operator 操作人
-     * @return result
-     * @throws AdminOperateException 操作es失败 或者保存物理模板信息失败
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    public Result<Integer> createLogicTemplate(IndexTemplateDTO param,
-                                               String operator) throws AdminOperateException {
-        Result<Void> checkResult = indexTemplateService.validateTemplate(param, ADD);
-        if (checkResult.failed()) {
-            LOGGER.warn("class=TemplateLogicServiceImpl||method=addTemplate||msg={}", checkResult.getMessage());
-            return Result.buildFrom(checkResult);
-        }
-
-        LOGGER.info("class=TemplateLogicServiceImpl||method=addTemplate||id={}||hotTime={}||name={}||physicalInfos={}",
-                param.getId(), param.getHotTime(), param.getName(), JSON.toJSONString(param.getPhysicalInfos()));
-
-        if (param.getPhysicalInfos() != null) {
-            setIndexTemplateLogicHotTime(param);
-        }
-
-        checkResult = templatePhyManager.validateTemplates(param.getPhysicalInfos(), ADD);
-        if (checkResult.failed()) {
-            LOGGER.warn("class=TemplateLogicServiceImpl||method=addTemplate||msg={}", checkResult.getMessage());
-            return Result.buildFrom(checkResult);
-        }
-
-        // 校验资源与模板的数据中心是否匹配
-        List<String> clusters = param.getPhysicalInfos().stream().map(IndexTemplatePhyDTO::getCluster)
-                .collect(Collectors.toList());
-        for (String cluster : clusters) {
-            ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
-            if (!clusterPhy.getDataCenter().equals(param.getDataCenter())) {
-                return Result.buildParamIllegal("物理集群数据中心不符");
-            }
-        }
-
-        return addTemplateWithoutCheck(param, operator);
-    }
-
-    private void setIndexTemplateLogicHotTime(IndexTemplateDTO param) {
-        for (IndexTemplatePhyDTO physicalDTO : param.getPhysicalInfos()) {
-            physicalDTO.setLogicId(NOT_CHECK);
-            physicalDTO.setName(param.getName());
-            physicalDTO.setExpression(param.getExpression());
-            physicalDTO.setWriteRateLimit(param.getWriteRateLimit());
-
-            if (param.getHotTime() == null || param.getHotTime() <= 0) {
-                int clusterSettingHotDay = templateColdManager.fetchClusterDefaultHotDay(physicalDTO.getCluster());
-                if (clusterSettingHotDay > 0) {
-                    param.setHotTime(clusterSettingHotDay);
-                }
-            }
-        }
+        return Result.buildSucc();
     }
 
     /**
@@ -579,6 +501,16 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public Result<Void> editTemplate(IndexTemplateDTO param, String operator)
             throws AdminOperateException {
         return indexTemplateService.editTemplate(param, operator);
+    }
+
+    @Override
+    public Result<Void> newEditTemplate(IndexTemplateDTO param, String operator) {
+        try {
+            return indexTemplateService.editTemplateInfoTODB(param);
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=newEditTemplate||msg=fail to editTemplate");
+        }
+        return Result.buildFail("编辑模板失败");
     }
 
     @Override
@@ -973,58 +905,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc();
     }
 
-    private void initLogicParam(IndexTemplateDTO param) {
-        if (param.getDateFormat() == null) {
-            param.setDateFormat("");
-        } else {
-            param.setDateFormat(param.getDateFormat().replace("Y", "y"));
-        }
-
-        if (param.getDateField() == null) {
-            param.setDateField("");
-        }
-
-        if (param.getDateFieldFormat() == null) {
-            param.setDateFieldFormat("");
-        }
-
-        if (param.getIdField() == null) {
-            param.setIdField("");
-        }
-
-        if (param.getRoutingField() == null) {
-            param.setRoutingField("");
-        }
-
-        if (param.getDesc() == null) {
-            param.setDesc("");
-        }
-
-        if (param.getLibraDepartment() == null) {
-            param.setLibraDepartment("");
-        }
-
-        if (param.getLibraDepartmentId() == null) {
-            param.setLibraDepartmentId("");
-        }
-
-        if (param.getHotTime() == null) {
-            param.setHotTime(-1);
-        }
-
-        if (param.getDisableSourceFlags() == null) {
-            param.setDisableSourceFlags(false);
-        }
-
-        if (param.getPreCreateFlags() == null) {
-            param.setPreCreateFlags(true);
-        }
-
-        if (param.getShardNum() == null) {
-            param.setShardNum(-1);
-        }
-    }
-
     private IndexTemplateConfig getDefaultTemplateConfig(Integer logicId) {
         IndexTemplateConfig indexTemplateConfig = new IndexTemplateConfig();
         indexTemplateConfig.setLogicId(logicId);
@@ -1042,11 +922,23 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**
      * 记录模板配置
-     *
-     * @param indexTemplateConfig 索引模板配置
+     * @param param 模板配置参数
      */
-    private boolean insertTemplateConfig(IndexTemplateConfig indexTemplateConfig) {
-        return indexTemplateService.insertTemplateConfig(indexTemplateConfig).success();
+    private Result<Void> insertTemplateConfig(IndexTemplateDTO param) {
+        IndexTemplateConfig defaultTemplateConfig = getDefaultTemplateConfig(param.getId());
+        defaultTemplateConfig.setDisableSourceFlags(false);
+        if(param.getDisableIndexRollover() != null) {
+            defaultTemplateConfig.setDisableIndexRollover(param.getDisableIndexRollover());
+        }
+
+        if (param.getPreCreateFlags() != null) {
+            defaultTemplateConfig.setPreCreateFlags(param.getPreCreateFlags());
+        }
+
+        if (param.getShardNum() != null) {
+            defaultTemplateConfig.setShardNum(param.getShardNum());
+        }
+        return indexTemplateService.insertTemplateConfig(defaultTemplateConfig);
     }
 
     /**
@@ -1075,5 +967,131 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         return Result.buildSucc();
+    }
+
+    private IndexTemplateDTO buildTemplateDTO(IndexTemplateWithCreateInfoDTO param, Integer projectId) {
+        IndexTemplateDTO indexTemplateDTO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
+
+        indexTemplateDTO.setAppId(projectId);
+
+        buildExtraField(indexTemplateDTO);
+        buildCyclicalRoll(indexTemplateDTO, param);
+        buildShardNum(indexTemplateDTO, param);
+        buildPhysicalInfo(indexTemplateDTO, param);
+
+        return indexTemplateDTO;
+    }
+
+    private void buildExtraField(IndexTemplateDTO indexTemplateDTO) {
+        indexTemplateDTO.setIngestPipeline(indexTemplateDTO.getName());
+        //todo: 移除quota 后删掉这行
+        indexTemplateDTO.setQuota(indexTemplateDTO.getDiskSize());
+        //todo: 0.3干掉
+        indexTemplateDTO.setLibraDepartment("");
+        indexTemplateDTO.setLibraDepartmentId("");
+        indexTemplateDTO.setIdField("");
+        indexTemplateDTO.setRoutingField("");
+
+        if (null == indexTemplateDTO.getDesc()) {
+            indexTemplateDTO.setDesc("");
+        }
+    }
+
+    private void buildCyclicalRoll(IndexTemplateDTO indexTemplateDTO, IndexTemplateWithCreateInfoDTO param) {
+        if (!param.getCyclicalRoll()) {
+            indexTemplateDTO.setExpression(param.getName());
+            indexTemplateDTO.setExpireTime(-1);
+        } else {
+            indexTemplateDTO.setExpression(param.getName() + "*");
+            // 数据不会过期，必须按月滚动
+            if (param.getExpireTime() < 0) {
+                indexTemplateDTO.setDateFormat(AdminConstant.YY_MM_DATE_FORMAT);
+            } else {
+                //每天的数据增量大于200G或者保存时长小于30天 按天存储
+                double incrementPerDay = param.getDiskSize() / param.getExpireTime();
+                if (incrementPerDay >= 200.0 || param.getExpireTime() <= 30) {
+                    if (StringUtils.isNotBlank(param.getDateField()) && !AdminConstant.MM_DD_DATE_FORMAT.equals(param.getDateField())) {
+                        indexTemplateDTO.setDateFormat(AdminConstant.YY_MM_DD_DATE_FORMAT);
+                    }
+                } else {
+                    indexTemplateDTO.setDateFormat(AdminConstant.YY_MM_DATE_FORMAT);
+                }
+            }
+        }
+
+        if (null == indexTemplateDTO.getDateFormat()) {
+            indexTemplateDTO.setDateFormat("");
+        }
+
+        if (null == indexTemplateDTO.getDateField()) {
+            indexTemplateDTO.setDateField("");
+        }
+
+        if (null == indexTemplateDTO.getDateFieldFormat()) {
+            indexTemplateDTO.setDateFieldFormat("");
+        }
+    }
+
+    private void buildPhysicalInfo(IndexTemplateDTO indexTemplateDTO, IndexTemplateWithCreateInfoDTO param) {
+        IndexTemplatePhyDTO indexTemplatePhyDTO = ConvertUtil.obj2Obj(indexTemplateDTO, IndexTemplatePhyDTO.class);
+
+        indexTemplatePhyDTO.setLogicId(NOT_CHECK);
+        indexTemplatePhyDTO.setGroupId(UUID.randomUUID().toString());
+        indexTemplatePhyDTO.setRole(TemplateDeployRoleEnum.MASTER.getCode());
+        indexTemplatePhyDTO.setShard(indexTemplateDTO.getShardNum());
+        indexTemplatePhyDTO.setDefaultWriterFlags(true);
+
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(param.getResourceId());
+        indexTemplatePhyDTO.setCluster(clusterRegion.getPhyClusterName());
+        indexTemplatePhyDTO.setRegionId(clusterRegion.getId().intValue());
+
+        Integer clusterSettingHotDay = templateColdManager.fetchClusterDefaultHotDay(clusterRegion.getPhyClusterName());
+        if (clusterSettingHotDay > 0) {
+            indexTemplateDTO.setHotTime(clusterSettingHotDay);
+        } else {
+            indexTemplateDTO.setHotTime(-1);
+        }
+
+        if (StringUtils.isNotBlank(param.getSetting())) {
+            indexTemplatePhyDTO.setSettings(param.getSetting());
+        } else {
+            indexTemplatePhyDTO.setSettings("{}");
+        }
+
+        if (StringUtils.isNotBlank(param.getMapping())) {
+            AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
+            ariusTypeProperty.setTypeName(DEFAULT_INDEX_MAPPING_TYPE);
+            ariusTypeProperty.setProperties(JSON.parseObject(param.getMapping()));
+            indexTemplatePhyDTO.setMappings(ariusTypeProperty.toMappingJSON().getJSONObject(DEFAULT_INDEX_MAPPING_TYPE).toJSONString());
+        } else {
+            indexTemplatePhyDTO.setMappings("{}");
+        }
+
+        indexTemplateDTO.setPhysicalInfos(Lists.newArrayList(indexTemplatePhyDTO));
+    }
+
+    private void buildShardNum(IndexTemplateDTO indexTemplateDTO, IndexTemplateWithCreateInfoDTO param) {
+        if (param.getCyclicalRoll()) {
+            int expireTime = param.getExpireTime();
+            if (expireTime < 0) {
+                // 如果数据永不过期，平台会按着180天来计算每日数据增量，最终用于生成模板shard
+                expireTime = 180;
+            }
+
+            if (TemplateUtils.isSaveByDay(indexTemplateDTO.getDateFormat())) {
+                // 按天滚动
+                indexTemplateDTO.setShardNum(genShardNumBySize(param.getDiskSize() / expireTime));
+            } else {
+                // 按月滚动
+                indexTemplateDTO.setShardNum(genShardNumBySize((param.getDiskSize() / expireTime) * 30));
+            }
+        } else {
+            indexTemplateDTO.setShardNum(genShardNumBySize(param.getDiskSize()));
+        }
+    }
+
+    private Integer genShardNumBySize(Double size) {
+        double shardNumCeil = Math.ceil(size / G_PER_SHARD);
+        return (int) shardNumCeil;
     }
 }

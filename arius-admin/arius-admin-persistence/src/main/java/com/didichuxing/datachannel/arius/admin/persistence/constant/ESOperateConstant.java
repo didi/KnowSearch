@@ -27,6 +27,11 @@ public class ESOperateConstant {
     public static final String  INDEX_INCLUDE_RACK                  = "routing.allocation.include.rack";
 
     /**
+     * region 配置
+     */
+    public static final String TEMPLATE_INDEX_INCLUDE_NODE_NAME = "index.routing.allocation.include._name";
+
+    /**
      * read-only
      */
     public static final String  INDEX_BLOCKS_WRITE                  = "blocks.write";
