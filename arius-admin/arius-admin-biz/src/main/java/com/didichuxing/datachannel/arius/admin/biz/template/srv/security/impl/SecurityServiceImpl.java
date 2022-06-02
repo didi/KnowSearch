@@ -423,6 +423,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
         return Result.buildFrom(saveUserResult);
     }
 
+    @Deprecated
     private String getUserName(Integer projectId) {
         return "user_" + esUserService.getDefaultESUserByProject(projectId).getId();
     }

@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
@@ -314,7 +315,7 @@ public class CustomDataSource {
     public static ESLogicClusterDTO esLogicClusterDTOFactory() {
         ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
         esLogicClusterDTO.setName("wpkTest");
-        esLogicClusterDTO.setProjectId(123);
+        esLogicClusterDTO.setProjectId(1);
         esLogicClusterDTO.setResponsible("wpk");
         esLogicClusterDTO.setType(ClusterResourceTypeEnum.EXCLUSIVE.getCode());
         esLogicClusterDTO.setQuota(3d);
@@ -342,7 +343,7 @@ public class CustomDataSource {
     public static ProjectTemplateAuthDTO appTemplateAuthDTOFactory() {
         ProjectTemplateAuthDTO projectTemplateAuthDTO = new ProjectTemplateAuthDTO();
         projectTemplateAuthDTO.setProjectId(1);
-        projectTemplateAuthDTO.setTemplateId(1147);
+        projectTemplateAuthDTO.setTemplateId(1);
         projectTemplateAuthDTO.setType(ProjectTemplateAuthEnum.RW.getCode());
         projectTemplateAuthDTO.setResponsible("admin");
         return projectTemplateAuthDTO;
@@ -383,7 +384,7 @@ public class CustomDataSource {
     public static ProjectClusterLogicAuth appClusterLogicAuthSource() {
         ProjectClusterLogicAuth projectClusterLogicAuth = new ProjectClusterLogicAuth();
         projectClusterLogicAuth.setLogicClusterId(897L);
-        projectClusterLogicAuth.setProjectId(1593);
+        projectClusterLogicAuth.setProjectId(1);
         projectClusterLogicAuth.setId(451L);
         projectClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.ACCESS.getCode());
         projectClusterLogicAuth.setResponsible("admin");
@@ -438,7 +439,27 @@ public class CustomDataSource {
         }
         return list;
     }
-
+    
+    public static List<ClusterLogicRackInfo> getClusterLogicRackInfoList() {
+        List<ClusterLogicRackInfo> list = new ArrayList<>();
+        for (int i = 1; i <= SIZE; i++) {
+            ClusterLogicRackInfo po = CustomDataSource.clusterLogicRackInfo();
+            po.setId((long) i);
+            list.add(po);
+        }
+        return list;
+    }
+    
+    private static ClusterLogicRackInfo clusterLogicRackInfo() {
+        final ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
+        clusterLogicRackInfo.setLogicClusterIds("1");
+        clusterLogicRackInfo.setRegionId(1L);
+        clusterLogicRackInfo.setPhyClusterName(PHY_CLUSTER_NAME);
+        clusterLogicRackInfo.setRack("2");
+        return clusterLogicRackInfo;
+    
+    }
+    
     public static List<ProjectClusterLogicAuth> getAppClusterLogicAuthList() {
         List<ProjectClusterLogicAuth> list = new ArrayList<>();
         for(int i = 1; i <= SIZE; i++) {
@@ -453,7 +474,7 @@ public class CustomDataSource {
     public static IndexTemplatePhy getIndexTemplatePhy() {
         IndexTemplatePhy indexTemplatePhy = new IndexTemplatePhy();
         indexTemplatePhy.setId(1L);
-        indexTemplatePhy.setLogicId(1);
+        indexTemplatePhy.setLogicId(1099);
         return indexTemplatePhy;
     }
 
