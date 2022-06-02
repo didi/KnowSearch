@@ -277,7 +277,6 @@ public class CustomDataSource {
         po.setQuota(0D);
         po.setIngestPipeline("");
         po.setWriteRateLimit(-1);
-        po.setRegionId(100);
         return po;
     }
 

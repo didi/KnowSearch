@@ -39,4 +39,6 @@ public class IndexTemplatePhyPO extends BasePO {
 
     private String  config;
 
+    private Integer regionId;
+
 }
