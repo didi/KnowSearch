@@ -63,6 +63,7 @@ public class DistributorUtils {
      * @param quota quota
      * @return result
      */
+    @Deprecated
     public Result<TemplateDistributedRack> getTemplateDistributedRack(Long resourceId, double quota) {
         Result<TemplateClusterDistributor> extendResult = extendServiceFactory
             .getExtend(TemplateClusterDistributor.class);
