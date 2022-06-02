@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
@@ -42,55 +42,54 @@ public class IndexManageController {
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "创建索引")
-    public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithCreateInfoDTO param) {
+    public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
         return indexManager.createIndex(param, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "查询索引")
-    public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @RequestParam String clusterPhyName,
-                                            @RequestParam String indexName) {
-        return indexManager.getIndexCatInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+    public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @RequestParam String cluster, @RequestParam String index) {
+        return indexManager.getIndexCatInfo(cluster, index, HttpRequestUtils.getAppId(request));
     }
 
     @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "删除索引")
-    public Result<Void> deleteIndex(HttpServletRequest request, @RequestBody List<IndicesClearDTO> param) {
+    public Result<Void> deleteIndex(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> param) {
         return indexManager.deleteIndex(param, HttpRequestUtils.getAppId(request), HttpRequestUtils.getOperator(request));
     }
 
-    @PostMapping("/mapping")
+    @PutMapping("/mapping")
     @ResponseBody
     @ApiOperation(value = "编辑mapping")
-    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
+    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
         //return indexManager.editMapping(param, HttpRequestUtils.getAppId(request));
         return Result.buildFail();
     }
 
-    @GetMapping("{clusterPhyName}/{indexName}/mapping")
+    @GetMapping("/mapping")
     @ResponseBody
     @ApiOperation(value = "查询mapping")
-    public Result<IndexMappingVO> getMapping(HttpServletRequest request, @PathVariable String clusterPhyName,
-                                             @PathVariable String indexName) {
-        return indexManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+    public Result<IndexMappingVO> getMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
+        //return indexManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return  Result.buildFail();
     }
 
-    @PostMapping("/setting")
+    @PutMapping("/setting")
     @ResponseBody
     @ApiOperation(value = "编辑setting")
-    public Result<Void> editSetting(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
+    public Result<Void> editSetting(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
         //return indexManager.editSetting(param, HttpRequestUtils.getAppId(request));
         return Result.buildFail();
     }
 
-    @GetMapping("{clusterPhyName}/{indexName}/setting")
+    @GetMapping("/setting")
     @ResponseBody
     @ApiOperation(value = "查询setting")
-    public Result<IndexSettingVO> getSetting(HttpServletRequest request, @PathVariable String clusterPhyName,
-                                             @PathVariable String indexName) {
-        return indexManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+    public Result<IndexSettingVO> getSetting(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
+        //return indexManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return Result.buildFail();
     }
 
     @PutMapping("/block")
@@ -102,10 +101,10 @@ public class IndexManageController {
                 HttpRequestUtils.getOperator(request));
     }
 
-    @PostMapping("/alias")
+    @PutMapping("/alias")
     @ResponseBody
     @ApiOperation(value = "编辑别名")
-    public Result<Void> alias(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
+    public Result<Void> alias(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
         //return indexManager.editAlias(param, HttpRequestUtils.getAppId(request));
         return Result.buildFail();
     }
@@ -121,7 +120,7 @@ public class IndexManageController {
     @PutMapping("/close")
     @ResponseBody
     @ApiOperation(value = "关闭索引")
-    public Result<Boolean> close(HttpServletRequest request, @RequestBody List<IndicesOpenOrCloseDTO> params) {
+    public Result<Boolean> close(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
         return indexManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
                 HttpRequestUtils.getOperator(request));
     }

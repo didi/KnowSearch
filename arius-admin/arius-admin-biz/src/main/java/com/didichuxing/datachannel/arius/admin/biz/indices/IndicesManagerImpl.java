@@ -14,10 +14,9 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,9 +25,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
@@ -107,7 +103,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO, Integer appId) {
+    public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer appId) {
         String cluster;
         if (appService.isSuperApp(appId)) {
             cluster = indexCreateDTO.getCluster();
@@ -130,16 +126,16 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> deleteIndex(List<IndicesClearDTO> params, Integer appId, String operator) {
-        for (IndicesClearDTO param : params) {
-            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), appId);
+    public Result<Void> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator) {
+        for (IndexCatCellDTO param : params) {
+            Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }
         }
 
         Map<String, List<String>> cluster2IndexNameListMap = ConvertUtil.list2MapOfList(params,
-            IndicesClearDTO::getClusterPhyName, IndicesClearDTO::getIndex);
+            IndexCatCellDTO::getCluster, IndexCatCellDTO::getIndex);
 
         cluster2IndexNameListMap.forEach((cluster, indexNameList) -> {
             try {
@@ -164,16 +160,16 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> batchUpdateIndexStatus(List<IndicesOpenOrCloseDTO> params, boolean indexNewStatus, Integer appId, String operator) {
-        for (IndicesOpenOrCloseDTO param : params) {
-            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), appId);
+    public Result<Boolean> batchUpdateIndexStatus(List<IndexCatCellDTO> params, boolean indexNewStatus, Integer appId, String operator) {
+        for (IndexCatCellDTO param : params) {
+            Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }
         }
 
         Map<String, List<String>> cluster2IndexNameListMap = ConvertUtil.list2MapOfList(params,
-                IndicesOpenOrCloseDTO::getClusterPhyName, IndicesOpenOrCloseDTO::getIndex);
+                IndexCatCellDTO::getCluster, IndexCatCellDTO::getIndex);
 
         for (Map.Entry<String, List<String>> entry : cluster2IndexNameListMap.entrySet()) {
             String cluster = entry.getKey();

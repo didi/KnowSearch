@@ -15,14 +15,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "索引创建信息")
-public class IndexCatCellWithCreateInfoDTO extends IndexCatCellDTO {
-
-    @ApiModelProperty("集群")
-    private String cluster;
+public class IndexCatCellWithConfigDTO extends IndexCatCellDTO {
 
     @ApiModelProperty("mapping")
     private String mapping;
 
     @ApiModelProperty("setting")
     private String setting;
+
+    @ApiModelProperty("alias")
+    private String alias;
 }

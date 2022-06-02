@@ -5,7 +5,7 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
@@ -30,7 +30,7 @@ public interface IndicesManager {
      * @param appId
      * @return
      */
-    Result<Void> createIndex(IndexCatCellWithCreateInfoDTO indexCreateDTO, Integer appId);
+    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer appId);
 
     /**
      * 删除索引
@@ -39,7 +39,7 @@ public interface IndicesManager {
      * @param operator   操作人
      * @return           Boolean
      */
-    Result<Void> deleteIndex(List<IndicesClearDTO> params, Integer appId, String operator);
+    Result<Void> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
 
     /**
      * 关闭索引
@@ -49,7 +49,7 @@ public interface IndicesManager {
      * @param operator       操作人
      * @return               Boolean
      */
-    Result<Boolean> batchUpdateIndexStatus(List<IndicesOpenOrCloseDTO> params, boolean indexNewStatus, Integer appId, String operator);
+    Result<Boolean> batchUpdateIndexStatus(List<IndexCatCellDTO> params, boolean indexNewStatus, Integer appId, String operator);
 
     /**
      * 配合删除真实集群索引使用

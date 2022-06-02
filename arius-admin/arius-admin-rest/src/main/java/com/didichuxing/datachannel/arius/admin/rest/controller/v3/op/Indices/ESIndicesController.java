@@ -55,24 +55,21 @@ public class ESIndicesController {
     @ResponseBody
     @ApiOperation(value = "批量删除索引")
     public Result<Void> delete(@RequestBody List<IndicesClearDTO> params, HttpServletRequest request) {
-        return indicesManager.deleteIndex(params, HttpRequestUtils.getAppId(request),
-            HttpRequestUtils.getOperator(request));
+        return Result.buildFail();
     }
 
     @PutMapping("/close")
     @ResponseBody
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> close(@RequestBody List<IndicesOpenOrCloseDTO> params, HttpServletRequest request) {
-        return indicesManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
-                HttpRequestUtils.getOperator(request));
+        return Result.buildFail();
     }
 
     @PutMapping("/open")
     @ResponseBody
     @ApiOperation(value = "开启索引")
     public Result<Boolean> open(@RequestBody List<IndicesOpenOrCloseDTO> params, HttpServletRequest request) {
-        return indicesManager.batchUpdateIndexStatus(params, true, HttpRequestUtils.getAppId(request),
-                HttpRequestUtils.getOperator(request));
+        return Result.buildFail();
     }
 
     @PutMapping("/block")
