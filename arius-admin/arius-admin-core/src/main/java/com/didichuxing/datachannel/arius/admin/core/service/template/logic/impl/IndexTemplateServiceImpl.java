@@ -957,6 +957,14 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return Result.buildSuccWithMsg("索引模板可以使用");
     }
 
+    @Override
+    public Result<List<IndexTemplate>> listByRegionId(Integer regionId) {
+        List<Integer> logicTemplateIdList = indexTemplatePhyService.listByRegionId(regionId).getData().stream()
+                .map(IndexTemplatePhy::getLogicId).distinct().collect(Collectors.toList());
+        List<IndexTemplate> logicTemplateList = logicTemplateIdList.stream().map(this::getLogicTemplateById).collect(Collectors.toList());
+        return Result.buildSucc(logicTemplateList);
+    }
+
 
     /**************************************** private method ****************************************************/
     /**
