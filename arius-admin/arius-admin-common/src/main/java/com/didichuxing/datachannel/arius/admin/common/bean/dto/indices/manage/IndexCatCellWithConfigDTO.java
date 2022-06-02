@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "索引创建信息")
+@ApiModel(value = "索引带有配置信息")
 public class IndexCatCellWithConfigDTO extends IndexCatCellDTO {
 
     @ApiModelProperty("mapping")
@@ -25,4 +25,7 @@ public class IndexCatCellWithConfigDTO extends IndexCatCellDTO {
 
     @ApiModelProperty("alias")
     private String alias;
+
+    @ApiModelProperty("extra")
+    private String extra;
 }
