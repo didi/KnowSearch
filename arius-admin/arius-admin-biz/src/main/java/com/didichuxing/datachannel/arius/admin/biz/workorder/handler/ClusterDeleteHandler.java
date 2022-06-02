@@ -104,8 +104,7 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
             return Result.buildFail(String.format("物理集群[%s]不存在", content.getPhyClusterName()));
         }
 
-        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteClusterInfo(clusterPhy.getId(), workOrder.getSubmitor(),
-            workOrder.getSubmitorAppid());
+        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhy.getId(), workOrder.getSubmitor());
         if (deleteClusterResult.failed()) {
             return Result.buildFail(deleteClusterResult.getMessage());
         }

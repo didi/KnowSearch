@@ -957,17 +957,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return Result.buildSuccWithMsg("索引模板可以使用");
     }
 
-    @Override
-    public Result<List<IndexTemplate>> listByRegionId(Integer regionId) {
-        List<IndexTemplatePO> indexTemplatePOS;
-        try {
-            indexTemplatePOS = indexTemplateDAO.listByRegionId(regionId);
-        } catch (Exception e) {
-            LOGGER.error("class=IndexTemplateServiceImpl||method=listAllByRegionId||errMsg={}", e);
-            return Result.buildFail(String.format("根据regionId获取模板列表失败, msg:%s", e.getMessage()));
-        }
-        return Result.buildSucc(ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class));
-    }
 
     /**************************************** private method ****************************************************/
     /**
@@ -1401,8 +1390,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (AriusObjUtils.isNull(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心为空");
         }
-        if (AriusObjUtils.isNull(param.getQuota())) {
-            return Result.buildParamIllegal("Quota为空");
+        if (AriusObjUtils.isNull(param.getDiskSize())) {
+            return Result.buildParamIllegal("DiskSize为空");
         }
         if (AriusObjUtils.isNull(param.getWriteRateLimit())) {
             param.setWriteRateLimit(-1);
@@ -1412,6 +1401,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
         if(levelOfTemplateLower(param)) {
             return Result.buildParamIllegal("模板设置的服务等级低于所属逻辑集群的服务等级");
+        }
+        if (AriusObjUtils.isNull(clusterLogicService.getClusterLogicById(param.getResourceId()))) {
+            return Result.buildNotExist("逻辑集群不存在");
         }
 
         return Result.buildSucc();

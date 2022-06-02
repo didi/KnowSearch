@@ -26,7 +26,7 @@ public class ThirdpartCommonController {
 
     @GetMapping("/cluster/list")
     @ResponseBody
-    @ApiOperation(value = "获取物理集群列表接口" )
+    @ApiOperation(value = "获取物理集群列表接口【三方接口】",tags = "【三方接口】" )
     public Result<List<ThirdPartClusterVO>> listDataCluster() {
         return commonManager.listDataCluster();
 
@@ -34,7 +34,7 @@ public class ThirdpartCommonController {
 
     @GetMapping("/cluster/getByName")
     @ResponseBody
-    @ApiOperation(value = "获取集群接口" )
+    @ApiOperation(value = "获取集群接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<ThirdPartClusterVO> getDataCluster(@RequestParam("cluster") String cluster) {
         return commonManager.getDataCluster(cluster);
