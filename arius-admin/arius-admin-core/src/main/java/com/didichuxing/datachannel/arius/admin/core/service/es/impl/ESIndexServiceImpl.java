@@ -542,7 +542,7 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public boolean rollover(String cluster, String alias) {
-        return esIndexDAO.rollover(clu)
+        return esIndexDAO.rollover(cluster, alias);
     }
 
     /***************************************** private method ****************************************************/

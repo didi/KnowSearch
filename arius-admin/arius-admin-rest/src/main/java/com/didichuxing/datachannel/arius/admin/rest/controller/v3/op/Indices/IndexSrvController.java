@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
+import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class IndexSrvController {
     @ResponseBody
     @ApiOperation(value = "rollover")
     public Result<Void> rollover(HttpServletRequest request, @RequestBody IndexRolloverDTO param) {
-        return Result.buildFail();
+        return indexManager.rollover(param, HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/shrink")

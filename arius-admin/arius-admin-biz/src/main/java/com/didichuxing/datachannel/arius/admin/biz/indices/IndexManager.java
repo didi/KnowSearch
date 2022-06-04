@@ -122,5 +122,5 @@ public interface IndexManager {
      * @param param
      * @return
      */
-    Result<Void> rollover(IndexRolloverDTO param);
+    Result<Void> rollover(IndexRolloverDTO param, Integer appId);
 }

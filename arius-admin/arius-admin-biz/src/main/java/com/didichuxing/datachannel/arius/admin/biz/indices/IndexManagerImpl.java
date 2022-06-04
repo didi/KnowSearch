@@ -13,12 +13,14 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -352,8 +354,24 @@ public class IndexManagerImpl implements IndexManager {
         return esIndexService.editAlias(getClusterPhy(param.getCluster(), appId), param.getIndex(), param.getAlias(), editFlag) ?
                 Result.buildSucc() : Result.buildFail();
     }
-    public Result<Void> rollover(IndexRolloverDTO param) {
-        return Result.buildFail();
+    public Result<Void> rollover(IndexRolloverDTO param, Integer appId) {
+        if (null == param.getIndices()) {
+            return Result.buildFail("索引为空");
+        }
+
+        for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
+            String cluster = getClusterPhy(indexCatCellDTO.getCluster(), appId);
+            List<Tuple<String, String>> aliasList = esIndexService.syncGetIndexAliasesByExpression(cluster, indexCatCellDTO.getIndex());
+            if (AriusObjUtils.isEmptyList(aliasList)) {
+                return Result.buildFail("alias 为空");
+            }
+
+            boolean rolloverResult = esIndexService.rollover(cluster, aliasList.get(0).getV2());
+            if (!rolloverResult) {
+                return Result.buildFail("rollover 失败");
+            }
+        }
+        return Result.buildSucc();
     }
 
 
@@ -433,11 +451,10 @@ public class IndexManagerImpl implements IndexManager {
             return cluster;
         } else {
             List<ClusterPhy> clusterPhyList = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(cluster);
-            if (null == clusterPhyList || clusterPhyList.size() < 1) {
+            if (AriusObjUtils.isEmptyList(clusterPhyList)) {
                 return null;
             }
 
-            // 现有一个逻辑集群对应一个物理集群
             return clusterPhyList.get(0).getCluster();
         }
     }

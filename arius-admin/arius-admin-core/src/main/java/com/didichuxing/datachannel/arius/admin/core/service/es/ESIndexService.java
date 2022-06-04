@@ -287,8 +287,8 @@ public interface ESIndexService {
     /**
      * rollover
      * @param cluster
-     * @param index
+     * @param alias
      * @return
      */
-    boolean rollover(String cluster, String index);
+    boolean rollover(String cluster, String alias);
 }

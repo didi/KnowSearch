@@ -691,6 +691,6 @@ public class ESIndexDAO extends BaseESDAO {
             return false;
         }
 
-
+        return false;
     }
 }
