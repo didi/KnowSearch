@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -122,5 +123,11 @@ public interface IndexManager {
      * @param param
      * @return
      */
-    Result<Void> rollover(IndexRolloverDTO param, Integer appId);
+    Result<Void> rollover(IndexRolloverDTO param);
+
+    Result<Void> shrink(IndexCatCellWithConfigDTO param);
+
+    Result<Void> split(IndexCatCellWithConfigDTO param);
+
+    Result<Void> forceMerge(IndexForceMergeDTO param);
 }

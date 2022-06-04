@@ -536,13 +536,18 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public boolean editAlias(String cluster, String index, String alias, Boolean editFlag) {
-        return esIndexDAO.editAlias(cluster, index, alias, editFlag);
+    public Result<Void> editAlias(String cluster, String index, String alias, Boolean editFlag) {
+        return Result.build(esIndexDAO.editAlias(cluster, index, alias, editFlag));
     }
 
     @Override
-    public boolean rollover(String cluster, String alias) {
-        return esIndexDAO.rollover(cluster, alias);
+    public Result<Void> rollover(String cluster, String alias) {
+        return Result.build(esIndexDAO.rollover(cluster, alias));
+    }
+
+    @Override
+    public Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
+        return Result.build(esIndexDAO.forceMerge(cluster, index, maxNumSegments, onlyExpungeDeletes));
     }
 
     /***************************************** private method ****************************************************/

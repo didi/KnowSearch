@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -351,30 +352,51 @@ public class IndexManagerImpl implements IndexManager {
     }
     @Override
     public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId) {
-        return esIndexService.editAlias(getClusterPhy(param.getCluster(), appId), param.getIndex(), param.getAlias(), editFlag) ?
-                Result.buildSucc() : Result.buildFail();
+        return esIndexService.editAlias(getClusterPhy(param.getCluster(), appId), param.getIndex(), param.getAlias(), editFlag);
     }
-    public Result<Void> rollover(IndexRolloverDTO param, Integer appId) {
+    public Result<Void> rollover(IndexRolloverDTO param) {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
         }
 
         for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
-            String cluster = getClusterPhy(indexCatCellDTO.getCluster(), appId);
+            String cluster = indexCatCellDTO.getCluster();
             List<Tuple<String, String>> aliasList = esIndexService.syncGetIndexAliasesByExpression(cluster, indexCatCellDTO.getIndex());
             if (AriusObjUtils.isEmptyList(aliasList)) {
                 return Result.buildFail("alias 为空");
             }
 
-            boolean rolloverResult = esIndexService.rollover(cluster, aliasList.get(0).getV2());
-            if (!rolloverResult) {
-                return Result.buildFail("rollover 失败");
+            Result<Void> rolloverResult = esIndexService.rollover(cluster, aliasList.get(0).getV2());
+            if (rolloverResult.failed()) {
+                return rolloverResult;
             }
         }
+
         return Result.buildSucc();
     }
 
+    public Result<Void> shrink(IndexCatCellWithConfigDTO param){
+        return Result.buildFail();
+    }
 
+    public Result<Void> split(IndexCatCellWithConfigDTO param){
+        return Result.buildFail();
+    }
+
+    public Result<Void> forceMerge(IndexForceMergeDTO param) {
+        if (null == param.getIndices()) {
+            return Result.buildFail("索引为空");
+        }
+
+        for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
+            Result<Void> forceMergeResult = esIndexService.forceMerge(indexCatCellDTO.getCluster(), indexCatCellDTO.getIndex(), param.getMaxNumSegments(), param.getOnlyExpungeDeletes());
+            if (forceMergeResult.failed()) {
+                return forceMergeResult;
+            }
+        }
+
+        return Result.buildSucc();
+    }
 
 
     /***************************************************private**********************************************************/

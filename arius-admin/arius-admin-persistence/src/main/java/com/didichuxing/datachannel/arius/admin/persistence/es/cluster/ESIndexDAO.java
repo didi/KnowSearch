@@ -693,4 +693,13 @@ public class ESIndexDAO extends BaseESDAO {
 
         return false;
     }
+
+    public boolean forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            return false;
+        }
+
+        return false;
+    }
 }

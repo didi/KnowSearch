@@ -33,7 +33,7 @@ public class IndexSrvController {
     @ResponseBody
     @ApiOperation(value = "rollover")
     public Result<Void> rollover(HttpServletRequest request, @RequestBody IndexRolloverDTO param) {
-        return indexManager.rollover(param, HttpRequestUtils.getAppId(request));
+        return indexManager.rollover(param);
     }
 
     @PostMapping("/shrink")
