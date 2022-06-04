@@ -59,8 +59,8 @@ import com.google.common.collect.Lists;
  * @date 2021/09/28
  **/
 @Component
-public class IndicesManagerImpl implements IndicesManager {
-    private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
+public class IndexManagerImpl implements IndexManager {
+    private static final ILog     LOGGER = LogFactory.getLog(IndexManagerImpl.class);
     public static final int RETRY_COUNT = 3;
     @Autowired
     private AppService            appService;

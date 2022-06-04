@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndexManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.ExpireManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -41,7 +41,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
     private ESIndexService esIndexService;
 
     @Autowired
-    private IndicesManager indicesManager;
+    private IndexManager indexManager;
 
     @Autowired
     private IndexTemplatePhyDAO indexTemplatePhyDAO;
@@ -115,7 +115,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             }
 
             succ = succ && esIndexService.syncBatchDeleteIndices(cluster, shouldDeleteIndexList, retryCount) == shouldDeleteIndexList.size();
-            succ = succ && indicesManager.batchSetIndexFlagInvalid(cluster, shouldDeleteIndexList).success();
+            succ = succ && indexManager.batchSetIndexFlagInvalid(cluster, shouldDeleteIndexList).success();
         }
         return succ;
     }
@@ -198,7 +198,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         Boolean succ = expireIndex.size() == esIndexService.syncBatchDeleteIndices(templatePhy.getCluster(), expireIndex, RETRY_TIMES);
         if (succ) {
-            indicesManager.batchSetIndexFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
+            indexManager.batchSetIndexFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
         }
         return succ;
     }
@@ -265,7 +265,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
                 }
                 if (succ) {
                     //批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
-                    indicesManager.batchSetIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
+                    indexManager.batchSetIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
                 }
             }
         }

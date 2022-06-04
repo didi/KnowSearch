@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.Indices;
 
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndexManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
@@ -26,7 +26,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 public class IndexSrvController {
 
     @Autowired
-    private IndicesManager indexManager;
+    private IndexManager indexManager;
 
     @PostMapping("/rollover")
     @ResponseBody
