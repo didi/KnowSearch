@@ -105,16 +105,14 @@ public class IndexManageController {
     @ResponseBody
     @ApiOperation(value = "编辑别名")
     public Result<Void> alias(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        //return indexManager.editAlias(param, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+        return indexManager.editAlias(param, Boolean.TRUE, HttpRequestUtils.getAppId(request));
     }
 
     @DeleteMapping("/alias")
     @ResponseBody
     @ApiOperation(value = "删除别名")
-    public Result<Void> deleteAlias(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
-        //return indexManager.deleteAlias(param, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+    public Result<Void> deleteAlias(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
+        return indexManager.editAlias(param, Boolean.FALSE, HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/close")

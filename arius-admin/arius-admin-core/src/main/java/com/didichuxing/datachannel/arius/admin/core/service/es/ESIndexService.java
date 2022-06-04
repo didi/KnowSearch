@@ -273,4 +273,14 @@ public interface ESIndexService {
      * @return
      */
     AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo);
+
+    /**
+     * 编辑别名
+     * @param alias
+     * @param index
+     * @param cluster
+     * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
+     * @return
+     */
+    boolean editAlias(String cluster, String index, String alias, Boolean editFlag);
 }

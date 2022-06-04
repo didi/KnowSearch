@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
@@ -107,4 +108,19 @@ public interface IndicesManager {
      * @return
      */
     Result<IndexCatCellVO> getIndexCatInfo(String clusterPhyName, String indexName, Integer appId);
+
+    /**
+     * 编辑别名
+     * @param param
+     * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
+     * @return
+     */
+    Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId);
+
+    /**
+     * rollover
+     * @param param
+     * @return
+     */
+    Result<Void> rollover(IndexRolloverDTO param);
 }

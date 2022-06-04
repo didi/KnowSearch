@@ -535,6 +535,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         return totalCheckpoint;
     }
 
+    @Override
+    public boolean editAlias(String cluster, String index, String alias, Boolean editFlag) {
+        return esIndexDAO.editAlias(cluster, index, alias, editFlag);
+    }
+
     /***************************************** private method ****************************************************/
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()

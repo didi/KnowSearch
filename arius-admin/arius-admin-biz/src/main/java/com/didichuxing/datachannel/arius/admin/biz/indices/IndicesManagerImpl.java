@@ -16,7 +16,9 @@ import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -345,6 +347,17 @@ public class IndicesManagerImpl implements IndicesManager {
 
         return Result.buildSucc(ConvertUtil.obj2Obj(indexCatCellVOs.getBizData().get(0), IndexCatCellVO.class));
     }
+    @Override
+    public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId) {
+        return esIndexService.editAlias(getClusterPhy(param.getCluster(), appId), param.getIndex(), param.getAlias(), editFlag) ?
+                Result.buildSucc() : Result.buildFail();
+    }
+    public Result<Void> rollover(IndexRolloverDTO param) {
+        return Result.buildFail();
+    }
+
+
+
 
     /***************************************************private**********************************************************/
     private Result<Void> basicCheckParam(String cluster, String index, Integer appId) {
@@ -412,6 +425,20 @@ public class IndicesManagerImpl implements IndicesManager {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private String getClusterPhy(String cluster, Integer appId) {
+        if (appService.isSuperApp(appId)) {
+            return cluster;
+        } else {
+            List<ClusterPhy> clusterPhyList = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(cluster);
+            if (null == clusterPhyList || clusterPhyList.size() < 1) {
+                return null;
+            }
+
+            // 现有一个逻辑集群对应一个物理集群
+            return clusterPhyList.get(0).getCluster();
         }
     }
 }

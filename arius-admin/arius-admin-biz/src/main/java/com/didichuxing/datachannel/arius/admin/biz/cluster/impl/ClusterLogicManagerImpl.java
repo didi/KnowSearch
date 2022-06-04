@@ -329,6 +329,16 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return logicClusterAssignedClusters;
     }
 
+    public List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(String logicCluster) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(logicCluster);
+        if (null == clusterLogic) {
+            return null;
+        }
+
+        return getLogicClusterAssignedPhysicalClusters(clusterLogic.getId());
+    }
+
+
     @Override
     public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer appId) {
         List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), ConsoleClusterVO.class);

@@ -13,6 +13,8 @@ import com.didiglobal.logi.elasticsearch.client.model.Client;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
+import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
+import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasType;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesStatsRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import com.didiglobal.logi.elasticsearch.client.request.index.updatemapping.ESIndicesUpdateMappingRequestBuilder;
@@ -26,6 +28,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasI
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getindex.ESIndicesGetIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.openindex.ESIndicesOpenIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.putalias.ESIndicesPutAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.putindex.ESIndicesPutIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
@@ -656,5 +659,29 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         return response.getIndicesMap();
+    }
+
+    /**
+     * 编辑索引别名
+     * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
+     * @return result
+     */
+    public boolean editAlias(String cluster, String index, String alias, Boolean editFlag) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            return false;
+        }
+
+        if (Boolean.TRUE == editFlag && null == alias) {
+            return false;
+        }
+
+        PutAliasNode putAliasNode = new PutAliasNode();
+        putAliasNode.setIndex(index);
+        putAliasNode.setAlias(null == alias ? "*" : alias);
+        putAliasNode.setType(editFlag ? PutAliasType.ADD : PutAliasType.REMOVE);
+
+        ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNode(putAliasNode).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        return response.getAcknowledged();
     }
 }
