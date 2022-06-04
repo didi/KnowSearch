@@ -283,4 +283,12 @@ public interface ESIndexService {
      * @return
      */
     boolean editAlias(String cluster, String index, String alias, Boolean editFlag);
+
+    /**
+     * rollover
+     * @param cluster
+     * @param index
+     * @return
+     */
+    boolean rollover(String cluster, String index);
 }

@@ -540,6 +540,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.editAlias(cluster, index, alias, editFlag);
     }
 
+    @Override
+    public boolean rollover(String cluster, String alias) {
+        return esIndexDAO.rollover(clu)
+    }
+
     /***************************************** private method ****************************************************/
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()

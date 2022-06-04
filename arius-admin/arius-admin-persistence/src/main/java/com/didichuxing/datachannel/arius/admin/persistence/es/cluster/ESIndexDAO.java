@@ -684,4 +684,13 @@ public class ESIndexDAO extends BaseESDAO {
         ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNode(putAliasNode).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         return response.getAcknowledged();
     }
+
+    public boolean rollover(String cluster, String alias) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            return false;
+        }
+
+
+    }
 }
