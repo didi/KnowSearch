@@ -40,21 +40,21 @@ public class IndexSrvController {
     @ResponseBody
     @ApiOperation(value = "shrink")
     public Result<Void> shrink(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return Result.buildFail();
+        return indexManager.shrink(param);
     }
 
     @PostMapping("/split")
     @ResponseBody
     @ApiOperation(value = "split")
     public Result<Void> split(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return Result.buildFail();
+        return indexManager.split(param);
     }
 
     @PostMapping("/forceMerge")
     @ResponseBody
     @ApiOperation(value = "forceMerge")
-    public Result<List<String>> forceMerge(HttpServletRequest request, @RequestBody IndexForceMergeDTO param) {
-        return Result.buildFail();
+    public Result<Void> forceMerge(HttpServletRequest request, @RequestBody IndexForceMergeDTO param) {
+        return indexManager.forceMerge(param);
     }
 
 }
