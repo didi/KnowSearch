@@ -72,14 +72,14 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Tuple</*创建的es user*/Result<Integer>,/*创建的es user po*/ ESUserPO> registerESUser(ESUserDTO esUserDTO,
-                                                                                  String operator) {
+    public Tuple<Result, ESUserPO> registerESUser(ESUserDTO esUserDTO,
+                                                  String operator) {
        
         Result<Void> checkResult = validateESUser(esUserDTO, ADD);
         
         if (checkResult.failed()) {
             LOGGER.warn("class=ESUserManagerImpl||method=addApp||fail msg={}", checkResult.getMessage());
-            return new Tuple<>(Result.buildFrom(checkResult),null);
+            return new Tuple<>(checkResult,null);
         }
         initParam(esUserDTO);
         ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
@@ -110,9 +110,8 @@ public class ESUserServiceImpl implements ESUserService {
     @Transactional(rollbackFor = Exception.class)
     public Tuple<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> editUser(ESUserDTO esUserDTO) {
         
-        
         final ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
-    
+      
         return new Tuple<>(Result.build((esUserDAO.update(param) == 1)), param);
     
     }
@@ -224,13 +223,12 @@ public class ESUserServiceImpl implements ESUserService {
         }
        
         ESUserPO oldESUser = esUserDAO.getByESUser(appDTO.getId());
-        if (Objects.nonNull(oldESUser)){
-            if (Objects.isNull(appDTO.getProjectId())) {
-                return Result.buildFail("项目id为空");
-            }
+        if (Objects.isNull(appDTO.getProjectId())) {
+            return Result.buildParamIllegal("项目id为空");
         }
+      
         if (ADD.equals(operation)) {
-            if (Objects.nonNull(oldESUser)) {
+            if (Objects.nonNull(oldESUser)&&appDTO.getProjectId().equals(oldESUser.getProjectId())) {
                 return Result.buildParamIllegal(String.format("es user [%s] 已存在", appDTO.getId()));
             }
         } else if (EDIT.equals(operation)) {

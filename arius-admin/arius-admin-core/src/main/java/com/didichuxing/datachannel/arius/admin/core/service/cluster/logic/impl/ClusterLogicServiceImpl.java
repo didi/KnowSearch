@@ -36,6 +36,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
@@ -89,6 +90,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private RoleTool roleTool;
 
 
 
@@ -696,7 +699,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             return Result.buildParamIllegal("应用ID非法");
         }
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(param.getProjectId());
-        if (!CommonUtils.isUserNameBelongProjectMember(param.getResponsible(), projectVO)
+        if (!roleTool.isAdmin(param.getResponsible())||!CommonUtils.isUserNameBelongProjectMember(param.getResponsible(), projectVO)
             || !CommonUtils.isUserNameBelongProjectResponsible(param.getResponsible(), projectVO)) {
             return Result.buildParamIllegal("责任人非法");
         }

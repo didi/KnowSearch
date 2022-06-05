@@ -18,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNorms
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
@@ -28,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClu
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import com.didiglobal.logi.security.service.ProjectService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,10 +57,10 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     private ClusterRegionService rackService;
 
     @MockBean
-    private AppService appService;
+    private ProjectService projectService;
 
     @MockBean
-    private EmployeeService employeeService;
+    private RoleTool roleTool;
 
     @MockBean
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -85,8 +87,8 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
 
     @BeforeEach
     public void mockRules() {
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
+        Mockito.when(roleTool.isAdmin(Mockito.anyString())).thenReturn(true);
     }
 
     @Test
@@ -162,20 +164,18 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     @Test
     public void createLogicClusterTest() {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(false);
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(false);
         Assertions.assertEquals(Result.buildParamIllegal("应用ID非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildFail());
-        Assertions.assertEquals(Result.buildParamIllegal("责任人非法").getMessage(),
-                clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
+    
         Assertions.assertEquals(Result.buildParamIllegal("逻辑集群信息为空").getMessage(),
                 clusterLogicService.createClusterLogic(null).getMessage());
         esLogicClusterDTO.setResponsible("");
-        Assertions.assertEquals(Result.buildParamIllegal("责任人为空").getMessage(),
+        Assertions.assertEquals(Result.buildParamIllegal("责任人非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
         esLogicClusterDTO.setProjectId(null);
+        esLogicClusterDTO.setResponsible("afdsa");
         Assertions.assertEquals(Result.buildParamIllegal("应用ID为空").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
         esLogicClusterDTO.setName("");

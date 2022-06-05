@@ -142,7 +142,7 @@ public class ESUserManagerImpl implements ESUserManager {
             return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
         }
     
-        final Tuple</*创建的es user*/Result<Integer>,/*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService.registerESUser(appDTO, operator);
+        final Tuple</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService.registerESUser(appDTO, operator);
     
          if (resultESUserPOTuple.getV1().success()) {
             // 操作记录
