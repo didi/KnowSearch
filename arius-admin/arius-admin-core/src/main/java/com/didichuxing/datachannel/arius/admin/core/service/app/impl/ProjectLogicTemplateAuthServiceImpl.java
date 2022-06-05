@@ -250,6 +250,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 	 */
 	@Override
 	public Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator) {
+
 		Result<Void> checkResult = validateTemplateAuth(authDTO, OperationEnum.EDIT);
 		if (checkResult.failed()) {
 			LOGGER.warn("class=ProjectAuthServiceImpl||method=updateTemplateAuth||msg={}||msg=check fail!",

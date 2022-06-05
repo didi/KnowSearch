@@ -40,7 +40,7 @@ public interface ESUserService {
      * @param operator  操作人 邮箱前缀
      * @return 成功 true  失败 false
      */
-    Tuple</*创建的es user*/Result<Integer>,/*创建的es user po*/ ESUserPO> registerESUser(ESUserDTO esUserDTO,
+    Tuple</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> registerESUser(ESUserDTO esUserDTO,
                                                                                    String operator);
     
     /**编辑用户

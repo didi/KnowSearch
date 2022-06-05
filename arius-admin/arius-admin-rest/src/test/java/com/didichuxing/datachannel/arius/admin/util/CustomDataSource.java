@@ -4,7 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.AppMonitorRuleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
@@ -12,19 +21,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
@@ -32,16 +39,25 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserMetricsConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
-import org.springframework.mock.web.MockMultipartFile;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import org.springframework.mock.web.MockMultipartFile;
 
 public class CustomDataSource {
 
@@ -231,6 +247,27 @@ public class CustomDataSource {
         dto.setDisableIndexRollover(true);
         return dto;
     }
+    public static  ESUserPO esUserPO(){
+        ESUserPO esUserPO = new ESUserPO();
+        esUserPO.setIsRoot(0);
+        esUserPO.setVerifyCode("verifyCode");
+        esUserPO.setMemo("memo");
+        esUserPO.setQueryThreshold(100);
+        esUserPO.setCluster("cluster");
+        esUserPO.setSearchType(0);
+        esUserPO.setDataCenter("dataCenter");
+        esUserPO.setProjectId(1);
+        esUserPO.setIp("192.168.111.111");
+        esUserPO.setResponsible("admin");
+        return esUserPO;
+    }
+    public static ProjectConfigPO projectConfigPO(){
+        ProjectConfigPO projectConfigPO = new ProjectConfigPO();
+        projectConfigPO.setProjectId(1);
+        projectConfigPO.setSlowQueryTimes(1000);
+        projectConfigPO.setMemo("");
+        return projectConfigPO;
+    }
 
     public static TemplateConfigPO templateConfigSource() {
         TemplateConfigPO po = new TemplateConfigPO();
@@ -407,6 +444,25 @@ public class CustomDataSource {
             list.add(po);
         }
         return list;
+    }
+    public static ProjectTemplateAuthPO projectTemplateAuthPO(){
+        ProjectTemplateAuthPO projectTemplateAuthPO = new ProjectTemplateAuthPO();
+        projectTemplateAuthPO.setId(1L);
+        projectTemplateAuthPO.setProjectId(1);
+        projectTemplateAuthPO.setTemplateId(1);
+        projectTemplateAuthPO.setType(ProjectTemplateAuthEnum.R.getCode());
+        projectTemplateAuthPO.setResponsible("");
+        return projectTemplateAuthPO;
+    }
+    
+    public static ProjectClusterLogicAuthPO projectClusterLogicAuthPO() {
+        ProjectClusterLogicAuthPO projectClusterLogicAuthPO = new ProjectClusterLogicAuthPO();
+        projectClusterLogicAuthPO.setId(1L);
+        projectClusterLogicAuthPO.setProjectId(1);
+        projectClusterLogicAuthPO.setLogicClusterId(1L);
+        projectClusterLogicAuthPO.setType(1);
+        return projectClusterLogicAuthPO;
+        
     }
 
 
