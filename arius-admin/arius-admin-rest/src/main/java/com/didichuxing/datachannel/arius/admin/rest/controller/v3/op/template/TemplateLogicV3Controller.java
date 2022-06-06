@@ -142,7 +142,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.newEditTemplate(param, HttpRequestUtils.getOperator(request));
     }
 
-    @PostMapping("/clear")
+    @PostMapping("/clearIndices")
     @ResponseBody
     @ApiOperation(value = "清理索引")
     public Result<Void> clearIndices(HttpServletRequest request, @RequestBody TemplateClearDTO param) {
