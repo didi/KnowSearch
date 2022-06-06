@@ -27,6 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -51,7 +52,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tem
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.event.template.TemplateCreateEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
@@ -61,13 +61,13 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
@@ -83,7 +83,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -128,6 +127,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private AppService                  appService;
 
     @Autowired
+    private ESIndexService esIndexService;
+
+    @Autowired
     private ResponsibleConvertTool      responsibleConvertTool;
 
     @Autowired
@@ -138,6 +140,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private TemplateDCDRManager templateDcdrManager;
+
+    private final Integer RETRY_TIMES = 3;
 
     /**
      * 校验所有逻辑模板元数据信息
@@ -738,6 +742,27 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         templateByPhyCluster.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic, appId)));
 
         return Result.buildSucc(consoleTemplateVOLists);
+    }
+
+    @Override
+    public Result<Void> clearIndices(TemplateClearDTO clearDTO) {
+        if (CollectionUtils.isEmpty(clearDTO.getDelIndices())) {
+            return Result.buildParamIllegal("清理索引不能为空");
+        }
+
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(clearDTO.getTemplateId());
+        List<String> delIndices = clearDTO.getDelIndices();
+        for (IndexTemplatePhy templatePhysical : templateLogicWithPhysical.getPhysicals()) {
+            if (CollectionUtils.isNotEmpty(delIndices)) {
+                esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), delIndices, RETRY_TIMES);
+            }
+
+            if (delIndices.size() != esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), delIndices, RETRY_TIMES)) {
+                return Result.buildFail("删除索引失败，请重试");
+            }
+        }
+
+        return Result.buildSucc();
     }
 
     /**************************************** private method ***************************************************/

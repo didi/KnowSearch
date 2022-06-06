@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import io.swagger.annotations.ApiImplicitParam;
@@ -138,6 +139,13 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "用户编辑模板")
     public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
         return templateLogicManager.newEditTemplate(param, HttpRequestUtils.getOperator(request));
+    }
+
+    @PostMapping("/clear")
+    @ResponseBody
+    @ApiOperation(value = "清理索引")
+    public Result<Void> clearIndices(HttpServletRequest request, @RequestBody TemplateClearDTO param) {
+        return templateLogicManager.clearIndices(param);
     }
 
 }
