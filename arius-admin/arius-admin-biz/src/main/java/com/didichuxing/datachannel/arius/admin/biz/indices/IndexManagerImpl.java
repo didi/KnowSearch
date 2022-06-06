@@ -354,6 +354,8 @@ public class IndexManagerImpl implements IndexManager {
     public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId) {
         return esIndexService.editAlias(getClusterPhy(param.getCluster(), appId), param.getIndex(), param.getAlias(), editFlag);
     }
+
+    @Override
     public Result<Void> rollover(IndexRolloverDTO param) {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
@@ -375,14 +377,17 @@ public class IndexManagerImpl implements IndexManager {
         return Result.buildSucc();
     }
 
+    @Override
     public Result<Void> shrink(IndexCatCellWithConfigDTO param){
         return Result.buildFail();
     }
 
+    @Override
     public Result<Void> split(IndexCatCellWithConfigDTO param){
         return Result.buildFail();
     }
 
+    @Override
     public Result<Void> forceMerge(IndexForceMergeDTO param) {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");

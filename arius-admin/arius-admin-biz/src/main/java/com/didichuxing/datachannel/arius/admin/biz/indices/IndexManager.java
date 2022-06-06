@@ -125,9 +125,24 @@ public interface IndexManager {
      */
     Result<Void> rollover(IndexRolloverDTO param);
 
+    /**
+     * shrink
+     * @param param
+     * @return
+     */
     Result<Void> shrink(IndexCatCellWithConfigDTO param);
 
+    /**
+     * split
+     * @param param
+     * @return
+     */
     Result<Void> split(IndexCatCellWithConfigDTO param);
 
+    /**
+     * forceMerge
+     * @param param
+     * @return
+     */
     Result<Void> forceMerge(IndexForceMergeDTO param);
 }

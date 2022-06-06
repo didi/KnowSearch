@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
@@ -9,6 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.model.Client;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
@@ -45,10 +48,12 @@ import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -666,14 +671,15 @@ public class ESIndexDAO extends BaseESDAO {
      * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
      * @return result
      */
-    public boolean editAlias(String cluster, String index, String alias, Boolean editFlag) {
+    public Result<Void> editAlias(String cluster, String index, String alias, Boolean editFlag) {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            return false;
+            LOGGER.warn("class=ESIndexDAO||method=editAlias||errMsg=es client not found");
+            return Result.buildFail();
         }
 
-        if (Boolean.TRUE == editFlag && null == alias) {
-            return false;
+        if (Boolean.TRUE.equals(editFlag) && null == alias) {
+            return Result.buildParamIllegal("新增别名为空");
         }
 
         PutAliasNode putAliasNode = new PutAliasNode();
@@ -682,24 +688,51 @@ public class ESIndexDAO extends BaseESDAO {
         putAliasNode.setType(editFlag ? PutAliasType.ADD : PutAliasType.REMOVE);
 
         ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNode(putAliasNode).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
+        return Result.build(response.getAcknowledged());
     }
 
-    public boolean rollover(String cluster, String alias) {
+    public Result<Void> rollover(String cluster, String alias) {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            return false;
+            LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=es client not found");
+            return Result.buildFail();
         }
 
-        return false;
+        try {
+            DirectRequest directRequest = new DirectRequest("POST", alias + "/_rollover");
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
+            return Result.buildFail();
+        }
     }
 
-    public boolean forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
+    public Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            return false;
+            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
+            return Result.buildFail();
         }
 
-        return false;
+        try {
+            Map<String, String> params = new HashMap<>();
+            if (null != maxNumSegments) {
+                params.put("max_num_segments", maxNumSegments.toString());
+            }
+
+            if (null != onlyExpungeDeletes && Boolean.TRUE.equals(onlyExpungeDeletes)) {
+                params.put("only_expunge_deletes", "true");
+            }
+
+            DirectRequest directRequest = new DirectRequest("POST", index + "/_forcemerge");
+            directRequest.setParams(params);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
+            return Result.buildFail();
+        }
+
     }
 }
