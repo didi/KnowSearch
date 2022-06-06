@@ -26,6 +26,9 @@ public class IndexCatCellWithConfigDTO extends IndexCatCellDTO {
     @ApiModelProperty("alias")
     private String alias;
 
+    @ApiModelProperty("target index")
+    private String targetIndex;
+
     @ApiModelProperty("extra")
     private String extra;
 }
