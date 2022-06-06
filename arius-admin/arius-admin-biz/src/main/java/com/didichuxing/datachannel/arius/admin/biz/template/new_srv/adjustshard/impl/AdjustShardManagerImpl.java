@@ -43,21 +43,6 @@ public class AdjustShardManagerImpl extends BaseTemplateSrvImpl implements Adjus
     }
 
     @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        if (!(openParam instanceof TemplateAdjustShardDTO)) {
-            return Result.buildFail("参数错误");
-        }
-        TemplateAdjustShardDTO adjustShardDTO = (TemplateAdjustShardDTO) openParam;
-
-        return adjustShard(adjustShardDTO.getTemplateId(), adjustShardDTO.getShardNum());
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildSucc();
-    }
-
-    @Override
     public Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum) {
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
         try {

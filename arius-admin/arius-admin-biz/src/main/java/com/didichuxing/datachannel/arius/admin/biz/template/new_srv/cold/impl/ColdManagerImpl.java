@@ -28,16 +28,6 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     }
 
     @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        return Result.buildFail();
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildFail();
-    }
-
-    @Override
     public Result<Void> move2ColdNode(Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("没有开启冷热分离模板服务");

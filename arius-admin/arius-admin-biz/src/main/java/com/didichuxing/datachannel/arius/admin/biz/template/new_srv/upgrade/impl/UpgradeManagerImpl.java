@@ -44,22 +44,6 @@ public class UpgradeManagerImpl extends BaseTemplateSrvImpl implements UpgradeMa
     }
 
     @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        for (Integer templateId : templateIdList) {
-            Result<Void> upgradeResult = upgradeTemplate(templateId);
-            if (upgradeResult.failed()) {
-                return upgradeResult;
-            }
-        }
-        return Result.buildSucc();
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildSucc();
-    }
-
-    @Override
     public Result<Void> upgradeTemplate(Integer logicTemplateId) {
         Result<Void> srvAvailableResult = isTemplateSrvAvailable(logicTemplateId);
         if (srvAvailableResult.failed()) {

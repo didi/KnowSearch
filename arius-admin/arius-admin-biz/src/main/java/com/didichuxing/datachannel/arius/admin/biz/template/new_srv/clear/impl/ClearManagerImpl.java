@@ -39,20 +39,6 @@ public class ClearManagerImpl extends BaseTemplateSrvImpl implements ClearManage
     }
 
     @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        if (!(openParam instanceof TemplateClearDTO)) {
-            return Result.buildParamIllegal("参数类型错误");
-        }
-        TemplateClearDTO templateClearDTO = (TemplateClearDTO) openParam;
-        return clearIndices(templateClearDTO);
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildSucc();
-    }
-
-    @Override
     public Result<Void> clearIndices(TemplateClearDTO clearDTO) {
         Result<Void> srvAvailableResult = isTemplateSrvAvailable(clearDTO.getTemplateId());
         if (srvAvailableResult.failed()) {

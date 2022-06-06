@@ -55,16 +55,6 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        return Result.buildFail();
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildFail();
-    }
-
-    @Override
     public Result<Void> createPipeline(Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("未开启pipeLine服务");

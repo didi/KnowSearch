@@ -26,13 +26,4 @@ public class DCDRManagerImpl extends BaseTemplateSrvImpl implements DCDRManager 
         return Result.buildFail();
     }
 
-    @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        return Result.buildFail();
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildFail();
-    }
 }
