@@ -379,7 +379,7 @@ public class IndexManagerImpl implements IndexManager {
 
     @Override
     public Result<Void> shrink(IndexCatCellWithConfigDTO param){
-        return Result.buildFail();
+        return esIndexService.shrink(param.getCluster(), param.getIndex(), param.getTargetIndex(), param.getExtra());
     }
 
     @Override

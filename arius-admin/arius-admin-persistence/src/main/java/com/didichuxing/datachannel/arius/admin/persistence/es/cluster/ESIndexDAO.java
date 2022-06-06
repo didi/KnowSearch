@@ -733,6 +733,23 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
             return Result.buildFail();
         }
+    }
 
+    public Result<Void> shrink(String cluster, String index, String targetIndex, String config) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
+            return Result.buildFail();
+        }
+
+        try {
+            DirectRequest directRequest = new DirectRequest("POST", index + "/_shrink/" + targetIndex);
+            directRequest.setPostContent(config);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
+            return Result.buildFail();
+        }
     }
 }

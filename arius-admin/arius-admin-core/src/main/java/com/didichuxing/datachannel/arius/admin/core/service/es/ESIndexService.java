@@ -304,4 +304,14 @@ public interface ESIndexService {
      */
     Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes);
 
+    /**
+     * shrink
+     * @param cluster
+     * @param index
+     * @param targetIndex
+     * @param config
+     * @return
+     */
+    Result<Void> shrink(String cluster, String index, String targetIndex, String config);
+
 }

@@ -550,6 +550,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.forceMerge(cluster, index, maxNumSegments, onlyExpungeDeletes);
     }
 
+    @Override
+    public Result<Void> shrink(String cluster, String index, String targetIndex, String config) {
+        return esIndexDAO.shrink(cluster, index, targetIndex, config);
+    }
+
     /***************************************** private method ****************************************************/
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
