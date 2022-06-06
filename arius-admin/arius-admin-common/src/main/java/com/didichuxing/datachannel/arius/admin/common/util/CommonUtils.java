@@ -308,7 +308,7 @@ public class CommonUtils {
     public static boolean isUserNameBelongProjectMember(String userName, ProjectVO projectVO) {
         return StringUtils.hasText(userName) && Optional.ofNullable(projectVO)
                 .map(ProjectVO::getUserList).orElse(Collections.emptyList()).stream().map(UserBriefVO::getUserName)
-                .noneMatch(username -> username.equals(userName));
+                .anyMatch(username -> username.equals(userName));
     }
     
     /**
@@ -320,6 +320,6 @@ public class CommonUtils {
      */
     public static boolean isUserNameBelongProjectResponsible(String userName,ProjectVO projectVO){
        return StringUtils.hasText(userName) && Optional.ofNullable(projectVO).map(ProjectVO::getOwnerList).orElse(Collections.emptyList()).stream()
-                .map(UserBriefVO::getUserName).noneMatch(username -> username.equals(userName));
+                .map(UserBriefVO::getUserName).anyMatch(username -> username.equals(userName));
     }
 }

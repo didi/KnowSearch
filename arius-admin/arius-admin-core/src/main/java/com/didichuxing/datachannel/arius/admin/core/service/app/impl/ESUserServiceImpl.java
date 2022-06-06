@@ -217,30 +217,30 @@ public class ESUserServiceImpl implements ESUserService {
         if (AriusObjUtils.isNull(appDTO)) {
             return Result.buildParamIllegal("应用信息为空");
         }
-        Result<Void> validateAppFieldIsNullResult = validateAppFieldIsNull(appDTO);
-        if (validateAppFieldIsNullResult.failed()) {
-            return validateAppFieldIsNullResult;
+         if (appDTO.getMemo() == null) {
+            return Result.buildParamIllegal("备注为空");
         }
-       
-        ESUserPO oldESUser = esUserDAO.getByESUser(appDTO.getId());
-        if (Objects.isNull(appDTO.getProjectId())) {
+       if (Objects.isNull(appDTO.getProjectId())) {
             return Result.buildParamIllegal("项目id为空");
         }
-      
+    
+        ESUserPO oldESUser = null;
+        if (Objects.nonNull(appDTO.getId())) {
+            oldESUser = esUserDAO.getByESUser(appDTO.getId());
+        }
+
         if (ADD.equals(operation)) {
-            if (Objects.nonNull(oldESUser)&&appDTO.getProjectId().equals(oldESUser.getProjectId())) {
+            if (Objects.nonNull(oldESUser)&&!appDTO.getProjectId().equals(oldESUser.getProjectId())) {
                 return Result.buildParamIllegal(String.format("es user [%s] 已存在", appDTO.getId()));
             }
         } else if (EDIT.equals(operation)) {
-            if (AriusObjUtils.isNull(appDTO.getId())) {
-                return Result.buildParamIllegal(String.format("es user [%s] 不存在", appDTO.getId()));
-            }
-            if (AriusObjUtils.isNull(oldESUser)) {
+            if (AriusObjUtils.isNull(appDTO.getId())||AriusObjUtils.isNull(oldESUser)) {
                 return Result.buildNotExist(ES_USER_NOT_EXIST);
             }
+           
             //判断当前es user 在同一个项目中
             if (Objects.nonNull(oldESUser) && !Objects.equals(oldESUser.getProjectId(), appDTO.getProjectId())) {
-                return Result.buildFail(
+                return Result.buildParamIllegal(
                         String.format("es user 已经存在在项目[%s],不能为项目[%s]创建,请重新提交es user", oldESUser.getProjectId(),
                                 appDTO.getProjectId()));
             }
@@ -333,10 +333,5 @@ public class ESUserServiceImpl implements ESUserService {
 
 
   
-    private Result<Void> validateAppFieldIsNull(ESUserDTO appDTO) {
-        if (appDTO.getMemo() == null) {
-            return Result.buildParamIllegal("备注为空");
-        }
-        return Result.buildSucc();
-    }
+   
 }

@@ -14,8 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserEditEvent;
@@ -31,12 +29,10 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.RoleService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -100,9 +96,12 @@ public class ESUserManagerImpl implements ESUserManager {
        
         
         //确定当前操作者属于该项目成员或者是管理员
-        if (Objects.nonNull(projectId) &&(!roleTool.isAdmin(operator)||! CommonUtils.isUserNameBelongProjectMember(operator,
-                projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(operator,projectVO))) {
-            return Result.buildFail(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
+        if (!(CommonUtils.isUserNameBelongProjectMember(operator,
+                projectVO)||
+            CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO)||
+            roleTool.isAdmin(operator))
+        ) {
+            return Result.buildParamIllegal(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
         }
         final List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
         for (ESUser user : users) {
@@ -111,18 +110,7 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         return Result.buildSucc(ConvertUtil.list2List(users,ESUserVO.class));
     }
-    
-    /**
-     * 验证APP参数是否合法
-     *
-     * @param esUserDTO    dto
-     * @param operation 是否校验null参数;  新建的时候需要校验,编辑的时候不需要校验
-     * @return 参数合法返回
-     */
-    @Override
-    public Result<Void> validateESUser(ESUserDTO esUserDTO, OperationEnum operation) {
-        return esUserService.validateESUser(esUserDTO, operation);
-    }
+   
     
    
     
@@ -137,8 +125,12 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator) {
+        if (Objects.nonNull(appDTO)) {
+            appDTO.setProjectId(projectId);
+        
+        }
          //暂定校验超级用户 user name
-        if (!roleTool.isAdmin(operator)) {
+        if (Objects.nonNull(appDTO)&&Objects.nonNull(appDTO.getResponsible())&&!roleTool.isAdmin(operator)) {
             return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
         }
     
@@ -168,10 +160,10 @@ public class ESUserManagerImpl implements ESUserManager {
         if (projectService.checkProjectExist(esUserDTO.getProjectId())){
              return Result.buildFail("应用不存在");
         }
-        Result<Void> checkResult = this.validateESUser(esUserDTO, EDIT);
+        Result<Void> checkResult = esUserService.validateESUser(esUserDTO, EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkResult.getMessage());
-            return Result.buildFrom(checkResult);
+            return checkResult;
         }
         //获取更新之前的po
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
@@ -284,9 +276,9 @@ public class ESUserManagerImpl implements ESUserManager {
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator) {
        
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (!CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
-            || !CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || !roleTool.isAdmin(operator)) {
-            return Result.buildParamIllegal("权限不足");
+        if (!(CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
+            || CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator))) {
+            return Result.buildFail("权限不足");
         }
         List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
         for (ESUser user : users) {

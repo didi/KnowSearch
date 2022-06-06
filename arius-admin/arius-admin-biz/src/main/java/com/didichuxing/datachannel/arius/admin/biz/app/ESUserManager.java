@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didiglobal.logi.security.common.po.ProjectPO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -37,13 +36,7 @@ public interface ESUserManager {
      */
     Result<List<ESUserVO>> listESUsersByProjectId(Integer projectId, String operator);
     
-    /**
-     * 验证APP参数是否合法
-     * @param esUserDTO dto
-     * @param operation 是否校验null参数;  新建的时候需要校验,编辑的时候不需要校验
-     * @return 参数合法返回
-     */
-    Result<Void> validateESUser(ESUserDTO esUserDTO, OperationEnum operation);
+
     
 
     

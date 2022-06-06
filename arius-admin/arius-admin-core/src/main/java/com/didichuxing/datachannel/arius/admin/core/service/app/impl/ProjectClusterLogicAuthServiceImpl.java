@@ -494,8 +494,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
                 .map(projectService::getProjectDetailByProjectId)
                 .orElse(new ProjectVO());
         // 校验责任人是否合法
-        if (!roleTool.isAdmin(authDTO.getResponsible()) || !CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),
-                projectVO)||!CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO)) {
+        if (!(roleTool.isAdmin(authDTO.getResponsible()) || CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),
+                projectVO)||CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO))) {
             return Result.buildParamIllegal("责任人非法");
         }
         return Result.buildSucc();

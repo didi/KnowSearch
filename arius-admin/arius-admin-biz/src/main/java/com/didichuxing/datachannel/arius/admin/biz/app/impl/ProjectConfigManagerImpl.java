@@ -8,23 +8,26 @@ import com.didichuxing.datachannel.arius.admin.biz.app.ProjectConfigManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didiglobal.logi.security.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ *
+ *
+ * @author shizeying
+ * @date 2022/06/06
+ */
 @Component
 public class ProjectConfigManagerImpl implements ProjectConfigManager {
 	@Autowired
 	private ProjectConfigService projectConfigService;
-	@Autowired
-	private ProjectService       projectService;
+
 	@Autowired
 	private OperateRecordService operateRecordService;
 	
