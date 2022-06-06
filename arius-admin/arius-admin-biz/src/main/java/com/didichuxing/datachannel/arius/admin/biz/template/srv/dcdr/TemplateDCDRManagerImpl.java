@@ -253,19 +253,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     public Result<Void> deleteDCDR(Integer logicId, String operator) throws ESOperateException {
         Result<Void> checkResult = checkDCDRParam(logicId);
 
-        if (checkResult.failed()) {
-            return checkResult;
-        }
+        if (checkResult.failed()) { return checkResult;}
 
-        TemplatePhysicalDCDRDTO dcdrdto = createDCDRMeta(logicId);
-
-        Result<Void> result = deletePhyDCDR(dcdrdto, operator);
-
-        if (result.success()) {
-            templateLabelService.updateTemplateLabel(logicId, null,
-                    Sets.newHashSet(TemplateLabelService.TEMPLATE_HAVE_DCDR), operator);
-        }
-        return result;
+        return deletePhyDCDR(createDCDRMeta(logicId), operator);
     }
 
     /**
