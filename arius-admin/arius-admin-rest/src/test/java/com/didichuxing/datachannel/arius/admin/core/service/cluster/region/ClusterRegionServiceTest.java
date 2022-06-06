@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
@@ -258,7 +258,7 @@ public class ClusterRegionServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(Result.buildFail(String.format("逻辑集群 %S 不存在", logicClusterId)).getMessage(),
                 clusterRegionService.bindRegion(id, logicClusterId, null, CustomDataSource.OPERATOR).getMessage());
         ClusterLogic clusterLogic = new ClusterLogic();
-        clusterLogic.setType(ResourceLogicTypeEnum.PUBLIC.getCode());
+        clusterLogic.setType(ClusterResourceTypeEnum.PUBLIC.getCode());
         Mockito.when(clusterLogicService.getClusterLogicById(Mockito.anyLong())).thenReturn(clusterLogic);
         Assertions.assertTrue(clusterRegionService.bindRegion(id, logicClusterId, 123, CustomDataSource.OPERATOR).failed());
         Assertions.assertTrue(clusterRegionService.bindRegion(id, logicClusterId, null, CustomDataSource.OPERATOR).success());

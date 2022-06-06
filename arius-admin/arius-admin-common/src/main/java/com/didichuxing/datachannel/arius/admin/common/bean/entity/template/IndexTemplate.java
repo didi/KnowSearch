@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author chengxiang
- * @date 2022/5/9
+ * @date 2022/5/11
  */
 @Data
 @NoArgsConstructor
@@ -154,9 +154,18 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
     private Long    checkPointDiff;
 
     /**
+     * 已开启的模板服务
+     */
+    private String  openSrv;
+    /**
      * regionId
      */
     private Integer regionId;
+
+    /**
+     * 可用磁盘容量
+     */
+    private Double diskSize;
 
     @Override
     public int compareTo(IndexTemplate o) {

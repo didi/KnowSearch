@@ -98,6 +98,22 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
         return result;
     }
 
+    @Override
+    public boolean mergeTemplateSettings(Integer logicId, String cluster, String template, IndexTemplatePhySettings settings) throws AdminOperateException {
+        Map<String, String> flatSettings = settings.flatSettings();
+        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
+        if (templateConfig == null) {
+            throw new AdminOperateException("模版不存在，template:" + template);
+        }
+
+        templateConfig.setSetttings(flatSettings);
+        if (!esTemplateService.syncCheckTemplateConfig(cluster, fetchPreCreateTemplateName(template), templateConfig, AdminESOpRetryConstants.DEFAULT_RETRY_COUNT)) {
+            throw new AdminOperateException("非法模板settings: " + settings);
+        }
+
+        return esTemplateService.syncUpsertSetting(cluster, template, flatSettings, AdminESOpRetryConstants.DEFAULT_RETRY_COUNT);
+    }
+
     /**************************************** private method ****************************************************/
     /**
      * 获取预创建模板名称

@@ -5,6 +5,7 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
@@ -45,6 +46,7 @@ public interface ClusterRegionManager {
      * @param cluster       物理集群名
      * @return
      */
+    @Deprecated
     List<PhyClusterRackVO> buildCanDividePhyClusterRackVOs(String cluster);
 
     /**
@@ -79,4 +81,19 @@ public interface ClusterRegionManager {
      * @return
      */
     Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator);
+
+    /**
+     * 根据物理集群名称获region信息（包含空节点region），包含region中的数据节点信息
+     * @param clusterName          物理集群名称
+     * @return                     Result<List<ClusterRegionWithNodeInfoVO>>
+     */
+    Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName);
+
+    /**
+     * 获取可分配至dcdr的物理集群名称获region列表, 不包含空节点region
+     *
+     * @param clusterName         物理集群名称
+     * @return                    Result<List<ClusterRegionVO>>
+     */
+    Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName);
 }

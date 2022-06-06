@@ -60,4 +60,7 @@ public class IndexTemplatePhysicalVO extends BaseVO {
     @ApiModelProperty("描述信息")
     private String  memo;
 
+    @ApiModelProperty("regionId")
+    private Integer regionId;
+
 }

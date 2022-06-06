@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,7 +26,7 @@ public class ESLogicClusterDTO extends PageDTO {
     private String  name;
 
     /**
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      */
     @ApiModelProperty("类型(1:公共：2:独立, 3:独占)")
     private Integer type;

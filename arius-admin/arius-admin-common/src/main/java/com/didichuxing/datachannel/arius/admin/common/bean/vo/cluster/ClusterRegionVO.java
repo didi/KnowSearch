@@ -7,11 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Author: lanxinzheng
- * @Date: 2021/1/6
- * @Comment: 逻辑集群region VO
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

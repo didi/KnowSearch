@@ -89,7 +89,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取索引列表", notes = "包含权限、集群信息、权限信息；")
+    @ApiOperation(value = "获取索引列表【三方接口】",tags = "【三方接口】", notes = "包含权限、集群信息、权限信息；")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
     public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "appId", required = false) Integer appId,
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
@@ -102,7 +102,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @GetMapping("/get")
     @ResponseBody
-    @ApiOperation(value = "获取索引详细信息接口" )
+    @ApiOperation(value = "获取索引详细信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
                                                                     @RequestParam("logicId") Integer logicId) {
@@ -138,7 +138,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @PutMapping("/update")
     @ResponseBody
-    @ApiOperation(value = "用户编辑模板接口", notes = "支持修改数据类型、责任人、备注")
+    @ApiOperation(value = "用户编辑模板接口【三方接口】",tags = "【三方接口】", notes = "支持修改数据类型、责任人、备注")
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
         return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
@@ -147,7 +147,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @GetMapping("/capacity")
     @ResponseBody
-    @ApiOperation(value = "获取索引配额信息接口" )
+    @ApiOperation(value = "获取索引配额信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
         IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(logicId);
@@ -165,7 +165,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @GetMapping("/clearInfo")
     @ResponseBody
-    @ApiOperation(value = "获取索引清理信息接口" )
+    @ApiOperation(value = "获取索引清理信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(@RequestParam("logicId") Integer logicId) {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
@@ -192,7 +192,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @PutMapping("/clearInfo")
     @ResponseBody
-    @ApiOperation(value = "清理索引信息接口" )
+    @ApiOperation(value = "清理索引信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
                                             @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
@@ -206,7 +206,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @GetMapping("/deleteInfo")
     @ResponseBody
-    @ApiOperation(value = "获取将要索引下线信息接口" )
+    @ApiOperation(value = "获取将要索引下线信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) {
         //与上清理索引信息接口实现合并
@@ -232,7 +232,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @DeleteMapping("/deleteInfo")
     @ResponseBody
-    @ApiOperation(value = "下线索引信息接口" )
+    @ApiOperation(value = "下线索引信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<Void> deleteTemplate(HttpServletRequest request,
@@ -246,7 +246,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @GetMapping("/indices/list")
     @ResponseBody
-    @ApiOperation(value = "获取App Id所有模板的索引" )
+    @ApiOperation(value = "获取App Id所有模板的索引【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
     public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(HttpServletRequest request,
                                                                         @RequestParam("appId") Integer appId) {
@@ -291,7 +291,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
      */
     @GetMapping(path = "/rateLimit")
     @ResponseBody
-    @ApiOperation(value = "获取模板当前限流值接口" )
+    @ApiOperation(value = "获取模板当前限流值接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
     public Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(@RequestParam("logicId") Integer logicId) throws Exception {    // 一个逻辑模板可能有master slave两种，限流查看时，默认查看master即可
         List<IndexTemplatePhy> indexTemplatePhysicalInfo = indexTemplatePhyService.getTemplateByLogicId(logicId);
@@ -314,7 +314,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
      */
     @PutMapping(path = "/rateLimit")
     @ResponseBody
-    @ApiOperation(value = "更新模板当前限流值接口" )
+    @ApiOperation(value = "更新模板当前限流值接口【三方接口】",tags = "【三方接口】" )
     public Result updateTemplateRateLimit(@RequestBody ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) {
         // 判断调整比例是否在区间内
         int percent = (int) Math.ceil(100.0 * (consoleTemplateRateLimitDTO.getAdjustRateLimit() - consoleTemplateRateLimitDTO.getCurRateLimit()) / consoleTemplateRateLimitDTO.getCurRateLimit());

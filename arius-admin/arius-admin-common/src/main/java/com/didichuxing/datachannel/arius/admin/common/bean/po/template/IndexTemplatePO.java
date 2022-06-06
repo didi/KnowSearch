@@ -149,7 +149,13 @@ public class IndexTemplatePO extends BasePO implements DigitResponsible {
     private Boolean hasDCDR;
 
     /**
-     * regionId
+     * 已开启的模板服务
      */
-    private Integer regionId;
+    private String openSrv;
+
+    /**
+     * 可用磁盘容量
+     */
+    private Double diskSize;
+
 }

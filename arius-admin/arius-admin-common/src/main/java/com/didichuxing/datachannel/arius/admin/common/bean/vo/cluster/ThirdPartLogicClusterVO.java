@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ public class ThirdPartLogicClusterVO extends BaseVO {
 
     /**
      * 类型
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      */
     @ApiModelProperty("类型(1:公共：2:独立)")
     private Integer type;

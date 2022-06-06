@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterReg
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.extend.capacity.plan.bean.dto.CapacityPlanRegionDTO;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterRegionControllerMethod;
 import com.didichuxing.datachannel.arius.admin.source.LogicClusterInfoSource;
@@ -53,7 +53,7 @@ public class ESPhyPhyClusterRegionTest extends BasePhyClusterRegionInfoTest {
      */
     @Test
     public void listPhyClusterRegionsTest() throws IOException {
-        Result<List<ClusterRegionVO>> result = ESPhyClusterRegionControllerMethod.listPhyClusterRegions(phyClusterInfo.getPhyClusterName(), ResourceLogicTypeEnum.PRIVATE.getCode());
+        Result<List<ClusterRegionVO>> result = ESPhyClusterRegionControllerMethod.listPhyClusterRegions(phyClusterInfo.getPhyClusterName(), ClusterResourceTypeEnum.PRIVATE.getCode());
         Assertions.assertTrue(result.success());
     }
 
@@ -122,7 +122,7 @@ public class ESPhyPhyClusterRegionTest extends BasePhyClusterRegionInfoTest {
         LogicClusterInfoSource.LogicClusterInfo logicClusterInfo =
                 LogicClusterInfoSource.applyLogicCluster(phyClusterInfo.getPhyClusterName(), phyClusterInfo.getPhyClusterName());
         Result<List<ClusterRegionVO>> result =
-                ESPhyClusterRegionControllerMethod.listPhyClusterRegions(phyClusterInfo.getPhyClusterName(), ResourceLogicTypeEnum.PRIVATE.getCode(), logicClusterInfo.getLogicClusterId());
+                ESPhyClusterRegionControllerMethod.listPhyClusterRegions(phyClusterInfo.getPhyClusterName(), ClusterResourceTypeEnum.PRIVATE.getCode(), logicClusterInfo.getLogicClusterId());
         Assertions.assertTrue(result.success());
         // 删除逻辑集群
         LogicClusterInfoSource.removeLogicCluster(logicClusterInfo.getLogicClusterName(), logicClusterInfo.getLogicClusterId());

@@ -8,8 +8,10 @@ import java.util.Set;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -118,6 +120,14 @@ public interface IndexTemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhy> getTemplateByClusterAndStatus(String cluster, int status);
+
+    /**
+     * 根据物理模板状态获取模板列表
+     * @param logicId 逻辑模板id
+     * @param status 状态 1 常规    -1 删除中     -2 已删除
+     * @return list
+     */
+    List<IndexTemplatePhy> getTemplateByLogicIdAndStatus(Integer logicId, Integer status);
 
     /**
      * 根据物理模板状态获取模板列表
@@ -262,4 +272,29 @@ public interface IndexTemplatePhyService {
 
 
     Map<Integer, Integer> getAllLogicTemplatesPhysicalCount();
+
+    /**
+     * 校验物理模板信息
+     *
+     * @param param     参数
+     * @param operation 操作
+     * @return result
+     */
+    Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation);
+
+    /**
+     * 批量校验物理模板信息
+     *
+     * @param params    参数
+     * @param operation 操作
+     * @return result
+     */
+    Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation);
+
+    /**
+     * 获取指定regionId下的所有模板列表
+     * @param regionId  regionId
+     * @return    Result<List<IndexTemplatePhy>>
+     */
+    Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId);
 }

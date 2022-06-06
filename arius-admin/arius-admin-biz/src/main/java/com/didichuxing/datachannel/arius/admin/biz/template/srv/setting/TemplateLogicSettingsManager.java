@@ -53,7 +53,16 @@ public interface TemplateLogicSettingsManager {
      * @param settings settings
      * @return
      */
+    @Deprecated
     Result<Void> updateSettings(Integer logicId, String operator, AriusIndexTemplateSetting settings);
+
+    /**
+     * 更新settings信息
+     * @param logicId 逻辑ID
+     * @param settings settings
+     * @return
+     */
+    Result<Void> updateSettings(Integer logicId, IndexTemplatePhySettings settings);
 
     /**
      * 更加逻辑ID获取Settings

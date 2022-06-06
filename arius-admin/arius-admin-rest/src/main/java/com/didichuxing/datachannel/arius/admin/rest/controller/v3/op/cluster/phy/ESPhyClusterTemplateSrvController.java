@@ -19,6 +19,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 @RestController
 @RequestMapping(V3_OP + "/phy/cluster/templateSrv")
 @Api(tags = "ES物理集群索引服务接口(REST)")
+@Deprecated
 public class ESPhyClusterTemplateSrvController {
 
     @Autowired

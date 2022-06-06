@@ -111,6 +111,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取索引Setting接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
+    @Deprecated
     public Result<TemplateSettingVO> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
         return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
     }
@@ -122,4 +123,5 @@ public class TemplateLogicV3Controller {
                                                                       @RequestParam("cluster") String cluster) {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getAppId(request));
     }
+
 }

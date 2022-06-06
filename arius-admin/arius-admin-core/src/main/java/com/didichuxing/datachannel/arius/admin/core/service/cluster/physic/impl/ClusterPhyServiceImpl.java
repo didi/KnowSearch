@@ -6,6 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -373,8 +374,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public ClusterPhy getClusterById(Integer phyClusterId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
-        ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
-        return clusterPhy;
+        return ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
     }
 
     /**
@@ -422,11 +422,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId) {
-        return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
-    }
-
-    @Override
     public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param) {
         Result<ClusterDynamicConfigsEnum> result = checkClusterDynamicType(param);
         if (result.failed()) {
@@ -451,19 +446,21 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-        List<ClusterPhyPO> clusterPOS = Lists.newArrayList();
+        param.setSortTerm(sortTerm);
+        param.setSortType(sortType);
+        param.setFrom((param.getPage() - 1) * param.getSize());
+        List<ClusterPhyPO> clusters = Lists.newArrayList();
         try {
-            clusterPOS = clusterDAO.pagingByCondition(param.getCluster(), param.getHealth(),
-                    param.getEsVersion(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
+            clusters = clusterDAO.pagingByCondition(param);
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(), e);
         }
-        return ConvertUtil.list2List(clusterPOS, ClusterPhy.class);
+        return ConvertUtil.list2List(clusters, ClusterPhy.class);
     }
 
     @Override
     public Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param) {
-        return clusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterPhyPO.class));
+        return clusterDAO.getTotalHitByCondition(param);
     }
 
     @Override
@@ -711,6 +708,16 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
         if (null == param.getDiskUsagePercent()) {
             param.setDiskUsagePercent(0D);
+        }
+
+        if (null == param.getPlatformType()) {
+            param.setPlatformType("");
+        }
+        if (null == param.getResourceType()) {
+            param.setResourceType(ClusterResourceTypeEnum.UNKNOWN.getCode());
+        }
+        if (null == param.getGatewayUrl()) {
+            param.setGatewayUrl("");
         }
     }
 

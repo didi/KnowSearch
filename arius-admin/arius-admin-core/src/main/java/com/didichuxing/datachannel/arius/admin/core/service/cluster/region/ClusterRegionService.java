@@ -7,8 +7,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 public interface ClusterRegionService {
     /**
      * 通过Rack ID删除Rack
@@ -30,10 +33,14 @@ public interface ClusterRegionService {
      * @param logicClusterId 逻辑集群ID
      * @return 已经被绑定到指定逻辑集群的region
      */
+    @Deprecated
+    //todo: logic cluster set to key
     List<ClusterRegion> listLogicClusterRegions(Long logicClusterId);
 
+    ClusterRegion getRegionByLogicClusterId(Long logicClusterId);
+
     /**
-     * 获取物理下的region
+     * 获取物理集群下的region
      * @param phyClusterName 物理集群名
      * @return 物理集群下的region
      */
@@ -237,4 +244,7 @@ public interface ClusterRegionService {
      * @return          false or true
      */
     boolean isExistByRegionId(Integer regionId);
+
+
+    List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
 }

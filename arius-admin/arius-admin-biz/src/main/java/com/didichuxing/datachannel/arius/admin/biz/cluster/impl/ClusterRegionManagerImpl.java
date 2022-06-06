@@ -9,9 +9,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +65,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Autowired
     private TemplateSrvManager    templateSrvManager;
 
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
+
     /**
      * 构建regionVO
      * @param regions region列表
@@ -85,7 +92,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      */
     @Override
     public List<ClusterRegion> filterClusterRegionByLogicClusterType(Long clusterLogicId, String phyCluster, Integer clusterLogicType) {
-        if (ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.UNKNOWN)) {
+        if (ClusterResourceTypeEnum.valueOf(clusterLogicType).equals(ClusterResourceTypeEnum.UNKNOWN)) {
             return new ArrayList<>();
         }
 
@@ -213,6 +220,42 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Override
     public Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator) {
         return clusterRegionService.bindRegion(regionId, logicClusterId, share, operator);
+    }
+
+    @Override
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName) {
+        List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(clusterName);
+        if (CollectionUtils.isEmpty(clusterRegions)) { return Result.buildSucc();}
+
+        // 构建region中的节点信息
+        List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions, ClusterRegionWithNodeInfoVO.class);
+        for (ClusterRegionWithNodeInfoVO clusterRegionWithNodeInfoVO : clusterRegionWithNodeInfoVOS) {
+            Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRegionWithNodeInfoVO.getId().intValue());
+            if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
+                List<ClusterRoleHost> data = ret.getData();
+                List<String> nodeNameList = data.stream().filter(Objects::nonNull).map(ClusterRoleHost::getNodeSet).distinct().collect(Collectors.toList());
+                String nodeNames = ListUtils.strList2String(nodeNameList);
+                clusterRegionWithNodeInfoVO.setNodeNames(nodeNames);
+            }
+        }
+
+        return Result.buildSucc(clusterRegionWithNodeInfoVOS.stream().filter(r -> !AriusObjUtils.isBlank(r.getName())).distinct().collect(Collectors.toList()));
+    }
+
+    @Override
+    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName) {
+        Result<List<ClusterRegionWithNodeInfoVO>> ret = listClusterRegionWithNodeInfoByClusterName(clusterName);
+        if (ret.failed()) { return Result.buildFrom(ret);}
+
+        List<ClusterRegionWithNodeInfoVO> data = ret.getData();
+        if (CollectionUtils.isEmpty(data)) { return Result.buildSucc();}
+
+        // 过滤空region
+        List<ClusterRegionVO> validClusterRegionVOList = data.stream()
+                .filter(r -> Objects.nonNull(r) && !AriusObjUtils.isBlank(r.getNodeNames()))
+                .collect(Collectors.toList());
+
+        return Result.buildSucc(validClusterRegionVOList);
     }
 
     /***************************************** private method ****************************************************/
@@ -445,8 +488,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         // 当region有被逻辑集群绑定时，如需被指定逻辑集群绑定需要满足：region已绑定的逻辑集群类型为共享且指定的逻辑集群类型为共享
         // 当满足上述条件之后，分为两种情况讨论：新建共享逻辑集群可以绑定该region;已建立逻辑集群需要过滤掉本来已经绑定了的region模块
-        return ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.PUBLIC)
-                && clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())
+        return ClusterResourceTypeEnum.valueOf(clusterLogicType).equals(ClusterResourceTypeEnum.PUBLIC)
+                && clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode())
                 && (AriusObjUtils.isNull(clusterLogicId) || !logicClusterIds.contains(clusterLogicId));
     }
 }

@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.physic.imp
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
@@ -14,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
@@ -26,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -41,15 +44,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +70,11 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     public static final Integer                            NOT_CHECK                      = -100;
 
     private static final String                            MSG                            = "editTemplateFromLogic fail||physicalId={}||expression={}";
+    private static final String TEMPLATE_PHYSICAL_ID_IS_NULL = "物理模板id为空";
+
+    private static final String TEMPLATE_PHYSICAL_NOT_EXISTS = "物理模板不存在";
+
+    private static final String CHECK_FAIL_MSG = "check fail||msg={}";
 
     @Autowired
     private IndexTemplatePhyDAO indexTemplatePhyDAO;
@@ -88,6 +93,9 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
 
     @Autowired
     private ResponsibleConvertTool                         responsibleConvertTool;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -333,6 +341,18 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     @Override
     public List<IndexTemplatePhy> getTemplateByClusterAndStatus(String cluster, int status) {
         return ConvertUtil.list2List(indexTemplatePhyDAO.listByClusterAndStatus(cluster, status),
+            IndexTemplatePhy.class);
+    }
+
+    /**
+     * 根据物理模板状态获取模板列表
+     * @param logicId 逻辑模板id
+     * @param status 状态 1 常规    -1 删除中     -2 已删除
+     * @return list
+     */
+    @Override
+    public List<IndexTemplatePhy> getTemplateByLogicIdAndStatus(Integer logicId, Integer status) {
+        return ConvertUtil.list2List(indexTemplatePhyDAO.getByLogicIdAndStatus(logicId, status),
             IndexTemplatePhy.class);
     }
 
@@ -666,6 +686,64 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
         return map;
     }
 
+    @Override
+    public Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation) {
+        if (AriusObjUtils.isNull(params)) {
+            return Result.buildParamIllegal("物理模板信息为空");
+        }
+
+        Set<String> deployClusterSet = Sets.newTreeSet();
+        for (IndexTemplatePhyDTO param : params) {
+            Result<Void> checkResult = validateTemplate(param, operation);
+            if (checkResult.failed()) {
+                LOGGER.warn("class=TemplatePhyManagerImpl||method=validateTemplates||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
+                checkResult
+                        .setMessage(checkResult.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());
+                return checkResult;
+            }
+
+            if (deployClusterSet.contains(param.getCluster())) {
+                return Result.buildParamIllegal("部署集群重复");
+            } else {
+                deployClusterSet.add(param.getCluster());
+            }
+
+        }
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation) {
+        if (AriusObjUtils.isNull(param)) {
+            return Result.buildParamIllegal("物理模板参数为空");
+        }
+        if (operation == OperationEnum.ADD) {
+            Result<Void> result = handleValidateTemplateAdd(param);
+            if (result.failed()) {return result;}
+        } else if (operation == EDIT) {
+            Result<Void> result = handleValidateTemplateEdit(param);
+            if (result.failed()) {return result;}
+        }
+
+        Result<Void> result = handleValidateTemplate(param);
+        if (result.failed()) {return result;}
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId) {
+        List<IndexTemplatePhyPO> indexTemplatePhyPOS;
+        try {
+            indexTemplatePhyPOS = indexTemplatePhyDAO.listByRegionId(regionId);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplatePhyServiceImpl||method=listAllByRegionId||errMsg={}", e);
+            return Result.buildFail(String.format("根据regionId获取模板列表失败, msg:%s", e.getMessage()));
+        }
+        return Result.buildSucc(ConvertUtil.list2List(indexTemplatePhyPOS, IndexTemplatePhy.class));
+    }
+
 
     /**************************************************** private method ****************************************************/
     private List<IndexTemplatePhyWithLogic> batchBuildTemplatePhysicalWithLogic(List<IndexTemplatePhyPO> indexTemplatePhyPOS) {
@@ -765,6 +843,64 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
                         param.getExpression());
                 return Result.build(false);
             }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplate(IndexTemplatePhyDTO param) {
+        if (param.getCluster() != null && !clusterPhyService.isClusterExists(param.getCluster())) {
+            return Result.buildParamIllegal("集群不存在");
+        }
+        if (StringUtils.isNotEmpty(param.getRack())) {
+            if (!clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
+                return Result.buildParamIllegal("集群rack不存在");
+            }
+        }
+        if (param.getShard() != null && param.getShard() < 1) {
+            return Result.buildParamIllegal("shard个数非法");
+        }
+        if (param.getRole() != null
+                && TemplateDeployRoleEnum.UNKNOWN.equals(TemplateDeployRoleEnum.valueOf(param.getRole()))) {
+            return Result.buildParamIllegal("模板角色非法");
+        }
+        if (param.getLogicId() != null && !Objects.equals(param.getLogicId(), NOT_CHECK)) {
+            IndexTemplate logic = indexTemplateService.getLogicTemplateById(param.getLogicId());
+            if (logic == null) {
+                return Result.buildNotExist("逻辑模板不存在");
+            }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplateEdit(IndexTemplatePhyDTO param) {
+        if (AriusObjUtils.isNull(param.getId())) {
+            return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
+        }
+        IndexTemplatePhy indexTemplatePhy = getTemplateById(param.getId());
+        if (indexTemplatePhy == null) {
+            return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplateAdd(IndexTemplatePhyDTO param) {
+        if (AriusObjUtils.isNull(param.getLogicId())) {
+            return Result.buildParamIllegal("逻辑模板id为空");
+        }
+        if (AriusObjUtils.isNull(param.getCluster())) {
+            return Result.buildParamIllegal("集群为空");
+        }
+
+        if (AriusObjUtils.isNull(param.getShard())) {
+            return Result.buildParamIllegal("shard为空");
+        }
+        if (AriusObjUtils.isNull(param.getRole())) {
+            return Result.buildParamIllegal("模板角色为空");
+        }
+
+        IndexTemplatePhy indexTemplatePhy = getTemplateByClusterAndName(param.getCluster(), param.getName());
+        if (indexTemplatePhy != null) {
+            return Result.buildDuplicate("物理模板已经存在");
         }
         return Result.buildSucc();
     }

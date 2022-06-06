@@ -36,8 +36,7 @@ public interface IndexTemplateDAO {
 
     List<IndexTemplatePO> likeByCondition(IndexTemplatePO param);
 
-    List<IndexTemplatePO> pagingByCondition(@Param("name") String name, @Param("dataType") Integer dataType,
-                                            @Param("hasDCDR") Boolean hasDCDR,
+    List<IndexTemplatePO> pagingByCondition(@Param("param") IndexTemplatePO param,
                                             @Param("from") Long from, @Param("size") Long size,
                                             @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
 
@@ -53,5 +52,4 @@ public interface IndexTemplateDAO {
 
     List<String> listAllNames();
 
-    List<IndexTemplatePO> listByRegionId(Integer regionId);
 }

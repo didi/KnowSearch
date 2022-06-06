@@ -7,12 +7,15 @@ import java.util.Set;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 public interface ClusterPhyService {
 
     /**
@@ -158,13 +161,6 @@ public interface ClusterPhyService {
      * @return
      */
     boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
-
-    /**
-     * 获取物理集群角色
-     * @param clusterId  物理集群ID
-     * @return 物理集群的角色列表
-     */
-    List<ClusterRoleInfo> listPhysicClusterRoles(Integer clusterId);
 
     /**
      * 更新集群的动态配置信息

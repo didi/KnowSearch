@@ -4,6 +4,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 
 import java.util.*;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -43,7 +45,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
-    private IndexTemplateService   indexTemplateService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
@@ -122,19 +124,24 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
      */
     private void buildCluster2TemplateWithNodeNamesSetMap(Map<String, List<TemplateWithNodeNames>> cluster2TemplateWithNodeNames,
                                                           ClusterRegion clusterRegion, Set<String> nodeNames) {
-        List<IndexTemplate> indexTemplates = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()))
-            .getData();
-        List<TemplateWithNodeNames> logicTemplateWithNodeNames = cluster2TemplateWithNodeNames
-            .get(clusterRegion.getPhyClusterName());
-        if (null == logicTemplateWithNodeNames) {
-            logicTemplateWithNodeNames = new ArrayList<>();
-            cluster2TemplateWithNodeNames.put(clusterRegion.getPhyClusterName(), logicTemplateWithNodeNames);
+        Result<List<IndexTemplatePhy>> templatePhyListResult = indexTemplatePhyService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        if (templatePhyListResult.failed()) {
+            LOGGER.error("class=RegionEditEventListener||method=buildCluster2TemplateWithNodeNamesSetMap||region={}||err={}", clusterRegion.getId(), "update indices setting failed");
+            return;
         }
-        for (IndexTemplate indexTemplate : indexTemplates) {
+
+        List<TemplateWithNodeNames> templateWithNodeNamesList = cluster2TemplateWithNodeNames
+            .get(clusterRegion.getPhyClusterName());
+        if (null == templateWithNodeNamesList) {
+            templateWithNodeNamesList = new ArrayList<>();
+            cluster2TemplateWithNodeNames.put(clusterRegion.getPhyClusterName(), templateWithNodeNamesList);
+        }
+
+        for (IndexTemplatePhy indexTemplatePhy : templatePhyListResult.getData()) {
             TemplateWithNodeNames templateWithNodeNames = new TemplateWithNodeNames();
             templateWithNodeNames.setNodeNames(nodeNames);
-            templateWithNodeNames.setTemplateName(indexTemplate.getName());
-            logicTemplateWithNodeNames.add(templateWithNodeNames);
+            templateWithNodeNames.setTemplateName(indexTemplatePhy.getName());
+            templateWithNodeNamesList.add(templateWithNodeNames);
         }
     }
 

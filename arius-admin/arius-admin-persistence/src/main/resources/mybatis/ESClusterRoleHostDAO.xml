@@ -31,9 +31,9 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_cluster_role_host_info
-        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, rack, node_set, machine_spec, region_id, attributes)
+        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, node_set, machine_spec, region_id, attributes)
         values
-        (#{roleClusterId}, #{hostname}, #{ip}, #{cluster},#{role},#{port},#{status},#{rack}, #{nodeSet}, #{machineSpec}, #{regionId}
+        (#{roleClusterId}, #{hostname}, #{ip}, #{cluster},#{role},#{port},#{status}, #{nodeSet}, #{machineSpec}, #{regionId}
         ,#{attributes})
     </insert>
 
@@ -183,6 +183,13 @@
         <include refid="Base_Column_List"/>
         from es_cluster_role_host_info
         where delete_flag = 0;
+    </select>
+
+    <select id="listAllByRoleCode" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_role_host_info
+        where role = #{roleCode} and delete_flag = 0;
     </select>
 
     <select id="getByHostName" parameterType="String" resultMap="BaseResultMap">
