@@ -83,6 +83,11 @@ public class IndexTemplatePhy extends BaseEntity {
     private String config;
 
     /**
+     * regionId
+     */
+    private Integer regionId;
+
+    /**
      * 获取并且解析config
      * @return
      */
