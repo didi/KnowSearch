@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -12,41 +14,52 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfig
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@ActiveProfiles("test")
+@RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
+@SpringBootTest
 class ProjectConfigManagerTest {
     
     @Mock
-    private ProjectConfigService mockProjectConfigService;
+    private ProjectConfigService projectConfigService;
     @Mock
-    private OperateRecordService mockOperateRecordService;
+    private OperateRecordService operateRecordService;
     
     @InjectMocks
-    private ProjectConfigManagerImpl projectConfigManagerImplUnderTest;
+    private ProjectConfigManagerImpl projectConfigManager;
     
     @BeforeEach
     void setUp() {
         initMocks(this);
+         when(operateRecordService.save(anyInt(), anyInt(), anyString(), anyString(), anyString())).thenReturn(
+                Result.buildSucc());
     }
     
     @Test
     void testGet() {
         // Setup
-        final Result<ProjectConfigVo> expectedResult = Result.buildFail(new ProjectConfigVo(0, 0, 0, 0, 0, 0, "memo"));
+        final Result<ProjectConfigVo> expectedResult = Result.buildSucc(new ProjectConfigVo(0, 0, 0, 0, 0, 0, "memo"));
         
         // Configure ProjectConfigService.getProjectConfig(...).
         final ProjectConfig projectConfig = new ProjectConfig(0, 0, 0, 0, 0, 0, "memo");
-        when(mockProjectConfigService.getProjectConfig(0)).thenReturn(projectConfig);
+        when(projectConfigService.getProjectConfig(0)).thenReturn(projectConfig);
         
         // Run the test
-        final Result<ProjectConfigVo> result = projectConfigManagerImplUnderTest.get(0);
+        final Result<ProjectConfigVo> result = projectConfigManager.get(0);
         
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -54,85 +67,35 @@ class ProjectConfigManagerTest {
     
     @Test
     void testUpdateProjectConfig() {
-        // Setup
-        final ProjectConfigDTO configDTO = new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo");
+        final ProjectConfigPO projectConfigPO = CustomDataSource.projectConfigPO();
+        final ProjectConfigDTO projectConfigDTO = ConvertUtil.obj2Obj(projectConfigPO, ProjectConfigDTO.class);
+        projectConfigDTO.setIsSourceSeparated(1);
         
-        // Configure ProjectConfigService.updateOrInitProjectConfig(...).
-        final Tuple<Result<Void>, ProjectConfigPO> resultProjectConfigPOTuple = new Tuple<>(
-                Result.buildFail(null), new ProjectConfigPO(0, 0, 0, 0, 0, 0, "memo"));
-        when(mockProjectConfigService.updateOrInitProjectConfig(new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo"),
-                "operator")).thenReturn(resultProjectConfigPOTuple);
+        when( projectConfigService.updateOrInitProjectConfig(any(),
+				anyString())).thenReturn(new Tuple<>(Result.buildSucc(),projectConfigPO));
+        assertThat(projectConfigManager.updateProjectConfig(projectConfigDTO,"admin").success())
+                .isTrue();
         
-        when(mockOperateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content",
-                "operator")).thenReturn(Result.buildFail(null));
         
-        // Run the test
-        final Result<Void> result = projectConfigManagerImplUnderTest.updateProjectConfig(configDTO, "operator");
         
-        // Verify the results
-        verify(mockOperateRecordService).save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content", "operator");
     }
     
-    @Test
-    void testUpdateProjectConfig_OperateRecordServiceReturnsFailure() {
-        // Setup
-        final ProjectConfigDTO configDTO = new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo");
-        
-        // Configure ProjectConfigService.updateOrInitProjectConfig(...).
-        final Tuple<Result<Void>, ProjectConfigPO> resultProjectConfigPOTuple = new Tuple<>(
-                Result.buildFail(null), new ProjectConfigPO(0, 0, 0, 0, 0, 0, "memo"));
-        when(mockProjectConfigService.updateOrInitProjectConfig(new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo"),
-                "operator")).thenReturn(resultProjectConfigPOTuple);
-        
-        when(mockOperateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content",
-                "operator")).thenReturn(Result.buildFail());
-        
-        // Run the test
-        final Result<Void> result = projectConfigManagerImplUnderTest.updateProjectConfig(configDTO, "operator");
-        
-        // Verify the results
-        verify(mockOperateRecordService).save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content", "operator");
-    }
     
     @Test
     void testInitProjectConfig() {
-        // Setup
-        final ProjectConfigDTO configDTO = new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo");
+      final ProjectConfigPO projectConfigPO = CustomDataSource.projectConfigPO();
+        final ProjectConfigDTO projectConfigDTO = ConvertUtil.obj2Obj(projectConfigPO, ProjectConfigDTO.class);
+        projectConfigDTO.setIsSourceSeparated(1);
         
-        // Configure ProjectConfigService.updateOrInitProjectConfig(...).
-        final Tuple<Result<Void>, ProjectConfigPO> resultProjectConfigPOTuple = new Tuple<>(
-                Result.buildFail(null), new ProjectConfigPO(0, 0, 0, 0, 0, 0, "memo"));
-        when(mockProjectConfigService.updateOrInitProjectConfig(new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo"),
-                "operator")).thenReturn(resultProjectConfigPOTuple);
+        when( projectConfigService.updateOrInitProjectConfig(any(),
+				anyString())).thenReturn(new Tuple<>(Result.buildSucc(),projectConfigPO));
         
-        when(mockOperateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content",
-                "operator")).thenReturn(Result.buildFail(null));
+       
         
         // Run the test
-        final Result<Void> result = projectConfigManagerImplUnderTest.initProjectConfig(configDTO, "operator");
+        final Result<Void> result = projectConfigManager.initProjectConfig(projectConfigDTO, "operator");
+        assertThat(result.success()).isTrue();
         
-        // Verify the results
-        verify(mockOperateRecordService).save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content", "operator");
     }
     
-    @Test
-    void testInitProjectConfig_OperateRecordServiceReturnsFailure() {
-        // Setup
-        final ProjectConfigDTO configDTO = new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo");
-        
-        // Configure ProjectConfigService.updateOrInitProjectConfig(...).
-        final Tuple<Result<Void>, ProjectConfigPO> resultProjectConfigPOTuple = new Tuple<>(
-                Result.buildFail(null), new ProjectConfigPO(0, 0, 0, 0, 0, 0, "memo"));
-        when(mockProjectConfigService.updateOrInitProjectConfig(new ProjectConfigDTO(0, 0, 0, 0, 0, 0, "memo"),
-                "operator")).thenReturn(resultProjectConfigPOTuple);
-        
-        when(mockOperateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content",
-                "operator")).thenReturn(Result.buildFail());
-        
-        // Run the test
-        final Result<Void> result = projectConfigManagerImplUnderTest.initProjectConfig(configDTO, "operator");
-        
-        // Verify the results
-        verify(mockOperateRecordService).save(ModuleEnum.TEMPLATE, OperationEnum.ADD, 0, "content", "operator");
-    }
 }

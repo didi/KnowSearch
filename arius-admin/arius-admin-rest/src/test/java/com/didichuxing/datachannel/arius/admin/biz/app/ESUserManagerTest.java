@@ -22,8 +22,11 @@ import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.lucene.search.QueryCachingPolicy.CacheOnLargeSegments;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,13 +49,13 @@ class ESUserManagerTest {
     private ProjectService projectService;
     
     @Mock
-    private   ESUserService         esUserService;
+    private ESUserService        esUserService;
     @Mock
-    private   RoleTool              roleTool;
+    private RoleTool             roleTool;
     @Mock
-    private   OperateRecordService  operateRecordService;
+    private OperateRecordService operateRecordService;
     @InjectMocks
-    private   ESUserManagerImpl     esUserManager;
+    private ESUserManagerImpl    esUserManager;
     
     @BeforeEach
     void setUp() {
@@ -81,14 +84,14 @@ class ESUserManagerTest {
         final ProjectVO projectVO = CustomDataSource.projectVO();
         
         when(projectService.getProjectDetailByProjectId(anyInt())).thenReturn(null);
-
+        
         when(roleTool.isAdmin(anyString())).thenReturn(false);
-
+        
         Assertions.assertEquals(Result.buildParamIllegal(String.format("项目:[%s]不存在成员:[%s]", 1, "aaaa")).getMessage(),
                 esUserManager.listESUsersByProjectId(1, "aaaa").getMessage());
         when(roleTool.isAdmin(anyString())).thenReturn(false);
         when(projectService.getProjectDetailByProjectId(anyInt())).thenReturn(CustomDataSource.projectVO());
-
+        
         Assertions.assertEquals(Result.buildParamIllegal(String.format("项目:[%s]不存在成员:[%s]", 1, "aaaa")).getMessage(),
                 esUserManager.listESUsersByProjectId(1, "aaaa").getMessage());
         when(roleTool.isAdmin(anyString())).thenReturn(true);
@@ -97,9 +100,8 @@ class ESUserManagerTest {
         when(roleTool.isAdmin(anyString())).thenReturn(false);
         when(projectService.getProjectDetailByProjectId(anyInt())).thenReturn(projectVO);
         when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser));
-         when(roleTool.isAdmin(anyString())).thenReturn(false);
-        Assertions.assertTrue(
-                esUserManager.listESUsersByProjectId(1, "admin").success());
+        when(roleTool.isAdmin(anyString())).thenReturn(false);
+        Assertions.assertTrue(esUserManager.listESUsersByProjectId(1, "admin").success());
         
     }
     
@@ -113,15 +115,13 @@ class ESUserManagerTest {
                 Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", esUserDTO.getResponsible()))
                         .getMessage(), esUserManager.registerESUser(esUserDTO, 1, "admin").getMessage());
         when(roleTool.isAdmin(anyString())).thenReturn(true);
-        when(esUserService.validateESUser(any(),any())).thenReturn(Result.buildParamIllegal("应用信息为空"));
-        when(esUserService.registerESUser(null, null)).thenReturn(new Tuple<>(Result.buildParamIllegal("应用信息为空"),
-                esUserPO));
+        when(esUserService.validateESUser(any(), any())).thenReturn(Result.buildParamIllegal("应用信息为空"));
+        when(esUserService.registerESUser(null, null)).thenReturn(
+                new Tuple<>(Result.buildParamIllegal("应用信息为空"), esUserPO));
         Assertions.assertEquals(Result.buildParamIllegal("应用信息为空").getMessage(),
-                esUserManager.registerESUser(null, null,null).getMessage());
-        when(esUserService.registerESUser(any(), anyString())).thenReturn(new Tuple<>(Result.buildSucc(1),
-                esUserPO));
-         Assertions.assertTrue(
-                esUserManager.registerESUser(esUserDTO, 1,"a").success());
+                esUserManager.registerESUser(null, null, null).getMessage());
+        when(esUserService.registerESUser(any(), anyString())).thenReturn(new Tuple<>(Result.buildSucc(1), esUserPO));
+        Assertions.assertTrue(esUserManager.registerESUser(esUserDTO, 1, "a").success());
     }
     
     @Test
@@ -134,30 +134,56 @@ class ESUserManagerTest {
                 esUserManager.editESUser(esUserDTO, "admin").getMessage());
         when(esUserService.validateESUser(any(), any())).thenReturn(Result.buildSucc());
         when(esUserService.editUser(any())).thenReturn(new Tuple<>(Result.buildSucc(), esUserPO));
-        Assertions.assertTrue(esUserManager.editESUser(esUserDTO, "admin").success());
+        Assertions.assertTrue(
+                Assertions.assertDoesNotThrow(() -> esUserManager.editESUser(esUserDTO, "admin").success()));
         
     }
     
     @Test
     void testDeleteESUserByProject() {
-    
+        final ESUserPO esUserPO = CustomDataSource.esUserPO();
+        final ProjectVO projectVO = CustomDataSource.projectVO();
+        final ESUser esUser = ConvertUtil.obj2Obj(esUserPO, ESUser.class);
+        
+        Assertions.assertEquals(Result.buildFail("当前操作者权限不足,需要管理员权限"), esUserManager.deleteESUserByProject(1, 1, null));
+        when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser));
+        when(roleTool.isAdmin("admin")).thenReturn(true);
+        Assertions.assertEquals(Result.buildFail(String.format("当前项目[%s]下只存在一个es user,不能被删除", 1)).getMessage(),
+                esUserManager.deleteESUserByProject(1, 1, "admin").getMessage());
+        esUser.setDefaultDisplay(true);
+        esUser.setId(1);
+        when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser, esUser));
+        Assertions.assertEquals(Result.buildParamIllegal(String.format("当前项目[%s]不存在es user:[%s]", 1,
+                        Lists.newArrayList(esUser, esUser).stream().map(ESUser::getId).collect(Collectors.toList())))
+                .getMessage(), esUserManager.deleteESUserByProject(2, 1, "admin").getMessage());
+        
+        when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser, esUser));
+        Assertions.assertEquals(
+                Result.buildFail(String.format("项目[%s]中es user:[%s],属于项目默认的es user,请先进行解绑", 1, 1)).getMessage(),
+                esUserManager.deleteESUserByProject(1, 1, "admin").getMessage());
+        esUser.setDefaultDisplay(false);
+        when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser, esUser));
+        when(esUserService.deleteESUserById(1)).thenReturn(new Tuple<>(Result.buildSucc(), esUserPO));
+        Assertions.assertTrue(esUserManager.deleteESUserByProject(1, 1, "admin").success());
+        
     }
     
     @Test
     void testDeleteAllESUserByProject() {
-    
+        when(roleTool.isAdmin("admin")).thenReturn(true);
+        when( esUserService.deleteByESUsers(anyInt())).thenReturn(
+                new Tuple<>(Result.buildSucc(), Lists.newArrayList(CustomDataSource.esUserPO())));
+        Assertions.assertEquals(Result.buildFail("当前操作者权限不足,需要管理员权限").getMessage(),
+                esUserManager.deleteAllESUserByProject(1, "").getMessage());
+        
+        Assertions.assertTrue(esUserManager.deleteAllESUserByProject(1, "admin").success());
+        
     }
     
     @Test
     void testVerifyAppCode() {
-        final ESUserPO esUserPO = CustomDataSource.esUserPO();
-        final ProjectVO projectVO = CustomDataSource.projectVO();
-        final ESUser esUser = ConvertUtil.obj2Obj(esUserPO, ESUser.class);
-        when(roleTool.isAdmin(anyString())).thenReturn(false);
-        when(projectService.getProjectDetailByProjectId(anyInt())).thenReturn(projectVO);
-        Assertions.assertEquals(Result.buildFail("权限不足").getMessage(),
-                esUserManager.getNoCodeESUser(1, "admin1").getMessage());
-        Assertions.assertTrue(esUserManager.getNoCodeESUser(1, "admin").success());
+        when(esUserService.verifyAppCode(1,"aaa")).thenReturn(Result.buildSucc());
+        Assertions.assertTrue(esUserManager.verifyAppCode(1, "aaa").success());
         
     }
     
@@ -167,14 +193,29 @@ class ESUserManagerTest {
         final ESUser esUser = ConvertUtil.obj2Obj(esUserPO, ESUser.class);
         when(esUserService.getEsUserById(anyInt())).thenReturn(esUser);
         final Result<ConsoleESUserVO> consoleESUserVOResult = esUserManager.get(1);
-        Assertions.assertEquals(consoleESUserVOResult.getData().getId(),esUser.getId());
+        Assertions.assertEquals(consoleESUserVOResult.getData().getId(), esUser.getId());
         
-    
     }
     
     @Test
     void testGetNoCodeESUser() {
-    
+        final ESUserPO esUserPO = CustomDataSource.esUserPO();
+        final ESUser esUser = ConvertUtil.obj2Obj(esUserPO, ESUser.class);
+        final ProjectVO projectVO = CustomDataSource.projectVO();
+        when(roleTool.isAdmin(anyString())).thenReturn(false);
+        projectVO.setOwnerList(null);
+        projectVO.setUserList(null);
+        when(projectService.getProjectDetailByProjectId(anyInt())).thenReturn(projectVO);
+        
+        when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser));
+        Assertions.assertEquals(Result.buildFail("权限不足").getMessage(),
+                esUserManager.getNoCodeESUser(1, "a1231").getMessage());
+        when(roleTool.isAdmin(anyString())).thenReturn(false);
+        projectVO.setUserList(CustomDataSource.projectVO().getUserList());
+        when(projectService.getProjectDetailByProjectId(anyInt())).thenReturn(projectVO);
+        
+        Assertions.assertTrue(esUserManager.getNoCodeESUser(1, "admin").success());
+        
     }
     
 }

@@ -191,7 +191,7 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteESUserByProject(int esUser, int projectId, String operator) {
-        if (roleTool.isAdmin(operator)){
+        if (!roleTool.isAdmin(operator)){
             return Result.buildFail("当前操作者权限不足,需要管理员权限");
         }
         //校验当前项目下所有的es user
@@ -201,7 +201,9 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         //校验当前项目中存在该es user
         if (esUsers.stream().map(ESUser::getId).noneMatch(esUserName -> Objects.equals(esUserName, esUser))) {
-            return Result.buildParamIllegal(String.format("当前项目[%s]不存在es user:[%s]", projectId, esUsers));
+            return Result.buildParamIllegal(String.format("当前项目[%s]不存在es user:[%s]", projectId,
+                    esUsers.stream().map(ESUser::getId).collect(
+                    Collectors.toList())));
         }
         //判断删除之后的es user是否为项目使用的es user,如果是项目使用的默认es user，则需要解绑项目默认的es user 后才能进行es user的删除
         if (esUsers.stream().anyMatch(oldESUser -> Objects.equals(oldESUser.getId(), esUser) && Boolean.TRUE.equals(
