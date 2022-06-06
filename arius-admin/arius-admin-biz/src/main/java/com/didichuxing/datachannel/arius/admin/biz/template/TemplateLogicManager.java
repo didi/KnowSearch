@@ -224,4 +224,12 @@ public interface TemplateLogicManager {
      * @return 调整结果
      */
     Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum);
+
+    /**
+     * 模板升级
+     * @param logicTemplateId 模板id
+     * @param operator 操作者
+     * @return
+     */
+    Result<Void> upgrade(Integer logicTemplateId, String operator);
 }

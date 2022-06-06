@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
@@ -52,7 +53,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tem
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
@@ -62,7 +62,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -118,9 +117,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ClusterPhyService           clusterPhyService;
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
-
-    @Autowired
     private ClusterRegionService clusterRegionService;
 
     @Autowired
@@ -146,6 +142,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private TemplateDCDRManager templateDcdrManager;
+
+    @Autowired
+    private PreCreateManager preCreateManager;
 
     private final Integer RETRY_TIMES = 3;
 
@@ -793,6 +792,31 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             LOGGER.error("class=TemplateLogicManagerImpl||method=adjustShard||errorMsg=failed to adjust shard", e);
             return Result.buildFail("模板扩缩容失败");
         }
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> upgrade(Integer logicTemplateId, String operator) {
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        try {
+            IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+            for (IndexTemplatePhy templatePhy : templatePhyList) {
+                updateParam.setId(templatePhy.getId());
+                updateParam.setRack(templatePhy.getRack());
+                updateParam.setShard(updateParam.getShard());
+                updateParam.setVersion(templatePhy.getVersion() + 1);
+
+                Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
+                if (editResult.failed()) {
+                    return editResult;
+                }
+
+                preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
+            }
+        } catch (Exception e) {
+            LOGGER.error("upgrade template error", e);
+        }
+
         return Result.buildSucc();
     }
 
