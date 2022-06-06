@@ -699,8 +699,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             return Result.buildParamIllegal("应用ID非法");
         }
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(param.getProjectId());
-        if (!roleTool.isAdmin(param.getResponsible())||!CommonUtils.isUserNameBelongProjectMember(param.getResponsible(), projectVO)
-            || !CommonUtils.isUserNameBelongProjectResponsible(param.getResponsible(), projectVO)) {
+        if (!(roleTool.isAdmin(param.getResponsible())||CommonUtils.isUserNameBelongProjectMember(param.getResponsible(), projectVO)
+            || CommonUtils.isUserNameBelongProjectResponsible(param.getResponsible(), projectVO))) {
             return Result.buildParamIllegal("责任人非法");
         }
         return Result.buildSucc();

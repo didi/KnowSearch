@@ -75,7 +75,6 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,6 +86,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Component
 public class TemplatePhyManagerImpl implements TemplatePhyManager {
@@ -333,15 +333,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getPhysicalId());
         IndexTemplatePhyDTO tgtTemplateParam = ConvertUtil.obj2Obj(indexTemplatePhy, IndexTemplatePhyDTO.class);
         tgtTemplateParam.setCluster(param.getCluster());
-        tgtTemplateParam.setRack(param.getRack());
         tgtTemplateParam.setRole(SLAVE.getCode());
         tgtTemplateParam.setShard(param.getShard());
         tgtTemplateParam.setVersion(indexTemplatePhy.getVersion());
+        tgtTemplateParam.setRegionId(param.getRegionId());
 
         Result<Long> addResult = addTemplateWithoutCheck(tgtTemplateParam);
-        if (addResult.failed()) {
-            return Result.buildFrom(addResult);
-        }
+        if (addResult.failed()) { return Result.buildFrom(addResult);}
 
         // 记录操作记录
         operateRecordService.save(TEMPLATE, COPY, indexTemplatePhy.getLogicId(),
@@ -790,11 +788,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildParamIllegal("目标集群不能与源集群相同");
         }
 
-        if (StringUtils.isNotEmpty(param.getRack())
-                && !clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
-            return Result.buildNotExist("rack不存在");
-        }
-
         if (param.getShard() < 1) {
             return Result.buildParamIllegal("shard非法");
         }
@@ -988,7 +981,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return finalIndexSet;
     }
 
-    private void syncCreateIndexTemplateWithEs(IndexTemplatePhyDTO param) throws ESOperateException {
+    private void syncCreateIndexTemplateWithEs(IndexTemplatePhyDTO param) throws AdminOperateException {
         IndexTemplate logic = indexTemplateService.getLogicTemplateById(param.getLogicId());
         MappingConfig mappings = null;
         Result result = AriusIndexMappingConfigUtils.parseMappingConfig(param.getMappings());
@@ -1007,16 +1000,25 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
     }
 
-    private Map<String, String> getSettingsMap(Integer shard, Integer regionId, String settings) {
+    private Map<String, String> getSettingsMap(Integer shard, Integer regionId, String settings) throws AdminOperateException {
         Map<String, String> settingsMap = new HashMap<>();
         if (null != shard && shard > 0) {
             settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
         }
 
         if (null != regionId) {
-            Set<String> nodeNames = new HashSet<>();
             Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService.listByRegionId(regionId);
-            roleHostResult.getData().stream().forEach(roleHost -> nodeNames.add(roleHost.getNodeSet()));
+            if (roleHostResult.failed()) {
+                throw new AdminOperateException(String.format("获取region[%d]节点列表异常", regionId));
+            }
+            List<ClusterRoleHost> data = roleHostResult.getData();
+            if (CollectionUtils.isEmpty(data)) {
+                throw new AdminOperateException(String.format("获取region[%d]节点列表为空, 请检查region中是否存在数据节点", regionId));
+            }
+            List<String> nodeNames = data.stream()
+                    .map(ClusterRoleHost::getNodeSet)
+                    .filter(nodeName -> !AriusObjUtils.isBlank(nodeName))
+                    .distinct().collect(Collectors.toList());
             settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
         }
 

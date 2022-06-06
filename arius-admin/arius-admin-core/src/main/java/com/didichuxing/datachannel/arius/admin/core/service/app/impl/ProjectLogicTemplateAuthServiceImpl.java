@@ -444,9 +444,9 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 			return Result.buildParamIllegal("不支持添加管理权限");
 		}
 		ProjectVO projectVO = projectService.getProjectDetailByProjectId(authDTO.getProjectId());
-		boolean belongTrue = (!roleTool.isAdmin(authDTO.getResponsible()) || !CommonUtils.isUserNameBelongProjectMember(
-				authDTO.getResponsible(), projectVO) || !CommonUtils.isUserNameBelongProjectResponsible(
-				authDTO.getResponsible(), projectVO));
+		boolean belongTrue = (!(roleTool.isAdmin(authDTO.getResponsible()) || CommonUtils.isUserNameBelongProjectMember(
+				authDTO.getResponsible(), projectVO) || CommonUtils.isUserNameBelongProjectResponsible(
+				authDTO.getResponsible(), projectVO)));
 		// 校验责任人是否合法
 		if (!AriusObjUtils.isNull(authDTO.getResponsible()) && belongTrue) {
 			return Result.buildParamIllegal("责任人非法");

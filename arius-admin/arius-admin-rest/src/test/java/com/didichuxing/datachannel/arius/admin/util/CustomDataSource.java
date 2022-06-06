@@ -54,7 +54,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.mock.web.MockMultipartFile;
@@ -260,6 +264,31 @@ public class CustomDataSource {
         esUserPO.setIp("192.168.111.111");
         esUserPO.setResponsible("admin");
         return esUserPO;
+    }
+    
+    public static ProjectBriefVO projectBriefVO() {
+        final ProjectBriefVO projectBriefVO = new ProjectBriefVO();
+        projectBriefVO.setId(1);
+        projectBriefVO.setProjectCode("123456");
+        projectBriefVO.setProjectName("test");
+        return projectBriefVO;
+        
+    }
+    
+    public static ProjectVO projectVO() {
+        final ProjectVO projectVO = new ProjectVO();
+        projectVO.setId(1);
+        projectVO.setProjectCode("123456");
+        projectVO.setProjectName("test");
+        final UserBriefVO userBriefVO = new UserBriefVO();
+        userBriefVO.setId(1);
+        userBriefVO.setUserName("admin");
+        userBriefVO.setRealName("admin");
+        userBriefVO.setDeptId(1);
+        projectVO.setUserList(Collections.singletonList(userBriefVO));
+        projectVO.setOwnerList(Collections.singletonList(userBriefVO));
+        projectVO.setDescription("test");
+        return projectVO;
     }
     public static ProjectConfigPO projectConfigPO(){
         ProjectConfigPO projectConfigPO = new ProjectConfigPO();
