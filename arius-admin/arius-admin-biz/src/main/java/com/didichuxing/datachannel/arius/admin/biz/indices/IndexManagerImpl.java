@@ -384,7 +384,7 @@ public class IndexManagerImpl implements IndexManager {
 
     @Override
     public Result<Void> split(IndexCatCellWithConfigDTO param){
-        return Result.buildFail();
+        return esIndexService.split(param.getCluster(), param.getIndex(), param.getTargetIndex(), param.getExtra());
     }
 
     @Override

@@ -314,4 +314,6 @@ public interface ESIndexService {
      */
     Result<Void> shrink(String cluster, String index, String targetIndex, String config);
 
+    Result<Void> split(String cluster, String index, String targetIndex, String config);
+
 }

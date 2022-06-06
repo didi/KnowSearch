@@ -555,6 +555,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.shrink(cluster, index, targetIndex, config);
     }
 
+    @Override
+    public Result<Void> split(String cluster, String index, String targetIndex, String config) {
+        return esIndexDAO.split(cluster, index, targetIndex, config);
+    }
+
     /***************************************** private method ****************************************************/
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
