@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -122,6 +124,20 @@ public class TemplateLogicV3Controller {
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,
                                                                       @RequestParam("cluster") String cluster) {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getAppId(request));
+    }
+
+    @PutMapping("/createTemplate")
+    @ResponseBody
+    @ApiOperation(value = "创建逻辑模板")
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) {
+        return templateLogicManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
+    }
+
+    @PutMapping("/edit")
+    @ResponseBody
+    @ApiOperation(value = "用户编辑模板")
+    public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
+        return templateLogicManager.newEditTemplate(param, HttpRequestUtils.getOperator(request));
     }
 
 }
