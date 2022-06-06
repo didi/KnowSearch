@@ -32,13 +32,13 @@
         <result column="resource_id" jdbcType="BIGINT" property="resourceId"/>
         <result column="level" jdbcType="TINYINT" property="level"/>
         <result column="open_srv" jdbcType="VARCHAR" property="openSrv"/>
-        <result column="region_id" jdbcType="INTEGER" property="regionId"/>
+        <result column="disk_size" jdbcType="DECIMAL" property="diskSize"/>
     </resultMap>
 
     <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, app_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, `region_id`
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`
     </sql>
 
     <select id="listByCondition"
@@ -52,7 +52,6 @@
         <if test="name != null">and `name` = #{name}</if>
         <if test="dataCenter != null">and data_center = #{dataCenter}</if>
         <if test="appId != null">and app_id = #{appId}</if>
-        <if test="regionId != null">and region_id = #{regionId}</if>
         order by id desc
     </select>
 
@@ -115,12 +114,12 @@
         insert into index_template_info
         (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, app_id, ingest_pipeline, resource_id, `level`, region_id)
+         `desc`, quota, write_rate_limit, app_id, ingest_pipeline, resource_id, `level`, disk_size)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
          #{libraDepartmentId}, #{libraDepartment}, #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
          #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{appId}, #{ingestPipeline}, #{resourceId}, #{level}
-        ,#{regionId})
+        , #{diskSize})
     </insert>
 
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
@@ -180,7 +179,7 @@
             <if test="checkPointDiff != null">,check_point_diff = #{checkPointDiff}</if>
             <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
             <if test="openSrv != null">,open_srv = #{openSrv}</if>
-            <if test="regionId != null">,region_id = #{regionId}</if>
+            <if test="diskSize != null">,disk_size = #{diskSize}</if>
         </trim>
         where id = #{id}
     </update>
@@ -233,12 +232,6 @@
         from index_template_info
         where is_active = 1
         order by id desc
-    </select>
-    <select id="listByRegionId" parameterType="int" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from index_template_info
-        where region_id = #{regionId} and is_active = 1
     </select>
 
 </mapper>

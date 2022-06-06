@@ -32,6 +32,7 @@ import static com.didichuxing.datachannel.arius.admin.common.util.RackUtils.belo
  * @author d06679
  * @date 2019-07-09
  */
+@Deprecated
 @Component("capacityPlanTemplateResourceDistributor")
 public class CapacityPlanTemplateClusterDistributor implements TemplateClusterDistributor {
 

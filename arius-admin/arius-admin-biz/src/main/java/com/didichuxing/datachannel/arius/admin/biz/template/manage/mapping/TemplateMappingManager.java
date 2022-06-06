@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
  * @author chengxiang
  * @date 2022/5/27
  */
-public interface MappingManager {
+public interface TemplateMappingManager {
 
     /**
      * 校验模板mapping 字段是否合法

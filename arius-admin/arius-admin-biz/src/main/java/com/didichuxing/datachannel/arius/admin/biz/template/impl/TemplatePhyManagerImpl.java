@@ -10,11 +10,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDEX_SHARD_NUM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.SINGLE_TYPE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.TEMPLATE_INDEX_INCLUDE_RACK;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
@@ -26,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -54,6 +54,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -70,13 +71,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -123,7 +119,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private IndexPlanManager indexPlanManager;
 
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -353,11 +349,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.buildSucWithTips("模板部署集群变更!请注意模板APP是否可以使用修改后的集群rack\n模板复制后请确认逻辑模板quota是否充足");
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> editTemplate(IndexTemplatePhyDTO param, String operator) throws ESOperateException {
-        Result<Void> checkResult = validateTemplate(param, EDIT);
+        Result<Void> checkResult = indexTemplatePhyService.validateTemplate(param, EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=editTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
@@ -394,58 +389,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation) {
-        if (AriusObjUtils.isNull(param)) {
-            return Result.buildParamIllegal("物理模板参数为空");
-        }
-        if (operation == OperationEnum.ADD) {
-            Result<Void> result = handleValidateTemplateAdd(param);
-            if (result.failed()) {return result;}
-        } else if (operation == EDIT) {
-            Result<Void> result = handleValidateTemplateEdit(param);
-            if (result.failed()) {return result;}
-        }
-
-        Result<Void> result = handleValidateTemplate(param);
-        if (result.failed()) {return result;}
-
-        return Result.buildSucc();
-    }
-
-    @Override
-    public Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation) {
-        if (AriusObjUtils.isNull(params)) {
-            return Result.buildParamIllegal("物理模板信息为空");
-        }
-
-        Set<String> deployClusterSet = Sets.newTreeSet();
-        for (IndexTemplatePhyDTO param : params) {
-            Result<Void> checkResult = validateTemplate(param, operation);
-            if (checkResult.failed()) {
-                LOGGER.warn("class=TemplatePhyManagerImpl||method=validateTemplates||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
-                checkResult
-                        .setMessage(checkResult.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());
-                return checkResult;
-            }
-
-            if (deployClusterSet.contains(param.getCluster())) {
-                return Result.buildParamIllegal("部署集群重复");
-            } else {
-                deployClusterSet.add(param.getCluster());
-            }
-
-        }
-
-        return Result.buildSucc();
-    }
-
-    @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> addTemplatesWithoutCheck(Integer logicId,
                                            List<IndexTemplatePhyDTO> physicalInfos) throws AdminOperateException {
         for (IndexTemplatePhyDTO param : physicalInfos) {
             param.setLogicId(logicId);
-            param.setPhysicalInfos(physicalInfos);
             Result<Long> result = addTemplateWithoutCheck(param);
             if (result.failed()) {
                 result.setMessage(result.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());
@@ -983,64 +931,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
     }
 
-    private Result<Void> handleValidateTemplate(IndexTemplatePhyDTO param) {
-        if (param.getCluster() != null && !clusterPhyService.isClusterExists(param.getCluster())) {
-            return Result.buildParamIllegal("集群不存在");
-        }
-        if (StringUtils.isNotEmpty(param.getRack())) {
-            if (!clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
-                return Result.buildParamIllegal("集群rack不存在");
-            }
-        }
-        if (param.getShard() != null && param.getShard() < 1) {
-            return Result.buildParamIllegal("shard个数非法");
-        }
-        if (param.getRole() != null
-                && TemplateDeployRoleEnum.UNKNOWN.equals(TemplateDeployRoleEnum.valueOf(param.getRole()))) {
-            return Result.buildParamIllegal("模板角色非法");
-        }
-        if (param.getLogicId() != null && !Objects.equals(param.getLogicId(), NOT_CHECK)) {
-            IndexTemplate logic = indexTemplateService.getLogicTemplateById(param.getLogicId());
-            if (logic == null) {
-                return Result.buildNotExist("逻辑模板不存在");
-            }
-        }
-        return Result.buildSucc();
-    }
-
-    private Result<Void> handleValidateTemplateEdit(IndexTemplatePhyDTO param) {
-        if (AriusObjUtils.isNull(param.getId())) {
-            return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
-        }
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getId());
-        if (indexTemplatePhy == null) {
-            return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
-        }
-        return Result.buildSucc();
-    }
-
-    private Result<Void> handleValidateTemplateAdd(IndexTemplatePhyDTO param) {
-        if (AriusObjUtils.isNull(param.getLogicId())) {
-            return Result.buildParamIllegal("逻辑模板id为空");
-        }
-        if (AriusObjUtils.isNull(param.getCluster())) {
-            return Result.buildParamIllegal("集群为空");
-        }
-
-        if (AriusObjUtils.isNull(param.getShard())) {
-            return Result.buildParamIllegal("shard为空");
-        }
-        if (AriusObjUtils.isNull(param.getRole())) {
-            return Result.buildParamIllegal("模板角色为空");
-        }
-
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateByClusterAndName(param.getCluster(), param.getName());
-        if (indexTemplatePhy != null) {
-            return Result.buildDuplicate("物理模板已经存在");
-        }
-        return Result.buildSucc();
-    }
-
     private Set<String> getFinalIndexSet(IndexTemplatePhyWithLogic physicalWithLogic, int days, IndexTemplate logicTemplate, List<String> indices) {
         Set<String> finalIndexSet = Sets.newHashSet();
         for (String indexName : indices) {
@@ -1093,7 +983,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (result.success()) {
             mappings = (MappingConfig) result.getData();
         }
-        Map<String, String> settingsMap = getSettingsMap(param.getCluster(), param.getRack(), param.getShard(), param.getShardRouting(), param.getSettings());
+        Map<String, String> settingsMap = getSettingsMap(param.getShard(), param.getRegionId(), param.getSettings());
         boolean ret;
         if (null != mappings || null != param.getSettings()) {
             ret = esTemplateService.syncCreate(settingsMap, param.getCluster(), param.getName(), logic.getExpression(), mappings, 0);
@@ -1105,20 +995,24 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
     }
 
-    private Map<String, String> getSettingsMap(String cluster, String rack, Integer shard, Integer shardRouting, AriusIndexTemplateSetting settings) {
+    private Map<String, String> getSettingsMap(Integer shard, Integer regionId, String settings) {
         Map<String, String> settingsMap = new HashMap<>();
-        if (StringUtils.isNotBlank(rack)) {
-            settingsMap.put(TEMPLATE_INDEX_INCLUDE_RACK, rack);
-        }
-        if (shard != null && shard > 0) {
+        if (null != shard && shard > 0) {
             settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
         }
-        settingsMap.put(SINGLE_TYPE, "true");
 
-        //这里设置自定义分词器、副本数量、translog是否异步
-        if (null != settings) {
-            settingsMap.putAll(settings.toJSON());
+        if (null != regionId) {
+            Set<String> nodeNames = new HashSet<>();
+            Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService.listByRegionId(regionId);
+            roleHostResult.getData().stream().forEach(roleHost -> nodeNames.add(roleHost.getNodeSet()));
+            settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
         }
+
+        if (null != settings) {
+            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSONObject.parseObject(settings)));
+        }
+
+        settingsMap.put(SINGLE_TYPE, "true");
         return settingsMap;
     }
 

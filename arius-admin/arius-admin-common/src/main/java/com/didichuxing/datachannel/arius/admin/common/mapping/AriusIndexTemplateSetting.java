@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Data
 @ApiModel(description = "索引模板分词器setting信息")
+//todo: 重构
 public class AriusIndexTemplateSetting implements Serializable {
 
     @ApiModelProperty("分词器")
