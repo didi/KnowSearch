@@ -133,6 +133,13 @@ public interface ClusterLogicManager {
     List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
 
     /**
+     * 获取逻辑集群分派的物理集群列表
+     * @param logicCluster
+     * @return
+     */
+    List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(String logicCluster);
+
+    /**
      * 获取所有逻辑集群列表接口
      */
     List<ConsoleClusterVO> getConsoleClusterVOS(ESLogicClusterDTO param, Integer appId);

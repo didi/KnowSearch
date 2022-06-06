@@ -13,10 +13,15 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,8 +62,8 @@ import com.google.common.collect.Lists;
  * @date 2021/09/28
  **/
 @Component
-public class IndicesManagerImpl implements IndicesManager {
-    private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
+public class IndexManagerImpl implements IndexManager {
+    private static final ILog     LOGGER = LogFactory.getLog(IndexManagerImpl.class);
     public static final int RETRY_COUNT = 3;
     @Autowired
     private AppService            appService;
@@ -345,6 +350,54 @@ public class IndicesManagerImpl implements IndicesManager {
 
         return Result.buildSucc(ConvertUtil.obj2Obj(indexCatCellVOs.getBizData().get(0), IndexCatCellVO.class));
     }
+    @Override
+    public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId) {
+        return esIndexService.editAlias(getClusterPhy(param.getCluster(), appId), param.getIndex(), param.getAlias(), editFlag);
+    }
+    public Result<Void> rollover(IndexRolloverDTO param) {
+        if (null == param.getIndices()) {
+            return Result.buildFail("索引为空");
+        }
+
+        for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
+            String cluster = indexCatCellDTO.getCluster();
+            List<Tuple<String, String>> aliasList = esIndexService.syncGetIndexAliasesByExpression(cluster, indexCatCellDTO.getIndex());
+            if (AriusObjUtils.isEmptyList(aliasList)) {
+                return Result.buildFail("alias 为空");
+            }
+
+            Result<Void> rolloverResult = esIndexService.rollover(cluster, aliasList.get(0).getV2());
+            if (rolloverResult.failed()) {
+                return rolloverResult;
+            }
+        }
+
+        return Result.buildSucc();
+    }
+
+    public Result<Void> shrink(IndexCatCellWithConfigDTO param){
+        return Result.buildFail();
+    }
+
+    public Result<Void> split(IndexCatCellWithConfigDTO param){
+        return Result.buildFail();
+    }
+
+    public Result<Void> forceMerge(IndexForceMergeDTO param) {
+        if (null == param.getIndices()) {
+            return Result.buildFail("索引为空");
+        }
+
+        for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
+            Result<Void> forceMergeResult = esIndexService.forceMerge(indexCatCellDTO.getCluster(), indexCatCellDTO.getIndex(), param.getMaxNumSegments(), param.getOnlyExpungeDeletes());
+            if (forceMergeResult.failed()) {
+                return forceMergeResult;
+            }
+        }
+
+        return Result.buildSucc();
+    }
+
 
     /***************************************************private**********************************************************/
     private Result<Void> basicCheckParam(String cluster, String index, Integer appId) {
@@ -412,6 +465,19 @@ public class IndicesManagerImpl implements IndicesManager {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private String getClusterPhy(String cluster, Integer appId) {
+        if (appService.isSuperApp(appId)) {
+            return cluster;
+        } else {
+            List<ClusterPhy> clusterPhyList = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(cluster);
+            if (AriusObjUtils.isEmptyList(clusterPhyList)) {
+                return null;
+            }
+
+            return clusterPhyList.get(0).getCluster();
         }
     }
 }

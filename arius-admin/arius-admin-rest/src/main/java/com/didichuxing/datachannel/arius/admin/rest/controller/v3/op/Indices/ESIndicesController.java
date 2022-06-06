@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShard
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndexManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
@@ -35,20 +35,20 @@ import io.swagger.annotations.ApiOperation;
 @Deprecated
 public class ESIndicesController {
     @Autowired
-    private IndicesManager indicesManager;
+    private IndexManager indexManager;
 
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "分页获取索引列表信息", notes = "携带可读可写标志位")
     public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(HttpServletRequest request, @RequestBody IndexQueryDTO condition) {
-        return indicesManager.pageGetIndex(condition, HttpRequestUtils.getAppId(request));
+        return indexManager.pageGetIndex(condition, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/select")
     @ResponseBody
     @ApiOperation(value = "获取单个索引的详情信息")
     public Result<IndexCatCellVO> getIndexCatInfoVO(HttpServletRequest request, @RequestParam String clusterPhyName, @RequestParam String indexName) {
-        return indicesManager.getIndexCatInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indexManager.getIndexCatInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @DeleteMapping("")
@@ -77,7 +77,7 @@ public class ESIndicesController {
     @ApiOperation(value = "批量编辑索引阻塞设置")
     public Result<Boolean> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
                                                  HttpServletRequest request) {
-        return indicesManager.batchEditIndexBlockSetting(params, HttpRequestUtils.getAppId(request),
+        return indexManager.batchEditIndexBlockSetting(params, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -86,7 +86,7 @@ public class ESIndicesController {
     @ApiOperation(value = "获取索引shard分配详情")
     public Result<List<IndexShardInfoVO>> getIndexShard(@PathVariable String clusterPhyName,
                                                         @PathVariable String indexName, HttpServletRequest request) {
-        return indicesManager.getIndexShardsInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indexManager.getIndexShardsInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("{clusterPhyName}/{indexName}/mapping")
@@ -94,7 +94,7 @@ public class ESIndicesController {
     @ApiOperation(value = "获取索引mapping信息")
     public Result<IndexMappingVO> mapping(@PathVariable String clusterPhyName, @PathVariable String indexName,
                                           HttpServletRequest request) {
-        return indicesManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indexManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("{clusterPhyName}/{indexName}/setting")
@@ -102,6 +102,6 @@ public class ESIndicesController {
     @ApiOperation(value = "获取模板setting信息")
     public Result<IndexSettingVO> setting(@PathVariable String clusterPhyName, @PathVariable String indexName,
                                           HttpServletRequest request) {
-        return indicesManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indexManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 }

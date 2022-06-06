@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
@@ -273,4 +274,34 @@ public interface ESIndexService {
      * @return
      */
     AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo);
+
+    /**
+     * 编辑别名
+     *
+     * @param alias
+     * @param index
+     * @param cluster
+     * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
+     * @return
+     */
+    Result<Void> editAlias(String cluster, String index, String alias, Boolean editFlag);
+
+    /**
+     * rollover
+     * @param cluster
+     * @param alias
+     * @return
+     */
+    Result<Void> rollover(String cluster, String alias);
+
+    /**
+     * forceMerge
+     * @param cluster
+     * @param index
+     * @param maxNumSegments
+     * @param onlyExpungeDeletes
+     * @return
+     */
+    Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes);
+
 }

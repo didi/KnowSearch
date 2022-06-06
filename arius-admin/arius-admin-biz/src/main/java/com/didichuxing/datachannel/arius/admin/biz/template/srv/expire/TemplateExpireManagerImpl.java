@@ -6,7 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DEL_EXPIRE;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndexManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -43,7 +43,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
     private ESIndexService           esIndexService;
 
     @Autowired
-    private IndicesManager           indicesManager;
+    private IndexManager indexManager;
 
     @Autowired
     private ESIndexCatService        esIndexCatService;
@@ -91,7 +91,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
             shouldDels, retryCount);
 
         if (succ) {
-            indicesManager.batchSetIndexFlagInvalid(templatePhysical.getCluster(), Lists.newArrayList(shouldDels));
+            indexManager.batchSetIndexFlagInvalid(templatePhysical.getCluster(), Lists.newArrayList(shouldDels));
         }
 
         return succ;
@@ -161,7 +161,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
                 succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(), retryCount);
                 if (succ) {
                     //批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
-                    indicesManager.batchSetIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
+                    indexManager.batchSetIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
                 }
             }
         }
@@ -260,7 +260,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
         boolean succ = esIndexService.syncBatchDeleteIndices(cluster, shouldDels, retryCount) == shouldDels.size();
         if (succ) {
             List<String> shouldDelList = Lists.newArrayList(shouldDels);
-            Result<Boolean> batchSetIndexFlagInvalidResult = indicesManager.batchSetIndexFlagInvalid(cluster, shouldDelList);
+            Result<Boolean> batchSetIndexFlagInvalidResult = indexManager.batchSetIndexFlagInvalid(cluster, shouldDelList);
             if (batchSetIndexFlagInvalidResult.success()){
                 operateRecordService.save(SCHEDULE, OperationEnum.DELETE, null,
                         String.format("根据模板过期时间删除过期索引：集群%s;索引:%s", cluster, ListUtils.strList2String(shouldDelList)),
