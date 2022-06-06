@@ -167,6 +167,7 @@ public class IndexManagerImpl implements IndexManager {
     @Override
     public Result<Boolean> batchUpdateIndexStatus(List<IndexCatCellDTO> params, boolean indexNewStatus, Integer appId, String operator) {
         for (IndexCatCellDTO param : params) {
+            param.setCluster(getClusterPhy(param.getCluster(), appId));
             Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
