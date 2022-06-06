@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateAdjustShardDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import io.swagger.annotations.ApiImplicitParam;
@@ -146,6 +147,13 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "清理索引")
     public Result<Void> clearIndices(HttpServletRequest request, @RequestBody TemplateClearDTO param) {
         return templateLogicManager.clearIndices(param);
+    }
+
+    @PostMapping("/adjustShard")
+    @ResponseBody
+    @ApiOperation(value = "扩缩容")
+    public Result<Void> adjustShard(HttpServletRequest request, @RequestBody TemplateAdjustShardDTO param) {
+        return templateLogicManager.adjustShard(param.getTemplateId(), param.getShardNum());
     }
 
 }

@@ -52,6 +52,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tem
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
@@ -61,6 +62,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -68,6 +70,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
@@ -128,6 +131,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private ESIndexService esIndexService;
+
+    @Autowired
+    private ESTemplateService esTemplateService;
 
     @Autowired
     private ResponsibleConvertTool      responsibleConvertTool;
@@ -762,6 +768,31 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
         }
 
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum) {
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        try {
+            IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+            for (IndexTemplatePhy templatePhy : templatePhyList) {
+                if (templatePhy.getShard().equals(shardNum)) {
+                    return Result.buildParamIllegal("该模板已经是" + shardNum + "分片");
+                }
+
+                updateParam.setId(templatePhy.getId());
+                updateParam.setShard(shardNum);
+                Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
+                if (updateDBResult.failed()) {
+                    return updateDBResult;
+                }
+                esTemplateService.syncUpdateRackAndShard(templatePhy.getCluster(), templatePhy.getName(), templatePhy.getRack(), updateParam.getShard(), updateParam.getShardRouting(), RETRY_TIMES);
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=adjustShard||errorMsg=failed to adjust shard", e);
+            return Result.buildFail("模板扩缩容失败");
+        }
         return Result.buildSucc();
     }
 

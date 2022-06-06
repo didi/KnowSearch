@@ -216,4 +216,12 @@ public interface TemplateLogicManager {
      * @return
      */
     Result<Void> clearIndices(TemplateClearDTO clearDTO);
+
+    /**
+     * 执行调整shard 数量
+     * @param logicTemplateId 模板id
+     * @param shardNum 调整后的shard数量
+     * @return 调整结果
+     */
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum);
 }
