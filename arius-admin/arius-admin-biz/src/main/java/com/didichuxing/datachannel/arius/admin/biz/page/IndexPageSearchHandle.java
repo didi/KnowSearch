@@ -132,14 +132,17 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
      */
     private PaginationResult<IndexCatCellVO> getIndexCatCellsFromES(IndexQueryDTO condition, Integer appId) {
         try {
-            //获取Cat/Index信息
-            Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                    condition.getCluster(), condition.getIndex(), condition.getHealth(), appId, condition.getResourceId(),(condition.getPage() - 1) * condition.getSize(), condition.getSize(),
-                condition.getSortTerm(), condition.getOrderByDesc());
+            Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple;
+            if (appService.isSuperApp(appId)) {
+                totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(condition.getCluster(), condition.getIndex(), condition.getHealth(), appId, null,(condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(), condition.getOrderByDesc());
+            } else {
+                totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(null, condition.getIndex(), condition.getHealth(), appId, condition.getCluster(),(condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(), condition.getOrderByDesc());
+            }
+
             if (null == totalHitAndIndexCatCellListTuple) {
                 LOGGER.warn("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||"
                             + "errMsg=get empty index cat info from es",
-                    ListUtils.strList2String(condition.getCluster()), condition.getIndex());
+                    condition.getCluster(), condition.getIndex());
                 return null;
             }
 
@@ -150,7 +153,7 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(), condition.getPage(), condition.getSize());
         } catch (Exception e) {
             LOGGER.error("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
-                ListUtils.strList2String(condition.getCluster()), condition.getIndex(), e.getMessage(), e);
+                condition.getCluster(), condition.getIndex(), e.getMessage(), e);
             return PaginationResult.buildFail("获取分页索引列表失败");
         }
     }

@@ -19,11 +19,8 @@ import java.util.List;
 @ApiModel(description = "索引条件查询实体")
 public class IndexQueryDTO extends PageDTO {
 
-    @ApiModelProperty("物理集群")
-    private List<String> cluster;
-
-    @ApiModelProperty("逻辑集群Id")
-    private Integer resourceId;
+    @ApiModelProperty("集群")
+    private String cluster;
 
     @ApiModelProperty("索引名称")
     private String index;

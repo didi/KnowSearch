@@ -10,8 +10,9 @@ public interface ESIndexCatService {
 
     /**
      * 分页获取CatIndex信息
-     * @param clusters     集群名称
      * @param index        索引名称
+     * @param clusterLogic clusterLogic
+     * @param clusterPhy clusterPhy
      * @param health       索引健康状态
      * @param from         起始点
      * @param size         当前页数量
@@ -21,7 +22,7 @@ public interface ESIndexCatService {
      * @param resourceId   资源id
      * @return Tuple<Long, List<IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
-    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(List<String> clusters, String index, String health, Integer appId, Integer resourceId,
+    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String clusterPhy, String index, String health, Integer appId, String clusterLogic,
                                                         Long from, Long size, String sortTerm, Boolean orderByDesc);
 
     /**

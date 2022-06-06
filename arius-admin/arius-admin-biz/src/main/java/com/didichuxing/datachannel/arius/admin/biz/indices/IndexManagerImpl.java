@@ -439,7 +439,7 @@ public class IndexManagerImpl implements IndexManager {
     private IndexQueryDTO buildOneIndicesConditionDTO(String clusterPhyName, String indexName) {
         IndexQueryDTO indexQueryDTO = new IndexQueryDTO();
         indexQueryDTO.setIndex(indexName);
-        indexQueryDTO.setCluster(Arrays.asList(clusterPhyName));
+        indexQueryDTO.setCluster(clusterPhyName);
         indexQueryDTO.setSortTerm(DEFAULT_SORT_TERM);
         indexQueryDTO.setPage(1L);
         indexQueryDTO.setSize(1L);

@@ -64,7 +64,6 @@ public class IndexCatESDAO extends BaseESDAO {
     /**
      * 根据条件获取CatIndex信息
      *
-     * @param clusters     集群名称列表
      * @param index        索引名称（可选）
      * @param health       健康度（可选）
      * @param from         起始值
@@ -73,11 +72,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(List<String> clusters, String index, String health, Integer appId, Integer resourceId,
+    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String clusterPhy, String index, String health, Integer appId, String clusterLogic,
                                                              Long from,
                                                              Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(clusters, index, health, appId, resourceId);
+        String queryTermDsl =  buildQueryTermDsl(clusterPhy, index, health, appId, clusterLogic);
         String sortType     =  buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
             queryTermDsl, sortTerm, sortType, from, size);
@@ -142,14 +141,14 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param health
      * @return
      */
-    private String buildQueryTermDsl(List<String> clusters, String index, String health, Integer appId, Integer resourceId) {
-        return "[" + buildTermCell(clusters, index, health, appId, resourceId) +"]";
+    private String buildQueryTermDsl(String clusterPhy, String index, String health, Integer appId, String clusterLogic) {
+        return "[" + buildTermCell(clusterPhy, index, health, appId, clusterLogic) +"]";
     }
 
-    private String buildTermCell(List<String> clusters, String index, String health, Integer appId, Integer resourceId) {
+    private String buildTermCell(String clusterPhy, String index, String health, Integer appId, String clusterLogic) {
         List<String> termCellList = Lists.newArrayList();
         //get cluster dsl term
-        termCellList.add(DSLSearchUtils.getTermCellsForExactSearch(clusters, "cluster"));
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(clusterPhy, "clusterPhy"));
 
         //get index dsl term
         termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(index, "index"));
@@ -158,7 +157,7 @@ public class IndexCatESDAO extends BaseESDAO {
         termCellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appId"));
 
         //get resourceId dsl term
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(resourceId, "resourceId"));
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(clusterLogic, "clusterLogic"));
 
         //get index status term
         if (IndexStatusEnum.isStatusExit(health)) {

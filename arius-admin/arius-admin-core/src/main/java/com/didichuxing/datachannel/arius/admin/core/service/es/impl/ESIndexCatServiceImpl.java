@@ -34,10 +34,10 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     private IndexCatESDAO indexCatESDAO;
 
     @Override
-    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(List<String> clusters, String index, String health, Integer appId, Integer resourceId,
+    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String clusterPhy, String index, String health, Integer appId, String clusterLogic,
                                                                Long from, Long size, String sortTerm, Boolean orderByDesc) {
-        Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(clusters, index,
-            health, appId, resourceId, from, size, sortTerm, orderByDesc);
+        Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(clusterPhy, index,
+            health, appId, clusterLogic, from, size, sortTerm, orderByDesc);
         if (null == hitTotal2catIndexInfoTuplePO) {
             return null;
         }
