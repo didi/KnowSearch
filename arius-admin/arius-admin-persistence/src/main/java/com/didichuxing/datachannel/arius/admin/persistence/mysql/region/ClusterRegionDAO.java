@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.region;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import org.springframework.stereotype.Repository;
 

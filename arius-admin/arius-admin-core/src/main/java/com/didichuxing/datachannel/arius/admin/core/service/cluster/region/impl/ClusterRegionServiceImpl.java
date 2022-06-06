@@ -6,6 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -13,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -614,6 +616,32 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                 .collect(Collectors.toList());
 
         return ConvertUtil.list2List(clusterRegionPOS, ClusterRegion.class);
+    }
+
+    @Override
+    public List<ClusterRegion> listColdRegionByCluster(String cluster) {
+        List<ClusterRegionPO> clusterRegions = clusterRegionDAO.getByPhyClusterName(cluster);
+        if (CollectionUtils.isEmpty(clusterRegions)) {
+            return new ArrayList<>();
+        }
+
+        List<ClusterRegion> coldRegionList = new ArrayList<>();
+        for (ClusterRegionPO region : clusterRegions) {
+            ClusterRegionConfig config = genClusterRegionConfig(region.getConfig());
+            if (Boolean.TRUE.equals(config.getColdFlag())) {
+                coldRegionList.add(ConvertUtil.obj2Obj(region, ClusterRegion.class));
+            }
+        }
+
+        return coldRegionList;
+    }
+
+    @Override
+    public ClusterRegionConfig genClusterRegionConfig(String config) {
+        if (StringUtils.isBlank(config)) {
+            return new ClusterRegionConfig();
+        }
+        return JSON.parseObject(config, ClusterRegionConfig.class);
     }
 
     /***************************************** private method ****************************************************/

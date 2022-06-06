@@ -2,15 +2,14 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -52,6 +51,9 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Autowired
     private ESIndexDAO        esIndexDAO;
+
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -288,6 +290,20 @@ public class ESIndexServiceImpl implements ESIndexService {
                                        int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("syncUpdateRackByExpression", retryCount,
             () -> esIndexDAO.batchUpdateIndexRack(cluster, indices, tgtRack));
+    }
+
+    @Override
+    public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
+                                         int retryCount) throws ESOperateException {
+        Set<String> nodeNames = new HashSet<>();
+        Result<List<ClusterRoleHost>> clusterRoleHostResult = clusterRoleHostService.listByRegionId(tgtRegionId);
+        if (clusterRoleHostResult.failed()) {
+            return false;
+        }
+        clusterRoleHostResult.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
+
+        return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
+            () -> esIndexDAO.batchUpdateIndexRegion(cluster, indices, nodeNames));
     }
 
     /**

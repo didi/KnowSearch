@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterRackInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 
 /**
  * @author ohushenglin_v
@@ -247,4 +248,13 @@ public interface ClusterRegionService {
 
 
     List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
+
+    /**
+     * 获取指定逻辑集群
+     * @param cluster
+     * @return
+     */
+    List<ClusterRegion> listColdRegionByCluster(String cluster);
+
+    ClusterRegionConfig genClusterRegionConfig(String config);
 }

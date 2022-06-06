@@ -41,4 +41,9 @@ public class ClusterRegion extends BaseEntity {
      */
     @Deprecated
     private String racks;
+
+    /**
+     * 配置
+     */
+    private String config;
 }

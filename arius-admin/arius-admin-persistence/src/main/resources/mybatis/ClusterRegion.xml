@@ -9,10 +9,11 @@
         <result column="racks"             jdbcType="VARCHAR"       property="racks"/>
         <result column="create_time"       jdbcType="TIMESTAMP"     property="createTime"/>
         <result column="update_time"       jdbcType="TIMESTAMP"     property="updateTime"/>
+        <result column="config"            jdbcType="VARCHAR"       property="config"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, name, logic_cluster_id, phy_cluster_name, racks, create_time, update_time
+        id, name, logic_cluster_id, phy_cluster_name, racks, create_time, update_time, config
     </sql>
 
     <insert id="insert"
@@ -20,9 +21,9 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_cluster_region
-        (name, logic_cluster_id,phy_cluster_name, racks)
+        (name, logic_cluster_id,phy_cluster_name, racks, config)
         values
-        (#{name}, #{logicClusterIds}, #{phyClusterName}, #{racks})
+        (#{name}, #{logicClusterIds}, #{phyClusterName}, #{racks}, #{config})
     </insert>
 
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
@@ -93,6 +94,7 @@
             <if test="logicClusterIds != null">,logic_cluster_id = #{logicClusterIds}</if>
             <if test="phyClusterName != null">,phy_cluster_name = #{phyClusterName}</if>
             <if test="racks != null">,racks = #{racks}</if>
+            <if test="config != null">,config = #{config}</if>
         </trim>
         where id = #{id} and delete_flag = 0
     </update>

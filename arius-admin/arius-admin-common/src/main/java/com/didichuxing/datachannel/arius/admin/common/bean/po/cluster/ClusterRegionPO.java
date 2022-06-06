@@ -43,4 +43,9 @@ public class ClusterRegionPO extends BasePO {
     @Deprecated
     private String racks;
 
+    /**
+     * 配置项
+     */
+    private String config;
+
 }
