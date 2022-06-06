@@ -37,7 +37,6 @@ public class TemplateDCDRController {
         return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, regionId, HttpRequestUtils.getOperator(request));
     }
 
-
     @GetMapping("/{templateId}/dcdrInfo")
     @ResponseBody
     @ApiOperation("获取模板DCDR详情")
