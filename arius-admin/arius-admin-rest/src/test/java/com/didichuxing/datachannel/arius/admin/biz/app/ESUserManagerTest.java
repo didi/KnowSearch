@@ -35,6 +35,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -44,7 +46,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes ={ SpringTool.class })
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ESUserManagerTest {
     
     @Mock
@@ -54,7 +56,7 @@ class ESUserManagerTest {
     private ESUserService        esUserService;
     @Mock
     private RoleTool             roleTool;
-    @Mock
+    @MockBean
     private OperateRecordService operateRecordService;
     @InjectMocks
     private ESUserManagerImpl    esUserManager;
@@ -62,8 +64,6 @@ class ESUserManagerTest {
     @BeforeEach
     void setUp() {
         initMocks(this);
-        when(operateRecordService.save(anyInt(), anyInt(), anyString(), anyString(), anyString())).thenReturn(
-                Result.buildSucc());
     }
     
     @Test

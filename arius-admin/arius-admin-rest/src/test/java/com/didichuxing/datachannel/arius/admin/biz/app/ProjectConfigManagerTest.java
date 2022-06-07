@@ -15,22 +15,26 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectCon
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
-@AutoConfigureMockMvc
+@ContextConfiguration(classes ={ SpringTool.class })
 @SpringBootTest
 class ProjectConfigManagerTest {
     
