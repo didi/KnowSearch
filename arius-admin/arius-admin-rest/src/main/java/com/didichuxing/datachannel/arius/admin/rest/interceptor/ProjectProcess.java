@@ -2,13 +2,22 @@ package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
 import static com.didiglobal.logi.security.common.constant.Constants.API_PREFIX;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.biz.app.ProjectConfigManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
+import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.Result;
+import com.didiglobal.logi.security.common.constant.OplogConstant;
+import com.didiglobal.logi.security.common.dto.oplog.OplogQueryDTO;
+import com.didiglobal.logi.security.common.vo.oplog.OplogVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.OplogService;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -28,10 +37,16 @@ public class ProjectProcess implements ResponseBodyAdvice {
     @Autowired
     private              ESUserService        esUserService;
     @Autowired
-    private              ProjectConfigService projectConfigService;
-    private static final String               PROJECT_END = "project";
+    private              ProjectConfigManager projectConfigManager;
+    @Autowired
+    private              OplogService         oplogService;
+    private static final String               PROJECT_END      = "project";
+    private static final String               SLOW_QUERY_TIMES = "slowQueryTimes";
+    private static final String               MEMO             = "memo";
+    
     @Autowired
     private RoleTool roleTool;
+    
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
         return true;
@@ -56,9 +71,39 @@ public class ProjectProcess implements ResponseBodyAdvice {
                     esUserDTO.setVerifyCode(RandomStringUtils.randomAlphabetic(7));
                     esUserDTO.setMemo(((ProjectVO) data).getProjectName() + "项目默认的es user");
                     esUserDTO.setProjectId(((ProjectVO) data).getId());
-                    esUserService.registerESUser(esUserDTO,roleTool.adminList().get(0).getUserName() );
+                    esUserService.registerESUser(esUserDTO, roleTool.adminList().get(0).getUserName());
+                    //获取description字段之后进行提取其中的两个配置
+                    final String description = ((ProjectVO) data).getDescription();
+                    if (StringUtils.isNotBlank(description)) {
+                       
+                        final OplogQueryDTO oplogQueryDTO = new OplogQueryDTO();
+                        oplogQueryDTO.setDetail(((ProjectVO) data).getProjectName());
+                        oplogQueryDTO.setTargetType(OplogConstant.PM_A);
+                        oplogQueryDTO.setTarget(OplogConstant.PM_P);
+                        oplogQueryDTO.setOperateType(OplogConstant.PM);
+                        final PagingData<OplogVO> oplogPage = oplogService.getOplogPage(oplogQueryDTO);
+                        //获取操作人
+                        String operator;
+                        if (oplogPage.getBizData().isEmpty()) {
+                            operator = ((ProjectVO) data).getOwnerList().stream().findFirst().orElse(new UserBriefVO())
+                                    .getUserName();
+                        } else {
+                            operator = oplogPage.getBizData().stream().findFirst().orElse(new OplogVO()).getOperator();
+                        }
+                        final JSONObject jsonObject = JSON.parseObject(description);
+                        final Integer slowQueryTimes = jsonObject.getInteger(SLOW_QUERY_TIMES);
+                        final String memo = jsonObject.getString(MEMO);
+                        final ProjectConfigDTO projectConfigDTO = new ProjectConfigDTO();
+                        projectConfigDTO.setProjectId(((ProjectVO) data).getId());
+                        projectConfigDTO.setSlowQueryTimes(slowQueryTimes);
+                        projectConfigDTO.setMemo(memo);
+                        
+                        projectConfigManager.initProjectConfig(projectConfigDTO,operator);
+                        
+                    }
+                    
                 }
-                
+    
             }
             String[] prefix = StringUtils.split(requestPath, "/");
             String projectId = prefix[prefix.length - 1];
@@ -67,8 +112,8 @@ public class ProjectProcess implements ResponseBodyAdvice {
                 && body instanceof com.didiglobal.logi.security.common.Result && ((Result<?>) body).successed()
                 && StringUtils.isNumeric(projectId)) {
                 Optional.ofNullable(prefix[prefix.length - 1]).map(Integer::parseInt)
-                        .ifPresent(projectConfigService::deleteByProjectId);
-                
+                        .ifPresent(projectConfigManager::deleteByProjectId);
+        
             }
         }
         

@@ -74,4 +74,13 @@ public class ProjectConfigManagerImpl implements ProjectConfigManager {
 		return tuple.getV1();
 	}
 	
+	/**
+	 * @param projectId
+	 */
+	@Override
+	public void deleteByProjectId(Integer projectId) {
+		projectConfigService.deleteByProjectId(projectId);
+		
+	}
+	
 }
