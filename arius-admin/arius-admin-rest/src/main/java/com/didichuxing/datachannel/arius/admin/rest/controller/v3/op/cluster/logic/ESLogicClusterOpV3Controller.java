@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
@@ -44,33 +44,33 @@ public class ESLogicClusterOpV3Controller {
     @Autowired
     private ClusterLogicNodeService clusterLogicNodeService;
     
-    @GetMapping("/cluster-names")
+    @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "根据AppId获取逻辑集群下的逻辑集群名称")
     public Result<List<String>> getAppLogicOrPhysicClusterNames(HttpServletRequest request) {
         return clusterLogicManager.getAppLogicOrPhysicClusterNames(HttpRequestUtils.getAppId(request));
     }
     
-    @GetMapping("/list")
+    @GetMapping()
     @ResponseBody
     @ApiOperation(value = "根据AppId获取有权限的逻辑或物理集群信息")
-    public Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(HttpServletRequest request) {
+    public Result<List<ClusterLogicVO>> getAppLogicClusterInfo(HttpServletRequest request) {
         return clusterLogicManager.getAppLogicClusterInfo(HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
-    public PaginationResult<ConsoleClusterVO> selectPage(HttpServletRequest request,
-                                                         @RequestBody ClusterLogicConditionDTO condition) {
-        return clusterLogicManager.selectPage(condition, HttpRequestUtils.getAppId(request));
+    public PaginationResult<ClusterLogicVO> pageGetClusterLogicVOS(HttpServletRequest request,
+                                                                     @RequestBody ClusterLogicConditionDTO condition) {
+        return clusterLogicManager.pageGetClusterLogicVOS(condition, HttpRequestUtils.getAppId(request));
     }
     
     @GetMapping("/detail/{clusterLogicId}")
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群概览信息接口")
     @ApiImplicitParam(type = "Long", name = "clusterLogicId", value = "逻辑集群ID", required = true)
-    public Result<ConsoleClusterVO> detail(HttpServletRequest request, @PathVariable Long clusterLogicId) {
+    public Result<ClusterLogicVO> detail(HttpServletRequest request, @PathVariable Long clusterLogicId) {
         return Result.buildSucc(
                 clusterLogicManager.getConsoleCluster(clusterLogicId, HttpRequestUtils.getAppId(request)));
     }
@@ -83,10 +83,9 @@ public class ESLogicClusterOpV3Controller {
         return Result.buildSucc();
     }
     
-    @PutMapping("/edit")
+    @PutMapping()
     @ResponseBody
     @ApiOperation(value = "编辑逻辑集群接口")
-    
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),
                 HttpRequestUtils.getAppId(request));
@@ -115,9 +114,8 @@ public class ESLogicClusterOpV3Controller {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
     
-    public PaginationResult<ESClusterRoleHostVO>  nodesPage(@PathVariable Long clusterLogicId,@RequestBody ClusterLogicNodeConditionDTO condition) {
+    public PaginationResult<ESClusterRoleHostVO>  pageGetESClusterRoleHostVO(@PathVariable Long clusterLogicId,@RequestBody ClusterLogicNodeConditionDTO condition) {
         List<ESClusterRoleHostVO>  nodes = clusterNodeManager.convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterLogicId));
         return clusterLogicManager.nodesPage(nodes,condition);
     }
-    
 }

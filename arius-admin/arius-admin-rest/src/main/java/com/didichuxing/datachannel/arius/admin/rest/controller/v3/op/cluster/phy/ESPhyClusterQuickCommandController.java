@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.QuickCommandManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 /**
  * 物理集群快捷命令
@@ -35,35 +35,35 @@ public class ESPhyClusterQuickCommandController {
     @PutMapping("/{cluster}/node-state-analysis")
     @ResponseBody
     @ApiOperation(value = "node_state分析")
-    public Result<List<Map>> nodeStateAnalysis(@PathVariable String cluster) {
+    public Result<List<NodeStateVO>> nodeStateAnalysis(@PathVariable String cluster) {
         return quickCommandManager.nodeStateAnalysis(cluster);
     }
 
     @PutMapping("/{cluster}/indices-distribution")
     @ResponseBody
     @ApiOperation(value = "indices分布")
-    public Result<JSONArray> indicesDistribution(@PathVariable String cluster) {
+    public Result<List<IndicesDistributionVO>> indicesDistribution(@PathVariable String cluster) {
         return quickCommandManager.indicesDistribution(cluster);
     }
 
     @PutMapping("/{cluster}/shard-distribution")
     @ResponseBody
     @ApiOperation(value = "shard分布")
-    public Result<JSONArray> shardDistribution(@PathVariable String cluster) {
+    public Result<List<ShardDistributionVO>> shardDistribution(@PathVariable String cluster) {
         return quickCommandManager.shardDistribution(cluster);
     }
 
     @PutMapping("/{cluster}/pending-task-analysis")
     @ResponseBody
     @ApiOperation(value = "pending task分析")
-    public Result<List<Map>> pendingTaskAnalysis(@PathVariable String cluster) {
+    public Result<List<PendingTaskAnalysisVO>> pendingTaskAnalysis(@PathVariable String cluster) {
         return quickCommandManager.pendingTaskAnalysis(cluster);
     }
 
     @PutMapping("/{cluster}/task-mission-analysis")
     @ResponseBody
     @ApiOperation(value = "task任务分析")
-    public Result<List<Map>> taskMissionAnalysis(@PathVariable String cluster) {
+    public Result<List<TaskMissionAnalysisVO>> taskMissionAnalysis(@PathVariable String cluster) {
         return quickCommandManager.taskMissionAnalysis(cluster);
     }
 
@@ -77,7 +77,7 @@ public class ESPhyClusterQuickCommandController {
     @PutMapping("/{cluster}/shard-assignment-description")
     @ResponseBody
     @ApiOperation(value = "shard分配说明")
-    public Result<Map> shardAssignmentDescription(@PathVariable String cluster) {
+    public Result<ShardAssignmentDescriptionVO> shardAssignmentDescription(@PathVariable String cluster) {
         return quickCommandManager.shardAssignmentDescription(cluster);
     }
 

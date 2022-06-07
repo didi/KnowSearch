@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
@@ -48,8 +48,8 @@ public class ESLogicClusterController {
     @ResponseBody
     @ApiOperation(value = "获取所有逻辑集群列表接口【三方接口】",tags = "【三方接口】" )
 
-    public Result<List<ConsoleClusterVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
-                                                                HttpServletRequest request) {
+    public Result<List<ClusterLogicVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
+                                                              HttpServletRequest request) {
         return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtils.getAppId(request)));
     }
 
@@ -58,8 +58,8 @@ public class ESLogicClusterController {
     @ApiOperation(value = "获取指定逻辑集群接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "resourceId", value = "逻辑集群ID", required = true) })
 
-    public Result<ConsoleClusterVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
-                                                        HttpServletRequest request) {
+    public Result<ClusterLogicVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
+                                                      HttpServletRequest request) {
         return Result.buildSucc(
             clusterLogicManager.getConsoleClusterVOByIdAndAppId(resourceId, HttpRequestUtils.getAppId(request)));
     }

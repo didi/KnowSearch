@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterLogicTemplateIndexDetailVO {
+public class ClusterLogicTemplateIndexDetailDTO {
     @ApiModelProperty("模板列表")
     private List<IndexTemplateLogicAggregate> templateLogicAggregates;
 

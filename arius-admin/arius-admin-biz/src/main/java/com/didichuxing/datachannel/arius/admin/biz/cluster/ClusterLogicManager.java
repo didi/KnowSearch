@@ -13,8 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
@@ -38,7 +37,7 @@ public interface ClusterLogicManager {
      *                          ，为null则权限为运维人员权限（管理权限）
      * @return 逻辑集群VO
      */
-    List<ConsoleClusterVO> batchBuildOpClusterVOs(List<ClusterLogic> logicClusters, Integer appIdForAuthJudge);
+    List<ClusterLogicVO> batchBuildOpClusterVOs(List<ClusterLogic> logicClusters, Integer appIdForAuthJudge);
 
     /**
      * 构建运维页面的逻辑集群VO
@@ -47,7 +46,7 @@ public interface ClusterLogicManager {
      *                          ，为null则权限为运维人员权限（管理权限）
      * @return
      */
-    ConsoleClusterVO buildOpClusterVO(ClusterLogic clusterLogic, Integer appIdForAuthJudge);
+    ClusterLogicVO buildOpClusterVO(ClusterLogic clusterLogic, Integer appIdForAuthJudge);
 
     /**
      * 获取逻辑集群所有访问的APP
@@ -62,7 +61,7 @@ public interface ClusterLogicManager {
      * @param appId appId
      * @return
      */
-    Result<List<ConsoleClusterVO>> getAppLogicClusters(Integer appId);
+    Result<List<ClusterLogicVO>> getAppLogicClusters(Integer appId);
 
     /**
      * 获取APP拥有的逻辑集群或者物理集群名称列表
@@ -77,14 +76,14 @@ public interface ClusterLogicManager {
      * @param appId 项目id
      * @return
      */
-    Result<List<ConsoleClusterVO>> getAppLogicClusterInfo(Integer appId);
+    Result<List<ClusterLogicVO>> getAppLogicClusterInfo(Integer appId);
 
     /**
      * 获取平台所有的集群列表
      * @param appId
      * @return
      */
-    Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(Integer appId);
+    Result<List<ClusterLogicVO>> getDataCenterLogicClusters(Integer appId);
 
     /**
      * 获取集群详情
@@ -92,7 +91,7 @@ public interface ClusterLogicManager {
      * @param appId
      * @return
      */
-    Result<ConsoleClusterVO> getAppLogicClusters(Long clusterId, Integer appId);
+    Result<ClusterLogicVO> getAppLogicClusters(Long clusterId, Integer appId);
 
     /**
      * 获取逻辑集群所有逻辑模板列表
@@ -131,14 +130,14 @@ public interface ClusterLogicManager {
      * @param appId
      * @return
      */
-    List<ConsoleClusterVO> getConsoleClusterVOS(ESLogicClusterDTO param, Integer appId);
+    List<ClusterLogicVO> getConsoleClusterVOS(ESLogicClusterDTO param, Integer appId);
 
     /**
      * 获取单个逻辑集群overView信息
      * @param clusterLogicId 逻辑集群id
      * @param currentAppId 当前登录项目
      */
-    ConsoleClusterVO getConsoleCluster(Long clusterLogicId, Integer currentAppId);
+    ClusterLogicVO getConsoleCluster(Long clusterLogicId, Integer currentAppId);
 
     /**
      * 新建逻辑集群, 关联 logicCluster 关联 region
@@ -154,7 +153,7 @@ public interface ClusterLogicManager {
      * @param appId appId
      * @return 集群详情
      */
-    ConsoleClusterVO getConsoleClusterVOByIdAndAppId(Long clusterLogicId, Integer appId);
+    ClusterLogicVO getConsoleClusterVOByIdAndAppId(Long clusterLogicId, Integer appId);
 
     /**
      *  新建带有region信息的逻辑集群
@@ -190,7 +189,7 @@ public interface ClusterLogicManager {
      * @param appId
      * @return
      */
-    PaginationResult<ConsoleClusterVO> selectPage(ClusterLogicConditionDTO condition, Integer appId);
+    PaginationResult<ClusterLogicVO> pageGetClusterLogicVOS(ClusterLogicConditionDTO condition, Integer appId);
 
     /**
      * 获取项目下指定权限类型的逻辑集群列表
@@ -214,7 +213,7 @@ public interface ClusterLogicManager {
      * @return
      */
     @Deprecated
-    Result<List<ConsoleClusterVO>> getAppLogicClusterInfoByType(Integer appId, Integer type);
+    Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(Integer appId, Integer type);
 
     /**
      * 更新逻辑集群状态

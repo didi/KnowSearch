@@ -671,20 +671,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 }
         );
         //节点名称列表
-//        List<String> nodeList = esClusterRoleHostPOS.stream().map(ESClusterRoleHostPO::getNodeSet).collect(toList());
-//        String clusterName =clusterRegions.get(0).getPhyClusterName();
-//        endTime = System.currentTimeMillis()- 60000L;
-//        startTime =System.currentTimeMillis()- 120000L;
-        //测试数据
-        String clusterName ="lyn-test-public12-08";
-        List<String> nodeList = new ArrayList<>();
-        nodeList.add("logi03-client03");
-        nodeList.add("logi01-client01");
-        Long startTime = 1653235200000L;
-        Long endTime = 1653235200000L;
+        List<String> nodeList = esClusterRoleHostPOS.stream().map(ESClusterRoleHostPO::getNodeSet).collect(toList());
+        String clusterName =clusterRegions.get(0).getPhyClusterName();
+        Long endTime = System.currentTimeMillis()- 60000L;
+        Long startTime =System.currentTimeMillis()- 120000L;
         return ariusStatsNodeInfoESDAO.getClusterLogicDiskUsedInfo(clusterName, nodeList, startTime, endTime);
-
-
     }
 
     /***************************************** private method ****************************************************/

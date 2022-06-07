@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.cluster;
 
 import java.util.List;
-import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
@@ -37,14 +36,14 @@ public class ConsoleClusterController {
     @ResponseBody
     @ApiOperation(value = "获取APP拥有的集群列表【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<List<ConsoleClusterVO>> getAppLogicClusters(@RequestParam("appId") Integer appId) {
+    public Result<List<ClusterLogicVO>> getAppLogicClusters(@RequestParam("appId") Integer appId) {
         return clusterLogicManager.getAppLogicClusters(appId);
     }
 
     @GetMapping("/listAll")
     @ResponseBody
     @ApiOperation(value = "获取平台所有的集群列表【三方接口】",tags = "【三方接口】" )
-    public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(@RequestParam(value = "appId",required = false) Integer appId) {
+    public Result<List<ClusterLogicVO>> getDataCenterLogicClusters(@RequestParam(value = "appId",required = false) Integer appId) {
         return clusterLogicManager.getDataCenterLogicClusters(appId);
     }
 
@@ -53,8 +52,8 @@ public class ConsoleClusterController {
     @ApiOperation(value = "获取集群详情" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "集群ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "APP ID", required = true) })
-    public Result<ConsoleClusterVO> getAppLogicClusters(@RequestParam("clusterId") Long clusterId,
-                                                        @RequestParam("appId") Integer appId) {
+    public Result<ClusterLogicVO> getAppLogicClusters(@RequestParam("clusterId") Long clusterId,
+                                                      @RequestParam("appId") Integer appId) {
         return clusterLogicManager.getAppLogicClusters(clusterId, appId);
     }
 

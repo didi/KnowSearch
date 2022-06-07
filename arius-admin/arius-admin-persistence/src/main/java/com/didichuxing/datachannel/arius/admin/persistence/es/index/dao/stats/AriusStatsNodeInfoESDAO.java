@@ -433,12 +433,12 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         Map<String/*rackName*/, NodeRackStatisPO> nodeRackStatisMap = Maps.newHashMap();
 
-        String rackFormat = CommonUtils.strConcat(nodeList);
+        String nodeFormat = CommonUtils.strConcat(nodeList);
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_DISK_INFO, clusterName,
-                rackFormat, startTime, endTime);
+                nodeFormat, startTime, endTime);
 
         ESQueryResponse esQueryResponse = gatewayClient.performRequest(realIndexName, TYPE, dsl);
 

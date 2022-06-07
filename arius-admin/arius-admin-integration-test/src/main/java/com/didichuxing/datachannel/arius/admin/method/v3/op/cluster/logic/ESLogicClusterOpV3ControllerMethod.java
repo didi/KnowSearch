@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.AriusClient;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,24 +25,24 @@ public class ESLogicClusterOpV3ControllerMethod {
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<String>>>(){});
     }
 
-    public static Result<List<ConsoleClusterVO>> getAppLogicClusterInfo() throws IOException {
+    public static Result<List<ClusterLogicVO>> getAppLogicClusterInfo() throws IOException {
         String path = String.format("%s/list", LOGIC_CLUSTER);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ConsoleClusterVO>>>(){});
+        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ClusterLogicVO>>>(){});
     }
 
-    public static Result<List<ConsoleClusterVO>> getAppLogicClusterInfoByType(Integer type) throws IOException {
+    public static Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(Integer type) throws IOException {
         String path = String.format("%s/%d", LOGIC_CLUSTER, type);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ConsoleClusterVO>>>(){});
+        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ClusterLogicVO>>>(){});
     }
 
-    public static PaginationResult<ConsoleClusterVO> pageGetConsoleClusterVOS(ClusterLogicConditionDTO condition) throws IOException {
+    public static PaginationResult<ClusterLogicVO> pageGetConsoleClusterVOS(ClusterLogicConditionDTO condition) throws IOException {
         String path = String.format("%s/page", LOGIC_CLUSTER);
-        return JSON.parseObject(AriusClient.post(path, condition), new TypeReference<PaginationResult<ConsoleClusterVO>>(){});
+        return JSON.parseObject(AriusClient.post(path, condition), new TypeReference<PaginationResult<ClusterLogicVO>>(){});
     }
 
-    public static Result<ConsoleClusterVO> get(Long clusterLogicId) throws IOException {
+    public static Result<ClusterLogicVO> get(Long clusterLogicId) throws IOException {
         String path = String.format("%s/%d/overView", LOGIC_CLUSTER, clusterLogicId);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<ConsoleClusterVO>>(){});
+        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<ClusterLogicVO>>(){});
     }
 
     public static Result<Void> checkTemplateValidForCreate(Long logicClusterId, String templateSize) throws IOException {

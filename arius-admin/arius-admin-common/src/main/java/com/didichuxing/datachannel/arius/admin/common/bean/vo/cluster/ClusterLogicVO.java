@@ -21,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("逻辑集群")
-public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleClusterVO> {
+public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO> {
 
     @ApiModelProperty("集群ID")
     private Long                         id;
@@ -112,7 +112,7 @@ public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleCluste
     
 
     @Override
-    public int compareTo(ConsoleClusterVO o) {
+    public int compareTo(ClusterLogicVO o) {
         if (null == o) {
             return -1;
         }

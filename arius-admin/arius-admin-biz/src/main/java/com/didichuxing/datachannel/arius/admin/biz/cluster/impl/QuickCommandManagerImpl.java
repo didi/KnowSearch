@@ -1,11 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.QuickCommandManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.PendingTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -40,21 +45,24 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
      */
     @Autowired
     protected ESOpClient esOpClient;
+    @Autowired
+    protected ClusterPhyService clusterPhyService;
+
+
 
     @Override
-    public Result<List<Map>> nodeStateAnalysis(String cluster) {
-
+    public Result<List<NodeStateVO>> nodeStateAnalysis(String cluster) {
         DirectResponse directResponse = getDirectResponse(cluster, NODE_STATE.getMethod(), NODE_STATE.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-            List<Map> result = new ArrayList<>();
+            List<NodeStateVO> result = new ArrayList<>();
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
             JSONObject nodes = (JSONObject) responseJson.get("nodes");
             nodes.keySet().forEach(key -> {
-                Map nodeMap = buildNodeState((JSONObject) nodes.get(key));
-                nodeMap.put("node_name", key);
+                NodeStateVO nodeMap = buildNodeState((JSONObject) nodes.get(key));
+                nodeMap.setNodeName(key);
                 result.add(nodeMap);
             });
             return Result.buildSucc(result);
@@ -63,65 +71,75 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
     }
 
     @Override
-    public Result<JSONArray> indicesDistribution(String cluster) {
+    public Result<List<IndicesDistributionVO>> indicesDistribution(String cluster) {
         DirectResponse directResponse = getDirectResponse(cluster, INDICES.getMethod(), INDICES.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONArray responseJson = JSONObject.parseArray(directResponse.getResponseContent());
-            return Result.buildSucc(responseJson);
+            return Result.buildSucc(buildIndicesDistributionVO(responseJson));
         }
         return Result.buildFail();
     }
 
+    private List<IndicesDistributionVO> buildIndicesDistributionVO(JSONArray responseJson) {
+        List<IndicesDistributionVO> vos = new ArrayList<>();
+        for (int i = 0; i < responseJson.size(); i++) {
+            JSONObject indice = (JSONObject) responseJson.get(i);
+            IndicesDistributionVO vo = new IndicesDistributionVO();
+            vo.setHealth(indice.getString("health"));
+            vo.setIndex(indice.getString("index"));
+            vo.setDocsCount(indice.getString("docs.count"));
+            vo.setPri(indice.getString("pri"));
+            vo.setRep(indice.getString("rep"));
+            vo.setDocsDeleted(indice.getString("docs.deleted"));
+            vo.setStatus(indice.getString("status"));
+            vo.setUuid(indice.getString("uuid"));
+            vo.setStoreSize(indice.getString("store.size"));
+            vo.setPriStoreSize(indice.getString("pri.store.size"));
+            vos.add(vo);
+        }
+        return vos;
+    }
+
     @Override
-    public Result<JSONArray> shardDistribution(String cluster) {
+    public Result<List<ShardDistributionVO>> shardDistribution(String cluster) {
         DirectResponse directResponse = getDirectResponse(cluster, SHARD.getMethod(), SHARD.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONArray responseJson = JSONObject.parseArray(directResponse.getResponseContent());
-            return Result.buildSucc(responseJson);
+            return Result.buildSucc(JSONObject.parseArray(responseJson.toJSONString(), ShardDistributionVO.class));
         }
         return Result.buildFail();
     }
 
     @Override
-    public Result<List<Map>> pendingTaskAnalysis(String cluster) {
+    public Result<List<PendingTaskAnalysisVO>> pendingTaskAnalysis(String cluster) {
         DirectResponse directResponse = getDirectResponse(cluster, PENDING_TASK.getMethod(), PENDING_TASK.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-            List<Map> result = new ArrayList<>();
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
             JSONArray tasks = responseJson.getJSONArray("tasks");
-            for (int i = 0; i < tasks.size(); i++) {
-                JSONObject taskObject = (JSONObject) tasks.get(i);
-                result.add(buildTask(taskObject));
-            }
-            return Result.buildSucc(result);
+            return Result.buildSucc(JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class));
         }
         return Result.buildFail();
     }
 
     @Override
-    public Result<List<Map>> taskMissionAnalysis(String cluster) {
+    public Result<List<TaskMissionAnalysisVO>> taskMissionAnalysis(String cluster) {
         DirectResponse directResponse = getDirectResponse(cluster, TASK_MISSION_ANALYSIS.getMethod(), TASK_MISSION_ANALYSIS.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-            List<Map> result = new ArrayList<>();
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
-            JSONObject nodes = responseJson.getJSONObject("nodes");
-            nodes.keySet().forEach(key -> {
-                JSONObject node = (JSONObject) nodes.get(key);
-                result.add(buildTaskMission(node, key));
-            });
-            Result.buildSucc(result);
+            List<TaskMissionAnalysisVO> result = buildTaskMission(responseJson);
+            return Result.buildSucc(result);
         }
         return Result.buildFail();
     }
@@ -130,7 +148,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
     public Result<String> hotThreadAnalysis(String cluster) {
         DirectResponse directResponse = getDirectResponse(cluster, HOT_THREAD.getMethod(), HOT_THREAD.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             return Result.buildSucc(directResponse.getResponseContent());
@@ -139,10 +157,10 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
     }
 
     @Override
-    public Result<Map> shardAssignmentDescription(String cluster) {
+    public Result<ShardAssignmentDescriptionVO> shardAssignmentDescription(String cluster) {
         DirectResponse directResponse = getDirectResponse(cluster, SHARD_ASSIGNMENT.getMethod(), SHARD_ASSIGNMENT.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
@@ -151,29 +169,26 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
         return Result.buildFail();
     }
 
-    private Map buildShardAssignment(JSONObject responseJson) {
-        Map map = new HashMap();
-        map.put("index", responseJson.get("responseJson"));
-        map.put("shard ", responseJson.get("shard"));
-        map.put("primary ", responseJson.get("primary"));
-        map.put("current_state ", responseJson.get("current_state"));
+    private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
+        ShardAssignmentDescriptionVO descriptionVO = new ShardAssignmentDescriptionVO();
+        descriptionVO.setShard((Integer) responseJson.get("shard"));
+        descriptionVO.setIndex((String) responseJson.get("responseJson"));
+        descriptionVO.setPrimary((Boolean) responseJson.get("primary"));
+        descriptionVO.setCurrentState((String) responseJson.get("current_state"));
         JSONArray decisionsArray = responseJson.getJSONArray("node_allocation_decisions");
-        List<Map> decisions = new ArrayList<>();
+        List<ShardAssignmenNodeVO> decisions = new ArrayList<>();
         for (int i = 0; i < decisionsArray.size(); i++) {
-            Map decisionMap = new HashMap();
+            ShardAssignmenNodeVO decisionMap = new ShardAssignmenNodeVO();
             JSONObject decisionObject = decisionsArray.getJSONObject(i);
-            decisionMap.put("node_name", decisionObject.get("node_name"));
-
+            decisionMap.setNodeName((String) decisionObject.get("node_name"));
             JSONArray deciders = decisionObject.getJSONArray("deciders");
             JSONObject decider = (JSONObject) deciders.get(0);
-
-            decisionMap.put("node_decide", decider.get("decider"));
-            decisionMap.put("explanation", decider.get("explanation"));
-
+            decisionMap.setNodeDecide((String) decider.get("decider"));
+            decisionMap.setExplanation((String) decider.get("explanation"));
             decisions.add(decisionMap);
         }
-        map.put("decisions ", decisions);
-        return map;
+        descriptionVO.setDecisions(decisions);
+        return descriptionVO;
     }
 
     @Override
@@ -181,7 +196,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
         boolean result = false;
         DirectResponse directResponse = getDirectResponse(cluster, ABNORMAL_SHARD_RETRY.getMethod(), ABNORMAL_SHARD_RETRY.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
@@ -199,7 +214,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
         Integer failed = 0;
         DirectResponse directResponse = getDirectResponse(cluster, CLEAR_FIELDDATA_MEMORY.getMethod(), CLEAR_FIELDDATA_MEMORY.getUri());
         if (directResponse == null) {
-            return null;
+            return Result.buildFail();
         }
         if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
             JSONObject responseJson = JSONObject.parseObject(directResponse.getResponseContent());
@@ -215,16 +230,18 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Nullable
     private DirectResponse getDirectResponse(String cluster, String method, String uri) {
-        ESClient client = esOpClient.getESClient(cluster);
-        if (null == client) {
+        //判断物理集群是否存在
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
+        if (null == clusterPhy) {
             return null;
         }
+        ESClient client = esOpClient.getESClient(cluster);
         DirectRequest directRequest = new DirectRequest(method, uri);
         DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
         return directResponse;
     }
 
-    private Map buildNodeState(JSONObject node) {
+    private NodeStateVO buildNodeState(JSONObject node) {
         Map nodeMap = new HashMap();
         //获取memoryInBytes
         JSONObject indices = (JSONObject) node.get("indices");
@@ -255,7 +272,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
         nodeMap.put("load_average_5m", loadAve.getBigDecimal("5m"));
         nodeMap.put("load_average_15m", loadAve.getBigDecimal("15m"));
         nodeMap.put("jvm_heap_used_percent", mem.getInteger("heap_used_percent"));
-        nodeMap.put("threads.count", threads.getInteger("count"));
+        nodeMap.put("threads_count", threads.getInteger("count"));
         nodeMap.put("current_open", http.getInteger("current_open"));
         nodeMap.put("thread_pool_write_active", write.getInteger("active"));
         nodeMap.put("thread_pool_write_queue", write.getInteger("queue"));
@@ -267,10 +284,17 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
         nodeMap.put("thread_pool_management_queue", management.getInteger("queue"));
         nodeMap.put("thread_pool_management_reject", management.getInteger("rejected"));
 
-        return nodeMap;
+        NodeStateVO nodeStateVO = JSON.parseObject(JSON.toJSONString(nodeMap), NodeStateVO.class);
+        return nodeStateVO;
     }
 
-    private Map buildTask(JSONObject taskObject) {
+    private Map buildPendingTask(JSONObject taskObject) {
+        PendingTaskAnalysisVO pendingTaskVO = new PendingTaskAnalysisVO();
+        pendingTaskVO.setInsertOrder((Long) taskObject.get("taskObject"));
+        pendingTaskVO.setSource((String) taskObject.get("source"));
+        pendingTaskVO.setPriority((String) taskObject.get("priority"));
+        pendingTaskVO.setTimeInQueue((String) taskObject.get("time_in_queue"));
+        pendingTaskVO.setTimeInQueueMillis((String) taskObject.get("time_in_queue_millis"));
         Map task = new HashMap();
         task.put("insert_order", taskObject.get("taskObject"));
         task.put("priority", taskObject.get("priority"));
@@ -280,14 +304,23 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
         return task;
     }
 
-    private Map buildTaskMission(JSONObject node, String key) {
-        Map map = new HashMap();
-        JSONObject nodeTasks = (JSONObject) node.get("tasks");
-        map.put("node", key);
-        map.put("action", nodeTasks.get("action"));
-        map.put("description", nodeTasks.get("description "));
-        map.put("start_time_in_millis", nodeTasks.get("start_time_in_millis"));
-        map.put("running_time_in_nanos", nodeTasks.get("running_time_in_nanos"));
-        return map;
+    private  List<TaskMissionAnalysisVO>  buildTaskMission(JSONObject responseJson) {
+       List<TaskMissionAnalysisVO> vos = new ArrayList<>();
+        JSONObject nodes = responseJson.getJSONObject("nodes");
+        nodes.keySet().forEach(key -> {
+            JSONObject node = (JSONObject) nodes.get(key);
+            JSONObject nodeTasks = (JSONObject) node.get("tasks");
+            nodeTasks.keySet().forEach(key1->{
+                TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
+                JSONObject nodeInfo = (JSONObject) nodeTasks.get(key1);
+                taskMissionAnalysisVO.setAction((String) nodeInfo.get("action"));
+                taskMissionAnalysisVO.setNode((String)nodeInfo.get("node"));
+                taskMissionAnalysisVO.setDescription((String) nodeInfo.get("description"));
+                taskMissionAnalysisVO.setStartTimeInMillis((Long) nodeInfo.get("start_time_in_millis"));
+                taskMissionAnalysisVO.setRunningTimeInNanos((Integer) nodeInfo.get("running_time_in_nanos"));
+                vos.add(taskMissionAnalysisVO);
+            });
+        });
+        return vos;
     }
 }

@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 
 import java.util.List;
 import java.util.Map;
@@ -21,35 +22,35 @@ public interface QuickCommandManager {
      * @param clusterId
      * @return
      */
-    Result<List<Map>> nodeStateAnalysis(String clusterId);
+    Result<List<NodeStateVO>> nodeStateAnalysis(String clusterId);
 
     /**
      * indices分布
      * @param cluster
      * @return
      */
-    Result<JSONArray> indicesDistribution(String cluster);
+    Result<List<IndicesDistributionVO>> indicesDistribution(String cluster);
 
     /**
      * shard分布
      * @param cluster
      * @return
      */
-    Result<JSONArray> shardDistribution(String cluster);
+    Result<List<ShardDistributionVO>> shardDistribution(String cluster);
 
     /**
      * pending task分析
      * @param cluster
      * @return
      */
-    Result<List<Map>> pendingTaskAnalysis(String cluster);
+    Result<List<PendingTaskAnalysisVO>> pendingTaskAnalysis(String cluster);
 
     /**
      * task任务分析
      * @param cluster
      * @return
      */
-    Result<List<Map>> taskMissionAnalysis(String cluster);
+    Result<List<TaskMissionAnalysisVO>> taskMissionAnalysis(String cluster);
 
     /**
      * 热点线程分析
@@ -63,7 +64,7 @@ public interface QuickCommandManager {
      * @param cluster
      * @return
      */
-    Result<Map> shardAssignmentDescription(String cluster);
+    Result<ShardAssignmentDescriptionVO> shardAssignmentDescription(String cluster);
 
     /**
      * 异常shard分配重试
