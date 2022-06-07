@@ -19,7 +19,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.In
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,9 +40,6 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
@@ -280,6 +278,25 @@ public class IndicesManagerImpl implements IndicesManager {
         indexMappingVO.setTypeProperties(ariusTypeProperty);
         indexMappingVO.setIndexName(indexName);
         return Result.buildSucc(indexMappingVO);
+    }
+
+    @Override
+    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer appId) {
+        String cluster = getClusterPhy(param.getCluster(), appId);
+        String indexName = param.getIndex();
+        String mapping = param.getMapping();
+        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
+        if (ret.failed()) {
+            return Result.buildFrom(ret);
+        }
+
+        try {
+            MappingConfig mappingConfig = new MappingConfig(JSON.parseObject(mapping));
+            return Result.build(esIndexService.syncUpdateIndexMapping(cluster, indexName, mappingConfig));
+        } catch (Exception e) {
+            LOGGER.error("class=IndicesManagerImpl||method=editMapping||cluster={}||index={}||errMsg={}", cluster, indexName, e.getMessage(), e);
+            return Result.buildFail();
+        }
     }
 
     @Override

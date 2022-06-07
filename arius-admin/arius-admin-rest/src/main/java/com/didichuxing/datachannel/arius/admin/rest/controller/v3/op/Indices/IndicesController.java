@@ -66,8 +66,7 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "编辑mapping")
     public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        //return indexManager.editMapping(param, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+        return indicesManager.editMapping(param, HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/mapping")

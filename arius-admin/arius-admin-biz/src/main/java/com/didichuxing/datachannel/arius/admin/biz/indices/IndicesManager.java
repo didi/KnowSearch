@@ -83,6 +83,14 @@ public interface IndicesManager {
     Result<IndexMappingVO> getMapping(IndexCatCellDTO param, Integer appId);
 
     /**
+     * 更新索引mapping
+     * @param param
+     * @param appId
+     * @return
+     */
+    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer appId);
+
+    /**
      * 获取索引setting信息
      *
      * @param param

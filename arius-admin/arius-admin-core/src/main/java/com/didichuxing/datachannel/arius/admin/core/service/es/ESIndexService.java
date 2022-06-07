@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 
@@ -54,12 +55,21 @@ public interface ESIndexService {
     boolean syncDeleteIndexByExpression(String cluster, String expression, int retryCount) throws ESOperateException;
 
     /**
-     * 跟进索引名称获取索引的mapping
+     * 根据索引名称获取索引的mapping
      * @param cluster    集群
      * @param index      索引名称
      * @return result
      */
     String syncGetIndexMapping(String cluster, String index);
+
+    /**
+     * 更新索引mapping
+     * @param cluster
+     * @param index
+     * @param mappingConfig
+     * @return
+     */
+    boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig);
 
     Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList);
 

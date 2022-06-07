@@ -99,6 +99,11 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
+    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) {
+        return esIndexDAO.updateIndexMapping(cluster, index, mappingConfig);
+    }
+
+    @Override
     public Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList) {
         MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
         if (null == multiIndexsConfig) { return Maps.newConcurrentMap();}
