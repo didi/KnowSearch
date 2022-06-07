@@ -26,17 +26,14 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author wuxuan
  * @Date 2022/5/31
  */
-@ExtendWith(MockitoExtension.class)
 public class GatewayServiceTest {
 
     //通过@Mock构造对应的mock对象
@@ -96,12 +93,13 @@ public class GatewayServiceTest {
 
     @Test
     void sqlOperateTest() {
-        //设置不同参数遍历preSqlParamCheck的fail分支(String sql, String phyClusterName, Integer appId, String postFix)
         int appid = 1;
         String sql = "show databases";
-        //Assertions.assertEquals("参数错误:查询的sql语句为空，请检查后再提交！",gatewayService.sqlOperate("",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").getMessage());
-        //Assertions.assertEquals("参数错误:查询gateway的路径后缀为空，请检查后再提交！",gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,appid,null).getMessage());
-        //Assertions.assertEquals("参数错误:对应的appId字段非法，请检查后再提交！", gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,null,"postFix").getMessage());
+        String postFix = "postFix" ;
+        //设置不同参数遍历preSqlParamCheck的fail分支(String sql, String phyClusterName, Integer appId, String postFix)
+        Assertions.assertEquals("参数错误:查询的sql语句为空，请检查后再提交！",gatewayService.sqlOperate("",CustomDataSource.PHY_CLUSTER_NAME,appid,postFix).getMessage());
+        Assertions.assertEquals("参数错误:查询gateway的路径后缀为空，请检查后再提交！",gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,appid,null).getMessage());
+        Assertions.assertEquals("参数错误:对应的appId字段非法，请检查后再提交！", gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,null,postFix).getMessage());
         App app = new App();
         app.setId(appid);
         List<App> apps = new ArrayList<>();
@@ -109,20 +107,19 @@ public class GatewayServiceTest {
         when(appService.listApps()).thenReturn(apps);
         when(appService.getAppById(Mockito.anyInt())).thenReturn(app);
         when(esGatewayClient.getSingleGatewayAddress()).thenReturn("10.190.32.30");
+        //设置BaseHttpUtil静态方法遍历
         Mockito.mockStatic(BaseHttpUtil.class);
         when(BaseHttpUtil.postForString(anyString(), anyString(), any())).thenReturn("");
-        Assertions.assertFalse(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").success());
+        Assertions.assertFalse(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,postFix).success());
         when(BaseHttpUtil.postForString(anyString(), anyString(), any())).thenReturn("sqlresponse");
         Header header = new BasicHeader("Authorization", "Basic ");
         when(BaseHttpUtil.buildHttpHeader(any(),any())).thenReturn(header);
-        Assertions.assertTrue(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").success());
+        Assertions.assertTrue(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,postFix).success());
     }
 
     @Test
     void getAliveNodeTest() {
-        when(gatewayClusterDAO.insert(Mockito.any())).thenReturn(1);
-        when(gatewayClusterNodeDAO.recordGatewayNode(Mockito.any())).thenReturn(1);
-        when(gatewayClusterNodeDAO.listAliveNodeByClusterNameAndTime(Mockito.any(), Mockito.any())).thenReturn(CustomDataSource.getGatewayNodePOList());
+        when(gatewayClusterNodeDAO.listAliveNodeByClusterNameAndTime(any(), any())).thenReturn(CustomDataSource.getGatewayNodePOList());
         Assertions.assertFalse(gatewayService.getAliveNode(CustomDataSource.PHY_CLUSTER_NAME, 1000).isEmpty());
     }
 }
