@@ -2,9 +2,8 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

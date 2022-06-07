@@ -27,14 +27,15 @@ public class TemplateDCDRController {
     @Autowired
     private TemplateDCDRManager templateDCDRManager;
 
-    @PostMapping("/{templateId}/{targetCluster}")
+    @PostMapping("/{templateId}/{regionId}/{targetCluster}")
     @ResponseBody
     @ApiOperation(value = "DCDR链路创建接口", notes = "")
-    public Result<Void> createDCDR(HttpServletRequest request, @PathVariable("templateId") Integer templateId,
-                                   @PathVariable("targetCluster") String targetCluster, @RequestBody TemplatePhysicalRackDTO templatePhysicalRackDTO) throws AdminOperateException {
-        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, templatePhysicalRackDTO.getRack(), HttpRequestUtils.getOperator(request));
+    public Result<Void> createDCDR(HttpServletRequest request,
+                                   @PathVariable("templateId") Integer templateId,
+                                   @PathVariable("targetCluster") String targetCluster,
+                                   @PathVariable("regionId") Integer regionId) throws AdminOperateException {
+        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, regionId, HttpRequestUtils.getOperator(request));
     }
-
 
     @GetMapping("/{templateId}/dcdrInfo")
     @ResponseBody
