@@ -519,6 +519,48 @@ public class ESIndexDAO extends BaseESDAO {
         return updateSettingsResponse.getAcknowledged();
     }
 
+    public boolean putIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (null == client) {
+            return false;
+        }
+
+        MultiIndexsConfig multiIndexsConfig = batchGetIndexConfig(cluster, indices);
+        List<String> needOps = Lists.newArrayList();
+        for (Map.Entry<String, IndexConfig> indexConfigEntry : multiIndexsConfig.getIndexConfigMap().entrySet()) {
+            IndexConfig indexConfig = indexConfigEntry.getValue();
+
+            Map<String, String> config = indexConfig.getSettings();
+            Boolean modifyFlag = Boolean.FALSE;
+            for (Map.Entry<String, String> settingEntry : settingMap.entrySet()) {
+                String settingName = settingEntry.getKey();
+                String settingValue = settingEntry.getValue();
+                String src = config.get(INDEX_SETTING_PRE + settingName);
+                if (settingName.startsWith(INDEX_SETTING_PRE)) {
+                    src = config.get(settingName);
+                }
+
+                if (!settingValue.equals(src)) {
+                    modifyFlag = Boolean.TRUE;
+                }
+            }
+            if (modifyFlag) {
+                needOps.add(indexConfigEntry.getKey());
+            }
+        }
+
+        if (CollectionUtils.isEmpty(needOps)) {
+            return true;
+        }
+
+        ESIndicesUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().indices()
+                .prepareUpdateSettings(String.join(",", needOps));
+        for (Map.Entry<String, String> settingEntry : settingMap.entrySet()) {
+            updateSettingsRequestBuilder.addSettings(settingEntry.getKey(), settingEntry.getValue());
+        }
+        return updateSettingsRequestBuilder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getAcknowledged();
+    }
+
     /**
      * 关闭索引
      * @param cluster 集群

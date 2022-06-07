@@ -80,8 +80,7 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "编辑setting")
     public Result<Void> editSetting(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        //return indexManager.editSetting(param, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+        return indicesManager.editSetting(param, HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/setting")

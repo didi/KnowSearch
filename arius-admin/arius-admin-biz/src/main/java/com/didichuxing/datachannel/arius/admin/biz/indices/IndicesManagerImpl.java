@@ -330,6 +330,29 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
+    public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer appId) {
+        String cluster = getClusterPhy(param.getCluster(), appId);
+        String indexName = param.getIndex();
+        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
+        if (ret.failed()) {
+            return Result.buildFrom(ret);
+        }
+
+        JSONObject settingObj = JSON.parseObject(param.getSetting());
+        if (null == settingObj) {
+            return Result.buildFail("setting 配置非法");
+        }
+        Map<String, String> settingMap = JsonUtils.flat(settingObj);
+        try {
+            return Result.build(esIndexService.syncPutIndexSetting(cluster, Lists.newArrayList(indexName), settingMap, RETRY_COUNT));
+        } catch (Exception e) {
+            LOGGER.error("class=IndicesManagerImpl||method=editSetting||cluster={}||index={}||errMsg=update setting fail", cluster, indexName, e);
+            return Result.buildFail("更新索引setting fail");
+        }
+
+    }
+
+    @Override
     public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String clusterPhyName, String indexName, Integer appId) {
         Result<Void> ret = basicCheckParam(clusterPhyName, indexName, appId);
         if (ret.failed()) {

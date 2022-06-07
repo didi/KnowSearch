@@ -94,6 +94,16 @@ public interface ESIndexService {
                                 String defaultValue, int retryCount) throws ESOperateException;
 
     /**
+     * 更新setting
+     * @param cluster
+     * @param indices
+     * @param settingMap
+     * @param retryCount
+     * @return
+     */
+    boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap, Integer retryCount) throws  ESOperateException;
+
+    /**
      * 批量修改多个索引的相同的多个setting
      * @param cluster 物理集群名称
      * @param indices 索引列表

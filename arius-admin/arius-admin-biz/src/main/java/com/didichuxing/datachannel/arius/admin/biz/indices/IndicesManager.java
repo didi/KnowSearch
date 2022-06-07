@@ -92,12 +92,19 @@ public interface IndicesManager {
 
     /**
      * 获取索引setting信息
-     *
      * @param param
      * @param appId             项目
      * @return                  IndexSettingVO
      */
     Result<IndexSettingVO> getSetting(IndexCatCellDTO param, Integer appId);
+
+    /**
+     * 更新索引setting
+     * @param param
+     * @param appId
+     * @return
+     */
+    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer appId);
 
     /**
      * 获取索引shard分配信息

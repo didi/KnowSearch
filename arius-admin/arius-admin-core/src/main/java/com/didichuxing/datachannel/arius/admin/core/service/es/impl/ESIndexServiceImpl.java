@@ -155,6 +155,12 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
+    public boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap, Integer retryCount) throws  ESOperateException{
+        return ESOpTimeoutRetry.esRetryExecute("putIndexSettingBatch", retryCount,
+                () -> esIndexDAO.putIndexSetting(cluster, indices, settingMap));
+    }
+
+    @Override
     public boolean syncPutIndexSettings(String cluster, List<String> indices, Map<String, String> settings, int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("putIndexSettings", retryCount,
                 () -> esIndexDAO.putIndexSettings(cluster, indices, settings));
