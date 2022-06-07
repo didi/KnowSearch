@@ -3,23 +3,21 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.gatewayHeartbeatFactory;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.impl.GatewayServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author wuxuan
@@ -32,7 +30,6 @@ public class GatewayServiceTest {
     GatewayClusterDAO gatewayClusterDAO = Mockito.mock(GatewayClusterDAO.class);
     GatewayClusterNodeDAO gatewayClusterNodeDAO = Mockito.mock(GatewayClusterNodeDAO.class);
     Set<String> clusterNames = new HashSet<>();
-    AppService appService = Mockito.mock(AppService.class);
     ESGatewayClient esGatewayClient = Mockito.mock(ESGatewayClient.class);
     @BeforeEach
     public void init(){
@@ -41,7 +38,6 @@ public class GatewayServiceTest {
         clusterNames.add("admin");
         //通过反射机制实现对应的对象中参数的赋值
         ReflectionTestUtils.setField(gatewayService,"clusterNames",clusterNames);
-        ReflectionTestUtils.setField(gatewayService,"appService",appService);
         ReflectionTestUtils.setField(gatewayService,"esGatewayClient",esGatewayClient);
     }
 
@@ -86,18 +82,16 @@ public class GatewayServiceTest {
     void sqlOperateTest() {
         //设置不同参数遍历preSqlParamCheck的fail分支(String sql, String phyClusterName, Integer appId, String postFix)
         int appid = 1;
+        final ESUserPO esUserPO = CustomDataSource.esUserPO();
+        final ESUser esUser = ConvertUtil.obj2Obj(esUserPO, ESUser.class);
         String sql = "show databases";
-        Assertions.assertEquals("参数错误:查询的sql语句为空，请检查后再提交！",gatewayService.sqlOperate("",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").getMessage());
-        Assertions.assertEquals("参数错误:查询gateway的路径后缀为空，请检查后再提交！",gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,appid,null).getMessage());
-        Assertions.assertEquals("参数错误:对应的appId字段非法，请检查后再提交！", gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,null,"postFix").getMessage());
-        App app = new App();
-        app.setId(appid);
-        List<App> apps = new ArrayList<>();
-        apps.add(app);
-        Mockito.when(appService.listApps()).thenReturn(apps);
-        Mockito.when(appService.getAppById(Mockito.anyInt())).thenReturn(app);
+        Assertions.assertEquals("参数错误:查询的sql语句为空，请检查后再提交！",gatewayService.sqlOperate("",
+                CustomDataSource.PHY_CLUSTER_NAME,esUser,"postFix").getMessage());
+        Assertions.assertEquals("参数错误:查询gateway的路径后缀为空，请检查后再提交！",gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,esUser,null).getMessage());
+       
+       
         Mockito.when(esGatewayClient.getSingleGatewayAddress()).thenReturn("10.190.32.30");
-        Assertions.assertFalse(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").success());
+        Assertions.assertFalse(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,esUser,"postFix").success());
     }
 
     @Test
@@ -107,4 +101,5 @@ public class GatewayServiceTest {
         Mockito.when(gatewayClusterNodeDAO.listAliveNodeByClusterNameAndTime(Mockito.any(), Mockito.any())).thenReturn(CustomDataSource.getGatewayNodePOList());
         Assertions.assertFalse(gatewayService.getAliveNode(CustomDataSource.PHY_CLUSTER_NAME, 1000).isEmpty());
     }
+   
 }

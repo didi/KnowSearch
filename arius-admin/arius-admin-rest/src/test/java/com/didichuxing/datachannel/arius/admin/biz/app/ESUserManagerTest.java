@@ -16,33 +16,37 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.lucene.search.QueryCachingPolicy.CacheOnLargeSegments;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
-@AutoConfigureMockMvc
-@SpringBootTest
+@ContextConfiguration(classes ={ SpringTool.class })
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ESUserManagerTest {
     
     @Mock
@@ -52,7 +56,7 @@ class ESUserManagerTest {
     private ESUserService        esUserService;
     @Mock
     private RoleTool             roleTool;
-    @Mock
+    @MockBean
     private OperateRecordService operateRecordService;
     @InjectMocks
     private ESUserManagerImpl    esUserManager;
@@ -60,8 +64,6 @@ class ESUserManagerTest {
     @BeforeEach
     void setUp() {
         initMocks(this);
-        when(operateRecordService.save(anyInt(), anyInt(), anyString(), anyString(), anyString())).thenReturn(
-                Result.buildSucc());
     }
     
     @Test
@@ -171,6 +173,7 @@ class ESUserManagerTest {
     @Test
     void testDeleteAllESUserByProject() {
         when(roleTool.isAdmin("admin")).thenReturn(true);
+        when(roleTool.isAdmin("")).thenReturn(false);
         when( esUserService.deleteByESUsers(anyInt())).thenReturn(
                 new Tuple<>(Result.buildSucc(), Lists.newArrayList(CustomDataSource.esUserPO())));
         Assertions.assertEquals(Result.buildFail("当前操作者权限不足,需要管理员权限").getMessage(),
