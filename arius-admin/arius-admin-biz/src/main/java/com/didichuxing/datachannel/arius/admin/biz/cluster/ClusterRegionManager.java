@@ -46,6 +46,7 @@ public interface ClusterRegionManager {
      * @param cluster       物理集群名
      * @return
      */
+    @Deprecated
     List<PhyClusterRackVO> buildCanDividePhyClusterRackVOs(String cluster);
 
     /**
@@ -82,9 +83,17 @@ public interface ClusterRegionManager {
     Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator);
 
     /**
-     * 根据物理集群名称获region信息，包含region中的数据节点信息
+     * 根据物理集群名称获region信息（包含空节点region），包含region中的数据节点信息
      * @param clusterName          物理集群名称
      * @return                     Result<List<ClusterRegionWithNodeInfoVO>>
      */
-    Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(String clusterName);
+    Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName);
+
+    /**
+     * 获取可分配至dcdr的物理集群名称获region列表, 不包含空节点region
+     *
+     * @param clusterName         物理集群名称
+     * @return                    Result<List<ClusterRegionVO>>
+     */
+    Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName);
 }
