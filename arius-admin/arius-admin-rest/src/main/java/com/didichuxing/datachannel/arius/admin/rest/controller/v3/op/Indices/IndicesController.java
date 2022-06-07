@@ -100,13 +100,6 @@ public class IndicesController {
                 HttpRequestUtils.getOperator(request));
     }
 
-    @PutMapping("/open")
-    @ResponseBody
-    @ApiOperation(value = "开启索引")
-    public Result<Boolean> open(@RequestBody List<IndicesOpenOrCloseDTO> params, HttpServletRequest request) {
-        return Result.buildFail();
-    }
-
     @PutMapping("/block")
     @ResponseBody
     @ApiOperation(value = "批量编辑索引阻塞设置")
