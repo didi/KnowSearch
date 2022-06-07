@@ -353,13 +353,14 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String clusterPhyName, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, appId);
+    public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String cluster, String indexName, Integer appId) {
+        String clusterPhy = getClusterPhy(cluster, appId);
+        Result<Void> ret = basicCheckParam(clusterPhy, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
 
-        List<IndexShardInfo> indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(clusterPhyName, indexName);
+        List<IndexShardInfo> indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(clusterPhy, indexName);
         List<IndexShardInfoVO> indexNodeShardVOList = indexShardInfoList.stream().filter(this::filterPrimaryShard)
             .map(this::coverUnit).collect(Collectors.toList());
         return Result.buildSucc(indexNodeShardVOList);

@@ -108,12 +108,12 @@ public interface IndicesManager {
 
     /**
      * 获取索引shard分配信息
-     * @param clusterPhyName    集群
+     * @param cluster 集群
      * @param indexName         索引名称
      * @param appId             项目
      * @return
      */
-    Result<List<IndexShardInfoVO>> getIndexShardsInfo(String clusterPhyName, String indexName, Integer appId);
+    Result<List<IndexShardInfoVO>> getIndexShardsInfo(String cluster, String indexName, Integer appId);
 
     /**
      * 获取单个索引的详情信息

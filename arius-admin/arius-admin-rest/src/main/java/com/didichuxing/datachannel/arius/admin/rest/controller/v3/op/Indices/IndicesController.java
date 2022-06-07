@@ -129,12 +129,12 @@ public class IndicesController {
         return indicesManager.editAlias(param, Boolean.FALSE, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("{clusterPhyName}/{indexName}/shard")
+    @GetMapping("{cluster}/{indexName}/shard")
     @ResponseBody
     @ApiOperation(value = "获取索引shard分配详情")
-    public Result<List<IndexShardInfoVO>> getIndexShard(@PathVariable String clusterPhyName,
+    public Result<List<IndexShardInfoVO>> getIndexShard(@PathVariable String cluster,
                                                         @PathVariable String indexName, HttpServletRequest request) {
-        return indicesManager.getIndexShardsInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
+        return indicesManager.getIndexShardsInfo(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
 
 }
