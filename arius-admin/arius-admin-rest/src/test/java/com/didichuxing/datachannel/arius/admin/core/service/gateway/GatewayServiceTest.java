@@ -1,11 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
 import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.gatewayHeartbeatFactory;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.impl.GatewayServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
@@ -15,19 +18,22 @@ import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 /**
  * @author wuxuan
  * @Date 2022/5/31
  */
-
+@ExtendWith(MockitoExtension.class)
 public class GatewayServiceTest {
 
     //通过@Mock构造对应的mock对象
@@ -100,6 +106,8 @@ public class GatewayServiceTest {
         when(appService.listApps()).thenReturn(apps);
         when(appService.getAppById(Mockito.anyInt())).thenReturn(app);
         when(esGatewayClient.getSingleGatewayAddress()).thenReturn("10.190.32.30");
+        Mockito.mockStatic(BaseHttpUtil.class);
+        when(BaseHttpUtil.postForString(anyString(), anyString(), any())).thenReturn("");
         Assertions.assertFalse(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").success());
     }
 
