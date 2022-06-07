@@ -230,7 +230,7 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteAllESUserByProject(int projectId, String operator) {
-        if (roleTool.isAdmin(operator)){
+        if (!roleTool.isAdmin(operator)){
             return Result.buildFail("当前操作者权限不足,需要管理员权限");
         }
         
