@@ -117,12 +117,12 @@ public interface IndicesManager {
 
     /**
      * 获取单个索引的详情信息
-     * @param clusterPhyName 物理集群名称
+     * @param cluster 集群名称
      * @param indexName 索引名称
      * @param appId 项目
      * @return
      */
-    Result<IndexCatCellVO> getIndexCatInfo(String clusterPhyName, String indexName, Integer appId);
+    Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer appId);
 
     /**
      * 编辑别名

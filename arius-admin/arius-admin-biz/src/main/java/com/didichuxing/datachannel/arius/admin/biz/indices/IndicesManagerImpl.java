@@ -366,9 +366,9 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexCatCellVO> getIndexCatInfo(String clusterPhyName, String indexName, Integer appId) {
+    public Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer appId) {
         //1.建立单个索引查询的查询条件信息
-        IndexQueryDTO indexQueryDTO = buildOneIndicesConditionDTO(clusterPhyName, indexName);
+        IndexQueryDTO indexQueryDTO = buildOneIndicesConditionDTO(cluster, indexName, appId);
         PaginationResult<IndexCatCellVO> indexCatCellVOPaginationResult = pageGetIndex(indexQueryDTO, appId);
         if (indexCatCellVOPaginationResult.failed()) {
             return Result.buildFail("获取单个索引详情信息失败");
@@ -468,10 +468,10 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc();
     }
 
-    private IndexQueryDTO buildOneIndicesConditionDTO(String clusterPhyName, String indexName) {
+    private IndexQueryDTO buildOneIndicesConditionDTO(String cluster, String indexName, Integer appId) {
         IndexQueryDTO indexQueryDTO = new IndexQueryDTO();
         indexQueryDTO.setIndex(indexName);
-        indexQueryDTO.setCluster(clusterPhyName);
+        indexQueryDTO.setCluster(getClusterPhy(cluster, appId));
         indexQueryDTO.setSortTerm(DEFAULT_SORT_TERM);
         indexQueryDTO.setPage(1L);
         indexQueryDTO.setSize(1L);
