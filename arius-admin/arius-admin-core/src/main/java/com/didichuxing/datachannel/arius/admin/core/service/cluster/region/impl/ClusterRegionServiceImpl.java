@@ -20,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterReg
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.event.region.RegionBindEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionCreateEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionUnbindEvent;

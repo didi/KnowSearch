@@ -250,11 +250,16 @@ public interface ClusterRegionService {
     List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
 
     /**
-     * 获取指定逻辑集群
+     * 获取指定物理集群下的冷节点
      * @param cluster
      * @return
      */
     List<ClusterRegion> listColdRegionByCluster(String cluster);
 
+    /**
+     * 获取region 配置项
+     * @param config
+     * @return
+     */
     ClusterRegionConfig genClusterRegionConfig(String config);
 }
