@@ -20,8 +20,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -285,26 +283,28 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexSettingVO> getIndexSetting(String clusterPhyName, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, appId);
+    public Result<IndexSettingVO> getSetting(IndexCatCellDTO param, Integer appId) {
+        String cluster = getClusterPhy(param.getCluster(), appId);
+        String indexName = param.getIndex();
+        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
 
         IndexSettingVO indexSettingVO = new IndexSettingVO();
-        MultiIndexsConfig multiIndexsConfig = esIndexService.syncGetIndexConfigs(clusterPhyName, indexName);
+        MultiIndexsConfig multiIndexsConfig = esIndexService.syncGetIndexConfigs(cluster, indexName);
         if (null == multiIndexsConfig) {
             LOGGER.warn(
-                "class=IndicesManagerImpl||method=getIndexSetting||cluster={}||index={}||errMsg=get empty Index configs ",
-                clusterPhyName, indexName);
+                "class=IndicesManagerImpl||method=getSetting||cluster={}||index={}||errMsg=get empty Index configs ",
+                cluster, indexName);
             return Result.buildSucc(indexSettingVO);
         }
 
         IndexConfig indexConfig = multiIndexsConfig.getIndexConfig(indexName);
         if (null == indexConfig) {
             LOGGER.warn(
-                "class=IndicesManagerImpl||method=getIndexSetting||cluster={}||index={}||errMsg=get empty Index configs ",
-                clusterPhyName, indexName);
+                "class=IndicesManagerImpl||method=getSetting||cluster={}||index={}||errMsg=get empty Index configs ",
+                cluster, indexName);
             return Result.buildSucc(indexSettingVO);
         }
         indexSettingVO.setProperties(JsonUtils.reFlat(indexConfig.getSettings()));

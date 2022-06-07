@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.Indices;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
@@ -74,7 +73,7 @@ public class IndicesController {
     @PostMapping("/mapping")
     @ResponseBody
     @ApiOperation(value = "查询mapping")
-    public Result<IndexMappingVO> getMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
+    public Result<IndexMappingVO> getMapping(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
         return indicesManager.getMapping(param, HttpRequestUtils.getAppId(request));
     }
 
@@ -89,9 +88,8 @@ public class IndicesController {
     @PostMapping("/setting")
     @ResponseBody
     @ApiOperation(value = "查询setting")
-    public Result<IndexSettingVO> getSetting(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        //return indexManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
-        return Result.buildFail();
+    public Result<IndexSettingVO> getSetting(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
+        return indicesManager.getSetting(param, HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/close")
@@ -140,12 +138,4 @@ public class IndicesController {
         return indicesManager.getIndexShardsInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
-
-    @GetMapping("{clusterPhyName}/{indexName}/setting")
-    @ResponseBody
-    @ApiOperation(value = "获取模板setting信息")
-    public Result<IndexSettingVO> setting(@PathVariable String clusterPhyName, @PathVariable String indexName,
-                                          HttpServletRequest request) {
-        return indicesManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
-    }
 }
