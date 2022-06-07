@@ -59,6 +59,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
         if (hasNoInterceptor(request)) {
             return true;
+            
         }
         //排除admin中接口中含有/logi-security 之后，对于原本属于admin中的接口进行header设置，保证项目视角到存在header
         if (!request.getServletPath().startsWith(API_PREFIX)) {

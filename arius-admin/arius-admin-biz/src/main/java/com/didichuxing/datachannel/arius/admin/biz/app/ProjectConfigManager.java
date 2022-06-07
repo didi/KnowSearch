@@ -35,4 +35,6 @@ public interface ProjectConfigManager {
      * @return {@code Result<Void>}
      */
     Result<Void> initProjectConfig(ProjectConfigDTO configDTO, String operator);
+    
+    void deleteByProjectId(Integer projectId);
 }
