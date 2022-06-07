@@ -126,10 +126,16 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{clusterName}")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获region信息，包含region中的数据节点信息")
-    public Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(HttpServletRequest request, @PathVariable String clusterName) {
-        return clusterRegionManager.getClusterRegionWithNodeInfoByClusterName(clusterName);
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(HttpServletRequest request, @PathVariable String clusterName) {
+        return clusterRegionManager.listClusterRegionWithNodeInfoByClusterName(clusterName);
     }
 
+    @GetMapping("/{clusterName}/dcdr")
+    @ResponseBody
+    @ApiOperation(value = "获取可分配至dcdr的物理集群名称获region列表", notes = "不包含空region")
+    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(@PathVariable String clusterName) {
+        return clusterRegionManager.listNoEmptyClusterRegionByClusterName(clusterName);
+    }
 
     @GetMapping("/{regionId}/nodes")
     @ResponseBody
