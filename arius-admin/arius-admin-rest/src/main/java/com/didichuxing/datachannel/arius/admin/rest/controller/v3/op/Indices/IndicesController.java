@@ -48,7 +48,7 @@ public class IndicesController {
         return indicesManager.createIndex(param, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "查询索引")
     public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @RequestParam String cluster, @RequestParam String index) {
@@ -95,6 +95,14 @@ public class IndicesController {
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> close(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
         return indicesManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
+                HttpRequestUtils.getOperator(request));
+    }
+
+    @PutMapping("/open")
+    @ResponseBody
+    @ApiOperation(value = "关闭索引")
+    public Result<Boolean> open(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
+        return indicesManager.batchUpdateIndexStatus(params, true, HttpRequestUtils.getAppId(request),
                 HttpRequestUtils.getOperator(request));
     }
 
