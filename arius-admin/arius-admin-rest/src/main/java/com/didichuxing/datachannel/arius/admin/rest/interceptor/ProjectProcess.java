@@ -77,14 +77,6 @@ public class ProjectProcess implements ResponseBodyAdvice {
                 if (Objects.nonNull(data) && ((Result<?>) body).successed() && data instanceof ProjectVO) {
                     //通过RequestContextHolder获取request
                     registerESUserDefault((ProjectVO) data);
-                    //获取description字段之后进行提取其中的两个配置
-                    final String description = ((ProjectVO) data).getDescription();
-                    if (StringUtils.isNotBlank(description)) {
-        
-                        creatProjectConfig((ProjectVO) data);
-        
-                    }
-                    
                 }
     
             }
@@ -128,35 +120,7 @@ public class ProjectProcess implements ResponseBodyAdvice {
         esUserService.registerESUser(esUserDTO, roleTool.adminList().get(0).getUserName());
     }
     
-    /**
-     * 项目创建完成后，通过Description字段进行后置写入projectconfig
-     *
-     * @param data 数据
-     */
-    private void creatProjectConfig(ProjectVO data) {
-        final OplogQueryDTO oplogQueryDTO = new OplogQueryDTO();
-        oplogQueryDTO.setDetail(((ProjectVO) data).getProjectName());
-        oplogQueryDTO.setTargetType(OplogConstant.PM_A);
-        oplogQueryDTO.setTarget(OplogConstant.PM_P);
-        oplogQueryDTO.setOperateType(OplogConstant.PM);
-        final PagingData<OplogVO> oplogPage = oplogService.getOplogPage(oplogQueryDTO);
-        //获取操作人
-        String operator;
-        if (oplogPage.getBizData().isEmpty()) {
-            operator = ((ProjectVO) data).getOwnerList().stream().findFirst().orElse(new UserBriefVO()).getUserName();
-        } else {
-            operator = oplogPage.getBizData().stream().findFirst().orElse(new OplogVO()).getOperator();
-        }
-        final JSONObject jsonObject = JSON.parseObject(data.getDescription());
-        final Integer slowQueryTimes = jsonObject.getInteger(SLOW_QUERY_TIMES);
-        final String memo = jsonObject.getString(MEMO);
-        final ProjectConfigDTO projectConfigDTO = new ProjectConfigDTO();
-        projectConfigDTO.setProjectId(((ProjectVO) data).getId());
-        projectConfigDTO.setSlowQueryTimes(slowQueryTimes);
-        projectConfigDTO.setMemo(memo);
-        
-        projectConfigManager.initProjectConfig(projectConfigDTO, operator);
-    }
+
     
     private Object projectBriefVOAddIsSuperField(Object body){
         Object data = ((Result<?>) body).getData();
