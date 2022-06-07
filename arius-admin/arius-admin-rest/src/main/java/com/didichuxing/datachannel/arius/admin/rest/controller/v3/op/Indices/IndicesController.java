@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.Indices;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
  * @date 2021/09/28
  **/
 @RestController
-@RequestMapping(V3 + "/indices")
+@RequestMapping(V3_OP + "/indices")
 @Api(tags = "索引管理接口(REST)")
 public class IndicesController {
     @Autowired
@@ -70,12 +71,11 @@ public class IndicesController {
         return Result.buildFail();
     }
 
-    @GetMapping("/mapping")
+    @PostMapping("/mapping")
     @ResponseBody
     @ApiOperation(value = "查询mapping")
     public Result<IndexMappingVO> getMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        //return indexManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
-        return  Result.buildFail();
+        return indicesManager.getMapping(param, HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/setting")
@@ -86,7 +86,7 @@ public class IndicesController {
         return Result.buildFail();
     }
 
-    @GetMapping("/setting")
+    @PostMapping("/setting")
     @ResponseBody
     @ApiOperation(value = "查询setting")
     public Result<IndexSettingVO> getSetting(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
@@ -140,13 +140,6 @@ public class IndicesController {
         return indicesManager.getIndexShardsInfo(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("{clusterPhyName}/{indexName}/mapping")
-    @ResponseBody
-    @ApiOperation(value = "获取索引mapping信息")
-    public Result<IndexMappingVO> mapping(@PathVariable String clusterPhyName, @PathVariable String indexName,
-                                          HttpServletRequest request) {
-        return indicesManager.getIndexMapping(clusterPhyName, indexName, HttpRequestUtils.getAppId(request));
-    }
 
     @GetMapping("{clusterPhyName}/{indexName}/setting")
     @ResponseBody

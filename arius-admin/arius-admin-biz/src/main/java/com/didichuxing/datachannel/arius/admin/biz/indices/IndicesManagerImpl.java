@@ -18,10 +18,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -74,9 +74,6 @@ public class IndicesManagerImpl implements IndicesManager {
     private ESIndexService        esIndexService;
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
-
-    @Autowired
     private ClusterLogicManager clusterLogicManager;
 
     @Autowired
@@ -108,18 +105,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer appId) {
-        String cluster;
-        if (appService.isSuperApp(appId)) {
-            cluster = indexCreateDTO.getCluster();
-        } else {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
-            if (clusterLogic == null) {
-                return Result.buildFail("集群不存在");
-            }
-
-            cluster = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(clusterLogic.getId()).get(0).getCluster();
-        }
-
+        String cluster = getClusterPhy(indexCreateDTO.getCluster(), appId);
         try {
             esIndexService.syncCreateIndex(cluster, indexCreateDTO.getIndex(), indexCreateDTO.getMapping(), indexCreateDTO.getSetting(), RETRY_COUNT);
         } catch (Exception e) {
@@ -132,6 +118,7 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<Void> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator) {
         for (IndexCatCellDTO param : params) {
+            param.setCluster(getClusterPhy(param.getCluster(), appId));
             Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
@@ -235,13 +222,16 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<Boolean> batchEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId,
                                                       String operator) {
+        for (IndicesBlockSettingDTO param : params) {
+            param.setCluster(getClusterPhy(param.getCluster(), appId));
+        }
         Result<Boolean> checkResult = checkEditIndexBlockSetting(params, appId);
         if (checkResult.failed()) {
             return checkResult;
         }
 
         Map<String, List<IndicesBlockSettingDTO>> cluster2IndicesBlockSettingListMap = ConvertUtil.list2MapOfList(
-            params, IndicesBlockSettingDTO::getClusterPhyName, indicesBlockSettingDTO -> indicesBlockSettingDTO);
+            params, IndicesBlockSettingDTO::getCluster, indicesBlockSettingDTO -> indicesBlockSettingDTO);
 
         cluster2IndicesBlockSettingListMap.forEach((cluster, indicesBlockSettingList) -> {
             for (IndicesBlockSettingDTO indicesBlockSetting : indicesBlockSettingList) {
@@ -276,15 +266,17 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexMappingVO> getIndexMapping(String clusterPhyName, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(clusterPhyName, indexName, appId);
+    public Result<IndexMappingVO> getMapping(IndexCatCellDTO param, Integer appId) {
+        String cluster = getClusterPhy(param.getCluster(), appId);
+        String indexName = param.getIndex();
+        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
 
         IndexMappingVO indexMappingVO = new IndexMappingVO();
         AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
-        String indexMappingStr = esIndexService.syncGetIndexMapping(clusterPhyName, indexName);
+        String indexMappingStr = esIndexService.syncGetIndexMapping(cluster, indexName);
         JSONObject indexMappingJsonObj = JSON.parseObject(indexMappingStr);
         ariusTypeProperty.setProperties(indexMappingJsonObj);
         indexMappingVO.setTypeProperties(ariusTypeProperty);
@@ -423,7 +415,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     private Result<Boolean> checkEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId) {
         for (IndicesBlockSettingDTO param : params) {
-            Result<Void> ret = basicCheckParam(param.getClusterPhyName(), param.getIndex(), appId);
+            Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }

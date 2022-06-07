@@ -76,12 +76,10 @@ public interface IndicesManager {
 
     /**
      * 获取索引mapping
-     * @param clusterPhyName     集群名称
-     * @param indexName          索引名称
-     * @param appId              项目
+     * @param param
      * @return                   IndexMappingVO
      */
-    Result<IndexMappingVO> getIndexMapping(String clusterPhyName, String indexName, Integer appId);
+    Result<IndexMappingVO> getMapping(IndexCatCellDTO param, Integer appId);
 
     /**
      * 获取索引setting信息

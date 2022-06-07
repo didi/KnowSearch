@@ -76,7 +76,7 @@ public class ESIndicesTest extends BasePhyClusterInfoTest{
     public void editIndexBlockSettingTest() throws IOException {
         List<IndicesBlockSettingDTO> params = new ArrayList<>();
         IndicesBlockSettingDTO index = new IndicesBlockSettingDTO();
-        index.setClusterPhyName(phyClusterInfo.getPhyClusterName());
+        index.setCluster(phyClusterInfo.getPhyClusterName());
         index.setIndex("test_index");
         index.setType("1");
         index.setValue(Boolean.TRUE);
