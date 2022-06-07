@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,8 +61,8 @@ import com.google.common.collect.Lists;
  * @date 2021/09/28
  **/
 @Component
-public class IndexManagerImpl implements IndexManager {
-    private static final ILog     LOGGER = LogFactory.getLog(IndexManagerImpl.class);
+public class IndicesManagerImpl implements IndicesManager {
+    private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
     public static final int RETRY_COUNT = 3;
     @Autowired
     private AppService            appService;

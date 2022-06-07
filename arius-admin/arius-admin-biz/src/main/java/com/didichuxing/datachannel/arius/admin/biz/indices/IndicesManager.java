@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSetti
  * @author lyn
  * @date 2021/09/28
  **/
-public interface IndexManager {
+public interface IndicesManager {
     /**
      * 条件获取索引列表信息 ,携带可读可写标志位
      * @param condition     查询条件

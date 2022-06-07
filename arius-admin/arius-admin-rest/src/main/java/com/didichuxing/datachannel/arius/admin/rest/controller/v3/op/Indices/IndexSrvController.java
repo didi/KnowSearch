@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.Indices;
 
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndexManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
@@ -25,34 +25,34 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 public class IndexSrvController {
 
     @Autowired
-    private IndexManager indexManager;
+    private IndicesManager indicesManager;
 
     @PostMapping("/rollover")
     @ResponseBody
     @ApiOperation(value = "rollover")
     public Result<Void> rollover(HttpServletRequest request, @RequestBody IndexRolloverDTO param) {
-        return indexManager.rollover(param);
+        return indicesManager.rollover(param);
     }
 
     @PostMapping("/shrink")
     @ResponseBody
     @ApiOperation(value = "shrink")
     public Result<Void> shrink(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return indexManager.shrink(param);
+        return indicesManager.shrink(param);
     }
 
     @PostMapping("/split")
     @ResponseBody
     @ApiOperation(value = "split")
     public Result<Void> split(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return indexManager.split(param);
+        return indicesManager.split(param);
     }
 
     @PostMapping("/forceMerge")
     @ResponseBody
     @ApiOperation(value = "forceMerge")
     public Result<Void> forceMerge(HttpServletRequest request, @RequestBody IndexForceMergeDTO param) {
-        return indexManager.forceMerge(param);
+        return indicesManager.forceMerge(param);
     }
 
 }
