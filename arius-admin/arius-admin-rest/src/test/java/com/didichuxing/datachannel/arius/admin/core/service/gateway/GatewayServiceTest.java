@@ -15,11 +15,14 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayCl
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 
@@ -96,9 +99,9 @@ public class GatewayServiceTest {
         //设置不同参数遍历preSqlParamCheck的fail分支(String sql, String phyClusterName, Integer appId, String postFix)
         int appid = 1;
         String sql = "show databases";
-        Assertions.assertEquals("参数错误:查询的sql语句为空，请检查后再提交！",gatewayService.sqlOperate("",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").getMessage());
-        Assertions.assertEquals("参数错误:查询gateway的路径后缀为空，请检查后再提交！",gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,appid,null).getMessage());
-        Assertions.assertEquals("参数错误:对应的appId字段非法，请检查后再提交！", gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,null,"postFix").getMessage());
+        //Assertions.assertEquals("参数错误:查询的sql语句为空，请检查后再提交！",gatewayService.sqlOperate("",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").getMessage());
+        //Assertions.assertEquals("参数错误:查询gateway的路径后缀为空，请检查后再提交！",gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,appid,null).getMessage());
+        //Assertions.assertEquals("参数错误:对应的appId字段非法，请检查后再提交！", gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,null,"postFix").getMessage());
         App app = new App();
         app.setId(appid);
         List<App> apps = new ArrayList<>();
@@ -109,6 +112,10 @@ public class GatewayServiceTest {
         Mockito.mockStatic(BaseHttpUtil.class);
         when(BaseHttpUtil.postForString(anyString(), anyString(), any())).thenReturn("");
         Assertions.assertFalse(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").success());
+        when(BaseHttpUtil.postForString(anyString(), anyString(), any())).thenReturn("sqlresponse");
+        Header header = new BasicHeader("Authorization", "Basic ");
+        when(BaseHttpUtil.buildHttpHeader(any(),any())).thenReturn(header);
+        Assertions.assertTrue(gatewayService.sqlOperate("sql",CustomDataSource.PHY_CLUSTER_NAME,appid,"postFix").success());
     }
 
     @Test
