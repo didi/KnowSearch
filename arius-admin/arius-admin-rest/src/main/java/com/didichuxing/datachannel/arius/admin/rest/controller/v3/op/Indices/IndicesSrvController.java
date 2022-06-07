@@ -20,9 +20,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  * @date 2022/5/31
  */
 @RestController
-@RequestMapping(V3_OP + "/index/srv")
+@RequestMapping(V3_OP + "/indices/srv")
 @Api(tags = "索引服务")
-public class IndexSrvController {
+public class IndicesSrvController {
 
     @Autowired
     private IndicesManager indicesManager;

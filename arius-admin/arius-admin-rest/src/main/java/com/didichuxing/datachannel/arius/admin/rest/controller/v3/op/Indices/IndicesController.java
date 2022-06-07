@@ -30,7 +30,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(V3 + "/indices")
 @Api(tags = "索引管理接口(REST)")
-public class ESIndicesController {
+public class IndicesController {
     @Autowired
     private IndicesManager indicesManager;
 
