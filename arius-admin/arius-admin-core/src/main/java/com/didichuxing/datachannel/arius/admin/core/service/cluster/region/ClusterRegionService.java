@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -8,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
 
 /**
  * @author ohushenglin_v
@@ -262,4 +264,11 @@ public interface ClusterRegionService {
      * @return
      */
     ClusterRegionConfig genClusterRegionConfig(String config);
+
+    /**
+     * 获取region 磁盘使用情况
+     * @param cluster
+     * @return (key, value) = (regionId, diskUsage)
+     */
+    Map<Integer, ClusterRegionFSInfo> getClusterRegionFSInfo(String cluster);
 }

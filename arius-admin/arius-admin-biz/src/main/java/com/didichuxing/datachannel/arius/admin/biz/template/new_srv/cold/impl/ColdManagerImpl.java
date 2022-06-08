@@ -118,16 +118,16 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         Set<String> coldIndex = coldAndHotIndices.getV1();
         Set<String> hotIndices = coldAndHotIndices.getV2();
 
-        Boolean moveFlag = Boolean.TRUE;
+        Boolean moveSuccFlag = Boolean.TRUE;
         if (!CollectionUtils.isEmpty(coldIndex)) {
-            moveFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(), Lists.newArrayList(coldIndex), coldRegionId, RETRY_TIME);
+            moveSuccFlag= esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(), Lists.newArrayList(coldIndex), coldRegionId, RETRY_TIME);
         }
 
-        if (!moveFlag && !CollectionUtils.isEmpty(hotIndices)) {
-            moveFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(), Lists.newArrayList(hotIndices), templatePhysical.getRegionId(), RETRY_TIME);
+        if (!moveSuccFlag && !CollectionUtils.isEmpty(hotIndices)) {
+            moveSuccFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(), Lists.newArrayList(hotIndices), templatePhysical.getRegionId(), RETRY_TIME);
         }
 
-        return Result.build(moveFlag);
+        return Result.build(moveSuccFlag);
     }
 
     /**
