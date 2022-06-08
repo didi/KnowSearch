@@ -47,7 +47,7 @@ public class ProjectConfigV3Controller {
 	public Result<Void> init(HttpServletRequest request, @RequestBody ProjectConfigDTO configDTO) {
 		//获取操作用户
 		String userName = HttpRequestUtil.getOperator(request);
-		return projectConfigManager.updateProjectConfig(configDTO, userName);
+		return projectConfigManager.initProjectConfig(configDTO, userName);
 	}
 	
 	@GetMapping

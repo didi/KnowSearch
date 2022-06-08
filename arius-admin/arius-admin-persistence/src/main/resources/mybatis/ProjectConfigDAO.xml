@@ -2,7 +2,7 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectConfigDAO">
 	<resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO">
-		<result column="" jdbcType="INTEGER" property="projectId"/>
+		<result column="project_id" jdbcType="INTEGER" property="projectId"/>
 		<result column="dsl_analyze_enable" jdbcType="INTEGER" property="dslAnalyzeEnable"/>
 		<result column="aggr_analyze_enable" jdbcType="INTEGER" property="aggrAnalyzeEnable"/>
 		<result column="is_source_separated" jdbcType="TINYINT" property="isSourceSeparated"/>
@@ -46,8 +46,7 @@
 	</select>
 	
 	
-	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO"
-		useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO" >
 		insert into project_arius_config
 		(project_id, dsl_analyze_enable, aggr_analyze_enable, is_source_separated, analyze_response_enable,
 		 slow_query_times, memo)

@@ -98,7 +98,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 				param.setAnalyzeResponseEnable(AdminConstant.YES);
 				
 			}
-			boolean succ = (1 == projectConfigDAO.insert(obj2Obj(configDTO, ProjectConfigPO.class)));
+			boolean succ = (1 == projectConfigDAO.insert(param));
 			final ProjectConfigPO newProjectConfigPO = projectConfigDAO.getByProjectId(configDTO.getProjectId());
 			
 			return new Tuple<>(Result.build(succ), newProjectConfigPO);
