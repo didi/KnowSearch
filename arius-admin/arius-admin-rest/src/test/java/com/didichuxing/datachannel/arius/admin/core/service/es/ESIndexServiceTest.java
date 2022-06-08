@@ -142,15 +142,6 @@ public class ESIndexServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void syncBatchUpdateRackTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.batchUpdateIndexRack(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
-        List<String> indices = new ArrayList<>();
-        indices.add("test1");
-        indices.add("test2");
-        Assertions.assertTrue(esIndexService.syncBatchUpdateRack(CustomDataSource.PHY_CLUSTER_NAME, indices, "rack", 1));
-    }
-
-    @Test
     public void syncBatchBlockIndexWriteTest() throws ESOperateException {
         Mockito.when(esIndexDAO.blockIndexWrite(Mockito.any(), Mockito.any(), Mockito.eq(true))).thenReturn(true);
         List<String> indices = new ArrayList<>();

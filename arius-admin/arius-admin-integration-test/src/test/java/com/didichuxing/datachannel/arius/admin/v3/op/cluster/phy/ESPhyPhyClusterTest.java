@@ -52,9 +52,6 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
                 .listCanBeAssociatedRegionOfClustersPhys(ClusterResourceTypeEnum.PRIVATE.getCode(), logicClusterInfo.getLogicClusterId());
         Assertions.assertTrue(result.success());
         Assertions.assertTrue(result.getData().contains(phyClusterInfo.getPhyClusterName()));
-        
-        // 删除逻辑集群
-        LogicClusterInfoSource.removeLogicCluster(logicClusterInfo.getLogicClusterName(), logicClusterInfo.getLogicClusterId());
     }
 
     @Test
@@ -132,29 +129,6 @@ public class ESPhyPhyClusterTest extends BasePhyClusterInfoTest {
             // 删除刚接入的物理集群
             PhyClusterInfoSource.phyClusterRemove(phyClusterInfo.getPhyClusterName(), phyClusterInfo.getPhyClusterId());
         }
-    }
-
-    @Test
-    public void getPhyClusterNameWithSameEsVersionAfterBuildLogicTest() throws IOException {
-        // 申请一个逻辑集群
-        LogicClusterInfoSource.LogicClusterInfo logicClusterInfo =
-                LogicClusterInfoSource.applyLogicCluster(phyClusterInfo.getPhyClusterName(), phyClusterInfo.getPhyClusterName());
-
-        Result<List<String>> result =
-                ESPhyClusterControllerMethod.getPhyClusterNameWithSameEsVersionAfterBuildLogic(logicClusterInfo.getLogicClusterId());
-        Assertions.assertTrue(result.success());
-        // 删除逻辑集群
-        LogicClusterInfoSource.removeLogicCluster(logicClusterInfo.getLogicClusterName(), logicClusterInfo.getLogicClusterId());
-    }
-
-    @Test
-    public void getValidRacksListByDiskSizeTest() throws IOException {
-        // 申请一个逻辑集群
-        LogicClusterInfoSource.LogicClusterInfo logicClusterInfo =
-                LogicClusterInfoSource.applyLogicCluster(phyClusterInfo.getPhyClusterName(), phyClusterInfo.getPhyClusterName());
-        Result<List<String>> result =
-                ESPhyClusterControllerMethod.getValidRacksListByDiskSize(phyClusterInfo.getPhyClusterName(), logicClusterInfo.getLogicClusterName(), "30");
-        Assertions.assertTrue(result.success());
     }
 
     @Test

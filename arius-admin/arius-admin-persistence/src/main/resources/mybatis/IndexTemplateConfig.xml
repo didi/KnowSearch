@@ -6,8 +6,8 @@
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="logic_id" jdbcType="INTEGER" property="logicId"/>
         <result column="is_source_separated" jdbcType="TINYINT" property="isSourceSeparated"/>
-        <result column="adjust_rack_tps_factor" jdbcType="DECIMAL" property="adjustRackTpsFactor"/>
-        <result column="adjust_rack_shard_factor" jdbcType="DECIMAL" property="adjustRackShardFactor"/>
+        <result column="adjust_rack_tps_factor" jdbcType="DECIMAL" property="adjustTpsFactor"/>
+        <result column="adjust_rack_shard_factor" jdbcType="DECIMAL" property="adjustShardFactor"/>
         <result column="dynamic_limit_enable" jdbcType="TINYINT" property="dynamicLimitEnable"/>
         <result column="mapping_improve_enable" jdbcType="TINYINT" property="mappingImproveEnable"/>
         <result column="pre_create_flags" jdbcType="TINYINT" property="preCreateFlags" />
@@ -54,12 +54,12 @@
             keyColumn="id" keyProperty="id">
         insert into index_template_config
         (logic_id, is_source_separated, adjust_rack_tps_factor, adjust_rack_shard_factor,
-            dynamic_limit_enable, mapping_improve_enable,
-            pre_create_flags, disable_source_flags, disable_index_rollover, shard_num)
+        dynamic_limit_enable, mapping_improve_enable,
+        pre_create_flags, disable_source_flags, disable_index_rollover, shard_num)
         values
-        (#{logicId}, #{isSourceSeparated}, #{adjustRackTpsFactor}, #{adjustRackShardFactor},
-            #{dynamicLimitEnable}, #{mappingImproveEnable},
-            #{preCreateFlags}, #{disableSourceFlags}, #{disableIndexRollover}, #{shardNum})
+        (#{logicId}, #{isSourceSeparated}, #{adjustTpsFactor}, #{adjustShardFactor},
+        #{dynamicLimitEnable}, #{mappingImproveEnable},
+        #{preCreateFlags}, #{disableSourceFlags}, #{disableIndexRollover}, #{shardNum})
     </insert>
 
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
@@ -81,8 +81,8 @@
         update index_template_config
         <trim prefix="set" prefixOverrides=",">
             <if test="isSourceSeparated != null">,is_source_separated = #{isSourceSeparated}</if>
-            <if test="adjustRackTpsFactor != null">,adjust_rack_tps_factor = #{adjustRackTpsFactor}</if>
-            <if test="adjustRackShardFactor != null">,adjust_rack_shard_factor = #{adjustRackShardFactor}</if>
+            <if test="adjustTpsFactor != null">,adjust_rack_tps_factor = #{adjustTpsFactor}</if>
+            <if test="adjustShardFactor != null">,adjust_rack_shard_factor = #{adjustShardFactor}</if>
             <if test="dynamicLimitEnable != null">,dynamic_limit_enable = #{dynamicLimitEnable}</if>
             <if test="mappingImproveEnable != null">,mapping_improve_enable = #{mappingImproveEnable}</if>
             <if test="preCreateFlags != null">,pre_create_flags = #{preCreateFlags}</if>

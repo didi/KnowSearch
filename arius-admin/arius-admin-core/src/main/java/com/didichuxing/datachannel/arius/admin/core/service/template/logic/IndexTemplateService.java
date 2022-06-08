@@ -375,4 +375,5 @@ public interface IndexTemplateService {
      */
     Result<List<IndexTemplate>> listByRegionId(Integer regionId);
 
+     List<IndexTemplateWithCluster> convert2WithCluster(List<IndexTemplateWithPhyTemplates> indexTemplateWithPhyTemplates);
 }

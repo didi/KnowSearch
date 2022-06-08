@@ -106,11 +106,6 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
     private String       clusterLogicName;
 
     /**
-     * rack信息
-     */
-    private String       rack;
-
-    /**
      * 预创建索引标识
      */
     private Boolean      preCreateFlags;

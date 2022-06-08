@@ -5,20 +5,16 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.arius.Ariu
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE_CONFIG;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_PIPELINE;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.EXPIRE_DAY;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_NAME_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_VERSION;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_ES_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_PLATFORM_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.RATE_LIMIT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_ES_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_PLATFORM_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
+
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateAction;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
@@ -37,10 +33,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -55,20 +47,16 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements TemplatePipelineManager {
-
-    private static final ILog           LOGGER = LogFactory.getLog( TemplatePipelineManagerImpl.class);
+    private static final ILog   LOGGER = LogFactory.getLog(TemplatePipelineManagerImpl.class);
 
     @Autowired
-    private ESPipelineDAO               esPipelineDAO;
+    private ESPipelineDAO       esPipelineDAO;
 
     @Autowired
     private IndexTemplatePhyDAO indexTemplatePhyDAO;
 
     @Autowired
-    private TemplateAction              templateAction;
-
-    @Autowired
-    private IndexTemplateDAO indexTemplateDAO;
+    private IndexTemplateDAO    indexTemplateDAO;
 
     @Override
     public TemplateServiceEnum templateService() {
