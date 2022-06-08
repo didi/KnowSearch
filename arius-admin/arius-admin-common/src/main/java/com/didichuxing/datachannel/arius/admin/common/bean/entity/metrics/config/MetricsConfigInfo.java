@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetricsConfigInfoPO extends BaseEntity {
+public class MetricsConfigInfo extends BaseEntity {
 
     /**
      * 用户名

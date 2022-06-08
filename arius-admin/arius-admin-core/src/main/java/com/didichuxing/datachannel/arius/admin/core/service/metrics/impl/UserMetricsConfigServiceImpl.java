@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.config.MetricsConfigInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.config.MetricsConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserMetricsConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -50,14 +50,14 @@ public class UserMetricsConfigServiceImpl implements UserMetricsConfigService {
             return new ArrayList<>();
         }
 
-        List<MetricsConfigInfoPO> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
-                MetricsConfigInfoPO.class);
+        List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
+                MetricsConfigInfo.class);
 
         // 获取对应属性下的配置列表
         List<List<String>> metricsList = metricsConfigInfos
                 .stream()
                 .filter(metricsConfigInfoPO -> metricsTypeMatch(metricsConfigInfoPO, metricsTypeEnum))
-                .map(MetricsConfigInfoPO::getMetricsTypes)
+                .map(MetricsConfigInfo::getMetricsTypes)
                 .collect(Collectors.toList());
 
         if (metricsList.isEmpty()) {
@@ -81,11 +81,11 @@ public class UserMetricsConfigServiceImpl implements UserMetricsConfigService {
             return insertMetricsConfigInfoWithoutCheck(param);
         }
 
-        List<MetricsConfigInfoPO> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
-                MetricsConfigInfoPO.class);
+        List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
+                MetricsConfigInfo.class);
 
         boolean ifPresent = false;
-        for (MetricsConfigInfoPO metricsConfigInfoPO : metricsConfigInfos) {
+        for (MetricsConfigInfo metricsConfigInfoPO : metricsConfigInfos) {
             if (metricsTypeMatch(metricsConfigInfoPO, metricsTypeEnum)) {
                 metricsConfigInfoPO.setMetricsTypes(param.getMetricsTypes());
                 ifPresent = true;
@@ -139,7 +139,7 @@ public class UserMetricsConfigServiceImpl implements UserMetricsConfigService {
         return userMetricsConfigDAO.selectOne(new QueryWrapper<UserMetricsConfigPO>().eq(USER_NAME, userName));
     }
 
-    private boolean metricsTypeMatch(MetricsConfigInfoPO metricsConfigInfoPO, MetricsTypeEnum metricsTypeEnum) {
+    private boolean metricsTypeMatch(MetricsConfigInfo metricsConfigInfoPO, MetricsTypeEnum metricsTypeEnum) {
         return metricsConfigInfoPO.getFirstMetricsType().equals(metricsTypeEnum.getFirstMetricsType())
                && metricsConfigInfoPO.getSecondMetricsType().equals(metricsTypeEnum.getSecondMetricsType());
     }
@@ -152,12 +152,12 @@ public class UserMetricsConfigServiceImpl implements UserMetricsConfigService {
         return Result.build(succ, userMetricsConfigPO.getId());
     }
 
-    private MetricsConfigInfoPO createMetricsConfigInfoWithoutCheck(MetricsConfigInfoDTO param) {
-        MetricsConfigInfoPO metricsConfigInfoPO = new MetricsConfigInfoPO();
-        metricsConfigInfoPO.setMetricsTypes(param.getMetricsTypes());
-        metricsConfigInfoPO.setFirstMetricsType(param.getFirstMetricsType());
-        metricsConfigInfoPO.setSecondMetricsType(param.getSecondMetricsType());
-        metricsConfigInfoPO.setUserName(param.getUserName());
-        return metricsConfigInfoPO;
+    private MetricsConfigInfo createMetricsConfigInfoWithoutCheck(MetricsConfigInfoDTO param) {
+        MetricsConfigInfo metricsConfigInfo = new MetricsConfigInfo();
+        metricsConfigInfo.setMetricsTypes(param.getMetricsTypes());
+        metricsConfigInfo.setFirstMetricsType(param.getFirstMetricsType());
+        metricsConfigInfo.setSecondMetricsType(param.getSecondMetricsType());
+        metricsConfigInfo.setUserName(param.getUserName());
+        return metricsConfigInfo;
     }
 }
