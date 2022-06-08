@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv;
+package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.IndexPlanManager;
