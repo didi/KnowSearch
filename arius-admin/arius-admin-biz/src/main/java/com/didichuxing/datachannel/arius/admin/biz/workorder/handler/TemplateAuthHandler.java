@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
  */
 @NoArgsConstructor
 @Service("templateAuthHandler")
+@Deprecated
 public class TemplateAuthHandler extends BaseWorkOrderHandler {
 
 
@@ -166,40 +167,6 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
      */
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        TemplateAuthContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), TemplateAuthContent.class);
-        Integer logicTemplateId = content.getId();
-
-        ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(content.getAuthCode());
-
-        if (authEnum.equals(ProjectTemplateAuthEnum.OWN)) {
-            // 逻辑模板移交
-            return Result.buildFrom(indexTemplateService.turnOverLogicTemplate(logicTemplateId, workOrder.getSubmitorProjectId(),
-                    content.getResponsible(), workOrder.getSubmitor()));
-        } else {
-            // 对于索引的工单任务，若没有集群权限，则添加所在集群的访问权限
-            // 获取所在集群
-            ClusterLogic clusterLogic = indexTemplateService
-                .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId).getLogicCluster();
-
-            if (clusterLogic == null) {
-                // 不应该走到这一步，防御编程
-                return Result.buildFail(String.format("找不到模板%s所属的逻辑集群", logicTemplateId));
-            }
-            ProjectClusterLogicAuthEnum logicClusterAuthEnum = logicClusterAuthService
-                .getLogicClusterAuthEnum(workOrder.getSubmitorProjectId(), clusterLogic.getId());
-
-            // 没有集群权限则添加访问权限
-            if (logicClusterAuthEnum == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
-                logicClusterAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorProjectId(), clusterLogic
-								.getId(),
-                    ProjectClusterLogicAuthEnum.ACCESS, workOrder.getSubmitor(), workOrder.getSubmitor());
-            }
-
-            // 逻辑模板权限设置
-            Result<Void> result = logicTemplateAuthService.ensureSetLogicTemplateAuth(workOrder.getSubmitorProjectId(),
-                logicTemplateId, authEnum, workOrder.getSubmitor(), workOrder.getSubmitor());
-
-            return Result.buildFrom(result);
-        }
+        return Result.buildSucc();
     }
 }

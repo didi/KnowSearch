@@ -112,12 +112,6 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
 
-
-        <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>capacity-plan</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>
             <artifactId>arius-admin-common</artifactId>

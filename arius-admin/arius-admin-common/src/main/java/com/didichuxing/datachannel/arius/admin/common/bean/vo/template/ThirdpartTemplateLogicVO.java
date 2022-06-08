@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import java.util.Date;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
@@ -88,12 +90,6 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
      */
     @ApiModelProperty("配额")
     private Double     quota;
-
-    /**
-     * quota磁盘利用率
-     */
-    @ApiModelProperty("配额使用情况")
-    private QuotaUsage quotaUsage;
 
     /**
      * 创建时间

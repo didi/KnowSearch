@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO">
-    <resultMap id="BaseResultMap"
-               type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO">
-        <result column="id" jdbcType="INTEGER" property="id"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="data_type" jdbcType="TINYINT" property="dataType"/>
-        <result column="date_format" jdbcType="VARCHAR" property="dateFormat"/>
-        <result column="data_center" jdbcType="VARCHAR" property="dataCenter"/>
-        <result column="expire_time" jdbcType="BIGINT" property="expireTime"/>
-        <result column="hot_time" jdbcType="BIGINT" property="hotTime"/>
-        <result column="department_id" jdbcType="VARCHAR" property="libraDepartmentId"/>
-        <result column="department" jdbcType="VARCHAR" property="libraDepartment"/>
-        <result column="responsible" jdbcType="VARCHAR" property="responsible"/>
-        <result column="date_field" jdbcType="VARCHAR" property="dateField"/>
-        <result column="date_field_format" jdbcType="VARCHAR" property="dateFieldFormat"/>
-        <result column="id_field" jdbcType="VARCHAR" property="idField"/>
-        <result column="routing_field" jdbcType="VARCHAR" property="routingField"/>
-        <result column="expression" jdbcType="VARCHAR" property="expression"/>
-        <result column="desc" jdbcType="VARCHAR" property="desc"/>
-        <result column="quota" jdbcType="DECIMAL" property="quota"/>
-        <result column="write_rate_limit" jdbcType="INTEGER" property="writeRateLimit"/>
-        <result column="project_id" jdbcType="INTEGER" property="projectId"/>
-        <result column="ingest_pipeline" jdbcType="VARCHAR" property="ingestPipeline"/>
-        <result column="block_read" jdbcType="BOOLEAN" property="blockRead"/>
-        <result column="block_write" jdbcType="BOOLEAN" property="blockWrite"/>
-        <result column="check_point_diff" jdbcType="BIGINT" property="checkPointDiff"/>
-        <result column="has_dcdr"    jdbcType="BOOLEAN" property="hasDCDR"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
-        <result column="resource_id" jdbcType="BIGINT" property="resourceId"/>
-        <result column="level" jdbcType="TINYINT" property="level"/>
-        <result column="open_srv" jdbcType="VARCHAR" property="openSrv"/>
-        <result column="disk_size" jdbcType="DECIMAL" property="diskSize"/>
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO">
+        <result column="id"                      jdbcType="INTEGER" property="id"/>
+        <result column="name"                    jdbcType="VARCHAR" property="name"/>
+        <result column="data_type"               jdbcType="TINYINT" property="dataType"/>
+        <result column="date_format"             jdbcType="VARCHAR" property="dateFormat"/>
+        <result column="data_center"             jdbcType="VARCHAR" property="dataCenter"/>
+        <result column="expire_time"             jdbcType="BIGINT" property="expireTime"/>
+        <result column="hot_time"                jdbcType="BIGINT" property="hotTime"/>
+        <result column="department_id"           jdbcType="VARCHAR" property="libraDepartmentId"/>
+        <result column="department"              jdbcType="VARCHAR" property="libraDepartment"/>
+        <result column="responsible"             jdbcType="VARCHAR" property="responsible"/>
+        <result column="date_field"              jdbcType="VARCHAR" property="dateField"/>
+        <result column="date_field_format"       jdbcType="VARCHAR" property="dateFieldFormat"/>
+        <result column="id_field"                jdbcType="VARCHAR" property="idField"/>
+        <result column="routing_field"           jdbcType="VARCHAR" property="routingField"/>
+        <result column="expression"              jdbcType="VARCHAR" property="expression"/>
+        <result column="desc"                    jdbcType="VARCHAR" property="desc"/>
+        <result column="quota"                   jdbcType="DECIMAL" property="quota"/>
+        <result column="write_rate_limit"        jdbcType="INTEGER" property="writeRateLimit"/>
+        <result column="project_id"                  jdbcType="INTEGER" property="projectId"/>
+        <result column="ingest_pipeline"         jdbcType="VARCHAR" property="ingestPipeline"/>
+        <result column="block_read"              jdbcType="BOOLEAN" property="blockRead"/>
+        <result column="block_write"             jdbcType="BOOLEAN" property="blockWrite"/>
+        <result column="check_point_diff"        jdbcType="BIGINT" property="checkPointDiff"/>
+        <result column="has_dcdr"                jdbcType="BOOLEAN" property="hasDCDR"/>
+        <result column="create_time"             jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time"             jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="resource_id"             jdbcType="BIGINT" property="resourceId"/>
+        <result column="level"                   jdbcType="TINYINT" property="level"/>
+        <result column="open_srv"                jdbcType="VARCHAR" property="openSrv"/>
+        <result column="disk_size"               jdbcType="DECIMAL" property="diskSize"/>
     </resultMap>
 
-       <sql id="Base_Column_List">
+    <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id, check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`
+         `desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id,
+          check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size
     </sql>
 
     <select id="listByCondition"
@@ -114,19 +114,19 @@
         insert into index_template_info2
           (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, disk_size)
+         `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, open_srv, disk_size)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
          #{libraDepartmentId}, #{libraDepartment}, #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
          #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{projectId}, #{ingestPipeline}, #{resourceId}, #{level}
-        , #{diskSize})
+        , #{openSrv}, #{diskSize})
     </insert>
 
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from index_template_info2
-        where id = #{logicId}
+        where id = #{logicId} and is_active = 1
     </select>
 
     <select id="listByProjectId" parameterType="int" resultMap="BaseResultMap">
@@ -202,7 +202,7 @@
         from index_template_info2
         where is_active = 1 and
         id in
-        <foreach collection="list" item="id" open="(" separator="," close=")">#{id}</foreach>
+        <foreach collection="logicIds" item="id" open="(" separator="," close=")">#{id}</foreach>
     </select>
 
     <select id="likeByResponsible" parameterType="string" resultMap="BaseResultMap">

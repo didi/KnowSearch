@@ -92,20 +92,18 @@ public class ESPhyClusterController {
     @PostMapping("/node/list")
     @ResponseBody
     @ApiOperation(value = "获取集群节点列表接口【三方接口】",tags = "【三方接口】" )
-
+    @Deprecated
     public Result<List<ESClusterRoleHostVO>> nodeList(@RequestBody ESClusterRoleHostDTO param) {
-        return Result
-            .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostService.queryNodeByCondt(param)));
+       return Result.buildSucc();
     }
 
     @GetMapping("/node/getByCluster")
     @ResponseBody
     @ApiOperation(value = "根据集群获取集群节点列表接口【三方接口】",tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
-
+    @Deprecated
     public Result<List<ESClusterRoleHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
-        return Result
-            .buildSucc(clusterNodeManager.convertClusterLogicNodes(clusterRoleHostService.getNodesByCluster(cluster)));
+        return Result.buildSucc();
     }
 
     @PostMapping("/deleteExpireIndex")

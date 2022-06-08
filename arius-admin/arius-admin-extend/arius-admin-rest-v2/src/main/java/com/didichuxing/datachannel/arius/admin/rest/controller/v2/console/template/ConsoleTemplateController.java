@@ -2,6 +2,26 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
@@ -19,6 +39,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateCapacityVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
@@ -75,11 +98,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     public static final int MAX_PERCENT = 10000;
     public static final int MIN_PERCENT = -99;
 
-    @Autowired
-    private ProjectService projectService;
-
-    @Autowired
-    private TemplateQuotaManager     templateQuotaManager;
+   
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -102,11 +121,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
     public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "projectId", required = false) Integer projectId,
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
-        
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.build(ResultCode.USER_ACCOUNT_NOT_EXIST.getCode(),
-                    ResultCode.USER_ACCOUNT_NOT_EXIST.getMessage());
-        }
+       
         return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
 
@@ -114,6 +129,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取索引详细信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @Deprecated
     public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
                                                                     @RequestParam("logicId") Integer logicId) {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
@@ -159,18 +175,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取索引配额信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @Deprecated
     public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
-        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(logicId);
-        if (templateLogic == null) {
-            return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
-        }
-
-        ConsoleTemplateCapacityVO templateCapacityVO = ConvertUtil.obj2Obj(templateLogic,
-            ConsoleTemplateCapacityVO.class);
-        templateCapacityVO.setCyclicalRoll(templateLogic.getExpression().endsWith("*"));
-        templateCapacityVO.setTopUsage(getQuotaUsage(templateLogic.getId()));
-        templateCapacityVO.setCurrentUsage(fetchLogicTemplateCurrentUsage(logicId));
-        return Result.buildSucc(templateCapacityVO);
+        return Result.buildSucc();
     }
 
     @GetMapping("/clearInfo")
@@ -262,9 +269,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     public Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(HttpServletRequest request,
                                                                             @RequestParam("projectId") Integer projectId) {
 
-       if (!projectService.checkProjectExist(projectId)) {
-            return Result.build(ResultCode.USER_ACCOUNT_NOT_EXIST.getCode(),ResultCode.USER_ACCOUNT_NOT_EXIST.getMessage());
-        }
+      
 
         return indexTemplateService.getLogicTemplatesByProjectId(projectId);
     }
@@ -340,22 +345,6 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     }
 
     /**
-     * 获取逻辑模板使用率
-     *
-     * @param logicId 逻辑模板ID
-     * @return
-     */
-    private QuotaUsage getQuotaUsage(Integer logicId) {
-        LogicTemplateQuotaUsage templateQuotaUsage = templateQuotaManager.getLogicTemplateQuotaUsage(logicId,
-                7 * AdminConstant.MILLIS_PER_DAY);
-        QuotaUsage topUsage = ConvertUtil.obj2Obj(templateQuotaUsage, QuotaUsage.class);
-        topUsage.setQuotaDiskUsage(templateQuotaUsage.getActualDiskG() / templateQuotaUsage.getQuotaDiskG());
-        topUsage.setQuotaCpuUsage(templateQuotaUsage.getActualCpuCount() / templateQuotaUsage.getQuotaCpuCount());
-
-        return topUsage;
-    }
-
-    /**
      * 获取逻辑模板索引列表
      *
      * @param logicId 逻辑ID
@@ -385,25 +374,5 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
 
         return StringUtils.EMPTY;
-    }
-
-    /**
-     * 获取逻辑模板当前使用率
-     *
-     * @param logicId 逻辑模板ID
-     * @return
-     */
-    private QuotaUsage fetchLogicTemplateCurrentUsage(Integer logicId) {
-        ESTemplateQuotaUsage esTemplateQuotaUsage = templateQuotaManager.getByLogicId(logicId);
-
-        QuotaUsage currentUsage = ConvertUtil.obj2Obj(esTemplateQuotaUsage, QuotaUsage.class);
-        if (esTemplateQuotaUsage != null) {
-            currentUsage
-                .setQuotaDiskUsage(esTemplateQuotaUsage.getActualDiskG() / esTemplateQuotaUsage.getQuotaDiskG());
-            currentUsage
-                .setQuotaCpuUsage(esTemplateQuotaUsage.getActualCpuCount() / esTemplateQuotaUsage.getQuotaCpuCount());
-        }
-
-        return currentUsage;
     }
 }

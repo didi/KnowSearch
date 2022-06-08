@@ -28,7 +28,7 @@ public interface IndexTemplateDAO {
 
     List<IndexTemplatePO> listAll();
 
-    List<IndexTemplatePO> listByIds(List<Integer> logicIds);
+    List<IndexTemplatePO> listByIds(@Param("logicIds") List<Integer> logicIds);
 
     List<IndexTemplatePO> listByDataCenter(String dataCenter);
 

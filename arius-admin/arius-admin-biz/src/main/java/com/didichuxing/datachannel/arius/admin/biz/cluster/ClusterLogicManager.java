@@ -104,13 +104,6 @@ public interface ClusterLogicManager {
     Result<Set<ESClusterNodeSepcVO>> getLogicClusterDataNodeSpec(Long clusterId);
 
     /**
-     * 获取指定罗集群节点列表接口
-     * @param clusterId
-     * @return
-     */
-    Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(Long clusterId);
-
-    /**
      * 获取当前集群支持的套餐列表
      * @return
      */
@@ -199,12 +192,4 @@ public interface ClusterLogicManager {
      * @return
      */
     boolean updateClusterLogicHealth(Long clusterLogicId);
-
-    /**
-     * 校验模板大小资源是否充足
-     * @param logicClusterId 逻辑集群id
-     * @param templateSize 模板新建的时候设置的数据大小
-     * @return
-     */
-    Result<Void> checkTemplateDataSizeValidForCreate(Long logicClusterId, String templateSize);
 }

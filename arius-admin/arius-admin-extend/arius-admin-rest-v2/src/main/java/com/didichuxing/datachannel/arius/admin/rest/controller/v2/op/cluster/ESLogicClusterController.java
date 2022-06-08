@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -38,10 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({ V2_OP })
 @Api(tags = "es集群逻辑集群接口(REST)")
 public class ESLogicClusterController {
-
-    @Autowired
-    private ClusterLogicNodeService clusterLogicNodeService;
-
     @Autowired
     private ClusterNodeManager      clusterNodeManager;
 
@@ -100,9 +97,8 @@ public class ESLogicClusterController {
     @ResponseBody
     @ApiOperation(value = "获取指定逻辑集群列表接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
-
+    @Deprecated
     public Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(@RequestParam(value = "clusterId") Long clusterId) {
-        return Result.buildSucc(clusterNodeManager
-            .convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterId)));
+        return Result.buildSucc();
     }
 }

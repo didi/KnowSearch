@@ -114,19 +114,6 @@ public interface TemplatePhyManager {
     Result<Long> addTemplateWithoutCheck(IndexTemplatePhyDTO param) throws AdminOperateException;
 
     /**
-     * 修改由于逻辑模板修改而物理模板需要同步修改的属性
-     * <p>
-     * 目前有:
-     * expression
-     *
-     * @param param    参数
-     * @param operator 操作人
-     * @return result
-     */
-    @Transactional(rollbackFor = Exception.class)
-    Result<Void> editTemplateFromLogic(IndexTemplateDTO param, String operator) throws ESOperateException;
-
-    /**
      * 主从切换
      *
      * @param logicId                逻辑模板id
@@ -136,26 +123,6 @@ public interface TemplatePhyManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> switchMasterSlave(Integer logicId, Long expectMasterPhysicalId, String operator);
-
-    /**
-     * 更新模板的rack和shard
-     *
-     * @param physicalId 物理模板的id
-     * @param tgtRack    rack
-     * @return result
-     * @throws ESOperateException
-     */
-    Result<Void> editTemplateRackWithoutCheck(Long physicalId, String tgtRack, String operator,
-                                              int retryCount) throws ESOperateException;
-
-    /**
-     * 升级模板
-     *
-     * @param physicalId physicalId
-     * @return reuslt
-     */
-
-    Result<Void> upgradeTemplateVersion(Long physicalId, String operator, int retryCount) throws ESOperateException;
 
     /**
      *

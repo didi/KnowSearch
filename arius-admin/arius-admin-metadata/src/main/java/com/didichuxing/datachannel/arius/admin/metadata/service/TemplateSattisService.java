@@ -1,14 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.formatDouble;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
@@ -23,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppQueryPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.TemplateAccessCountPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.TemplateTpsMetricPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateStatsInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -31,7 +38,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app.AppIdTemplateAccessESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslFieldUseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexHealthDegreeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexNodeInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIngestInfoESDAO;
@@ -43,12 +49,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.formatDouble;
 
 @Service
 public class TemplateSattisService {
@@ -63,9 +63,6 @@ public class TemplateSattisService {
 
     @Autowired
     private AriusStatsIngestInfoESDAO       ariusStatsIngestInfoESDAO;
-
-    @Autowired
-    private IndexHealthDegreeDAO            indexHealthDegreeDAO;
 
     @Autowired
     private GatewayJoinESDAO                gatewayJoinESDAO;
@@ -395,10 +392,6 @@ public class TemplateSattisService {
             double totalSizeInBytes = ariusStatsIndexInfoESDAO.getLogicTemplateTotalSize(logicTemplateId);
             indexTemplateLogicWithStats.setStore(formatDouble(totalSizeInBytes / ONE_GB, 2));
         }).runnableTask(() -> {
-            double templateHealthDegree = indexHealthDegreeDAO.getTemplateAvgDegree(logicTemplateId, endDate - ONE_DAY,
-                    endDate);
-            indexTemplateLogicWithStats.setIndexHealthDegree(formatDouble(templateHealthDegree, 2));
-        }).runnableTask(() -> {
             Integer templaterValueDegree = templateValueService
                     .getTemplateValueByLogicTemplateId(logicTemplateId.intValue()).getValue();
             indexTemplateLogicWithStats.setIndexValueDegree(formatDouble(templaterValueDegree, 2));
@@ -471,10 +464,6 @@ public class TemplateSattisService {
         templateStatsInfoPO.setQutoa(indexTemplate.getQuota());
 
         FutureUtil.DEAULT_FUTURE.runnableTask(() -> {
-            double indexHealthDegree = indexHealthDegreeDAO.getTemplateAvgDegree(logicTemplateId, current - ONE_DAY,
-                    current);
-            templateStatsInfoPO.setIndexHealthDegree(formatDouble(indexHealthDegree, 2));
-        }).runnableTask(() -> {
             double totalSizeInBytes = ariusStatsIndexInfoESDAO.getLogicTemplateTotalSize(logicTemplateId);
             templateStatsInfoPO.setStoreBytes(totalSizeInBytes);
             templateStatsInfoPO.setStore(formatDouble(totalSizeInBytes / ONE_GB, 2));

@@ -198,16 +198,6 @@ public class ESPhyClusterController {
         return clusterPhyManager.getPhyClusterNameWithSameEsVersionAfterBuildLogic(clusterLogicId);
     }
 
-    @GetMapping("/{clusterPhy}/{clusterLogic}/{templateSize}/bindRack")
-    @ResponseBody
-    @ApiOperation(value = "根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表")
-    @Deprecated
-    public Result<Set<String>> getValidRacksListByDiskSize(@PathVariable("clusterPhy") String clusterPhy,
-                                                @PathVariable("clusterLogic") String clusterLogic,
-                                                @PathVariable("templateSize") String templateSize) {
-        return clusterPhyManager.getValidRacksListByTemplateSize(clusterPhy, clusterLogic, templateSize);
-    }
-
     @GetMapping("/zeus-url")
     @ResponseBody
     @ApiOperation(value = "获取zeus管控平台跳转接口")

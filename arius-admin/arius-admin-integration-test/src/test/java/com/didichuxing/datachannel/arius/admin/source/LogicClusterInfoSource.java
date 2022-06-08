@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.source;
 
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterDeleteContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
@@ -68,36 +67,5 @@ public class LogicClusterInfoSource {
         Assertions.assertFalse(result3.getData().getBizData().isEmpty());
         logicClusterInfo.logicClusterId = result3.getData().getBizData().get(0).getId();
         return logicClusterInfo;
-    }
-
-    /**
-     * 删除逻辑集群
-     */
-    public static void removeLogicCluster(String logicClusterName, Long logicClusterId) throws IOException {
-        // 解绑 region
-        // 逻辑集群节点映射解绑
-        Result<List<ClusterRegionVO>> result = ESLogicClusterRegionControllerMethod.listLogicClusterRegions(logicClusterId);
-        Assertions.assertTrue(result.success());
-        for (ClusterRegionVO clusterRegionVO : result.getData()) {
-            ESLogicClusterRegionControllerMethod.cancelBindingLogicClusterRegion(clusterRegionVO.getId(), logicClusterId);
-        }
-
-        // 删除逻辑集群工单申请
-        WorkOrderDTO workOrderDTO = CustomDataSource.getWorkOrderDTO("logicClusterDelete");
-        LogicClusterDeleteContent logicClusterDeleteContent = new LogicClusterDeleteContent();
-        logicClusterDeleteContent.setId(logicClusterId);
-        logicClusterDeleteContent.setName(logicClusterName);
-        logicClusterDeleteContent.setResponsible(CustomDataSource.operator);
-        logicClusterDeleteContent.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
-        workOrderDTO.setContentObj(logicClusterDeleteContent);
-        workOrderDTO.setType("logicClusterDelete");
-        workOrderDTO.setSubmitorProjectid(1);
-        Result<AriusWorkOrderInfoSubmittedVO> result2 = NormalOrderControllerMethod.submit("logicClusterDelete", workOrderDTO);
-        Assertions.assertTrue(result2.success());
-
-        // 通过工单，删除逻辑集群
-        WorkOrderProcessDTO processDTO = CustomDataSource.getWorkOrderProcessDTO(result2.getData().getId());
-        Result<Void> result3 = NormalOrderControllerMethod.process(result2.getData().getId(), processDTO);
-        Assertions.assertTrue(result3.success());
     }
 }

@@ -32,12 +32,12 @@ public class IndexTemplateConfig extends BaseEntity {
     /**
      * 资源调整tps系数  默认1.0
      */
-    private Double  adjustRackTpsFactor;
+    private Double adjustTpsFactor;
 
     /**
      * 资源调整  默认1.0
      */
-    private Double  adjustRackShardFactor;
+    private Double adjustShardFactor;
 
     /**
      * 写入动态限流开关  默认打开

@@ -367,37 +367,6 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         return Result.buildSucc();
     }
 
-    /**
-     * 根据集群名称，ip和port获取对应的rack信息的设置
-     *
-     * @param clusterName 物理集群名称
-     * @param ip          ip地址
-     * @return 判断指定data节点的rack类型，如果是冷节点则返回cold，否则返回*
-     */
-    @Override
-    public String judgeColdRackFromEcmTaskOfClusterNewOrder(String clusterName, String ip) {
-        Result<String> ecmTaskOrderDetailInfo = getEcmTaskOrderDetailInfo(clusterName);
-        if (ecmTaskOrderDetailInfo.failed()) {
-            return AdminConstant.DEFAULT_HOT_RACK;
-        }
-        ClusterHostContent clusterOpHostContent = ConvertUtil.str2ObjByJson(ecmTaskOrderDetailInfo.getData(),
-                ClusterHostContent.class);
-
-        //获取用户配置的冷节点的http地址信息
-        Set<String> coldHttpAddress = clusterOpHostContent.getClusterRoleHosts()
-                .stream()
-                .filter(ESClusterRoleHost::getBeCold)
-                .map(ESClusterRoleHost::getHostname)
-                .collect(Collectors.toSet());
-
-        //冷节点默认设置rack值为cold
-        if (coldHttpAddress.contains(ip)) {
-            return AdminConstant.DEFAULT_COLD_RACK;
-        }
-
-        return AdminConstant.DEFAULT_HOT_RACK;
-    }
-
     @Override
     public Result<Void> cancelClusterEcmTask(Long taskId, String operator) {
         EcmTask ecmTask = getEcmTask(taskId);

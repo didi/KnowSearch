@@ -3,62 +3,19 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PhysicalTemplateTpsMetric;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateMetaMetric;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AppIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateValueRecordVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 
 /**
  * @author d06679
  * @date 2019-06-24
  */
 public interface TemplatePhyStatisManager {
-
-    /**
-     * 统计模板各个指标
-     * @param physicalIds id列表
-     * @return result
-     */
-    List<TemplateMetaMetric> metaByPhysical(List<Long> physicalIds);
-
-    /**
-     * 获取模板统计指标
-     * @param physicalIds 物理模板id
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param resourceConfig 配置
-     * @return list
-     */
-    Result<List<TemplateMetaMetric>> getTemplateMetricByPhysicals(List<Long> physicalIds, long startTime, long endTime,
-                                                                  TemplateResourceConfig resourceConfig);
-
-    /**
-     * 获取模板统计指标
-     * @param physicalId 物理模板id
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param resourceConfig 配置
-     * @return list
-     */
-    Result<TemplateMetaMetric> getTemplateMetricByPhysical(Long physicalId, long startTime, long endTime,
-                                                           TemplateResourceConfig resourceConfig);
-
-    /**
-     * 获取模板tps指标 时间范围是指currenttps的时间范围；tpsMax是过去7天的
-     * @param cluster 集群
-     * @param template 模板
-     * @param currentStartTime 实时tps时间范围开始时间
-     * @param currentEndTime 实时tps时间范围结束时间
-     * @return result
-     */
-    Result<PhysicalTemplateTpsMetric> getTemplateTpsMetric(String cluster, String template, long currentStartTime,
-                                                           long currentEndTime);
-
     /**
      * 根据模板id获取最近days天的appid访问统计信息
      * @param logicTemplateId 逻辑索引模板ID

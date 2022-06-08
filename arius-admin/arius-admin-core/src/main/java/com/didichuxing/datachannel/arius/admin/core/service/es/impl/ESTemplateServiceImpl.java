@@ -53,16 +53,15 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      *
      * @param cluster    集群
      * @param name       模板明细
-     * @param rack       rack
      * @param shard      shard
      * @param retryCount 重试次数
      * @return result
      */
     @Override
-    public boolean syncUpdateRackAndShard(String cluster, String name, String rack, Integer shard, Integer shardRouting,
-                                          int retryCount) throws ESOperateException {
+    public boolean syncUpdateShard(String cluster, String name, Integer shard, Integer shardRouting,
+                                   int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("updateTemplateRackAndShard", retryCount,
-            () -> esTemplateDAO.updateRackAndShard(cluster, name, rack, shard,
+                () -> esTemplateDAO.updateShard(cluster, name, shard,
                 shardRouting));
     }
 
@@ -71,16 +70,15 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @param cluster    集群
      * @param name       模板名字
      * @param expression 表达式
-     * @param rack       rack
      * @param shard      shard
      * @param retryCount 重试次数
      * @return result
      */
     @Override
-    public boolean syncCreate(String cluster, String name, String expression, String rack, Integer shard,
+    public boolean syncCreate(String cluster, String name, String expression, Integer shard,
                               Integer shardRouting, int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount, () -> esTemplateDAO.create(cluster, name,
-            expression, rack, shard, shardRouting));
+            expression, shard, shardRouting));
     }
 
     @Override
