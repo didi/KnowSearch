@@ -21,8 +21,6 @@ ariusManagerAppId=1
 logicClusterId=0
 # 物理集群名
 phyClusterName="logi-em-matedata-cluster"
-# 给模板分配的rack，如果有多个则逗号分隔, 开源用户接入默认为*
-rack=""
 
 # 管理员用户cookie里的domainAccount
 domainAccount="admin"
@@ -190,9 +188,6 @@ for file in `ls ${templateDirForArius}`
         # 物理集群名
         sed -i "s/\"cluster\":.*/\"cluster\": \"${phyClusterName}\",/g" ${file}
 
-        # rack
-        sed -i "s/\"rack\":.*/\"rack\": \"${rack}\",/g" ${file}
-
         # 物理模板角色
         sed -i "s/\"role\":.*/\"role\": 1,/g" ${file}
 
@@ -212,9 +207,6 @@ for file in `ls ${templateDirForCluster}`
     do
         templateName=`echo ${file}`
         file="${templateDirForCluster}/${file}"
-
-        # 替换rack
-        sed -i "s/\"rack\": \"r1.*/\"rack\": \"${rack}\"/g" ${file}
 
         templateContentForCluster=`cat ${file}`
         echo -e "\ncreate admin template ${templateName}"
