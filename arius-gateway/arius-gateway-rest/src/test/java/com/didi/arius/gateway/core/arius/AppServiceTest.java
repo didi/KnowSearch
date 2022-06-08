@@ -4,51 +4,55 @@ import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.service.arius.AppService;
-import com.didi.arius.gateway.rest.AriusGatewayApplication;
+import com.didi.arius.gateway.core.service.arius.impl.AppServiceImpl;
+import com.didi.arius.gateway.util.CustomDataSource;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = AriusGatewayApplication.class)
-public class AppServiceTests {
+public class AppServiceTest {
 
     private static String INDEX_NAME = "cn_record.arius.template.value_2021-05";
 
-
-    @Autowired
-    private AppService appService;
+    AppService appService = new AppServiceImpl();
+    Map<Integer, AppDetail> appDetails = Mockito.mock(Map.class);
+    Map<String, AppDetail> ipToAppMap = Mockito.mock(Map.class);
 
     @Before
     public void setUp() {
+        ipToAppMap.put(CustomDataSource.ip,CustomDataSource.appDetailFactory());
+        ReflectionTestUtils.setField(appService, "appDetails", appDetails);
+        ReflectionTestUtils.setField(appService,"ipToAppMap",ipToAppMap);
     }
 
     @Test
-    public void testGetAppDetail() throws InterruptedException {
-        final AppDetail appDetail = appService.getAppDetail(5);
-        System.out.println(JSON.toJSONString(appDetail));
+    public void testGetAppDetail() {
+        Mockito.when(appDetails.get(Mockito.anyInt())).thenReturn(CustomDataSource.appDetailFactory());
+        AppDetail appDetail = appService.getAppDetail(CustomDataSource.appid);
         assertEquals(true, appDetail != null);
     }
 
     @Test
-    public void testGetAppDetails() throws InterruptedException {
-        final Map<Integer, AppDetail> appDetails = appService.getAppDetails();
-        System.out.println(JSON.toJSONString(appDetails));
+    public void testGetAppDetails() {
+        Map<Integer, AppDetail> appDetails = appService.getAppDetails();
         assertEquals(true, appDetails != null);
     }
 
     @Test
-    public void testGetAppDetailFromIp() throws InterruptedException {
-        final AppDetail appDetailFromIp = appService.getAppDetailFromIp("127.0.0.1");
-        System.out.println(JSON.toJSONString(appDetailFromIp));
+    public void testGetAppDetailFromIp() {
+        AppDetail appDetailFromIp = appService.getAppDetailFromIp(null);
+        assertEquals(true,appDetailFromIp == null);
+        appDetailFromIp = appService.getAppDetailFromIp(CustomDataSource.ip);
+        assertEquals(true,appDetailFromIp != null);
     }
 
     @Test

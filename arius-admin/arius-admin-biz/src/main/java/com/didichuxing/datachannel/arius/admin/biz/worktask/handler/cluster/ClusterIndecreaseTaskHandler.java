@@ -103,9 +103,21 @@ public class ClusterIndecreaseTaskHandler extends AbstractClusterTaskHandler {
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setOrderType(content.getOperationType());
 
-        List<EcmParamBase> hostScaleParamBaseList = getHostScaleParamBaseList(content.getPhyClusterId().intValue(),
-            content.getClusterRoleHosts(), content.getPidCount());
+        List<String> roleNameList = new ArrayList<>();
+        for (ESClusterRoleHost clusterRoleHost : content.getClusterRoleHosts()) {
+            if (!roleNameList.contains(clusterRoleHost.getRole())) {
+                roleNameList.add(clusterRoleHost.getRole());
+            }
+        }
+        Result<List<EcmParamBase>> result = ecmHandleService.buildEcmParamBaseList(content.getPhyClusterId().intValue(),
+            roleNameList);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        List<EcmParamBase> ecmParamBaseList = result.getData();
 
+        List<EcmParamBase> hostScaleParamBaseList = buildHostScaleParamBaseList(content.getClusterRoleHosts(),
+            content.getPidCount(), roleNameList, ecmParamBaseList);
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(
             hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(hostScaleParamBaseList);
@@ -125,21 +137,6 @@ public class ClusterIndecreaseTaskHandler extends AbstractClusterTaskHandler {
             .strList2String(ecmParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
         return Result.buildSucc();
-    }
-
-
-    private List<EcmParamBase> getHostScaleParamBaseList(Integer phyClusterId,
-                                                           List<ESClusterRoleHost> roleClusterHosts, Integer pidCount) {
-        List<String> roleNameList = new ArrayList<>();
-        for (ESClusterRoleHost clusterRoleHost : roleClusterHosts) {
-            if (!roleNameList.contains(clusterRoleHost.getRole())) {
-                roleNameList.add(clusterRoleHost.getRole());
-            }
-        }
-
-        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseList(phyClusterId, roleNameList)
-                .getData();
-        return buildHostScaleParamBaseList(roleClusterHosts, pidCount, roleNameList, ecmParamBaseList);
     }
 
     private List<EcmParamBase> buildHostScaleParamBaseList(List<ESClusterRoleHost> roleClusterHosts, Integer pidCount,
