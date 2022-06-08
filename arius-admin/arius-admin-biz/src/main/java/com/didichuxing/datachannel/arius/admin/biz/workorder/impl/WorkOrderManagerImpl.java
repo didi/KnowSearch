@@ -250,7 +250,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public List<WorkOrderPO> getPassApprovalList(String approver) {
         try {
-            if (roleTool.isAdmin(approver)) {
+            if (!roleTool.isAdmin(approver)) {
                 return orderDao.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
             }
             return orderDao.listByStatus(OrderStatusEnum.PASSED.getCode());

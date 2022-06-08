@@ -117,7 +117,8 @@ public class ProjectProcess implements ResponseBodyAdvice {
         esUserDTO.setVerifyCode(RandomStringUtils.randomAlphabetic(7));
         esUserDTO.setMemo(((ProjectVO) data).getProjectName() + "项目默认的es user");
         esUserDTO.setProjectId(((ProjectVO) data).getId());
-        esUserService.registerESUser(esUserDTO, roleTool.adminList().get(0).getUserName());
+        esUserService.registerESUser(esUserDTO, roleTool.adminList().size()>0?
+                roleTool.adminList().get(0).getUserName():AuthConstant.SUPER_USER_NAME);
     }
     
 
