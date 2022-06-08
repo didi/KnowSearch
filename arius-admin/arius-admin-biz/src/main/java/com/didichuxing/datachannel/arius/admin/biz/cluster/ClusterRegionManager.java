@@ -4,12 +4,9 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 
 /**
  * @Author: lanxinzheng
@@ -40,21 +37,6 @@ public interface ClusterRegionManager {
      * @return
      */
     ClusterRegionVO buildLogicClusterRegionVO(ClusterRegion region);
-
-    /**
-     * 获取物理集群可划分至region的Racks信息
-     * @param cluster       物理集群名
-     * @return
-     */
-    @Deprecated
-    List<PhyClusterRackVO> buildCanDividePhyClusterRackVOs(String cluster);
-
-    /**
-     * 构建逻辑集群物RackVO
-     * @param logicClusterRackInfos 逻辑集群rack信息
-     * @return
-     */
-    List<LogicClusterRackVO> buildLogicClusterRackVOs(List<ClusterLogicRackInfo> logicClusterRackInfos);
 
     /**
      * 逻辑集群批量绑定region

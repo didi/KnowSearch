@@ -154,13 +154,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
 
         List<Integer> regionIdList = clusterRoleHostList.stream().map(ClusterRoleHost::getRegionId).collect(Collectors.toList());
-        List<ClusterRegion> clusterRegionList = clusterRegionService.getClusterRegionsByLogicIds();
-        if (CollectionUtils.isEmpty(clusterRegionList)) {
-            return null;
-        }
-        Map<Integer, >
 
-
+        return null;
     }
 
     private List<IndexCatCellPO> buildIndexCatCellPOS(List<CatIndexResult> catIndexResults, String clusterName, long timeMillis) {

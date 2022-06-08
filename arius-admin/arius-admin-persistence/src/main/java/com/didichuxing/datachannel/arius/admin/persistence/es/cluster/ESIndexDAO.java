@@ -399,17 +399,6 @@ public class ESIndexDAO extends BaseESDAO {
     }
 
     /**
-     * 修改索引的setting 幂等
-     * @param cluster 集群
-     * @param indices indices
-     * @param tgtRack tgtRack
-     * @return true/false
-     */
-    public boolean batchUpdateIndexRack(String cluster, List<String> indices, String tgtRack) {
-        return putIndexSetting(cluster, indices, INDEX_INCLUDE_RACK, tgtRack, "");
-    }
-
-    /**
      * 设置索引只读属性
      * @param cluster 集群
      * @param indexNames 索引列表

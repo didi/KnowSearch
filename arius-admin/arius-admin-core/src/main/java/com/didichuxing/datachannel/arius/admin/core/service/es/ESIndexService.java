@@ -174,18 +174,6 @@ public interface ESIndexService {
     boolean syncDeleteByQuery(String cluster, List<String> delIndices, String delQueryDsl) throws ESOperateException;
 
     /**
-     * 修改表达式对应索引的rack
-     * @param cluster cluster
-     * @param indices 表达式
-     * @param tgtRack tgtRack
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws ESOperateException
-     */
-    boolean syncBatchUpdateRack(String cluster, List<String> indices, String tgtRack,
-                                int retryCount) throws ESOperateException;
-
-    /**
      * 修改索引只读配置
      * @param cluster 集群
      * @param indices 索引

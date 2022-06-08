@@ -40,14 +40,4 @@ public interface TemplateColdManager {
      * @return
      */
     Result<Integer> batchChangeHotDay(Integer days, String operator);
-
-    /**
-     * 修改热数据的rack
-     * @param physicalId 物理模板id
-     * @param tgtRack 目标rack
-     * @param retryCount 重试次数
-     * @throws ESOperateException e
-     * @return true/false
-     */
-    boolean updateHotIndexRack(Long physicalId, String tgtRack, int retryCount) throws ESOperateException;
 }

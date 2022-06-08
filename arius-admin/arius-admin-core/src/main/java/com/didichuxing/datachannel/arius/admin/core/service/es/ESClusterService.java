@@ -162,14 +162,6 @@ public interface ESClusterService {
     Set<String> syncGetAllNodesAttributes(String cluster);
 
     /**
-     * 获取指定物理集群下的rack对应的剩余资源使用空间
-     *
-     * @param cluster 物理集群名称
-     * @return rack对应的可使用磁盘大小 key->rack value->diskSize
-     */
-    Map</*rack*/String, /*总磁盘使用信息,单位为字节数目*/Float> getAllocationInfoOfRack(String cluster);
-
-    /**
      * 获取全量集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeInfo
      */
     Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster);
@@ -185,14 +177,6 @@ public interface ESClusterService {
      * @return 物理集群es版本号
      */
     String synGetESVersionByCluster(String cluster);
-
-    /**
-     * 获取集群rack的信息
-     * @param addresses client地址
-     * @param password  集群认证信息：'user:password'
-     * @return
-     */
-    Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password);
 
     /**
      * 检测是否为同一个集群
