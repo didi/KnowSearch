@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
@@ -123,6 +124,13 @@ public interface ESClusterService {
      * 获取集群状态信息
      */
     ESClusterStatsResponse syncGetClusterStats(String clusterName);
+
+    /**
+     * 获取集群信息
+     * @param cluster
+     * @return
+     */
+    ESClusterStateResponse syncGetClusterState(String cluster);
 
     /**
      * 获取集群配置

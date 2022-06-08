@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import org.apache.commons.collections4.CollectionUtils;
@@ -250,6 +251,11 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public ESClusterStatsResponse syncGetClusterStats(String clusterName) {
         return esClusterDAO.getClusterStats(clusterName);
+    }
+
+    @Override
+    public ESClusterStateResponse syncGetClusterState(String cluster) {
+        return esClusterDAO.getClusterState(cluster);
     }
 
     @Override

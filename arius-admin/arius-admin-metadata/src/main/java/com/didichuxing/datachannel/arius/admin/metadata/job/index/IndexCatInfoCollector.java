@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @author lyn
  * @date 2021/09/30
@@ -43,6 +47,9 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     @Autowired
     private IndexCatESDAO     indexCatESDAO;
+
+    @Autowired
+    private ESClusterService esClusterService;
 
     //key: cluster@indexName  value: indexName
     private Cache<String, Object> notCollectorIndexNameCache = CacheBuilder.newBuilder()

@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.IndexRouting;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ShardInfo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;
@@ -390,6 +394,55 @@ public class ESClusterDAO extends BaseESDAO {
         }
 
         return responses;
+    }
+
+    public ESClusterStateResponse getClusterState(String cluster) {
+        ESClient esClient = esOpClient.getESClient(cluster);
+        if (null == esClient) {
+            LOGGER.error("class=ESClusterDAO||method=getClusterState||clusterName={}||errMsg=esClient is null", cluster);
+            return null;
+        }
+
+        try {
+            DirectRequest directRequest = new DirectRequest("GET", "_cluster/state/nodes,routing_table");
+            DirectResponse directResponse = esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+
+            if (RestStatus.OK != directResponse.getRestStatus() || StringUtils.isBlank(directResponse.getResponseContent())) {
+                LOGGER.error("class=ESClusterDAO||method=getClusterState||clusterName={}||errMsg=get response empty", cluster);
+                return null;
+            }
+
+            JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
+
+            List<ClusterNodeSettings> nodes = new ArrayList<>();
+            JSONObject nodesObj = jsonObject.getJSONObject("nodes");
+            for (String nodeKey : nodesObj.keySet()) {
+                ClusterNodeSettings node = nodesObj.getObject(nodeKey, ClusterNodeSettings.class);
+                if (null != node) {
+                    nodes.add(node);
+                }
+            }
+
+            List<IndexRouting> indicesRouting = new ArrayList<>();
+            JSONObject indicesRoutingObj = jsonObject.getJSONObject("routing_table").getJSONObject("indices");
+            for (String index : indicesRoutingObj.keySet()) {
+                List<ShardInfo> fullShards = new ArrayList<>();
+                IndexRouting indexRouting = new IndexRouting(index, fullShards);
+                JSONObject shardsObj = indicesRoutingObj.getJSONObject(index).getJSONObject("shards");
+                for (String shardGroup : shardsObj.keySet()) {
+                    List<ShardInfo> shards = JSONObject.parseArray(shardsObj.getJSONArray(shardGroup).toJSONString(), ShardInfo.class);
+                    if (CollectionUtils.isNotEmpty(shards)) {
+                        fullShards.addAll(shards);
+                    }
+                }
+                indicesRouting.add(indexRouting);
+            }
+
+            return new ESClusterStateResponse(nodes, indicesRouting);
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterDAO||method=getClusterState||clusterName={}||errMsg=fail to get", cluster, e);
+            return null;
+        }
     }
 
     public List<ESClusterTaskStatsResponse> getClusterTaskStats(String clusterName) {
