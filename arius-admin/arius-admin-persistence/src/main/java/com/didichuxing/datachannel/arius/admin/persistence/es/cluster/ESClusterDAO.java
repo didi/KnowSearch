@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterNodeInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.IndexRouting;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ShardInfo;
@@ -46,7 +47,6 @@ import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStats
 import com.didiglobal.logi.elasticsearch.client.response.cat.ESCatResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.getsetting.ESClusterGetSettingsResponse;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESClusterNodesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ESClusterNodesSettingResponse;
@@ -414,12 +414,12 @@ public class ESClusterDAO extends BaseESDAO {
 
             JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
 
-            List<ClusterNodeSettings> nodes = new ArrayList<>();
+            List<ClusterNodeInfo> nodes = new ArrayList<>();
             JSONObject nodesObj = jsonObject.getJSONObject("nodes");
-            for (String nodeKey : nodesObj.keySet()) {
-                ClusterNodeSettings node = nodesObj.getObject(nodeKey, ClusterNodeSettings.class);
+            for (String nodeName : nodesObj.keySet()) {
+                JSONObject node = nodesObj.getJSONObject(nodeName);
                 if (null != node) {
-                    nodes.add(node);
+                    nodes.add(new ClusterNodeInfo(node.getString("name"), nodeName));
                 }
             }
 

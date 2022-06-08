@@ -125,6 +125,14 @@ public interface ClusterRoleHostService {
     List<ClusterRoleHost> getByRoleClusterId(Long roleClusterId);
 
     /**
+     * 根据集群和nodeSet 获取节点信息
+     * @param cluster
+     * @param nodeSets
+     * @return
+     */
+    List<ClusterRoleHost> getByClusterAndNodeSets(String cluster, List<String> nodeSets);
+
+    /**
      * 获取节点信息
      * @param roleClusterIds 多个角色集群id
      * @return  Map<角色集群id,List<节点对象>>

@@ -2,14 +2,22 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterNodeInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +35,6 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatI
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @author lyn
@@ -51,6 +57,12 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
     @Autowired
     private ESClusterService esClusterService;
 
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
+
+    @Autowired
+    private ClusterRegionService clusterRegionService;
+
     //key: cluster@indexName  value: indexName
     private Cache<String, Object> notCollectorIndexNameCache = CacheBuilder.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(10000).build();
@@ -70,7 +82,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                         = new BatchProcessor<String, List<IndexCatCellPO>>()
                         .batchList(clusterPhyNameList)
                         .batchSize(5)
-                        .processor(this::getCatIndexInfoFromEs)
+                        .processor(this::getIndexInfoFromEs)
                         .process();
         LOGGER.info("class=IndexCatInfoCollector||method=handleJobTask||timeOut={}", System.currentTimeMillis() - currentTimeMillis);
 
@@ -100,16 +112,51 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
     }
 
-    private List<IndexCatCellPO> getCatIndexInfoFromEs(List<String> clusterNameList) {
+
+    private List<IndexCatCellPO> getIndexInfoFromEs(List<String> clusterNameList) {
         List<IndexCatCellPO> catIndexCellList = Lists.newArrayList();
         for (String clusterName : clusterNameList) {
             long timeMillis                      = System.currentTimeMillis();
             List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 2);
+            if (CollectionUtils.isEmpty(catIndexResults)) {
+                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||index empty");
+                continue;
+            }
+
+            ESClusterStateResponse clusterStateResponse = esClusterService.syncGetClusterState(clusterName);
+            if (null == clusterStateResponse) {
+                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||cluster state null");
+                continue;
+            }
+
+            Map<String, String> node2ClusterLogic = buildNode2ClusterLogic(clusterName ,clusterStateResponse.getNodes());
+
             List<IndexCatCellPO> indexCatCellPOS = buildIndexCatCellPOS(catIndexResults, clusterName, timeMillis);
             catIndexCellList.addAll(indexCatCellPOS);
         }
 
         return catIndexCellList;
+    }
+
+    private Map<String, String> buildNode2ClusterLogic(String cluster, List<ClusterNodeInfo> nodes) {
+        if (CollectionUtils.isEmpty(nodes)) {
+            return null;
+        }
+
+        List<String> nodeSetList = nodes.stream().map(ClusterNodeInfo::getNodeSet).distinct().collect(Collectors.toList());
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getByClusterAndNodeSets(cluster, nodeSetList);
+        if (CollectionUtils.isEmpty(clusterRoleHostList)) {
+            return null;
+        }
+        Map<String, Integer> nodeSet2RegionId = new HashMap<>();
+        for (ClusterRoleHost clusterRoleHost : clusterRoleHostList) {
+            nodeSet2RegionId.put(clusterRoleHost.getNodeSet(), clusterRoleHost.getRegionId());
+        }
+
+        List<Integer> regionIdList = clusterRoleHostList.stream().map(ClusterRoleHost::getRegionId).collect(Collectors.toList());
+        List<ClusterRegion> clusterRegionList = clusterRegionService.
+
+
     }
 
     private List<IndexCatCellPO> buildIndexCatCellPOS(List<CatIndexResult> catIndexResults, String clusterName, long timeMillis) {

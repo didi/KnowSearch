@@ -253,6 +253,17 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     }
 
     @Override
+    public List<ClusterRoleHost> getByClusterAndNodeSets(String cluster, List<String> nodeSets) {
+        List<ESClusterRoleHostPO> roleHostPOS = clusterRoleHostDAO.listByClusterAndNodeSets(cluster, nodeSets);
+
+        if (null == roleHostPOS) {
+            return Lists.newArrayList();
+        }
+
+        return ConvertUtil.list2List(roleHostPOS, ClusterRoleHost.class);
+    }
+
+    @Override
     public Map<Long,List<ClusterRoleHost>> getByRoleClusterIds(List<Long> roleClusterIds) {
         if(CollectionUtils.isEmpty(roleClusterIds)){
             return new HashMap<>();

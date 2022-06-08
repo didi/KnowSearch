@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
  * @author chengxiang
  * @date 2022/06/08
@@ -13,10 +11,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESClusterStateResponse {
+public class ClusterNodeInfo {
 
-    private List<ClusterNodeInfo> nodes;
+    private String nodeSet;
 
-    private List<IndexRouting> indices;
-
+    private String nodeName;
 }
