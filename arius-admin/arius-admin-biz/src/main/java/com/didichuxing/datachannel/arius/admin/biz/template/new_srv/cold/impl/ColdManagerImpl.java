@@ -20,6 +20,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,9 +158,9 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         }
 
         ClusterRegion minUsageColdRegion = regionList.get(0);
-        Double maxFreeDiskRatio = Double.MAX_VALUE;
+        Double maxFreeDiskRatio = Double.MIN_VALUE;
         for (ClusterRegion region : regionList) {
-            ClusterRegionFSInfo fsInfo = regionId2FsInfoMap.get(region.getId());
+            ClusterRegionFSInfo fsInfo = regionId2FsInfoMap.get(region.getId().intValue());
             if (null == fsInfo) {
                 continue;
             }
