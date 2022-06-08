@@ -352,4 +352,12 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Assertions.assertFalse(ret.isEmpty());
     }
 
+    @Test
+    public void listByRegionIdTest() {
+        Mockito.when(indexTemplatePhyService.listByRegionId(Mockito.anyInt())).thenReturn(Result.buildSucc(CustomDataSource.getIndexTemplatePhyList()));
+        Result<List<IndexTemplate>> indexTemplateResult = indexTemplateService.listByRegionId(127);
+        Assertions.assertTrue(indexTemplateResult.success());
+        Assertions.assertTrue(null != indexTemplateResult.getData());
+    }
+
 }

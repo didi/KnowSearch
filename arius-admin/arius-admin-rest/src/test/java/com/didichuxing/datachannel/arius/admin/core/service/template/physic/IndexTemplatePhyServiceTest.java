@@ -565,6 +565,13 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(queriedLogicIds.containsAll(logicIds));
     }
 
+    @Test
+    public void listByRegionIdTest() {
+        Result<List<IndexTemplatePhy>> indexTemplatePhyResult = service.listByRegionId(127);
+        Assertions.assertTrue(indexTemplatePhyResult.success());
+        Assertions.assertTrue(null != indexTemplatePhyResult.getData());
+    }
+
     private List<IndexTemplatePhyPO> batchInsert() {
         List<IndexTemplatePhyPO> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {

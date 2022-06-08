@@ -292,7 +292,7 @@ public interface IndexTemplatePhyService {
     Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation);
 
     /**
-     * 获取指定regionId下的所有模板列表
+     * 获取指定regionId下的所有物理模板列表
      * @param regionId  regionId
      * @return    Result<List<IndexTemplatePhy>>
      */
