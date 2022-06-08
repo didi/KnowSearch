@@ -4,9 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalRackDTO;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +14,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @RestController

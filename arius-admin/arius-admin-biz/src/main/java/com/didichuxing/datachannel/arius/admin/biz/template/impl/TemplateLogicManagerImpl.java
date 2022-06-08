@@ -3,15 +3,22 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum.OWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
@@ -20,13 +27,8 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
@@ -34,16 +36,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithLabels;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -79,14 +73,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 @Component
 public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
@@ -94,9 +80,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
-
-    @Autowired
-    private TemplateQuotaManager        templateQuotaManager;
 
     @Autowired
     private TemplateSattisService       templateSattisService;
@@ -108,19 +91,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private TemplateColdManager         templateColdManager;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService        indexTemplateService;
 
     @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
+    private IndexTemplatePhyService     indexTemplatePhyService;
 
     @Autowired
     private ClusterPhyService           clusterPhyService;
 
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService        clusterRegionService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService        operateRecordService;
 
     @Autowired
     private AppService                  appService;
@@ -141,7 +124,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private HandleFactory               handleFactory;
 
     @Autowired
-    private TemplateDCDRManager templateDcdrManager;
+    private TemplateDCDRManager         templateDcdrManager;
 
     @Autowired
     private PreCreateManager preCreateManager;
@@ -399,11 +382,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
                     templateLogic.setValue(aggregate.getIndexTemplateValue().getValue());
                 }
-
-                if (aggregate.getEsTemplateQuotaUsage() != null) {
-                    templateLogic.setQuotaUsage(ConvertUtil.obj2Obj(
-                            aggregate.getEsTemplateQuotaUsage(), QuotaUsage.class));
-                }
                 templateLogic.setHasDCDR(templateLogic.getHasDCDR());
                 
                 //设置模板关联物理集群
@@ -421,23 +399,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         return null;
-    }
-
-    @Override
-    public List<ConsoleTemplateVO> getConsoleTemplateVOSForClusterLogic(Long clusterLogicId, Integer appId) {
-        if (AriusObjUtils.isNull(clusterLogicId)) {
-            return Lists.newArrayList();
-        }
-
-        List<IndexTemplate> logicClusterTemplates = indexTemplateService.getLogicClusterTemplates(clusterLogicId);
-
-        Set<Integer> templateLogicIds = logicClusterTemplates.stream().map(IndexTemplate::getId)
-                .collect(Collectors.toSet());
-
-        return getConsoleTemplatesVOS(appId)
-                .stream()
-                .filter(r -> templateLogicIds.contains(r.getId()))
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -786,7 +747,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 if (updateDBResult.failed()) {
                     return updateDBResult;
                 }
-                esTemplateService.syncUpdateRackAndShard(templatePhy.getCluster(), templatePhy.getName(), templatePhy.getRack(), updateParam.getShard(), updateParam.getShardRouting(), RETRY_TIMES);
+                esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(), shardNum, RETRY_TIMES);
             }
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=adjustShard||errorMsg=failed to adjust shard", e);
@@ -887,12 +848,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      *
      * @param indexTemplateLogicWithCluster 逻辑集群
      * @param appTemplateAuths                 App模板权限
-     * @param templateQuotaUsages              逻辑模板Quota使用率
      * @param logicTemplateValues              逻辑模板健康分
      */
     private IndexTemplateLogicAggregate fetchTemplateAggregate(IndexTemplateWithCluster indexTemplateLogicWithCluster,
                                                                Map<Integer, AppTemplateAuth> appTemplateAuths,
-                                                               Map<Integer, ESTemplateQuotaUsage> templateQuotaUsages,
                                                                Map<Integer, IndexTemplateValue> logicTemplateValues,
                                                                List<Integer> hasDCDRLogicIds) {
 
@@ -900,7 +859,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         indexTemplateLogicAggregate.setIndexTemplateLogicWithCluster(indexTemplateLogicWithCluster);
         indexTemplateLogicAggregate.setAppTemplateAuth(appTemplateAuths.get(indexTemplateLogicWithCluster.getId()));
-        indexTemplateLogicAggregate.setEsTemplateQuotaUsage(templateQuotaUsages.get(indexTemplateLogicWithCluster.getId()));
         indexTemplateLogicAggregate.setIndexTemplateValue(logicTemplateValues.get(indexTemplateLogicWithCluster.getId()));
         indexTemplateLogicAggregate.setHasDCDR(hasDCDRLogicIds.contains(indexTemplateLogicWithCluster.getId()));
 
@@ -937,11 +895,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             // 模板权限
             Map<Integer, AppTemplateAuth> appTemplateAuths = ConvertUtil
                     .list2Map(appLogicTemplateAuthService.getTemplateAuthsByAppId(appId), AppTemplateAuth::getTemplateId);
-
-            // quota
-            Map<Integer, ESTemplateQuotaUsage> templateQuotaUsages = ConvertUtil
-                    .list2Map( templateQuotaManager.listAllTemplateQuotaUsageWithCache(), ESTemplateQuotaUsage::getLogicId);
-
+            
             // 模板
             Map<Integer, IndexTemplateValue> logicTemplateValues = ConvertUtil.list2Map(fetchTemplateValues(),
                     IndexTemplateValue::getLogicTemplateId);
@@ -952,7 +906,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             for (IndexTemplateWithCluster combineLogicCluster : logicTemplates) {
                 try {
                     indexTemplateLogicAggregates.add(fetchTemplateAggregate(combineLogicCluster, appTemplateAuths,
-                            templateQuotaUsages, logicTemplateValues, hasDCDRLogicIds));
+                             logicTemplateValues, hasDCDRLogicIds));
                 } catch (Exception e) {
                     LOGGER.warn(
                             "class=LogicTemplateManager||method=fetchLogicTemplatesAggregates||" + "combineLogicCluster={}",
@@ -993,8 +947,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private IndexTemplateConfig getDefaultTemplateConfig(Integer logicId) {
         IndexTemplateConfig indexTemplateConfig = new IndexTemplateConfig();
         indexTemplateConfig.setLogicId(logicId);
-        indexTemplateConfig.setAdjustRackTpsFactor(1.0);
-        indexTemplateConfig.setAdjustRackShardFactor(1.0);
+        indexTemplateConfig.setAdjustTpsFactor(1.0);
+        indexTemplateConfig.setAdjustShardFactor(1.0);
         indexTemplateConfig.setDynamicLimitEnable( AdminConstant.YES);
         indexTemplateConfig.setMappingImproveEnable(AdminConstant.NO);
         indexTemplateConfig.setIsSourceSeparated(AdminConstant.NO);

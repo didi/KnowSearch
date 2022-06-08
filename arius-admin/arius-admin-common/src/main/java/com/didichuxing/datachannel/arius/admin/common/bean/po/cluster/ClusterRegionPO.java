@@ -38,12 +38,6 @@ public class ClusterRegionPO extends BasePO {
     private String phyClusterName;
 
     /**
-     * Rack列表
-     */
-    @Deprecated
-    private String racks;
-
-    /**
      * 配置项
      */
     private String config;

@@ -94,13 +94,6 @@
         </trim>
     </select>
 
-    <select id="listByClusterAndRack" parameterType="map" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from es_cluster_role_host_info
-        where cluster = #{cluster} and rack = #{rack} and status = 1 and delete_flag = 0;
-    </select>
-
     <select id="listByCluster" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

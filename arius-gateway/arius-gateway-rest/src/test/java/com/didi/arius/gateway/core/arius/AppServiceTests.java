@@ -15,14 +15,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author lyn
+ * @date 2022/6/8
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AriusGatewayApplication.class)
 public class AppServiceTests {
-
     private static String INDEX_NAME = "cn_record.arius.template.value_2021-05";
-
 
     @Autowired
     private AppService appService;
@@ -82,6 +84,4 @@ public class AppServiceTests {
         queryContext.setAppDetail(appDetail);
         appService.checkIndices(queryContext, Lists.newArrayList(INDEX_NAME));
     }
-
-
 }

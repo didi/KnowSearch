@@ -380,17 +380,6 @@ public class ESIndexDAO extends BaseESDAO {
         return true;
     }
 
-    /**
-     * 修改索引的setting 幂等
-     * @param cluster 集群
-     * @param indices indices
-     * @param tgtRack tgtRack
-     * @return true/false
-     */
-    public boolean batchUpdateIndexRack(String cluster, List<String> indices, String tgtRack) {
-        return putIndexSetting(cluster, indices, INDEX_INCLUDE_RACK, tgtRack, "");
-    }
-
     public boolean batchUpdateIndexRegion(String cluster, List<String> indices, Set<String> nodeNames) {
         return putIndexSetting(cluster, indices, TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(COMMA, nodeNames), "");
     }

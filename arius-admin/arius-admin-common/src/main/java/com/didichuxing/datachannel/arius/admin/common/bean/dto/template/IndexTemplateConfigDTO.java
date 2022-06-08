@@ -28,10 +28,10 @@ public class IndexTemplateConfigDTO extends BaseDTO {
     private Integer isSourceSeparated;
 
     @ApiModelProperty("tps因子")
-    private Double adjustRackTpsFactor;
+    private Double adjustTpsFactor;
 
     @ApiModelProperty("shard资源因子")
-    private Double adjustRackShardFactor;
+    private Double adjustShardFactor;
 
     @ApiModelProperty("动态限流开关")
     private Integer dynamicLimitEnable;

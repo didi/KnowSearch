@@ -73,7 +73,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||logicTemplate={}||no cold rack", logicTemplateId);
             return Result.buildFail("没有冷节点");
         }
-        ClusterRegion minUsageColdRegion = getMinUsageColdRegion(coldRegionList);
+        ClusterRegion minUsageColdRegion = getMinUsageColdRegion(masterPhyTemplate.getCluster(), coldRegionList);
 
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
         if (CollectionUtils.isEmpty(templatePhysicals)) {
@@ -100,12 +100,6 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     public int fetchClusterDefaultHotDay(String phyCluster) {
         return 0;
     }
-
-    @Override
-    public boolean updateHotIndexRack(Long physicalId, String tgtRack) {
-        return true;
-    }
-
 
     ////////////////////////////private method/////////////////////////////////////
 
@@ -177,7 +171,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
                 continue;
             }
 
-            Double freeDiskRatio = fsInfo.getAvailableInBytes().doubleValue(); / fsInfo.getTotalInBytes();
+            Double freeDiskRatio = fsInfo.getAvailableInBytes().doubleValue() / fsInfo.getTotalInBytes();
             if (freeDiskRatio > maxFreeDiskRatio) {
                 minUsageColdRegion = region;
                 maxFreeDiskRatio = freeDiskRatio;

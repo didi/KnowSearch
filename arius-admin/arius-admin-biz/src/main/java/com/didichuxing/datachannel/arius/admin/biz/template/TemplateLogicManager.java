@@ -113,11 +113,6 @@ public interface TemplateLogicManager {
     ConsoleTemplateVO fetchConsoleTemplate(IndexTemplateLogicAggregate aggregate);
 
     /**
-     * 获取逻辑集群所有逻辑模板列表
-     */
-    List<ConsoleTemplateVO> getConsoleTemplateVOSForClusterLogic(Long clusterLogicId, Integer appId);
-
-    /**
      * 获取逻辑索引列表
      */
     List<ConsoleTemplateVO> getConsoleTemplatesVOS(Integer appId);

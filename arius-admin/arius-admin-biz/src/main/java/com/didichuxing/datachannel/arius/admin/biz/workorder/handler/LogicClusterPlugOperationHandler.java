@@ -48,22 +48,22 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     private AppClusterLogicAuthService appClusterLogicAuthService;
 
     @Autowired
-    private ClusterRegionService rackService;
+    private ClusterRegionService       clusterRegionService;
 
     @Autowired
-    private ClusterPhyService esClusterPhyService;
+    private ClusterPhyService          esClusterPhyService;
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService        clusterLogicService;
 
     @Autowired
     private EcmTaskManager             ecmTaskManager;
 
     @Autowired
-    private ClusterRoleService clusterRoleService;
+    private ClusterRoleService         clusterRoleService;
 
     @Autowired
-    private EcmHandleService ecmHandleService;
+    private EcmHandleService           ecmHandleService;
 
     protected static final ILog        LOGGER = LogFactory.getLog(LogicClusterPlugOperationHandler.class);
 
@@ -127,7 +127,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         LogicClusterPlugOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPlugOperationContent.class);
 
-        List<Integer> clusterStrIdList = rackService.listPhysicClusterId(content.getLogicClusterId());
+        List<Integer> clusterStrIdList = clusterRegionService.listPhysicClusterId(content.getLogicClusterId());
         for (Integer clusterId : clusterStrIdList) {
             Result<EcmTaskDTO> result = editClusterAndSave2WorkOrderTask(clusterId, workOrder, content);
             if (result.failed()) {

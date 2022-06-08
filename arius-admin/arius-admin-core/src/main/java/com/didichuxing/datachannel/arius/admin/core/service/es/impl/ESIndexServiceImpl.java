@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
@@ -274,23 +274,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.deleteByQuery(cluster, String.join(",", delIndices), delQueryDsl);
     }
 
-    /**
-     * 修改表达式对应索引的rack
-     *
-     * @param cluster    cluster
-     * @param indices 表达式
-     * @param tgtRack tgtRack
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws ESOperateException
-     */
-    @Override
-    public boolean syncBatchUpdateRack(String cluster, List<String> indices, String tgtRack,
-                                       int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("syncUpdateRackByExpression", retryCount,
-            () -> esIndexDAO.batchUpdateIndexRack(cluster, indices, tgtRack));
-    }
-
     @Override
     public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
                                          int retryCount) throws ESOperateException {
@@ -307,7 +290,6 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     /**
      * 修改索引只读配置
-     *
      * @param cluster    集群
      * @param indices    索引
      * @param block   配置

@@ -25,10 +25,6 @@ public class ClusterRegionVO extends BaseVO {
     @ApiModelProperty("物理集群名称")
     private String clusterName;
 
-    @ApiModelProperty("Rack列表")
-    @Deprecated
-    private String racks;
-
     @ApiModelProperty("配置项")
     private String config;
 }
