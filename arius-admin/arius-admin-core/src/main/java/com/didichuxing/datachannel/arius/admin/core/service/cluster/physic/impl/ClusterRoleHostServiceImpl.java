@@ -5,18 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum.ONLINE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
-import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
-
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -30,21 +18,33 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.Getter;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
+import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -219,12 +219,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     }
 
     @Override
-    public int getIndicesCount(String cluster, String racks) {
-        String nodes = getHostNodeNames(cluster, racks);
-        return esClusterNodeService.syncGetIndicesCount(cluster, nodes);
-    }
-
-    @Override
     public List<ClusterRoleHost> listOnlineNode() {
         List<ESClusterRoleHostPO> pos = clusterRoleHostDAO.listOnlineNode();
         return ConvertUtil.list2List(pos, ClusterRoleHost.class);
@@ -301,23 +295,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     @Override
     public List<ClusterRoleHost> listAllNodeByRole(Integer roleCode) {
         return ConvertUtil.list2List(clusterRoleHostDAO.listAllByRoleCode(roleCode), ClusterRoleHost.class);
-    }
-
-    @Override
-    public List<ClusterRoleHost> listRacksNodes(String clusterName, String racks) {
-        List<ClusterRoleHost> nodes = new ArrayList<>();
-        if (StringUtils.isAnyBlank(clusterName, racks)) {
-            return nodes;
-        }
-
-        for (String rack : RackUtils.racks2List(racks)) {
-            ESClusterRoleHostDTO queryClusterNodeRequest = new ESClusterRoleHostDTO();
-            queryClusterNodeRequest.setCluster(clusterName);
-            queryClusterNodeRequest.setRack(rack);
-            nodes.addAll(queryNodeByCondt(queryClusterNodeRequest));
-        }
-
-        return nodes;
     }
 
     @Override
@@ -484,15 +461,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return succ;
     }
 
-    private String getHostNodeNames(String cluster, String racks) {
-        List<ESClusterRoleHostPO> rackNodePOs = Lists.newArrayList();
-        for (String rack : racks.split(",")) {
-            List<ESClusterRoleHostPO> nodePOS = clusterRoleHostDAO.listByClusterAndRack(cluster, rack);
-            rackNodePOs.addAll(nodePOS);
-        }
-        return rackNodePOs.stream().map(ESClusterRoleHostPO::getHostname).collect(Collectors.joining(","));
-    }
-
     /**
      * 获取集群内节点配置
      * @param cluster 集群名称
@@ -649,27 +617,6 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
             ESClusterNodeRoleEnum role = ESClusterNodeRoleEnum.valueOf(roleClusterHostPO.getRole());
             ClusterRoleInfo clusterRoleInfo = clusterRoleService.createRoleClusterIfNotExist(cluster, role.getDesc());
             roleClusterHostPO.setRoleClusterId(clusterRoleInfo.getId());
-    }
-
-    /**
-     * 从节点设置获取节点rack
-     * @param clusterNodeInfo 节点设置
-     * @return
-     */
-    private String getRackFromNodeSettings(ClusterNodeInfo clusterNodeInfo) {
-        String defaultRackValue = "";
-        try {
-            if (clusterNodeInfo.getRoles().contains(ES_ROLE_DATA)) {
-                if (clusterNodeInfo.getAttributes() == null) {
-                    defaultRackValue = "*";
-                } else {
-                    defaultRackValue = Getter.withDefault(clusterNodeInfo.getAttributes().get(RACK), "*");
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("class=RoleClusterHostServiceImpl||method=getRack||mg=analyze rack fail||nodeSettings={}", JSON.toJSON(clusterNodeInfo));
-        }
-        return defaultRackValue;
     }
 
     private Map<String/*roleClusterId@esNodeName*/ , ESClusterRoleHostPO> getNodeInfoFromDbMap(String cluster) {

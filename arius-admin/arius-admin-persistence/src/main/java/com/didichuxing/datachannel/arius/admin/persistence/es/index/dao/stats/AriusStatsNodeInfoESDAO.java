@@ -1,24 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.METRICS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.SUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIMESTAMP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_15M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_1M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_5M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_USAGE_PERCENT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_INDEXING_LATENCY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_QUERY_LATENCY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_RX_SIZE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_TX_SIZE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.NodeRackStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
@@ -26,20 +24,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsCon
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 @Component
 public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
@@ -219,33 +204,6 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
-    }
-
-    /**
-     * 根据集群和rack信息获取rack相关的统计信息
-     * @param clusterName
-     * @param rackList
-     * @return
-     */
-    public List<NodeRackStatisPO> getRackStatis(String clusterName, List<String> rackList) {
-        Map<String/*rackName*/, NodeRackStatisPO> nodeRackStatisMap = Maps.newHashMap();
-
-        // 由于近15分钟存在跨天情况，需要获取最近2天对应索引名称
-        String indexNames = genIndexNames(2);
-        String rackFormat = CommonUtils.strConcat(rackList);
-
-        int minuteSpan = 15;
-
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_RECENT_NODE_METRICS_BY_CLUSTER, clusterName,
-            rackFormat, minuteSpan);
-
-        ESQueryResponse esQueryResponse = gatewayClient.performRequest(indexNames, TYPE, dsl);
-        handleESQueryResponse(clusterName, nodeRackStatisMap, esQueryResponse);
-
-        List<NodeRackStatisPO> nodeRackStatisPOS = Lists.newLinkedList();
-        handleRackList(clusterName, rackList, nodeRackStatisMap, nodeRackStatisPOS);
-
-        return nodeRackStatisPOS;
     }
 
     /**
@@ -477,90 +435,4 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     private String getIndexNameByNowTimestamp(String indexName){
       return IndexNameUtils.genCurrentDailyIndexName(indexName);
     }
-    private void handleESQueryResponse(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESQueryResponse esQueryResponse) {
-        if (esQueryResponse != null && esQueryResponse.getAggs() != null) {
-            Map<String, ESAggr> esAggrMap = esQueryResponse.getAggs().getEsAggrMap();
-            if (esAggrMap != null && esAggrMap.containsKey("minute_bucket")) {
-                ESAggr minuteBucketESAggr = esAggrMap.get("minute_bucket");
-                handleMinuteBucketESAggr(clusterName, nodeRackStatisMap, minuteBucketESAggr);
-            }
-        }
-    }
-
-    private void handleMinuteBucketESAggr(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESAggr minuteBucketESAggr) {
-        if (minuteBucketESAggr != null && CollectionUtils.isNotEmpty(minuteBucketESAggr.getBucketList())) {
-            for (ESBucket esBucket : minuteBucketESAggr.getBucketList()) {
-                ESAggr groupByRackAggr = esBucket.getAggrMap().get("groupByRack");
-
-                if (groupByRackAggr != null && CollectionUtils.isNotEmpty(groupByRackAggr.getBucketList())) {
-                    handleBucketList(clusterName, nodeRackStatisMap, groupByRackAggr);
-                }
-            }
-        }
-    }
-
-    private void handleRackList(String clusterName, List<String> rackList, Map<String, NodeRackStatisPO> nodeRackStatisMap, List<NodeRackStatisPO> nodeRackStatisPOS) {
-        NodeRackStatisPO nodeRackStatisPO;
-        for (String rack : rackList) {
-            if (nodeRackStatisMap.containsKey(rack)) {
-                nodeRackStatisPOS.add(nodeRackStatisMap.get(rack));
-            } else {
-                LOGGER.warn("class=AriusStatsNodeInfoEsDao||method=getRackStatis||msg={} {} set default value",
-                        clusterName, rack);
-                nodeRackStatisPO = new NodeRackStatisPO(clusterName, rack, 0.0, 0.0, 0, 0d, 0);
-
-                nodeRackStatisPOS.add(nodeRackStatisPO);
-            }
-        }
-    }
-
-    private void handleBucketList(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESAggr groupByRackAggr) {
-        for (ESBucket rackBucket : groupByRackAggr.getBucketList()) {
-            ESAggr sumFreeDiskAggr = rackBucket.getAggrMap().get("sumFreeDisk");
-            ESAggr sumTotalDiskAggr = rackBucket.getAggrMap().get("sumTotalDisk");
-            ESAggr avgCpuUsageAggr = rackBucket.getAggrMap().get("avgCpuUsage");
-            ESAggr docsCountAggr = rackBucket.getAggrMap().get("docsCount");
-            String rackName = rackBucket.getUnusedMap().get("key").toString();
-
-            if (!nodeRackStatisMap.containsKey(rackName)) {
-                handleNodeRackStatisPO(clusterName, nodeRackStatisMap, sumFreeDiskAggr, sumTotalDiskAggr, avgCpuUsageAggr, docsCountAggr, rackName);
-            }
-        }
-    }
-
-    private void handleNodeRackStatisPO(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap,
-                                        ESAggr sumFreeDiskAggr, ESAggr sumTotalDiskAggr,
-                                        ESAggr avgCpuUsageAggr, ESAggr docsCountAggr,
-                                        String rackName) {
-        NodeRackStatisPO nodeRackStatisPO;
-        nodeRackStatisPO = new NodeRackStatisPO(clusterName, rackName, 0.0, 0.0, 0, 0d, 0);
-
-        if (sumTotalDiskAggr != null && sumTotalDiskAggr.getUnusedMap().containsKey(VALUE)
-                && sumTotalDiskAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setTotalDiskG(
-                    Double.valueOf(sumTotalDiskAggr.getUnusedMap().get(VALUE).toString())
-                            / ONE_GB);
-        }
-        if (sumFreeDiskAggr != null && sumFreeDiskAggr.getUnusedMap().containsKey(VALUE)
-                && sumFreeDiskAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setDiskFreeG(
-                    Double.valueOf(sumFreeDiskAggr.getUnusedMap().get(VALUE).toString())
-                            / ONE_GB);
-        }
-        if (avgCpuUsageAggr != null && avgCpuUsageAggr.getUnusedMap().containsKey(VALUE)
-                && avgCpuUsageAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setCpuUsedPercent(
-                    Double.valueOf(avgCpuUsageAggr.getUnusedMap().get(VALUE).toString()));
-        }
-        if (docsCountAggr != null && docsCountAggr.getUnusedMap().containsKey(VALUE)
-                && docsCountAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setDocNu(Double
-                    .valueOf(docsCountAggr.getUnusedMap().get(VALUE).toString()).longValue());
-        }
-
-        nodeRackStatisMap.put(rackName, nodeRackStatisPO);
-    }
-    
-    
-  
 }

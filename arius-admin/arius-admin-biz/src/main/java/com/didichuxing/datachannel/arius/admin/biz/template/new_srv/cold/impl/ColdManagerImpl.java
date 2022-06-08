@@ -49,10 +49,4 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     public int fetchClusterDefaultHotDay(String phyCluster) {
         return 0;
     }
-
-    @Override
-    public boolean updateHotIndexRack(Long physicalId, String tgtRack) {
-        return true;
-    }
-
 }

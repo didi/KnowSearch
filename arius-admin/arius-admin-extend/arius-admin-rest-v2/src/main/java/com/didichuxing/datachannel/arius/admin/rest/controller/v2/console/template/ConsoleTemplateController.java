@@ -7,17 +7,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,15 +14,19 @@ import org.springframework.web.bind.annotation.*;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -41,6 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -68,9 +62,6 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @Autowired
     private AppService               appService;
-
-    @Autowired
-    private TemplateQuotaManager     templateQuotaManager;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -104,6 +95,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取索引详细信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @Deprecated
     public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
                                                                     @RequestParam("logicId") Integer logicId) {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
@@ -149,18 +141,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取索引配额信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @Deprecated
     public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
-        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(logicId);
-        if (templateLogic == null) {
-            return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
-        }
-
-        ConsoleTemplateCapacityVO templateCapacityVO = ConvertUtil.obj2Obj(templateLogic,
-            ConsoleTemplateCapacityVO.class);
-        templateCapacityVO.setCyclicalRoll(templateLogic.getExpression().endsWith("*"));
-        templateCapacityVO.setTopUsage(getQuotaUsage(templateLogic.getId()));
-        templateCapacityVO.setCurrentUsage(fetchLogicTemplateCurrentUsage(logicId));
-        return Result.buildSucc(templateCapacityVO);
+        return Result.buildSucc();
     }
 
     @GetMapping("/clearInfo")
@@ -330,22 +313,6 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     }
 
     /**
-     * 获取逻辑模板使用率
-     *
-     * @param logicId 逻辑模板ID
-     * @return
-     */
-    private QuotaUsage getQuotaUsage(Integer logicId) {
-        LogicTemplateQuotaUsage templateQuotaUsage = templateQuotaManager.getLogicTemplateQuotaUsage(logicId,
-                7 * AdminConstant.MILLIS_PER_DAY);
-        QuotaUsage topUsage = ConvertUtil.obj2Obj(templateQuotaUsage, QuotaUsage.class);
-        topUsage.setQuotaDiskUsage(templateQuotaUsage.getActualDiskG() / templateQuotaUsage.getQuotaDiskG());
-        topUsage.setQuotaCpuUsage(templateQuotaUsage.getActualCpuCount() / templateQuotaUsage.getQuotaCpuCount());
-
-        return topUsage;
-    }
-
-    /**
      * 获取逻辑模板索引列表
      *
      * @param logicId 逻辑ID
@@ -375,25 +342,5 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
 
         return StringUtils.EMPTY;
-    }
-
-    /**
-     * 获取逻辑模板当前使用率
-     *
-     * @param logicId 逻辑模板ID
-     * @return
-     */
-    private QuotaUsage fetchLogicTemplateCurrentUsage(Integer logicId) {
-        ESTemplateQuotaUsage esTemplateQuotaUsage = templateQuotaManager.getByLogicId(logicId);
-
-        QuotaUsage currentUsage = ConvertUtil.obj2Obj(esTemplateQuotaUsage, QuotaUsage.class);
-        if (esTemplateQuotaUsage != null) {
-            currentUsage
-                .setQuotaDiskUsage(esTemplateQuotaUsage.getActualDiskG() / esTemplateQuotaUsage.getQuotaDiskG());
-            currentUsage
-                .setQuotaCpuUsage(esTemplateQuotaUsage.getActualCpuCount() / esTemplateQuotaUsage.getQuotaCpuCount());
-        }
-
-        return currentUsage;
     }
 }

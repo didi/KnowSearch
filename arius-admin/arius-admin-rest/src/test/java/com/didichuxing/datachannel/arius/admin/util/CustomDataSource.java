@@ -224,7 +224,7 @@ public class CustomDataSource {
         dto.setLogicId(1);
         dto.setDynamicLimitEnable(1);
         dto.setMappingImproveEnable(1);
-        dto.setAdjustRackTpsFactor(1d);
+        dto.setAdjustTpsFactor(1d);
         dto.setIsSourceSeparated(1);
         dto.setDynamicLimitEnable(1);
         dto.setDisableIndexRollover(true);
@@ -235,7 +235,7 @@ public class CustomDataSource {
         TemplateConfigPO po = new TemplateConfigPO();
         po.setLogicId(1);
         po.setId(1L);
-        po.setAdjustRackShardFactor(1d);
+        po.setAdjustShardFactor(1d);
         return po;
     }
 
@@ -299,7 +299,6 @@ public class CustomDataSource {
         ESClusterRoleHostDTO esClusterRoleHostDTO = new ESClusterRoleHostDTO();
         esClusterRoleHostDTO.setCluster("test_cluster");
         esClusterRoleHostDTO.setIp("127.0.0.0");
-        esClusterRoleHostDTO.setRack("r1");
         esClusterRoleHostDTO.setHostname("wpk");
         esClusterRoleHostDTO.setPort("8080");
         esClusterRoleHostDTO.setRole(ESClusterNodeRoleEnum.DATA_NODE.getCode());
@@ -326,7 +325,6 @@ public class CustomDataSource {
         ClusterRegionDTO clusterRegionDTO = new ClusterRegionDTO();
         //clusterRegionDTO.setLogicClusterId(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
         clusterRegionDTO.setPhyClusterName("wpk");
-        clusterRegionDTO.setRacks("r1,r2");
         return clusterRegionDTO;
     }
 

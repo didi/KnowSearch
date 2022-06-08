@@ -144,14 +144,6 @@ public interface IndexTemplatePhyService {
     Set<String> getMatchNormalLogicIdByCluster(String cluster);
 
     /**
-     * 根据物理模板状态获取模板列表
-     * @param cluster 集群
-     * @param racks racks
-     * @return list
-     */
-    List<IndexTemplatePhy> getNormalTemplateByClusterAndRack(String cluster, Collection<String> racks);
-
-    /**
      * 获取模板匹配的索引列表，按着时间排序
      * @param physicalId 物理模板id
      * @return list
@@ -264,12 +256,6 @@ public interface IndexTemplatePhyService {
      * @return
      */
     IndexTemplatePhyWithLogic buildIndexTemplatePhysicalWithLogic(IndexTemplatePhyPO physicalPO);
-
-    /**
-     * 获取regionId下的物理模板
-     */
-    List<IndexTemplatePhy> getTemplateByRegionId(Long regionId);
-
 
     Map<Integer, Integer> getAllLogicTemplatesPhysicalCount();
 
