@@ -309,11 +309,11 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @return List<VariousLineChartMetrics>
      */
     public List<VariousLineChartMetrics> getTopNNodeAggMetrics(String clusterPhyName, List<String> metricsTypes,
-                                                               Integer topNu, String aggType,
+                                                               Integer topNu, Integer topMethod ,Integer topTimeStep ,String aggType,
                                                                Long startTime, Long endTime) {
         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
         //获取TopN指标节点名称信息
-        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfo(clusterPhyName, metricsTypes, topNu, aggType,
+        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfo(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType,
                 esNodesMaxNum, startTime, endTime);
 
         //构建多个指标TopN数据
@@ -364,33 +364,37 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param endTime        结束时间
      * @return
      */
-    private List<TopMetrics> getTopNNodeMetricsInfo(String clusterPhyName, List<String> metricsTypes, Integer topNu,
+    private List<TopMetrics> getTopNNodeMetricsInfo(String clusterPhyName, List<String> metricsTypes, Integer topNu,Integer topMethod ,Integer topTimeStep,
                                                     String aggType, int esNodesMaxNum, Long startTime, Long endTime) {
 
         int retryTime = 0;
         List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
         do {
-            // 获取有数据的第一个时间点
+            // 获取有数据的第一个时间点，endtime 就等于这个，开始就是end-10
             Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
             //没有数据则提前终止
             if (null == timePoint) {
                 break;
             }
 
-            Tuple<Long, Long> firstInterval = MetricsUtils.getSortInterval(endTime - startTime, timePoint);
-            long startTimeForOneInterval = firstInterval.getV1();
-            long endTimeForOneInterval = firstInterval.getV2();
+//            Tuple<Long, Long> firstInterval = MetricsUtils.getSortInterval(endTime - startTime, timePoint);
+            long startTimeForOneInterval = timePoint-(topTimeStep*60*1000);
+            long endTimeForOneInterval = timePoint;
 
-            String interval = MetricsUtils.getInterval(endTime - startTime);
-
+            //步长
+//            String interval = MetricsUtils.getInterval(endTime - startTime);
+            String interval = "1m";
             String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
                     startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
 
             String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
                     endTimeForOneInterval);
 
+//            variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
+//                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu,topMethod), 3);
+
             variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu), 3);
+                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsTop(s, null, metricsTypes, topNu,topMethod), 3);
         } while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());

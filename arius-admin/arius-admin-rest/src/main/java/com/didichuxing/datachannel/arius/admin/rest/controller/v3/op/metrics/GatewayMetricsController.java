@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
@@ -7,14 +8,10 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -36,12 +33,21 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(V3_OP + "/gateway/metrics")
+@RequestMapping({V3_OP + "/gateway/metrics", V3 + "/metrics/gateway" })
 @Api(tags = "Gateway指标监控信息")
 public class GatewayMetricsController {
 
     @Autowired
     private GatewayMetricsManager gatewayMetricsManager;
+    @Autowired
+    private GatewayManager gatewayManager;
+
+    @GetMapping("/alive-nodes")
+    @ResponseBody
+    @ApiOperation(value = "获取gateway存活节点名称列表接口" )
+    public Result<List<String>> getGatewayAliveNodeNames(HttpServletRequest request) {
+        return gatewayManager.getGatewayAliveNodeNames("Normal");
+    }
 
     @GetMapping("/config/{group}")
     @ApiOperation(value = "获取不同组的指标", notes = "")
@@ -49,7 +55,7 @@ public class GatewayMetricsController {
         return gatewayMetricsManager.getGatewayMetricsEnums(group);
     }
 
-    @GetMapping("/dslMd5/list")
+    @GetMapping("/dsl-md5")
     @ApiOperation(value = "获取当前项目下的dslMd5列表", notes = "")
     public Result<List<String>> getDslMd5List(Long startTime, Long endTime, HttpServletRequest request) {
         return gatewayMetricsManager.getDslMd5List(HttpRequestUtils.getAppId(request), startTime, endTime);
@@ -78,7 +84,7 @@ public class GatewayMetricsController {
         return gatewayMetricsManager.getMultiGatewayNodesMetrics(dto, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/node/client")
+    @PostMapping("/client-node")
     @ApiOperation(value = "获取gatewayNode相关的clientNode指标信息")
     public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(@RequestBody ClientNodeDTO dto,
                                                                          HttpServletRequest request) {
@@ -86,7 +92,7 @@ public class GatewayMetricsController {
         return gatewayMetricsManager.getClientNodeMetrics(dto, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("/node/client/list")
+    @GetMapping("/client-node-ip")
     @ApiOperation(value = "获取取gatewayNode相关的clientNode ip列表")
     public Result<List<String>> getClientNodeIpList(String gatewayNode, Long startTime,
                                                     Long endTime, HttpServletRequest request) {
@@ -101,7 +107,7 @@ public class GatewayMetricsController {
         return gatewayMetricsManager.getGatewayIndexMetrics(dto, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/app")
+    @PostMapping("/projects")
     @ApiModelProperty(value = "获取gateway项目指标信息")
     public Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(@RequestBody GatewayAppDTO dto) {
         validateParam(dto);
@@ -126,5 +132,4 @@ public class GatewayMetricsController {
             throw new RuntimeException("非法指标:" + invalidMetrics);
         }
     }
-
 }
