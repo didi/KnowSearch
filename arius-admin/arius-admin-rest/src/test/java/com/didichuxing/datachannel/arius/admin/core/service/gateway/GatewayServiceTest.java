@@ -10,9 +10,9 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayCl
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
