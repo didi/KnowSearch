@@ -75,22 +75,15 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         }
         ClusterRegion minUsageColdRegion = getMinUsageColdRegion(masterPhyTemplate.getCluster(), coldRegionList);
 
-        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
-        if (CollectionUtils.isEmpty(templatePhysicals)) {
-            return Result.buildSucc();
-        }
-
-        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-            try {
-                Result<Void> moveResult = movePerTemplate(templatePhysical, minUsageColdRegion.getId().intValue());
-                if (moveResult.failed()) {
-                    LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail", templatePhysical.getName());
-                    return moveResult;
-                }
-            } catch (Exception e) {
-                LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||errMsg={}", templatePhysical.getName(), e.getMessage(), e);
-                return Result.buildFail();
+        try {
+            Result<Void> moveResult = movePerTemplate(masterPhyTemplate, minUsageColdRegion.getId().intValue());
+            if (moveResult.failed()) {
+                LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail", masterPhyTemplate.getName());
+                return moveResult;
             }
+        } catch (Exception e) {
+            LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||errMsg={}", masterPhyTemplate.getName(), e.getMessage(), e);
+            return Result.buildFail();
         }
 
         return Result.buildSucc();
