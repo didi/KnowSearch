@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdMan
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -15,10 +16,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -156,13 +159,32 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         return templatePhyManager.getHotAndColdIndexByBeforeDay(templatePhysicalWithLogic, hotTime);
     }
 
-    private ClusterRegion getMinUsageColdRegion(List<ClusterRegion> regionList) {
+    private ClusterRegion getMinUsageColdRegion(String cluster, List<ClusterRegion> regionList) {
         if (CollectionUtils.isEmpty(regionList)) {
             return null;
         }
 
-        //todo: implement
-        return regionList.get(0);
+        Map<Integer, ClusterRegionFSInfo> regionId2FsInfoMap = clusterRegionService.getClusterRegionFSInfo(cluster);
+        if (MapUtils.isEmpty(regionId2FsInfoMap)) {
+            return null;
+        }
+
+        ClusterRegion minUsageColdRegion = regionList.get(0);
+        Double maxFreeDiskRatio = Double.MAX_VALUE;
+        for (ClusterRegion region : regionList) {
+            ClusterRegionFSInfo fsInfo = regionId2FsInfoMap.get(region.getId());
+            if (null == fsInfo) {
+                continue;
+            }
+
+            Double freeDiskRatio = fsInfo.getAvailableInBytes().doubleValue(); / fsInfo.getTotalInBytes();
+            if (freeDiskRatio > maxFreeDiskRatio) {
+                minUsageColdRegion = region;
+                maxFreeDiskRatio = freeDiskRatio;
+            }
+        }
+
+        return minUsageColdRegion;
     }
 
 }
