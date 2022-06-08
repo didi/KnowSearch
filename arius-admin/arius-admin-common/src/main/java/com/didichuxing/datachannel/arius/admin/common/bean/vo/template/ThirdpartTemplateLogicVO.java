@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.Date;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import io.swagger.annotations.ApiModel;

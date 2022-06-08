@@ -1,10 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
-import java.io.Serializable;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
