@@ -19,15 +19,6 @@ import java.util.stream.Collectors;
 public class ClusterLogicTemplateSrvTest extends BaseLogicClusterInfoTest {
 
     @Test
-    public void listTest() throws IOException {
-        Result<List<ESClusterTemplateSrvVO>> result = ClusterLogicTemplateSrvControllerMethod.list(logicClusterInfo.getLogicClusterId());
-        Assertions.assertTrue(result.success());
-        String[] templateSrvs = phyClusterInfo.getClusterJoinDTO().getTemplateSrvs().split(",");
-        // 已开启的，应该和创建时设置的一致
-        Assertions.assertEquals(result.getData().size(), templateSrvs.length);
-    }
-
-    @Test
     public void listSelectTest() throws IOException {
         Result<List<ESClusterTemplateSrvVO>> result = ClusterLogicTemplateSrvControllerMethod.listSelect(logicClusterInfo.getLogicClusterId());
         Assertions.assertTrue(result.success());

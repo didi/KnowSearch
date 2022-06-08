@@ -36,7 +36,7 @@ public abstract class BaseConcurrentClusterTask extends BaseConcurrentTask<Clust
      */
     @Override
     protected List<ClusterPhy> getAllItems() {
-        return clusterPhyService.listAllClusters();
+        return clusterPhyService.getAllClusters();
     }
 
     /**

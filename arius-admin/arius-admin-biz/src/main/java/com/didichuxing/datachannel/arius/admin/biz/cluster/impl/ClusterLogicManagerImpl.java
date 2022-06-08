@@ -358,7 +358,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<List<String>> getAppLogicOrPhysicClusterNames(Integer appId) {
         if (appService.isSuperApp(appId)) {
-            return Result.buildSucc(esClusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
+            return Result.buildSucc(esClusterPhyService.getAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
         }
         List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(appId);
         return Result.buildSucc(appAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));

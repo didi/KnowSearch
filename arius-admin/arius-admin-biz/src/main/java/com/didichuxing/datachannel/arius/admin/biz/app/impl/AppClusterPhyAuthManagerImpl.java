@@ -138,7 +138,7 @@ public class AppClusterPhyAuthManagerImpl implements AppClusterPhyAuthManager {
         List<App> appList = appService.listApps();
         if (CollectionUtils.isEmpty(appList)) { return;}
 
-        List<ClusterPhy> esClusterPhyList = clusterPhyService.listClustersByCondt(null);
+        List<ClusterPhy> esClusterPhyList = clusterPhyService.getClustersByCondt(null);
         if (CollectionUtils.isEmpty(esClusterPhyList)) { return;}
 
         List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();

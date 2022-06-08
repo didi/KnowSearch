@@ -50,7 +50,7 @@ public class DistributorUtils {
     public List<String> fetchClusterNames() {
         List<String> clusterNames = null;
             clusterNames = new ArrayList<>();
-            List<ClusterPhy> esClusterPhies = esClusterPhyService.listAllClusters();
+            List<ClusterPhy> esClusterPhies = esClusterPhyService.getAllClusters();
             for (ClusterPhy clusterPhy : esClusterPhies) {
                 clusterNames.add(clusterPhy.getCluster());
             }

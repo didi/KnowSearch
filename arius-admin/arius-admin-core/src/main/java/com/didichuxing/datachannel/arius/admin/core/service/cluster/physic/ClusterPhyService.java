@@ -24,7 +24,7 @@ public interface ClusterPhyService {
      * @return 集群列表
      *
      */
-    List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params);
+    List<ClusterPhy> getClustersByCondt(ClusterPhyDTO params);
 
     /**
      * 删除物理集群
@@ -70,21 +70,21 @@ public interface ClusterPhyService {
      * 列出所有集群
      * @return 集群列表,如果没有返回空列表
      */
-    List<ClusterPhy> listAllClusters();
+    List<ClusterPhy> getAllClusters();
 
     /**
      * 获取所有集群名称列表
      *
      * @return {@link List}<{@link String}>
      */
-    List<String>  listAllClusterNameList();
+    List<String> getClusterNames();
 
     /**
      * 根据names列出所有集群
      * @param names
      * @return 集群列表,如果没有返回空列表
      */
-    List<ClusterPhy> listClustersByNames(List<String> names);
+    List<ClusterPhy> getClustersByNames(List<String> names);
     /**
      * 集群是否存在
      *
@@ -93,13 +93,6 @@ public interface ClusterPhyService {
      */
     boolean isClusterExists(String clusterName);
 
-    /**
-     * 集群是否存在于列表中
-     * @param list 集群列表
-     * @param clusterName 集群名字
-     * @return
-     */
-    boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName);
     /**
      * rack是否存在
      *
@@ -137,7 +130,7 @@ public interface ClusterPhyService {
      * @param cluster 集群名称
      * @return
      */
-    List<Plugin> listClusterPlugins(String cluster);
+    List<Plugin> getClusterPlugins(String cluster);
 
     /**
      * 查询指定集群
@@ -145,13 +138,6 @@ public interface ClusterPhyService {
      * @return 集群  不存在返回null
      */
     ClusterPhy getClusterById(Integer phyClusterId);
-
-    /**
-     * 获取写节点的个数
-     * @param cluster 集群
-     * @return count
-     */
-    int getWriteClientCount(String cluster);
 
     /**
      * 确保集群配置了DCDR的远端集群地址，如果没有配置尝试配置
@@ -196,6 +182,7 @@ public interface ClusterPhyService {
      * @param password client连接需要的密码
      * @return 需要添加的rack列表
      */
+    @Deprecated
     Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password);
 
     /**
@@ -205,6 +192,7 @@ public interface ClusterPhyService {
      * @param allocationInfoOfRack rack对应的磁盘使用总大小
      * @return 指定rack的总的磁盘大小，单位是字节数目
      */
+    @Deprecated
     Float getSurplusDiskSizeOfRacks(String clusterPhyName, String racks, Map</*rack信息*/String, /*rack对应的总磁盘大小*/Float> allocationInfoOfRack);
 
     /**

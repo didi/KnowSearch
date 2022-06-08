@@ -44,7 +44,7 @@ public class AriusMetaJobClusterDistributeServiceImpl implements AriusMetaJobClu
     @Override
     public List<ClusterPhy> getSingleMachineMonitorCluster(String monitorHost) {
         List<ClusterPhy> monitorCluster = Lists.newArrayList();
-        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
+        List<ClusterPhy> clusterPhyList = clusterPhyService.getAllClusters();
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             LOGGER.warn("class=AriusMetaJobClusterDistributeServiceImpl||method=getSingleMachineMonitorCluster||" +
                     "msg=clusterPhyList is empty");

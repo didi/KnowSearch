@@ -44,8 +44,6 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Autowired
     private ClusterPhyService        clusterPhyService;
     @Autowired
-    private ClusterContextManager clusterContextManager;
-    @Autowired
     private ClusterLogicService clusterLogicService;
     @Autowired
     private ClusterPhyManager        clusterPhyManager;

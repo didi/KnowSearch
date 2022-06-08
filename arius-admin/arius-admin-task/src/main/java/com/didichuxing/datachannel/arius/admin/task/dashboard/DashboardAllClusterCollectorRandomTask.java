@@ -37,7 +37,7 @@ public class DashboardAllClusterCollectorRandomTask implements Job {
         long currentTimeMillis = System.currentTimeMillis();
         long currentTime       = CommonUtils.monitorTimestamp2min(currentTimeMillis);
         TaskResultBuilder taskResultBuilder = new TaskResultBuilder();
-        List<String> clusterNameList = clusterPhyService.listAllClusterNameList();
+        List<String> clusterNameList = clusterPhyService.getClusterNames();
         if (CollectionUtils.isEmpty(clusterNameList)) {
             LOGGER.warn("class=DashboardAllClusterCollectorRandomTask||method=execute||msg=clusterNameList is empty");
             return TaskResult.SUCCESS;

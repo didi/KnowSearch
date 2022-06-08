@@ -18,20 +18,6 @@ import java.util.stream.Collectors;
  */
 public class ESPhyClusterTemplateSrvTest extends BasePhyClusterInfoTest {
 
-    /**
-     * 测试获取集群当前已经开启的索引服务
-     */
-    @Test
-    public void listTest() throws IOException {
-        Result<List<ESClusterTemplateSrvVO>> result = ESPhyClusterTemplateSrvControllerMethod.list(phyClusterInfo.getPhyClusterName());
-        Assertions.assertTrue(result.success());
-        Set<Integer> idSet = result.getData().stream().map(ESClusterTemplateSrvVO::getServiceId).collect(Collectors.toSet());
-        // 获取创建物理集群时，设置的索引服务 id
-        String[] ids = phyClusterInfo.getClusterJoinDTO().getTemplateSrvs().split(",");
-        if(ids.length > 0) {
-            Assertions.assertTrue(idSet.contains(Integer.parseInt(ids[0])));
-        }
-    }
 
     /**
      * 测试获取集群可供选择的索引服务
