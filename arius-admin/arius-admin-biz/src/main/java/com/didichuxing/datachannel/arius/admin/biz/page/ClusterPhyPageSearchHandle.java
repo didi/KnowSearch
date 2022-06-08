@@ -16,13 +16,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -79,7 +77,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
             // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
             List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
             //项目下的有管理权限逻辑集群会关联多个物理集群
-            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
+            List<ClusterRegion> regions = clusterRegionService.listClusterRegionsByLogicIds(
                 clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
             clusterNames = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
                 .collect(Collectors.toList());

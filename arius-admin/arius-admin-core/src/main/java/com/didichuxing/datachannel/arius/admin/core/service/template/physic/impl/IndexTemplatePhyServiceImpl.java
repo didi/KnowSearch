@@ -4,12 +4,22 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
@@ -24,7 +34,6 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -44,18 +53,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author d06679
@@ -377,27 +375,6 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     }
 
     /**
-     * 根据集群和分区获取模板列表
-     *
-     * @param cluster 集群
-     * @param racks
-     * @return list
-     */
-    @Override
-    public List<IndexTemplatePhy> getNormalTemplateByClusterAndRack(String cluster, Collection<String> racks) {
-        if (CollectionUtils.isEmpty(racks)) {
-            return Lists.newArrayList();
-        }
-        List<IndexTemplatePhy> templatePhysicals = getNormalTemplateByCluster(cluster);
-        if (CollectionUtils.isEmpty(templatePhysicals)) {
-            return Lists.newArrayList();
-        }
-        return templatePhysicals.stream()
-            .filter(templatePhysical -> RackUtils.hasIntersect(templatePhysical.getRack(), racks))
-            .collect(Collectors.toList());
-    }
-
-    /**
      * 获取模板匹配的索引列表，按着时间排序
      * 注意：
      * 该方法只能识别出那些时间后缀是一样的情况；
@@ -667,16 +644,6 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     }
 
     @Override
-    public List<IndexTemplatePhy> getTemplateByRegionId(Long regionId) {
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        if (AriusObjUtils.isNull(region)) {
-            return Lists.newArrayList();
-        }
-
-        return getNormalTemplateByClusterAndRack(region.getPhyClusterName(), RackUtils.racks2List(region.getRacks()));
-    }
-
-    @Override
     public Map<Integer, Integer> getAllLogicTemplatesPhysicalCount() {
         Map<Integer, Integer> map = new HashMap<>();
         List<IndexTemplatePhyPO> list = indexTemplatePhyDAO.countListByLogicId();
@@ -819,8 +786,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
                 LOGGER.info("class=TemplatePhyServiceImpl||method=updateShardNumTemplatePhy||editTemplateFromLogic succeed||physicalId={}||preShardNum={}||currentShardNum={}",
                         physicalPO.getId(), physicalPO.getShard(), param.getShardNum());
 
-                esTemplateService.syncUpdateRackAndShard(physicalPO.getCluster(), physicalPO.getName(),
-                        physicalPO.getRack(), param.getShardNum(), physicalPO.getShardRouting(), 0);
+                esTemplateService.syncUpdateShard(physicalPO.getCluster(), physicalPO.getName(), param.getShardNum(), physicalPO.getShardRouting(), 0);
             } else {
                 LOGGER.warn("class=TemplatePhyServiceImpl||method=updateShardNumTemplatePhy||msg=", MSG, physicalPO.getId(),
                         param.getExpression());
@@ -850,11 +816,6 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     private Result<Void> handleValidateTemplate(IndexTemplatePhyDTO param) {
         if (param.getCluster() != null && !clusterPhyService.isClusterExists(param.getCluster())) {
             return Result.buildParamIllegal("集群不存在");
-        }
-        if (StringUtils.isNotEmpty(param.getRack())) {
-            if (!clusterPhyService.isRacksExists(param.getCluster(), param.getRack())) {
-                return Result.buildParamIllegal("集群rack不存在");
-            }
         }
         if (param.getShard() != null && param.getShard() < 1) {
             return Result.buildParamIllegal("shard个数非法");

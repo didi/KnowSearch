@@ -104,16 +104,6 @@ public interface TemplateSrvManager {
     Result<Boolean> checkTemplateSrv(String phyCluster, String strId, String operator);
 
     /**
-     * 校验一个接入的集群是否可以开启指定的索引服务
-     * @param httpAddresses client的地址
-     * @param password 集群认证信息
-     * @param strId 模板服务id
-     * @param password 密码
-     * @return 校验结果 返回确认可开启的索引服务id
-     */
-    Result<Boolean> checkTemplateSrvWhenJoin(String httpAddresses, String password, String strId);
-
-    /**
      * 为逻辑集群增加一个索引服务
      * @param clusterLogicId  逻辑集群Id
      * @param templateSrvId   索引服务Id

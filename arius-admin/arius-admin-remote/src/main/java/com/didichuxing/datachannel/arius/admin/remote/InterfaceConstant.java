@@ -271,11 +271,6 @@ public class InterfaceConstant {
     public static final String URL_INDEX_LABEL_GET_TEMPLATE_LABELID   = "/template/label/listByLabelId.do";
 
     /**
-     * 获取指定集群rack的磁盘空余空间
-     */
-    public static final String URL_NODE_STATIS_RACK_GET               = "/node/statis/rack/get.do";
-
-    /**
      * dsl模板审核
      */
     public static final String URL_DSL_TEMPLATE_AUDIT                 = "/dsl/auditDsl.do";

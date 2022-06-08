@@ -1,12 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_COLD_DAY_DEFAULT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.BATCH_CHANGE_TEMPLATE_HOT_DAYS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
@@ -16,12 +23,10 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -30,13 +35,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * 索引冷存服务
@@ -105,20 +103,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
-        //根据可连接的地址获取集群上的
-        Result<Set<String>> clusterRackByHttpAddress = clusterPhyService.getClusterRackByHttpAddress(httpAddresses, password);
-        if (clusterRackByHttpAddress.failed()) {
-            return Result.buildFrom(clusterRackByHttpAddress);
-        }
-
-        //如果含有冷节点则可以开启冷热分离的索引服务
-        for (String rack : clusterRackByHttpAddress.getData()) {
-            if (AdminConstant.DEFAULT_COLD_RACK.equals(rack)) {
-                return Result.buildSucc(Boolean.TRUE);
-            }
-        }
-
-        return Result.buildFail("接入集群不具备开启【冷热分离索引模板服务】条件，需要满足【集群版本6.6.1以上；具备cold属性节点】");
+        return Result.buildSucc();
     }
 
     /**
@@ -128,7 +113,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Result<Boolean> checkOpenTemplateSrvByCluster(String phyCluster) {
-        if (StringUtils.isBlank(phyCluster)) {
+        /*if (StringUtils.isBlank(phyCluster)) {
             return Result.buildFail("物理集群名称为空");
         }
 
@@ -137,7 +122,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         if (CollectionUtils.isEmpty(coldRackList)) {
             LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||cluster={}||no cold rack", phyCluster);
             return Result.buildFail("接入集群不具备开启【冷热分离索引模板服务】条件，需要满足【集群版本6.6.1以上；具备cold属性节点】");
-        }
+        }*/
 
         return Result.buildSucc();
     }
@@ -153,7 +138,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
      */
     @Override
     public Result<Boolean> move2ColdNode(String phyCluster) {
-        if (!isTemplateSrvOpen(phyCluster)) {
+        /*if (!isTemplateSrvOpen(phyCluster)) {
             return Result.buildFail(phyCluster + " 没有开启冷存搬迁服务");
 
         }
@@ -167,10 +152,6 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
 
         coldRackList.sort(RackUtils::compareByName);
         String coldRack = String.join(",", coldRackList);
-
-        /**
-         * 配置分片级别重分配的参数由集群控制
-         */
 
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
 
@@ -196,7 +177,8 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
             }
         }
 
-        return Result.buildSucc(succ * 1.0 / templatePhysicals.size() > 0.8);
+        return Result.buildSucc(succ * 1.0 / templatePhysicals.size() > 0.8);*/
+        return Result.buildSucc();
     }
 
     /**
@@ -244,41 +226,6 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
             "deltaHotDays:" + days + ";editCount:" + count, operator);
 
         return Result.buildSucc(count);
-    }
-
-    /**
-     * 修改热数据的rack
-     *
-     * @param physicalId 物理模板id
-     * @param tgtRack    目标rack
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws ESOperateException e
-     */
-    @Override
-    public boolean updateHotIndexRack(Long physicalId, String tgtRack, int retryCount) throws ESOperateException {
-
-        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
-        if (physicalWithLogic == null) {
-            return false;
-        }
-
-        List<String> indices = indexTemplatePhyService.getMatchIndexNames(physicalWithLogic.getId());
-        if (CollectionUtils.isEmpty(indices)) {
-            return true;
-        }
-
-        int hotDay = physicalWithLogic.getLogicTemplate().getHotTime();
-
-        List<String> expList = getExpList(physicalWithLogic, indices, hotDay);
-
-        LOGGER.info("class=TemplateColdManagerImpl||method=updateHotIndexRack||template={}||expList={}", physicalWithLogic.getName(), expList);
-
-        if (CollectionUtils.isNotEmpty(expList)) {
-            return esIndexService.syncBatchUpdateRack(physicalWithLogic.getCluster(), expList, tgtRack, retryCount);
-        } else {
-            return true;
-        }
     }
 
     /**************************************************** private method ****************************************************/
@@ -332,13 +279,14 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
 
     private boolean movePerIndexTemplate(IndexTemplatePhy templatePhysical,
                                          String racks, Set<String> indexNames) throws ESOperateException {
-        if (CollectionUtils.isEmpty(indexNames)) {
+        /*if (CollectionUtils.isEmpty(indexNames)) {
             LOGGER.info("class=TemplateColdManagerImpl||method=movePerIndexTemplate||template={}||msg=no need index", templatePhysical.getName());
             return false;
         } else {
             //冷热节点数据间的迁移
             return esIndexService.syncBatchUpdateRack(templatePhysical.getCluster(), Lists.newArrayList(indexNames), racks, 3);
-        }
+        }*/
+        return false;
     }
 
     /**

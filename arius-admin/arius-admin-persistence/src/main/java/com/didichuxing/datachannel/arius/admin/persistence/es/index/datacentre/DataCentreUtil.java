@@ -57,13 +57,6 @@ public class DataCentreUtil {
     @Value("${es.template.label.index.name:v2.arius.template.label}")
     private String  ariusTemplateLabel;
 
-    // 健康分
-    @Value("${es.health.degress.index.name:index_health_degree}")
-    private String ariusIndexHealthDegress;
-    // 健康检查
-    @Value("${es.health.check.info.index.name:health_check_info}")
-    private String ariusHealthCheck;
-
     // 国内原始gateway日志索引
     @Value("${arius.gateway.original.log.index.name:foundation_fd.data-online.arius.gateway}")
     private String ariusCNGatewayOriginalLog;
@@ -128,8 +121,6 @@ public class DataCentreUtil {
         LOGGER.info("class=DataCentreUtil||method=init||ariusIndexNameAccess={}",               getAriusIndexNameAccess());
         LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateAccess={}",                getAriusTemplateAccess());
         LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateLabel={}",                 getAriusTemplateLabel());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusIndexHealthDegress={}",            getAriusIndexHealthDegress());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusHealthCheck={}",                   getAriusHealthCheck());
         LOGGER.info("class=DataCentreUtil||method=init||ariusGatewayOriginalLog={}",            getAriusGatewayOriginalLog());
         LOGGER.info("class=DataCentreUtil||method=init||ariusStatsNodeIndexInfo={}",            getAriusStatsNodeIndexInfo());
         LOGGER.info("class=DataCentreUtil||method=init||ariusStatsNodeInfo={}",                 getAriusStatsNodeInfo());
@@ -222,14 +213,6 @@ public class DataCentreUtil {
     public String getAriusGatewayJoin() { return getIndexName(ariusGatewayJoin); }
 
     public String getAriusGatewayOriginalLog(){ return getIndexName(ariusCNGatewayOriginalLog);}
-
-    public String getAriusHealthCheck(){
-        return getIndexName(ariusHealthCheck);
-    }
-
-    public String getAriusIndexHealthDegress(){
-        return getIndexName(ariusIndexHealthDegress);
-    }
 
     public String getAriusDslAnalyzeResult(){
         return getIndexName(ariusDslAnalyzeResult);

@@ -16,7 +16,6 @@ java -jar /lib/java-1.8.0/jacococli.jar report output/arius-admin-rest/coverage-
  --classfiles arius-admin-client/target/classes --sourcefiles arius-admin-client/src/main/java \
  --classfiles arius-admin-persistence/target/classes --sourcefiles arius-admin-persistence/src/main/java \
  --classfiles arius-admin-remote/target/classes --sourcefiles arius-admin-remote/src/main/java \
- --classfiles arius-admin-extend/capacity-plan/target/classes --sourcefiles arius-admin-extend/capacity-plan/src/main/java \
  --html site/ --csv coverage.csv
 # --classfiles arius-admin-task/target/classes --sourcefiles arius-admin-task/src/main/java \
 
