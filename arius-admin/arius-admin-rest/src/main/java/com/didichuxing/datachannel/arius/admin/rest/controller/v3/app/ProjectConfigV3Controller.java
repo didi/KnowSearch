@@ -8,10 +8,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfig
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,12 +53,13 @@ public class ProjectConfigV3Controller {
 		return projectConfigManager.initProjectConfig(configDTO, userName);
 	}
 	
-	@GetMapping
+	@GetMapping("/{projectId}")
 	@ResponseBody
 	@ApiOperation(value = "获取项目配置", notes = "")
-	public Result<ProjectConfigVo> get(HttpServletRequest request) {
+	@ApiImplicitParam(name = "projectId", value = "项目id", dataType = "int", required = true)
+	public Result<ProjectConfigVo> get(HttpServletRequest request, @PathVariable("projectId") Integer projectId) {
 		//获取操作用户慢查询耗时：ms
-		Integer projectId = HttpRequestUtil.getProjectId(request);
-		return projectConfigManager.get(projectId);
+		Integer id = Objects.isNull(projectId)?HttpRequestUtil.getProjectId(request):projectId;
+		return projectConfigManager.get(id);
 	}
 }
