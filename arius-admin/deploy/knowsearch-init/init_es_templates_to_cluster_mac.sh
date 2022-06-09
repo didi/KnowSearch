@@ -5,10 +5,8 @@ cd ${workspace}
 
 esHost=$1
 esPort=$2
-# 给模板分配的rack，如果有多个则逗号分隔
-rack=$3
 templateDir=$4
-echo "esHost:${esHost} esPort:${esPort} rack:${rack} templateDir:${templateDir}"
+echo "esHost:${esHost} esPort:${esPort}  templateDir:${templateDir}"
 
 if [ -z ${esHost} ]; then
     echo "error: esHost not specified."
@@ -25,19 +23,10 @@ if [ -z ${templateDir} ]; then
     exit 1
 fi
 
-if [ -z ${rack} ]; then
-    echo "error: rack not specified."
-    exit 1
-fi
-
-
 for file in `ls ${templateDir}`
     do
         templateName=`echo ${file}`
         file="${templateDir}/${file}"
-
-        # 替换rack
-        sed -i '' "s/\"rack\": \"r1.*/\"rack\": \"${rack}\"/g" ${file}
 
         templateContent=`cat ${file}`
         echo -e "\ncreate admin template ${templateName}"

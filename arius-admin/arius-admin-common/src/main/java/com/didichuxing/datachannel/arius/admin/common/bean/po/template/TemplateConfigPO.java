@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,9 +21,9 @@ public class TemplateConfigPO extends BasePO {
 
     private Integer isSourceSeparated;
 
-    private Double  adjustRackTpsFactor;
+    private Double adjustTpsFactor;
 
-    private Double  adjustRackShardFactor;
+    private Double adjustShardFactor;
 
     private Integer dynamicLimitEnable;
 

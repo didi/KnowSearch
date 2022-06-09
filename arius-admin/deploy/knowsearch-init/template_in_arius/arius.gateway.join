@@ -9,7 +9,6 @@
   "physicalInfos": [
     {
       "cluster": "logi-elasticsearch-7.6.0",
-      "rack": "r2",
       "resourceId": 63,
       "role": 1,
       "shard": "4"

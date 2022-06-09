@@ -75,7 +75,7 @@ public class AdjustShardManagerImpl extends BaseTemplateSrvImpl implements Adjus
                 if (updateDBResult.failed()) {
                     return updateDBResult;
                 }
-                esTemplateService.syncUpdateRackAndShard(templatePhy.getCluster(), templatePhy.getName(), templatePhy.getRack(),
+                esTemplateService.syncUpdateShard(templatePhy.getCluster(), templatePhy.getName(),
                         updateParam.getShard(), updateParam.getShardRouting(), RETRY_TIMES);
 
                 SpringTool.publish(new PhysicalTemplateModifyEvent(this, templatePhy,

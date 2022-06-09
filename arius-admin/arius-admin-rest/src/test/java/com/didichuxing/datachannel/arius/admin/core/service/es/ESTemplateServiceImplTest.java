@@ -1,13 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESTemplateDAO;
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.elasticsearch.rest.RestStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,9 +13,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESTemplateDAO;
+import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 
 @Transactional
 @Rollback
@@ -33,23 +34,16 @@ public class ESTemplateServiceImplTest extends AriusAdminApplicationTest {
 
     @Test
     public void syncCreateTest() throws ESOperateException {
-        Mockito.when(esTemplateDAO.create(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.when(esTemplateDAO.create(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(true);
         Assertions.assertTrue(esTemplateService
-                .syncCreate(CustomDataSource.PHY_CLUSTER_NAME, "test", "test", "test", 1, 1, 1));
-
+                .syncCreate(CustomDataSource.PHY_CLUSTER_NAME, "test", "test", 1, 1, 1));
     }
 
     @Test
     public void syncDeleteTest() throws ESOperateException {
         Mockito.when(esTemplateDAO.delete(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         Assertions.assertTrue(esTemplateService.syncDelete(CustomDataSource.PHY_CLUSTER_NAME, "test", 1));
-    }
-
-    @Test
-    public void syncUpdateRackAndShardTest() throws ESOperateException {
-        Mockito.when(esTemplateDAO.updateRackAndShard(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertTrue(esTemplateService.syncUpdateRackAndShard(CustomDataSource.PHY_CLUSTER_NAME, "test", "test", 1, 1, 1));
     }
 
     @Test
@@ -115,7 +109,6 @@ public class ESTemplateServiceImplTest extends AriusAdminApplicationTest {
         Mockito.when(esTemplateDAO.getTemplate(Mockito.anyString(), Mockito.any())).thenReturn(null);
         Assertions.assertFalse(esTemplateService.syncUpdateName(CustomDataSource.PHY_CLUSTER_NAME, "test", "test", 1));
         Mockito.when(esTemplateDAO.getTemplate(CustomDataSource.PHY_CLUSTER_NAME, "test")).thenReturn(new TemplateConfig());
-        Mockito.when(esTemplateDAO.create(CustomDataSource.PHY_CLUSTER_NAME, "test", "test", "test", 1, 1)).thenReturn(true);
         Assertions.assertFalse(esTemplateService.syncUpdateName(CustomDataSource.PHY_CLUSTER_NAME, "test", "test", 1));
     }
 

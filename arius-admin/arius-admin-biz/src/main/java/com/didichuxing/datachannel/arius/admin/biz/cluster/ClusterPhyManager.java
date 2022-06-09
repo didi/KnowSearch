@@ -277,15 +277,6 @@ public interface ClusterPhyManager {
     Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId);
 
     /**
-     * 根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表
-     * @param clusterPhy 物理集群名称
-     * @param clusterLogic 逻辑集群名称
-     * @param templateSize 模板设置的数据大小
-     * @return 可以绑定的rack列表
-     */
-    Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
-
-    /**
      * 更新集群网关
      *
      * @param param    参数

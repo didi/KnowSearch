@@ -3,13 +3,11 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -21,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,6 +26,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
@@ -53,7 +51,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -121,11 +118,11 @@ class ClusterPhyManagerTest {
     private ESOpClient                    mockEsOpClient;
 
     @InjectMocks
-    private ClusterPhyManagerImpl clusterPhyManager;
+    private ClusterPhyManagerImpl         clusterPhyManager;
 
     private IndexTemplate                 indexTemplate;
     private IndexTemplatePhy              indexTemplatePhy;
-    private List<IndexTemplatePhy>        indexTemplatePhies;
+    private List<IndexTemplatePhy>        indexTemplatePhyList;
     private IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates;
     private ClusterPhyDTO                 clusterPhyDTO;
     ESConfigDTO                           esConfigDTO;
@@ -161,15 +158,14 @@ class ClusterPhyManagerTest {
             0.0);
         indexTemplatePhy = new IndexTemplatePhy(PHYSICAL_ID, 0, TEMPLATE, EXPRESSION, CLUSTER, "rack", 0, 0, 0, 1, 0,
             "config", 0);
-        indexTemplatePhies = Collections.singletonList(indexTemplatePhy);
-        indexTemplateWithPhyTemplates = new IndexTemplateWithPhyTemplates(indexTemplatePhies);
+        indexTemplatePhyList = Collections.singletonList(indexTemplatePhy);
+        indexTemplateWithPhyTemplates = new IndexTemplateWithPhyTemplates(indexTemplatePhyList);
         esConfigDTO = new ESConfigDTO(0L, 0L, "typeName", "enginName", "configData", "desc", "versionTag", 0, 0);
         pluginDTO = new PluginDTO(0L, "name", "physicClusterId", "version", "url", "md5", "desc", "creator", 0,
             "fileName", null);
         esClusterRoleDTO = new ESClusterRoleDTO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", "esVersion", 0,
             "plugIds", false);
-        esClusterRoleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "ip", CLUSTER, "port", false, 0, 0, "rack",
-            "nodeSet", 0, "attributes");
+        esClusterRoleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "ip", CLUSTER, "port", false, 0, 0, "nodeSet", 0, "attributes");
         clusterPhyDTO = new ClusterPhyDTO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
@@ -220,7 +216,7 @@ class ClusterPhyManagerTest {
 
         clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
             "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
-        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "racks");
+        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER);
 
         roleHostList = Collections.singletonList(new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0,
             "rack", "nodeSet", "machineSpec", -1, "attributes"));
@@ -231,7 +227,7 @@ class ClusterPhyManagerTest {
     void testCopyMapping() throws Exception {
         final Result<MappingConfig> succ = Result.buildSucc(new MappingConfig(new JSONObject(0, false)));
         final Result<MappingConfig> fail = Result.buildFail();
-        when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhies);
+        when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhyList);
         when(mockIndexTemplateService.getLogicTemplateById(0)).thenReturn(indexTemplate);
         when(mockTemplatePhyMappingManager.syncMappingConfig(CLUSTER, TEMPLATE, EXPRESSION, DATE_FORMAT))
             .thenReturn(succ);
@@ -253,7 +249,7 @@ class ClusterPhyManagerTest {
 
     @Test
     void testSyncTemplateMetaData() throws Exception {
-        when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhies);
+        when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhyList);
         when(mockIndexTemplateService.getLogicTemplateWithPhysicalsById(LOGIC_TEMPLATE_ID))
             .thenReturn(indexTemplateWithPhyTemplates);
 
@@ -278,7 +274,7 @@ class ClusterPhyManagerTest {
 
     @Test
     void testSyncTemplateMetaData_TemplatePhyManagerThrowsESOperateException() throws Exception {
-        when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhies);
+        when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhyList);
 
         doThrow(ESOperateException.class).when(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0);
 
@@ -367,13 +363,12 @@ class ClusterPhyManagerTest {
 
     @Test
     void testBuildClusterInfo() {
+        assertEquals(Collections.emptyList(), clusterPhyManager.buildClusterInfo(Collections.emptyList(), 0));
+
         when(mockClusterRoleService.getAllRoleClusterByClusterIds(Collections.singletonList(0)))
             .thenReturn(new HashMap<>());
         when(mockClusterRoleHostService.getByRoleClusterIds(Collections.singletonList(0L))).thenReturn(new HashMap<>());
-
-        final List<ClusterPhyVO> result = clusterPhyManager.buildClusterInfo(clusterPhyList, 0);
-
-        assertEquals(Collections.singletonList(clusterPhyVOWithNotRole), result);
+        assertEquals(Collections.singletonList(clusterPhyVOWithNotRole), clusterPhyManager.buildClusterInfo(clusterPhyList, 0));
     }
 
     @Test
@@ -503,7 +498,7 @@ class ClusterPhyManagerTest {
                 0, 0, "clusterPhyName", "operator", "esVersion", Lists.newArrayList(),
             "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1);
         ESClusterRoleHostDTO roleHostDTO=   new ESClusterRoleHostDTO(0L, 0L,
-                "hostname", "", CLUSTER, "port", false, 0, 0, "rack", "nodeSet", 0, "attributes");
+                "hostname", "", CLUSTER, "port", false, 0, 0, "nodeSet", 0, "attributes");
         assertEquals(Result.buildParamIllegal("参数为空").getMessage(),
             clusterPhyManager.joinCluster(null, "admin").getMessage());
         assertEquals(Result.buildParamIllegal("操作人不存在").getMessage(),
@@ -769,7 +764,7 @@ class ClusterPhyManagerTest {
     @Test
     void testUpdateClusterInfo() {
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(null);
-        assertFalse(clusterPhyManager.updateClusterHealth(CLUSTER, "operator"));
+        assertFalse(clusterPhyManager.updateClusterInfo(CLUSTER, "operator"));
 
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         ESClusterStatsResponse   response = new ESClusterStatsResponse("status", 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L,
@@ -845,6 +840,7 @@ class ClusterPhyManagerTest {
         assertEquals(Collections.emptyList(), result);
     }
 
+
     @Test
     public void getTemplateSameVersionClusterNamesByTemplateIdTest() {
         Result<List<String>> rest = clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(1, 37529);
@@ -852,11 +848,28 @@ class ClusterPhyManagerTest {
 
         when(mockAppService.isSuperApp(1)).thenReturn(true);
         when(mockClusterPhyService.getAllClusters()).thenReturn(clusterPhyList);
-        when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
+        when(mockIndexTemplateService.getLogicTemplateWithPhysicalsById(Mockito.any())).thenReturn(new IndexTemplateWithPhyTemplates(null));
+        Assertions.assertEquals(Result.buildFail(String.format("the physicals of templateId[%s] is empty", 37529)).getMessage(),clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(1, 37529).getMessage());
+
         when(mockIndexTemplateService.getLogicTemplateWithPhysicalsById(Mockito.any())).thenReturn(indexTemplateWithPhyTemplates);
+        when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         rest = clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(1, 37529);
         Assertions.assertTrue(rest.success());
         Assertions.assertTrue(null != rest.getData() && !rest.getData().isEmpty());
+    }
+    @Test
+    public void testDeleteClusterExit() {
+
+        when(mockAppService.isSuperApp(1)).thenReturn(false);
+        Assertions.assertEquals(Result.buildFail("无权限删除集群").getMessage(),clusterPhyManager.deleteClusterExit(CLUSTER, 1,"operator").getMessage());
+        when(mockAppService.isSuperApp(1)).thenReturn(true);
+        when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
+        when(mockClusterPhyService.getClusterById(0)).thenReturn(clusterPhy);
+        when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(Collections.emptyList());
+        when(mockClusterRoleService.deleteRoleClusterByClusterId(0)).thenReturn(Result.buildSucc());
+        when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(Collections.emptyList());
+        when(mockClusterPhyService.deleteClusterById(0, "operator")).thenReturn(Result.buildSucc(true));
+        Assertions.assertTrue(clusterPhyManager.deleteClusterExit(CLUSTER, 1,"operator").success());
     }
 
 }

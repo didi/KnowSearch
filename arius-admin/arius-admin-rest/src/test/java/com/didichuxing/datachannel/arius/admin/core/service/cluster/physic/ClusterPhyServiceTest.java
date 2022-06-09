@@ -186,7 +186,7 @@ public class ClusterPhyServiceTest {
             .anyMatch(esClusterPhy -> esClusterPhy.getCluster().equals(cluster)));
         Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.getClustersByNames(Collections.emptyList())));
     }
-    
+
     @Test
     public void isClusterExistsTest() {
         Assertions.assertFalse(ClusterPhyService.isClusterExists(existCluster));

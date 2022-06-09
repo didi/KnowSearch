@@ -27,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.Templa
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
@@ -190,7 +189,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (templateConfig == null) {
             // es集群中还没有模板，创建
             esTemplateService.syncCreate(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), indexTemplatePhy.getExpression(),
-                    indexTemplatePhy.getRack(), indexTemplatePhy.getShard(), indexTemplatePhy.getShardRouting(), retryCount);
+                    indexTemplatePhy.getShard(), indexTemplatePhy.getShardRouting(), retryCount);
 
         } else {
             // 校验表达式
@@ -204,35 +203,21 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                         indexTemplatePhy.getName(), templateConfig.getTemplate(), indexTemplatePhy.getExpression());
             }
 
-            // 标志shard或rack是否需要修改
-            boolean editShardOrRack = false;
+            // 标志shard是否需要修改
             Map<String, String> settings = templateConfig.getSetttings();
-            String rack = settings.get(TEMPLATE_INDEX_INCLUDE_RACK);
             String shardNum = settings.get(INDEX_SHARD_NUM);
 
             // 校验shard个数
             if (!String.valueOf(indexTemplatePhy.getShard()).equals(shardNum)) {
-                editShardOrRack = true;
                 shardNum = String.valueOf(indexTemplatePhy.getShard());
             }
 
-            // 校验rack
-            if (
-                    StringUtils.isNotBlank(indexTemplatePhy.getRack()) &&
-                            (!settings.containsKey(TEMPLATE_INDEX_INCLUDE_RACK)
-                                    || !indexTemplatePhy.getRack().equals(settings.get(TEMPLATE_INDEX_INCLUDE_RACK)))
-            ) {
-                editShardOrRack = true;
-                rack = indexTemplatePhy.getRack();
-            }
-
-            if (editShardOrRack && esTemplateService.syncUpdateRackAndShard(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), rack,
+            if (esTemplateService.syncUpdateShard(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
                     Integer.valueOf(shardNum), indexTemplatePhy.getShardRouting(), retryCount)) {
                 // 同步变化到ES集群
                     LOGGER.info(
-                            "class=TemplatePhyManagerImpl||method=syncMeta||msg=syncUpdateRackAndShard succ||template={}||srcRack={}||srcShard={}||tgtRack={}||tgtShard={}",
-                            indexTemplatePhy.getName(), settings.get(TEMPLATE_INDEX_INCLUDE_RACK), settings.get(INDEX_SHARD_NUM),
-                            rack, shardNum);
+                            "class=TemplatePhyManagerImpl||method=syncMeta||msg=syncUpdateShard succ||template={}||srcShard={}",
+                            indexTemplatePhy.getName(), settings.get(INDEX_SHARD_NUM), shardNum);
             }
         }
     }
@@ -335,7 +320,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             LOGGER.warn("class=TemplatePhyManagerImpl||methood=copyTemplate||TemplatePhysicalCopyDTO={}||msg=syncCopyMappingAndAlias fail", param);
         }
 
-        return Result.buildSucWithTips("模板部署集群变更!请注意模板APP是否可以使用修改后的集群rack\n模板复制后请确认逻辑模板quota是否充足");
+        return Result.buildSucWithTips("模板部署集群变更!");
     }
 
     @Override
@@ -421,34 +406,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> editTemplateFromLogic(IndexTemplateDTO param, String operator) throws ESOperateException {
-        List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(param.getId());
-        if (CollectionUtils.isEmpty(indexTemplatePhies)) {
-            return Result.buildSucc();
-        }
-
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
-            if (AriusObjUtils.isChanged(param.getExpression(), indexTemplatePhy.getExpression())) {
-                Result<Void> result = indexTemplatePhyService.updateTemplateExpression(indexTemplatePhy, param.getExpression(), operator);
-                if (result.failed()) {
-                    return result;
-                }
-            }
-
-            if (isValidShardNum(param.getShardNum())
-                    && AriusObjUtils.isChanged(param.getShardNum(), indexTemplatePhy.getShard())) {
-                Result<Void> result = indexTemplatePhyService.updateTemplateShardNum(indexTemplatePhy, param.getShardNum(), operator);
-                if (result.failed()) {
-                    return result;
-                }
-            }
-        }
-
-        return Result.buildSucc();
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     public Result<Void> switchMasterSlave(Integer logicId, Long expectMasterPhysicalId, String operator) {
         List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(logicId);
         if (CollectionUtils.isEmpty(indexTemplatePhies)) {
@@ -494,33 +451,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public Result<Void> editTemplateRackWithoutCheck(Long physicalId, String tgtRack, String operator,
-                                               int retryCount) throws ESOperateException {
-        IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
-        updateParam.setId(physicalId);
-        updateParam.setRack(tgtRack);
-        return editTemplateWithoutCheck(updateParam, operator, retryCount);
-    }
-
-    @Override
-    public Result<Void> upgradeTemplateVersion(Long physicalId, String operator, int retryCount) throws ESOperateException {
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(physicalId);
-        if (indexTemplatePhy == null) {
-            return Result.buildNotExist("模板不存在");
-        }
-
-        int version = indexTemplatePhy.getVersion() + 1;
-        if (version > MAX_VERSION) {
-            version = 0;
-        }
-
-        IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
-        updateParam.setId(indexTemplatePhy.getId());
-        updateParam.setVersion(version);
-        return editTemplateWithoutCheck(updateParam, operator, retryCount);
-    }
-
-    @Override
     public Result<Void> editTemplateWithoutCheck(IndexTemplatePhyDTO param, String operator,
                                                  int retryCount) throws ESOperateException {
         IndexTemplatePhy oldIndexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getId());
@@ -532,15 +462,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         boolean succ = indexTemplatePhyService.update(param).success();
         String tips = "";
         if (succ) {
-            if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())
-                    || AriusObjUtils.isChanged(param.getShard(), oldIndexTemplatePhy.getShard())) {
-                esTemplateService.syncUpdateRackAndShard(oldIndexTemplatePhy.getCluster(), oldIndexTemplatePhy.getName(), param.getRack(),
-                        param.getShard(), param.getShardRouting(), retryCount);
-                if (AriusObjUtils.isChanged(param.getRack(), oldIndexTemplatePhy.getRack())) {
-                    tips = "模板部署rack变更!请注意模板APP是否可以使用修改后的rack";
-                }
-            }
-
             SpringTool.publish(new PhysicalTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldIndexTemplatePhy, IndexTemplatePhy.class),
                     indexTemplatePhyService.getTemplateById(oldIndexTemplatePhy.getId()),
                     indexTemplateService.getLogicTemplateWithPhysicalsById(oldIndexTemplatePhy.getLogicId())));
@@ -702,9 +623,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 || (param.getVersion() > 0 && param.getVersion() < oldIndexTemplatePhy.getVersion())) {
             return Result.buildParamIllegal("物理模板版本非法");
         }
-        if (param.getRack() != null && !clusterPhyService.isRacksExists(oldIndexTemplatePhy.getCluster(), param.getRack())) {
-            return Result.buildParamIllegal("物理模板rack非法");
-        }
         if (param.getShard() != null && param.getShard() < MIN_SHARD_NUM) {
             return Result.buildParamIllegal("shard个数非法");
         }
@@ -725,12 +643,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         IndexTemplate logic = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
-        LOGGER.info("class=TemplatePhyManagerImpl||method=upgradeTemplateWithCheck||name={}||rack={}||shard={}||version={}", logic.getName(), param.getRack(),
+        LOGGER.info("class=TemplatePhyManagerImpl||method=upgradeTemplateWithCheck||name={}||shard={}||version={}", logic.getName(),
                 param.getShard(), param.getVersion());
 
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
         updateParam.setId(indexTemplatePhy.getId());
-        updateParam.setRack(param.getRack());
         updateParam.setShard(param.getShard());
         updateParam.setVersion(param.getVersion());
         Result<Void> editResult = editTemplateWithoutCheck(updateParam, operator, retryCount);
@@ -972,7 +889,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (null != mappings || null != param.getSettings()) {
             ret = esTemplateService.syncCreate(settingsMap, param.getCluster(), param.getName(), logic.getExpression(), mappings, 0);
         } else {
-            ret = esTemplateService.syncCreate(param.getCluster(), param.getName(), logic.getExpression(), param.getRack(), param.getShard(), param.getShardRouting(), 0);
+            ret = esTemplateService.syncCreate(param.getCluster(), param.getName(), logic.getExpression(), param.getShard(), param.getShardRouting(), 0);
         }
         if (!ret) {
             throw new ESOperateException("failed to create template!");

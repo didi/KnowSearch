@@ -27,7 +27,9 @@ import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTags;
@@ -742,50 +744,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         //获取逻辑集群已绑定的物理集群信息
-        List<ClusterLogicRackInfo> clusterLogicRackInfos = clusterRegionService.listLogicClusterRacks(clusterLogicId);
-        if (CollectionUtils.isEmpty(clusterLogicRackInfos)) {
-            return canBeAssociatedClustersPhyNamesResult;
-        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        if (null == clusterRegion) { return canBeAssociatedClustersPhyNamesResult;}
 
         //根据已绑定的物理集群的版本进行筛选
-        String hasSelectedPhyClusterName = clusterLogicRackInfos.get(0).getPhyClusterName();
-        return Result.buildSucc(getPhyClusterNameWithSameEsVersion(hasSelectedPhyClusterName, canBeAssociatedClustersPhyNamesResult.getData()));
-    }
-
-    /**
-     * 根据物理集群名称来获取满足设置磁盘存储大小的rack列表
-     *
-     * @param clusterPhyName   物理集群名称
-     * @param templateSize     模板设置的磁盘存储大小
-     * @param clusterLogicName 逻辑集群名称
-     * @return 满足条件的rack列表
-     */
-    @Override
-    @Deprecated
-    public Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhyName, String clusterLogicName, String templateSize) {
-        //将传入的数据大小转化为字节数的单位,获取逻辑集群信息
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
-        if (AriusObjUtils.isNull(clusterLogic)) {
-            return Result.buildFail("对应的逻辑集群不存在");
-        }
-
-        //获取逻辑集群关联到物理集群的region资源信息
-        List<ClusterRegion> logicBindRegions = clusterRegionService.listRegionsByLogicAndPhyCluster(clusterLogic.getId(), clusterPhyName);
-        if (CollectionUtils.isEmpty(logicBindRegions)) {
-            return Result.buildFail("无法获取逻辑集群对应的region信息");
-        }
-
-        Set<String> canCreateTemplateRegionLists = logicBindRegions
-                .stream()
-                .map(ClusterRegion::getRacks)
-                .collect(Collectors.toSet());
-
-        if (CollectionUtils.isEmpty(canCreateTemplateRegionLists)) {
-            return Result.buildFail("没有能设置指定模板数据大小的region");
-        }
-
-        //返回按照磁盘大小倒序输出的序列
-        return Result.buildSucc(canCreateTemplateRegionLists);
+        return Result.buildSucc(getPhyClusterNameWithSameEsVersion(clusterRegion.getPhyClusterName(), canBeAssociatedClustersPhyNamesResult.getData()));
     }
 
     @Override

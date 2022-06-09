@@ -21,12 +21,6 @@ public class ESOperateContant {
     public static final Integer ES_OPERATE_TIMEOUT                  = 30;
 
     /**
-     * rack配置名字
-     */
-    public static final String  TEMPLATE_INDEX_INCLUDE_RACK         = "index.routing.allocation.include.rack";
-    public static final String  INDEX_INCLUDE_RACK                  = "routing.allocation.include.rack";
-
-    /**
      * region 配置
      */
     public static final String TEMPLATE_INDEX_INCLUDE_NODE_NAME = "index.routing.allocation.include._name";
@@ -56,12 +50,6 @@ public class ESOperateContant {
      * 模板默认order
      */
     public static final Long    TEMPLATE_DEFAULT_ORDER              = 10L;
-
-    /**
-     * 节点rack配置名称
-     */
-    public static final String  NODE_STATS_RACK                     = "node.rack";
-    public static final String  RACK                                = "rack";
 
     /**
      * 通用版本role--client
