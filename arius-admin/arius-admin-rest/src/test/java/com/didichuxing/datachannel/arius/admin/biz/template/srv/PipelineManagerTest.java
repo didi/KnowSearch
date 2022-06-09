@@ -28,4 +28,10 @@ public class PipelineManagerTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(result.success());
     }
 
+    @Test
+    public void deletePipelineTest() {
+        Result<Void> result = pipelineManager.deletePipeline(46797);
+        Assertions.assertTrue(result.success());
+    }
+
 }

@@ -124,7 +124,6 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             return Result.buildFail("未开启pipeLine服务");
         }
 
-
         try {
             return Result.build(ESOpTimeoutRetry.esRetryExecute("deletePipeline", RETRY_TIMES,
                     () -> esPipelineDAO.delete(indexTemplatePhy.getCluster(), indexTemplatePhy.getName())));
