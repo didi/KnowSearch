@@ -173,7 +173,7 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
     private List<IndexCatCell> batchFetchIndexBlockInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newArrayList();
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(catCellList,
-            IndexCatCell::getCluster, indexCatCell -> indexCatCell);
+            IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
         if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
             return finalIndexCatCellList;
         }
@@ -222,7 +222,7 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
             if (null == indexConfig) {
                 LOGGER.warn(
                     "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||index={}||errMsg=index config is empty",
-                    indexCatCell.getCluster(), indexCatCell.getIndex());
+                    indexCatCell.getClusterPhy(), indexCatCell.getIndex());
                 continue;
             }
 
@@ -241,7 +241,7 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
                 writeAndReadBlockFromMerge.setV2(null);
                 LOGGER.error(
                     "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||index={}||errMsg={}",
-                    indexCatCell.getCluster(), indexCatCell.getIndex(), e.getMessage(), e);
+                    indexCatCell.getClusterPhy(), indexCatCell.getIndex(), e.getMessage(), e);
             }
 
             indexCatCell.setReadFlag(writeAndReadBlockFromMerge.getV1() != null && writeAndReadBlockFromMerge.getV1());

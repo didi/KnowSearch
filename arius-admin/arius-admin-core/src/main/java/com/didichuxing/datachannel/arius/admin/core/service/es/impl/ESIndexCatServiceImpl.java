@@ -109,9 +109,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         for (IndexCatCellPO indexCatCellPO : indexCatCellPOList) {
             IndexCatCell indexCatCell = new IndexCatCell();
             indexCatCell.setKey(indexCatCellPO.getKey());
-            indexCatCell.setCluster(indexCatCellPO.getCluster());
-            indexCatCell.setResourceId(String.valueOf(indexCatCellPO.getResourceId()));
-            indexCatCell.setAppId(String.valueOf(indexCatCellPO.getAppId()));
+            indexCatCell.setClusterPhy(indexCatCellPO.getCluster());
             indexCatCell.setIndex(indexCatCellPO.getIndex());
             indexCatCell.setStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getStoreSize() ,2));
             indexCatCell.setPriStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getPriStoreSize(), 2));

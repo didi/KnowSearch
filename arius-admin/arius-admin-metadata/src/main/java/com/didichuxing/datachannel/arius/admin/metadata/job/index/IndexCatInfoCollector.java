@@ -9,28 +9,25 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterNodeInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
-import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
@@ -39,6 +36,8 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatI
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author lyn
@@ -68,6 +67,9 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     @Autowired
     private IndexTemplateService indexTemplateService;
+
+    @Autowired
+    private ClusterLogicService clusterLogicService;
 
     //key: cluster@indexName  value: indexName
     private Cache<String, Object> notCollectorIndexNameCache = CacheBuilder.newBuilder()
@@ -154,23 +156,50 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
             return indexCatCellList;
         }
 
-        // 1. 获取物理集群所有逻辑集群
+        // 1. 获取物理集群下所有逻辑集群
         List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(cluster);
         if (CollectionUtils.isEmpty(clusterRegionList)) {
             LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||cluster region empty");
             return indexCatCellList;
         }
-        List<Integer> logicClusterIdList = new ArrayList<>();
+        List<Long> logicClusterIdList = new ArrayList<>();
         for (ClusterRegion clusterRegion : clusterRegionList) {
-            logicClusterIdList.addAll(ListUtils.string2IntList(clusterRegion.getLogicClusterIds()));
+            logicClusterIdList.addAll(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()));
+        }
+        List<ClusterLogic> logicClusterList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList);
+        if (CollectionUtils.isEmpty(logicClusterList)) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||logic cluster empty");
+            return indexCatCellList;
+        }
+        Map<Long, String> logicClusterId2NameMap = ConvertUtil.list2Map(logicClusterList, ClusterLogic::getId, ClusterLogic::getName);
+
+        // 2. 获取逻辑集群下所有逻辑模板
+        List<IndexTemplate> indexTemplateList = indexTemplateService.listByResourceIds(logicClusterIdList);
+        if (CollectionUtils.isEmpty(indexTemplateList)) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||index template empty");
+            return indexCatCellList;
         }
 
-        // 2. 获取逻辑集群下所有模板
-        return null;
+        // 3. 聚合数据，这里有很大性能问题，需要好好测试
+        for (CatIndexResult catIndexResult : catIndexResultList) {
+            for (IndexTemplate indexTemplate : indexTemplateList) {
+                if (IndexNameUtils.indexExpMatch(catIndexResult.getIndex(), indexTemplate.getExpression())) {
+                    IndexCatCell indexCatCell = ConvertUtil.obj2Obj(catIndexResult, IndexCatCell.class);
+                    String logicCluster = logicClusterId2NameMap.get(indexTemplate.getResourceId());
+                    if (null == logicCluster) {
+                        LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||logic cluster null");
+                        break;
+                    }
 
+                    indexCatCell.setClusterLogic(logicCluster);
+                    indexCatCell.setClusterPhy(cluster);
+                    indexCatCellList.add(indexCatCell);
+                    break;
+                }
+            }
+        }
 
-
-
+        return indexCatCellList;
     }
 
     private Map<String, String> buildNode2ClusterLogic(String cluster, List<ClusterNodeInfo> nodes) {

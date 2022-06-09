@@ -13,9 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IndexCatCell {
     private String  key;
-    private String  cluster;
-    private String  resourceId;
-    private String  appId;
+    private String  clusterPhy;
+    private String  clusterLogic;
     private String  health;
     private String  status;
     private String  index;
