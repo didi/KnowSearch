@@ -29,10 +29,10 @@ public interface PipelineManager {
 
     /**
      * 删除
-     * @param logicTemplateId 逻辑模板id
+     * @param templatePhyId 物理模板id
      * @return true/false
      */
-    Boolean deletePipeline(Integer logicTemplateId);
+    Result<Void> deletePipeline(Integer templatePhyId);
 
     /**
      * 修改逻辑字段

@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
@@ -35,6 +34,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESP
 public class PipelineManagerImpl extends BaseTemplateSrvImpl implements PipelineManager {
 
     private static final ILog LOGGER = LogFactory.getLog(PipelineManagerImpl.class);
+    private static final Integer RETRY_TIMES = 3;
 
     @Autowired
     private ESPipelineDAO esPipelineDAO;
@@ -102,8 +102,24 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Boolean deletePipeline(Integer logicTemplateId) {
-        return Boolean.FALSE;
+    public Result<Void> deletePipeline(Integer templatePhyId) {
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+
+        try {
+            return Result.build(ESOpTimeoutRetry.esRetryExecute("deletePipeline", RETRY_TIMES,
+                    () -> esPipelineDAO.delete(indexTemplatePhy.getCluster(), indexTemplatePhy.getName())));
+        } catch (Exception e) {
+            LOGGER.error("class=PipelineManagerImpl||method=deletePipeline||template={}||errMsg={}", indexTemplatePhy.getName(), e.getMessage(), e);
+            return Result.buildFail("delete fail");
+        }
     }
 
     @Override
