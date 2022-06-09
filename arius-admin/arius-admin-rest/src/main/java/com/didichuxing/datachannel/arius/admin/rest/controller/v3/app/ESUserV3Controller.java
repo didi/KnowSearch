@@ -71,7 +71,7 @@ public class ESUserV3Controller {
         return esUserManager.getNoCodeESUser(projectId, operator);
     }
     
-    @GetMapping("{projectId}")
+    @GetMapping("/project/{projectId}")
     @ResponseBody
     @ApiOperation(value = "获取项目下的es user")
     	@ApiImplicitParam(name = "projectId", value = "项目id", dataType = "int", required = true)
