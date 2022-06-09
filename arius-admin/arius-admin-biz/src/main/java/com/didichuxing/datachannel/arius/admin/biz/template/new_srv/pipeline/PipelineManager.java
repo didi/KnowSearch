@@ -47,17 +47,7 @@ public interface PipelineManager {
      * @param oldTemplate 物理模板
      * @return true/false
      */
-    Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
-                                     IndexTemplateWithPhyTemplates logicWithPhysical);
-
-    /**
-     * 调整限流值
-     *
-     * @param indexTemplatePhysicalInfo 名字
-     * @param percent 百分比 [-99, 1000]
-     * @return true/false
-     */
-    Boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysicalInfo, Integer percent);
+    Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate, IndexTemplateWithPhyTemplates logicWithPhysical);
 
     Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
 

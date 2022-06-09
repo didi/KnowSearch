@@ -212,13 +212,9 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysicalInfo, Integer percent) {
-        return Boolean.FALSE;
-    }
-
-    @Override
-    public Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo) {
-        return 0;
+    public Integer getRateLimit(IndexTemplatePhy indexTemplatePhy) {
+        ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
+        return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
     }
 
 
