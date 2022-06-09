@@ -58,13 +58,21 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Result<Void> createPipeline(Integer templatePhyId, Integer logicTemplateId) {
-        if (!isTemplateSrvOpen(logicTemplateId)) {
+    public Result<Void> createPipeline(Integer templatePhyId) {
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+        if (null == indexTemplate) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(indexTemplate.getId())) {
             return Result.buildFail("未开启pipeLine服务");
         }
 
-        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
         Integer rateLimit = getDynamicRateLimit(indexTemplatePhy);
         return doCreatePipeline(indexTemplatePhy, indexTemplate, rateLimit);
     }
@@ -90,7 +98,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             if (esPipelineProcessor == null) {
                 // pipeline processor不存在，创建
                 LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate", indexTemplatePhy.getName());
-                return createPipeline(templatePhyId, logicTemplateId);
+                return createPipeline(templatePhyId);
             }
                 // pipeline processor不一致（有变化），以新元数据创建
             if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
