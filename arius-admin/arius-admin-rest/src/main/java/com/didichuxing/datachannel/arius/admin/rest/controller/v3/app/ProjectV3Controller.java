@@ -33,49 +33,54 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping({ V3 + "/project" })
-@Api(tags = "超级应用获取 (REST)")
+@Api(tags = "应用获取 (REST)")
 public class ProjectV3Controller {
-    @Autowired
-    private RoleTool roleTool;
-    @Autowired
-    private ProjectExtendManager projectExtendManager;
-    
-    @GetMapping
-    @ResponseBody
-    @ApiOperation(value = "获取超级应用id")
-    public Result<Integer> isAdminProject(HttpServletRequest request) {
-        final String operator = HttpRequestUtil.getOperator(request);
-        if (!roleTool.isAdmin(operator)) {
-            return Result.buildFail("当前角色非管理员");
-        }
-        return Result.buildSucc(AuthConstant.SUPER_PROJECT_ID);
-    }
-    
-    @GetMapping("/{id}")
-    @ApiOperation(value = "获取项目详情", notes = "根据项目id获取项目详情")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
-    public com.didiglobal.logi.security.common.Result<ProjectExtendVO> detail(@PathVariable Integer id) {
-        return projectExtendManager.getProjectDetailByProjectId(id);
-    }
-     @PostMapping
-    @ApiOperation(value = "创建项目", notes = "创建项目")
-    public com.didiglobal.logi.security.common.Result<ProjectExtendVO> create(@RequestBody ProjectExtendSaveDTO saveDTO,
-                                                                        HttpServletRequest request) {
-       return projectExtendManager.createProject(saveDTO, HttpRequestUtil.getOperator(request));
-    }
-    
-    @DeleteMapping("/{id}")
-    @ApiOperation(value = "删除项目", notes = "根据项目id删除项目")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
-    public Result<Void> delete(@PathVariable Integer id, HttpServletRequest request) {
-        
-        return projectExtendManager.deleteProjectByProjectId(id, HttpRequestUtil.getOperator(request));
-    }
-    
-    @GetMapping("/list")
-    @ApiOperation(value = "获取所有项目简要信息", notes = "获取全部项目简要信息（只返回id、项目名）")
-    public com.didiglobal.logi.security.common.Result<List<ProjectBriefExtendVO>> list() {
-        return projectExtendManager.getProjectBriefList();
-    }
-
+	@Autowired
+	private RoleTool             roleTool;
+	@Autowired
+	private ProjectExtendManager projectExtendManager;
+	
+	@GetMapping("/admin-project")
+	@ResponseBody
+	@ApiOperation(value = "获取超级应用id")
+	public Result<Integer> isAdminProject(HttpServletRequest request) {
+		final String operator = HttpRequestUtil.getOperator(request);
+		if (!roleTool.isAdmin(operator)) {
+			return Result.buildFail("当前角色非管理员");
+		}
+		return Result.buildSucc(AuthConstant.SUPER_PROJECT_ID);
+	}
+	
+	@GetMapping("/{id}")
+	@ResponseBody
+	@ApiOperation(value = "获取项目详情", notes = "根据项目id获取项目详情")
+	@ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
+	public com.didiglobal.logi.security.common.Result<ProjectExtendVO> detail(@PathVariable Integer id) {
+		return projectExtendManager.getProjectDetailByProjectId(id);
+	}
+	
+	@PostMapping
+	@ResponseBody
+	@ApiOperation(value = "创建项目", notes = "创建项目")
+	public com.didiglobal.logi.security.common.Result<ProjectExtendVO> create(@RequestBody ProjectExtendSaveDTO saveDTO,
+	                                                                          HttpServletRequest request) {
+		return projectExtendManager.createProject(saveDTO, HttpRequestUtil.getOperator(request));
+	}
+	
+	@DeleteMapping("/{id}")
+	@ResponseBody
+	@ApiOperation(value = "删除项目", notes = "根据项目id删除项目")
+	@ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
+	public Result<Void> delete(@PathVariable Integer id, HttpServletRequest request) {
+		
+		return projectExtendManager.deleteProjectByProjectId(id, HttpRequestUtil.getOperator(request));
+	}
+	
+	@GetMapping("/list")
+	@ResponseBody
+	@ApiOperation(value = "获取所有项目简要信息", notes = "获取全部项目简要信息（只返回id、项目名）")
+	public com.didiglobal.logi.security.common.Result<List<ProjectBriefExtendVO>> list() {
+		return projectExtendManager.getProjectBriefList();
+	}
+	
 }
