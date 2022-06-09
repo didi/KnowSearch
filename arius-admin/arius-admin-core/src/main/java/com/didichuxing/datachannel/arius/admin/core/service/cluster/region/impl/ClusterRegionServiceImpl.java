@@ -402,6 +402,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
         List<Long> uniqueClusterLogicIds = clusterLogicIds.stream().distinct().collect(Collectors.toList());
         List<ClusterRegion> clusterRegionList = Lists.newArrayList();
+        // 这里一次性把clusterLogic id列表放置在 sql in, 使用范围来查询，是为了模糊匹配单个clusterLogicId;
         for (Long clusterLogicId : uniqueClusterLogicIds) {
             ClusterRegionPO logicCluster = clusterRegionDAO.getByLogicClusterId(clusterLogicId);
             clusterRegionList.add(ConvertUtil.obj2Obj(logicCluster, ClusterRegion.class));

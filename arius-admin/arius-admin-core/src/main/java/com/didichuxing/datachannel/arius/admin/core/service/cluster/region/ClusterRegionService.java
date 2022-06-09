@@ -143,7 +143,7 @@ public interface ClusterRegionService {
     boolean isExistByRegionId(Integer regionId);
 
     /**
-     * 根据逻辑集群Id列表获取region列表
+     * 根据逻辑集群Id列表获取region列表, 注意这里入参列表元素不能太大，否则有性能影响
      * @param clusterLogicIdList  逻辑集群id列表
      * @return
      */
