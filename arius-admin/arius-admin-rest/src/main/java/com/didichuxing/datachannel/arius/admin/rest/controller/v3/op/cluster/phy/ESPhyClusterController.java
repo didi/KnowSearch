@@ -65,7 +65,6 @@ public class ESPhyClusterController {
     @GetMapping("/{clusterId}/roles")
     @ResponseBody
     @ApiOperation(value = "根据物理集群ID获取全部角色列表", notes = "")
-    @Deprecated
     public Result<List<ESClusterRoleVO>> roleList(@PathVariable Integer clusterId) {
         List<ClusterRoleInfo> clusterRoleInfos = clusterPhyManager.listClusterRolesByClusterId(clusterId);
 
