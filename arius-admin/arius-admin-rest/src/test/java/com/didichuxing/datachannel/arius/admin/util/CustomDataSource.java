@@ -26,7 +26,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInf
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
@@ -524,25 +523,8 @@ public class CustomDataSource {
         return list;
     }
     
-    public static List<ClusterLogicRackInfo> getClusterLogicRackInfoList() {
-        List<ClusterLogicRackInfo> list = new ArrayList<>();
-        for (int i = 1; i <= SIZE; i++) {
-            ClusterLogicRackInfo po = CustomDataSource.clusterLogicRackInfo();
-            po.setId((long) i);
-            list.add(po);
-        }
-        return list;
-    }
-    
-    private static ClusterLogicRackInfo clusterLogicRackInfo() {
-        final ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
-        clusterLogicRackInfo.setLogicClusterIds("1");
-        clusterLogicRackInfo.setRegionId(1L);
-        clusterLogicRackInfo.setPhyClusterName(PHY_CLUSTER_NAME);
-        clusterLogicRackInfo.setRack("2");
-        return clusterLogicRackInfo;
-    
-    }
+ 
+  
     
     public static List<ProjectClusterLogicAuth> getAppClusterLogicAuthList() {
         List<ProjectClusterLogicAuth> list = new ArrayList<>();
