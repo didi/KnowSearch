@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
  */
 public class ESPhyClusterTemplateSrvTest extends BasePhyClusterInfoTest {
 
+    /**
+     * 测试获取集群当前已经开启的索引服务
+     */
+    @Test
+    public void listTest() throws IOException {
+    }
 
     /**
      * 测试获取集群可供选择的索引服务

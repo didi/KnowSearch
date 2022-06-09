@@ -1,23 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.v3.op.cluster.logic;
 
-import com.didichuxing.datachannel.arius.admin.base.BaseLogicClusterInfoTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ClusterLogicTemplateSrvControllerMethod;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import com.didichuxing.datachannel.arius.admin.base.BaseLogicClusterInfoTest;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ClusterLogicTemplateSrvControllerMethod;
+
 /**
  * @author cjm
  */
 public class ClusterLogicTemplateSrvTest extends BaseLogicClusterInfoTest {
-
     @Test
     public void listSelectTest() throws IOException {
         Result<List<ESClusterTemplateSrvVO>> result = ClusterLogicTemplateSrvControllerMethod.listSelect(logicClusterInfo.getLogicClusterId());

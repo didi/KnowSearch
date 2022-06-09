@@ -21,7 +21,7 @@ public class BasePhyClusterRegionInfoTest extends BasePhyClusterInfoTest {
     public static void preHandle() throws IOException {
         BasePhyClusterInfoTest.preHandle();
         // create region
-//        phyClusterRegionInfo = PhyClusterRegionInfoSource.createRegion(phyClusterInfo.getPhyClusterName());
+        /*phyClusterRegionInfo = PhyClusterRegionInfoSource.createRegion(phyClusterInfo.getPhyClusterName());*/
     }
 
     /**
