@@ -66,8 +66,39 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Boolean syncPipeline(Integer logicTemplateId) {
-        return Boolean.TRUE;
+    public Result<Void> syncPipeline(Integer templatePhyId, Integer logicTemplateId) {
+        if (!isTemplateSrvOpen(logicTemplateId)) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
+        if (null == indexTemplate) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+
+        try {
+            ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
+            if (esPipelineProcessor == null) {
+                // pipeline processor不存在，创建
+                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate", indexTemplatePhy.getName());
+                return createPipeline(templatePhyId, logicTemplateId);
+            }
+                // pipeline processor不一致（有变化），以新元数据创建
+            if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
+                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline", indexTemplatePhy.getName());
+                return doCreatePipeline(indexTemplatePhy, indexTemplate, esPipelineProcessor.getThrottle().getInteger("rate_limit"));
+            }
+
+            return Result.buildSucc();
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||errMsg={}", indexTemplatePhy.getCluster(), e.getMessage(), e);
+            return Result.buildFail("sync fail");
+        }
     }
 
     @Override
@@ -111,8 +142,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         }
 
         if (StringUtils.isNotEmpty(logicTemplate.getDateFieldFormat()) &&
-                (isDateFieldFormatChange(logicTemplate.getDateFieldFormat(), logicTemplate.getDateField(),
-                        esPipelineProcessor.getIndexTemplate().getString(DATE_FIELD_FORMAT)))) {
+                (isDateFieldFormatChange(logicTemplate.getDateFieldFormat(), esPipelineProcessor.getIndexTemplate().getString(DATE_FIELD_FORMAT)))) {
             LOGGER.info(
                     "class=PipelineManagerImpl||method=notConsistent||msg=dateFieldFormat change||pipelineId={}||dateFieldFormat={}||dateField={}"
                             + "||pipelineDateFieldFormat={}",
@@ -175,11 +205,9 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
      * 校验日期字段格式是否改变
      *
      * @param dateFieldFormat         日期字段格式
-     * @param dateField               日期格式
-     * @param pipelineDateFieldFormat pipeline日期字段格式
      * @return
      */
-    private boolean isDateFieldFormatChange(String dateFieldFormat, String dateField, String pipelineDateFieldFormat) {
+    private boolean isDateFieldFormatChange(String dateFieldFormat, String pipelineDateFieldFormat) {
         if (MS_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
             dateFieldFormat = MS_TIME_FIELD_ES_FORMAT;
         } else if (SECOND_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
@@ -218,6 +246,13 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
 
+    /**
+     * 根据逻辑模板更新物理模板的pipeline 配置
+     * @param indexTemplatePhy
+     * @param logicTemplate
+     * @param rateLimit
+     * @return
+     */
     private Result<Void> doCreatePipeline(IndexTemplatePhy indexTemplatePhy, IndexTemplate logicTemplate, Integer rateLimit) {
         String cluster = indexTemplatePhy.getCluster();
         String pipelineId = indexTemplatePhy.getName();
