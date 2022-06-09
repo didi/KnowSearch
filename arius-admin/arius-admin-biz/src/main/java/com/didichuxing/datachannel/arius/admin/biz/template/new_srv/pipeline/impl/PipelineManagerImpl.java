@@ -222,7 +222,12 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Integer getRateLimit(IndexTemplatePhy indexTemplatePhy) {
+    public Integer getRateLimit(Integer templatePhyId) {
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return null;
+        }
+
         ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
         return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
     }

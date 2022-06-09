@@ -48,6 +48,11 @@ public interface PipelineManager {
      */
     Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate);
 
-    Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
+    /**
+     * 获取指定物理模板限流值
+     * @param templatePhyId
+     * @return
+     */
+    Integer getRateLimit(Integer templatePhyId);
 
 }

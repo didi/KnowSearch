@@ -62,5 +62,10 @@ public class PipelineManagerTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(result.success());
     }
 
+    @Test
+    public void getRateLimitTest() {
+        Integer rateLimit = pipelineManager.getRateLimit(46797);
+        Assertions.assertNotNull(rateLimit);
+    }
 
 }
