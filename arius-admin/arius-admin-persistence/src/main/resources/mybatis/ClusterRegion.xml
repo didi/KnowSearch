@@ -42,22 +42,11 @@
         select
         <include refid="Base_Column_List"/>
         from es_cluster_region
-        where logic_cluster_id = #{logicClusterId} and delete_flag = 0
-    </select>
-
-    <select id="listByLogicClusterIds" parameterType="list" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from es_cluster_region
-        where delete_flag = 0 and
-        <choose>
-            <when test="logicClusterIds != null and logicClusterIds.size() > 0">
-                logic_cluster_id in <foreach collection="logicClusterIds" item="value" open="(" separator="," close=")">#{value}</foreach>
-            </when>
-            <otherwise>
-                1=0
-            </otherwise>
-        </choose>
+        where delete_flag = 0
+        and (logic_cluster_id = #{logicClusterId}
+        or logic_cluster_id like CONCAT(#{logicClusterId},',%')
+        or logic_cluster_id like CONCAT('%,', #{logicClusterId})
+        or logic_cluster_id like CONCAT('%,', #{logicClusterId},',%'))
     </select>
 
     <select id="getByPhyClusterName" parameterType="string" resultMap="BaseResultMap">
