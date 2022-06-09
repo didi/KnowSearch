@@ -43,9 +43,10 @@ public interface PipelineManager {
     /**
      * 修改物理字段
      * @param oldTemplate 物理模板
+     * @param newTemplate 新物理模板
      * @return true/false
      */
-    Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate, IndexTemplateWithPhyTemplates logicWithPhysical);
+    Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate);
 
     Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
 

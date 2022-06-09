@@ -193,8 +193,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
-                                            IndexTemplateWithPhyTemplates logicWithPhysical) {
+    public Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate) {
         if (!isTemplateSrvOpen(oldTemplate.getLogicId())) {
             return Result.buildFail("未开启pipeLine服务");
         }
@@ -203,15 +202,19 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             return Result.buildSucc();
         }
 
-        Integer rateLimit = getDynamicRateLimit(newTemplate);
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(oldTemplate.getLogicId());
+        if (null == indexTemplate) {
+            return Result.buildFail("逻辑模板不存在");
+        }
 
+        Integer rateLimit = getDynamicRateLimit(newTemplate);
         try {
             return Result.build(ESOpTimeoutRetry.esRetryExecute("editFromTemplatePhysical", RETRY_TIMES,
-                    () -> esPipelineDAO.save(newTemplate.getCluster(), newTemplate.getName(), logicWithPhysical.getDateField(),
-                            logicWithPhysical.getDateFieldFormat(), logicWithPhysical.getDateFormat(),
-                            logicWithPhysical.getHotTime() > 0 ? logicWithPhysical.getHotTime() : logicWithPhysical.getExpireTime(),
-                            rateLimit, newTemplate.getVersion(), logicWithPhysical.getIdField(),
-                            logicWithPhysical.getRoutingField())));
+                    () -> esPipelineDAO.save(newTemplate.getCluster(), newTemplate.getName(), indexTemplate.getDateField(),
+                            indexTemplate.getDateFieldFormat(), indexTemplate.getDateFormat(),
+                            indexTemplate.getHotTime() > 0 ? indexTemplate.getHotTime() : indexTemplate.getExpireTime(),
+                            rateLimit, newTemplate.getVersion(), indexTemplate.getIdField(),
+                            indexTemplate.getRoutingField())));
         } catch (Exception e) {
             LOGGER.error("class=PipelineManagerImpl||method=editFromTemplatePhysical||template={}||errMsg={}", oldTemplate.getName(), e.getMessage(), e);
             return Result.buildFail("edit fail");
