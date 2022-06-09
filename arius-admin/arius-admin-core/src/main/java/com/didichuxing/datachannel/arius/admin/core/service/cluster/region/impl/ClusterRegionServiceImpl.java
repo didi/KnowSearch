@@ -398,11 +398,16 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
     @Override
     public List<ClusterRegion> listClusterRegionsByLogicIds(List<Long> clusterLogicIds) {
-        if (CollectionUtils.isEmpty(clusterLogicIds)) {
-            return Lists.newArrayList();
-        }
+        if (CollectionUtils.isEmpty(clusterLogicIds)) { return Lists.newArrayList();}
+
         List<Long> uniqueClusterLogicIds = clusterLogicIds.stream().distinct().collect(Collectors.toList());
-        return ConvertUtil.list2List(clusterRegionDAO.listByLogicClusterIds(uniqueClusterLogicIds), ClusterRegion.class);
+        List<ClusterRegion> clusterRegionList = Lists.newArrayList();
+        for (Long clusterLogicId : uniqueClusterLogicIds) {
+            ClusterRegionPO logicCluster = clusterRegionDAO.getByLogicClusterId(clusterLogicId);
+            clusterRegionList.add(ConvertUtil.obj2Obj(logicCluster, ClusterRegion.class));
+        }
+
+        return clusterRegionList;
     }
 
     /***************************************** private method ****************************************************/
