@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,9 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 class UserMetricsConfigServiceTest {
     
     @Mock
@@ -40,7 +37,7 @@ class UserMetricsConfigServiceTest {
                 Arrays.asList("cpuUsage", "cpuLoad1M"));
         
         // Configure UserMetricsConfigDAO.selectOne(...).
-        lenient().when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+        when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
         
         // Run the test
         param.setUserName(null);
@@ -48,13 +45,13 @@ class UserMetricsConfigServiceTest {
         param.setUserName("admin");
         metricsConfigPO.setMetricInfo(null);
         
-        lenient().when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+        when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
         Assertions.assertFalse(CollectionUtils.isNotEmpty(userMetricsConfigService.getMetricsByTypeAndUserName(param)));
         metricsConfigPO.setMetricInfo("[]");
-        lenient().when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+       when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
         Assertions.assertFalse(CollectionUtils.isNotEmpty(userMetricsConfigService.getMetricsByTypeAndUserName(param)));
         metricsConfigPO.setMetricInfo(CustomDataSource.metricInfo());
-        lenient().when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+        when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
         Assertions.assertTrue(CollectionUtils.isNotEmpty(userMetricsConfigService.getMetricsByTypeAndUserName(param)));
     }
     
@@ -65,7 +62,7 @@ class UserMetricsConfigServiceTest {
         
         // Configure UserMetricsConfigDAO.selectOne(...).
         
-        lenient().when(userMetricsConfigDAO.insert(any())).thenReturn(1);
+        when(userMetricsConfigDAO.insert(any())).thenReturn(1);
       
         final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("admin", "cluster", "overview",
                 Arrays.asList("cpuUsage", "cpuLoad1M"));
@@ -84,11 +81,11 @@ class UserMetricsConfigServiceTest {
         assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).getMessage()).isEqualTo(
                 Result.buildFail("指标看板未知").getMessage());
         param.setSecondMetricsType("overview");
-        lenient().when(userMetricsConfigDAO.selectOne(any())).thenReturn(null);
+        when(userMetricsConfigDAO.selectOne(any())).thenReturn(null);
         
         assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).success()).isTrue();
-        lenient().when(userMetricsConfigDAO.selectOne(any())).thenReturn(metricsConfigPO);
-          lenient().when(
+        when(userMetricsConfigDAO.selectOne(any())).thenReturn(metricsConfigPO);
+         when(
                         userMetricsConfigDAO.update(any(), any()))
                 .thenReturn(1);
           assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).success()).isTrue();

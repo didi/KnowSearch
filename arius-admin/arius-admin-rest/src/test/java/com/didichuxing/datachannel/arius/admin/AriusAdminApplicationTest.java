@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin;
 
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import org.junit.jupiter.api.Assertions;

@@ -339,8 +339,6 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Mockito.when(indexTemplatePhyService.getValidTemplatesByLogicId(Mockito.anyInt()))
                 .thenReturn(indexTemplatePhyList);
         Mockito.when(clusterLogicService.listAllClusterLogics()).thenReturn(CustomDataSource.getClusterLogicList());
-        Mockito.when(clusterRegionService.listAllLogicClusterRacks())
-                .thenReturn(CustomDataSource.getClusterLogicRackInfoList());
         Mockito.when(logicTemplateAuthService.getTemplateAuthsByProjectId(Mockito.anyInt()))
                 .thenReturn(CustomDataSource.getAppTemplateAuthList());
         List<IndexTemplateWithPhyTemplates> ret = indexTemplateService.getAllLogicTemplateWithPhysicals();
@@ -474,8 +472,6 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Mockito.when(indexTemplatePhyService.getValidTemplatesByLogicId(Mockito.anyInt()))
                 .thenReturn(indexTemplatePhyList);
         Mockito.when(clusterLogicService.listAllClusterLogics()).thenReturn(CustomDataSource.getClusterLogicList());
-        Mockito.when(clusterRegionService.listAllLogicClusterRacks())
-                .thenReturn(CustomDataSource.getClusterLogicRackInfoList());
         Mockito.when(logicTemplateAuthService.getTemplateAuthsByProjectId(Mockito.anyInt()))
                 .thenReturn(CustomDataSource.getAppTemplateAuthList());
         Assertions.assertFalse(CollectionUtils.isNotEmpty(indexTemplateService.getTemplatesByHasAuthCluster(1)));
@@ -500,8 +496,6 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Mockito.when(indexTemplatePhyService.getValidTemplatesByLogicId(Mockito.anyInt()))
                 .thenReturn(indexTemplatePhyList);
         Mockito.when(clusterLogicService.listAllClusterLogics()).thenReturn(CustomDataSource.getClusterLogicList());
-        Mockito.when(clusterRegionService.listAllLogicClusterRacks())
-                .thenReturn(CustomDataSource.getClusterLogicRackInfoList());
         Mockito.when(logicTemplateAuthService.getTemplateAuthsByProjectId(Mockito.anyInt()))
                 .thenReturn(CustomDataSource.getAppTemplateAuthList());
         Assertions.assertFalse(CollectionUtils.isEmpty(indexTemplateService.getHasAuthTemplatesInLogicCluster(1, 1L)));
