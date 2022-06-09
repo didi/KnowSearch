@@ -1,22 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.security.resource;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.constant.ProjectResourceEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.dto.resource.ResourceDTO;
 import com.didiglobal.logi.security.extend.ResourceExtend;
 import com.didiglobal.logi.security.properties.LogiSecurityProper;
-import com.didiglobal.logi.security.service.ResourceTypeService;
-import com.google.common.collect.Lists;
-import java.util.Collections;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,14 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ResourceExtendManager implements ResourceExtend {
-	@Autowired
-	private ResourceTypeService  resourceTypeService;
-	@Autowired
-	private ESUserService        esUserService;
-	@Autowired
-	private ClusterLogicService  clusterLogicService;
-	@Autowired
-	private IndexTemplateService indexTemplateService;
+
 	
 	/**
 	 * 获取资源信息List，资源id指的是该资源所在服务对该资源的标识
@@ -64,37 +45,8 @@ public class ResourceExtendManager implements ResourceExtend {
 	 */
 	@Override
 	public List<ResourceDTO> getResourceList(Integer projectId, Integer resourceTypeId) {
-		//校验项目是否绑定es user
-		List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
-		List<ResourceDTO> resourceDTOS = Lists.newArrayList();
-		if (CollectionUtils.isNotEmpty(esUsers)) {
-			ResourceDTO resourceDTO = new ResourceDTO();
-			resourceDTO.setResourceName((ProjectResourceEnum.PROJECT_ES_USER.getDesc()));
-			resourceDTO.setProjectId(projectId);
-			resourceDTO.setResourceTypeId(ProjectResourceEnum.PROJECT_ES_USER.getCode());
-			resourceDTOS.add(resourceDTO);
-		}
-		//校验项目绑定逻辑集群
-		List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-		if (CollectionUtils.isNotEmpty(clusterLogics)) {
-			ResourceDTO resourceDTO = new ResourceDTO();
-			resourceDTO.setResourceName((ProjectResourceEnum.PROJECT_CLUSTER_LOGIC.getDesc()));
-			resourceDTO.setProjectId(projectId);
-			resourceDTO.setResourceTypeId(ProjectResourceEnum.PROJECT_CLUSTER_LOGIC.getCode());
-			resourceDTOS.add(resourceDTO);
-		}
-		
-		//校验项目绑定模板服务
-		List<IndexTemplate> indexTemplates = indexTemplateService.getProjectLogicTemplatesByProjectId(projectId);
-		if (CollectionUtils.isNotEmpty(indexTemplates)) {
-			ResourceDTO resourceDTO = new ResourceDTO();
-			resourceDTO.setResourceName((ProjectResourceEnum.PROJECT_INDEX_TEMPLATE.getDesc()));
-			resourceDTO.setProjectId(projectId);
-			resourceDTO.setResourceTypeId(ProjectResourceEnum.PROJECT_CLUSTER_LOGIC.getCode());
-			resourceDTOS.add(resourceDTO);
-		}
-		
-		return resourceDTOS;
+	
+		return null;
 	}
 	
 	/**
@@ -106,6 +58,6 @@ public class ResourceExtendManager implements ResourceExtend {
 	 */
 	@Override
 	public int getResourceCnt(Integer projectId, Integer resourceTypeId) {
-		return resourceTypeService.getAllResourceTypeList().size();
+		return 0;
 	}
 }

@@ -2,8 +2,10 @@ package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER_UI;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL_USER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_PROJECT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART_SSO;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,17 +62,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
         if (hasNoInterceptor(request)) {
             return true;
-            
-        }
-        //排除admin中接口中含有/logi-security 之后，对于原本属于admin中的接口进行header设置，保证项目视角到存在header
-        if (!request.getServletPath().startsWith(API_PREFIX)) {
-            final Integer projectId = HttpRequestUtil.getProjectId(request);
-            if (Objects.isNull(projectId) ) {
-                 throw new OperateForbiddenException(String.format("请携带项目信息,HTTP_HEADER_KEY:%s",
-                         HttpRequestUtil.PROJECT_ID));
-            } if (!projectService.checkProjectExist(projectId)) {
-                throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
-            }
+
         }
 
         String classRequestMappingValue = null;
@@ -126,6 +119,17 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
         if (request.getServletPath().contains(SWAGGER)) {
             return Boolean.TRUE;
+        }
+        //排除admin中接口中含有/logi-security 或者/v3/project 之后，对于原本属于admin中的接口进行header设置，保证项目视角到存在header
+        if (!(request.getServletPath().startsWith(API_PREFIX) || request.getServletPath().startsWith(V3_PROJECT))) {
+            final Integer projectId = HttpRequestUtil.getProjectId(request);
+            if (Objects.isNull(projectId)) {
+                throw new OperateForbiddenException(
+                        String.format("请携带项目信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.PROJECT_ID));
+            }
+            if (!projectService.checkProjectExist(projectId)) {
+                throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
+            }
         }
 
         boolean interceptorSwitch = ariusConfigInfoService.booleanSetting(ARIUS_COMMON_GROUP,

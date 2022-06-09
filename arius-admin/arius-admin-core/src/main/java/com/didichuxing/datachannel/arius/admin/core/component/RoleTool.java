@@ -44,7 +44,7 @@ public class RoleTool {
      *
      * @return {@code List<UserBriefVO>}
      */
-    public List<UserBriefVO> adminList() {
+    public List<UserBriefVO> getAdminList() {
         final RoleVO roleVO = roleService.getRoleDetailByRoleId(AuthConstant.ADMIN_ROLE_ID);
         return Optional.ofNullable(roleVO).map(RoleVO::getAuthedUsers)
                 

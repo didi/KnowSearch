@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,15 +43,7 @@ public class ProjectConfigV3Controller {
 		return projectConfigManager.initProjectConfig(configDTO, userName);
 	}
 	
-	@PostMapping
-	@ResponseBody
-	@ApiOperation(value = "新增项目配置", notes = "")
-	public Result<Void> init(HttpServletRequest request, @RequestBody ProjectConfigDTO configDTO) {
-		//获取操作用户
-		String userName = HttpRequestUtil.getOperator(request);
-		return projectConfigManager.initProjectConfig(configDTO, userName);
-	}
-	
+
 	@GetMapping("/{projectId}")
 	@ResponseBody
 	@ApiOperation(value = "获取项目配置", notes = "")

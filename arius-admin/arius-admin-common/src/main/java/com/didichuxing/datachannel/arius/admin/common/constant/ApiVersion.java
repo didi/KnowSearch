@@ -35,6 +35,8 @@ public class ApiVersion {
     public static final String V3_NORMAL_USER    = "/v3/normal/user";
 
     public static final String HEALTH            = "/health";
+    public static final String V3_PROJECT            = "/v3/project";
 
     public static final String SWAGGER           = "swagger";
+    public static final String SWAGGER_UI           = "swagger-ui.html";
 }

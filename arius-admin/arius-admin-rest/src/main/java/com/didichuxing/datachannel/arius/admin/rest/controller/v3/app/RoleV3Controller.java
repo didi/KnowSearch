@@ -29,10 +29,10 @@ public class RoleV3Controller {
     @Autowired
     private RoleTool roleTool;
     
-    @GetMapping("is-admin")
+    @GetMapping("/is-admin")
     @ResponseBody
     @ApiOperation(value = "判断是否为管理员")
-    public Result<Void> isSuper(HttpServletRequest request) {
+    public Result<Void> isAdmin(HttpServletRequest request) {
         final String operator = HttpRequestUtil.getOperator(request);
         if (!roleTool.isAdmin(operator)) {
             return Result.buildFail("当前角色非管理员");
@@ -43,7 +43,7 @@ public class RoleV3Controller {
     @GetMapping()
     @ResponseBody
     @ApiOperation(value = "获取管理员列表")
-    public Result<List<UserBriefVO>> superList(HttpServletRequest request) {
-        return Result.buildSucc(roleTool.adminList());
+    public Result<List<UserBriefVO>> getAdminList(HttpServletRequest request) {
+        return Result.buildSucc(roleTool.getAdminList());
     }
 }
