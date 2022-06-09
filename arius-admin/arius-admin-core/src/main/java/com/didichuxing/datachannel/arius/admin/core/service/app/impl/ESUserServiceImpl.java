@@ -217,9 +217,9 @@ public class ESUserServiceImpl implements ESUserService {
         if (AriusObjUtils.isNull(appDTO)) {
             return Result.buildParamIllegal("应用信息为空");
         }
-         if (appDTO.getMemo() == null) {
-            return Result.buildParamIllegal("备注为空");
-        }
+        // if (appDTO.getMemo() == null) {
+        //    return Result.buildParamIllegal("备注为空");
+        //}
        if (Objects.isNull(appDTO.getProjectId())) {
             return Result.buildParamIllegal("项目id为空");
         }

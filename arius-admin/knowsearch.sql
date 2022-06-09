@@ -72,7 +72,7 @@ create table project_template_info
     project_id      int(10)      default -1                not null comment '项目id',
     template        varchar(100) default ''                not null comment '模板名称, 不能关联模板id 模板会跨集群迁移，id会变',
     type            int(10)      default -1                not null comment '项目id的权限 1 读写 2 读 -1 未知',
-    responsible_ids varchar(100) default ''                not null comment '责任人id列表',
+    responsible_ids varchar(100) default ''                not null comment '责任人id列表 下线',
     status          int(10)      default 1                 not null comment '状态 1有效 0无效',
     create_time     timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
     update_time     timestamp    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间'
@@ -103,7 +103,7 @@ create table project_logi_cluster_auth
     project_id       int(10)         default -1                not null comment '用户账号',
     logic_cluster_id bigint unsigned default 0                 not null comment '逻辑集群id',
     type             int(10)         default -1                not null comment '权限类型，0-超管，1-配置管理，2-访问，-1-无权限',
-    responsible      varchar(100)    default ''                not null comment '责任人id列表',
+    responsible      varchar(100)    default ''                not null comment '责任人id列表 下线',
     status           int(10)         default 1                 not null comment '状态 1有效 0无效',
     create_time      timestamp       default CURRENT_TIMESTAMP not null comment '创建时间',
     update_time      timestamp       default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间'
@@ -199,7 +199,7 @@ create table project_arius_config
     project_id              bigint(10) unsigned auto_increment comment 'project id'
         primary key,
     analyze_response_enable tinyint       default 1                 not null comment '响应结果解析开关 默认是0：关闭，1：开启',
-    is_source_separated     tinyint       default 0                 not null comment '是否是索引处分分离的 0 不是 1 是',
+    is_source_separated     tinyint       default 0                 not null comment '是否是索引存储分离的 0 不是 1 是',
     aggr_analyze_enable     tinyint       default 1                 not null comment '1 生效 0 不生效',
     dsl_analyze_enable      tinyint(2)    default 1                 not null comment '1为生效dsl分析查询限流值，0不生效dsl分析查询限流值',
     slow_query_times        int(10)       default 100               not null comment '慢查询耗时',

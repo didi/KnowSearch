@@ -37,6 +37,12 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+/**
+ * 项目返回数据操作的后置处理过程
+ *
+ * @author shizeying
+ * @date 2022/06/09
+ */
 @ControllerAdvice
 public class ProjectProcess implements ResponseBodyAdvice {
     
@@ -70,7 +76,7 @@ public class ProjectProcess implements ResponseBodyAdvice {
         String requestPath = ((ServletServerHttpRequest) request).getServletRequest().getServletPath();
         
         if (requestPath.startsWith(API_PREFIX)) {
-            //如何是创建项目的接口会一并创建projectid
+            //如果是创建项目的接口会一并创建projectid
             if (requestPath.endsWith(PROJECT_END) && HttpMethod.POST.equals(request.getMethod())
                 && body instanceof com.didiglobal.logi.security.common.Result) {
                 Object data = ((Result<?>) body).getData();
