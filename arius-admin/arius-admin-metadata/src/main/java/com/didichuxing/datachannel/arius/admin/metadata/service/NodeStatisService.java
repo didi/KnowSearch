@@ -1,21 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyNodeTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ESClusterTaskDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.NodeRackStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 
@@ -26,13 +20,6 @@ public class NodeStatisService {
 
     @Autowired
     private AriusStatsClusterTaskInfoESDAO ariusStatsClusterTaskInfoESDAO;
-
-    public Result<List<RackMetaMetric>> getRackStatis(String cluster, Collection<String> racks) {
-        List<String> rackList = new ArrayList<>(racks);
-        List<NodeRackStatisPO> nodeRackStatisPOS = ariusStatsNodeInfoEsDao.getRackStatis(cluster, rackList);
-
-        return Result.buildSucc(ConvertUtil.list2List(nodeRackStatisPOS, RackMetaMetric.class));
-    }
 
     public List<VariousLineChartMetrics> getAggClusterPhyNodeMetrics(MetricsClusterPhyNodeDTO param) {
         Integer topNu             =   param.getTopNu();

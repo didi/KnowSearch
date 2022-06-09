@@ -1,18 +1,30 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.CREATE_DCDR;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE_DCDR;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.SWITCH_MASTER_SLAVE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DCDR;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.limit.TemplateLimitManager;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -22,6 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.DCDRMast
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalDCDRDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRSingleTemplateMasterSlaveSwitchDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTasksDetail;
@@ -32,6 +45,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
@@ -41,11 +55,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -57,30 +67,10 @@ import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 索引DCDR服务实现
@@ -151,19 +141,16 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     private ESTemplateService     esTemplateService;
 
     @Autowired
-    private TemplateLimitManager  templateLimitManager;
-
-    @Autowired
     private TemplateLabelService  templateLabelService;
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager         opTaskManager;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService  indexTemplateService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService  operateRecordService;
     private static final  int TRY_LOCK_TIMEOUT=5;
     private static final  int ONE_STEP=1;
     private static final int TRY_TIMES_THREE=3;
@@ -1028,8 +1015,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
                     stopMasterIndexResult = Result.buildFail(TASK_IS_CANCEL);
                 }else {
                     // 停止索引写入
-                    stopMasterIndexResult = templateLimitManager.blockIndexWrite(masterTemplate.getCluster(),
-                            matchIndexNames, true);
+                    boolean suc = esIndexService.syncBatchBlockIndexWrite(masterTemplate.getCluster(),
+                            matchIndexNames, true, 3);
+                    stopMasterIndexResult = Result.build(suc);
                 }
 
                 Result<List<String>> step1Result = buildStepMsg(DCDRSwithTypeEnum.SMOOTH.getCode(), stopMasterIndexResult,
@@ -1050,7 +1038,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
                     if (!esIndexService.ensureDateSame(masterTemplate.getCluster(), slaveTemplate.getCluster(), matchIndexNames)) {
                         checkDataResult = Result.buildFail("校验索引数据不一致!");
                         // 恢复实时数据写入
-                        Result<Void> sttartMasterIndexResult = templateLimitManager.blockIndexWrite(masterTemplate.getCluster(), matchIndexNames, false);
+                        
+                        Result<Void> sttartMasterIndexResult = Result.build(esIndexService.syncBatchBlockIndexWrite(masterTemplate.getCluster(), matchIndexNames, false, 3));
                         if (sttartMasterIndexResult.failed()) {
                             checkDataResult.setMessage(checkDataResult.getMessage() + "|" + sttartMasterIndexResult.getMessage());
                         }
@@ -1136,7 +1125,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
                 if(hasCancelSubTask(workTaskId, switchDetail.getTemplateId())) {
                     stopSlaveIndexResult = Result.buildFail(TASK_IS_CANCEL);
                 }else {
-                    stopSlaveIndexResult = templateLimitManager.blockIndexWrite(slaveTemplate.getCluster(), matchIndexNames, true);
+                    stopSlaveIndexResult = Result.build(esIndexService.syncBatchBlockIndexWrite(masterTemplate.getCluster(), matchIndexNames, true, 3));
                 }
                 Result<List<String>> step6Result = buildStepMsg(DCDRSwithTypeEnum.SMOOTH.getCode(), stopSlaveIndexResult,
                         templateId, expectMasterPhysicalId, DCDR_SWITCH_STEP_6, operator, switchDetail.getTaskProgressList());
@@ -1170,10 +1159,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
                 if(hasCancelSubTask(workTaskId, switchDetail.getTemplateId())) {
                     startIndexResult = Result.buildFail(TASK_IS_CANCEL);
                 }else {
-                    Result<Void> startMasterIndexResult = templateLimitManager.blockIndexWrite(masterTemplate.getCluster(),
-                            matchIndexNames, false);
-                    Result<Void> startSlaveIndexResult = templateLimitManager.blockIndexWrite(slaveTemplate.getCluster(),
-                            matchIndexNames, false);
+                    Result<Void> startMasterIndexResult = Result.build(esIndexService.syncBatchBlockIndexWrite(masterTemplate.getCluster(),
+                            matchIndexNames, false, 3));
+                    
+                    Result<Void> startSlaveIndexResult = Result.build(esIndexService.syncBatchBlockIndexWrite(slaveTemplate.getCluster(),
+                            matchIndexNames, false, 3));
 
                     if (startMasterIndexResult.failed() || startSlaveIndexResult.failed()) {
                         startIndexResult = Result.buildFail(startMasterIndexResult.getMessage() + "|" + startSlaveIndexResult.getMessage());

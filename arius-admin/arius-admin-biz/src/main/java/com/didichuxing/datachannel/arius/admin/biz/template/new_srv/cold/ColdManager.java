@@ -22,12 +22,4 @@ public interface ColdManager {
      * @return
      */
     int fetchClusterDefaultHotDay(String phyCluster);
-
-    /**
-     * 修改热数据的rack
-     * @param physicalId 物理模板id
-     * @param tgtRack 目标rack
-     * @return true/false
-     */
-    boolean updateHotIndexRack(Long physicalId, String tgtRack);
 }

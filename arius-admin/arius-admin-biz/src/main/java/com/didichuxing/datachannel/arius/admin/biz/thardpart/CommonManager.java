@@ -1,50 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.biz.thardpart;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ThirdpartAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdPartTemplateLogicWithMasterTemplateResourceVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ThirdpartTemplateVO;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
 public interface CommonManager {
-
-    /**
-     * 保存操作记录接口
-     * @param param
-     * @return
-     */
-    Result<Void> addOperateRecord(OperateRecordDTO param);
-
-    /**
-     * 获取逻辑集群列表
-     * @return
-     */
-    Result<List<ThirdPartLogicClusterVO>> listLogicCluster();
-
-    /**
-     * 获取逻辑集群列表(带上逻辑集群对应的rack信息)
-     * @return
-     */
-    Result<List<ThirdPartLogicClusterVO>> listLogicClusterWithRack();
-
-    /**
-     * 根据物理集群名称获取rack匹配到的逻辑集群
-     * @param cluster
-     * @param rack
-     * @return
-     */
-    Result<ThirdPartLogicClusterVO> queryLogicCluster(String cluster, String rack);
-
     /**
      * 获取app列表,包含APP全部元信息
      * @return
@@ -92,13 +63,6 @@ public interface CommonManager {
      * @return
      */
     Result<List<ThirdPartTemplateLogicWithMasterTemplateResourceVO>> listLogicWithMasterTemplateAndResource();
-
-    /**
-     * 获取所有逻辑模板接口
-     * @param template
-     * @return
-     */
-    Result<List<ThirdpartTemplateLogicVO>> listLogicByName(String template);
 
     /**
      * 获取所有物理模板接口

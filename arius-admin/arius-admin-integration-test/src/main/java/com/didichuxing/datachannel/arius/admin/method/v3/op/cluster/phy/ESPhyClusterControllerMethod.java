@@ -2,6 +2,9 @@ package com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.didichuxing.datachannel.arius.admin.AriusClient;
@@ -13,8 +16,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * @author cjm
@@ -90,16 +91,6 @@ public class ESPhyClusterControllerMethod {
 
     public static Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType, String clusterName) throws IOException {
         String path = String.format("%s/%d/%s/version/list", PHY_CLUSTER, clusterLogicType, clusterName);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<String>>>(){});
-    }
-
-    public static Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId) throws IOException {
-        String path = String.format("%s/%d/bind/version/list", PHY_CLUSTER, clusterLogicId);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<String>>>(){});
-    }
-
-    public static Result<List<String>> getValidRacksListByDiskSize(String clusterPhy, String clusterLogic, String templateSize) throws IOException {
-        String path = String.format("%s/%s/%s/%s/bindRack", PHY_CLUSTER, clusterPhy, clusterLogic, templateSize);
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<String>>>(){});
     }
 }

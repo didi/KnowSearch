@@ -103,6 +103,13 @@ public interface ClusterLogicManager {
 
 
     /**
+     * 获取指定逻辑集群datanode的规格接口
+     * @param clusterId
+     * @return
+     */
+    Result<Set<ESClusterNodeSepcVO>> getLogicClusterDataNodeSpec(Long clusterId);
+
+    /**
      * 获取当前集群支持的套餐列表
      * @return
      */
@@ -119,7 +126,8 @@ public interface ClusterLogicManager {
 
     /**
      * 获取逻辑集群分派的物理集群列表
-     * @param logicClusterId
+     *
+     * @param logicClusterId 逻辑集群ID
      * @return
      */
     List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
@@ -230,6 +238,7 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator, Integer appId);
+
 
     /**
      * 逻辑集群下的节点信息分页查询

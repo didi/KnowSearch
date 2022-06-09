@@ -49,9 +49,6 @@ public class ESClusterRoleHostDTO extends BaseDTO {
     @ApiModelProperty("状态（1 在线    2 离线   3 故障）")
     private Integer status;
 
-    @ApiModelProperty("节点rack信息")
-    private String  rack;
-
     @ApiModelProperty("节点set信息")
     private String  nodeSet;
 

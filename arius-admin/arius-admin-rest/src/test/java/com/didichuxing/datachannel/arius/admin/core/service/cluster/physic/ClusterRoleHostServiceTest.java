@@ -98,15 +98,6 @@ public class ClusterRoleHostServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void getIndicesCountTest() {
-        int count = 1;
-        ESClusterRoleHostDTO esClusterRoleHostDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        Mockito.when(esClusterNodeDAO.getIndicesCount(Mockito.anyString(), Mockito.anyString())).thenReturn(count);
-        Assertions.assertEquals(count, clusterRoleHostService
-                .getIndicesCount(esClusterRoleHostDTO.getCluster(), esClusterRoleHostDTO.getRack()));
-    }
-
-    @Test
     public void listOnlineNodeTest() {
         ESClusterRoleHostDTO esClusterRoleHostDTO1 = CustomDataSource.esRoleClusterHostDTOFactory();
         esClusterRoleHostDTO1.setStatus(ESClusterNodeStatusEnum.ONLINE.getCode());
@@ -220,18 +211,6 @@ public class ClusterRoleHostServiceTest extends AriusAdminApplicationTest {
 
         List<ClusterRoleHost> masterNodeList = clusterRoleHostService.listAllNodeByRole(ESClusterNodeRoleEnum.MASTER_NODE.getCode());
         Assertions.assertFalse(masterNodeList.isEmpty());
-    }
-
-    @Test
-    public void listRacksNodesTest() {
-        ESClusterRoleHostDTO esClusterRoleHostDTO = CustomDataSource.esRoleClusterHostDTOFactory();
-        Assertions.assertTrue(clusterRoleHostService.listRacksNodes(null, null).isEmpty());
-        ClusterRoleHost clusterRoleHost = ConvertUtil.obj2Obj(esClusterRoleHostDTO, ClusterRoleHost.class);
-        Long id = clusterRoleHostService.save(clusterRoleHost).getData();
-        Assertions.assertTrue(clusterRoleHostService
-                .listRacksNodes(clusterRoleHost.getCluster(), clusterRoleHost.getRack())
-                .stream()
-                .anyMatch(esRoleClusterHost1 -> esRoleClusterHost1.getId().equals(id)));
     }
 
     @Test

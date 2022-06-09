@@ -1,5 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.source;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -11,19 +20,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterReg
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalOrderControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.phy.ESPhyClusterRegionControllerMethod;
-import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalOrderControllerMethod;
-import lombok.Data;
-import org.junit.jupiter.api.Assertions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import lombok.Data;
 
 /**
  * @author cjm
@@ -109,8 +111,7 @@ public class PhyClusterInfoSource {
         }
         if(regionId == null) {
             // 如果没有 region，则新增
-            PhyClusterRegionInfoSource.PhyClusterRegionInfo phyClusterRegionInfo =
-                    PhyClusterRegionInfoSource.createRegion(phyClusterName);
+            PhyClusterRegionInfoSource.PhyClusterRegionInfo phyClusterRegionInfo = new PhyClusterRegionInfoSource.PhyClusterRegionInfo();
             regionId = phyClusterRegionInfo.getRegionId();
         }
         Assertions.assertNotNull(regionId);
@@ -121,7 +122,6 @@ public class PhyClusterInfoSource {
         ClusterRegionDTO clusterRegionDTO = new ClusterRegionDTO();
         clusterRegionDTO.setPhyClusterName(phyClusterName);
         clusterRegionDTO.setId(regionId);
-        clusterRegionDTO.setRacks("*");
         clusterRegionDTOs.add(clusterRegionDTO);
 
         Map<String, Object> contentObj = new HashMap<>();
