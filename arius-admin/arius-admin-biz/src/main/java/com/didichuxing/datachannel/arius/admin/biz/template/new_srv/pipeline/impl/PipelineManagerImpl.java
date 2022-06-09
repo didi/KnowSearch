@@ -186,9 +186,29 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
+    public Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
                                             IndexTemplateWithPhyTemplates logicWithPhysical) {
-        return Boolean.FALSE;
+        if (!isTemplateSrvOpen(oldTemplate.getLogicId())) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+        if (!AriusObjUtils.isChanged(newTemplate.getVersion(), oldTemplate.getVersion())) {
+            return Result.buildSucc();
+        }
+
+        Integer rateLimit = getDynamicRateLimit(newTemplate);
+
+        try {
+            return Result.build(ESOpTimeoutRetry.esRetryExecute("editFromTemplatePhysical", RETRY_TIMES,
+                    () -> esPipelineDAO.save(newTemplate.getCluster(), newTemplate.getName(), logicWithPhysical.getDateField(),
+                            logicWithPhysical.getDateFieldFormat(), logicWithPhysical.getDateFormat(),
+                            logicWithPhysical.getHotTime() > 0 ? logicWithPhysical.getHotTime() : logicWithPhysical.getExpireTime(),
+                            rateLimit, newTemplate.getVersion(), logicWithPhysical.getIdField(),
+                            logicWithPhysical.getRoutingField())));
+        } catch (Exception e) {
+            LOGGER.error("class=PipelineManagerImpl||method=editFromTemplatePhysical||template={}||errMsg={}", oldTemplate.getName(), e.getMessage(), e);
+            return Result.buildFail("edit fail");
+        }
     }
 
     @Override

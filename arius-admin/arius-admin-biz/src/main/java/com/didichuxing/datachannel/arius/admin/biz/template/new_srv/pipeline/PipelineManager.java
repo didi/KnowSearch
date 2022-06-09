@@ -47,7 +47,7 @@ public interface PipelineManager {
      * @param oldTemplate 物理模板
      * @return true/false
      */
-    Boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
+    Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
                                      IndexTemplateWithPhyTemplates logicWithPhysical);
 
     /**
