@@ -376,4 +376,11 @@ public interface IndexTemplateService {
     Result<List<IndexTemplate>> listByRegionId(Integer regionId);
 
      List<IndexTemplateWithCluster> convert2WithCluster(List<IndexTemplateWithPhyTemplates> indexTemplateWithPhyTemplates);
+
+    /**
+     * 根据逻辑集群id 列表获取逻辑模板列表
+     * @param resourceIds
+     * @return
+     */
+     List<IndexTemplate> listByResourceIds(List<Long> resourceIds);
 }

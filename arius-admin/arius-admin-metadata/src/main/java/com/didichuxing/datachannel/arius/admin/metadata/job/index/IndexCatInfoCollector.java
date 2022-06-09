@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +12,15 @@ import java.util.stream.Collectors;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterNodeInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +46,8 @@ import com.google.common.collect.Lists;
  **/
 @Component
 public class IndexCatInfoCollector extends AbstractMetaDataJob {
-    @Value("${es.update.cluster.name}")
-    private String            metadataClusterName;
 
+    private static final Integer RETRY_TIMES = 3;
     @Autowired
     private ClusterPhyService clusterPhyService;
 
@@ -62,6 +65,9 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     @Autowired
     private ClusterRegionService clusterRegionService;
+
+    @Autowired
+    private IndexTemplateService indexTemplateService;
 
     //key: cluster@indexName  value: indexName
     private Cache<String, Object> notCollectorIndexNameCache = CacheBuilder.newBuilder()
@@ -136,6 +142,35 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
 
         return catIndexCellList;
+    }
+
+    private List<IndexCatCell> getIndexCatInfo(String cluster) {
+        List<IndexCatCell> indexCatCellList = Lists.newArrayList();
+
+        // 0. 获取物理集群所有索引cat 信息
+        List<CatIndexResult> catIndexResultList = esIndexService.syncCatIndex(cluster, RETRY_TIMES);
+        if (CollectionUtils.isEmpty(catIndexResultList)) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||index empty");
+            return indexCatCellList;
+        }
+
+        // 1. 获取物理集群所有逻辑集群
+        List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(cluster);
+        if (CollectionUtils.isEmpty(clusterRegionList)) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||cluster region empty");
+            return indexCatCellList;
+        }
+        List<Integer> logicClusterIdList = new ArrayList<>();
+        for (ClusterRegion clusterRegion : clusterRegionList) {
+            logicClusterIdList.addAll(ListUtils.string2IntList(clusterRegion.getLogicClusterIds()));
+        }
+
+        // 2. 获取逻辑集群下所有模板
+        return null;
+
+
+
+
     }
 
     private Map<String, String> buildNode2ClusterLogic(String cluster, List<ClusterNodeInfo> nodes) {

@@ -29,6 +29,7 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -347,6 +348,13 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         List<IndexTemplateWithPhyTemplates> physicalTemplates = indexTemplateService.getLogicTemplateWithPhysicalsByIds(
                 Sets.newHashSet(1111, 1109, 1107));
         List<IndexTemplateWithCluster> indexTemplateWithClusters = indexTemplateService.convert2WithCluster(physicalTemplates);
+    }
+
+    @Test
+    public void listByResourceIdsTest() {
+        Mockito.when(indexTemplateDAO.listByResourceIds(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplate> indexTemplateList = indexTemplateService.listByResourceIds(Lists.newArrayList(1125L, 1129L, 1141L));
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(indexTemplateList));
     }
 
 }

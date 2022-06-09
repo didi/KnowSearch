@@ -30,6 +30,8 @@ public interface IndexTemplateDAO {
 
     List<IndexTemplatePO> listByIds(@Param("logicIds") List<Integer> logicIds);
 
+    List<IndexTemplatePO> listByResourceIds(@Param("resourceIds") List<Long> resourceIds);
+
     List<IndexTemplatePO> listByDataCenter(String dataCenter);
 
     List<IndexTemplatePO> listByName(String name);
