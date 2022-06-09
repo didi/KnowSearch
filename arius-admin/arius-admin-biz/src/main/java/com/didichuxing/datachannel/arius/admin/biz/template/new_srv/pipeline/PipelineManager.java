@@ -36,10 +36,11 @@ public interface PipelineManager {
 
     /**
      * 修改逻辑字段
-     * @param newTemplate 逻辑模板
+     * @param newTemplate 新逻辑模板
+     * @param oldTemplate 旧逻辑模板
      * @return true/false
      */
-    Boolean editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
+    Result<Void> editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
 
     /**
      * 修改物理字段

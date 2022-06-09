@@ -12,15 +12,19 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
 import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
@@ -123,8 +127,62 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Boolean editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate) {
-        return Boolean.FALSE;
+    public Result<Void> editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate) {
+        if (!isTemplateSrvOpen(oldTemplate.getId())) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+        boolean changed = AriusObjUtils.isChanged(newTemplate.getDateField(), oldTemplate.getDateField())
+                || AriusObjUtils.isChanged(newTemplate.getDateFieldFormat(), oldTemplate.getDateFieldFormat())
+                || AriusObjUtils.isChanged(newTemplate.getDateFormat(), oldTemplate.getDateFormat())
+                || AriusObjUtils.isChanged(newTemplate.getExpireTime(), oldTemplate.getExpireTime())
+                || AriusObjUtils.isChanged(newTemplate.getWriteRateLimit(), oldTemplate.getWriteRateLimit());
+
+        boolean cyclicalRollChanged = oldTemplate.getExpression().endsWith("*")
+                && !newTemplate.getExpression().endsWith("*");
+
+        if (!changed && !cyclicalRollChanged) {
+            LOGGER.info("class=PipelineManagerImpl||method=editFromTemplateLogic||msg=no changed||pipelineId={}", oldTemplate.getName());
+            return Result.buildSucc();
+        }
+
+        String dateField = newTemplate.getDateField();
+        String dateFieldFormat = newTemplate.getDateFieldFormat();
+        String dateFormat = newTemplate.getDateFormat();
+
+        Integer expireDay = newTemplate.getExpireTime();
+        if (newTemplate.getHotTime() != null && newTemplate.getHotTime() > 0) {
+            expireDay = newTemplate.getHotTime();
+        } else if (oldTemplate.getHotTime() != null && oldTemplate.getHotTime() > 0) {
+            expireDay = oldTemplate.getHotTime();
+        }
+
+        if (cyclicalRollChanged) {
+            dateField = "";
+            dateFieldFormat = "";
+            dateFormat = "";
+            expireDay = -1;
+        }
+
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByLogicId(oldTemplate.getId());
+        if (CollectionUtils.isEmpty(templatePhysicals)) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        for (IndexTemplatePhy physical : templatePhysicals) {
+            Integer rateLimit   = getDynamicRateLimit(physical);
+            try {
+                if (!esPipelineDAO.save(physical.getCluster(), physical.getName(),
+                        dateField, dateFieldFormat, dateFormat, expireDay, rateLimit,
+                        physical.getVersion(), newTemplate.getIdField(), newTemplate.getRoutingField())) {
+                    return Result.buildFail("edit fail");
+                }
+            } catch (Exception e) {
+                LOGGER.error("class=PipelineManagerImpl||method=editFromTemplateLogic||template={}||errMsg={}", physical.getName(), e.getMessage(), e);
+                return Result.buildFail("edit fail");
+            }
+        }
+        return Result.buildSucc();
     }
 
     @Override
