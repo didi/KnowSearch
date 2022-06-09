@@ -80,6 +80,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -215,10 +216,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (null == result.getData() || 0 == result.getData().size()) {
             return Lists.newArrayList();
         }
-        final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
-        Map<Integer, ProjectBriefVO> id2ProjectMap = ConvertUtil.list2Map(projectBriefList, ProjectBriefVO::getId);
+       
 
-        return result.getData().keySet().stream().map(id2ProjectMap::get).collect( Collectors.toList());
+        return result.getData().keySet().stream().map(projectService::getProjectBriefByProjectId)
+                .filter(Objects::nonNull).collect( Collectors.toList());
     }
 
     /**
