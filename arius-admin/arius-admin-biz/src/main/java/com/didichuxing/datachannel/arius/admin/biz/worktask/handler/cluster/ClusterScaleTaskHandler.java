@@ -39,8 +39,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
  * @author ohushenglin_v
  * @date 2022-05-20
  */
-@Service("clusterIndecreaseTaskHandler")
-public class ClusterIndecreaseTaskHandler extends AbstractClusterTaskHandler {
+@Service("clusterScaleTaskHandler")
+public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
     @Override
     Result<Void> initHostParam(OpTask opTask) {
