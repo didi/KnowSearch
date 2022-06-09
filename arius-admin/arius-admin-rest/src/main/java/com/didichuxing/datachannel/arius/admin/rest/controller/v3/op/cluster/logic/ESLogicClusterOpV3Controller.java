@@ -50,15 +50,15 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "根据AppId获取有权限的逻辑或物理集群信息")
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfo(HttpServletRequest request) {
-        return clusterLogicManager.getAppLogicClusterInfo(HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.getLogicClustersByProjectId(HttpRequestUtils.getAppId(request));
     }
 
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
-    public PaginationResult<ClusterLogicVO> pageGetClusterLogicVOS(HttpServletRequest request,
+    public PaginationResult<ClusterLogicVO> pageGetClusterLogics(HttpServletRequest request,
                                                                      @RequestBody ClusterLogicConditionDTO condition) {
-        return clusterLogicManager.pageGetClusterLogicVOS(condition, HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.pageGetClusterLogics(condition, HttpRequestUtils.getAppId(request));
     }
     
     @GetMapping("/detail/{clusterLogicId}")
@@ -67,7 +67,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiImplicitParam(type = "Long", name = "clusterLogicId", value = "逻辑集群ID", required = true)
     public Result<ClusterLogicVO> detail(HttpServletRequest request, @PathVariable Long clusterLogicId) {
         return Result.buildSucc(
-                clusterLogicManager.getConsoleCluster(clusterLogicId, HttpRequestUtils.getAppId(request)));
+                clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtils.getAppId(request)));
     }
     
     @GetMapping("/{logicClusterId}/{templateSize}/sizeCheck")

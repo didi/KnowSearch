@@ -57,7 +57,7 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
      *
      * @param clusterLogicVO 逻辑集群源信息
      */
-    private void setConsoleClusterBasicInfo(ClusterLogicVO clusterLogicVO) {
+    private void setClusterLogicBasicInfo(ClusterLogicVO clusterLogicVO) {
         if (null == clusterLogicVO) {
             return;
         }
@@ -179,11 +179,11 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
     protected PaginationResult<ClusterLogicVO> buildPageData(ClusterLogicConditionDTO condition, Integer appId) {
         List<ClusterLogic> pagingGetClusterLogicList = clusterLogicService.pagingGetClusterLogicByCondition(condition);
 
-        List<ClusterLogicVO> clusterLogicVOS = clusterLogicManager.batchBuildOpClusterVOs(pagingGetClusterLogicList, appId);
+        List<ClusterLogicVO> clusterLogicVOS = clusterLogicManager.buildClusterLogics(pagingGetClusterLogicList, appId);
 
         //7. 设置逻辑集群基本信息
         for (ClusterLogicVO clusterLogicVO : clusterLogicVOS) {
-            futureUtilForClusterNum.runnableTask(() -> setConsoleClusterBasicInfo(clusterLogicVO));
+            futureUtilForClusterNum.runnableTask(() -> setClusterLogicBasicInfo(clusterLogicVO));
         }
         futureUtilForClusterNum.waitExecute();
         long totalHit = clusterLogicService.fuzzyClusterLogicHitByCondition(condition);

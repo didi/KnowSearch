@@ -25,7 +25,7 @@ public class ESLogicClusterOpV3ControllerMethod {
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<String>>>(){});
     }
 
-    public static Result<List<ClusterLogicVO>> getAppLogicClusterInfo() throws IOException {
+    public static Result<List<ClusterLogicVO>> getLogicClustersByProjectId() throws IOException {
         String path = String.format("%s/list", LOGIC_CLUSTER);
         return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<ClusterLogicVO>>>(){});
     }

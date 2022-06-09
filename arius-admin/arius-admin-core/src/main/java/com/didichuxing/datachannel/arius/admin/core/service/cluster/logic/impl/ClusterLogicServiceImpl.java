@@ -522,19 +522,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public ClusterLogicDiskUsedInfoPO getDiskInfo(Long id) {
-        List<ESClusterRoleHostPO> esClusterRoleHostPOS = new ArrayList<>();
-        List<ClusterRegion> clusterRegions =clusterRegionService.listLogicClusterRegions(id);
-        clusterRegions.forEach(
-                c->{
-                    esClusterRoleHostPOS.addAll(clusterRoleHostDAO.listByRegionId(Math.toIntExact(c.getId())));
-                }
-        );
+        ClusterRegion clusterRegion =clusterRegionService.getRegionByLogicClusterId(id);
+        List<ESClusterRoleHostPO> esClusterRoleHostPOS = clusterRoleHostDAO.listByRegionId(Math.toIntExact(clusterRegion.getId()));
         //节点名称列表
         List<String> nodeList = esClusterRoleHostPOS.stream().map(ESClusterRoleHostPO::getNodeSet).collect(toList());
-        String clusterName =clusterRegions.get(0).getPhyClusterName();
-        Long endTime = System.currentTimeMillis()- 60000L;
-        Long startTime =System.currentTimeMillis()- 120000L;
-        return ariusStatsNodeInfoESDAO.getClusterLogicDiskUsedInfo(clusterName, nodeList, startTime, endTime);
+        String clusterName =clusterRegion.getPhyClusterName();
+        return ariusStatsNodeInfoESDAO.getClusterLogicDiskUsedInfo(clusterName, nodeList);
     }
 
     /***************************************** private method ****************************************************/

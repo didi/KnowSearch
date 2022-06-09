@@ -6,12 +6,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.QuickCommandManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.PendingTaskVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
+import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
@@ -21,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,12 +44,12 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
     protected ESOpClient esOpClient;
     @Autowired
     protected ClusterPhyService clusterPhyService;
-
-
+    @Autowired
+    protected BaseESDAO baseESDAO; 
 
     @Override
     public Result<List<NodeStateVO>> nodeStateAnalysis(String cluster) {
-        DirectResponse directResponse = getDirectResponse(cluster, NODE_STATE.getMethod(), NODE_STATE.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, NODE_STATE.getMethod(), NODE_STATE.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -72,7 +69,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Override
     public Result<List<IndicesDistributionVO>> indicesDistribution(String cluster) {
-        DirectResponse directResponse = getDirectResponse(cluster, INDICES.getMethod(), INDICES.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, INDICES.getMethod(), INDICES.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -105,7 +102,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Override
     public Result<List<ShardDistributionVO>> shardDistribution(String cluster) {
-        DirectResponse directResponse = getDirectResponse(cluster, SHARD.getMethod(), SHARD.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, SHARD.getMethod(), SHARD.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -118,7 +115,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Override
     public Result<List<PendingTaskAnalysisVO>> pendingTaskAnalysis(String cluster) {
-        DirectResponse directResponse = getDirectResponse(cluster, PENDING_TASK.getMethod(), PENDING_TASK.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, PENDING_TASK.getMethod(), PENDING_TASK.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -132,7 +129,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Override
     public Result<List<TaskMissionAnalysisVO>> taskMissionAnalysis(String cluster) {
-        DirectResponse directResponse = getDirectResponse(cluster, TASK_MISSION_ANALYSIS.getMethod(), TASK_MISSION_ANALYSIS.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, TASK_MISSION_ANALYSIS.getMethod(), TASK_MISSION_ANALYSIS.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -146,7 +143,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Override
     public Result<String> hotThreadAnalysis(String cluster) {
-        DirectResponse directResponse = getDirectResponse(cluster, HOT_THREAD.getMethod(), HOT_THREAD.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, HOT_THREAD.getMethod(), HOT_THREAD.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -158,7 +155,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
 
     @Override
     public Result<ShardAssignmentDescriptionVO> shardAssignmentDescription(String cluster) {
-        DirectResponse directResponse = getDirectResponse(cluster, SHARD_ASSIGNMENT.getMethod(), SHARD_ASSIGNMENT.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, SHARD_ASSIGNMENT.getMethod(), SHARD_ASSIGNMENT.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -194,7 +191,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
     @Override
     public Result<Void> abnormalShardAllocationRetry(String cluster) {
         boolean result = false;
-        DirectResponse directResponse = getDirectResponse(cluster, ABNORMAL_SHARD_RETRY.getMethod(), ABNORMAL_SHARD_RETRY.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, ABNORMAL_SHARD_RETRY.getMethod(), ABNORMAL_SHARD_RETRY.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -212,7 +209,7 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
     @Override
     public Result<Void> clearFielddataMemory(String cluster) {
         Integer failed = 0;
-        DirectResponse directResponse = getDirectResponse(cluster, CLEAR_FIELDDATA_MEMORY.getMethod(), CLEAR_FIELDDATA_MEMORY.getUri());
+        DirectResponse directResponse =  baseESDAO.getDirectResponse(cluster, CLEAR_FIELDDATA_MEMORY.getMethod(), CLEAR_FIELDDATA_MEMORY.getUri());
         if (directResponse == null) {
             return Result.buildFail();
         }
@@ -227,20 +224,6 @@ public class QuickCommandManagerImpl implements QuickCommandManager {
             return Result.buildFail();
         }
     }
-
-    @Nullable
-    private DirectResponse getDirectResponse(String cluster, String method, String uri) {
-        //判断物理集群是否存在
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
-        if (null == clusterPhy) {
-            return null;
-        }
-        ESClient client = esOpClient.getESClient(cluster);
-        DirectRequest directRequest = new DirectRequest(method, uri);
-        DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
-        return directResponse;
-    }
-
     private NodeStateVO buildNodeState(JSONObject node) {
         Map nodeMap = new HashMap();
         //获取memoryInBytes

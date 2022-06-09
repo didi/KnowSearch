@@ -44,7 +44,7 @@ public class ConsoleClusterController {
     @ResponseBody
     @ApiOperation(value = "获取平台所有的集群列表【三方接口】",tags = "【三方接口】" )
     public Result<List<ClusterLogicVO>> getDataCenterLogicClusters(@RequestParam(value = "appId",required = false) Integer appId) {
-        return clusterLogicManager.getDataCenterLogicClusters(appId);
+        return clusterLogicManager.getLogicClustersByProjectId(appId);
     }
 
     @GetMapping("/get")

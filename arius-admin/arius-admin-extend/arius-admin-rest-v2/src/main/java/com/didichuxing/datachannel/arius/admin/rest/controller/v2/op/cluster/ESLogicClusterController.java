@@ -45,7 +45,7 @@ public class ESLogicClusterController {
 
     public Result<List<ClusterLogicVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
                                                               HttpServletRequest request) {
-        return Result.buildSucc(clusterLogicManager.getConsoleClusterVOS(param, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterLogicManager.getClusterLogics(param, HttpRequestUtils.getAppId(request)));
     }
 
     @GetMapping("/resource/get")
@@ -56,7 +56,7 @@ public class ESLogicClusterController {
     public Result<ClusterLogicVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
                                                       HttpServletRequest request) {
         return Result.buildSucc(
-            clusterLogicManager.getConsoleClusterVOByIdAndAppId(resourceId, HttpRequestUtils.getAppId(request)));
+            clusterLogicManager.getClusterLogicByIdAndAppId(resourceId, HttpRequestUtils.getAppId(request)));
     }
 
     @DeleteMapping("/resource/del")

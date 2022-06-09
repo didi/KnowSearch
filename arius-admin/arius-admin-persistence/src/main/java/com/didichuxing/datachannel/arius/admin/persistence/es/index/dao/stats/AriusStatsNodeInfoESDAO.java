@@ -266,11 +266,11 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     public List<VariousLineChartMetrics> getTopNNodeAggMetricsWithStep(String clusterPhyName, List<String> metricsTypes,
-                                                               Integer topNu, Integer topMethod, Integer topTimeStep, String aggType,
+                                                               Integer topNu,String topMethod,Integer topTimeStep, String aggType,
                                                                Long startTime, Long endTime) {
         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
         //获取TopN指标节点名称信息
-        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfo(clusterPhyName, metricsTypes, topNu, aggType,
+        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfoWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType,
                 esNodesMaxNum, startTime, endTime);
 
         //构建多个指标TopN数据
@@ -381,6 +381,48 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     /**
+     *  获取最新时间分片中指标数值前TopN的节点名称
+     *  如果延迟后的最新时间分片的指标值为null，最新时间迭代 - 1, 直到不为空, 迭代上限为3次。
+     *
+     * @param clusterPhyName   集群名称
+     * @param metricsTypes     指标类型
+     * @param topNu            topN
+     * @param aggType          聚合类型
+     * @param esNodesMaxNum    聚合节点数量最大值（agg bucket number）
+     * @param startTime        开始时间
+     * @param endTime          结束时间
+     * @return
+     */
+    private List<TopMetrics> getTopNNodeMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu,String topMethod,Integer topTimeStep,
+                                                            String aggType, int esNodesMaxNum, Long startTime, Long endTime) {
+
+        int retryTime = 0;
+        List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
+        do {
+            // 获取有数据的第一个时间点
+            Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
+            //没有数据则提前终止
+            if (null == timePoint) { break;}
+
+            long startTimeForOneInterval    = timePoint-topTimeStep*60*1000;
+            long endTimeForOneInterval      = timePoint;
+
+            String interval = "1m";
+
+            String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
+                    startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
+
+            String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
+                    endTimeForOneInterval);
+
+            variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
+                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu,topMethod), 3);
+        }while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
+
+        return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
+    }
+
+    /**
      * 获取单个指标信息
      *
      * @param clusterPhyName    集群名称
@@ -406,19 +448,19 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
             s -> fetchSingleAggMetrics(s, metrics, nodeName), 3);
     }
 
-    /*
-     * @description: 获取磁盘使用情况
-     * @param: null
-     * @return:
-     * @date: 2022/5/30 14:51
+    /**
+     *  获取磁盘使用情况
+     * @param clusterName
+     * @param nodeList
+     * @return
      */
-    public ClusterLogicDiskUsedInfoPO getClusterLogicDiskUsedInfo(String clusterName, List<String> nodeList,
-                                                              Long startTime, Long endTime) {
-
-
+    public ClusterLogicDiskUsedInfoPO getClusterLogicDiskUsedInfo(String clusterName, List<String> nodeList) {
         String nodeFormat = CommonUtils.strConcat(nodeList);
 
-        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
+        String startTime =  "now - 1m";
+        String endTime  =  "now - 2m";
+
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, System.currentTimeMillis()-120000L, System.currentTimeMillis()-60000L);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_DISK_INFO, clusterName,
                 nodeFormat, startTime, endTime);

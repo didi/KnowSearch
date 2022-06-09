@@ -41,7 +41,7 @@ public class MetricsClusterPhyDTO extends BaseDTO {
     private Integer      topTimeStep;
 
     @ApiModelProperty("Top计算方式:max,avg")
-    private Integer      topMethod;
+    private String      topMethod;
 
 
 }

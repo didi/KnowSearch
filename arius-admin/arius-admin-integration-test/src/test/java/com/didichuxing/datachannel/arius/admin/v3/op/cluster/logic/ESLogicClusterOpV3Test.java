@@ -30,7 +30,7 @@ public class ESLogicClusterOpV3Test extends BaseLogicClusterInfoTest {
 
     @Test
     public void getAppLogicClusterInfoTest() throws IOException {
-        Result<List<ClusterLogicVO>> result = ESLogicClusterOpV3ControllerMethod.getAppLogicClusterInfo();
+        Result<List<ClusterLogicVO>> result = ESLogicClusterOpV3ControllerMethod.getLogicClustersByProjectId();
         Assertions.assertTrue(result.success());
         // 包含刚创建的逻辑集群名
         Set<String> nameSet = result.getData().stream().map(ClusterLogicVO::getName).collect(Collectors.toSet());

@@ -23,7 +23,7 @@ public class NodeStatisService {
 
     public List<VariousLineChartMetrics> getAggClusterPhyNodeMetrics(MetricsClusterPhyNodeDTO param) {
         Integer topNu             =   param.getTopNu();
-        Integer topMethod         =   param.getTopMethod();
+        String topMethod         =   param.getTopMethod();
         Integer topTimeStep       =   param.getTopTimeStep();
         String nodeName           =   param.getNodeName();
         String clusterPhyName     =   param.getClusterPhyName();
