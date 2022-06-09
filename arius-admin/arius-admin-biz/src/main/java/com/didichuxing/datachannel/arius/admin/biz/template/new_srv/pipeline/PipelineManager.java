@@ -20,11 +20,10 @@ public interface PipelineManager {
 
     /**
      * 同步pipeline
-     * @param logicTemplateId 逻辑模板id
      * @param templatePhyId 物理模板id
      * @return
      */
-    Result<Void>syncPipeline(Integer templatePhyId, Integer logicTemplateId);
+    Result<Void>syncPipeline(Integer templatePhyId);
 
     /**
      * 删除

@@ -78,19 +78,19 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Result<Void> syncPipeline(Integer templatePhyId, Integer logicTemplateId) {
-        if (!isTemplateSrvOpen(logicTemplateId)) {
-            return Result.buildFail("未开启pipeLine服务");
-        }
-
+    public Result<Void> syncPipeline(Integer templatePhyId) {
         IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
         if (null == indexTemplatePhy) {
             return Result.buildFail("物理模板不存在");
         }
 
-        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
         if (null == indexTemplate) {
             return Result.buildFail("逻辑模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(indexTemplate.getId())) {
+            return Result.buildFail("未开启pipeLine服务");
         }
 
         try {

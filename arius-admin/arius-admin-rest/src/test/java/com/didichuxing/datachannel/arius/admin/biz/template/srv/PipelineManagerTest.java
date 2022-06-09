@@ -22,4 +22,10 @@ public class PipelineManagerTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(result.success());
     }
 
+    @Test
+    public void syncPipelineTest() {
+        Result<Void> result = pipelineManager.syncPipeline(46797);
+        Assertions.assertTrue(result.success());
+    }
+
 }
