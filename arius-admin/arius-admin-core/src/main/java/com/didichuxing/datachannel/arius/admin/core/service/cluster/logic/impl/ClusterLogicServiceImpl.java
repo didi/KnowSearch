@@ -114,9 +114,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     private ClusterPhyService          clusterPhyService;
 
     @Autowired
-    private ClusterLogicNodeService    clusterLogicNodeService;
-
-    @Autowired
     private ESMachineNormsService      esMachineNormsService;
 
     @Autowired
@@ -130,9 +127,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Autowired
     private ESClusterRoleHostDAO clusterRoleHostDAO ;
-
-    @Autowired
-    private ClusterRoleHostService     clusterRoleHostService;
 
     /**
      * 条件查询逻辑集群

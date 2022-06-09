@@ -7,12 +7,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -37,13 +38,7 @@ public class ESLogicClusterOpV3Controller {
     
     @Autowired
     private ClusterLogicManager clusterLogicManager;
-    
-    @Autowired
-    private ClusterNodeManager clusterNodeManager;
-    
-    @Autowired
-    private ClusterLogicNodeService clusterLogicNodeService;
-    
+
     @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "根据AppId获取逻辑集群下的逻辑集群名称")
@@ -113,9 +108,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "获取指定逻辑集群列表接口")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
-    
     public PaginationResult<ESClusterRoleHostVO>  pageGetESClusterRoleHostVO(@PathVariable Long clusterLogicId,@RequestBody ClusterLogicNodeConditionDTO condition) {
-        List<ESClusterRoleHostVO>  nodes = clusterNodeManager.convertClusterLogicNodes(clusterLogicNodeService.getLogicClusterNodesIncludeNonDataNodes(clusterLogicId));
-        return clusterLogicManager.nodesPage(nodes,condition);
+        return clusterLogicManager.nodesPage(clusterLogicId,condition);
     }
 }

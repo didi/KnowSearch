@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.NodeRackStatisPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
@@ -264,6 +265,24 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         return totalPhySize[0];
     }
 
+    public List<VariousLineChartMetrics> getTopNNodeAggMetricsWithStep(String clusterPhyName, List<String> metricsTypes,
+                                                               Integer topNu, Integer topMethod, Integer topTimeStep, String aggType,
+                                                               Long startTime, Long endTime) {
+        List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
+        //获取TopN指标节点名称信息
+        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfo(clusterPhyName, metricsTypes, topNu, aggType,
+                esNodesMaxNum, startTime, endTime);
+
+        //构建多个指标TopN数据
+        for (TopMetrics topMetrics : topNIndexMetricsList) {
+            futureUtil.runnableTask(() -> buildTopNSingleMetricsForNode(buildMetrics, clusterPhyName, aggType,
+                    esNodesMaxNum, startTime, endTime, topMetrics));
+        }
+        futureUtil.waitExecute();
+
+        return buildMetrics;
+    }
+
     /**
      * 获取多个节点折线图指标信息
      *
@@ -396,7 +415,6 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     public ClusterLogicDiskUsedInfoPO getClusterLogicDiskUsedInfo(String clusterName, List<String> nodeList,
                                                               Long startTime, Long endTime) {
 
-        Map<String/*rackName*/, NodeRackStatisPO> nodeRackStatisMap = Maps.newHashMap();
 
         String nodeFormat = CommonUtils.strConcat(nodeList);
 
@@ -407,7 +425,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         ESQueryResponse esQueryResponse = gatewayClient.performRequest(realIndexName, TYPE, dsl);
 
-        return buildDiskInfoESQueryResponse(clusterName, nodeRackStatisMap, esQueryResponse);
+        return buildDiskInfoESQueryResponse(esQueryResponse);
     }
 
     /**
@@ -476,7 +494,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
       return IndexNameUtils.genCurrentDailyIndexName(indexName);
     }
 
-    private ClusterLogicDiskUsedInfoPO buildDiskInfoESQueryResponse(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESQueryResponse esQueryResponse) {
+    private ClusterLogicDiskUsedInfoPO buildDiskInfoESQueryResponse(ESQueryResponse esQueryResponse) {
         ClusterLogicDiskUsedInfoPO clusterLogicDiskUsedInfoPO = new ClusterLogicDiskUsedInfoPO();
         if (esQueryResponse != null && esQueryResponse.getAggs() != null) {
             Map<String, ESAggr> esAggrMap = esQueryResponse.getAggs().getEsAggrMap();
@@ -497,90 +515,4 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         }
         return clusterLogicDiskUsedInfoPO;
     }
-
-    private void handleESQueryResponse(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESQueryResponse esQueryResponse) {
-        if (esQueryResponse != null && esQueryResponse.getAggs() != null) {
-            Map<String, ESAggr> esAggrMap = esQueryResponse.getAggs().getEsAggrMap();
-            if (esAggrMap != null && esAggrMap.containsKey("minute_bucket")) {
-                ESAggr minuteBucketESAggr = esAggrMap.get("minute_bucket");
-                handleMinuteBucketESAggr(clusterName, nodeRackStatisMap, minuteBucketESAggr);
-            }
-        }
-    }
-
-    private void handleMinuteBucketESAggr(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESAggr minuteBucketESAggr) {
-        if (minuteBucketESAggr != null && CollectionUtils.isNotEmpty(minuteBucketESAggr.getBucketList())) {
-            for (ESBucket esBucket : minuteBucketESAggr.getBucketList()) {
-                ESAggr groupByRackAggr = esBucket.getAggrMap().get("groupByRack");
-
-                if (groupByRackAggr != null && CollectionUtils.isNotEmpty(groupByRackAggr.getBucketList())) {
-                    handleBucketList(clusterName, nodeRackStatisMap, groupByRackAggr);
-                }
-            }
-        }
-    }
-
-    private void handleRackList(String clusterName, List<String> rackList, Map<String, NodeRackStatisPO> nodeRackStatisMap, List<NodeRackStatisPO> nodeRackStatisPOS) {
-        NodeRackStatisPO nodeRackStatisPO;
-        for (String rack : rackList) {
-            if (nodeRackStatisMap.containsKey(rack)) {
-                nodeRackStatisPOS.add(nodeRackStatisMap.get(rack));
-            } else {
-                LOGGER.warn("class=AriusStatsNodeInfoEsDao||method=getRackStatis||msg={} {} set default value",
-                        clusterName, rack);
-                nodeRackStatisPO = new NodeRackStatisPO(clusterName, rack, 0.0, 0.0, 0, 0d, 0);
-
-                nodeRackStatisPOS.add(nodeRackStatisPO);
-            }
-        }
-    }
-
-    private void handleBucketList(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESAggr groupByRackAggr) {
-        for (ESBucket rackBucket : groupByRackAggr.getBucketList()) {
-            ESAggr sumFreeDiskAggr = rackBucket.getAggrMap().get("sumFreeDisk");
-            ESAggr sumTotalDiskAggr = rackBucket.getAggrMap().get("sumTotalDisk");
-            ESAggr avgCpuUsageAggr = rackBucket.getAggrMap().get("avgCpuUsage");
-            ESAggr docsCountAggr = rackBucket.getAggrMap().get("docsCount");
-            String rackName = rackBucket.getUnusedMap().get("key").toString();
-
-            if (!nodeRackStatisMap.containsKey(rackName)) {
-                handleNodeRackStatisPO(clusterName, nodeRackStatisMap, sumFreeDiskAggr, sumTotalDiskAggr, avgCpuUsageAggr, docsCountAggr, rackName);
-            }
-        }
-    }
-
-    private void handleNodeRackStatisPO(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap,
-                                        ESAggr sumFreeDiskAggr, ESAggr sumTotalDiskAggr,
-                                        ESAggr avgCpuUsageAggr, ESAggr docsCountAggr,
-                                        String rackName) {
-        NodeRackStatisPO nodeRackStatisPO;
-        nodeRackStatisPO = new NodeRackStatisPO(clusterName, rackName, 0.0, 0.0, 0, 0d, 0);
-
-        if (sumTotalDiskAggr != null && sumTotalDiskAggr.getUnusedMap().containsKey(VALUE)
-                && sumTotalDiskAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setTotalDiskG(
-                    Double.valueOf(sumTotalDiskAggr.getUnusedMap().get(VALUE).toString())
-                            / ONE_GB);
-        }
-        if (sumFreeDiskAggr != null && sumFreeDiskAggr.getUnusedMap().containsKey(VALUE)
-                && sumFreeDiskAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setDiskFreeG(
-                    Double.valueOf(sumFreeDiskAggr.getUnusedMap().get(VALUE).toString())
-                            / ONE_GB);
-        }
-        if (avgCpuUsageAggr != null && avgCpuUsageAggr.getUnusedMap().containsKey(VALUE)
-                && avgCpuUsageAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setCpuUsedPercent(
-                    Double.valueOf(avgCpuUsageAggr.getUnusedMap().get(VALUE).toString()));
-        }
-        if (docsCountAggr != null && docsCountAggr.getUnusedMap().containsKey(VALUE)
-                && docsCountAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setDocNu(Double
-                    .valueOf(docsCountAggr.getUnusedMap().get(VALUE).toString()).longValue());
-        }
-
-        nodeRackStatisMap.put(rackName, nodeRackStatisPO);
-    }
-
-
 }

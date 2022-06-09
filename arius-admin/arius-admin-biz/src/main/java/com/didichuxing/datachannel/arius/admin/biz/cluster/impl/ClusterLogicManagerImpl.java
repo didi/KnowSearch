@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -85,12 +86,6 @@ import com.google.common.collect.Sets;
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     private static final ILog             LOGGER     = LogFactory.getLog(ClusterLogicManagerImpl.class);
-
-    @Autowired
-    private ClusterRegionService esClusterRackService;
-
-    @Autowired
-    private ClusterLogicNodeService clusterLogicNodeService;
 
     @Autowired
     private ClusterLogicManager           clusterLogicManager;
@@ -383,18 +378,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(result);
     }
 
-    /**
-     * 获取指定逻辑集群datanode的规格接口
-     * @param clusterId
-     * @return
-     */
-    @Override
-    public Result<Set<ESClusterNodeSepcVO>> getLogicClusterDataNodeSpec(Long clusterId) {
-        Set<RoleClusterNodeSepc> roleClusterNodeSepcs = clusterLogicService.getLogicDataNodeSepc(clusterId);
-
-        return Result.buildSucc(ConvertUtil.set2Set(roleClusterNodeSepcs, ESClusterNodeSepcVO.class));
-    }
-
     @Override
     public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
         List<ESMachineNormsPO> esMachineNormsPOS = esMachineNormsService.listMachineNorms();
@@ -622,7 +605,24 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public PaginationResult<ESClusterRoleHostVO> nodesPage(List<ESClusterRoleHostVO> nodes, ClusterLogicNodeConditionDTO condition) {
+    public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator, Integer appId) {
+        ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterId, appId);
+        ClusterLogicTemplateIndexCountVO countVO = new ClusterLogicTemplateIndexCountVO();
+        countVO.setCatIndexResults(detailVO.getCatIndexResults().size());
+        countVO.setTemplateLogicAggregates(detailVO.getTemplateLogicAggregates().size());
+        return Result.buildSucc(countVO);
+    }
+
+    @Override
+    public PaginationResult<ESClusterRoleHostVO> nodesPage(Long clusterLogicId,ClusterLogicNodeConditionDTO condition) {
+        ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<ClusterRoleHost> nodes;
+        if (result.success()){
+            nodes = result.getData();
+        }else {
+            return null;
+        }
         if (StringUtils.isNotBlank(condition.getKeyword())) {
             nodes = nodes.stream().filter(n -> n.getNodeSet().contains(condition.getKeyword())).collect(Collectors.toList());
         }
@@ -635,13 +635,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
         logicClusterDTO.setAppId(appId);
         logicClusterDTO.setType(type);
-        return Result.buildSucc(ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ConsoleClusterVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ClusterLogicVO.class));
     }
 
 /**************************************************** private method ****************************************************/
     /**
      * 构建OP逻辑集群权限
-     * @param consoleClusterVO  逻辑集群
+     * @param clusterLogicVO  逻辑集群
      * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
      *                          ，为null则权限为运维人员权限（管理权限）
      */

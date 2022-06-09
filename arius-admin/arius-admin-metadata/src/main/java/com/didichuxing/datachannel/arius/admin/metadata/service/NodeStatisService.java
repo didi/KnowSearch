@@ -37,7 +37,7 @@ public class NodeStatisService {
                     aggType, startTime, endTime);
         }
 
-        return ariusStatsNodeInfoEsDao.getTopNNodeAggMetrics(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep,
+        return ariusStatsNodeInfoEsDao.getTopNNodeAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep,
             aggType, startTime, endTime);
     }
 

@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
@@ -100,14 +101,6 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<List<ConsoleTemplateVO>> getClusterLogicTemplates(HttpServletRequest request, Long clusterId);
-
-
-    /**
-     * 获取指定逻辑集群datanode的规格接口
-     * @param clusterId
-     * @return
-     */
-    Result<Set<ESClusterNodeSepcVO>> getLogicClusterDataNodeSpec(Long clusterId);
 
     /**
      * 获取当前集群支持的套餐列表
@@ -242,9 +235,8 @@ public interface ClusterLogicManager {
 
     /**
      * 逻辑集群下的节点信息分页查询
-     * @param convertClusterLogicNodes 节点列表
      * @param condition 分页参数
      * @return PaginationResult
      */
-    PaginationResult<ESClusterRoleHostVO> nodesPage(List<ESClusterRoleHostVO> convertClusterLogicNodes, ClusterLogicNodeConditionDTO condition);
+    PaginationResult<ESClusterRoleHostVO> nodesPage(Long clusterLogicId,ClusterLogicNodeConditionDTO condition);
 }
