@@ -14,9 +14,10 @@ public interface PipelineManager {
     /**
      * 创建
      * @param logicTemplateId 逻辑模板id
+     * @param templatePhyId 物理模板id
      * @return true/false
      */
-    Result<Void> createPipeline(Integer logicTemplateId);
+    Result<Void> createPipeline(Integer templatePhyId, Integer logicTemplateId);
 
     /**
      * 同步pipeline

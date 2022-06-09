@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline.Pip
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -23,8 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
 import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_VERSION;
 
@@ -55,14 +54,15 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Result<Void> createPipeline(Integer logicTemplateId) {
+    public Result<Void> createPipeline(Integer templatePhyId, Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("未开启pipeLine服务");
         }
 
         IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
-        Integer rateLimit = getDynamicQuotaRateLimit(indexTemplate);
-        return Result.buildFail();
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        Integer rateLimit = getDynamicRateLimit(indexTemplatePhy);
+        return doCreatePipeline(indexTemplatePhy, indexTemplate, rateLimit);
     }
 
     @Override
@@ -218,7 +218,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
 
-    private boolean doCreatePipeline(IndexTemplatePhy indexTemplatePhy, IndexTemplate logicTemplate, Integer rateLimit) throws ESOperateException {
+    private Result<Void> doCreatePipeline(IndexTemplatePhy indexTemplatePhy, IndexTemplate logicTemplate, Integer rateLimit) {
         String cluster = indexTemplatePhy.getCluster();
         String pipelineId = indexTemplatePhy.getName();
         String dateField = logicTemplate.getDateField();
@@ -228,39 +228,57 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         Integer version = indexTemplatePhy.getVersion();
         String idField = logicTemplate.getIdField();
         String routingField = logicTemplate.getRoutingField();
-        Integer expireDay = logicTemplate.getHotTime() > 0 ? logicTemplate.getHotTime()
-                : logicTemplate.getExpireTime();
+        Integer expireDay = logicTemplate.getHotTime() > 0 ? logicTemplate.getHotTime() : logicTemplate.getExpireTime();
 
-        LOGGER.info("class=PipelineManagerImpl||method=createPipeline||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}||rateLimit={}||version={}", cluster, pipelineId, dateField, dateFormat, expireDay, rateLimit, version);
+        LOGGER.info("class=PipelineManagerImpl||method=doCreatePipeline||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}||rateLimit={}||version={}", cluster, pipelineId, dateField, dateFormat, expireDay, rateLimit, version);
 
         // 保存限流值到DB
         saveRateLimitToDB(indexTemplatePhy, rateLimit);
 
-        return ESOpTimeoutRetry.esRetryExecute("createPipeline", 3, () -> esPipelineDAO.save(cluster, pipelineId,
-                dateField, dateFieldFormat, dateFormat, expireDay, rateLimit, version, idField, routingField));
+        try {
+            return Result.build(ESOpTimeoutRetry.esRetryExecute("doCreatePipeline", 3, () -> esPipelineDAO.save(cluster, pipelineId,
+                    dateField, dateFieldFormat, dateFormat, expireDay, rateLimit, version, idField, routingField)));
+        } catch (Exception e) {
+            LOGGER.error("class=PipelineManagerImpl||method=doCreatePipeline||error", e);
+            return Result.buildFail();
+        }
     }
 
     private void saveRateLimitToDB(IndexTemplatePhy physical, Integer rateLimit) {
         // 保存数据库
-        IndexTemplatePhysicalConfig physicalConfig = JSON.parseObject(physical.getConfig(),
-                IndexTemplatePhysicalConfig.class);
-        if (physicalConfig == null) {
+        IndexTemplatePhysicalConfig physicalConfig = JSON.parseObject(physical.getConfig(), IndexTemplatePhysicalConfig.class);
+        if (null == physicalConfig) {
             physicalConfig = new IndexTemplatePhysicalConfig();
         }
 
         physicalConfig.setPipeLineRateLimit(rateLimit);
-
         IndexTemplatePhyPO physicalPO = new IndexTemplatePhyPO();
         physicalPO.setId(physical.getId());
         physicalPO.setConfig(JSON.toJSONString(physicalConfig));
 
-        // 避免出现死循环风险，这里直接使用DAO
+        // 避免出现死循环风险，这里直接使用DAO，历史原因
         indexTemplatePhyDAO.update(physicalPO);
     }
 
 
-    //todo: 等待yunan quota 开发
-    private Integer getDynamicQuotaRateLimit(IndexTemplate template) {
-        return 0;
+    private Integer getDynamicRateLimit(IndexTemplatePhy indexTemplatePhy) {
+        Integer rateLimit = PIPELINE_RATE_LIMIT_MAX_VALUE;
+
+        if (StringUtils.isNotBlank(indexTemplatePhy.getConfig())) {
+            IndexTemplatePhysicalConfig physicalConfig = JSON.parseObject(indexTemplatePhy.getConfig(), IndexTemplatePhysicalConfig.class);
+            if (null == physicalConfig) {
+                return rateLimit;
+            }
+
+            if (null != physicalConfig.getManualPipeLineRateLimit() && physicalConfig.getManualPipeLineRateLimit() > 0) {
+                rateLimit = physicalConfig.getManualPipeLineRateLimit();
+            }
+
+            if (null != physicalConfig.getPipeLineRateLimit()) {
+                rateLimit = (physicalConfig.getPipeLineRateLimit() < rateLimit) ? physicalConfig.getPipeLineRateLimit() : rateLimit;
+            }
+        }
+
+        return rateLimit;
     }
 }
