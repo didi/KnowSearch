@@ -185,7 +185,7 @@
         select
         <include refid="Base_Column_List"/>
         from index_template_physical_info
-        where region_id = #{regionId} and is_active = 1
+        where region_id = #{regionId} and status > 0
     </select>
 
 </mapper>
