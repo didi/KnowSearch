@@ -100,35 +100,6 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
             clusterLogicVO.setAppName(app.getName());
         }
     }
-
-
-    /**
-     * 对条件匹配后的结果集进行排序
-     *
-     * @param meetConditionClusterLogicList 条件匹配结果集
-     * @param sortTerm                      排序字段
-     * @param orderByDesc                   是否降序排序 true 是 false 否
-     * @see SortTermEnum                   支持的排序字段枚举
-     */
-    private void sort(List<ClusterLogic> meetConditionClusterLogicList, String sortTerm, Boolean orderByDesc) {
-        // TODO: 排序逻辑简化
-        // 使用默认排序
-        if (null == sortTerm) {
-            Collections.sort(meetConditionClusterLogicList);
-            return;
-        }
-
-        meetConditionClusterLogicList.sort((o1, o2) -> {
-            // 可在此添加需要排序的项
-            if (SortTermEnum.LEVEL.getType().equals(sortTerm)) {
-                return orderByDesc ? o2.getLevel().compareTo(o1.getLevel()) : o1.getLevel().compareTo(o2.getLevel());
-            }
-
-            // 返回0 不排序
-            return 0;
-        });
-    }
-
     @Override
     protected Result<Boolean> checkCondition(ClusterLogicConditionDTO clusterLogicConditionDTO, Integer appId) {
 
@@ -179,7 +150,7 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
     protected PaginationResult<ClusterLogicVO> buildPageData(ClusterLogicConditionDTO condition, Integer appId) {
         List<ClusterLogic> pagingGetClusterLogicList = clusterLogicService.pagingGetClusterLogicByCondition(condition);
 
-        List<ClusterLogicVO> clusterLogicVOS = clusterLogicManager.buildClusterLogics(pagingGetClusterLogicList, appId);
+        List<ClusterLogicVO> clusterLogicVOS = clusterLogicManager.buildClusterLogics(pagingGetClusterLogicList);
 
         //7. 设置逻辑集群基本信息
         for (ClusterLogicVO clusterLogicVO : clusterLogicVOS) {

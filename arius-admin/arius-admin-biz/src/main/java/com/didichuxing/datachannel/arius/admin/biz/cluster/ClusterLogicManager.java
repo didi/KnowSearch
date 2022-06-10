@@ -32,20 +32,16 @@ public interface ClusterLogicManager {
     /**
      * 构建运维页面的逻辑集群VO
      * @param logicClusters     逻辑集群列表
-     * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
-     *                          ，为null则权限为运维人员权限（管理权限）
      * @return 逻辑集群VO
      */
-    List<ClusterLogicVO> buildClusterLogics(List<ClusterLogic> logicClusters, Integer appIdForAuthJudge);
+    List<ClusterLogicVO> buildClusterLogics(List<ClusterLogic> logicClusters);
 
     /**
      * 构建运维页面的逻辑集群VO
      * @param clusterLogic    逻辑集群
-     * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
-     *                          ，为null则权限为运维人员权限（管理权限）
      * @return
      */
-    ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic, Integer appIdForAuthJudge);
+    ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic);
 
     /**
      * 获取APP拥有的集群列表

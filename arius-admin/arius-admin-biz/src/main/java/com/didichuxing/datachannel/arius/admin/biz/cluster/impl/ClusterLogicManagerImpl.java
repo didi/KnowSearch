@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +36,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -47,7 +45,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
@@ -155,22 +152,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterLogicManager", 10, 10, 100);
 
+
     /**
      * 构建运维页面的逻辑集群VO
      * @param logicClusters     逻辑集群列表
-     * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
-     *                          ，为null则权限为运维人员权限（管理权限）
      * @return 逻辑集群列表
      */
     @Override
-    public List<ClusterLogicVO> buildClusterLogics(List<ClusterLogic> logicClusters, Integer appIdForAuthJudge) {
+    public List<ClusterLogicVO> buildClusterLogics(List<ClusterLogic> logicClusters) {
         if (CollectionUtils.isEmpty(logicClusters)) {
             return Lists.newArrayList();
         }
 
         List<ClusterLogicVO> clusterLogicVOS = Lists.newArrayList();
         for (ClusterLogic logicCluster : logicClusters) {
-            clusterLogicVOS.add(buildClusterLogic(logicCluster, appIdForAuthJudge));
+            clusterLogicVOS.add(buildClusterLogic(logicCluster));
         }
 
         Collections.sort(clusterLogicVOS);
@@ -180,20 +176,15 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     /**
      * 构建运维页面的逻辑集群VO
      * @param clusterLogic    逻辑集群
-     * @param appIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
-     *                          ，为null则权限为运维人员权限（管理权限）
      * @return
      */
     @Override
-    public ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic, Integer appIdForAuthJudge) {
+    public ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic) {
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
         futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
                 .runnableTask(() -> buildLogicRole(clusterLogicVO, clusterLogic))
-                .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
-//                .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, appIdForAuthJudge))
-//                .runnableTask(() -> buildLogicClusterTemplateSrvs(clusterLogicVO)).waitExecute()
-        ;
+                .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO));
 
         //依赖获取集群状态, 不能使用FutureUtil, 否则抛NPE
         buildClusterNodeInfo(clusterLogicVO);
@@ -285,7 +276,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         return Result.buildSucc(
-                buildClusterLogics(clusterLogicService.getHasAuthClusterLogicsByAppId(appId), appId));
+                buildClusterLogics(clusterLogicService.getHasAuthClusterLogicsByAppId(appId)));
     }
 
     @Override
@@ -310,7 +301,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Result.buildNotExist("集群不存在");
         }
 
-        return Result.buildSucc(buildClusterLogic(clusterLogic, appId));
+        return Result.buildSucc(buildClusterLogic(clusterLogic));
     }
 
     /**
@@ -348,7 +339,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer appId) {
         List<ClusterLogic> clusterLogics = clusterLogicService.listClusterLogics(param);
-        return buildClusterLogics(clusterLogics, appId);
+        return buildClusterLogics(clusterLogics);
     }
 
     @Override
