@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESUser extends BaseEntity implements StringResponsible {
+public class ESUser extends BaseEntity   {
 
     private Integer id;
 

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
@@ -22,18 +21,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateR
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.arius.AriusUserInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
@@ -77,25 +73,10 @@ public class CustomDataSource {
         return Stream.of(JSON.parseObject(json, cls));
     }
 
-    public static Stream<AppPO> appPOSource() {
-        return fromJSON("{\"id\": null,\"name\": \"test\",\"isRoot\": 1,\"verifyCode\": \"1\",\"department\": \"1\",\"departmentId\": \"1\",\"responsible\": \"1\",\"memo\": \"1\",\"queryThreshold\": 100,\"cluster\": \"\",\"searchType\": 0,\"dataCenter\": \"\"}", AppPO.class);
-    }
+    
+  
 
-    public static Stream<AppDTO> appDTOSource() {
-        return fromJSON("{\"id\": null,\"name\": \"test\",\"isRoot\": 1,\"verifyCode\": \"1\",\"department\": \"1\",\"departmentId\": \"1\",\"responsible\": \"1\",\"memo\": \"1\",\"queryThreshold\": 100,\"cluster\": \"\",\"searchType\": 0,\"dataCenter\": \"\"}", AppDTO.class);
-    }
-
-    public static AriusUserInfoDTO ariusUserInfoDTOFactory() {
-        AriusUserInfoDTO ariusUserInfoDTO = new AriusUserInfoDTO();
-        ariusUserInfoDTO.setEmail("");
-        ariusUserInfoDTO.setMobile("");
-        ariusUserInfoDTO.setStatus(1);
-        ariusUserInfoDTO.setDomainAccount("wpk");
-        ariusUserInfoDTO.setName("wpk");
-        ariusUserInfoDTO.setPassword("1");
-        ariusUserInfoDTO.setRole(2);
-        return ariusUserInfoDTO;
-    }
+  
 
     public static AriusConfigInfoDTO ariusConfigInfoDTOFactory() {
         AriusConfigInfoDTO configInfoDTO = new AriusConfigInfoDTO();
@@ -661,21 +642,7 @@ public class CustomDataSource {
         return list;
     }
 
-    public static AriusUserInfoPO getAriusUserInfoPO() {
-        AriusUserInfoPO ariusUserInfoPO = new AriusUserInfoPO();
-        ariusUserInfoPO.setId(1L);
-        return ariusUserInfoPO;
-    }
-
-    public static List<AriusUserInfoPO> getAriusUserInfoPOList() {
-        List<AriusUserInfoPO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++ ) {
-            AriusUserInfoPO po = CustomDataSource.getAriusUserInfoPO();
-            po.setId((long) i);
-            list.add(po);
-        }
-        return list;
-    }
+    
 
     public static AriusConfigInfoPO getAriusConfigInfoPO() {
         AriusConfigInfoPO ariusConfigInfoPO = new AriusConfigInfoPO();

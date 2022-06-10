@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterLogic extends BaseEntity implements StringResponsible, Comparable<ClusterLogic> {
+public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic> {
 
     /**
      * 主键

@@ -12,12 +12,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -155,17 +153,7 @@ public class CustomDataSource {
         return dto;
     }
 
-    public static AriusUserInfoDTO getariusUserInfoDTOFactory() {
-        AriusUserInfoDTO ariusUserInfoDTO = new AriusUserInfoDTO();
-        ariusUserInfoDTO.setEmail("");
-        ariusUserInfoDTO.setMobile("");
-        ariusUserInfoDTO.setStatus(1);
-        ariusUserInfoDTO.setDomainAccount("wpk");
-        ariusUserInfoDTO.setName("wpk");
-        ariusUserInfoDTO.setPassword("hTw1yTAuEifG/HN82zFkHzTK1N2rQ9WCw8QuRgfITAy9aNJ7IccoFQwM11sblbhPmkKHGV+rsbO+rzenRmjwiB7bmyu8kYgNWPZuI5wXYKFeeBPbXXd2NQDM01i9oUDU8KAiN60rY83XSiEm4X2iBVKOgYlq3SEchNkodfsBWts=");
-        ariusUserInfoDTO.setRole(2);
-        return ariusUserInfoDTO;
-    }
+   
 
     public static OpTaskDTO getworkTaskDTO(){
         OpTaskDTO opTaskDTO =new OpTaskDTO();

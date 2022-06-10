@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.app;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectClusterPhyAuth extends BaseEntity implements StringResponsible {
+public class ProjectClusterPhyAuth extends BaseEntity  {
     /**
      * ID
      */
