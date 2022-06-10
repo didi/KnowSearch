@@ -11,8 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
@@ -49,10 +49,10 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @MockBean
-    private AppLogicTemplateAuthService logicTemplateAuthService;
+    private ProjectLogicTemplateAuthService logicTemplateAuthService;
 
     @MockBean
-    private AppClusterLogicAuthService logicClusterAuthService;
+    private ProjectClusterLogicAuthService logicClusterAuthService;
 
     @MockBean
     private IndexTemplatePhyDAO indexTemplatePhyDAO;
@@ -244,8 +244,8 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getAppLogicTemplatesByAppIdTest() {
-        Mockito.when(indexTemplateDAO.listByAppId(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
-        List<IndexTemplate> ret = indexTemplateService.getAppLogicTemplatesByAppId(1);
+        Mockito.when(indexTemplateDAO.listByProjectId(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplate> ret = indexTemplateService.getProjectLogicTemplatesByProjectId(1);
         Assertions.assertFalse(ret.isEmpty());
     }
 

@@ -65,10 +65,7 @@ class ESUserManagerTest {
     @InjectMocks
     private ESUserManagerImpl    esUserManager;
     
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
-    }
+ 
     
     @Test
     void testListESUsers() {
