@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
-import com.alibaba.fastjson.JSONArray;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.QuickCommandManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyQuickCommandManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
@@ -30,69 +27,69 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 public class ESPhyClusterQuickCommandController {
     
     @Autowired
-    private QuickCommandManager quickCommandManager;
+    private ClusterPhyQuickCommandManager clusterPhyQuickCommandManager;
     
     @PutMapping("/{cluster}/node-state-analysis")
     @ResponseBody
     @ApiOperation(value = "node_state分析")
     public Result<List<NodeStateVO>> nodeStateAnalysis(@PathVariable String cluster) {
-        return quickCommandManager.nodeStateAnalysis(cluster);
+        return clusterPhyQuickCommandManager.nodeStateAnalysis(cluster);
     }
 
     @PutMapping("/{cluster}/indices-distribution")
     @ResponseBody
     @ApiOperation(value = "indices分布")
     public Result<List<IndicesDistributionVO>> indicesDistribution(@PathVariable String cluster) {
-        return quickCommandManager.indicesDistribution(cluster);
+        return clusterPhyQuickCommandManager.indicesDistribution(cluster);
     }
 
     @PutMapping("/{cluster}/shard-distribution")
     @ResponseBody
     @ApiOperation(value = "shard分布")
     public Result<List<ShardDistributionVO>> shardDistribution(@PathVariable String cluster) {
-        return quickCommandManager.shardDistribution(cluster);
+        return clusterPhyQuickCommandManager.shardDistribution(cluster);
     }
 
     @PutMapping("/{cluster}/pending-task-analysis")
     @ResponseBody
     @ApiOperation(value = "pending task分析")
     public Result<List<PendingTaskAnalysisVO>> pendingTaskAnalysis(@PathVariable String cluster) {
-        return quickCommandManager.pendingTaskAnalysis(cluster);
+        return clusterPhyQuickCommandManager.pendingTaskAnalysis(cluster);
     }
 
     @PutMapping("/{cluster}/task-mission-analysis")
     @ResponseBody
     @ApiOperation(value = "task任务分析")
     public Result<List<TaskMissionAnalysisVO>> taskMissionAnalysis(@PathVariable String cluster) {
-        return quickCommandManager.taskMissionAnalysis(cluster);
+        return clusterPhyQuickCommandManager.taskMissionAnalysis(cluster);
     }
 
     @PutMapping("/{cluster}/hot-thread-analysis")
     @ResponseBody
     @ApiOperation(value = "热点线程分析")
     public Result<String> hotThreadAnalysis(@PathVariable String cluster) {
-        return quickCommandManager.hotThreadAnalysis(cluster);
+        return clusterPhyQuickCommandManager.hotThreadAnalysis(cluster);
     }
 
     @PutMapping("/{cluster}/shard-assignment-description")
     @ResponseBody
     @ApiOperation(value = "shard分配说明")
     public Result<ShardAssignmentDescriptionVO> shardAssignmentDescription(@PathVariable String cluster) {
-        return quickCommandManager.shardAssignmentDescription(cluster);
+        return clusterPhyQuickCommandManager.shardAssignmentDescription(cluster);
     }
 
     @PutMapping("/{cluster}/abnormal-shard-allocation-retry")
     @ResponseBody
     @ApiOperation(value = "异常shard分配重试")
     public Result<Void> abnormalShardAllocationRetry(@PathVariable String cluster) {
-        return quickCommandManager.abnormalShardAllocationRetry(cluster);
+        return clusterPhyQuickCommandManager.abnormalShardAllocationRetry(cluster);
     }
 
-    @PutMapping("/{cluster}/clear-fielddata-memory")
+    @PutMapping("/{cluster}/clear-field-data-memory")
     @ResponseBody
-    @ApiOperation(value = "清除fielddata内存")
-    public Result<Void> clearFielddataMemory(@PathVariable String cluster) {
-        return quickCommandManager.clearFielddataMemory(cluster);
+    @ApiOperation(value = "清除fieldData内存")
+    public Result<Void> clearFieldDataMemory(@PathVariable String cluster) {
+        return clusterPhyQuickCommandManager.clearFieldDataMemory(cluster);
     }
 
 }

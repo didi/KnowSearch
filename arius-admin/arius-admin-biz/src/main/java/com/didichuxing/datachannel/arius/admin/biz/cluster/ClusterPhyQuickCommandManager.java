@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 快捷指令.
@@ -15,7 +13,7 @@ import java.util.Map;
  * @Date 2022/6/1
  * @Version 1.0
  */
-public interface QuickCommandManager {
+public interface ClusterPhyQuickCommandManager {
 
     /**
      * node_state分析
@@ -78,5 +76,5 @@ public interface QuickCommandManager {
      * @param cluster
      * @return
      */
-    Result<Void> clearFielddataMemory(String cluster);
+    Result<Void> clearFieldDataMemory(String cluster);
 }

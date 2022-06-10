@@ -25,8 +25,6 @@ public class IndicesDistributionVO {
     private String status;
     @ApiModelProperty("索引名")
     private String index;
-    @ApiModelProperty("uuid")
-    private String uuid;
     @ApiModelProperty("主分片数量")
     private String pri;
     @ApiModelProperty("副分片数量")

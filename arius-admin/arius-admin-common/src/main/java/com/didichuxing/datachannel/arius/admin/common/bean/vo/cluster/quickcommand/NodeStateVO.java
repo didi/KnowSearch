@@ -22,37 +22,37 @@ public class NodeStateVO {
     @ApiModelProperty("节点名称")
     private String nodeName;
     @ApiModelProperty("segments大小")
-    private Integer segmentsMemory;
+    private Long segmentsMemory;
     @ApiModelProperty("cpu占用")
     private Integer osCpu;
     @ApiModelProperty("load_average_1m")
-    private BigDecimal loadAverage1m;
+    private double loadAverage1m;
     @ApiModelProperty("load_average_5m")
-    private BigDecimal loadAverage5m;
+    private double loadAverage5m;
     @ApiModelProperty("load_average_15m")
-    private BigDecimal loadAverage15m;
+    private double loadAverage15m;
     @ApiModelProperty("jvm堆内存使用率")
-    private Integer jvmHeapUsedPercent;
+    private long jvmHeapUsedPercent;
     @ApiModelProperty("线程数量")
-    private Integer threadsCount;
+    private long threadsCount;
     @ApiModelProperty("currentOpen")
-    private Integer currentOpen;
+    private long currentOpen;
     @ApiModelProperty("线程池写活跃数")
-    private Integer threadPoolWriteActive;
+    private long threadPoolWriteActive;
     @ApiModelProperty("线程池写队列数")
-    private Integer threadPoolWriteQueue;
+    private long threadPoolWriteQueue;
     @ApiModelProperty("线程池写拒绝数")
-    private Integer threadPoolWriteReject;
+    private long threadPoolWriteReject;
     @ApiModelProperty("线程池搜索活跃数")
-    private Integer threadPoolSearchActive;
+    private long threadPoolSearchActive;
     @ApiModelProperty("线程池搜索队列数")
-    private Integer threadPoolSearchQueue;
+    private long threadPoolSearchQueue;
     @ApiModelProperty("线程池搜索拒绝数")
-    private Integer threadPoolSearchReject;
+    private long threadPoolSearchReject;
     @ApiModelProperty("线程池管理活跃数")
-    private Integer threadPoolManagementActive;
+    private long threadPoolManagementActive;
     @ApiModelProperty("线程池管理队列数")
-    private Integer threadPoolManagementQueue;
+    private long threadPoolManagementQueue;
     @ApiModelProperty("线程池管理拒绝数")
-    private String threadPoolManagementReject;
+    private long threadPoolManagementReject;
 }

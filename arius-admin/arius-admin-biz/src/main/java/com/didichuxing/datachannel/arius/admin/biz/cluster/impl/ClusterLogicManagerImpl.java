@@ -191,8 +191,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
                 .runnableTask(() -> buildLogicRole(clusterLogicVO, clusterLogic))
                 .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
-                .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, appIdForAuthJudge))
-                .runnableTask(() -> buildLogicClusterTemplateSrvs(clusterLogicVO)).waitExecute();
+//                .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, appIdForAuthJudge))
+//                .runnableTask(() -> buildLogicClusterTemplateSrvs(clusterLogicVO)).waitExecute()
+        ;
 
         //依赖获取集群状态, 不能使用FutureUtil, 否则抛NPE
         buildClusterNodeInfo(clusterLogicVO);
