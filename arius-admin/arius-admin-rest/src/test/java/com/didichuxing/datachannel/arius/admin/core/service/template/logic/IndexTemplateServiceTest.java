@@ -4,42 +4,29 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -62,10 +49,10 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @MockBean
-    private ProjectLogicTemplateAuthService logicTemplateAuthService;
+    private AppLogicTemplateAuthService logicTemplateAuthService;
 
     @MockBean
-    private ProjectClusterLogicAuthService logicClusterAuthService;
+    private AppClusterLogicAuthService logicClusterAuthService;
 
     @MockBean
     private IndexTemplatePhyDAO indexTemplatePhyDAO;
@@ -81,12 +68,6 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
 
     @MockBean
     private ClusterLogicService clusterLogicService;
-    @MockBean
-    private ProjectService projectService;
-    @MockBean
-    private ESIndexService       esIndexService;
-    @MockBean
-    private ClusterRegionService clusterRegionService;
 
     @Test
     public void editTemplateNameTest() throws AdminOperateException {
@@ -263,8 +244,8 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getAppLogicTemplatesByAppIdTest() {
-        Mockito.when(indexTemplateDAO.listByProjectId(Mockito.anyInt())).thenReturn(CustomDataSource.getTemplateLogicPOList());
-        List<IndexTemplate> ret = indexTemplateService.getProjectLogicTemplatesByProjectId(1);
+        Mockito.when(indexTemplateDAO.listByAppId(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
+        List<IndexTemplate> ret = indexTemplateService.getAppLogicTemplatesByAppId(1);
         Assertions.assertFalse(ret.isEmpty());
     }
 
@@ -279,9 +260,6 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
     public void getAllLogicTemplatesPhysicalCountTest() {
         Mockito.when(indexTemplatePhyDAO.listAll()).thenReturn(CustomDataSource.getTemplatePhysicalPOList());
         Mockito.when(indexTemplatePhyService.listTemplate()).thenReturn(CustomDataSource.getIndexTemplatePhyList());
-        Mockito.when(indexTemplatePhyService.getAllLogicTemplatesPhysicalCount()).thenReturn(new HashedMap(){{
-            putIfAbsent(1,1);
-        }});
         Map<Integer, Integer> ret = indexTemplateService.getAllLogicTemplatesPhysicalCount();
         Assertions.assertFalse(ret.isEmpty());
     }
@@ -327,23 +305,9 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void getAllLogicTemplateWithClustersTest() {
-        final List<IndexTemplatePO> templateLogicPOList = CustomDataSource.getTemplateLogicPOList();
-        final List<IndexTemplatePhy> indexTemplatePhyList = CustomDataSource.getIndexTemplatePhyList();
-        Mockito.when(indexTemplateDAO.listAll()).thenReturn(templateLogicPOList);
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhyList) {
-            indexTemplatePhy.setLogicId(indexTemplatePhy.getId().intValue());
-            indexTemplatePhy.setRack(indexTemplatePhy.getId().intValue() + "");
-        
-        }
-        Mockito.when(indexTemplatePhyService.getTemplateByLogicIds(Mockito.anyList())).thenReturn(indexTemplatePhyList);
-        Mockito.when(indexTemplatePhyService.getValidTemplatesByLogicId(Mockito.anyInt()))
-                .thenReturn(indexTemplatePhyList);
-        Mockito.when(clusterLogicService.listAllClusterLogics()).thenReturn(CustomDataSource.getClusterLogicList());
-        Mockito.when(logicTemplateAuthService.getTemplateAuthsByProjectId(Mockito.anyInt()))
-                .thenReturn(CustomDataSource.getAppTemplateAuthList());
+        Mockito.when(indexTemplateDAO.listAll()).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<IndexTemplateWithPhyTemplates> ret = indexTemplateService.getAllLogicTemplateWithPhysicals();
-        
-        Assertions.assertTrue(ret.stream().allMatch(IndexTemplateWithPhyTemplates::hasPhysicals));
+        Assertions.assertFalse(ret.isEmpty());
     }
 
     @Test
@@ -377,143 +341,18 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
+    public void listByRegionIdTest() {
+        Mockito.when(indexTemplatePhyService.listByRegionId(Mockito.anyInt())).thenReturn(Result.buildSucc(CustomDataSource.getIndexTemplatePhyList()));
+        Result<List<IndexTemplate>> indexTemplateResult = indexTemplateService.listByRegionId(127);
+        Assertions.assertTrue(indexTemplateResult.success());
+        Assertions.assertTrue(null != indexTemplateResult.getData());
+    }
+
+    @Test
     public void convert2WithClusterTest() {
         List<IndexTemplateWithPhyTemplates> physicalTemplates = indexTemplateService.getLogicTemplateWithPhysicalsByIds(
                 Sets.newHashSet(1111, 1109, 1107));
         List<IndexTemplateWithCluster> indexTemplateWithClusters = indexTemplateService.convert2WithCluster(physicalTemplates);
     }
 
-    @Test
-    public void listAllByRegionIdTest() {
-        Mockito.when(indexTemplatePhyService.listByRegionId(Mockito.anyInt())).thenReturn(Result.buildSucc(CustomDataSource.getIndexTemplatePhyList()));
-        Mockito.when(indexTemplateDAO.listByIds(Mockito.anyList())).thenReturn(CustomDataSource.getTemplateLogicPOList());
-        Result<List<IndexTemplate>> ret = indexTemplateService.listByRegionId(100);
-        if (ret.failed()) { Assertions.assertNull(ret.getMessage());}
-        if (ret.success()) { Assertions.assertNotNull(ret.getData());}
-    }
-    @Test
-    public void addTemplateWithoutCheckTest() {
-        Mockito.when(indexTemplateDAO.insert(Mockito.any())).thenReturn(1);
-        final IndexTemplatePO indexTemplatePO = CustomDataSource.templateLogicSource();
-    
-        final Result<Void> result = Assertions.assertDoesNotThrow(
-                () -> indexTemplateService.addTemplateWithoutCheck(
-                        ConvertUtil.obj2Obj(indexTemplatePO, IndexTemplateDTO.class)));
-        Assertions.assertEquals(result,Result.<Void>buildSucc());
-    
-    }
-    @Test
-    void turnOverLogicTemplateTest() throws ESOperateException {
-        Mockito.when(indexTemplateDAO.update(Mockito.any())).thenReturn(1);
-        final IndexTemplatePO indexTemplatePO = CustomDataSource.templateLogicSource();
-        Mockito.when(indexTemplateDAO.getById(Mockito.anyInt())).thenReturn(indexTemplatePO);
-        Mockito.when(indexTemplatePhyService.editTemplateFromLogic(Mockito.any(),
-                Mockito.anyString())).thenReturn(Result.buildSucc());
-        Assertions.assertEquals(
-                Assertions.assertDoesNotThrow(() -> indexTemplateService.turnOverLogicTemplate(null, null, null, null))
-                        .getMessage(), "参数错误:模板不存在，请检查后再提交！");
-        indexTemplatePO.setExpression("aaaa*");
-        Assertions.assertEquals(Assertions.assertDoesNotThrow(
-                () -> indexTemplateService.turnOverLogicTemplate(1479, null, null, null).getMessage()
-        ), "参数错误:表达式*结尾,后缀格式必填，请检查后再提交！");
-        indexTemplatePO.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        indexTemplatePO.setExpression(indexTemplatePO.getName()+"o");
-        Assertions.assertEquals(Assertions.assertDoesNotThrow(
-                () -> indexTemplateService.turnOverLogicTemplate(indexTemplatePO.getId(), null, null, null).getMessage()
-        ), "参数错误:表达式与模板名字不匹配，请检查后再提交！");
-         indexTemplatePO.setExpression(indexTemplatePO.getName());
-         Assertions.assertEquals(Assertions.assertDoesNotThrow(
-                () -> indexTemplateService.turnOverLogicTemplate(indexTemplatePO.getId(), null, null, null).getMessage()
-    
-        ), "参数错误:索引分区创建，分区字段必填，请检查后再提交！");
-        indexTemplatePO.setDateField("yyyy-MM-dd HH:mm:ss.SSS");
-        Assertions.assertTrue(Assertions.assertDoesNotThrow(
-                () -> indexTemplateService.turnOverLogicTemplate(indexTemplatePO.getId(), 1, "admin", "admin")
-
-        ).success());
-        
-    }
-    @Test
-    void getLogicTemplatesByProjectIdTest(){
-        final IndexTemplatePO indexTemplatePO = CustomDataSource.templateLogicSource();
-        final List<IndexTemplatePhy> indexTemplatePhyList = CustomDataSource.getIndexTemplatePhyList();
-        final Set<String> strings = Collections.singleton("aa");
-        Mockito.when(esIndexService.syncGetIndexNameByExpression(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(strings);
-        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true) ;
-        Mockito.when(indexTemplateDAO.getById(Mockito.anyInt())).thenReturn(indexTemplatePO);
-        Mockito.when(indexTemplatePhyService.getTemplateByLogicIds(Mockito.anyList())).thenReturn(indexTemplatePhyList);
-        Mockito.when(logicTemplateAuthService.getTemplateAuthsByProjectId(Mockito.anyInt()))
-                .thenReturn(CustomDataSource.getAppTemplateAuthList());
-        Assertions.assertFalse(
-                CollectionUtils.isNotEmpty(indexTemplateService.getLogicTemplatesByProjectId(1).getData()));
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhyList) {
-            indexTemplatePhy.setExpression("aaaa");
-        }
-       Mockito.when(indexTemplatePhyService.getTemplateByLogicIds(Mockito.anyList())).thenReturn(indexTemplatePhyList);
-        Assertions.assertTrue(
-                CollectionUtils.isNotEmpty(indexTemplateService.getLogicTemplatesByProjectId(1).getData()));
-
-        
-    }
-    
-    @Test
-    void getTemplatesByHasAuthClusterTest() {
-  
-        final List<IndexTemplatePO> templateLogicPOList = CustomDataSource.getTemplateLogicPOList();
-        final List<IndexTemplatePhy> indexTemplatePhyList = CustomDataSource.getIndexTemplatePhyList();
-        Mockito.when(indexTemplateDAO.listAll()).thenReturn(templateLogicPOList);
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhyList) {
-            indexTemplatePhy.setLogicId(indexTemplatePhy.getId().intValue());
-            indexTemplatePhy.setRack(indexTemplatePhy.getId().intValue() + "");
-        
-        }
-        Mockito.when(indexTemplatePhyService.getTemplateByLogicIds(Mockito.anyList())).thenReturn(indexTemplatePhyList);
-        Mockito.when(indexTemplatePhyService.getValidTemplatesByLogicId(Mockito.anyInt()))
-                .thenReturn(indexTemplatePhyList);
-        Mockito.when(clusterLogicService.listAllClusterLogics()).thenReturn(CustomDataSource.getClusterLogicList());
-        Mockito.when(logicTemplateAuthService.getTemplateAuthsByProjectId(Mockito.anyInt()))
-                .thenReturn(CustomDataSource.getAppTemplateAuthList());
-        Assertions.assertFalse(CollectionUtils.isNotEmpty(indexTemplateService.getTemplatesByHasAuthCluster(1)));
-        
-    }
-    
-    @Test
-    void getHasAuthTemplatesInLogicClusterTest() {
-        Assertions.assertTrue(
-                CollectionUtils.isEmpty(indexTemplateService.getHasAuthTemplatesInLogicCluster(null, null)));
-        Assertions.assertTrue(
-                CollectionUtils.isEmpty(indexTemplateService.getHasAuthTemplatesInLogicCluster(null, null)));
-        final List<IndexTemplatePO> templateLogicPOList = CustomDataSource.getTemplateLogicPOList();
-        final List<IndexTemplatePhy> indexTemplatePhyList = CustomDataSource.getIndexTemplatePhyList();
-        Mockito.when(indexTemplateDAO.listAll()).thenReturn(templateLogicPOList);
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhyList) {
-            indexTemplatePhy.setLogicId(indexTemplatePhy.getId().intValue());
-            indexTemplatePhy.setRack(indexTemplatePhy.getId().intValue() + "");
-        
-        }
-        Mockito.when(indexTemplatePhyService.getTemplateByLogicIds(Mockito.anyList())).thenReturn(indexTemplatePhyList);
-        Mockito.when(indexTemplatePhyService.getValidTemplatesByLogicId(Mockito.anyInt()))
-                .thenReturn(indexTemplatePhyList);
-        Mockito.when(clusterLogicService.listAllClusterLogics()).thenReturn(CustomDataSource.getClusterLogicList());
-        Mockito.when(logicTemplateAuthService.getTemplateAuthsByProjectId(Mockito.anyInt()))
-                .thenReturn(CustomDataSource.getAppTemplateAuthList());
-        Assertions.assertFalse(CollectionUtils.isEmpty(indexTemplateService.getHasAuthTemplatesInLogicCluster(1, 1L)));
-        
-        
-        
-    }
-    
-    @Test
-    void editTemplateInfoTODBTest(){
-        final IndexTemplateDTO indexTemplateDTO = new IndexTemplateDTO();
-        Mockito.when(indexTemplateDAO.update(Mockito.any())).thenReturn(1);
-    
-        final Result<Void> voidResult =Assertions.assertDoesNotThrow(()-> indexTemplateService.editTemplateInfoTODB(indexTemplateDTO));
-        Assertions.assertTrue(voidResult.success());
-        
-    }
-    
-    
-    
 }
