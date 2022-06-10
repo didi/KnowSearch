@@ -4,6 +4,7 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,5 +22,5 @@ public class ProjectBriefExtendVO extends ProjectBriefVO {
 	@ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
 	private ProjectConfigVo config;
 	@ApiModelProperty(value = "是否为超级项目", dataType = "boolean", required = false)
-	private Boolean isSuper=false;
+	private Boolean isAdmin;
 }

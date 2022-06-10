@@ -46,13 +46,7 @@ public interface ProjectExtendManager {
   
 
     
-    /**
-     * 获取user下绑定的项目
-     *
-     * @param userId 用户id
-     * @return {@code Result<List<ProjectBriefVO>>}
-     */
-    Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId);
+
         /**
          * 删除项目
          *

@@ -43,130 +43,122 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ProjectExtendManagerImpl implements ProjectExtendManager {
-	
-	@Autowired
-	private ProjectConfigService projectConfigService;
-	@Autowired
-	private ProjectService       projectService;
-	@Autowired
-	private ESUserService        esUserService;
-	
-	@Autowired
-	private ClusterLogicService  clusterLogicService;
-	@Autowired
-	private IndexTemplateService indexTemplateService;
-	
-	@Override
-	public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator)  {
-		try {
-			
-			ProjectSaveDTO project = saveDTO.getProject();
-			ProjectConfigDTO config = saveDTO.getConfig();
-			ProjectVO projectVO = projectService.createProject(project, operator);
-			ProjectExtendVO projectExtendVO = CopyBeanUtil.copy(project, ProjectExtendVO.class);
-			config.setProjectId(projectVO.getId());
-			Tuple<com.didichuxing.datachannel.arius.admin.common.bean.common.Result<Void>, ProjectConfigPO> resultProjectConfigPOTuple = projectConfigService.updateOrInitProjectConfig(
-					config, operator);
-			//todo 需要设置创建成功的日志
-			if (resultProjectConfigPOTuple.getV1().success()) {
-				if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
-					projectExtendVO.setIsSuper(true);
-				}
-				projectExtendVO.setConfig(CopyBeanUtil.copy(resultProjectConfigPOTuple.getV2(), ProjectConfigVo.class));
-				
-			}
-			
-			//创建es user
-			createESUserDefault(projectVO, operator);
-			return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
-		} catch (LogiSecurityException e) {
-			e.printStackTrace();
-			return com.didiglobal.logi.security.common.Result.fail(e);
-		}
-	}
-	
-	@Override
-	public Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId) {
-		try {
-			ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-			ProjectExtendVO projectExtendVO = CopyBeanUtil.copy(projectVO, ProjectExtendVO.class);
-			if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
-				projectExtendVO.setIsSuper(true);
-			}
-			ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-			projectExtendVO.setConfig(CopyBeanUtil.copy(projectConfig, ProjectConfigVo.class));
-			
-			return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
-		} catch (LogiSecurityException e) {
-			return com.didiglobal.logi.security.common.Result.fail(e);
-		}
-	}
-	
-	@Override
-	public Result<List<ProjectBriefExtendVO>> getProjectBriefList() {
-		List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
-		List<ProjectBriefExtendVO> projectBriefExtendList = ConvertUtil.list2List(projectBriefList,
-				ProjectBriefExtendVO.class);
-		return getListResult(projectBriefExtendList);
-	}
-	
-	
-	
-	@Override
-	public Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId) {
-		Result<List<ProjectBriefVO>> result = projectService.getProjectBriefByUserId(userId);
-		if (result.successed()) {
-			List<ProjectBriefExtendVO> projectBriefExtendList = ConvertUtil.list2List(result.getData(),
-					ProjectBriefExtendVO.class);
-			return getListResult(projectBriefExtendList);
-			
-		}
-		return Result.fail(result.getMessage());
-	}
-	
-	@Override
-	public com.didichuxing.datachannel.arius.admin.common.bean.common.Result<Void> deleteProjectByProjectId(
-			Integer projectId, String operator) {
-		//项目删除前的检查
-		//校验项目是否绑定es user
-		List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
-		if (CollectionUtils.isNotEmpty(esUsers)) {
-			return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildFail("项目已绑定es user，不能删除");
-		}
-		//校验项目绑定逻辑集群
-		List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-		if (CollectionUtils.isNotEmpty(clusterLogics)) {
-			return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildFail("项目已绑定逻辑集群，不能删除");
-		}
-		
-		//校验项目绑定模板服务
-		List<IndexTemplate> indexTemplates = indexTemplateService.getProjectLogicTemplatesByProjectId(projectId);
-		if (CollectionUtils.isNotEmpty(indexTemplates)) {
-			return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildFail("项目已绑定模板服务，不能删除");
-		}
-		
-		
-		projectService.deleteProjectByProjectId(projectId, operator);
-		return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildSucc();
-	}
-	
-	@NotNull
-	private Result<List<ProjectBriefExtendVO>> getListResult(List<ProjectBriefExtendVO> projectBriefExtendList) {
-		for (ProjectBriefExtendVO projectBriefExtendVO : projectBriefExtendList) {
-			if (AuthConstant.SUPER_PROJECT_ID.equals(projectBriefExtendVO.getId())) {
-				projectBriefExtendVO.setIsSuper(true);
-				ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectBriefExtendVO.getId());
-				projectBriefExtendVO.setConfig(CopyBeanUtil.copy(projectConfig, ProjectConfigVo.class));
-			}
-		}
-		return Result.buildSucc(projectBriefExtendList);
-	}
-	    /**
+    
+    @Autowired
+    private ProjectConfigService projectConfigService;
+    @Autowired
+    private ProjectService       projectService;
+    @Autowired
+    private ESUserService        esUserService;
+    
+    @Autowired
+    private ClusterLogicService  clusterLogicService;
+    @Autowired
+    private IndexTemplateService indexTemplateService;
+    
+    @Override
+    public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator) {
+        try {
+            
+            ProjectSaveDTO project = saveDTO.getProject();
+            ProjectConfigDTO config = saveDTO.getConfig();
+            ProjectVO projectVO = projectService.createProject(project, operator);
+            ProjectExtendVO projectExtendVO = CopyBeanUtil.copy(project, ProjectExtendVO.class);
+            config.setProjectId(projectVO.getId());
+            Tuple<com.didichuxing.datachannel.arius.admin.common.bean.common.Result<Void>, ProjectConfigPO> resultProjectConfigPOTuple = projectConfigService.updateOrInitProjectConfig(
+                    config, operator);
+            //todo 需要设置创建成功的日志
+            if (resultProjectConfigPOTuple.getV1().success()) {
+                if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+                    projectExtendVO.setIsAdmin(true);
+                } else {
+                    projectExtendVO.setIsAdmin(false);
+                }
+                projectExtendVO.setConfig(CopyBeanUtil.copy(resultProjectConfigPOTuple.getV2(), ProjectConfigVo.class));
+                
+            }
+            
+            //创建es user
+            createESUserDefault(projectVO, operator);
+            return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
+        } catch (LogiSecurityException e) {
+            e.printStackTrace();
+            return com.didiglobal.logi.security.common.Result.fail(e);
+        }
+    }
+    
+    @Override
+    public Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId) {
+        try {
+            ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
+            ProjectExtendVO projectExtendVO = CopyBeanUtil.copy(projectVO, ProjectExtendVO.class);
+            if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+                projectExtendVO.setIsAdmin(true);
+            } else {
+                projectExtendVO.setIsAdmin(false);
+            }
+            ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+            projectExtendVO.setConfig(CopyBeanUtil.copy(projectConfig, ProjectConfigVo.class));
+            
+            return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
+        } catch (LogiSecurityException e) {
+            return com.didiglobal.logi.security.common.Result.fail(e);
+        }
+    }
+    
+    @Override
+    public Result<List<ProjectBriefExtendVO>> getProjectBriefList() {
+        List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
+        List<ProjectBriefExtendVO> projectBriefExtendList = ConvertUtil.list2List(projectBriefList,
+                ProjectBriefExtendVO.class);
+        return getListResult(projectBriefExtendList);
+    }
+    
+    @Override
+    public com.didichuxing.datachannel.arius.admin.common.bean.common.Result<Void> deleteProjectByProjectId(
+            Integer projectId, String operator) {
+        //项目删除前的检查
+        //校验项目是否绑定es user
+        List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
+        if (CollectionUtils.isNotEmpty(esUsers)) {
+            return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildFail("项目已绑定es user，不能删除");
+        }
+        //校验项目绑定逻辑集群
+        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+        if (CollectionUtils.isNotEmpty(clusterLogics)) {
+            return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildFail("项目已绑定逻辑集群，不能删除");
+        }
+        
+        //校验项目绑定模板服务
+        List<IndexTemplate> indexTemplates = indexTemplateService.getProjectLogicTemplatesByProjectId(projectId);
+        if (CollectionUtils.isNotEmpty(indexTemplates)) {
+            return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildFail("项目已绑定模板服务，不能删除");
+        }
+        
+        projectService.deleteProjectByProjectId(projectId, operator);
+        return com.didichuxing.datachannel.arius.admin.common.bean.common.Result.buildSucc();
+    }
+    
+    @NotNull
+    private Result<List<ProjectBriefExtendVO>> getListResult(List<ProjectBriefExtendVO> projectBriefExtendList) {
+        for (ProjectBriefExtendVO projectBriefExtendVO : projectBriefExtendList) {
+            if (AuthConstant.SUPER_PROJECT_ID.equals(projectBriefExtendVO.getId())) {
+                projectBriefExtendVO.setIsAdmin(true);
+            } else {
+                projectBriefExtendVO.setIsAdmin(false);
+            }
+            ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectBriefExtendVO.getId());
+            projectBriefExtendVO.setConfig(CopyBeanUtil.copy(projectConfig, ProjectConfigVo.class));
+        }
+        return Result.buildSucc(projectBriefExtendList);
+    }
+    
+    /**
      * 新增默认的es user
      *
      * @param data 数据
      */
-    private void createESUserDefault(ProjectVO data,String operator) {
+    private void createESUserDefault(ProjectVO data, String operator) {
         ESUserDTO esUserDTO = new ESUserDTO();
         esUserDTO.setIsRoot(0);
         esUserDTO.setSearchType(AppSearchTypeEnum.TEMPLATE.getCode());
