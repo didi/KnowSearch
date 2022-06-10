@@ -15,8 +15,6 @@ public interface ClusterRegionDAO {
 
     ClusterRegionPO getByLogicClusterId(Long logicClusterId);
 
-    List<ClusterRegionPO> listByLogicClusterIds(@Param("logicClusterIds") List<Long> logicClusterIds);
-
     List<ClusterRegionPO> getByPhyClusterName(String phyClusterName);
 
     int insert(ClusterRegionPO param);
