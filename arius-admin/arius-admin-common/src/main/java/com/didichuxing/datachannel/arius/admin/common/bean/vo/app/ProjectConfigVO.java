@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "应用信息")
-public class ProjectConfigVo extends BaseEntity {
+public class ProjectConfigVO extends BaseEntity {
     
     /**
      * projectId

@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.app;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GET_USER_PROJECT_ID_LIST_TICKET;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GET_USER_PROJECT_ID_LIST_TICKET_NAME;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -39,8 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({ V3 + "/es-user" })
 @Api(tags = "应用关联es user (REST)")
 public class ESUserV3Controller {
-    private static final String        GET_USER_PROJECT_ID_LIST_TICKET      = "xTc59aY72";
-    private static final String        GET_USER_PROJECT_ID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
+   
     @Autowired
     private              ESUserManager esUserManager;
     

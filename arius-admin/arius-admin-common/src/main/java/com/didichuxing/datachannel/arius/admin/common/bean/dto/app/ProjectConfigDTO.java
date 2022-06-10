@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "应用配置信息")
 public class ProjectConfigDTO extends BaseDTO {
 	
-	@ApiModelProperty(value = "项目id(更新操作必填)", dataType = "private", required = false)
+	@ApiModelProperty(value = "项目id(更新操作必填)", dataType = "projectId", hidden = true,required = false)
 	private Integer projectId;
 	
 	@ApiModelProperty("gateway返回结果解析开关")

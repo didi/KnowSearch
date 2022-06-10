@@ -63,7 +63,6 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,12 +183,7 @@ public class GatewayManagerImpl implements GatewayManager {
    
 
     @Override
-    public Result<List<GatewayESUserVO>> listProject(HttpServletRequest request) {
-        String ticket = request.getHeader(GATEWAY_GET_PROJECT_TICKET_NAME);
-        if (!GATEWAY_GET_PROJECT_TICKET.equals(ticket)) {
-            return Result.buildParamIllegal("ticket错误");
-        }
-
+    public Result<List<GatewayESUserVO>> listESUserByProject() {
         // 查询出所有的应用
         List<ESUser> esUsers = listESUserWithCache();
         final Map<Integer/*projectId*/, /*es user*/List<Integer>> projectIdEsUsersMap = esUsers.stream().collect(
@@ -222,7 +216,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
         Map<Integer/*logicId*/, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
         
-        List<GatewayESUserVO> appVOS = esUsers.parallelStream().map(user -> {
+        List<GatewayESUserVO> appVOList = esUsers.parallelStream().map(user -> {
             try {
                 final GatewayESUserVO gatewayESUserVO = buildESUserVO(user, esUser2ProjectTemplateAuthsMap,
                         esUser2ESUserConfigMap, templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
@@ -236,7 +230,7 @@ public class GatewayManagerImpl implements GatewayManager {
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        return Result.buildSucc(appVOS);
+        return Result.buildSucc(appVOList);
     }
 
     @Override

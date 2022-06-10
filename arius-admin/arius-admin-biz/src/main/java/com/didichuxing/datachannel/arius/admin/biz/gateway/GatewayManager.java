@@ -10,7 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTe
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -49,10 +48,10 @@ public interface GatewayManager {
 
     /**
      * 获取app列表,包含APP全部元信息
-     * @param request 请求
-     * @return Result<List<GatewayESUserVO>>
+     *
+     * @return Result<List < GatewayESUserVO>>
      */
-    Result<List<GatewayESUserVO>> listProject(HttpServletRequest request);
+    Result<List<GatewayESUserVO>> listESUserByProject();
 
     /**
      * 以map结构组织,key是表达式

@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
@@ -37,9 +37,9 @@ public class ProjectConfigManagerImpl implements ProjectConfigManager {
 	 * @param projectId@return 配置信息
 	 */
 	@Override
-	public Result<ProjectConfigVo> get(int projectId) {
-		final ProjectConfigVo projectConfigVo = ConvertUtil.obj2Obj(projectConfigService.getProjectConfig(projectId),
-				ProjectConfigVo.class);
+	public Result<ProjectConfigVO> get(int projectId) {
+		final ProjectConfigVO projectConfigVo = ConvertUtil.obj2Obj(projectConfigService.getProjectConfig(projectId),
+				ProjectConfigVO.class);
 		return Result.buildSucc(projectConfigVo);
 	}
 	

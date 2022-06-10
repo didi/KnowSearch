@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.impl.GatewayManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
@@ -199,7 +198,7 @@ public class GatewayManagerTest {
         when(mockTemplateLogicAliasService.listAliasMapWithCache()).thenReturn(new HashMap<>());
         
         // Run the test
-        final Result<List<GatewayESUserVO>> result = gatewayManagerImplUnderTest.listProject(request);
+        final Result<List<GatewayESUserVO>> result = gatewayManagerImplUnderTest.listESUserByProject();
         
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);

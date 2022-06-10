@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
@@ -56,14 +56,14 @@ class ProjectConfigManagerTest {
     @Test
     void testGet() {
         // Setup
-        final Result<ProjectConfigVo> expectedResult = Result.buildSucc(new ProjectConfigVo(0, 0, 0, 0, 0, 0, "memo"));
+        final Result<ProjectConfigVO> expectedResult = Result.buildSucc(new ProjectConfigVO(0, 0, 0, 0, 0, 0, "memo"));
         
         // Configure ProjectConfigService.getProjectConfig(...).
         final ProjectConfig projectConfig = new ProjectConfig(0, 0, 0, 0, 0, 0, "memo");
         when(projectConfigService.getProjectConfig(0)).thenReturn(projectConfig);
         
         // Run the test
-        final Result<ProjectConfigVo> result = projectConfigManager.get(0);
+        final Result<ProjectConfigVO> result = projectConfigManager.get(0);
         
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);

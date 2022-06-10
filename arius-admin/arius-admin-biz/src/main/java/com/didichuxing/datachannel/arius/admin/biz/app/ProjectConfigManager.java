@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVO;
 
 /**
  * project config
@@ -17,7 +17,7 @@ public interface ProjectConfigManager {
          * @param projectId projectId
          * @return 配置信息
          */
-    Result<ProjectConfigVo> get(int projectId);
+    Result<ProjectConfigVO> get(int projectId);
     
         /**
      * 更新 es user config
