@@ -23,14 +23,6 @@ public class ESPhyClusterTemplateSrvTest extends BasePhyClusterInfoTest {
      */
     @Test
     public void listTest() throws IOException {
-        Result<List<ESClusterTemplateSrvVO>> result = ESPhyClusterTemplateSrvControllerMethod.list(phyClusterInfo.getPhyClusterName());
-        Assertions.assertTrue(result.success());
-        Set<Integer> idSet = result.getData().stream().map(ESClusterTemplateSrvVO::getServiceId).collect(Collectors.toSet());
-        // 获取创建物理集群时，设置的索引服务 id
-        String[] ids = phyClusterInfo.getClusterJoinDTO().getTemplateSrvs().split(",");
-        if(ids.length > 0) {
-            Assertions.assertTrue(idSet.contains(Integer.parseInt(ids[0])));
-        }
     }
 
     /**

@@ -30,8 +30,6 @@ public class BaseLogicClusterInfoTest extends BasePhyClusterInfoTest {
      */
     @AfterAll
     public static void afterCompletion() throws IOException {
-        // 删除逻辑集群（会解绑 region）
-//        LogicClusterInfoSource.removeLogicCluster(logicClusterInfo.getLogicClusterName(), logicClusterInfo.getLogicClusterId());
         BasePhyClusterInfoTest.afterCompletion();
     }
 }
