@@ -17,7 +17,7 @@ public interface GatewayJoinLogManager {
     Result<List<GatewayJoinVO>> getGatewayErrorList(Long projectId, Long startDate, Long endDate);
 
     /**
-     * 获取appId的慢查gateway请求日志
+     * 获取projectId的慢查gateway请求日志
      * @param projectId 应用账号
      * @param startDate 开始时刻
      * @param endDate 结束时刻
@@ -26,7 +26,7 @@ public interface GatewayJoinLogManager {
     Result<List<GatewayJoinVO>> getGatewaySlowList(Long projectId, Long startDate, Long endDate);
 
     /**
-     * 根据appid获取指定数据中心一段时间查询量
+     * 根据projectId获取指定数据中心一段时间查询量
      *
      * @param dataCenter
      * @param projectId
