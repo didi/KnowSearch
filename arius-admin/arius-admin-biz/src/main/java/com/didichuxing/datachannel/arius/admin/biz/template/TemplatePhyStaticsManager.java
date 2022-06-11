@@ -13,9 +13,9 @@ import java.util.Map;
  * @author d06679
  * @date 2019-06-24
  */
-public interface TemplatePhyStatisManager {
+public interface TemplatePhyStaticsManager {
     /**
-     * 根据模板id获取最近days天的appid访问统计信息
+     * 根据模板id获取最近days天的projectid访问统计信息
      * @param logicTemplateId 逻辑索引模板ID
      * @param days 最近多少天
      * @return map
@@ -45,7 +45,7 @@ public interface TemplatePhyStatisManager {
      * @param endDate 结束时刻
      * @return list
      */
-    Result<List<ESIndexStats>> getIndexStatis(Long logicTemplateId, Long startDate, Long endDate);
+    Result<List<ESIndexStats>> getIndexStatics(Long logicTemplateId, Long startDate, Long endDate);
 
     /**
      * 获取某个模板的某段时间的索引健康分统计

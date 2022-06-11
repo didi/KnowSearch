@@ -21,28 +21,28 @@ public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {
     private GatewayJoinLogService gatewayJoinLogService;
 
     @Override
-    public Result<List<GatewayJoinVO>> getGatewayErrorList(Long appId, Long startDate, Long endDate) {
+    public Result<List<GatewayJoinVO>> getGatewayErrorList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinLogService.getGatewayErrorList(appId, startDate, endDate).getData(),
+                gatewayJoinLogService.getGatewayErrorList(projectId, startDate, endDate).getData(),
                 GatewayJoinVO.class));
     }
 
     @Override
-    public Result<List<GatewayJoinVO>> getGatewaySlowList(Long appId, Long startDate, Long endDate) {
+    public Result<List<GatewayJoinVO>> getGatewaySlowList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinLogService.getGatewaySlowList(appId, startDate, endDate).getData(),
+                gatewayJoinLogService.getGatewaySlowList(projectId, startDate, endDate).getData(),
                 GatewayJoinVO.class));
     }
 
     @Override
-    public Result<Long> getSearchCountByProjectId(String dataCenter, Long appId, Long startDate,
+    public Result<Long> getSearchCountByProjectId(String dataCenter, Long projectId, Long startDate,
                                                   Long endDate) {
-        return gatewayJoinLogService.getSearchCountByAppid(appId, startDate, endDate);
+        return gatewayJoinLogService.getSearchCountByProjectId(projectId, startDate, endDate);
     }
 
     @Override
-    public Result<List<GatewayJoinVO>> getGatewayJoinSlowList(Integer appId, GatewayJoinQueryDTO queryDTO) {
-        List<GatewayJoin> gatewayJoinList = gatewayJoinLogService.getGatewaySlowList(appId, queryDTO);
+    public Result<List<GatewayJoinVO>> getGatewayJoinSlowList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
+        List<GatewayJoin> gatewayJoinList = gatewayJoinLogService.getGatewaySlowList(projectId, queryDTO);
         if (CollectionUtils.isEmpty(gatewayJoinList)) {
             return Result.buildSucc(new ArrayList<>());
         }
@@ -51,8 +51,8 @@ public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {
     }
 
     @Override
-    public Result<List<GatewayJoinVO>> getGatewayJoinErrorList(Integer appId, GatewayJoinQueryDTO queryDTO) {
-        List<GatewayJoin> gatewayJoinList = gatewayJoinLogService.getGatewayJoinErrorList(appId, queryDTO);
+    public Result<List<GatewayJoinVO>> getGatewayJoinErrorList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
+        List<GatewayJoin> gatewayJoinList = gatewayJoinLogService.getGatewayJoinErrorList(projectId, queryDTO);
         if (CollectionUtils.isEmpty(gatewayJoinList)) {
             return Result.buildSucc(new ArrayList<>());
         }

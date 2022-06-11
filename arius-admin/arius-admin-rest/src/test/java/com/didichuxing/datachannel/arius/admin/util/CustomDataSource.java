@@ -16,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackage
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.monitor.AppMonitorRuleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
@@ -99,13 +98,7 @@ public class CustomDataSource {
         return operateRecordDTO;
     }
 
-    public static AppMonitorRuleDTO appMonitorRuleDTOFactory() {
-        AppMonitorRuleDTO appMonitorRuleDTO = new AppMonitorRuleDTO();
-        appMonitorRuleDTO.setAppId(1L);
-        appMonitorRuleDTO.setName("add");
-        return appMonitorRuleDTO;
-    }
-
+ 
     public static GatewayHeartbeat gatewayHeartbeatFactory()  {
         GatewayHeartbeat gatewayHeartbeat = new GatewayHeartbeat();
         gatewayHeartbeat.setClusterName(PHY_CLUSTER_NAME);

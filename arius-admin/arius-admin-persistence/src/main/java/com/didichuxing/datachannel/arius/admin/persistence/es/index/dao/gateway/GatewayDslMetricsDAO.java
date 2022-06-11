@@ -54,49 +54,49 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
     /**
      * 获取各查询模版访问量 count  topN
      */
-    public VariousLineChartMetrics getDslCountByRange(Long startTime, Long endTime, Integer topNu, Integer appId) {
+    public VariousLineChartMetrics getDslCountByRange(Long startTime, Long endTime, Integer topNu, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT, startTime, endTime, projectId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResult(response, GatewayMetricsTypeEnum.QUERY_DSL_COUNT, topNu, interval), 3);
     }
 
     /**
      * 获取某个查询模版访问量 count by dslTemplateMd5
      */
-    public VariousLineChartMetrics getDslCountByRangeAndMd5(Long startTime, Long endTime, String dslMd5, Integer appId) {
+    public VariousLineChartMetrics getDslCountByRangeAndMd5(Long startTime, Long endTime, String dslMd5, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT_BY_MD5, dslMd5, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_COUNT_BY_MD5, dslMd5, startTime, endTime, projectId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResultByMd5(response, GatewayMetricsTypeEnum.QUERY_DSL_COUNT, dslMd5, interval), 3);
     }
 
     /**
      * 获取各个查询模版访问耗时  topN
      */
-    public VariousLineChartMetrics getDslTotalCostByRange(Long startTime, Long endTime, Integer topNu, Integer appId) {
+    public VariousLineChartMetrics getDslTotalCostByRange(Long startTime, Long endTime, Integer topNu, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST, startTime, endTime, projectId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResult(response, GatewayMetricsTypeEnum.QUERY_DSL_TOTAL_COST, topNu, interval), 3);
     }
 
     /**
      * 获取某个查询模版访问耗时  by dslTemplateMd5 GET_GATEWAY_DSLMD5_BY_APPID
      */
-    public VariousLineChartMetrics getDslTotalCostByRangeAndMd5(Long startTime, Long endTime, String dslMd5, Integer appId) {
+    public VariousLineChartMetrics getDslTotalCostByRangeAndMd5(Long startTime, Long endTime, String dslMd5, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST_BY_MD5, dslMd5, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_TOTAL_COST_BY_MD5, dslMd5, startTime, endTime, projectId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchDslResultByMd5(response, GatewayMetricsTypeEnum.QUERY_DSL_TOTAL_COST, dslMd5, interval), 3);
     }
 
     /**
-     * 获取某个appId下的dslTemplateMd5
+     * 获取某个projectId下的dslTemplateMd5
      */
-    public List<String> getDslMd5List(Long startTime, Long endTime, Integer appId) {
+    public List<String> getDslMd5List(Long startTime, Long endTime, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSLMD5_BY_APPID, appId, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSLMD5_BY_APPID, projectId, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> {
             List<String> list = Lists.newArrayList();
             Map<String, ESAggr> esAggrMap = Optional.ofNullable(response.getAggs()).map(ESAggrMap::getEsAggrMap).orElse(null);

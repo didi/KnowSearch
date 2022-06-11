@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
@@ -27,9 +27,9 @@ import org.springframework.stereotype.Service;
  * @date 2019-06-24
  */
 @Service
-public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
+public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager {
 
-    private static final ILog         LOGGER = LogFactory.getLog( TemplatePhyStatisManagerImpl.class);
+    private static final ILog         LOGGER = LogFactory.getLog( TemplatePhyStaticsManagerImpl.class);
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -72,7 +72,7 @@ public class TemplatePhyStatisManagerImpl implements TemplatePhyStatisManager {
     }
 
     @Override
-    public Result<List<ESIndexStats>> getIndexStatis(Long logicTemplateId, Long startDate, Long endDate) {
+    public Result<List<ESIndexStats>> getIndexStatics(Long logicTemplateId, Long startDate, Long endDate) {
         return templateSattisService.getIndexStatis(logicTemplateId, startDate, endDate);
     }
 

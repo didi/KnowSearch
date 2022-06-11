@@ -637,7 +637,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                     return getAppOwnAuthClusterPhyList(projectId);
                 }
             case ACCESS:
-                return getClusterPhysByAppId(projectId);
+                return getClusterPhysByProjectId(projectId);
 
             case NO_PERMISSIONS:
                 List<Integer> appOwnAuthClusterPhyIdList = getAppOwnAuthClusterPhyList(projectId)
@@ -645,7 +645,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                                                             .map(ClusterPhy::getId)
                                                             .collect(Collectors.toList());
 
-                List<Integer> appAccessAuthClusterPhyIdList = getClusterPhysByAppId(projectId)
+                List<Integer> appAccessAuthClusterPhyIdList = getClusterPhysByProjectId(projectId)
                                                                 .stream()
                                                                 .map(ClusterPhy::getId)
                                                                 .collect(Collectors.toList());
@@ -663,7 +663,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<ClusterPhy> getClusterPhysByAppId(Integer projectId) {
+    public List<ClusterPhy> getClusterPhysByProjectId(Integer projectId) {
         // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
         List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
         //项目下的有管理权限逻辑集群会关联多个物理集群

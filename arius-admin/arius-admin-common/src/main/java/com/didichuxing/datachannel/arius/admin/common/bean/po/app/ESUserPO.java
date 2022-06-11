@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESUserPO extends BasePO implements DigitResponsible {
+public class ESUserPO extends BasePO  {
 
     /**
      * 主键

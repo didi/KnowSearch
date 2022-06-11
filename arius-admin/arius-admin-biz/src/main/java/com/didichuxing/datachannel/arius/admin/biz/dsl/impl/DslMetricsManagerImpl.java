@@ -22,7 +22,7 @@ public class DslMetricsManagerImpl implements DslMetricsManager {
     @Override
     public Result<List<DslTemplateVO>> getDSLMetricsInfoByProjectId(Integer projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-            dslMetricsService.getDSLMetricsInfoByAppId(projectId, startDate, endDate).getData(), DslTemplateVO.class));
+            dslMetricsService.getDSLMetricsInfoByProjectId(projectId, startDate, endDate).getData(), DslTemplateVO.class));
     }
 
     @Override

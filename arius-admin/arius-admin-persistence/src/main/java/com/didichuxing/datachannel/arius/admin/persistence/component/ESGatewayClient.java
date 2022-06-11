@@ -109,7 +109,7 @@ public class ESGatewayClient {
     @PostConstruct
     public void init() {
         LOGGER.info("class=ESGatewayClient||method=init||ESGatewayClient init start.");
-        // 多个appid
+        // 多个appid todo 有逻辑问题
         String[] esUsers = StringUtils.splitByWholeSeparatorPreserveAllTokens(esUser, COMMA);
         String[] passwords = StringUtils.splitByWholeSeparatorPreserveAllTokens(password, COMMA);
 

@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 获取AppId查询信息
+ * 获取ProjectId查询信息
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AppQueryPO {
+public class ProjectQueryPO {
 
     /**
      * 模板名称

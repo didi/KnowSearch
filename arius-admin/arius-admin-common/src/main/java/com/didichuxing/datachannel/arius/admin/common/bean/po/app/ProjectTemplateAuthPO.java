@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.app;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectTemplateAuthPO extends BasePO implements DigitResponsible {
+public class ProjectTemplateAuthPO extends BasePO {
 
     /**
      * 主键

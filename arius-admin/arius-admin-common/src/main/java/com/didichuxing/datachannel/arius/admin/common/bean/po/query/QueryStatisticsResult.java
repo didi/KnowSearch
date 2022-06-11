@@ -23,14 +23,14 @@ public class QueryStatisticsResult {
     /**
      *  索引模板维度访问次数
      */
-    private Map<String/*templateId*/, TemplateAccessCountPO> templateAccessCountMap = Maps.newLinkedHashMap();
+    private Map<String/*templateId*/, TemplateAccessCountPO>                  templateAccessCountMap          = Maps.newLinkedHashMap();
     /**
      * 索引维度访问次数
      */
-    private Map<String/*templateId_indexName*/, IndexNameAccessCountPO> indexNameAccessCountMap = Maps.newLinkedHashMap();
+    private Map<String/*templateId_indexName*/, IndexNameAccessCountPO>       indexNameAccessCountMap         = Maps.newLinkedHashMap();
     /**
-     * appid维度访问次数
+     * projectid维度访问次数
      */
-    private Map<String/*templateId_appId*/, AppIdTemplateAccessCountPO> appIdTemplateAccessCountMap = Maps.newLinkedHashMap();
+    private Map<String/*templateId_projectId*/, ProjectTemplateAccessCountPO> projectIdTemplateAccessCountMap = Maps.newLinkedHashMap();
 
 }

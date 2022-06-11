@@ -145,7 +145,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getGatewayNodeMetrics(GatewayNodeDTO dto, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getGatewayNodeMetrics(GatewayNodeDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
         List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
         Long startTime = dto.getStartTime();
@@ -155,13 +155,13 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if (StringUtils.isNotBlank(dto.getNodeIp())) {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (GatewayMetricsTypeEnum.WRITE_GATEWAY_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeWriteMetrics(startTime, endTime, appId, dto.getNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeWriteMetrics(startTime, endTime, projectId, dto.getNodeIp());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, appId, dto.getNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, projectId, dto.getNodeIp());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeDSLLenMetrics(startTime, endTime,appId, dto.getNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeDSLLenMetrics(startTime, endTime,projectId, dto.getNodeIp());
                     result.add(gatewayMetricsVO);
                 }
             });
@@ -169,13 +169,13 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         } else {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (GatewayMetricsTypeEnum.WRITE_GATEWAY_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeWriteMetrics(startTime, endTime, appId, dto.getTopNu());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeWriteMetrics(startTime, endTime, projectId, dto.getTopNu());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, appId, dto.getTopNu());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeMetrics(startTime, endTime, projectId, dto.getTopNu());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeDSLLenMetrics(startTime, endTime, appId, dto.getTopNu());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getGatewayNodeDSLLenMetrics(startTime, endTime, projectId, dto.getTopNu());
                     result.add(gatewayMetricsVO);
                 }
             });
@@ -187,17 +187,17 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getMultiGatewayNodesMetrics(MultiGatewayNodesDTO dto, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getMultiGatewayNodesMetrics(MultiGatewayNodesDTO dto, Integer projectId) {
         List<VariousLineChartMetricsVO> result = new ArrayList<>();
         GatewayNodeDTO gatewayNodeDTO = ConvertUtil.obj2Obj(dto, GatewayNodeDTO.class);
         if (AriusObjUtils.isEmptyList(dto.getNodeIps())) {
-            return getGatewayNodeMetrics(gatewayNodeDTO, appId);
+            return getGatewayNodeMetrics(gatewayNodeDTO, projectId);
         }
 
         for (String nodeIp : dto.getNodeIps()) {
             try {
                 gatewayNodeDTO.setNodeIp(nodeIp);
-                Result<List<VariousLineChartMetricsVO>> nodeMetrics = getGatewayNodeMetrics(gatewayNodeDTO, appId);
+                Result<List<VariousLineChartMetricsVO>> nodeMetrics = getGatewayNodeMetrics(gatewayNodeDTO, projectId);
                 if (nodeMetrics.success()) {
                     result.addAll(nodeMetrics.getData());
                 }
@@ -209,7 +209,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(ClientNodeDTO dto, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(ClientNodeDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
         List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
         Long startTime = dto.getStartTime();
@@ -219,13 +219,13 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if (StringUtils.isNotBlank(dto.getClientNodeIp())) {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (GatewayMetricsTypeEnum.WRITE_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeWriteMetrics(startTime, endTime, appId, dto.getNodeIp(), dto.getClientNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeWriteMetrics(startTime, endTime, projectId, dto.getNodeIp(), dto.getClientNodeIp());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getNodeIp(), dto.getClientNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, projectId, dto.getNodeIp(), dto.getClientNodeIp());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeDSLLENMetrics(startTime, endTime, appId, dto.getNodeIp(), dto.getClientNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeDSLLENMetrics(startTime, endTime, projectId, dto.getNodeIp(), dto.getClientNodeIp());
                     result.add(gatewayMetricsVO);
                 }
             });
@@ -233,24 +233,24 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         } else {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (GatewayMetricsTypeEnum.WRITE_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeWriteMetrics(startTime, endTime, appId, dto.getTopNu(), dto.getNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeWriteMetrics(startTime, endTime, projectId, dto.getTopNu(), dto.getNodeIp());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.QUERY_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, appId, dto.getTopNu(), dto.getNodeIp());
+                    VariousLineChartMetrics gatewayMetricsVO = gatewayMetricsService.getClientNodeMetrics(startTime, endTime, projectId, dto.getTopNu(), dto.getNodeIp());
                     result.add(gatewayMetricsVO);
                 } else if (GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE.getType().equals(metricsType)) {
-                    VariousLineChartMetrics gatewayMericsVO = gatewayMetricsService.getClientNodeDSLLENMetrics(startTime, endTime, appId, dto.getTopNu(), dto.getNodeIp());
+                    VariousLineChartMetrics gatewayMericsVO = gatewayMetricsService.getClientNodeDSLLENMetrics(startTime, endTime, projectId, dto.getTopNu(), dto.getNodeIp());
                     result.add(gatewayMericsVO);
                 }
             });
-            clientNodeIpList.addAll(gatewayMetricsService.getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(), dto.getEndTime(), appId));
+            clientNodeIpList.addAll(gatewayMetricsService.getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(), dto.getEndTime(), projectId));
         }
         fillSortData(result, rawMetricsTypes, clientNodeIpList, startTime, endTime, dto.getTopNu());
         return Result.buildSucc(ConvertUtil.list2List(result, VariousLineChartMetricsVO.class));
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getGatewayIndexMetrics(GatewayIndexDTO dto, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getGatewayIndexMetrics(GatewayIndexDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
         List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
         Long startTime = dto.getStartTime();
@@ -278,10 +278,10 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if (StringUtils.isNotBlank(dto.getIndexName())) {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (WRITE.equals(metricsType)) {
-                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexWriteMetrics(writeMetrics, startTime, endTime, appId, dto.getIndexName());
+                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexWriteMetrics(writeMetrics, startTime, endTime, projectId, dto.getIndexName());
                     result.addAll(list);
                 } else if (SEARCH.equals(metricsType)) {
-                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexSearchMetrics(searchMetrics, startTime, endTime, appId, dto.getIndexName());
+                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexSearchMetrics(searchMetrics, startTime, endTime, projectId, dto.getIndexName());
                     result.addAll(list);
                 }
             });
@@ -289,15 +289,15 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         } else {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (WRITE.equals(metricsType)) {
-                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexWriteMetrics(writeMetrics, startTime, endTime, appId, dto.getTopNu());
+                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexWriteMetrics(writeMetrics, startTime, endTime, projectId, dto.getTopNu());
                     result.addAll(list);
                 } else if (SEARCH.equals(metricsType)) {
-                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexSearchMetrics(searchMetrics, startTime, endTime, appId, dto.getTopNu());
+                    List<VariousLineChartMetrics> list = gatewayMetricsService.getGatewayIndexSearchMetrics(searchMetrics, startTime, endTime, projectId, dto.getTopNu());
                     result.addAll(list);
                 }
             });
             // 补齐数据
-            nameList.addAll(templateLogicManager.getTemplateLogicNames(appId));
+            nameList.addAll(templateLogicManager.getTemplateLogicNames(projectId));
         }
         fillSortData(result, rawMetricsTypes, nameList, startTime, endTime, dto.getTopNu() == 0 ? 1 : dto.getTopNu());
         return Result.buildSucc(ConvertUtil.list2List(result, VariousLineChartMetricsVO.class));
@@ -323,10 +323,10 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if (StringUtils.isNotBlank(dto.getProjectId())) {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (COMMON.equals(metricsType)) {
-                    List<VariousLineChartMetrics> list = gatewayMetricsService.getAppCommonMetricsByAppId(startTime, endTime, commonMetrics, dto.getProjectId());
+                    List<VariousLineChartMetrics> list = gatewayMetricsService.getAppCommonMetricsByProjectId(startTime, endTime, commonMetrics, dto.getProjectId());
                     result.addAll(list);
                 } else if (GatewayMetricsTypeEnum.QUERY_APP_COUNT.getType().equals(metricsType)) {
-                    VariousLineChartMetrics appCountMetrics = gatewayMetricsService.getAppCountMetricsByAppId(startTime, endTime,dto.getProjectId());
+                    VariousLineChartMetrics appCountMetrics = gatewayMetricsService.getAppCountMetricsByProjectId(startTime, endTime,dto.getProjectId());
                     result.add(appCountMetrics);
                 }
             });
@@ -353,7 +353,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getGatewayDslMetrics(GatewayDslDTO dto, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getGatewayDslMetrics(GatewayDslDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
         List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
         Long startTime = dto.getStartTime();
@@ -363,10 +363,10 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if (StringUtils.isNotBlank(dto.getDslMd5())) {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (GatewayMetricsTypeEnum.QUERY_DSL_COUNT.getType().equals(metricsType)) {
-                    VariousLineChartMetrics dslCountMetrics = gatewayMetricsService.getDslCountMetricsByMd5(startTime, endTime, dto.getDslMd5(), appId);
+                    VariousLineChartMetrics dslCountMetrics = gatewayMetricsService.getDslCountMetricsByMd5(startTime, endTime, dto.getDslMd5(), projectId);
                     result.add(dslCountMetrics);
                 } else if (GatewayMetricsTypeEnum.QUERY_DSL_TOTAL_COST.getType().equals(metricsType)) {
-                    VariousLineChartMetrics dslTotalCostMetrics = gatewayMetricsService.getDslTotalCostMetricsByMd5(startTime, endTime, dto.getDslMd5(), appId);
+                    VariousLineChartMetrics dslTotalCostMetrics = gatewayMetricsService.getDslTotalCostMetricsByMd5(startTime, endTime, dto.getDslMd5(), projectId);
                     result.add(dslTotalCostMetrics);
                 }
             });
@@ -374,15 +374,15 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         } else {
             dto.getMetricsTypes().parallelStream().forEach(metricsType -> {
                 if (GatewayMetricsTypeEnum.QUERY_DSL_COUNT.getType().equals(metricsType)) {
-                    VariousLineChartMetrics dslCountMetrics = gatewayMetricsService.getDslCountMetrics(startTime, endTime, dto.getTopNu(), appId);
+                    VariousLineChartMetrics dslCountMetrics = gatewayMetricsService.getDslCountMetrics(startTime, endTime, dto.getTopNu(), projectId);
                     result.add(dslCountMetrics);
                 } else if (GatewayMetricsTypeEnum.QUERY_DSL_TOTAL_COST.getType().equals(metricsType)) {
-                    VariousLineChartMetrics dslTotalCostMetrics = gatewayMetricsService.getDslTotalCostMetrics(startTime, endTime, dto.getTopNu(), appId);
+                    VariousLineChartMetrics dslTotalCostMetrics = gatewayMetricsService.getDslTotalCostMetrics(startTime, endTime, dto.getTopNu(), projectId);
                     result.add(dslTotalCostMetrics);
                 }
             });
             // 获取所有dslMD5
-            nameList.addAll(getDslMd5List(appId, null, null).getData());
+            nameList.addAll(getDslMd5List(projectId, null, null).getData());
         }
         // 获取
         fillSortData(result, rawMetricsTypes, nameList, startTime, endTime, dto.getTopNu() == 0 ? 1 : dto.getTopNu());
@@ -390,7 +390,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<String>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime, Integer appId) {
+    public Result<List<String>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime, Integer projectId) {
         long oneHour = 60 * 60 * 1000L;
         if (endTime == null) {
             endTime = System.currentTimeMillis();
@@ -402,7 +402,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if ((endTime - startTime) > oneHour * 24 * 7) {
             return Result.buildFail("时间跨度不要超过一周");
         }
-        return Result.buildSucc(gatewayMetricsService.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, appId));
+        return Result.buildSucc(gatewayMetricsService.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, projectId));
     }
 
     /********************************************************** private methods **********************************************************/

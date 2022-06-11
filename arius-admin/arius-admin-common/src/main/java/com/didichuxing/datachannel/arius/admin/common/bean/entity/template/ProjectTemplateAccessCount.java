@@ -13,13 +13,13 @@ import java.util.Map;
  * @date: Create on 2019/2/27 下午2:19
  * @modified By D10865
  *
- * appid访问索引模板级别次数
+ * projectid访问索引模板级别次数
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
-public class AppIdTemplateAccessCount {
+public class ProjectTemplateAccessCount {
     /**
      * 索引模板主键
      */
@@ -35,15 +35,15 @@ public class AppIdTemplateAccessCount {
     /**
      * 集群名称
      */
-    private String clusterName;
+    private String  clusterName;
     /**
      * 应用账号
      */
-    private Integer appId;
+    private Integer projectId;
     /**
      * 访问索引模板次数，为@accessDetailInfo 访问索引明细的总次数
      */
-    private Long count;
+    private Long    count;
     /**
      *访问索引名称明细数据,key不能是.开头，否则写入es失败
      */

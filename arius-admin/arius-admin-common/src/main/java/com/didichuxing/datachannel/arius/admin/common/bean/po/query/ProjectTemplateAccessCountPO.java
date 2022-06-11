@@ -3,13 +3,11 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.query;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -17,14 +15,14 @@ import java.util.Map;
  * @date: Create on 2019/2/27 下午2:19
  * @modified By D10865
  *
- * appid访问索引模板级别次数
+ * project访问索引模板级别次数
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
-@ApiModel(value = "AppIdTemplateAccessCountPO", description = "appid访问索引模板级别次数")
-public class AppIdTemplateAccessCountPO extends BaseESPO {
+@ApiModel(value = "ProjectTemplateAccessCountPO", description = "Project访问索引模板级别次数")
+public class ProjectTemplateAccessCountPO extends BaseESPO {
 
     /**
      * 索引模板主键
@@ -41,16 +39,16 @@ public class AppIdTemplateAccessCountPO extends BaseESPO {
     /**
      * 集群名称
      */
-    private String clusterName;
+    private String  clusterName;
     /**
      * 应用账号
      */
 
-    private Integer appId;
+    private Integer projectId;
     /**
      * 访问索引模板次数，为@accessDetailInfo 访问索引明细的总次数
      */
-    private Long count;
+    private Long    count;
     /**
      *访问索引名称明细数据,key不能是.开头，否则写入es失败
      */
@@ -80,7 +78,7 @@ public class AppIdTemplateAccessCountPO extends BaseESPO {
     @Override
     public String getKey() {
         // 由于存在索引双写的情况，需要加上索引模板主键作为联合id
-        return String.format("%d_%d_%s", templateId, appId, date);
+        return String.format("%d_%d_%s", templateId, projectId, date);
     }
 
     @JSONField(serialize = false)

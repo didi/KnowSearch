@@ -17,30 +17,30 @@ public class GatewayJoinLogService {
     @Autowired
     private GatewayJoinESDAO gatewayJoinESDAO;
 
-    public Result<Long> getSearchCountByAppid(Long appId, Long startDate, Long endDate){
-        return Result.buildSucc(gatewayJoinESDAO.getSearchCountByAppid(appId, startDate, endDate));
+    public Result<Long> getSearchCountByProjectId(Long projectId, Long startDate, Long endDate){
+        return Result.buildSucc(gatewayJoinESDAO.getSearchCountByProjectId(projectId, startDate, endDate));
     }
 
-    public Result<List<GatewayJoin>> getGatewayErrorList(Long appId, Long startDate, Long endDate) {
+    public Result<List<GatewayJoin>> getGatewayErrorList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinESDAO.getGatewayErrorList(appId, startDate, endDate),
+                gatewayJoinESDAO.getGatewayErrorList(projectId, startDate, endDate),
                 GatewayJoin.class));
     }
 
-    public Result<List<GatewayJoin>> getGatewaySlowList(Long appId, Long startDate, Long endDate) {
+    public Result<List<GatewayJoin>> getGatewaySlowList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinESDAO.getGatewaySlowList(appId, startDate, endDate),
+                gatewayJoinESDAO.getGatewaySlowList(projectId, startDate, endDate),
                 GatewayJoin.class));
     }
 
-    public List<GatewayJoin> getGatewaySlowList(Integer appId, GatewayJoinQueryDTO queryDTO) {
+    public List<GatewayJoin> getGatewaySlowList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
         initGatewaySlowQueryCondition(queryDTO);
-        return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinSlowList(appId, queryDTO), GatewayJoin.class);
+        return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinSlowList(projectId, queryDTO), GatewayJoin.class);
     }
 
-    public List<GatewayJoin> getGatewayJoinErrorList(Integer appId, GatewayJoinQueryDTO queryDTO) {
+    public List<GatewayJoin> getGatewayJoinErrorList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
         initQueryTimeRange(queryDTO);
-        return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinErrorList(appId, queryDTO), GatewayJoin.class);
+        return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinErrorList(projectId, queryDTO), GatewayJoin.class);
     }
 
     private void initGatewaySlowQueryCondition(GatewayJoinQueryDTO queryDTO) {

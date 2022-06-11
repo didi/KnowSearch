@@ -99,15 +99,15 @@ public class DslTemplate {
     /**
      * dsink写入时间
      */
-    private Long sinkTime;
+    private Long    sinkTime;
     /**
-     * appid
+     * projectId
      */
-    private Integer appid;
+    private Integer projectId;
     /**
      * 查询语句
      */
-    private String dsl;
+    private String  dsl;
     /**
      * 平均gateway处理耗时
      */

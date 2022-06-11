@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.DigitResponsible;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplatePO extends BasePO implements DigitResponsible {
+public class IndexTemplatePO extends BasePO {
 
     private Integer id;
 

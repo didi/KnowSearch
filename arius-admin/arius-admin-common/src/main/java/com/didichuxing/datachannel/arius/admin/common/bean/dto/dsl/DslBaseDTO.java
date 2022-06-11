@@ -36,7 +36,7 @@ public class DslBaseDTO {
      * @return
      */
     @JSONField(serialize = false)
-    public String getAppidDslTemplateMd5() {
+    public String getProjectIdDslTemplateMd5() {
         return String.format("%d_%s", this.projectId, this.dslTemplateMd5);
     }
 

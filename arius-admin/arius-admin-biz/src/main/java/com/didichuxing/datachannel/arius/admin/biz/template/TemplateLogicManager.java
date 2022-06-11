@@ -68,11 +68,11 @@ public interface TemplateLogicManager {
      * 新建逻辑模板
      * @param param 模板信息
      * @param operator 操作人
-     * @param appId appId
+     * @param projectId projectId
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId);
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId);
 
     /**
      * 获取所有逻辑模板聚合

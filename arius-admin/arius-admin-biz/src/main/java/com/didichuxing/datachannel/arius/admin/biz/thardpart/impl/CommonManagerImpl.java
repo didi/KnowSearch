@@ -82,7 +82,7 @@ public class CommonManagerImpl implements CommonManager {
     }
 
     @Override
-    public Result<Void> verifyApp(HttpServletRequest request,  Integer appId, String appSecret) throws UnsupportedEncodingException {
+    public Result<Void> verifyApp(HttpServletRequest request,  Integer projectId, String appSecret) throws UnsupportedEncodingException {
         appSecret = URLDecoder.decode(appSecret, "UTF-8");
         return appService.verifyAppCode(appId, appSecret);
     }**/

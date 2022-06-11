@@ -31,23 +31,23 @@ public class DslAnalyzeResultQpsESDAO extends BaseESDAO {
     }
 
     /**
-     * 批量保存appid 查询模板qps信息到es
+     * 批量保存projectId 查询模板qps信息到es
      *
-     * @param appIdTemplateQpsInfoList
+     * @param projectIdTemplateQpsInfoList
      * @return
      */
-    public boolean bathInsert(List<DslAnalyzeResultQpsPO> appIdTemplateQpsInfoList) {
+    public boolean bathInsert(List<DslAnalyzeResultQpsPO> projectIdTemplateQpsInfoList) {
 
-        return updateClient.batchInsert( EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, appIdTemplateQpsInfoList);
+        return updateClient.batchInsert( EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, projectIdTemplateQpsInfoList);
     }
 
     /**
-     * 获取最大查询qps根据appid和templatemd5
+     * 获取最大查询qps根据projectid和templatemd5
      *
      * @param dslBase
      * @return
      */
-    public DslAnalyzeResultQpsPO getMaxAppIdTemplateQpsInfoByAppIdTemplateMd5(DslBase dslBase) {
+    public DslAnalyzeResultQpsPO getMaxProjectIdTemplateQpsInfoByProjectIdTemplateMd5(DslBase dslBase) {
         if (null == dslBase) {
             return null;
         }

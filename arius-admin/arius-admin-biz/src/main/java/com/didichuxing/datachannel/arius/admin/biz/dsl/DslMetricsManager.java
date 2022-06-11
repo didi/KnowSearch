@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DslMetricsManager {
     /**
-     * 根据appId获取dsl的指标信息
+     * 根据projectId获取dsl的指标信息
      * @param projectId 应用账号
      * @param startDate 开始时刻
      * @param endDate 结束时刻

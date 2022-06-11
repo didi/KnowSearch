@@ -26,15 +26,15 @@ public class GatewayJoin {
     /**
      * 请求id
      */
-    private String requestId;
+    private String  requestId;
     /**
-     * appid
+     * projectid
      */
-    private Integer appid;
+    private Integer projectId;
     /**
      * 索引名称
      */
-    private String indices;
+    private String  indices;
     /**
      * type名称
      */

@@ -307,7 +307,7 @@ public class DslsConstant {
      */
     public static final String GET_SEARCH_REQUEST_BY_INDEX_NAME                              = "GatewayJoinEsDao/getSearchRequestByIndexName";
     /**
-     * 根据appid获得对应的查询99分位
+     * 根据projectId获得对应的查询99分位
      */
     public static final String GET_QUERY_RT_BY_APPID                                         = "GatewayJoinEsDao/getQueryRtByAppId";
     /**

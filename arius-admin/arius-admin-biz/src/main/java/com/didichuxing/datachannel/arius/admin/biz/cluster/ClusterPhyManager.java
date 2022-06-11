@@ -219,7 +219,7 @@ public interface ClusterPhyManager {
      * @param projectId
      * @return
      */
-    List<ClusterPhy> getClusterPhysByAppId(Integer projectId);
+    List<ClusterPhy> getClusterPhysByProjectId(Integer projectId);
 
     /**
      * 获取项目下有访问权限的物理集群列表
