@@ -5,8 +5,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,9 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
@@ -164,11 +166,14 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 .collect(
                     Collectors.toMap(region -> String.valueOf(region.getId()), ClusterRegion::getName, (r1, r2) -> r1));
 
-            Map<String, BigDecimal> nodeDiskUsageMap = esClusterNodeService.syncGetNodesDiskUsage(cluster);
+            Map<String, Triple<Long, Long, Double>> nodeDiskUsageMap = esClusterNodeService.syncGetNodesDiskUsage(cluster);
             roleHostList.forEach(vo -> {
                 Optional.ofNullable(regionMap.get(String.valueOf(vo.getRegionId()))).ifPresent(vo::setRegionName);
-                Optional.ofNullable(nodeDiskUsageMap.get(vo.getNodeSet()))
-                    .ifPresent(diskUsagePercent -> vo.setDiskUsagePercent(diskUsagePercent.doubleValue()));
+                Optional.ofNullable(nodeDiskUsageMap.get(vo.getNodeSet())).ifPresent(triple -> {
+                    vo.setDiskTotal(triple.v1());
+                    vo.setDiskUsage(triple.v2());
+                    vo.setDiskUsagePercent(triple.v3());
+                });
             });
         }
         return roleHostList;

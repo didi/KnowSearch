@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
@@ -292,22 +293,34 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public Map<String, BigDecimal> syncGetNodesDiskUsage(String cluster) {
-        Map<String, BigDecimal> diskUsageMap = new HashMap<>();
+    public Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster) {
+        Map<String, Triple<Long, Long, Double>> diskUsageMap = new HashMap<>();
         List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
-
+       
+        
         if (CollectionUtils.isNotEmpty(nodeStatsList)) {
-
             // 遍历节点，获得节点和对应的磁盘使用率
             nodeStatsList.forEach(nodeStats -> {
+
                 FSNode fsNode = nodeStats.getFs();
                 String nodeName = nodeStats.getName();
-                long total = fsNode.getTotal().getTotalInBytes();
-                long used = total - fsNode.getTotal().getFreeInBytes();
-                if (StringUtils.isNotBlank(nodeName) && total > 0 && used >= 0 && used <= total) {
-                    diskUsageMap.put(nodeName,
-                        BigDecimal.valueOf(used).divide(BigDecimal.valueOf(total), 5, RoundingMode.HALF_UP));
+                long totalFsBytes = fsNode.getTotal().getTotalInBytes();
+                long usageFsBytes = totalFsBytes - fsNode.getTotal().getFreeInBytes();
+                //Triple<diskTotal, diskUsage, diskUsagePercent>
+                Triple<Long, Long, Double> triple = new Triple<>();
+                if (totalFsBytes > 0) {
+                    triple.setV1(totalFsBytes);
                 }
+                if (usageFsBytes >= 0 && usageFsBytes <= totalFsBytes) {
+                    triple.setV2(usageFsBytes);
+                }
+
+                if (StringUtils.isNotBlank(nodeName) && totalFsBytes > 0 && usageFsBytes >= 0
+                    && usageFsBytes <= totalFsBytes) {
+                    triple.setV3(BigDecimal.valueOf(usageFsBytes)
+                        .divide(BigDecimal.valueOf(totalFsBytes), 5, RoundingMode.HALF_UP).doubleValue());
+                }
+                diskUsageMap.put(nodeName, triple);
             });
         }
         return diskUsageMap;

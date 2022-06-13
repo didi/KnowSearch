@@ -74,4 +74,10 @@ public class ESClusterRoleHostVO extends BaseVO {
 
     @ApiModelProperty("磁盘使用率")
     private Double  diskUsagePercent;
+
+    @ApiModelProperty("磁盘总量(byte)")
+    private Long    diskTotal;
+
+    @ApiModelProperty("磁盘使用大小(byte)")
+    private Long    diskUsage;
 }
