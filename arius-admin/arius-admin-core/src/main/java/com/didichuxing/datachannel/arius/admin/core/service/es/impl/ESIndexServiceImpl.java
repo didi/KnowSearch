@@ -7,9 +7,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -512,6 +515,17 @@ public class ESIndexServiceImpl implements ESIndexService {
             totalCheckpoint.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
         }));
         return totalCheckpoint;
+    }
+
+    @Override
+    public List<IndicesDistributionVO> indicesDistribution(String cluster) {
+        List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
+        // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
+        return catIndexResultList.stream().map(catIndexResult -> {
+            IndicesDistributionVO vo = new IndicesDistributionVO();
+            BeanUtils.copyProperties(catIndexResult, vo);
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /***************************************** private method ****************************************************/

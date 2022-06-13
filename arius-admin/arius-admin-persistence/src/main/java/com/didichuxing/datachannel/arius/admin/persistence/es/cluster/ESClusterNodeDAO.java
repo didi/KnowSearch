@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import org.springframework.stereotype.Repository;
@@ -35,6 +36,19 @@ public class ESClusterNodeDAO extends BaseESDAO {
         }
 
         return count;
+    }
+
+
+    /**
+     * 获取nodes信息
+     * @param cluster
+     * @return
+     */
+    public ESClusterNodesStatsResponse getNodeState(String cluster) {
+        ESClient esClient = esOpClient.getESClient(cluster);
+        ESClusterNodesStatsResponse response =  esClient.admin().cluster().nodeStats(new ESClusterNodesStatsRequest())
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        return response;
     }
 
 }

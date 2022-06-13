@@ -4,8 +4,10 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyQuickComman
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,25 +26,32 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
 
     @Autowired
     protected ClusterPhyService clusterPhyService;
-    @Autowired
-    protected ESClusterDAO esClusterDAO;
+
     @Autowired
     protected ESClusterService esClusterService;
+    @Autowired
+    protected ESClusterNodeService esClusterNodeService;
+
+    @Autowired
+    protected ESIndexService esIndexService;
+
+    @Autowired
+    protected ESShardService esShardService;
 
 
     @Override
     public Result<List<NodeStateVO>> nodeStateAnalysis(String cluster) {
-        return Result.buildSucc(esClusterService.nodeStateAnalysis(cluster));
+        return Result.buildSucc(esClusterNodeService.nodeStateAnalysis(cluster));
     }
 
     @Override
     public Result<List<IndicesDistributionVO>> indicesDistribution(String cluster) {
-        return Result.buildSucc(esClusterService.indicesDistribution(cluster));
+        return Result.buildSucc(esIndexService.indicesDistribution(cluster));
     }
 
     @Override
     public Result<List<ShardDistributionVO>> shardDistribution(String cluster) {
-        return Result.buildSucc(esClusterService.shardDistribution(cluster));
+        return Result.buildSucc(esShardService.shardDistribution(cluster));
     }
 
     @Override
@@ -70,7 +79,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
 
     @Override
     public Result<ShardAssignmentDescriptionVO> shardAssignmentDescription(String cluster) {
-        ShardAssignmentDescriptionVO vo = esClusterService.shardAssignmentDescription(cluster);
+        ShardAssignmentDescriptionVO vo = esShardService.shardAssignmentDescription(cluster);
         if (vo == null) {
             return Result.buildFail();
         }
@@ -88,7 +97,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
 
     @Override
     public Result<Void> clearFieldDataMemory(String cluster) {
-        boolean result =esClusterService.clearFieldDataMemory(cluster);
+        boolean result = esClusterService.clearFieldDataMemory(cluster);
         if (result) {
             return Result.buildSucc();
         }

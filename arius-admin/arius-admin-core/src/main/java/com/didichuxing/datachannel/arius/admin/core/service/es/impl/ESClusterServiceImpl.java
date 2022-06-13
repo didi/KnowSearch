@@ -402,54 +402,6 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<NodeStateVO> nodeStateAnalysis(String cluster) {
-        ESClusterNodesStatsResponse response = esClusterDAO.getNodeState(cluster);
-        List<NodeStateVO> vos = new ArrayList<>();
-        response.getNodes().keySet().forEach(key->{
-            ClusterNodeStats clusterNodeStats = response.getNodes().get(key);
-            NodeStateVO vo = new NodeStateVO();
-
-            vo.setNodeName(clusterNodeStats.getName());
-            vo.setSegmentsMemory(clusterNodeStats.getIndices().getSegments().getMemoryInBytes());
-            vo.setOsCpu(clusterNodeStats.getOs().getCpu().getPercent());
-            vo.setLoadAverage1m(clusterNodeStats.getOs().getCpu().getLoadAverage().getOneM());
-            vo.setLoadAverage5m(clusterNodeStats.getOs().getCpu().getLoadAverage().getFiveM());
-            vo.setLoadAverage15m(clusterNodeStats.getOs().getCpu().getLoadAverage().getFifteenM());
-            vo.setJvmHeapUsedPercent(clusterNodeStats.getJvm().getMem().getHeapUsedPercent());
-            vo.setThreadsCount(clusterNodeStats.getJvm().getThreads().getCount());
-            vo.setCurrentOpen(clusterNodeStats.getHttp().getCurrentOpen());
-            vo.setThreadPoolWriteActive(clusterNodeStats.getThreadPool().getWrite().getActive());
-            vo.setThreadPoolWriteQueue(clusterNodeStats.getThreadPool().getWrite().getQueue());
-            vo.setThreadPoolWriteReject(clusterNodeStats.getThreadPool().getWrite().getRejected());
-            vo.setThreadPoolSearchActive(clusterNodeStats.getThreadPool().getSearch().getActive());
-            vo.setThreadPoolSearchReject(clusterNodeStats.getThreadPool().getSearch().getRejected());
-            vo.setThreadPoolSearchQueue(clusterNodeStats.getThreadPool().getSearch().getQueue());
-            vo.setThreadPoolManagementActive(clusterNodeStats.getThreadPool().getManagement().getActive());
-            vo.setThreadPoolManagementReject(clusterNodeStats.getThreadPool().getManagement().getRejected());
-            vo.setThreadPoolManagementQueue(clusterNodeStats.getThreadPool().getManagement().getQueue());
-
-            vos.add(vo);
-        });
-        return vos;
-    }
-
-    @Override
-    public List<IndicesDistributionVO> indicesDistribution(String cluster) {
-        ESIndicesCatIndicesResponse response = esClusterDAO.catIndices(cluster);
-        // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
-        return response.getCatIndexResults().stream().map(catIndexResult -> {
-            IndicesDistributionVO vo = new IndicesDistributionVO();
-            BeanUtils.copyProperties(catIndexResult, vo);
-            return vo;
-        }).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ShardDistributionVO> shardDistribution(String cluster) {
-        return  esClusterDAO.catShard(cluster);
-    }
-
-    @Override
     public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
         String response = esClusterDAO.pendingTask(cluster);
         if (null!=response){
@@ -474,16 +426,6 @@ public class ESClusterServiceImpl implements ESClusterService {
     public String hotThreadAnalysis(String cluster) {
         String response = esClusterDAO.hotThread(cluster);
         return response;
-    }
-
-    @Override
-    public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
-        String response = esClusterDAO.shardAssignment(cluster);
-        if (null!=response){
-            return buildShardAssignment(JSONObject.parseObject(response));
-        }else {
-            return null;
-        }
     }
 
     @Override
@@ -518,27 +460,5 @@ public class ESClusterServiceImpl implements ESClusterService {
             });
         });
         return vos;
-    }
-
-    private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
-        ShardAssignmentDescriptionVO descriptionVO = new ShardAssignmentDescriptionVO();
-        descriptionVO.setShard((Integer) responseJson.get("shard"));
-        descriptionVO.setIndex((String) responseJson.get("responseJson"));
-        descriptionVO.setPrimary((Boolean) responseJson.get("primary"));
-        descriptionVO.setCurrentState((String) responseJson.get("current_state"));
-        JSONArray decisionsArray = responseJson.getJSONArray("node_allocation_decisions");
-        List<ShardAssignmenNodeVO> decisions = new ArrayList<>();
-        for (int i = 0; i < decisionsArray.size(); i++) {
-            ShardAssignmenNodeVO decisionMap = new ShardAssignmenNodeVO();
-            JSONObject decisionObject = decisionsArray.getJSONObject(i);
-            decisionMap.setNodeName((String) decisionObject.get("node_name"));
-            JSONArray deciders = decisionObject.getJSONArray("deciders");
-            JSONObject decider = (JSONObject) deciders.get(0);
-            decisionMap.setNodeDecide((String) decider.get("decider"));
-            decisionMap.setExplanation((String) decider.get("explanation"));
-            decisions.add(decisionMap);
-        }
-        descriptionVO.setDecisions(decisions);
-        return descriptionVO;
     }
 }

@@ -12,12 +12,14 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +58,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
 
     @Autowired
     private ESClusterNodeDAO esClusterNodeDAO;
+
 
     @Override
     public Map<String, ClusterNodeStats> syncGetNodeFsStatsMap(String clusterName) {
@@ -292,6 +295,38 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         clusterMemInfo.setMemUsedPercent(100 - clusterMemInfo.getMemFreePercent());
 
         return clusterMemInfo;
+    }
+
+    @Override
+    public List<NodeStateVO> nodeStateAnalysis(String cluster) {
+        ESClusterNodesStatsResponse response = esClusterNodeDAO.getNodeState(cluster);
+        List<NodeStateVO> vos = new ArrayList<>();
+        response.getNodes().keySet().forEach(key->{
+            ClusterNodeStats clusterNodeStats = response.getNodes().get(key);
+            NodeStateVO vo = new NodeStateVO();
+
+            vo.setNodeName(clusterNodeStats.getName());
+            vo.setSegmentsMemory(clusterNodeStats.getIndices().getSegments().getMemoryInBytes());
+            vo.setOsCpu(clusterNodeStats.getOs().getCpu().getPercent());
+            vo.setLoadAverage1m(clusterNodeStats.getOs().getCpu().getLoadAverage().getOneM());
+            vo.setLoadAverage5m(clusterNodeStats.getOs().getCpu().getLoadAverage().getFiveM());
+            vo.setLoadAverage15m(clusterNodeStats.getOs().getCpu().getLoadAverage().getFifteenM());
+            vo.setJvmHeapUsedPercent(clusterNodeStats.getJvm().getMem().getHeapUsedPercent());
+            vo.setThreadsCount(clusterNodeStats.getJvm().getThreads().getCount());
+            vo.setCurrentOpen(clusterNodeStats.getHttp().getCurrentOpen());
+            vo.setThreadPoolWriteActive(clusterNodeStats.getThreadPool().getWrite().getActive());
+            vo.setThreadPoolWriteQueue(clusterNodeStats.getThreadPool().getWrite().getQueue());
+            vo.setThreadPoolWriteReject(clusterNodeStats.getThreadPool().getWrite().getRejected());
+            vo.setThreadPoolSearchActive(clusterNodeStats.getThreadPool().getSearch().getActive());
+            vo.setThreadPoolSearchReject(clusterNodeStats.getThreadPool().getSearch().getRejected());
+            vo.setThreadPoolSearchQueue(clusterNodeStats.getThreadPool().getSearch().getQueue());
+            vo.setThreadPoolManagementActive(clusterNodeStats.getThreadPool().getManagement().getActive());
+            vo.setThreadPoolManagementReject(clusterNodeStats.getThreadPool().getManagement().getRejected());
+            vo.setThreadPoolManagementQueue(clusterNodeStats.getThreadPool().getManagement().getQueue());
+
+            vos.add(vo);
+        });
+        return vos;
     }
 
     /*********************************************private******************************************/

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 
@@ -61,4 +62,11 @@ public interface ESClusterNodeService {
      * @return 集群的内存使用信息统计
      */
      ClusterMemInfo synGetClusterMem(String cluster);
+
+    /**
+     * node_state分析
+     * @param cluster
+     * @return
+     */
+    List<NodeStateVO> nodeStateAnalysis(String cluster);
 }

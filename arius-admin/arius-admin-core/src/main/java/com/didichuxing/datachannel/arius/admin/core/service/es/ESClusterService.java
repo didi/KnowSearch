@@ -203,26 +203,6 @@ public interface ESClusterService {
 
     ESClusterHealthResponse syncGetClusterHealthAtIndicesLevel(String phyClusterName);
 
-    /**
-     * node_state分析
-     * @param cluster
-     * @return
-     */
-    List<NodeStateVO> nodeStateAnalysis(String cluster);
-
-    /**
-     * indices分布
-     * @param cluster
-     * @return
-     */
-    List<IndicesDistributionVO> indicesDistribution(String cluster);
-
-    /**
-     * shard分布
-     * @param cluster
-     * @return
-     */
-    List<ShardDistributionVO> shardDistribution(String cluster);
 
     /**
      * pending task分析
@@ -244,13 +224,6 @@ public interface ESClusterService {
      * @return
      */
     String hotThreadAnalysis(String cluster);
-
-    /**
-     * shard分配说明
-     * @param cluster
-     * @return
-     */
-    ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster);
 
     /**
      * 异常shard分配重试
