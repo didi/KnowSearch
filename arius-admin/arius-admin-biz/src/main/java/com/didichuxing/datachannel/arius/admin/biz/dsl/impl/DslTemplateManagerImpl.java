@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.dsl.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
+import com.didichuxing.datachannel.arius.admin.biz.page.DslTemplatePageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
@@ -63,9 +64,9 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     @Override
     public PaginationResult<DslTemplateVO> getDslTemplatePage(Integer appId, DslTemplateConditionDTO queryDTO) {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(DSL_TEMPLATE.getPageSearchType());
-        if (baseHandle instanceof DslTemplatePageSearchHandle1) {
-            DslTemplatePageSearchHandle1 handle = (DslTemplatePageSearchHandle1) baseHandle;
-            return handle.doPageHandle(queryDTO, null, appId);
+        if (baseHandle instanceof DslTemplatePageSearchHandle) {
+            DslTemplatePageSearchHandle handle = (DslTemplatePageSearchHandle) baseHandle;
+            return handle.doPage(queryDTO, appId);
         }
 
         LOGGER.warn("class=DslTemplateManagerImpl||method=getDslTemplatePage||msg=failed to get the DslTemplatePageSearchHandle");
