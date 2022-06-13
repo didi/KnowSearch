@@ -207,28 +207,6 @@ public interface ClusterPhyManager {
     PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId);
 
     /**
-     * 获取项目下指定权限的物理集群列表
-     * @param appId
-     * @param authType
-     * @return
-     */
-    List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer appId, Integer authType);
-
-    /**
-     * 获取项目下有管理权限的物理集群列表
-     * @param appId
-     * @return
-     */
-    List<ClusterPhy> getClusterPhysByAppId(Integer appId);
-
-    /**
-     * 获取项目下有访问权限的物理集群列表
-     * @param appId
-     * @return
-     */
-    List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer appId);
-
-    /**
      * 构建物理集群角色信息
      * @param cluster
      */

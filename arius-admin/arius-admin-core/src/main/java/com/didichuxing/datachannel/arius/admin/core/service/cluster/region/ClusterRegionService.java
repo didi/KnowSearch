@@ -147,5 +147,5 @@ public interface ClusterRegionService {
      * @param clusterLogicIdList  逻辑集群id列表
      * @return
      */
-    List<ClusterRegion> listClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
+    List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
 }

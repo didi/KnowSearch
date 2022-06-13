@@ -409,7 +409,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             return new ArrayList<>();
         }
 
-        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
+        List<ClusterPhy> clusterPhyList = clusterPhyService.getAllClusters();
         Map<String, ClusterPhy> name2ClusterPhyMap = ConvertUtil.list2Map(clusterPhyList, ClusterPhy::getCluster);
 
         Map<Long, Plugin> pluginMap = new HashMap<>(0);

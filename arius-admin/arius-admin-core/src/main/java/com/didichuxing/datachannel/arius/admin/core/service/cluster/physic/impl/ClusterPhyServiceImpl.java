@@ -93,7 +93,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return 集群列表
      */
     @Override
-    public List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params) {
+    public List<ClusterPhy> getClustersByCondt(ClusterPhyDTO params) {
         List<ClusterPhyPO> clusterPOs = clusterDAO.listByCondition(ConvertUtil.obj2Obj(params, ClusterPhyPO.class));
 
         if (CollectionUtils.isEmpty(clusterPOs)) {
@@ -219,12 +219,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<ClusterPhy> listAllClusters() {
+    public List<ClusterPhy> getAllClusters() {
         return ConvertUtil.list2List(clusterDAO.listAll(), ClusterPhy.class);
     }
 
     @Override
-    public List<String> listAllClusterNameList() {
+    public List<String> getClusterNames() {
         List<String> clusterNameList = Lists.newArrayList();
         try {
             clusterNameList.addAll(clusterDAO.listAllName());
@@ -235,7 +235,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<ClusterPhy> listClustersByNames(List<String> names) {
+    public List<ClusterPhy> getClustersByNames(List<String> names) {
         if (CollectionUtils.isEmpty(names)) {
             return new ArrayList<>();
         }
@@ -253,22 +253,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     /**
-     * 集群是否存在
-     * @param clusterName 集群名字
-     * @return true 存在
-     */
-    @Override
-    public boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName) {
-        return list.stream().map(ClusterPhy::getCluster).anyMatch(cluster->cluster.equals(clusterName));
-    }
-
-    /**
      * 根据集群名称解析获取对应的插件列表
      * @param cluster 集群名称
      * @return
      */
     @Override
-    public List<Plugin> listClusterPlugins(String cluster) {
+    public List<Plugin> getClusterPlugins(String cluster) {
         ClusterPhyPO clusterPhy = clusterDAO.getByName(cluster);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return new ArrayList<>();
@@ -305,22 +295,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public ClusterPhy getClusterById(Integer phyClusterId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
         return ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
-    }
-
-    /**
-     * 获取写节点的个数
-     * @param cluster 集群
-     * @return count
-     */
-    @Override
-    public int getWriteClientCount(String cluster) {
-        ClusterPhyPO clusterPO = clusterDAO.getByName(cluster);
-
-        if (StringUtils.isBlank(clusterPO.getHttpWriteAddress())) {
-            return 1;
-        }
-
-        return clusterPO.getHttpWriteAddress().split(",").length;
     }
 
     /**

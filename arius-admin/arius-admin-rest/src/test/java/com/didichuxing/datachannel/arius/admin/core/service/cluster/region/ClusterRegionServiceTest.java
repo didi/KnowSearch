@@ -51,7 +51,7 @@ public class ClusterRegionServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void listClusterRegionsByLogicIdsTest() {
-        List<ClusterRegion> clusterRegions = clusterRegionService.listClusterRegionsByLogicIds(Lists.newArrayList(621L, 453L, 451L));
+        List<ClusterRegion> clusterRegions = clusterRegionService.getClusterRegionsByLogicIds(Lists.newArrayList(621L,453L, 451L));
         Assertions.assertNotNull(clusterRegions);
     }
 }

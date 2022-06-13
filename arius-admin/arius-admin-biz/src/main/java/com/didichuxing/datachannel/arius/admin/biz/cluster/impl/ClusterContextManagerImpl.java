@@ -267,7 +267,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     public void flushClusterPhyContexts() {
         LOGGER.info("class=ClusterContextManagerImpl||method=flushClusterPhyContexts||msg=start...");
         long currentTimeMillis = System.currentTimeMillis();
-        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
+        List<ClusterPhy> clusterPhyList = clusterPhyService.getAllClusters();
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             LOGGER.info("class=ClusterContextManagerImpl||method=flushClusterLogicContexts||msg=finish...||consumingTime={}",
                     System.currentTimeMillis() - currentTimeMillis);
