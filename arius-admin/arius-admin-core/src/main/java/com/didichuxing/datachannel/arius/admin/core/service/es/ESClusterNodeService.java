@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -61,4 +62,13 @@ public interface ESClusterNodeService {
      * @return 集群的内存使用信息统计
      */
      ClusterMemInfo synGetClusterMem(String cluster);
+
+
+    /**
+     * 同步获取节点磁盘使用情况
+     *
+     * @param cluster 集群
+     * @return {@link Map}<{@link String}, {@link BigDecimal}>
+     */
+    Map<String, BigDecimal> syncGetNodesDiskUsage(String cluster);
 }

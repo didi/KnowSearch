@@ -8,9 +8,9 @@ public enum OpTaskHandleEnum {
     /**新增*/
     CLUSTER_NEW(OpTaskTypeEnum.CLUSTER_NEW.getType(), OpTaskConstant.CLUSTER_CREATE_TASK),
 
-    CLUSTER_EXPAND(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), OpTaskConstant.CLUSTER_INDECREASE_TASK),
+    CLUSTER_EXPAND(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), OpTaskConstant.CLUSTER_SCALE_TASK),
 
-    CLUSTER_SHRINK(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), OpTaskConstant.CLUSTER_INDECREASE_TASK),
+    CLUSTER_SHRINK(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), OpTaskConstant.CLUSTER_SCALE_TASK),
 
     CLUSTER_RESTART(OpTaskTypeEnum.CLUSTER_RESTART.getType(), OpTaskConstant.CLUSTER_RESTART_TASK),
 
@@ -70,7 +70,7 @@ class OpTaskConstant {
 
     public static final String CLUSTER_CREATE_TASK     = "clusterCreateTask";
 
-    public static final String CLUSTER_INDECREASE_TASK     = "clusterIndecreaseTask";
+    public static final String CLUSTER_SCALE_TASK = "clusterScaleTask";
 
     public static final String CLUSTER_RESTART_TASK     = "clusterRestartTask";
 
