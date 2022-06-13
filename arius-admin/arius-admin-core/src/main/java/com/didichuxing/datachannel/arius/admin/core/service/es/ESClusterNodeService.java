@@ -1,12 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 
 /**
  * Created by linyunan on 2021-08-09
@@ -65,10 +67,11 @@ public interface ESClusterNodeService {
 
 
     /**
+     * 同步节点磁盘使用情况
      * 同步获取节点磁盘使用情况
      *
      * @param cluster 集群
-     * @return {@link Map}<{@link String}, {@link BigDecimal}>
+     * @return {@link Map}<{@link String}, {@link Triple}<{@link Long}, {@link Long}, {@link Double}>>
      */
-    Map<String, BigDecimal> syncGetNodesDiskUsage(String cluster);
+    Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster);
 }
