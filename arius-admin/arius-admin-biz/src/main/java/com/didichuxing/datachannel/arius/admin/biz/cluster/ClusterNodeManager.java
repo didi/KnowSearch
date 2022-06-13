@@ -42,6 +42,4 @@ public interface ClusterNodeManager {
      * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
      */
     Result<List<ESClusterRoleHostVO>> listClusterPhyNode(Integer clusterId);
-
-    Result<List<ESClusterRoleHostVO>> listClusterPhyInstance(Integer clusterId);
 }
