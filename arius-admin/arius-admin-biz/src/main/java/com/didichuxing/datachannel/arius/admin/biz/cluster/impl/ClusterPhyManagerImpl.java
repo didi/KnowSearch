@@ -292,6 +292,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         List<String> clusters = Lists.newArrayList();
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        if (clusterLogic == null) {
+            return Result.buildFail("选定的逻辑集群不存在");
+        }
         ClusterRegion logicClusterRegions = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
         if (null != logicClusterRegions) {
             return Result.buildSucc(clusters);
@@ -801,20 +804,22 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (clusterLogicId == null && clusterLogicType == null) {
             return Result.buildFail("传入的参数错误");
         }
-
+        Result<List<String>> canBeAssociatedClustersPhyNames = Result.buildSucc(Lists.newArrayList());
         if (clusterLogicId != null) {
             ClusterLogic clusterLogicById = clusterLogicService.getClusterLogicById(clusterLogicId);
             if (clusterLogicById == null) {
                 return Result.buildFail("选定的逻辑集群不存在");
             }
             clusterLogicType = clusterLogicById.getType();
+            canBeAssociatedClustersPhyNames = listCanBeAssociatedRegionOfClustersPhys(clusterLogicType, clusterLogicId);
+        } else {
+            canBeAssociatedClustersPhyNames = listCanBeAssociatedClustersPhys(clusterLogicType);
         }
 
         if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
             return Result.buildParamIllegal("逻辑集群类型非法");
         }
 
-        Result<List<String>> canBeAssociatedClustersPhyNames = clusterContextManager.getCanBeAssociatedClustersPhys(clusterLogicType, clusterLogicId);
         if (canBeAssociatedClustersPhyNames.failed()) {
             LOGGER.warn("class=ClusterPhyManagerImpl||method=getPhyClusterNameWithSameEsVersionAfterBuildLogic||errMsg={}",
                     canBeAssociatedClustersPhyNames.getMessage());
