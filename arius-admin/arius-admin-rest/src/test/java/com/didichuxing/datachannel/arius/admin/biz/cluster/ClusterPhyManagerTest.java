@@ -303,7 +303,7 @@ class ClusterPhyManagerTest {
 
         when(mockClusterRoleHostService.getByRoleClusterIds(Collections.singletonList(0L))).thenReturn(new HashMap<>());
 
-        final List<ClusterPhyVO> result = clusterPhyManager.getClusterPhys(clusterPhyDTO);
+        final List<ClusterPhyVO> result = clusterPhyManager.listClusterPhys(clusterPhyDTO);
         ClusterPhyVO vo = new ClusterPhyVO();
         BeanUtils.copyProperties(vo,clusterPhyVO);
         vo.setResourceType(1);
@@ -321,7 +321,7 @@ class ClusterPhyManagerTest {
 
         when(mockClusterRoleHostService.getByRoleClusterIds(Collections.singletonList(0L))).thenReturn(new HashMap<>());
 
-        final List<ClusterPhyVO> result = clusterPhyManager.getClusterPhys(clusterPhyDTO);
+        final List<ClusterPhyVO> result = clusterPhyManager.listClusterPhys(clusterPhyDTO);
 
         assertEquals(Collections.emptyList(), result);
     }
@@ -336,9 +336,9 @@ class ClusterPhyManagerTest {
 
         when(mockClusterRoleService.getAllRoleClusterByClusterId(0)).thenReturn(clusterRoleInfos);
 
-        when(mockClusterRoleHostService.getByRoleClusterIds(Arrays.asList(0L))).thenReturn(new HashMap<>());
+        when(mockClusterRoleHostService.getByRoleClusterIds(Collections.singletonList(0L))).thenReturn(new HashMap<>());
 
-        final List<ClusterPhyVO> result = clusterPhyManager.getClusterPhys(clusterPhyDTO);
+        final List<ClusterPhyVO> result = clusterPhyManager.listClusterPhys(clusterPhyDTO);
         ClusterPhyVO vo = new ClusterPhyVO();
         BeanUtils.copyProperties(vo,clusterPhyVO);
         vo.setResourceType(1);
@@ -354,9 +354,9 @@ class ClusterPhyManagerTest {
         when(mockEsClusterService.syncGetClusterStats(CLUSTER)).thenReturn(esClusterStatsResponse);
 
         when(mockClusterRoleService.getAllRoleClusterByClusterId(0)).thenReturn(Collections.emptyList());
-        when(mockClusterRoleHostService.getByRoleClusterIds(Arrays.asList(0L))).thenReturn(new HashMap<>());
+        when(mockClusterRoleHostService.getByRoleClusterIds(Collections.singletonList(0L))).thenReturn(new HashMap<>());
 
-        final List<ClusterPhyVO> result = clusterPhyManager.getClusterPhys(clusterPhyDTO);
+        final List<ClusterPhyVO> result = clusterPhyManager.listClusterPhys(clusterPhyDTO);
 
         assertEquals(Collections.singletonList(clusterPhyVOWithNotRole), result);
     }
@@ -668,7 +668,7 @@ class ClusterPhyManagerTest {
     void testGetAppClusterPhyNames() {
         when(mockAppService.isSuperApp(0)).thenReturn(true);
         when(mockClusterPhyService.getAllClusters()).thenReturn(clusterPhyList);
-        assertEquals(Collections.singletonList(CLUSTER), clusterPhyManager.getAppClusterPhyNames(0));
+        assertEquals(Collections.singletonList(CLUSTER), clusterPhyManager.listClusterPhyNameByAppId(0));
     }
 
   
@@ -676,12 +676,12 @@ class ClusterPhyManagerTest {
     void testGetAppClusterPhyNodeNames() {
         
         when(mockEsClusterNodeService.syncGetNodeNames("clusterPhyName")).thenReturn(Collections.singletonList("value"));
-        assertEquals(Collections.singletonList("value"), clusterPhyManager.getAppClusterPhyNodeNames("clusterPhyName"));
+        assertEquals(Collections.singletonList("value"), clusterPhyManager.listClusterPhyNodeName("clusterPhyName"));
 
         when(mockEsClusterNodeService.syncGetNodeNames("clusterPhyName")).thenReturn(Collections.emptyList());
-        assertEquals(Collections.emptyList(), clusterPhyManager.getAppClusterPhyNodeNames("clusterPhyName"));
+        assertEquals(Collections.emptyList(), clusterPhyManager.listClusterPhyNodeName("clusterPhyName"));
 
-        assertEquals(Collections.emptyList(), clusterPhyManager.getAppClusterPhyNodeNames(null));
+        assertEquals(Collections.emptyList(), clusterPhyManager.listClusterPhyNodeName(null));
     }
     
 

@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -124,7 +123,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "根据AppId获取逻辑集群下的物理集群名称")
     public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
     }
 
     @GetMapping("/{templateId}/sameversion/clusternames")
@@ -137,15 +136,9 @@ public class ESPhyClusterController {
     @GetMapping("/{clusterPhyName}/nodes")
     @ResponseBody
     @ApiOperation(value = "获取物理集群下的节点名称")
+    @Deprecated
     public Result<List<String>> getAppClusterPhyNodeNames(@PathVariable String clusterPhyName) {
-        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNodeNames(clusterPhyName));
-    }
-
-    @GetMapping("/node/names")
-    @ResponseBody
-    @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
-    public Result<List<String>> getAppNodeNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getAppNodeNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNodeName(clusterPhyName));
     }
 
     @PostMapping("/page")

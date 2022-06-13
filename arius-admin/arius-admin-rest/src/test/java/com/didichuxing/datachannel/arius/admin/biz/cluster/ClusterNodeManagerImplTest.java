@@ -55,11 +55,11 @@ class ClusterNodeManagerImplTest {
     void listClusterPhyInstanceTest() {
         when(clusterPhyService.getClusterById(0)).thenReturn(getClusterPhy());
 
-        when(clusterRoleHostService.queryNodeByCondt(Mockito.any())).thenReturn(Collections.singletonList(getClusterRoleHost()));
+        when(clusterRoleHostService.getNodesByCluster(Mockito.any())).thenReturn(Collections.singletonList(getClusterRoleHost()));
 
         when(esClusterNodeService.syncGetNodesDiskUsage(PHY_CLUSTER_NAME)).thenReturn(new HashMap<>());
 
-        final Result<List<ESClusterRoleHostVO>> result = clusterNodeManager.listClusterPhyInstance(0);
+        final Result<List<ESClusterRoleHostVO>> result = clusterNodeManager.listClusterPhyNode(0);
 
         assertThat(result).isEqualTo(Result
                 .buildSucc(Collections.singletonList(getESClusterRoleHostVO())));
@@ -69,10 +69,10 @@ class ClusterNodeManagerImplTest {
     void listClusterPhyInstanceClusterRoleHostServiceReturnsNoItemsTest() {
         when(clusterPhyService.getClusterById(0)).thenReturn(getClusterPhy());
 
-        when(clusterRoleHostService.queryNodeByCondt(Mockito.any())).thenReturn(Collections.emptyList());
+        when(clusterRoleHostService.getNodesByCluster(Mockito.any())).thenReturn(Collections.emptyList());
         when(esClusterNodeService.syncGetNodesDiskUsage(PHY_CLUSTER_NAME)).thenReturn(new HashMap<>());
 
-        final Result<List<ESClusterRoleHostVO>> result = clusterNodeManager.listClusterPhyInstance(0);
+        final Result<List<ESClusterRoleHostVO>> result = clusterNodeManager.listClusterPhyNode(0);
 
         assertThat(result).isEqualTo(Result.buildSucc(Collections.emptyList()));
     }

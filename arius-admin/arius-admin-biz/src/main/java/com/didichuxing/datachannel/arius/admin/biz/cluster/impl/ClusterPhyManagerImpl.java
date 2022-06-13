@@ -239,7 +239,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<ClusterPhyVO> getClusterPhys(ClusterPhyDTO param) {
+    public List<ClusterPhyVO> listClusterPhys(ClusterPhyDTO param) {
         List<ClusterPhy> phyClusters = clusterPhyService.getClustersByCondt(param);
         return buildPhyClusters(ConvertUtil.list2List(phyClusters, ClusterPhyVO.class));
     }
@@ -436,7 +436,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> getAppClusterPhyNames(Integer appId) {
+    public List<String> listClusterPhyNameByAppId(Integer appId) {
         if (appService.isSuperApp(appId)) {
             //超级appId返回所有的集群
             List<ClusterPhy> phyList = clusterPhyService.getAllClusters();
@@ -454,7 +454,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId) {
-        List<String> clusterPhyNameList = getAppClusterPhyNames(appId);
+        List<String> clusterPhyNameList = listClusterPhyNameByAppId(appId);
         // No permission, cut branches and return
         if (CollectionUtils.isEmpty(clusterPhyNameList)) { return Result.buildSucc();}
 
@@ -485,7 +485,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> getAppClusterPhyNodeNames(String clusterPhyName) {
+    public List<String> listClusterPhyNodeName(String clusterPhyName) {
         if (null == clusterPhyName) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=getAppClusterPhyNodeNames||errMsg=集群名称为空");
             return Lists.newArrayList();
@@ -494,10 +494,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> getAppNodeNames(Integer appId) {
+    public List<String> listNodeNameByAppId(Integer appId) {
         List<String> appAuthNodeNames = Lists.newCopyOnWriteArrayList();
 
-        List<String> appClusterPhyNames = getAppClusterPhyNames(appId);
+        List<String> appClusterPhyNames = listClusterPhyNameByAppId(appId);
         appClusterPhyNames
             .forEach(clusterPhyName -> appAuthNodeNames.addAll(esClusterNodeService.syncGetNodeNames(clusterPhyName)));
 
