@@ -457,7 +457,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_LOGIC.getPageSearchType());
         if (baseHandle instanceof ClusterLogicPageSearchHandle) {
             ClusterLogicPageSearchHandle pageSearchHandle = (ClusterLogicPageSearchHandle) baseHandle;
-            return pageSearchHandle.selectPage(condition, appId);
+            return pageSearchHandle.doPage(condition, appId);
         }
 
         LOGGER.warn(

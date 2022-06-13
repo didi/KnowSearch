@@ -42,6 +42,4 @@ public class MetricsClusterPhyDTO extends BaseDTO {
 
     @ApiModelProperty("Top计算方式:max,avg")
     private String      topMethod;
-
-
 }

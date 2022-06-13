@@ -37,4 +37,6 @@ public class IndicesDistributionVO {
     private String storeSize;
     @ApiModelProperty("主分片大小")
     private String priStoreSize;
+    @ApiModelProperty("uuid")
+    private String uuid;
 }

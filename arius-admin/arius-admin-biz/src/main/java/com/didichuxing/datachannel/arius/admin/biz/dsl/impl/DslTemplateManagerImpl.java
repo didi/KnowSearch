@@ -66,7 +66,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(DSL_TEMPLATE.getPageSearchType());
         if (baseHandle instanceof DslTemplatePageSearchHandle) {
             DslTemplatePageSearchHandle handle = (DslTemplatePageSearchHandle) baseHandle;
-            return handle.selectPage(queryDTO, appId);
+            return handle.doPage(queryDTO, appId);
         }
 
         LOGGER.warn("class=DslTemplateManagerImpl||method=getDslTemplatePage||msg=failed to get the DslTemplatePageSearchHandle");

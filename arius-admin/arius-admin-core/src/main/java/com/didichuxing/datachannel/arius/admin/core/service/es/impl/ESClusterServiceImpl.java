@@ -10,7 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.PendingTaskAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.TaskMissionAnalysisVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -26,9 +27,6 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealth
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ESClusterNodesSettingResponse;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -41,14 +39,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
@@ -444,19 +441,23 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
         List<TaskMissionAnalysisVO> vos = new ArrayList<>();
+
         JSONObject nodes = responseJson.getJSONObject("nodes");
         nodes.keySet().forEach(key -> {
-            JSONObject node = (JSONObject) nodes.get(key);
-            JSONObject nodeTasks = (JSONObject) node.get("tasks");
-            nodeTasks.keySet().forEach(key1 -> {
-                TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
-                JSONObject nodeInfo = (JSONObject) nodeTasks.get(key1);
-                taskMissionAnalysisVO.setAction((String) nodeInfo.get("action"));
-                taskMissionAnalysisVO.setNode((String) nodeInfo.get("node"));
-                taskMissionAnalysisVO.setDescription((String) nodeInfo.get("description"));
-                taskMissionAnalysisVO.setStartTimeInMillis((Long) nodeInfo.get("start_time_in_millis"));
-                taskMissionAnalysisVO.setRunningTimeInNanos((Integer) nodeInfo.get("running_time_in_nanos"));
-                vos.add(taskMissionAnalysisVO);
+            Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject("tasks")).ifPresent(nodeTasks -> {
+                nodeTasks.forEach((key1, val) -> {
+                    JSONObject nodeInfo = (JSONObject) val;
+                    TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
+                    Optional.ofNullable(nodeInfo)
+                            .ifPresent(o -> {
+                                taskMissionAnalysisVO.setAction(o.getString("action"));
+                                taskMissionAnalysisVO.setNode(o.getString("node"));
+                                taskMissionAnalysisVO.setDescription(o.getString("description"));
+                                taskMissionAnalysisVO.setStartTimeInMillis(o.getLong("start_time_in_millis"));
+                                taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger("running_time_in_nanos"));
+                                vos.add(taskMissionAnalysisVO);
+                            });
+                });
             });
         });
         return vos;

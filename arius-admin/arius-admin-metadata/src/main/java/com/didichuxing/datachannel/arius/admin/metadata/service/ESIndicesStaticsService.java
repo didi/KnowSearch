@@ -48,6 +48,8 @@ public class ESIndicesStaticsService {
      */
     public List<VariousLineChartMetrics> getAggClusterPhyTemplateMetrics(MetricsClusterPhyTemplateDTO param) {
         Integer topNu = param.getTopNu();
+        String topMethod         =   param.getTopMethod();
+        Integer topTimeStep       =   param.getTopTimeStep();
         Integer logicTemplateId = param.getLogicTemplateId();
         String clusterPhyName = param.getClusterPhyName();
         String aggType = param.getAggType();
@@ -60,7 +62,7 @@ public class ESIndicesStaticsService {
                     startTime, endTime);
         }
 
-        return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetrics(clusterPhyName, metricsTypes, topNu, aggType,
+        return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType,
                 startTime, endTime);
     }
 
