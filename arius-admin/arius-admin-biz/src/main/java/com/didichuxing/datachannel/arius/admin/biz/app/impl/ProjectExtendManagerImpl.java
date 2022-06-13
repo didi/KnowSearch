@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtendSaveDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -178,9 +179,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @return 项目分页信息
      */
     @Override
-    public PagingResult<ProjectVO> getProjectPage(ProjectQueryDTO queryDTO) {
-        PagingData<ProjectVO> pageProject = projectService.getProjectPage(queryDTO);
-        return PagingResult.success(pageProject);
+    public PagingResult<ProjectVO> getProjectPage(ProjectQueryExtendDTO queryDTO) {
+        final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
+    
+        if (Objects.isNull(queryDTO.getSearchType())) {
+            final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO);
+            return PagingResult.success(projectPage);
+        } else {
+            final List<Integer> projectIds = esUserService.getProjectIdBySearchType(queryDTO.getSearchType());
+            final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
+            return PagingResult.success(projectPage);
+        
+        }
     }
     
     /**
@@ -360,11 +370,13 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @return {@code Result<List<ProjectBriefVO>>}
      */
     @Override
-    public Result<List<ProjectBriefVO>> getProjectBriefByUserId(Integer userId) {
+    public Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId) {
         final com.didiglobal.logi.security.common.Result<List<ProjectBriefVO>> listResult = projectService.getProjectBriefByUserId(
                 userId);
         if (listResult.successed()) {
-            return Result.buildSucc(listResult.getData());
+            final List<ProjectBriefExtendVO> dtoList = ConvertUtil.list2List(listResult.getData(),
+                    ProjectBriefExtendVO.class);
+            return getListResult(dtoList);
         } else {
             return Result.buildFail(listResult.getMessage());
         }

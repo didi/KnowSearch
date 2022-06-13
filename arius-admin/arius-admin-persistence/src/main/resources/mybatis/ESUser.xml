@@ -190,13 +190,10 @@
 		from arius_es_user
 	</select>
 	
-
-	
-	
-
-	
-	
-
-	
-
+	<select id="getProjectIdBySearchType" resultType="java.lang.Integer">
+		select distinct project_id
+		from arius_es_user
+		where search_type = #{searchType}
+			and is_active = 1
+	</select>
 </mapper>

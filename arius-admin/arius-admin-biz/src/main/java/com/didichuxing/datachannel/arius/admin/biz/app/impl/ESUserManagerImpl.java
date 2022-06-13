@@ -196,9 +196,7 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         //校验当前项目下所有的es user
         final List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
-        if (esUsers.size()==1){
-             return Result.buildFail(String.format("当前项目[%s]下只存在一个es user,不能被删除", projectId));
-        }
+       
         //校验当前项目中存在该es user
         if (esUsers.stream().map(ESUser::getId).noneMatch(esUserName -> Objects.equals(esUserName, esUser))) {
             return Result.buildParamIllegal(String.format("当前项目[%s]不存在es user:[%s]", projectId,

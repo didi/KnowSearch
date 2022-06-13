@@ -6,14 +6,13 @@ import com.didichuxing.datachannel.arius.admin.biz.app.ProjectConfigManager;
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtendSaveDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
-import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -102,7 +101,7 @@ public class ProjectV3Controller {
     @GetMapping("/list")
     @ResponseBody
     @ApiOperation(value = "获取所有项目简要信息", notes = "获取全部项目简要信息（只返回id、项目名）")
-    public Result<List<ProjectBriefExtendVO>> list() {
+    public Result<List<ProjectBriefExtendVO>> list(HttpServletRequest request) {
         return projectExtendManager.getProjectBriefList();
     }
     
@@ -137,7 +136,7 @@ public class ProjectV3Controller {
     
     @PostMapping("/page")
     @ApiOperation(value = "分页查询项目列表", notes = "分页和条件查询")
-    public PagingResult<ProjectVO> page(@RequestBody ProjectQueryDTO queryDTO) {
+    public PagingResult<ProjectVO> page(@RequestBody ProjectQueryExtendDTO queryDTO) {
         return projectExtendManager.getProjectPage(queryDTO);
     }
     
@@ -192,7 +191,8 @@ public class ProjectV3Controller {
     @GetMapping("/user/{userId}")
     @ApiOperation(value = "获取用户绑定的项目列表", notes = "获取用户绑定的项目列表")
     @ApiImplicitParam(name = "userId", value = "项目id", dataType = "int", required = true)
-    public Result<List<ProjectBriefVO>> getProjectBriefByUserId(@PathVariable("userId") Integer userId) {
+    public Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(@PathVariable("userId") Integer userId) {
+        
         return projectExtendManager.getProjectBriefByUserId(userId);
     }
 }

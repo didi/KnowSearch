@@ -2,13 +2,13 @@ package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtendSaveDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectExtendVO;
 ;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
-import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -82,7 +82,7 @@ public interface ProjectExtendManager {
      * @param queryDTO 条件信息
      * @return 项目分页信息
      */
-    PagingResult<ProjectVO> getProjectPage(ProjectQueryDTO queryDTO);
+    PagingResult<ProjectVO> getProjectPage(ProjectQueryExtendDTO queryDTO);
 
   
 
@@ -178,5 +178,5 @@ public interface ProjectExtendManager {
      * @param userId 用户id
      * @return {@code Result<List<ProjectBriefVO>>}
      */
-    Result<List<ProjectBriefVO>> getProjectBriefByUserId(Integer userId);
+    Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId);
 }

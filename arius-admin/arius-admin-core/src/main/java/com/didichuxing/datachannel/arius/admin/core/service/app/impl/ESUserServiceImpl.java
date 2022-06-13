@@ -274,6 +274,17 @@ public class ESUserServiceImpl implements ESUserService {
     }
     
     /**
+     * 获取项目id通过搜索类型
+     *
+     * @param searchType 搜索类型
+     * @return {@code List<Integer>}
+     */
+    @Override
+    public List<Integer> getProjectIdBySearchType(Integer searchType) {
+        return esUserDAO.getProjectIdBySearchType(searchType);
+    }
+    
+    /**
      *
      * @param projectId
      * @return

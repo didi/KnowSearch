@@ -109,4 +109,12 @@ public interface ESUserService {
     ESUser getDefaultESUserByProject(Integer projectId);
     
     boolean checkDefaultESUserByProject(Integer projectId);
+    
+    /**
+     * 获取项目id通过搜索类型
+     *
+     * @param searchType 搜索类型
+     * @return {@code List<Integer>}
+     */
+    List<Integer> getProjectIdBySearchType(Integer searchType);
 }

@@ -103,4 +103,6 @@ public interface ESUserDAO {
      * @return int
      */
     int countDefaultESUserByProject(Integer projectId);
+    
+    List<Integer> getProjectIdBySearchType(Integer searchType);
 }
