@@ -38,6 +38,13 @@ public class ESPhyClusterNodeController {
     public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
         return clusterNodeManager.listClusterPhyNode(clusterId);
     }
+    @GetMapping("/{clusterId}/instance")
+    @ResponseBody
+    @ApiOperation(value = "获取节点data实例列表")
+    public Result<List<ESClusterRoleHostVO>> getClusterPhyInstance(@PathVariable Integer clusterId) {
+        return clusterNodeManager.listClusterPhyInstance(clusterId);
+    }
+
     @GetMapping("/{clusterId}/region/")
     @ResponseBody
     @ApiOperation(value = "获取可划分至region的节点信息")

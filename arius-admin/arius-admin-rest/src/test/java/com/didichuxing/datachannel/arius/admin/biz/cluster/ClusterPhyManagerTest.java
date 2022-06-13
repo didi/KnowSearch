@@ -173,7 +173,7 @@ class ClusterPhyManagerTest {
             0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl");
         esClusterTemplateSrvVO = new ESClusterTemplateSrvVO(0, "serviceName", "esVersion");
         esClusterRoleHostVO = new ESClusterRoleHostVO(0L, 0L, "hostname", "ip", CLUSTER, "clusterLogicNames", "port", 0,
-            0, "rack", "machineSpec", "nodeSet", 0, "logicDepart", "attributes");
+            0, "rack", "machineSpec", "nodeSet", 0, "logicDepart", "attributes","regionName",0.1d);
         esClusterRoleVO = new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec",
             Collections.singletonList(esClusterRoleHostVO));
         clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
