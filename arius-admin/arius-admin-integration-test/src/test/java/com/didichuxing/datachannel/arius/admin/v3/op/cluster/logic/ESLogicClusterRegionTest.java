@@ -68,7 +68,7 @@ public class ESLogicClusterRegionTest extends BaseLogicClusterInfoTest {
         ESLogicClusterWithRegionDTO dto = new ESLogicClusterWithRegionDTO();
         dto.setResponsible("admin");
         dto.setDataCenter("cn");
-        dto.setDataNodeNu(0);
+        dto.setDataNodeNum(0);
         dto.setConfigJson("");
         dto.setId(logicClusterInfo.getLogicClusterId());
         dto.setLibraDepartment("");

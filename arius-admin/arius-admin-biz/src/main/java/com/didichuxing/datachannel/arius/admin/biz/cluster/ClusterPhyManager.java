@@ -53,7 +53,7 @@ public interface ClusterPhyManager {
      * @param param 查询参数
      * @return 物理集群列表
      */
-    List<ClusterPhyVO> getClusterPhys(ClusterPhyDTO param);
+    List<ClusterPhyVO> listClusterPhys(ClusterPhyDTO param);
 
     /**
      * 构建客户端需要的数据
@@ -141,7 +141,7 @@ public interface ClusterPhyManager {
      * @param appId appId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNames(Integer appId);
+    List<String> listClusterPhyNameByAppId(Integer appId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
@@ -156,7 +156,7 @@ public interface ClusterPhyManager {
      * @param clusterPhyName 集群phy名称
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNodeNames(String clusterPhyName);
+    List<String> listClusterPhyNodeName(String clusterPhyName);
 
     /**
      * 构建单个物理集群统计信息
@@ -169,7 +169,7 @@ public interface ClusterPhyManager {
      * @param appId appId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppNodeNames(Integer appId);
+    List<String> listNodeNameByAppId(Integer appId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)

@@ -43,7 +43,7 @@ public class ClusterPhyMetricsController {
     @ResponseBody
     @ApiOperation(value = "根据AppId获取集群名称列表")
     public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
     }
 
     @GetMapping("/{type}")

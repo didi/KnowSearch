@@ -17,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.Templa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
@@ -59,7 +58,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "获取集群列表接口【三方接口】",tags = "【三方接口】")
     public Result<List<ClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getClusterPhys(param));
+        return Result.buildSucc(clusterPhyManager.listClusterPhys(param));
     }
 
     @PutMapping("/add")
