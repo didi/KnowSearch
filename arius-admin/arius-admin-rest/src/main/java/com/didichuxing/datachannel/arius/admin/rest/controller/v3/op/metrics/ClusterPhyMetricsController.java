@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +29,22 @@ import io.swagger.annotations.ApiOperation;
  * @date 2021-07-30
  */
 @RestController()
-@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/cluster/phy/metrics" })
+@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/metrics/cluster" })
 @Api(tags = "ES物理集群监控信息")
 public class ClusterPhyMetricsController {
-
     @Autowired
     private ClusterPhyMetricsManager clusterPhyMetricsManager;
+
+    @Autowired
+    private ClusterPhyManager clusterPhyManager;
+
+
+    @GetMapping("/clusters")
+    @ResponseBody
+    @ApiOperation(value = "根据AppId获取集群名称列表")
+    public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getAppId(request)));
+    }
 
     @GetMapping("/{type}")
     @ResponseBody
@@ -42,7 +53,7 @@ public class ClusterPhyMetricsController {
         return Result.buildSucc(clusterPhyMetricsManager.getMetricsCode2TypeMap(type));
     }
 
-    @PostMapping("/configMetrics")
+    @PostMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "获取账号下已配置指标类型")
     public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,

@@ -24,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ThirdpartAppVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
@@ -137,7 +137,7 @@ public class CommonManagerImpl implements CommonManager {
                     ThirdPartTemplateLogicWithMasterTemplateResourceVO vo = ConvertUtil.obj2Obj(entity,
                             ThirdPartTemplateLogicWithMasterTemplateResourceVO.class);
                     vo.setMasterTemplate(ConvertUtil.obj2Obj(entity.getMasterTemplate(), IndexTemplatePhysicalVO.class));
-                    vo.setMasterResource(ConvertUtil.obj2Obj(entity.getLogicCluster(), ConsoleClusterVO.class));
+                    vo.setMasterResource(ConvertUtil.obj2Obj(entity.getLogicCluster(), ClusterLogicVO.class));
                     return vo;
                 }).collect( Collectors.toList());
 

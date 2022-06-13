@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,6 +21,6 @@ public class ThirdPartTemplateLogicWithMasterTemplateResourceVO extends Thirdpar
     private IndexTemplatePhysicalVO masterTemplate;
 
     @ApiModelProperty("master所在的逻辑集群信息")
-    private ConsoleClusterVO masterResource;
+    private ClusterLogicVO masterResource;
 
 }
