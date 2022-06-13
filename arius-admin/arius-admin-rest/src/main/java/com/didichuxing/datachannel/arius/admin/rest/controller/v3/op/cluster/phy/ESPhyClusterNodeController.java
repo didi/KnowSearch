@@ -1,14 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
-
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -16,9 +8,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 /**
  * @author ohushenglin_v
@@ -37,12 +35,6 @@ public class ESPhyClusterNodeController {
     @ApiOperation(value = "获取节点列表")
     public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
         return clusterNodeManager.listClusterPhyNode(clusterId);
-    }
-    @GetMapping("/{clusterId}/instance")
-    @ResponseBody
-    @ApiOperation(value = "获取节点data实例列表")
-    public Result<List<ESClusterRoleHostVO>> getClusterPhyInstance(@PathVariable Integer clusterId) {
-        return clusterNodeManager.listClusterPhyInstance(clusterId);
     }
 
     @GetMapping("/{clusterId}/region/")

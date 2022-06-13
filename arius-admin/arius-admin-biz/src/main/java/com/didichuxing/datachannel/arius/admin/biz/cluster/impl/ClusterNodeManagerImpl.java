@@ -149,19 +149,6 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
-        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
-    }
-
-    @Override
-    public Result<List<ESClusterRoleHostVO>> listClusterPhyInstance(Integer clusterId) {
-        ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterId);
-        if (AriusObjUtils.isNull(clusterPhy)) {
-            return Result.buildFail(String.format("集群[%s]不存在", clusterId));
-        }
-        ESClusterRoleHostDTO dto = new ESClusterRoleHostDTO();
-        dto.setCluster(clusterPhy.getCluster());
-        dto.setRole(DATA_NODE.getCode());
-        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.queryNodeByCondt(dto);
         return Result.buildSucc(buildClusterRoleHostStats(clusterPhy.getCluster(), clusterRoleHostList));
     }
 
