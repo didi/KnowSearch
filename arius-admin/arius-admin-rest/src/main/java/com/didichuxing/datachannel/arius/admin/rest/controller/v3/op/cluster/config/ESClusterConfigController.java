@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.config;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +31,7 @@ import io.swagger.annotations.ApiOperation;
  * @date 2020-12-30
  */
 @RestController
-@RequestMapping({ V3_OP + "/cluster/config", V3 + "/cluster/phy/config-file" })
+@RequestMapping({ V3 + "/cluster/phy/config-file" })
 @Api(tags = "ES集群Config接口(REST)")
 public class ESClusterConfigController {
 

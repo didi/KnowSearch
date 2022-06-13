@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemp
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -40,12 +38,9 @@ import io.swagger.annotations.ApiOperation;
  * @date 2020/09/20
  */
 @RestController
-@RequestMapping({ V3_OP + "/phy/cluster/region", V3 + "/cluster/phy/region" })
+@RequestMapping({ V3 + "/cluster/phy/region" })
 @Api(tags = "ES物理集群region接口(REST)")
 public class ESPhyClusterRegionController {
-
-    @Autowired
-    private ClusterPhyService       clusterPhyService;
 
     @Autowired
     private ClusterRegionService    clusterRegionService;
