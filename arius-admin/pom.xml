@@ -40,7 +40,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <flatten-maven-plugin.version>1.2.2</flatten-maven-plugin.version>
-         <logi-security-spring-boot-starter.version>2.0.8</logi-security-spring-boot-starter.version>
+         <logi-security-spring-boot-starter.version>2.0.9</logi-security-spring-boot-starter.version>
     </properties>
 
     <dependencyManagement>
