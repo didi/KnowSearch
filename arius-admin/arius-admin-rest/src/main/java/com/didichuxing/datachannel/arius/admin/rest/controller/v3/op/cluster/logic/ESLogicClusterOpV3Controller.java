@@ -53,6 +53,14 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.getLogicClustersByProjectId(HttpRequestUtils.getAppId(request));
     }
 
+    // todo: replace upper
+    @GetMapping("/new/{type}")
+    @ResponseBody
+    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
+    public Result<List<String>> getAppLogicClusterNameByType(HttpServletRequest request, @PathVariable Integer type) {
+        return clusterLogicManager.getAppLogicClusterNameByType(HttpRequestUtils.getAppId(request), type);
+    }
+
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
