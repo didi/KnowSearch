@@ -17,14 +17,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "es user 信息")
 public class ESUserDTO extends BaseDTO {
-
+    
     @ApiModelProperty("es user name")
     private Integer id;
 
    
 
     @ApiModelProperty("root用户")
-    private Integer isRoot;
+    private Integer isRoot=0;
 
     @ApiModelProperty("验证码")
     private String  verifyCode;

@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.core.service.app.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -20,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
@@ -33,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -127,8 +130,14 @@ public class ESUserManagerImpl implements ESUserManager {
     public Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator) {
         if (Objects.nonNull(appDTO)) {
             appDTO.setProjectId(projectId);
+            appDTO.setVerifyCode(VerifyCodeFactory.get(VERIFY_CODE_LENGTH));
+            appDTO.setIsActive(1);
+            appDTO.setQueryThreshold(1000);
+            appDTO.setIsRoot(0);
+            appDTO.setMemo("新增");
         
         }
+       
          //暂定校验超级用户 user name
         if (Objects.nonNull(appDTO)&&Objects.nonNull(appDTO.getResponsible())&&!roleTool.isAdmin(operator)) {
             return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));

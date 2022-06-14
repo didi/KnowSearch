@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
+import static com.didichuxing.datachannel.arius.admin.core.service.app.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
+
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -12,19 +14,24 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationMethodEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
+import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
@@ -33,6 +40,7 @@ import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.logi.security.service.OplogService;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Collections;
 import java.util.List;
@@ -57,10 +65,11 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private ProjectService       projectService;
     @Autowired
-    private ESUserService        esUserService;
-    
+    private ESUserService       esUserService;
     @Autowired
-    private ClusterLogicService  clusterLogicService;
+    private OplogService        oplogService;
+    @Autowired
+    private ClusterLogicService clusterLogicService;
     @Autowired
     private IndexTemplateService indexTemplateService;
     
@@ -405,9 +414,17 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         ESUserDTO esUserDTO = new ESUserDTO();
         esUserDTO.setIsRoot(0);
         esUserDTO.setSearchType(AppSearchTypeEnum.TEMPLATE.getCode());
-        esUserDTO.setVerifyCode(RandomStringUtils.randomAlphabetic(7));
-        esUserDTO.setMemo(((ProjectVO) data).getProjectName() + "项目默认的es user");
-        esUserDTO.setProjectId(((ProjectVO) data).getId());
-        esUserService.registerESUser(esUserDTO, operator);
+        esUserDTO.setVerifyCode(VerifyCodeFactory.get(VERIFY_CODE_LENGTH));
+        esUserDTO.setMemo((data).getProjectName() + "项目默认的es user");
+        esUserDTO.setProjectId((data).getId());
+        esUserDTO.setMemo("创建项目es user");
+        final Tuple<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
+        if (result.getV1().success()){
+            oplogService.saveOplog(new OplogDTO(operator, NewModuleEnum.APPLICATION.getOperationType(),
+                    NewModuleEnum.getOperatingContent(NewModuleEnum.APPLICATION, AppSearchTypeEnum.TEMPLATE.getDesc(),
+                            result.getV2().getId() + ""),
+                    NewModuleEnum.APPLICATION.getModule(), result.getV2().getId().toString(),
+                    OperationMethodEnum.SYSTEM_TRIGGER.getOperationMethod()));
+        }
     }
 }

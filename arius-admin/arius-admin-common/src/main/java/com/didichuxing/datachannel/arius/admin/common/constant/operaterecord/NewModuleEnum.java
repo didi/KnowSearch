@@ -8,7 +8,10 @@ package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
  * @date 2022/06/13
  */
 public enum NewModuleEnum {
-    APPLICATION("应用","访问模式","新增访问模式:%s");
+    /**
+     * 应用程序
+     */
+    APPLICATION("应用","访问模式","新增访问模式:%s；es user用户:%s");
     
     /**
      * 模块

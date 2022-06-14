@@ -154,11 +154,6 @@ public class ProjectV3Controller {
     @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
     public Result<Void> deleteProjectOwner(@PathVariable Integer id, @PathVariable Integer ownerId,
                                            HttpServletRequest request) {
-        try {
-        
-        } catch (LogiSecurityException e) {
-            return Result.buildFail(e.getMessage());
-        }
         return projectExtendManager.delProjectOwner(id, ownerId, HttpRequestUtil.getOperator(request));
     }
     

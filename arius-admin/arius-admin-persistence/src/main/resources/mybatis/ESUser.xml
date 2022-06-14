@@ -196,4 +196,12 @@
 		where search_type = #{searchType}
 			and is_active = 1
 	</select>
+	
+	<select id="countByProjectIdAndSearchType" resultType="int">
+		select count(id)
+		from arius_es_user
+		where is_active = 1
+			and search_type = #{searchType}
+			and project_id = #{projectId}
+	</select>
 </mapper>

@@ -94,7 +94,7 @@ public interface ESUserDAO {
      * @param projectId 项目id
      * @return {@code ESUser}
      */
-    ESUser getDefaultESUserByProject(Integer projectId);
+    ESUser getDefaultESUserByProject(@Param("projectId")Integer projectId);
     
     /**
      * 获取项目中的默认es user
@@ -102,7 +102,23 @@ public interface ESUserDAO {
      * @param projectId 项目id
      * @return int
      */
-    int countDefaultESUserByProject(Integer projectId);
+    int countDefaultESUserByProject(@Param("projectId")Integer projectId);
     
-    List<Integer> getProjectIdBySearchType(Integer searchType);
+    /**
+     * 获取项目id通过搜索类型
+     *
+     * @param searchType 搜索类型
+     * @return {@code List<Integer>}
+     */
+    List<Integer> getProjectIdBySearchType(@Param("searchType")Integer searchType);
+    
+    /**
+     * 通过项目id和搜索类型
+     *
+     * @param searchType 搜索类型
+     * @param projectId  项目id
+     * @return int
+     */
+    int countByProjectIdAndSearchType(@Param("searchType")Integer searchType, @Param("projectId")Integer projectId);
+    
 }

@@ -38,7 +38,7 @@ public class ESUserServiceImpl implements ESUserService {
 
     private static final ILog LOGGER = LogFactory.getLog(ESUserServiceImpl.class);
     
-    private static final Integer VERIFY_CODE_LENGTH = 15;
+    public static final Integer VERIFY_CODE_LENGTH = 15;
     
     private static final Integer APP_QUERY_THRESHOLD_DEFAULT = 100;
     
@@ -249,14 +249,20 @@ public class ESUserServiceImpl implements ESUserService {
         if (appDTO.getIsRoot() == null || !AdminConstant.yesOrNo(appDTO.getIsRoot())) {
             return Result.buildParamIllegal("超管标记非法");
         }
-    
         AppSearchTypeEnum searchTypeEnum = AppSearchTypeEnum.valueOf(appDTO.getSearchType());
         if (searchTypeEnum.equals(AppSearchTypeEnum.UNKNOWN)) {
             return Result.buildParamIllegal("查询模式非法");
         }
+        final int countByProjectIdAndSearchType = esUserDAO.countByProjectIdAndSearchType(appDTO.getSearchType(),
+                appDTO.getProjectId());
         if (StringUtils.isBlank(appDTO.getVerifyCode())) {
             return Result.buildParamIllegal("校验码不能为空");
         }
+        if (countByProjectIdAndSearchType > 1) {
+            return Result.buildParamIllegal("当前项目已经存在相同模式的es user");
+        }
+        
+        
         return Result.buildSucc();
     }
     
