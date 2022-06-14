@@ -41,6 +41,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 
 @Service("templateSrvService")
 @DependsOn("springTool")
+@Deprecated
 public class TemplateSrvManagerImpl implements TemplateSrvManager {
     protected static final ILog   LOGGER                      = LogFactory.getLog(TemplateSrvManagerImpl.class);
 

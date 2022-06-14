@@ -24,4 +24,7 @@ public class ClusterRegionVO extends BaseVO {
 
     @ApiModelProperty("物理集群名称")
     private String clusterName;
+
+    @ApiModelProperty("配置项")
+    private String config;
 }

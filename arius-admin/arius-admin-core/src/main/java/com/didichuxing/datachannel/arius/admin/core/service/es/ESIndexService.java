@@ -152,6 +152,18 @@ public interface ESIndexService {
     boolean syncDeleteByQuery(String cluster, List<String> delIndices, String delQueryDsl) throws ESOperateException;
 
     /**
+     * 修改索引的region
+     * @param cluster
+     * @param indices
+     * @param tgtRegionId
+     * @param retryCount
+     * @return
+     * @throws ESOperateException
+     */
+    boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
+                                int retryCount) throws ESOperateException;
+
+    /**
      * 修改索引只读配置
      * @param cluster 集群
      * @param indices 索引

@@ -7,12 +7,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +49,7 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Autowired
     private ESIndexDAO        esIndexDAO;
+
 
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -270,6 +269,20 @@ public class ESIndexServiceImpl implements ESIndexService {
     public boolean syncDeleteByQuery(String cluster, List<String> delIndices,
                                      String delQueryDsl) throws ESOperateException {
         return esIndexDAO.deleteByQuery(cluster, String.join(",", delIndices), delQueryDsl);
+    }
+
+    @Override
+    public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
+                                         int retryCount) throws ESOperateException {
+        Set<String> nodeNames = new HashSet<>();
+        Result<List<ClusterRoleHost>> clusterRoleHostResult = clusterRoleHostService.listByRegionId(tgtRegionId);
+        if (clusterRoleHostResult.failed()) {
+            return false;
+        }
+        clusterRoleHostResult.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
+
+        return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
+            () -> esIndexDAO.batchUpdateIndexRegion(cluster, indices, nodeNames));
     }
 
     /**

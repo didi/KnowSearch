@@ -57,16 +57,6 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        return Result.buildSucc();
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildSucc();
-    }
-
-    @Override
     public Result<Void> indexRollover(Integer logicTemplateId) {
         LOGGER.info("class=IndexPlanManagerImpl||method=indexRollover||logicTemplateId={}||msg=start indexRollover", logicTemplateId);
         if (!isTemplateSrvOpen(logicTemplateId)) {

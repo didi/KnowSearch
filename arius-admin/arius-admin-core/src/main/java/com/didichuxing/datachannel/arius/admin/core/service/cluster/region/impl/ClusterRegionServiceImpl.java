@@ -15,15 +15,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionUnbindEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -35,12 +39,21 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.region.ClusterRegionDAO;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSTotal;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
+import java.util.*;
+import org.apache.commons.collections4.MapUtils;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author ohushenglin_v
@@ -69,6 +82,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
     @Autowired
     private ClusterRoleHostService  clusterRoleHostService;
+
+    @Autowired
+    private ESClusterNodeService    esClusterNodeService;
 
     @Override
     public ClusterRegion getRegionById(Long regionId) {
@@ -410,6 +426,86 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         }
 
         return clusterRegionList;
+    }
+
+    @Override
+    public List<ClusterRegion> listColdRegionByCluster(String cluster) {
+        List<ClusterRegionPO> clusterRegions = clusterRegionDAO.getByPhyClusterName(cluster);
+        if (CollectionUtils.isEmpty(clusterRegions)) {
+            return new ArrayList<>();
+        }
+
+        List<ClusterRegion> coldRegionList = new ArrayList<>();
+        for (ClusterRegionPO region : clusterRegions) {
+            ClusterRegionConfig config = genClusterRegionConfig(region.getConfig());
+            if (Boolean.TRUE.equals(config.getColdFlag())) {
+                coldRegionList.add(ConvertUtil.obj2Obj(region, ClusterRegion.class));
+            }
+        }
+
+        return coldRegionList;
+    }
+
+    @Override
+    public ClusterRegionConfig genClusterRegionConfig(String config) {
+        if (StringUtils.isBlank(config)) {
+            return new ClusterRegionConfig();
+        }
+        return JSON.parseObject(config, ClusterRegionConfig.class);
+    }
+
+    @Override
+    public Map<Integer, ClusterRegionFSInfo> getClusterRegionFSInfo(String cluster) {
+        Map<Integer, ClusterRegionFSInfo> clusterRegionFSInfoMap = new HashMap<>();
+
+        List<ClusterRegion> clusterRegionList = listRegionsByClusterName(cluster);
+        if (CollectionUtils.isEmpty(clusterRegionList)) {
+            return clusterRegionFSInfoMap;
+        }
+
+        Map<String, ClusterNodeStats> nodeId2NodeStatsMap = esClusterNodeService.syncGetNodeFsStatsMap(cluster);
+        if (MapUtils.isEmpty(nodeId2NodeStatsMap)) {
+            return clusterRegionFSInfoMap;
+        }
+        Map<String, ClusterNodeStats> nodeName2NodeStatsMap = new HashMap<>();
+        for (Map.Entry<String, ClusterNodeStats> entry : nodeId2NodeStatsMap.entrySet()) {
+            ClusterNodeStats nodeStats = entry.getValue();
+            if (nodeStats == null) {
+                continue;
+            }
+
+            nodeName2NodeStatsMap.put(nodeStats.getName(), nodeStats);
+        }
+
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
+        if (CollectionUtils.isEmpty(clusterRoleHostList)) {
+            return clusterRegionFSInfoMap;
+        }
+
+        Multimap<Integer, ClusterRoleHost> regionId2NodeMap = ConvertUtil.list2MulMap(clusterRoleHostList, ClusterRoleHost::getRegionId);
+        for (Integer regionId : regionId2NodeMap.keySet()) {
+            List<ClusterRoleHost> nodeList = Lists.newArrayList(regionId2NodeMap.get(regionId));
+            ClusterRegionFSInfo clusterRegionFSInfo = new ClusterRegionFSInfo();
+            clusterRegionFSInfo.setRegionId(regionId);
+            for (ClusterRoleHost node : nodeList) {
+                if (ESClusterNodeRoleEnum.DATA_NODE.getCode() != node.getRole()) {
+                    continue;
+                }
+
+                ClusterNodeStats nodeStats = nodeName2NodeStatsMap.get(node.getNodeSet());
+                if (null == nodeStats) {
+                    continue;
+                }
+
+                FSTotal fsTotal = nodeStats.getFs().getTotal();
+                clusterRegionFSInfo.setAvailableInBytes(fsTotal.getAvailableInBytes() + clusterRegionFSInfo.getAvailableInBytes());
+                clusterRegionFSInfo.setFreeInBytes(fsTotal.getFreeInBytes() + clusterRegionFSInfo.getFreeInBytes());
+                clusterRegionFSInfo.setTotalInBytes(fsTotal.getTotalInBytes() + clusterRegionFSInfo.getTotalInBytes());
+            }
+            clusterRegionFSInfoMap.put(regionId, clusterRegionFSInfo);
+        }
+
+        return clusterRegionFSInfoMap;
     }
 
     /***************************************** private method ****************************************************/
