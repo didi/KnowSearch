@@ -50,4 +50,11 @@ public interface ClusterNodeManager {
      * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
      */
     Result<List<ESClusterRoleHostVO>> listClusterLogicNode(Integer clusterId);
+
+    /**
+     * 通过逻辑集群名称获取节点
+     * @param clusterLogicName
+     * @return
+     */
+    Result listClusterLogicNodeByName(String clusterLogicName);
 }

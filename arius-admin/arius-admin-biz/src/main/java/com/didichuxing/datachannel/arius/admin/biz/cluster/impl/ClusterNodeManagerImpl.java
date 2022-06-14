@@ -178,6 +178,23 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return Result.buildSucc(ConvertUtil.list2List(result.getData(), ESClusterRoleHostVO.class));
     }
 
+    @Override
+    public Result listClusterLogicNodeByName(String clusterLogicName) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
+        if (AriusObjUtils.isNull(clusterLogic)) {
+            return Result.buildFail(String.format("集群[%s]不存在", clusterLogicName));
+        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+
+        //节点名称列表
+        return Result.buildSucc(result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList()));
+    }
+
 
     /**************************************** private method ***************************************************/
 
