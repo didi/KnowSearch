@@ -94,9 +94,9 @@ public class ESGatewayClient {
      */
     private Map<String/*esUser*/, ESClient>                       queryClientMap        = Maps.newLinkedHashMap();
     /**
-     * 访问国内索引模板和appid的映射
+     * 访问国内索引模板和es user的映射
      */
-    private Map<String/*access template name*/, String/*projectId*/> accessTemplateNameMap = Maps.newHashMap();
+    private Map<String/*access template name*/, String/*es user*/> accessTemplateNameMap = Maps.newHashMap();
     /**
      * 认证header
      */
@@ -109,7 +109,7 @@ public class ESGatewayClient {
     @PostConstruct
     public void init() {
         LOGGER.info("class=ESGatewayClient||method=init||ESGatewayClient init start.");
-        // 多个appid todo 有逻辑问题
+        // 多个es user
         String[] esUsers = StringUtils.splitByWholeSeparatorPreserveAllTokens(esUser, COMMA);
         String[] passwords = StringUtils.splitByWholeSeparatorPreserveAllTokens(password, COMMA);
 
