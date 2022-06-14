@@ -10,7 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.PendingTaskAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.TaskMissionAnalysisVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -26,9 +27,6 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealth
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ESClusterNodesSettingResponse;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -41,14 +39,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
@@ -402,54 +399,6 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<NodeStateVO> nodeStateAnalysis(String cluster) {
-        ESClusterNodesStatsResponse response = esClusterDAO.getNodeState(cluster);
-        List<NodeStateVO> vos = new ArrayList<>();
-        response.getNodes().keySet().forEach(key->{
-            ClusterNodeStats clusterNodeStats = response.getNodes().get(key);
-            NodeStateVO vo = new NodeStateVO();
-
-            vo.setNodeName(clusterNodeStats.getName());
-            vo.setSegmentsMemory(clusterNodeStats.getIndices().getSegments().getMemoryInBytes());
-            vo.setOsCpu(clusterNodeStats.getOs().getCpu().getPercent());
-            vo.setLoadAverage1m(clusterNodeStats.getOs().getCpu().getLoadAverage().getOneM());
-            vo.setLoadAverage5m(clusterNodeStats.getOs().getCpu().getLoadAverage().getFiveM());
-            vo.setLoadAverage15m(clusterNodeStats.getOs().getCpu().getLoadAverage().getFifteenM());
-            vo.setJvmHeapUsedPercent(clusterNodeStats.getJvm().getMem().getHeapUsedPercent());
-            vo.setThreadsCount(clusterNodeStats.getJvm().getThreads().getCount());
-            vo.setCurrentOpen(clusterNodeStats.getHttp().getCurrentOpen());
-            vo.setThreadPoolWriteActive(clusterNodeStats.getThreadPool().getWrite().getActive());
-            vo.setThreadPoolWriteQueue(clusterNodeStats.getThreadPool().getWrite().getQueue());
-            vo.setThreadPoolWriteReject(clusterNodeStats.getThreadPool().getWrite().getRejected());
-            vo.setThreadPoolSearchActive(clusterNodeStats.getThreadPool().getSearch().getActive());
-            vo.setThreadPoolSearchReject(clusterNodeStats.getThreadPool().getSearch().getRejected());
-            vo.setThreadPoolSearchQueue(clusterNodeStats.getThreadPool().getSearch().getQueue());
-            vo.setThreadPoolManagementActive(clusterNodeStats.getThreadPool().getManagement().getActive());
-            vo.setThreadPoolManagementReject(clusterNodeStats.getThreadPool().getManagement().getRejected());
-            vo.setThreadPoolManagementQueue(clusterNodeStats.getThreadPool().getManagement().getQueue());
-
-            vos.add(vo);
-        });
-        return vos;
-    }
-
-    @Override
-    public List<IndicesDistributionVO> indicesDistribution(String cluster) {
-        ESIndicesCatIndicesResponse response = esClusterDAO.catIndices(cluster);
-        // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
-        return response.getCatIndexResults().stream().map(catIndexResult -> {
-            IndicesDistributionVO vo = new IndicesDistributionVO();
-            BeanUtils.copyProperties(catIndexResult, vo);
-            return vo;
-        }).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ShardDistributionVO> shardDistribution(String cluster) {
-        return  esClusterDAO.catShard(cluster);
-    }
-
-    @Override
     public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
         String response = esClusterDAO.pendingTask(cluster);
         if (null!=response){
@@ -477,16 +426,6 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
-        String response = esClusterDAO.shardAssignment(cluster);
-        if (null!=response){
-            return buildShardAssignment(JSONObject.parseObject(response));
-        }else {
-            return null;
-        }
-    }
-
-    @Override
     public boolean abnormalShardAllocationRetry(String cluster) {
         String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
       boolean  acknowledged  = (boolean) JSONObject.parseObject(response).get("acknowledged");
@@ -502,43 +441,25 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
         List<TaskMissionAnalysisVO> vos = new ArrayList<>();
+
         JSONObject nodes = responseJson.getJSONObject("nodes");
         nodes.keySet().forEach(key -> {
-            JSONObject node = (JSONObject) nodes.get(key);
-            JSONObject nodeTasks = (JSONObject) node.get("tasks");
-            nodeTasks.keySet().forEach(key1 -> {
-                TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
-                JSONObject nodeInfo = (JSONObject) nodeTasks.get(key1);
-                taskMissionAnalysisVO.setAction((String) nodeInfo.get("action"));
-                taskMissionAnalysisVO.setNode((String) nodeInfo.get("node"));
-                taskMissionAnalysisVO.setDescription((String) nodeInfo.get("description"));
-                taskMissionAnalysisVO.setStartTimeInMillis((Long) nodeInfo.get("start_time_in_millis"));
-                taskMissionAnalysisVO.setRunningTimeInNanos((Integer) nodeInfo.get("running_time_in_nanos"));
-                vos.add(taskMissionAnalysisVO);
+            Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject("tasks")).ifPresent(nodeTasks -> {
+                nodeTasks.forEach((key1, val) -> {
+                    JSONObject nodeInfo = (JSONObject) val;
+                    TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
+                    Optional.ofNullable(nodeInfo)
+                            .ifPresent(o -> {
+                                taskMissionAnalysisVO.setAction(o.getString("action"));
+                                taskMissionAnalysisVO.setNode(o.getString("node"));
+                                taskMissionAnalysisVO.setDescription(o.getString("description"));
+                                taskMissionAnalysisVO.setStartTimeInMillis(o.getLong("start_time_in_millis"));
+                                taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger("running_time_in_nanos"));
+                                vos.add(taskMissionAnalysisVO);
+                            });
+                });
             });
         });
         return vos;
-    }
-
-    private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
-        ShardAssignmentDescriptionVO descriptionVO = new ShardAssignmentDescriptionVO();
-        descriptionVO.setShard((Integer) responseJson.get("shard"));
-        descriptionVO.setIndex((String) responseJson.get("responseJson"));
-        descriptionVO.setPrimary((Boolean) responseJson.get("primary"));
-        descriptionVO.setCurrentState((String) responseJson.get("current_state"));
-        JSONArray decisionsArray = responseJson.getJSONArray("node_allocation_decisions");
-        List<ShardAssignmenNodeVO> decisions = new ArrayList<>();
-        for (int i = 0; i < decisionsArray.size(); i++) {
-            ShardAssignmenNodeVO decisionMap = new ShardAssignmenNodeVO();
-            JSONObject decisionObject = decisionsArray.getJSONObject(i);
-            decisionMap.setNodeName((String) decisionObject.get("node_name"));
-            JSONArray deciders = decisionObject.getJSONArray("deciders");
-            JSONObject decider = (JSONObject) deciders.get(0);
-            decisionMap.setNodeDecide((String) decider.get("decider"));
-            decisionMap.setExplanation((String) decider.get("explanation"));
-            decisions.add(decisionMap);
-        }
-        descriptionVO.setDecisions(decisions);
-        return descriptionVO;
     }
 }

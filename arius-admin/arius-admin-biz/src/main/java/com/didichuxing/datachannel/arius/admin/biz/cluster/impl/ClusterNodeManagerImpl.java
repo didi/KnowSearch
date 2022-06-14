@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +53,7 @@ import com.google.common.collect.Maps;
 public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     private static final ILog      LOGGER = LogFactory.getLog(ClusterNodeManager.class);
-    
+
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
 
@@ -64,6 +68,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     @Autowired
     private OperateRecordService   operateRecordService;
+
+    @Autowired
+    private ClusterLogicService clusterLogicService;
 
     @Override
     public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId) {
@@ -151,7 +158,23 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
-        return Result.buildSucc(buildClusterRoleHostStats(clusterPhy.getCluster(), clusterRoleHostList));
+        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
+    }
+
+
+    @Override
+    public Result<List<ESClusterRoleHostVO>> listClusterLogicNode(Integer clusterId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(Long.valueOf(clusterId));
+        if (AriusObjUtils.isNull(clusterLogic)) {
+            return Result.buildFail(String.format("集群[%s]不存在", clusterId));
+        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        //节点名称列表
+        return Result.buildSucc(ConvertUtil.list2List(result.getData(), ESClusterRoleHostVO.class));
     }
 
     /**************************************** private method ***************************************************/

@@ -204,4 +204,6 @@ public interface TemplateLogicManager {
      * @return 物理集群下的全量模板信息列表视图
      */
     Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId);
+
+    Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId);
 }

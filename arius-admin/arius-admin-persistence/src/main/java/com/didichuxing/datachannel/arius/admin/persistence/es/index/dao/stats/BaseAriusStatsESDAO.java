@@ -592,6 +592,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return variousLineChartsMetrics;
     }
 
+
     TopMetrics buildTopMetrics(VariousLineChartMetrics variousLineChartMetrics) {
         TopMetrics topMetrics = new TopMetrics();
         topMetrics.setType(variousLineChartMetrics.getType());

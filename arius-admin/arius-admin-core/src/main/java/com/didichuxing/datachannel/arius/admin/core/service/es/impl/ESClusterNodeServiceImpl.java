@@ -7,12 +7,17 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ThreadPoolVO;
+import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -326,5 +331,43 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         return diskUsageMap;
     }
 
-    /*********************************************private******************************************/
+    @Override
+    public List<NodeStateVO> nodeStateAnalysis(String cluster) {
+        List<ClusterNodeStats> nodeStats = esClusterNodeDAO.syncGetNodesStats(cluster);
+        List<NodeStateVO> vos = new ArrayList<>();
+        nodeStats.forEach(nodeStat->{
+            NodeStateVO vo = new NodeStateVO();
+
+            vo.setNodeName(nodeStat.getName());
+            vo.setSegmentsMemory(nodeStat.getIndices().getSegments().getMemoryInBytes());
+            vo.setOsCpu(nodeStat.getOs().getCpu().getPercent());
+            vo.setLoadAverage5m(nodeStat.getOs().getCpu().getLoadAverage().getFiveM());
+
+            List<ThreadPoolVO> threadPoolVOs = new ArrayList<>();
+
+            ThreadPoolVO write = new ThreadPoolVO();
+            write.setName("write");
+            write.setActive(nodeStat.getThreadPool().getWrite().getActive());
+            write.setReject(nodeStat.getThreadPool().getWrite().getRejected());
+            write.setQueue(nodeStat.getThreadPool().getWrite().getQueue());
+            threadPoolVOs.add(write);
+
+            ThreadPoolVO search = new ThreadPoolVO();
+            search.setName("search");
+            search.setActive(nodeStat.getThreadPool().getSearch().getActive());
+            search.setReject(nodeStat.getThreadPool().getSearch().getRejected());
+            search.setQueue(nodeStat.getThreadPool().getSearch().getQueue());
+            threadPoolVOs.add(search);
+
+            ThreadPoolVO management = new ThreadPoolVO();
+            management.setName("management");
+            management.setActive(nodeStat.getThreadPool().getManagement().getActive());
+            management.setReject(nodeStat.getThreadPool().getManagement().getRejected());
+            management.setQueue(nodeStat.getThreadPool().getManagement().getQueue());
+            threadPoolVOs.add(management);
+
+            vos.add(vo);
+        });
+        return vos;
+    }
 }

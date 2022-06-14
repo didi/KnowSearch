@@ -8,6 +8,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,7 @@ import io.swagger.annotations.ApiOperation;
  * @date 2021-07-30
  */
 @RestController()
-@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/metrics/cluster" })
+@RequestMapping({  V3 + "/metrics/cluster" })
 @Api(tags = "ES物理集群监控信息")
 public class ClusterPhyMetricsController {
     @Autowired
@@ -37,6 +39,8 @@ public class ClusterPhyMetricsController {
 
     @Autowired
     private ClusterPhyManager clusterPhyManager;
+    @Autowired
+    private TemplateLogicManager templateLogicManager;
 
 
     @GetMapping("/clusters")
@@ -114,13 +118,6 @@ public class ClusterPhyMetricsController {
                 HttpRequestUtils.getOperator(request), ClusterPhyTypeMetricsEnum.TEMPLATES);
     }
 
-    @GetMapping("{clusterPhyName}/indices")
-    @ResponseBody
-    @ApiModelProperty(value = "获取物理集群节点列表")
-    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
-        return clusterPhyMetricsManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtils.getAppId(request));
-    }
-
     @GetMapping("{clusterPhyName}/{node}/task")
     @ResponseBody
     @ApiModelProperty(value = "获取物理集群节点task详情")
@@ -138,4 +135,33 @@ public class ClusterPhyMetricsController {
         return clusterPhyMetricsManager.getMultiClusterMetrics(param, HttpRequestUtils.getAppId(request),
                 HttpRequestUtils.getOperator(request), ClusterPhyTypeMetricsEnum.NODE_TASKS);
     }
+
+    @GetMapping("{clusterPhyName}/phy/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取物理集群索引列表")
+    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
+        return clusterPhyMetricsManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("{clusterLogicName}/logic/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取逻辑集群索引列表")
+    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName, HttpServletRequest request) {
+        return clusterPhyMetricsManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("{clusterPhyName}/phy/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,@PathVariable String clusterPhyName) {
+        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("{clusterLogicName}/logic/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
+        return templateLogicManager.getTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtils.getAppId(request));
+    }
+
 }

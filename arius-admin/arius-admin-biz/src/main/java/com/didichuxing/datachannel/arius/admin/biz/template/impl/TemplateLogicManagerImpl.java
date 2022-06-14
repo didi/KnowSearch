@@ -693,9 +693,32 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         // 转化为视图列表展示
         List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
-        templateByPhyCluster.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic, appId)));
+        templateByPhyCluster.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
 
         return Result.buildSucc(consoleTemplateVOLists);
+    }
+
+    @Override
+    public Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
+        if (clusterLogic == null) {
+            return Result.buildFail();
+        }
+
+        List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
+                .getLogicTemplateWithClustersByClusterId(clusterLogic.getId());
+
+        if (CollectionUtils.isEmpty(logicTemplates)) {
+            return  Result.buildFail();
+        }
+
+        List<IndexTemplateLogicAggregate> indexTemplates = fetchLogicTemplatesAggregates(logicTemplates, appId);
+
+        // 转化为视图列表展示
+        List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
+//        indexTemplates.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
+
+        return null;
     }
 
     /**************************************** private method ***************************************************/
@@ -734,7 +757,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     /**
      * 构建逻辑模板视图
      */
-    private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyWithLogic param, Integer appId) {
+    private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyWithLogic param) {
         if (param == null) {
             return null;
         }
@@ -743,6 +766,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateVO.setClusterPhies(Collections.singletonList(param.getCluster()));
         return consoleTemplateVO;
     }
+
 
     /**
      * 获取逻辑模板标签列表

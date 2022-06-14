@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
@@ -259,4 +260,11 @@ public interface ESIndexService {
      * @return
      */
     AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo);
+
+    /**
+     * indices分布
+     * @param cluster
+     * @return
+     */
+    List<IndicesDistributionVO> indicesDistribution(String cluster);
 }
