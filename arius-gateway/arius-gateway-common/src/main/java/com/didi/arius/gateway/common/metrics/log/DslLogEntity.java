@@ -20,6 +20,7 @@ public class DslLogEntity {
     private int failedShards;
     private long totalHits;
     private int appid;
+    private int projectId;
     private String dslTemplate;
     private String dslTemplateMd5;
     private String appidDslTemplateMd5;
