@@ -129,6 +129,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private PreCreateManager preCreateManager;
 
+    @Autowired
+    private ClusterLogicService clusterLogicService;
+
     private final Integer RETRY_TIMES = 3;
 
     /**
