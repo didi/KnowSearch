@@ -76,8 +76,6 @@ public class GatewayManagerImpl implements GatewayManager {
 
     private static final ILog LOGGER                      = LogFactory.getLog(GatewayManagerImpl.class);
 
-    private static final String GATEWAY_GET_PROJECT_TICKET      = "xTc59aY72";
-    private static final String GATEWAY_GET_PROJECT_TICKET_NAME = "X-ARIUS-GATEWAY-TICKET";
 
     private static final int                    TIMEOUT                     = 10 * 60 * 1000;
     

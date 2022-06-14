@@ -47,6 +47,7 @@ import com.didiglobal.logi.security.service.UserService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -262,9 +263,24 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     @Override
     public Result<Void> addProjectUser(Integer projectId, List<Integer> userIdList, String operator) {
+       
+       
+       
        final Result<Void> result = checkProject(projectId, userIdList);
         if (result.failed()) {
             return result;
+        }
+        //校验成员
+        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
+        //校验当前userList是否已经拥有该项目
+        final List<Integer> haveUserIdList = Optional.ofNullable(projectVO.getUserList())
+                .orElse(Collections.emptyList()).stream().map(UserBriefVO::getId)
+                //过滤出已经拥有该项目的user
+                .filter(userIdList::contains).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(haveUserIdList)) {
+            final String havaUseridListStr = haveUserIdList.stream().map(String::valueOf)
+                    .collect(Collectors.joining("，"));
+            return Result.buildParamIllegal(String.format("以下用户已经是该项目的成员:%s", havaUseridListStr));
         }
         try {
             for (Integer id : userIdList) {
@@ -306,6 +322,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         final Result<Void> result = checkProject(projectId, ownerIdList);
         if (result.failed()) {
             return result;
+        }
+         //校验成员
+        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
+        //校验当前userList是否已经拥有该项目
+        final List<Integer> haveUserIdList = Optional.ofNullable(projectVO.getOwnerList())
+                .orElse(Collections.emptyList()).stream().map(UserBriefVO::getId)
+                //过滤出已经拥有该项目的user
+                .filter(ownerIdList::contains).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(haveUserIdList)) {
+            final String havaUseridListStr = haveUserIdList.stream().map(String::valueOf)
+                    .collect(Collectors.joining("，"));
+            return Result.buildParamIllegal(String.format("以下用户已经是该项目的拥有者:%s", havaUseridListStr));
         }
         try {
             for (Integer ownerId : ownerIdList) {
@@ -453,6 +481,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         if (Objects.isNull(projectId)) {
             return Result.buildParamIllegal("项目id不存在");
         }
+        if (!projectService.checkProjectExist(projectId)){
+            return Result.buildParamIllegal(String.format("项目%s不存在", projectId));
+        }
         //校验当前用户id是否存在
         final List<UserVO> userList = userIdList.stream()
                 .map(userService::getUserDetailByUserId)
@@ -464,23 +495,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     .collect(Collectors.joining("，"));
             return Result.buildParamIllegal(String.format("传入用户:%s不存在", notExitsIds));
         }
-        Function<UserVO, Tuple<Integer, Boolean>> userVOFunction = userVo -> {
-            final Integer userId = userVo.getId();
-            final List<ProjectBriefVO> projectList = userVo.getProjectList();
-            //校验当前项目是否已经被用户拥有
-            final boolean matchProject = projectList.stream()
-                    .anyMatch(projectBriefVO -> projectBriefVO.getId().equals(projectId));
-            return new Tuple<>(userId, matchProject);
-        };
-        //校验当前userList是否已经拥有该项目
-        final List<Integer> haveUserIdList = userList.stream().map(userVOFunction)
-                //过滤出已经拥有该项目的user
-                .filter(tuple2 -> Boolean.TRUE.equals(tuple2.getV2())).map(Tuple::getV1).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(haveUserIdList)) {
-            final String havaUseridListStr = haveUserIdList.stream().map(String::valueOf)
-                    .collect(Collectors.joining("，"));
-            return Result.buildParamIllegal(String.format("以下用户已经用户该项目:%s", havaUseridListStr));
-        }
+        
+        
         return Result.buildSucc();
     }
 }

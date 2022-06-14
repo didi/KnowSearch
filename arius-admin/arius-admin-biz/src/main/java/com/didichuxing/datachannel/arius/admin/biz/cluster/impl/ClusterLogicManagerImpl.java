@@ -498,7 +498,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public List<ClusterLogic> getClusterLogicByProjectIdAndAuthType(Integer projectId, Integer authType) {
-        if (projectService.checkProjectExist(projectId)) {
+        if (!projectService.checkProjectExist(projectId)) {
             return Lists.newArrayList();
         }
 

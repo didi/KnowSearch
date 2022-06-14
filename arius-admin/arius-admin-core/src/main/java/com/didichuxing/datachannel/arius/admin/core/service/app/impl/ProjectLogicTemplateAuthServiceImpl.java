@@ -474,7 +474,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 			return Result.buildParamIllegal("projectId为空");
 		}
 		
-		if (projectService.checkProjectExist(projectId)) {
+		if (!projectService.checkProjectExist(projectId)) {
 			return Result.buildParamIllegal(String.format("project[%d]不存在", projectId));
 		}
 		

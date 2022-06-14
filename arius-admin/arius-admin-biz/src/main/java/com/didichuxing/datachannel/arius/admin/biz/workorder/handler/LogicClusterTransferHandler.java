@@ -53,12 +53,12 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         }
 
        
-        if (projectService.checkProjectExist(sourceProjectId)) {
+        if (!projectService.checkProjectExist(sourceProjectId)) {
             return Result.buildParamIllegal("原项目不存在");
         }
 
        
-        if (projectService.checkProjectExist(targetProjectId)) {
+        if (!projectService.checkProjectExist(targetProjectId)) {
             return Result.buildParamIllegal("目标项目不存在");
         }
         

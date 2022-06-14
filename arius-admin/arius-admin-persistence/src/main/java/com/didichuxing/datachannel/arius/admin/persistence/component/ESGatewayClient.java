@@ -96,7 +96,7 @@ public class ESGatewayClient {
     /**
      * 访问国内索引模板和appid的映射
      */
-    private Map<String/*access template name*/, String/*appId*/> accessTemplateNameMap = Maps.newHashMap();
+    private Map<String/*access template name*/, String/*projectId*/> accessTemplateNameMap = Maps.newHashMap();
     /**
      * 认证header
      */

@@ -106,7 +106,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             return Result.buildNotExist("索引不存在");
         }
 
-        if (projectService.checkProjectExist(content.getTgtProjectId())) {
+        if (!projectService.checkProjectExist(content.getTgtProjectId())) {
             return Result.buildNotExist("应用不存在");
         }
 

@@ -1223,7 +1223,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             return Result.buildParamIllegal("数据中心非法");
         }
         if (param.getProjectId() != null
-                && projectService.checkProjectExist(param.getProjectId())) {
+                && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用不存在");
         }
         if (param.getDataType() != null

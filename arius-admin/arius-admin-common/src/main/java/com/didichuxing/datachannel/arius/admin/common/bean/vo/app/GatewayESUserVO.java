@@ -22,6 +22,8 @@ public class GatewayESUserVO extends BaseVO {
 	
 	@ApiModelProperty("es user")
 	private Integer id;
+	@ApiModelProperty("project id")
+	private Integer projectId;
 	
 	@ApiModelProperty("应用名称")
 	private String name;

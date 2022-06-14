@@ -71,7 +71,7 @@ public class SinkManagerImpl implements SinkManager {
         }
 
       
-        if (projectService.checkProjectExist(projectId)) {
+        if (!projectService.checkProjectExist(projectId)) {
             return Result.buildNotExist("应用不存在");
         }
 

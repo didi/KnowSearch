@@ -166,7 +166,7 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> editESUser(ESUserDTO esUserDTO, String operator) {
-        if (projectService.checkProjectExist(esUserDTO.getProjectId())){
+        if (!projectService.checkProjectExist(esUserDTO.getProjectId())){
              return Result.buildFail("应用不存在");
         }
         Result<Void> checkResult = esUserService.validateESUser(esUserDTO, EDIT);
