@@ -85,7 +85,7 @@ public class IndicesManagerImpl implements IndicesManager {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.INDICES.getPageSearchType());
         if (baseHandle instanceof IndicesPageSearchHandle) {
             IndicesPageSearchHandle handle = (IndicesPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, null, projectId);
+            return handle.doPage(condition,  projectId);
         }
 
         LOGGER.warn("class=TemplateLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the TemplateLogicPageSearchHandle");

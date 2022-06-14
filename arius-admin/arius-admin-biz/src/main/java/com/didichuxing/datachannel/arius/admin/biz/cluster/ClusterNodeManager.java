@@ -42,4 +42,12 @@ public interface ClusterNodeManager {
      * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
      */
     Result<List<ESClusterRoleHostVO>> listClusterPhyNode(Integer clusterId);
+
+    /**
+     * 获取逻辑集群节点列表
+     *
+     * @param clusterId 集群id
+     * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
+     */
+    Result<List<ESClusterRoleHostVO>> listClusterLogicNode(Integer clusterId);
 }

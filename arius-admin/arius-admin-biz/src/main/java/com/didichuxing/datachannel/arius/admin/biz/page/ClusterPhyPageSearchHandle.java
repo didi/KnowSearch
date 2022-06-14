@@ -1,5 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -40,8 +50,6 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Autowired
     private ClusterPhyService        clusterPhyService;
     @Autowired
-    private ClusterContextManager clusterContextManager;
-    @Autowired
     private ClusterLogicService clusterLogicService;
     @Autowired
     private ClusterPhyManager        clusterPhyManager;
@@ -74,7 +82,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
             // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
             List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
             //项目下的有管理权限逻辑集群会关联多个物理集群
-            List<ClusterRegion> regions = clusterRegionService.listClusterRegionsByLogicIds(
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
                 clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
             clusterNames = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
                 .collect(Collectors.toList());

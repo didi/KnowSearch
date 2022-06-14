@@ -17,15 +17,23 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author cjm
+ * 详细介绍类情况.
+ *
+ * @ClassName DslTemplatePageSearchHandle
+ * @Author gyp
+ * @Date 2022/6/13
+ * @Version 1.0
  */
 @Component
-public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplateVO> {
-
+public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<PageDTO, DslTemplateVO> {
     private static final ILog LOGGER = LogFactory.getLog(DslTemplatePageSearchHandle.class);
-
     @Autowired
     private ProjectService projectService;
 
@@ -33,8 +41,8 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     private DslTemplateService dslTemplateService;
 
     @Override
-    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
-        if (!projectService.checkProjectExist(projectId)) {
+    protected Result<Boolean> checkCondition(PageDTO condition, Integer projectId) {
+         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
         return Result.buildSucc(true);
@@ -44,6 +52,8 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof DslTemplateConditionDTO) {
             DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) pageDTO;
+        if (condition instanceof DslTemplateConditionDTO) {
+            DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) condition;
             String queryIndex = dslTemplateConditionDTO.getQueryIndex();
             if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
                 return Result.buildParamIllegal("查询索引名称不允许带类似*, ?等通配符");
@@ -58,17 +68,12 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     }
 
     @Override
-    protected void init(PageDTO pageDTO) {
+    protected void initCondition(PageDTO condition, Integer appId) {
         // Do nothing
     }
 
     @Override
-    protected PaginationResult<DslTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
-        return PaginationResult.buildSucc();
-    }
-
-    @Override
-    protected PaginationResult<DslTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
+    protected PaginationResult<DslTemplateVO> buildPageData(PageDTO pageDTO, Integer appId) {
         DslTemplateConditionDTO condition = buildInitDslTemplateConditionDTO(pageDTO);
 
         Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);

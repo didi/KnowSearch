@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
@@ -77,7 +76,7 @@ public interface ClusterPhyService {
      *
      * @return {@link List}<{@link String}>
      */
-    List<String>  listAllClusterNameList();
+    List<String> listClusterNames();
 
     /**
      * 根据names列出所有集群
@@ -94,14 +93,6 @@ public interface ClusterPhyService {
     boolean isClusterExists(String clusterName);
 
     /**
-     * 集群是否存在于列表中
-     * @param list 集群列表
-     * @param clusterName 集群名字
-     * @return
-     */
-    boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName);
-
-    /**
      * 获取集群插件列表
      * @param cluster 集群名称
      * @return
@@ -114,13 +105,6 @@ public interface ClusterPhyService {
      * @return 集群  不存在返回null
      */
     ClusterPhy getClusterById(Integer phyClusterId);
-
-    /**
-     * 获取写节点的个数
-     * @param cluster 集群
-     * @return count
-     */
-    int getWriteClientCount(String cluster);
 
     /**
      * 确保集群配置了DCDR的远端集群地址，如果没有配置尝试配置

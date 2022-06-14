@@ -3,6 +3,17 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
@@ -37,12 +48,24 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2021-07-30
  */
 @RestController()
-@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/cluster/phy/metrics" })
+@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/metrics/cluster" })
 @Api(tags = "ES物理集群监控信息")
 public class ClusterPhyMetricsController {
-
     @Autowired
     private ClusterPhyMetricsManager clusterPhyMetricsManager;
+
+    @Autowired
+    private ClusterPhyManager clusterPhyManager;
+    @Autowired
+    private TemplateLogicManager templateLogicManager;
+
+
+    @GetMapping("/clusters")
+    @ResponseBody
+    @ApiOperation(value = "根据AppId获取集群名称列表")
+    public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
+    }
 
     @GetMapping("/{type}")
     @ResponseBody
@@ -51,20 +74,20 @@ public class ClusterPhyMetricsController {
         return Result.buildSucc(clusterPhyMetricsManager.getMetricsCode2TypeMap(type));
     }
 
-    @PostMapping("/configMetrics")
+    @PostMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "获取账号下已配置指标类型")
     public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
                                                           HttpServletRequest request) {
         return Result.buildSucc(
-            clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request)));
+            clusterPhyMetricsManager.getDomainAccountConfigMetrics(param, HttpRequestUtil.getOperator(request)));
     }
 
     @PostMapping("/updateConfigMetrics")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
     public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param, HttpServletRequest request) {
-        return clusterPhyMetricsManager.updateUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request));
+        return clusterPhyMetricsManager.updateDomainAccountConfigMetrics(param, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("/overview")
@@ -112,13 +135,6 @@ public class ClusterPhyMetricsController {
                 HttpRequestUtil.getOperator(request), ClusterPhyTypeMetricsEnum.TEMPLATES);
     }
 
-    @GetMapping("{clusterPhyName}/indices")
-    @ResponseBody
-    @ApiModelProperty(value = "获取物理集群节点列表")
-    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
-        return clusterPhyMetricsManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtil.getProjectId(request));
-    }
-
     @GetMapping("{clusterPhyName}/{node}/task")
     @ResponseBody
     @ApiModelProperty(value = "获取物理集群节点task详情")
@@ -136,4 +152,33 @@ public class ClusterPhyMetricsController {
         return clusterPhyMetricsManager.getMultiClusterMetrics(param, HttpRequestUtil.getProjectId(request),
                 HttpRequestUtil.getOperator(request), ClusterPhyTypeMetricsEnum.NODE_TASKS);
     }
+
+    @GetMapping("{clusterPhyName}/phy/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取物理集群索引列表")
+    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
+        return clusterPhyMetricsManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("{clusterLogicName}/logic/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取逻辑集群索引列表")
+    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName, HttpServletRequest request) {
+        return clusterPhyMetricsManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("{clusterPhyName}/phy/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,@PathVariable String clusterPhyName) {
+        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName, HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("{clusterLogicName}/logic/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
+        return templateLogicManager.getTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtil.getProjectId(request));
+    }
+
 }

@@ -5,12 +5,17 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterPhyAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterPhyAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -21,8 +26,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

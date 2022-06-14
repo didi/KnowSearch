@@ -51,12 +51,13 @@ public class ESClusterRoleHostVO extends BaseVO {
     private Integer status;
 
     @ApiModelProperty("rack")
+    @Deprecated
     private String  rack;
 
-    @ApiModelProperty("节点规格")
+    @ApiModelProperty("实例规格")
     private String  machineSpec;
 
-    @ApiModelProperty("节点名称")
+    @ApiModelProperty("实例名称")
     private String  nodeSet;
 
     @ApiModelProperty("RegionId")
@@ -67,4 +68,16 @@ public class ESClusterRoleHostVO extends BaseVO {
 
     @ApiModelProperty("attributes, 逗号分隔 key1:value1,key2:value2")
     private String attributes;
+
+    @ApiModelProperty("regionName")
+    private String regionName;
+
+    @ApiModelProperty("磁盘使用率")
+    private Double  diskUsagePercent;
+
+    @ApiModelProperty("磁盘总量(byte)")
+    private Long    diskTotal;
+
+    @ApiModelProperty("磁盘使用大小(byte)")
+    private Long    diskUsage;
 }

@@ -52,7 +52,7 @@ public interface ClusterPhyManager {
      * @param param 查询参数
      * @return 物理集群列表
      */
-    List<ClusterPhyVO> getClusterPhys(ClusterPhyDTO param);
+    List<ClusterPhyVO> listClusterPhys(ClusterPhyDTO param);
 
     /**
      * 构建客户端需要的数据
@@ -140,7 +140,7 @@ public interface ClusterPhyManager {
      * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNames(Integer projectId);
+    List<String> listClusterPhyNameByAppId(Integer projectId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
@@ -155,7 +155,7 @@ public interface ClusterPhyManager {
      * @param clusterPhyName 集群phy名称
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNodeNames(String clusterPhyName);
+    List<String> listClusterPhyNodeName(String clusterPhyName);
 
     /**
      * 构建单个物理集群统计信息
@@ -168,7 +168,7 @@ public interface ClusterPhyManager {
      * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> getProjectNodeNames(Integer projectId);
+    List<String> listNodeNameByAppId(Integer projectId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
@@ -205,28 +205,6 @@ public interface ClusterPhyManager {
      * @return
      */
     PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId);
-
-    /**
-     * 获取项目下指定权限的物理集群列表
-     * @param projectId
-     * @param authType
-     * @return
-     */
-    List<ClusterPhy> getClusterPhyByProjectIdAndAuthType(Integer projectId, Integer authType);
-
-    /**
-     * 获取项目下有管理权限的物理集群列表
-     * @param projectId
-     * @return
-     */
-    List<ClusterPhy> getClusterPhysByProjectId(Integer projectId);
-
-    /**
-     * 获取项目下有访问权限的物理集群列表
-     * @param projectId
-     * @return
-     */
-    List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer projectId);
 
     /**
      * 构建物理集群角色信息

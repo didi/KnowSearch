@@ -84,4 +84,6 @@ public interface ClusterPhyMetricsManager {
      @return {@code Result<List<ESClusterTaskDetailVO>>}
      */
     Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer projectId);
+
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
 }

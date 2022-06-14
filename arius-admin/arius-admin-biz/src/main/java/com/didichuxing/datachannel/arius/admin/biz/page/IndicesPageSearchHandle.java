@@ -42,9 +42,9 @@ import org.springframework.stereotype.Component;
  * Created by linyunan on 2021-10-28
  */
 @Component
-public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> {
+public class IndicesPageSearchHandle extends AbstractPageSearchHandle<PageDTO, IndexCatCellVO> {
 
-    private static final ILog   LOGGER            = LogFactory.getLog(IndicesPageSearchHandle.class);
+    private static final ILog LOGGER = LogFactory.getLog(IndicesPageSearchHandle.class);
 
     private static final String DEFAULT_SORT_TERM = "timestamp";
     
@@ -52,23 +52,21 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
     private ProjectService projectService;
     
     @Autowired
-    private ClusterPhyManager clusterPhyManager;
+    private ESIndexCatService esIndexCatService;
 
     @Autowired
-    private ESIndexCatService   esIndexCatService;
-
-    @Autowired
-    private ESIndexService      esIndexService;
+    private ESIndexService esIndexService;
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
+    protected Result<Boolean> checkCondition(PageDTO pageDTO, Integer projectId) {
+        
         if (pageDTO instanceof IndicesConditionDTO) {
             IndicesConditionDTO indicesConditionDTO = (IndicesConditionDTO) pageDTO;
 
             if (StringUtils.isNotBlank(indicesConditionDTO.getHealth()) && !IndexStatusEnum.isStatusExit(indicesConditionDTO.getHealth())) {
                 return Result.buildParamIllegal(String.format("健康状态%s非法", indicesConditionDTO.getHealth()));
             }
-            
+
             String indexName = indicesConditionDTO.getIndex();
             if (!AriusObjUtils.isBlack(indexName) && (indexName.startsWith("*") || indexName.startsWith("?"))) {
                 return Result.buildParamIllegal("索引名称不允许带类似*, ?等通配符查询");
@@ -83,7 +81,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
     }
 
     @Override
-    protected void init(PageDTO pageDTO) {
+    protected void initCondition(PageDTO pageDTO, Integer appId) {
         if (pageDTO instanceof IndicesConditionDTO) {
             IndicesConditionDTO condition = (IndicesConditionDTO) pageDTO;
             if (null == condition.getPage()) {
@@ -101,20 +99,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
     }
 
     @Override
-    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
-        return Result.buildSucc(true);
-    }
-
-    @Override
-    protected PaginationResult<IndexCatCellVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
-        return PaginationResult.buildSucc();
-    }
-
-    @Override
-    protected PaginationResult<IndexCatCellVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
+    protected PaginationResult<IndexCatCellVO> buildPageData(PageDTO pageDTO, Integer projectId) {
         IndicesConditionDTO condition = buildIndicesConditionDTO(pageDTO);
 
         if (null == condition) {
@@ -127,9 +112,10 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
         return getIndexCatCellsFromES(clusterPhyNameList, condition);
     }
 
+
     /**
      * 获取索引Cat/index信息
-     *
+     * <p>
      * 业务上限制ES深分页(不考虑10000条之后的数据), 由前端限制
      */
     private PaginationResult<IndexCatCellVO> getIndexCatCellsFromES(List<String> phyNameList,
@@ -138,22 +124,22 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
             //获取Cat/Index信息
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
                     phyNameList, condition.getIndex(), condition.getHealth(), (condition.getPage() - 1) * condition.getSize(), condition.getSize(),
-                condition.getSortTerm(), condition.getOrderByDesc());
+                    condition.getSortTerm(), condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
                 LOGGER.warn("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||"
-                            + "errMsg=get empty index cat info from es",
-                    ListUtils.strList2String(phyNameList), condition.getIndex());
+                                + "errMsg=get empty index cat info from es",
+                        ListUtils.strList2String(phyNameList), condition.getIndex());
                 return null;
             }
 
             //设置索引阻塞信息
             List<IndexCatCell> finalIndexCatCellList = batchFetchIndexBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
-            List<IndexCatCellVO> indexCatCellVOList  = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
+            List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
 
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(), condition.getPage(), condition.getSize());
         } catch (Exception e) {
             LOGGER.error("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
-                ListUtils.strList2String(phyNameList), condition.getIndex(), e.getMessage(), e);
+                    ListUtils.strList2String(phyNameList), condition.getIndex(), e.getMessage(), e);
             return PaginationResult.buildFail("获取分页索引列表失败");
         }
     }
@@ -167,13 +153,14 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
 
     /**
      * 批量构建索引阻塞信息
-     * @param catCellList    索引cat/index基本信息
-     * @return               List<IndexCatCell>
+     *
+     * @param catCellList 索引cat/index基本信息
+     * @return List<IndexCatCell>
      */
     private List<IndexCatCell> batchFetchIndexBlockInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newArrayList();
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(catCellList,
-            IndexCatCell::getCluster, indexCatCell -> indexCatCell);
+                IndexCatCell::getCluster, indexCatCell -> indexCatCell);
         if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
             return finalIndexCatCellList;
         }
@@ -184,12 +171,12 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
 
             //批量操作
             BatchProcessor.BatchProcessResult<IndexCatCell, List<IndexCatCell>> batchResult = new BatchProcessor<IndexCatCell, List<IndexCatCell>>()
-                .batchList(indexCatCellList).batchSize(50).processor(items -> buildBlockInfo(cluster, items)).process();
+                    .batchList(indexCatCellList).batchSize(50).processor(items -> buildBlockInfo(cluster, items)).process();
 
             if (!batchResult.isSucc() && (batchResult.getErrorMap().size() > 0)) {
                 LOGGER.warn(
-                    "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||errMsg=batch result error:{}",
-                    cluster, batchResult.getErrorMap());
+                        "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||errMsg=batch result error:{}",
+                        cluster, batchResult.getErrorMap());
             }
 
             List<List<IndexCatCell>> resultList = batchResult.getResultList();
@@ -203,8 +190,9 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
 
     /**
      * 批量构建索引阻塞信息
-     * @param cluster              集群名称
-     * @param indexCatCellList     批量索引列表
+     *
+     * @param cluster          集群名称
+     * @param indexCatCellList 批量索引列表
      * @return
      */
     private List<IndexCatCell> buildBlockInfo(String cluster, List<IndexCatCell> indexCatCellList) {
@@ -212,7 +200,7 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
         List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(indexNameList)) {
             LOGGER.warn("class=IndicesPageSearchHandle||method=buildBlockInfo||cluster={}||index={}||errMsg=index is empty",
-                cluster, ListUtils.strList2String(indexNameList));
+                    cluster, ListUtils.strList2String(indexNameList));
             return indexCatCellWithBlockInfo;
         }
 
@@ -221,8 +209,8 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
             IndexConfig indexConfig = name2IndexConfigMap.get(indexCatCell.getIndex());
             if (null == indexConfig) {
                 LOGGER.warn(
-                    "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||index={}||errMsg=index config is empty",
-                    indexCatCell.getCluster(), indexCatCell.getIndex());
+                        "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||index={}||errMsg=index config is empty",
+                        indexCatCell.getCluster(), indexCatCell.getIndex());
                 continue;
             }
 
@@ -230,18 +218,18 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
             try {
                 //build from es setUp settings
                 Tuple<Boolean, Boolean> writeAndReadBlockFromSetUpSettingTuple = getBlockInfoFromSetUpSettings(
-                    indexConfig);
+                        indexConfig);
                 //build from es default settings
                 Tuple<Boolean, Boolean> writeAndReadBlockFromDefaultSettingTuple = getBlockInfoFromDefaultSettings(
-                    indexConfig);
+                        indexConfig);
                 writeAndReadBlockFromMerge = mergeBlockInfo(writeAndReadBlockFromSetUpSettingTuple,
-                    writeAndReadBlockFromDefaultSettingTuple);
+                        writeAndReadBlockFromDefaultSettingTuple);
             } catch (Exception e) {
                 writeAndReadBlockFromMerge.setV1(null);
                 writeAndReadBlockFromMerge.setV2(null);
                 LOGGER.error(
-                    "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||index={}||errMsg={}",
-                    indexCatCell.getCluster(), indexCatCell.getIndex(), e.getMessage(), e);
+                        "class=IndicesPageSearchHandle||method=batchFetchIndexBlockInfo||cluster={}||index={}||errMsg={}",
+                        indexCatCell.getCluster(), indexCatCell.getIndex(), e.getMessage(), e);
             }
 
             indexCatCell.setReadFlag(writeAndReadBlockFromMerge.getV1() != null && writeAndReadBlockFromMerge.getV1());
@@ -254,7 +242,8 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
 
     /**
      * 从默认 索引setting 中获取获取block信息
-     * @param  indexConfig  indexConfig from es
+     *
+     * @param indexConfig indexConfig from es
      * @return read write
      */
     private Tuple<Boolean, Boolean> getBlockInfoFromDefaultSettings(IndexConfig indexConfig) {
@@ -279,11 +268,11 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
 
         if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
             writeAndReadBlockFromDefaultSettingTuple
-                .setV1(Boolean.parseBoolean(blocksObj.get(IndexBlockEnum.READ.getType()).toString()));
+                    .setV1(Boolean.parseBoolean(blocksObj.get(IndexBlockEnum.READ.getType()).toString()));
         }
         if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
             writeAndReadBlockFromDefaultSettingTuple
-                .setV2(Boolean.parseBoolean(blocksObj.get(IndexBlockEnum.WRITE.getType()).toString()));
+                    .setV2(Boolean.parseBoolean(blocksObj.get(IndexBlockEnum.WRITE.getType()).toString()));
         }
 
         return writeAndReadBlockFromDefaultSettingTuple;
@@ -291,7 +280,8 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
 
     /**
      * 从手动配置的 索引setting 中获取获取block信息
-     * @param  indexConfig  indexConfig from es
+     *
+     * @param indexConfig indexConfig from es
      * @return read write
      */
     private Tuple<Boolean, Boolean> getBlockInfoFromSetUpSettings(IndexConfig indexConfig) {
@@ -316,8 +306,9 @@ public class IndicesPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO
 
     /**
      * 合并block信息
-     * @param tupleFromSetUp    手动配置setting
-     * @param tupleFromDefault  默认setting
+     *
+     * @param tupleFromSetUp   手动配置setting
+     * @param tupleFromDefault 默认setting
      * @return
      */
     private Tuple<Boolean/*read*/, Boolean/*write*/> mergeBlockInfo(Tuple<Boolean, Boolean> tupleFromSetUp,

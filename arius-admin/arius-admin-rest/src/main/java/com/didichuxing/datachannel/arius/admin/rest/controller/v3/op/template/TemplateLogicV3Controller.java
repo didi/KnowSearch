@@ -7,8 +7,12 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateAdjustShardDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -120,12 +124,47 @@ public class TemplateLogicV3Controller {
         return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
     }
 
-    @GetMapping("/listTemplates")
+    @GetMapping("/templates")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,
                                                                       @RequestParam("cluster") String cluster) {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster);
+    }
+
+    @PutMapping("/createTemplate")
+    @ResponseBody
+    @ApiOperation(value = "创建逻辑模板")
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) {
+        return templateLogicManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
+    }
+
+    @PutMapping("/edit")
+    @ResponseBody
+    @ApiOperation(value = "用户编辑模板")
+    public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
+        return templateLogicManager.newEditTemplate(param, HttpRequestUtils.getOperator(request));
+    }
+
+    @PostMapping("/clearIndices")
+    @ResponseBody
+    @ApiOperation(value = "清理索引")
+    public Result<Void> clearIndices(HttpServletRequest request, @RequestBody TemplateClearDTO param) {
+        return templateLogicManager.clearIndices(param);
+    }
+
+    @PostMapping("/adjustShard")
+    @ResponseBody
+    @ApiOperation(value = "扩缩容")
+    public Result<Void> adjustShard(HttpServletRequest request, @RequestBody TemplateAdjustShardDTO param) {
+        return templateLogicManager.adjustShard(param.getTemplateId(), param.getShardNum());
+    }
+
+    @PostMapping("/upgrade")
+    @ResponseBody
+    @ApiOperation(value = "升版本")
+    public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer logicTemplateId) {
+        return templateLogicManager.upgrade(logicTemplateId, HttpRequestUtils.getOperator(request));
     }
 
 }

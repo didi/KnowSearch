@@ -1,10 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
+import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
@@ -38,14 +39,14 @@ public class ConsoleClusterController {
     @ResponseBody
     @ApiOperation(value = "获取APP拥有的集群列表【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
-    public Result<List<ConsoleClusterVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
+    public Result<List<ConsoleClustClusterLogicVOerVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(projectId);
     }
 
     @GetMapping("/listAll")
     @ResponseBody
     @ApiOperation(value = "获取平台所有的集群列表【三方接口】",tags = "【三方接口】" )
-    public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(@RequestParam(value = "projectId",required = false) Integer projectId) {
+    public Result<List<ClusterLogicVO>> getDataCenterLogicClusters(@RequestParam(value = "projectId",required = false) Integer projectId) {
         return clusterLogicManager.getDataCenterLogicClusters(projectId);
     }
 
@@ -55,7 +56,7 @@ public class ConsoleClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "集群ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value =
                                  "PROJECT ID", required = true) })
-    public Result<ConsoleClusterVO> getAppLogicClusters(@RequestParam("clusterId") Long clusterId,
+    public Result<ClusterLogicVO> getAppLogicClusters(@RequestParam("clusterId") Long clusterId,
                                                         @RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(clusterId, projectId);
     }

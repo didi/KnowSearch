@@ -33,11 +33,11 @@ import org.springframework.stereotype.Component;
  * @date 2022/5/18
  */
 @Component
-public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWithSrvVO> {
+public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDTO, TemplateWithSrvVO> {
 
     private static final ILog LOGGER = LogFactory.getLog(TemplateSrvPageSearchHandle.class);
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL",10,10,100);
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL",10,10,100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
 
     @Autowired
     private ProjectService projectService;
@@ -50,6 +50,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
 
     @Autowired
     private TemplateSrvManager templateSrvManager;
+
 
     @Override
     protected Result<Boolean> validCheckForProjectId(Integer projectId) {
@@ -76,18 +77,12 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
     }
 
     @Override
-    protected void init(PageDTO pageDTO) {
+    protected void initCondition(PageDTO condition, Integer appId) {
         // nothing to do
     }
 
     @Override
-    protected PaginationResult<TemplateWithSrvVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer projectId) {
-        // nothing to do
-        return PaginationResult.buildFail("暂时不支持带有鉴权的查询");
-    }
-
-    @Override
-    protected PaginationResult<TemplateWithSrvVO> buildWithoutAuthType(PageDTO pageDTO, Integer projectId) {
+    protected PaginationResult<TemplateWithSrvVO> buildPageData(PageDTO pageDTO, Integer projectId) {
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;
         TemplateQueryDTO condition = (TemplateQueryDTO) pageDTO;
@@ -108,6 +103,7 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
         List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList);
         return PaginationResult.buildSucc(templateWithSrvVOList, totalHit, condition.getPage(), condition.getSize());
     }
+
 
     /******************************************private***********************************************/
     /**
@@ -173,4 +169,33 @@ public class TemplateSrvPageSearchHandle extends BasePageSearchHandle<TemplateWi
         TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL.waitExecute();
     }
 
+    /**
+     * 对全量查询结果根据分页条件进行过滤
+     *
+     * @param condition 分页条件
+     * @param source    全量查询结果
+     * @return
+     */
+    <T> List<T> filterFullDataByPage(List<T> source, PageDTO condition) {
+        //这里页码和前端对应起来，第一页页码是1 而不是0
+        long fromIndex = condition.getSize() * (condition.getPage() - 1);
+        long toIndex = getLastPageSize(condition, source.size());
+        return source.subList((int) fromIndex, (int) toIndex);
+    }
+
+    /**
+     * 获取最后一条数据的index，以防止数组溢出
+     *
+     * @param condition      分页条件
+     * @param pageSizeFromDb 查询结果
+     * @return
+     */
+    long getLastPageSize(PageDTO condition, Integer pageSizeFromDb) {
+        //分页最后一条数据的index
+        long size = condition.getPage() * condition.getSize();
+        if (pageSizeFromDb < size) {
+            size = pageSizeFromDb;
+        }
+        return size;
+    }
 }

@@ -61,9 +61,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     private static final String CLUSTER_NOT_EXIST = "集群不存在";
 
-    @Value("${es.client.cluster.port}")
-    private String                   esClusterClientPort;
-
     @Autowired
     private PhyClusterDAO clusterDAO;
 
@@ -72,12 +69,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Autowired
     private ESPluginService          esPluginService;
-
-    @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
-
-    @Autowired
-    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private ClusterRoleService clusterRoleService;
@@ -219,7 +210,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<String> listAllClusterNameList() {
+    public List<String> listClusterNames() {
         List<String> clusterNameList = Lists.newArrayList();
         try {
             clusterNameList.addAll(clusterDAO.listAllName());
@@ -245,16 +236,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public boolean isClusterExists(String clusterName) {
         return clusterDAO.getByName(clusterName) != null;
-    }
-
-    /**
-     * 集群是否存在
-     * @param clusterName 集群名字
-     * @return true 存在
-     */
-    @Override
-    public boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName) {
-        return list.stream().map(ClusterPhy::getCluster).anyMatch(cluster->cluster.equals(clusterName));
     }
 
     /**
@@ -300,22 +281,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public ClusterPhy getClusterById(Integer phyClusterId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
         return ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
-    }
-
-    /**
-     * 获取写节点的个数
-     * @param cluster 集群
-     * @return count
-     */
-    @Override
-    public int getWriteClientCount(String cluster) {
-        ClusterPhyPO clusterPO = clusterDAO.getByName(cluster);
-
-        if (StringUtils.isBlank(clusterPO.getHttpWriteAddress())) {
-            return 1;
-        }
-
-        return clusterPO.getHttpWriteAddress().split(",").length;
     }
 
     /**

@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -30,6 +31,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
@@ -66,6 +72,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
@@ -118,16 +126,22 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ClusterPhyService           clusterPhyService;
 
     @Autowired
-    private ClusterLogicService         clusterLogicService;
-
-    @Autowired
     private ClusterRegionService        clusterRegionService;
 
     @Autowired
     private OperateRecordService        operateRecordService;
 
-    @Autowired
+     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private ESUserService esUserService
+
+    @Autowired
+    private ESIndexService esIndexService;
+
+    @Autowired
+    private ESTemplateService esTemplateService;
+
     @Autowired
     private ESUserService esUserService;
 
@@ -141,6 +155,14 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private TemplateDCDRManager         templateDcdrManager;
+
+    @Autowired
+    private PreCreateManager preCreateManager;
+
+    @Autowired
+    private ClusterLogicService clusterLogicService;
+
+    private final Integer RETRY_TIMES = 3;
 
     /**
      * 校验所有逻辑模板元数据信息
@@ -512,7 +534,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(TEMPLATE_LOGIC.getPageSearchType());
         if (baseHandle instanceof TemplateLogicPageSearchHandle) {
             TemplateLogicPageSearchHandle handle = (TemplateLogicPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, condition.getAuthType(), projectId);
+            return handle.doPage(condition, projectId);
         }
 
         LOGGER.warn("class=TemplateLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the TemplateLogicPageSearchHandle");
@@ -723,6 +745,100 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc(consoleTemplateVOLists);
     }
 
+    @Override
+    public Result<Void> clearIndices(TemplateClearDTO clearDTO) {
+        if (CollectionUtils.isEmpty(clearDTO.getDelIndices())) {
+            return Result.buildParamIllegal("清理索引不能为空");
+        }
+
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(clearDTO.getTemplateId());
+        List<String> delIndices = clearDTO.getDelIndices();
+        for (IndexTemplatePhy templatePhysical : templateLogicWithPhysical.getPhysicals()) {
+            if (CollectionUtils.isNotEmpty(delIndices)) {
+                esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), delIndices, RETRY_TIMES);
+            }
+
+            if (delIndices.size() != esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), delIndices, RETRY_TIMES)) {
+                return Result.buildFail("删除索引失败，请重试");
+            }
+        }
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum) {
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        try {
+            IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+            for (IndexTemplatePhy templatePhy : templatePhyList) {
+                if (templatePhy.getShard().equals(shardNum)) {
+                    return Result.buildParamIllegal("该模板已经是" + shardNum + "分片");
+                }
+
+                updateParam.setId(templatePhy.getId());
+                updateParam.setShard(shardNum);
+                Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
+                if (updateDBResult.failed()) {
+                    return updateDBResult;
+                }
+                esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(), shardNum, RETRY_TIMES);
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=adjustShard||errorMsg=failed to adjust shard", e);
+            return Result.buildFail("模板扩缩容失败");
+        }
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> upgrade(Integer logicTemplateId, String operator) {
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        try {
+            IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+            for (IndexTemplatePhy templatePhy : templatePhyList) {
+                updateParam.setId(templatePhy.getId());
+                updateParam.setRack(templatePhy.getRack());
+                updateParam.setShard(updateParam.getShard());
+                updateParam.setVersion(templatePhy.getVersion() + 1);
+
+                Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
+                if (editResult.failed()) {
+                    return editResult;
+                }
+
+                preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
+            }
+        } catch (Exception e) {
+            LOGGER.error("upgrade template error", e);
+        }
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
+        if (clusterLogic == null) {
+            return Result.buildFail();
+        }
+
+        List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
+                .getLogicTemplateWithClustersByClusterId(clusterLogic.getId());
+
+        if (CollectionUtils.isEmpty(logicTemplates)) {
+            return  Result.buildFail();
+        }
+
+        List<IndexTemplateLogicAggregate> indexTemplates = fetchLogicTemplatesAggregates(logicTemplates, appId);
+
+        // 转化为视图列表展示
+        List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
+//        indexTemplates.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
+
+        return null;
+    }
+
     /**************************************** private method ***************************************************/
     /**
      * 校验逻辑模板Master ROLE物理模板是否存在
@@ -768,6 +884,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateVO.setClusterPhies(Collections.singletonList(param.getCluster()));
         return consoleTemplateVO;
     }
+
 
     /**
      * 获取逻辑模板标签列表

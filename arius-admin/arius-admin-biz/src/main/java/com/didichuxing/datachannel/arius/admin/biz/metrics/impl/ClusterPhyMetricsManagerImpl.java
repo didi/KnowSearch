@@ -164,4 +164,9 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         return Result.buildSucc(ConvertUtil.list2List(nodeStatisService.getClusterTaskDetail(clusterPhyName, node, Long.parseLong(startTime), Long.parseLong(endTime)),
                 ESClusterTaskDetailVO.class));
     }
+
+    @Override
+    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId) {
+        return null;
+    }
 }

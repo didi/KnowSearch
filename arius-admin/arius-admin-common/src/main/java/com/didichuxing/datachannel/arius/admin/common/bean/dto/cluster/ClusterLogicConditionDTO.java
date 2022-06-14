@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * Created by linyunan on 2021-10-14
  */
@@ -25,6 +27,11 @@ public class ClusterLogicConditionDTO extends ESLogicClusterDTO {
     @ApiModelProperty("暂无")
     private String  sortTerm;
 
+    private String sortType;
+
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
     private Boolean orderByDesc = true;
+
+    @ApiModelProperty("集群名称，用于后端根据项目筛选")
+    private List<String> clusterNames;
 }

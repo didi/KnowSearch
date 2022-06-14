@@ -61,7 +61,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "获取集群列表接口【三方接口】",tags = "【三方接口】")
     public Result<List<ClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getClusterPhys(param));
+        return Result.buildSucc(clusterPhyManager.listClusterPhys(param));
     }
 
     @PutMapping("/add")

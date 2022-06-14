@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -201,4 +202,40 @@ public interface ESClusterService {
     ESClusterThreadStats syncGetThreadStatsByCluster(String cluster);
 
     ESClusterHealthResponse syncGetClusterHealthAtIndicesLevel(String phyClusterName);
+
+
+    /**
+     * pending task分析
+     * @param cluster
+     * @return
+     */
+    List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster);
+
+    /**
+     * task任务分析
+     * @param cluster
+     * @return
+     */
+    List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster);
+
+    /**
+     * 热点线程分析
+     * @param cluster
+     * @return
+     */
+    String hotThreadAnalysis(String cluster);
+
+    /**
+     * 异常shard分配重试
+     * @param cluster
+     * @return
+     */
+    boolean abnormalShardAllocationRetry(String cluster);
+
+    /**
+     * 清除fielddata内存
+     * @param cluster
+     * @return
+     */
+    boolean clearFieldDataMemory(String cluster);
 }

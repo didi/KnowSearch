@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.AriusMetaJobClusterDistribute;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;

@@ -45,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service("templateSrvService")
 @DependsOn("springTool")
+@Deprecated
 public class TemplateSrvManagerImpl implements TemplateSrvManager {
     protected static final ILog   LOGGER                      = LogFactory.getLog(TemplateSrvManagerImpl.class);
 

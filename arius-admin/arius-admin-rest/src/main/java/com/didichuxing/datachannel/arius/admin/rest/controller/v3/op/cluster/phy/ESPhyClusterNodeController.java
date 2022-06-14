@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
@@ -28,12 +28,15 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2022-05-30
  */
 @RestController
-@RequestMapping({ V3_OP + "/phy/cluster/node", V3 + "/cluster/phy/node" })
+@RequestMapping({ V3 + "/cluster/phy/node" })
 @Api(tags = "ES物理集群节点接口(REST)")
 public class ESPhyClusterNodeController {
 
     @Autowired
     private ClusterNodeManager clusterNodeManager;
+
+    @Autowired
+    private ClusterPhyManager  clusterPhyManager;
 
     @GetMapping("/{clusterId}")
     @ResponseBody
@@ -41,6 +44,7 @@ public class ESPhyClusterNodeController {
     public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
         return clusterNodeManager.listClusterPhyNode(clusterId);
     }
+
     @GetMapping("/{clusterId}/region/")
     @ResponseBody
     @ApiOperation(value = "获取可划分至region的节点信息")
@@ -61,5 +65,20 @@ public class ESPhyClusterNodeController {
     public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
         return clusterNodeManager.editMultiNode2Region(params, HttpRequestUtil.getOperator(request));
     }
+
+    @GetMapping("/{clusterPhyName}/names")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群下的节点名称")
+    public Result<List<String>> listClusterPhyNodeName(@PathVariable String clusterPhyName) {
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNodeName(clusterPhyName));
+    }
+
+    @GetMapping("/names")
+    @ResponseBody
+    @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
+    public Result<List<String>> getAppNodeNames(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.listNodeNameByAppId(HttpRequestUtils.getAppId(request)));
+    }
+
 
 }

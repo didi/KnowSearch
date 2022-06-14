@@ -259,6 +259,11 @@ public class DslsConstant {
     public static final String GET_FIELD_SUM_AND_RANGE_FIELD_TOTAL                           = "AriusStatsNodeInfoEsDao"
                                                                                                + "/getFieldSumAndRangeFieldTotal";
 
+    /**
+     * 获取指定集群节点的磁盘数据情况
+     */
+    public static final String GET_CLUSTER_LOGIC_DISK_INFO                                = "AriusStatsNodeInfoEsDao/getClusterLogicDiskInfo";
+
     /************************************************************** TemplateAccessCountEsDao **************************************************************/
     /**
      * 根据时间范围获取索引模板查询统计次数

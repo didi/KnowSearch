@@ -1,10 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.handler.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
 import java.util.List;
 import java.util.Objects;
 
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -68,6 +73,30 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
         }
 
         return Result.buildSucc();
+    }
+    @Override
+    Result<OpTask> buildOpTask(OpTask opTask) {
+        ClusterBaseContent content = ConvertUtil.str2ObjByJson(opTask.getExpandData(), ClusterBaseContent.class);
+        EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
+        ecmTaskDTO
+                .setTitle(content.getPhyClusterName() + OpTaskTypeEnum.valueOfType(opTask.getTaskType()).getMessage());
+        ecmTaskDTO.setCreator(opTask.getCreator());
+        ecmTaskDTO.setType(content.getType());
+        ecmTaskDTO.setPhysicClusterId(ClusterConstant.INVALID_VALUE);
+
+        Result<Void> result = CLUSTER_TYPE_NOT_SUPPORT;
+        if (ES_DOCKER.getCode() == content.getType()) {
+            result = buildDockerEcmTaskDTO(ecmTaskDTO, opTask.getExpandData(), opTask.getCreator());
+        } else if (ES_HOST.getCode() == content.getType()) {
+            result = buildHostEcmTaskDTO(ecmTaskDTO, opTask.getExpandData(), opTask.getCreator());
+        }
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        opTask.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        //这里由于历史原因，需要将配置变更的taskType设置为 CLUSTER_RESTART
+        opTask.setTaskType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
+        return Result.buildSucc(opTask);
     }
 
     @Override

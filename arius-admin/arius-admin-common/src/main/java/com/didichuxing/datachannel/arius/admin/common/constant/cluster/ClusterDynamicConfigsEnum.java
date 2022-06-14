@@ -97,7 +97,9 @@ public enum ClusterDynamicConfigsEnum {
     CLUSTER_ROUTING_ALLOCATION_ENABLE("cluster.routing.allocation.enable",
             ClusterDynamicConfigsTypeEnum.ROUTING,
             ClusterDynamicConfigTypeCheckFunUtil::allocationEnableTypeCheck),
-
+    INDICES_RECOVERY_MAX_BYTES_PER_SEC("indices.recovery.max_bytes_per_sec",
+            ClusterDynamicConfigsTypeEnum.ROUTING,
+            ClusterDynamicConfigTypeCheckFunUtil::bandwidthCheck),
     /**
      * 动态配置项中集群下zen类型
      */

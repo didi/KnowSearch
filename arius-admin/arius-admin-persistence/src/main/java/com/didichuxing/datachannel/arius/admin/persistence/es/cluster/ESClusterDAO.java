@@ -1,6 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDICES;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +11,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
+import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
+import com.didiglobal.logi.elasticsearch.client.request.index.searchshards.ESIndicesSearchShardsRequest;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.searchshards.ESIndicesSearchShardsResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;
@@ -532,4 +541,112 @@ public class ESClusterDAO extends BaseESDAO {
         }
         return null;
     }
+
+
+
+    public String pendingTask(String clusterName) {
+        ESClient client = esOpClient.getESClient(clusterName);
+        String ecSegmentsOnIps = null;
+        if (Objects.isNull(client)) {
+            LOGGER.error("class=ESClusterDAO||method=pendingTask||clusterName={}||errMsg=esClient is null", clusterName);
+            return null;
+        }
+        try {
+            DirectRequest directRequest = new DirectRequest(PENDING_TASK.getMethod(), PENDING_TASK.getUri());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                ecSegmentsOnIps = directResponse.getResponseContent();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=pendingTask||cluster={}||mg=get es segments fail", clusterName, e);
+            return null;
+        }
+        return ecSegmentsOnIps;
+    }
+
+    public String taskMission(String clusterName) {
+        ESClient client = esOpClient.getESClient(clusterName);
+        String result = null;
+        if (Objects.isNull(client)) {
+            LOGGER.error("class=ESClusterDAO||method=taskMission||clusterName={}||errMsg=esClient is null", clusterName);
+            return null;
+        }
+        try {
+            DirectRequest directRequest = new DirectRequest(TASK_MISSION_ANALYSIS.getMethod(), TASK_MISSION_ANALYSIS.getUri());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                result = directResponse.getResponseContent();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=taskMission||cluster={}||mg=get es segments fail", clusterName, e);
+            return null;
+        }
+        return result;
+    }
+
+    public String hotThread(String clusterName) {
+        ESClient client = esOpClient.getESClient(clusterName);
+        String result = null;
+        if (Objects.isNull(client)) {
+            LOGGER.error("class=ESClusterDAO||method=hotThread||clusterName={}||errMsg=esClient is null", clusterName);
+            return null;
+        }
+        try {
+            DirectRequest directRequest = new DirectRequest(HOT_THREAD.getMethod(), HOT_THREAD.getUri());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                result = directResponse.getResponseContent();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=hotThread||cluster={}||mg=get es segments fail", clusterName, e);
+            return null;
+        }
+        return result;
+    }
+
+    public String clearFieldDataMemory(String clusterName) {
+        ESClient client = esOpClient.getESClient(clusterName);
+        String result = null;
+        if (Objects.isNull(client)) {
+            LOGGER.error("class=ESClusterDAO||method=shardAssignment||clusterName={}||errMsg=esClient is null", clusterName);
+            return null;
+        }
+        try {
+            DirectRequest directRequest = new DirectRequest(CLEAR_FIELDDATA_MEMORY.getMethod(), CLEAR_FIELDDATA_MEMORY.getUri());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                result = directResponse.getResponseContent();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=shardAssignment||cluster={}||mg=get es segments fail", clusterName, e);
+            return null;
+        }
+        return result;
+    }
+
+    public String abnormalShardAllocationRetry(String clusterName) {
+        ESClient client = esOpClient.getESClient(clusterName);
+        String result = null;
+        if (Objects.isNull(client)) {
+            LOGGER.error("class=ESClusterDAO||method=abnormalShardAllocationRetry||clusterName={}||errMsg=esClient is null", clusterName);
+            return null;
+        }
+        try {
+            DirectRequest directRequest = new DirectRequest(ABNORMAL_SHARD_RETRY.getMethod(), ABNORMAL_SHARD_RETRY.getUri());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                result = directResponse.getResponseContent();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=abnormalShardAllocationRetry||cluster={}||mg=get es segments fail", clusterName, e);
+            return null;
+        }
+        return result;
+    }
+
 }

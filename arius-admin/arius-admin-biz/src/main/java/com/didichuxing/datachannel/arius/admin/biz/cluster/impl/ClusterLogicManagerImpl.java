@@ -13,19 +13,33 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -33,15 +47,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicStatis;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
@@ -76,6 +91,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterStaticsService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.enums.ResultCode;
@@ -161,81 +177,52 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Autowired
     private HandleFactory                 handleFactory;
-    
-    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterLogicManager", 10,10,100);
+
+    @Autowired
+    private IndicesManager                indicesManager;
+
+    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterLogicManager", 10, 10, 100);
+
 
     /**
      * 构建运维页面的逻辑集群VO
      * @param logicClusters     逻辑集群列表
-     * @param projectIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
-     *                          ，为null则权限为运维人员权限（管理权限）
-     * @return
+     * @return 逻辑集群列表
      */
     @Override
-    public List<ConsoleClusterVO> batchBuildOpClusterVOs(List<ClusterLogic> logicClusters,
-                                                         Integer projectIdForAuthJudge) {
+    public List<ClusterLogicVO> buildClusterLogics(List<ClusterLogic> logicClusters) {
         if (CollectionUtils.isEmpty(logicClusters)) {
             return Lists.newArrayList();
         }
 
-        List<ConsoleClusterVO> consoleClusterVOS = Lists.newArrayList();
+        List<ClusterLogicVO> clusterLogicVOS = Lists.newArrayList();
         for (ClusterLogic logicCluster : logicClusters) {
-            consoleClusterVOS.add(buildOpClusterVO(logicCluster, projectIdForAuthJudge));
+            clusterLogicVOS.add(buildClusterLogic(logicCluster));
         }
 
-        Collections.sort(consoleClusterVOS);
-        return consoleClusterVOS;
+        Collections.sort(clusterLogicVOS);
+        return clusterLogicVOS;
     }
 
     /**
      * 构建运维页面的逻辑集群VO
      * @param clusterLogic    逻辑集群
-     * @param projectIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
-     *                          ，为null则权限为运维人员权限（管理权限）
      * @return
      */
     @Override
-    public ConsoleClusterVO buildOpClusterVO(ClusterLogic clusterLogic, Integer projectIdForAuthJudge) {
-        ConsoleClusterVO consoleClusterVO = ConvertUtil.obj2Obj(clusterLogic, ConsoleClusterVO.class);
+    public ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic) {
+        ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
-        futureUtil.runnableTask(() -> buildLogicClusterStatus(consoleClusterVO, clusterLogic))
-            .runnableTask(() -> buildLogicRole(consoleClusterVO, clusterLogic))
-            .runnableTask(() -> buildConsoleClusterVersions(consoleClusterVO))
-            .runnableTask(() -> buildOpLogicClusterPermission(consoleClusterVO, projectIdForAuthJudge))
-            .runnableTask(() -> buildLogicClusterTemplateSrvs(consoleClusterVO)).waitExecute();
+        futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
+                .runnableTask(() -> buildLogicRole(clusterLogicVO, clusterLogic))
+                .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO));
 
         //依赖获取集群状态, 不能使用FutureUtil, 否则抛NPE
-        buildClusterNodeInfo(consoleClusterVO);
-        
-        consoleClusterVO.setAppName(projectService.getProjectBriefByProjectId(consoleClusterVO.getProjectId()).getProjectName());
+        buildClusterNodeInfo(clusterLogicVO);
+        clusterLogicVO.setAppName(appService.getAppName(clusterLogicVO.getAppId()));
 
-        return consoleClusterVO;
+        return clusterLogicVO;
     }
-
-    /**
-     * 获取逻辑集群所有访问的APP
-     *
-     * @param logicClusterId 逻辑集群ID
-     * @return
-     */
-   /**
-    @Override
-    public Result<List<ConsoleAppVO>> getAccessAppsOfLogicCluster(Long logicClusterId) {
-        List<Integer> appsResult = esClusterStaticsService
-                .getLogicClusterAccessInfo(logicClusterId, 7);
-
-        if (CollectionUtils.isEmpty(appsResult)) {
-            return Result.buildSucc();
-        }
-
-        List<App> apps = appService.listApps();
-        Map<Integer, App> id2AppMap = ConvertUtil.list2Map(apps, App::getId);
-
-        List<App> appsRet = appsResult.stream().map(id2AppMap::get).collect( Collectors.toList());
-        return Result.buildSucc(ConvertUtil.list2List(appsRet, ConsoleAppVO.class));
-
-    }
-    **/
 
     @Override
     public Result<Void> clearIndices(ConsoleTemplateClearDTO clearDTO, String operator) throws ESOperateException {
@@ -253,21 +240,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         LOGGER.info("class=TemplateLogicServiceImpl||method=clearIndex||"
-                        + "operator={}||logicId={}||delIndices={}||delQueryDsl={}",
-                operator, clearDTO.getLogicId(), JSON.toJSONString(clearDTO.getDelIndices()), clearDTO.getDelQueryDsl());
+                        + "operator={}||logicId={}||delIndices={}||delQueryDsl={}", operator, clearDTO.getLogicId(),
+                JSON.toJSONString(clearDTO.getDelIndices()), clearDTO.getDelQueryDsl());
 
-        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
-                .getLogicTemplateWithPhysicalsById(clearDTO.getLogicId());
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(
+                clearDTO.getLogicId());
 
         if (StringUtils.isNotBlank(clearDTO.getDelQueryDsl())) {
-            Result<Void> deleteResult = batchDeletePhysicalTemplateIndicesByQuery(templateLogicWithPhysical.getPhysicals(),
-                    clearDTO.getDelQueryDsl(), clearDTO.getDelIndices());
+            Result<Void> deleteResult = batchDeletePhysicalTemplateIndicesByQuery(
+                    templateLogicWithPhysical.getPhysicals(), clearDTO.getDelQueryDsl(), clearDTO.getDelIndices());
             if (deleteResult.failed()) {
                 return deleteResult;
             }
         } else {
-            Result<Void> deleteIndicesResult = batchDeletePhysicalTemplateIndices(templateLogicWithPhysical.getPhysicals(),
-                    clearDTO.getDelIndices());
+            Result<Void> deleteIndicesResult = batchDeletePhysicalTemplateIndices(
+                    templateLogicWithPhysical.getPhysicals(), clearDTO.getDelIndices());
             if (deleteIndicesResult.failed()) {
                 return deleteIndicesResult;
             }
@@ -296,32 +283,31 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<ConsoleClusterVO>> getProjectLogicClusterInfo(Integer projectId) {
-        List<ConsoleClusterVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByProjectId(
-                projectId), ConsoleClusterVO.class);
-        for(ConsoleClusterVO consoleClusterVO : list) {
-            List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(consoleClusterVO.getId());
-            consoleClusterVO.setPhyClusterAssociated(!AriusObjUtils.isEmptyList(clusterPhyNames));
-            consoleClusterVO.setAssociatedPhyClusterName(clusterPhyNames);
+    public Result<List<ClusterLogicVO>> getLogicClustersByProjectId(Integer projectId) {
+        List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByProjectId(appId),
+                ClusterLogicVO.class);
+        for (ClusterLogicVO clusterLogicVO : list) {
+            List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(clusterLogicVO.getId());
+            clusterLogicVO.setPhyClusterAssociated(!AriusObjUtils.isEmptyList(clusterPhyNames));
+            clusterLogicVO.setAssociatedPhyClusterName(clusterPhyNames);
         }
         return Result.buildSucc(list);
     }
 
     /**
      * 获取APP拥有的集群列表
-     * @param projectId
-     * @return
+     * @param projectId projectId
+     * @return 集群列表
      */
     @Override
-    public Result<List<ConsoleClusterVO>> getProjectLogicClusters(Integer projectId) {
+    public Result<List<ClusterLogicVO>> getAppLogicClusters(Integer appId) {
     
-       if (projectService.checkProjectExist(projectId)){
+       if (!projectService.checkProjectExist(projectId)){
            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(),ResultCode.PROJECT_NOT_EXISTS.getMessage());
        }
         
-
-        return Result.buildSucc(batchBuildOpClusterVOs(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId),
-                projectId));
+        return Result.buildSucc(
+                buildClusterLogics(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId)));
     }
     
     @Override
@@ -334,36 +320,19 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     /**
-     * 获取平台所有的集群列表
-     * @param projectId
-     * @return
-     */
-    @Override
-    public Result<List<ConsoleClusterVO>> getDataCenterLogicClusters(Integer projectId) {
-
-        List<ClusterLogic> logicClusters = clusterLogicService.listAllClusterLogics();
-        List<ConsoleClusterVO> consoleClusterVOS = ConvertUtil.list2List(logicClusters, ConsoleClusterVO.class);
-        if (projectId != null &&projectService.checkProjectExist(projectId) && CollectionUtils.isNotEmpty(consoleClusterVOS)) {
-            consoleClusterVOS.forEach(consoleClusterVO -> buildOpLogicClusterPermission(consoleClusterVO, projectId));
-        }
-        Collections.sort(consoleClusterVOS);
-        return Result.buildSucc(consoleClusterVOS);
-    }
-
-    /**
      *
      * @param clusterId
      * @param projectId
      * @return
      */
     @Override
-    public Result<ConsoleClusterVO> getProjectLogicClusters(Long clusterId, Integer projectId) {
+    public Result<ClusterLogicVO> getAppLogicClusters(Long clusterId, Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId);
         if (clusterLogic == null) {
             return Result.buildNotExist("集群不存在");
         }
 
-        return Result.buildSucc(buildOpClusterVO(clusterLogic, projectId));
+        return Result.buildSucc(buildClusterLogic(clusterLogic));
     }
 
     /**
@@ -378,7 +347,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         List<ConsoleTemplateVO> result = new ArrayList<>();
 
         Integer projectId = HttpRequestUtil.getProjectId(request, AuthConstant.SUPER_PROJECT_ID);
-        List<IndexTemplateLogicAggregate> aggregates =templateLogicManager.getLogicClusterTemplatesAggregate(clusterId,
+        List<IndexTemplateLogicAggregate> aggregates = templateLogicManager.getLogicClusterTemplatesAggregate(clusterId,
                 projectId);
         if (CollectionUtils.isNotEmpty(aggregates)) {
             for (IndexTemplateLogicAggregate aggregate : aggregates) {
@@ -392,18 +361,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(result);
     }
 
-    /**
-     * 获取指定逻辑集群datanode的规格接口
-     * @param clusterId
-     * @return
-     */
-    @Override
-    public Result<Set<ESClusterNodeSepcVO>> getLogicClusterDataNodeSpec(Long clusterId) {
-        Set<RoleClusterNodeSepc> roleClusterNodeSepcs = clusterLogicService.getLogicDataNodeSepc(clusterId);
-
-        return Result.buildSucc(ConvertUtil.set2Set(roleClusterNodeSepcs, ESClusterNodeSepcVO.class));
-    }
-
     @Override
     public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
         List<ESMachineNormsPO> esMachineNormsPOS = esMachineNormsService.listMachineNorms();
@@ -411,23 +368,22 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public List<ConsoleClusterVO> getConsoleClusterVOS(ESLogicClusterDTO param, Integer projectId) {
+    public List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer projectId) {
         List<ClusterLogic> clusterLogics = clusterLogicService.listClusterLogics(param);
-        return batchBuildOpClusterVOs(clusterLogics, projectId);
+        return buildClusterLogics(clusterLogics);
     }
 
     @Override
-    public ConsoleClusterVO getConsoleCluster(Long clusterLogicId, Integer currentProjectId) {
+    public ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentProjectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
-        ConsoleClusterVO consoleClusterVO = ConvertUtil.obj2Obj(clusterLogic, ConsoleClusterVO.class);
+        ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
-        futureUtil.runnableTask(() -> buildLogicClusterStatus(consoleClusterVO, clusterLogic))
-                    .runnableTask(() -> buildOpLogicClusterPermission(consoleClusterVO, currentProjectId))
-                    .runnableTask(() -> consoleClusterVO.setAppName(projectService.getProjectBriefByProjectId(consoleClusterVO.getProjectId()).getProjectName()))
-                    .runnableTask(() -> buildClusterNodeInfo(consoleClusterVO))
-                    .waitExecute();
+        futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
+                .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, currentProjectId))
+                .runnableTask(() -> consoleClusterVO.setAppName(projectService.getProjectBriefByProjectId(consoleClusterVO.getProjectId()).getProjectName()))
+                .runnableTask(() -> buildClusterNodeInfo(clusterLogicVO)).waitExecute();
 
-        return consoleClusterVO;
+        return clusterLogicVO;
     }
 
     @Override
@@ -435,16 +391,18 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return clusterRegionManager.batchBindRegionToClusterLogic(param, operator, Boolean.TRUE);
     }
 
-	@Override
-    public ConsoleClusterVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId) {
-        if(AriusObjUtils.isNull(clusterLogicId)){return null;}
+    @Override
+    public ClusterLogicVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId) {
+        if (AriusObjUtils.isNull(clusterLogicId)) {
+            return null;
+        }
 
         //这里必须clusterLogicManager为了走spring全局缓存
-        List<ConsoleClusterVO> consoleClusterVOS = clusterLogicManager.getConsoleClusterVOS(null, projectId);
-        if(CollectionUtils.isNotEmpty(consoleClusterVOS)){
-            for (ConsoleClusterVO consoleClusterVO : consoleClusterVOS) {
-                if (clusterLogicId.equals(consoleClusterVO.getId())) {
-                    return consoleClusterVO;
+        List<ClusterLogicVO> clusterLogicVOS = clusterLogicManager.getClusterLogics(null, projectId);
+        if (CollectionUtils.isNotEmpty(clusterLogicVOS)) {
+            for (ClusterLogicVO clusterLogicVO : clusterLogicVOS) {
+                if (clusterLogicId.equals(clusterLogicVO.getId())) {
+                    return clusterLogicVO;
                 }
             }
         }
@@ -452,106 +410,90 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return null;
     }
 
-	@Override
-	public Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator,
-			Integer projectId) {
-		Result<Long> result = clusterLogicService.createClusterLogic(param);
+    @Override
+    public Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
+        Result<Long> result = clusterLogicService.createClusterLogic(param);
 
-		if (result.success()) {
+        if (result.success()) {
 			SpringTool.publish(new ClusterLogicEvent(result.getData(), projectId));
-			operateRecordService.save(RESOURCE, ADD, result.getData(), "创建逻辑集群", operator);
-		}
-		return result;
-	}
+            operateRecordService.save(RESOURCE, ADD, result.getData(), "创建逻辑集群", operator);
+        }
+        return result;
+    }
 
-	@Override
-	public Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException {
-		Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator);
-		if (result.success()) {
+    @Override
+    public Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer projectId)
+            throws AdminOperateException {
+        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator);
+        ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(logicClusterId, projectId);
+
+        for (IndexTemplateLogicAggregate agg : templateIndexVO.getTemplateLogicAggregates()) {
+            templateLogicManager.delTemplate(agg.getIndexTemplateLogicWithCluster().getId(), operator);
+        }
+
+        indicesManager.batchDeleteIndex(templateIndexVO.getCatIndexResults(),appId,operator);
+
+        if (result.success()) {
 			SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
-			operateRecordService.save(RESOURCE, DELETE, logicClusterId, "", operator);
-		}
-		return result;
-	}
+            operateRecordService.save(RESOURCE, DELETE, logicClusterId, "", operator);
+        }
+        return result;
+    }
 
-	@Override
-	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
+    private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(Long logicClusterId, Integer projectId) {
+        List<IndexTemplateLogicAggregate> templateLogicAggregates =
+                templateLogicManager.getLogicClusterTemplatesAggregate(logicClusterId, projectId);
+
+        List<IndicesClearDTO> catIndexResults = Lists.newArrayList();
+        templateLogicAggregates.forEach(tl -> {
+
+            Integer templateLogic = tl.getIndexTemplateLogicWithCluster().getId();
+
+            IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(templateLogic);
+            if (templateLogicWithPhysical != null) {
+
+                List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+                for (IndexTemplatePhy physicalMaster : physicalMasters) {
+                    List<CatIndexResult> catIndexResultList = esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
+                            physicalMaster.getExpression());
+                    catIndexResultList.forEach(catIndexResult -> {
+                        IndicesClearDTO indicesClearDTO = new IndicesClearDTO();
+                        indicesClearDTO.setIndex(catIndexResult.getIndex());
+                        indicesClearDTO.setClusterPhyName(physicalMaster.getCluster());
+                        catIndexResults.add(indicesClearDTO);
+                    });
+                }
+
+            }
+        });
+
+        ClusterLogicTemplateIndexDetailDTO templateIndexVO = new ClusterLogicTemplateIndexDetailDTO();
+        templateIndexVO.setCatIndexResults(catIndexResults);
+        templateIndexVO.setTemplateLogicAggregates(templateLogicAggregates);
+        return templateIndexVO;
+    }
+
+    @Override
+	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer appId) {
         Result<Void> result = clusterLogicService.editClusterLogic(param, operator);
         if (result.success()) {
-            SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
+            SpringTool.publish(new ClusterLogicEvent(param.getId(), appId));
             operateRecordService.save(RESOURCE, EDIT, param.getId(), String.valueOf(param.getId()), operator);
         }
 		return result;
 	}
 
     @Override
-    public PaginationResult<ConsoleClusterVO> pageGetConsoleClusterVOS(ClusterLogicConditionDTO condition, Integer projectId) {
-        BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(CLUSTER_LOGIC.getPageSearchType());
+    public PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition, Integer projectId) {
+        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_LOGIC.getPageSearchType());
         if (baseHandle instanceof ClusterLogicPageSearchHandle) {
-            ClusterLogicPageSearchHandle handle     =  (ClusterLogicPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, condition.getAuthType(), projectId);
+            ClusterLogicPageSearchHandle pageSearchHandle = (ClusterLogicPageSearchHandle) baseHandle;
+            return pageSearchHandle.doPage(condition, projectId);
         }
 
-        LOGGER.warn("class=ClusterLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterLogicPageSearchHandle");
+        LOGGER.warn(
+                "class=ClusterLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterLogicPageSearchHandle");
         return PaginationResult.buildFail("分页获取逻辑集群信息失败");
-    }
-
-    @Override
-    public List<ClusterLogic> getClusterLogicByProjectIdAndAuthType(Integer projectId, Integer authType) {
-        if (!projectService.checkProjectExist(projectId)) {
-            return Lists.newArrayList();
-        }
-
-        //超级用户对所有模板都是管理权限
-        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId) && !ProjectClusterLogicAuthEnum.OWN.getCode().equals(authType)) {
-            return Lists.newArrayList();
-        }
-
-        if (!ProjectClusterLogicAuthEnum.isExitByCode(authType)) {
-            return Lists.newArrayList();
-        }
-
-        switch (ProjectClusterLogicAuthEnum.valueOf(authType)) {
-            case OWN:
-                if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-                    return clusterLogicService.listAllClusterLogics();
-                } else {
-                    return clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-                }
-            case ACCESS:
-                return getProjectAccessClusterLogicList(projectId);
-
-            case NO_PERMISSIONS:
-                List<Long> appOwnAuthClusterLogicIdList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId)
-                        .stream()
-                        .map(ClusterLogic::getId)
-                        .collect(Collectors.toList());
-
-                List<Long> appAccessAuthClusterLogicIdList = getProjectAccessClusterLogicList(projectId)
-                        .stream()
-                        .map(ClusterLogic::getId)
-                        .collect(Collectors.toList());
-
-                List<ClusterLogic> allClusterLogicList  =  clusterLogicService.listAllClusterLogics();
-
-                return allClusterLogicList.stream()
-                        .filter(clusterLogic -> !appOwnAuthClusterLogicIdList.contains(clusterLogic.getId())
-                                && !appAccessAuthClusterLogicIdList.contains(clusterLogic.getId()))
-                        .collect(Collectors.toList());
-            default:
-                return Lists.newArrayList();
-
-        }
-    }
-
-    @Override
-    public List<ClusterLogic> getProjectAccessClusterLogicList(Integer projectId) {
-        List<Long> clusterLogicIdList = projectClusterLogicAuthService.getLogicClusterAccessAuths(projectId)
-                                        .stream()
-                                        .map(ProjectClusterLogicAuth::getLogicClusterId)
-                                        .collect(Collectors.toList());
-
-        return clusterLogicService.getClusterLogicListByIds(clusterLogicIdList);
     }
 
     @Override
@@ -588,33 +530,57 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<ConsoleClusterVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type) {
-        ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
-        logicClusterDTO.setProjectId(projectId);
-        logicClusterDTO.setType(type);
-        return Result.buildSucc(ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ConsoleClusterVO.class));
+    public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator, Integer projectId) {
+        ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterId, projectId);
+        ClusterLogicTemplateIndexCountVO countVO = new ClusterLogicTemplateIndexCountVO();
+        countVO.setCatIndexResults(detailVO.getCatIndexResults().size());
+        countVO.setTemplateLogicAggregates(detailVO.getTemplateLogicAggregates().size());
+        return Result.buildSucc(countVO);
+    }
+
+    @Override
+    public PaginationResult<ESClusterRoleHostVO> nodesPage(Long clusterLogicId,ClusterLogicNodeConditionDTO condition) {
+        ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<ClusterRoleHost> nodes;
+        if (result.success()){
+            nodes = result.getData();
+        }else {
+            return PaginationResult.buildFail("获取节点失败！");
+        }
+        if (StringUtils.isNotBlank(condition.getKeyword())) {
+            nodes = nodes.stream().filter(n -> n.getNodeSet().contains(condition.getKeyword())).collect(Collectors.toList());
+        }
+        return PaginationResult.buildSucc(rowBounds(condition.getPage().intValue(), condition.getSize().intValue(), nodes),
+                nodes.size(), condition.getPage(), condition.getSize());
+    }
+
+    @Override
+    public Result<String> estimatedDiskSize(Long clusterLogicId, Integer count) {
+        ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        return null;
     }
 
 /**************************************************** private method ****************************************************/
     /**
      * 构建OP逻辑集群权限
-     * @param consoleClusterVO  逻辑集群
+     * @param clusterLogicVO  逻辑集群
      * @param projectIdForAuthJudge 用于判断权限的应用id（供应用管理页面获取关联集群列表使用）
      *                          ，为null则权限为运维人员权限（管理权限）
      */
-    private void buildOpLogicClusterPermission(ConsoleClusterVO consoleClusterVO, Integer projectIdForAuthJudge) {
-        if (consoleClusterVO == null) {
+    private void buildOpLogicClusterPermission(ClusterLogicVO clusterLogicVO, Integer projectIdForAuthJudge) {
+        if (clusterLogicVO == null) {
             return;
         }
 
         if (projectIdForAuthJudge == null) {
             // 未指定需要判断权限的app，取运维人员权限
-            consoleClusterVO.setAuthId(null);
-            consoleClusterVO.setAuthType( ProjectClusterLogicAuthEnum.OWN.getCode());
-            consoleClusterVO.setPermissions(ProjectClusterLogicAuthEnum.OWN.getDesc());
+            clusterLogicVO.setAuthId(null);
+            clusterLogicVO.setAuthType(ProjectClusterLogicAuthEnum.OWN.getCode());
+            clusterLogicVO.setPermissions(ProjectClusterLogicAuthEnum.OWN.getDesc());
         } else {
             // 指定了需要判断权限的app
-            buildLogicClusterPermission(consoleClusterVO, projectIdForAuthJudge);
+            buildLogicClusterPermission(clusterLogicVO, projectIdForAuthJudge);
         }
     }
 
@@ -622,7 +588,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 构建ES集群版本
      * @param logicCluster 逻辑集群
      */
-    private void buildConsoleClusterVersions(ConsoleClusterVO logicCluster) {
+    private void buildConsoleClusterVersions(ClusterLogicVO logicCluster) {
         try {
             if (logicCluster != null) {
                 List<ClusterPhy> physicalClusters = getLogicClusterAssignedPhysicalClusters(logicCluster.getId());
@@ -642,7 +608,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @param logicClusterVO      逻辑集群
      * @param projectIdForAuthJudge 需要判断的app的ID
      */
-    private void buildLogicClusterPermission(ConsoleClusterVO logicClusterVO, Integer projectIdForAuthJudge) {
+    private void buildLogicClusterPermission(ClusterLogicVO logicClusterVO, Integer projectIdForAuthJudge) {
         try {
             if (logicClusterVO == null || projectIdForAuthJudge == null) {
                 return;
@@ -678,7 +644,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     /**
      * 更新逻辑集群状态信息
      */
-    private void buildLogicClusterStatus(ConsoleClusterVO logicCluster, ClusterLogic clusterLogic) {
+    private void buildLogicClusterStatus(ClusterLogicVO logicCluster, ClusterLogic clusterLogic) {
         ClusterLogicStatis esClusterLogicStatus = buildDefaultLogicStatus();
         try {
             ClusterLogicStatis clusterLogicStatus = getClusterLogicStatus(clusterLogic.getId());
@@ -689,7 +655,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             LOGGER.error("class=ClusterLogicManagerImpl||method=buildLogicClusterStatus||logicClusterId={}",
                     logicCluster.getId(), e);
         }
-        
+
         logicCluster.setClusterStatus(ConvertUtil.obj2Obj(esClusterLogicStatus, ConsoleClusterStatusVO.class));
     }
 
@@ -707,7 +673,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return logicStatus;
     }
 
-    private void buildLogicRole(ConsoleClusterVO logicCluster, ClusterLogic clusterLogic) {
+    private void buildLogicRole(ClusterLogicVO logicCluster, ClusterLogic clusterLogic) {
         if (logicCluster != null) {
             try {
                 Long logicClusterId = logicCluster.getId();
@@ -734,7 +700,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
     }
 
-    private List<ESClusterRoleVO> buildESRoleClusterVOS(ClusterLogic clusterLogic, Long logicClusterId, List<ClusterRoleInfo> esRolePhyClusters, List<ClusterRoleHost> esRolePhyClusterHosts) {
+    private List<ESClusterRoleVO> buildESRoleClusterVOS(ClusterLogic clusterLogic, Long logicClusterId,
+                                                        List<ClusterRoleInfo> esRolePhyClusters,
+                                                        List<ClusterRoleHost> esRolePhyClusterHosts) {
         List<ESClusterRoleVO> esClusterRoleVOS = new ArrayList<>();
         for (ClusterRoleInfo clusterRoleInfo : esRolePhyClusters) {
             ESClusterRoleVO esClusterRoleVO = ConvertUtil.obj2Obj(clusterRoleInfo, ESClusterRoleVO.class);
@@ -775,10 +743,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return esClusterRoleVOS;
     }
 
-    private void buildLogicClusterTemplateSrvs(ConsoleClusterVO logicCluster) {
+    private void buildLogicClusterTemplateSrvs(ClusterLogicVO logicCluster) {
         try {
-            Result<List<ClusterTemplateSrv>> listResult = templateSrvManager
-                    .getLogicClusterTemplateSrv(logicCluster.getId());
+            Result<List<ClusterTemplateSrv>> listResult = templateSrvManager.getLogicClusterTemplateSrv(
+                    logicCluster.getId());
             if (null != listResult && listResult.success()) {
                 logicCluster.setEsClusterTemplateSrvVOS(
                         ConvertUtil.list2List(listResult.getData(), ESClusterTemplateSrvVO.class));
@@ -797,30 +765,31 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 4. 防止没有关联物理集群, 或者取消关联region, 逻辑集群状态为red
      * 5. 获取gateway地址
      */
-    private void buildClusterNodeInfo(ConsoleClusterVO consoleClusterVO) {
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(consoleClusterVO.getId());
+    private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
+        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(
+                clusterLogicVO.getId());
         if (null == clusterLogicContext) {
             return;
         }
 
         //1. 是否关联物理集群
-        consoleClusterVO.setPhyClusterAssociated(clusterLogicContext.getAssociatedPhyNum() > 0);
+        clusterLogicVO.setPhyClusterAssociated(clusterLogicContext.getAssociatedPhyNum() > 0);
 
         //2. 获取关联物理集群列表
         if (CollectionUtils.isNotEmpty(clusterLogicContext.getAssociatedClusterPhyNames())) {
-            consoleClusterVO.setAssociatedPhyClusterName(clusterLogicContext.getAssociatedClusterPhyNames());
+            clusterLogicVO.setAssociatedPhyClusterName(clusterLogicContext.getAssociatedClusterPhyNames());
         }
 
         //3. 逻辑集群拥有的数据节点数
-        consoleClusterVO.setDataNodesNumber(clusterLogicContext.getAssociatedDataNodeNum());
+        clusterLogicVO.setDataNodesNumber(clusterLogicContext.getAssociatedDataNodeNum());
 
         //4. 没有关联物理集群下, 逻辑集群状态至为red
-        if (consoleClusterVO.getPhyClusterAssociated().equals(false)) {
-            consoleClusterVO.getClusterStatus().setStatus("red");
+        if (clusterLogicVO.getPhyClusterAssociated().equals(false)) {
+            clusterLogicVO.getClusterStatus().setStatus("red");
         }
 
         //5. 获取gateway地址
-        consoleClusterVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
+        clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
     }
 
     private Result<Void> checkIndices(List<String> delIndices, Integer logicId) {
@@ -956,4 +925,23 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         return RED.getDesc();
     }
+
+    public static List rowBounds(int pageNum, int pageSize, List list) {
+        pageNum = pageNum - 1;
+        pageNum = Math.max(pageNum, 0);
+        // 默认至少返回5行
+        pageSize = Math.max(pageSize, 5);
+        int startRow = 0;
+        int endRow = 0;
+        if (list == null || list.size() == 0) {
+            return list;
+        }
+        int totalCount = list.size();
+        startRow = pageNum > 0 ? pageNum * pageSize : 0;
+        endRow = startRow + pageSize;
+        endRow = Math.min(endRow, totalCount);
+        list = list.subList(startRow, endRow);
+        return list;
+    }
+
 }
