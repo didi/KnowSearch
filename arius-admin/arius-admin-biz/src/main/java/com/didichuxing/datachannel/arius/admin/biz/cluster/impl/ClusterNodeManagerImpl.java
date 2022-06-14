@@ -7,6 +7,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -28,12 +31,11 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -47,21 +49,18 @@ import com.google.common.collect.Maps;
 public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     private static final ILog      LOGGER = LogFactory.getLog(ClusterNodeManager.class);
-
-    @Autowired
-    private NodeStatisService      nodeStatisService;
-
+    
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
-
-    @Autowired
-    private ClusterLogicService    clusterLogicService;
 
     @Autowired
     private ClusterRegionService   clusterRegionService;
 
     @Autowired
     private ClusterPhyService      clusterPhyService;
+
+    @Autowired
+    private ESClusterNodeService   esClusterNodeService;
 
     @Autowired
     private OperateRecordService   operateRecordService;
@@ -152,9 +151,34 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
-        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
+        return Result.buildSucc(buildClusterRoleHostStats(clusterPhy.getCluster(), clusterRoleHostList));
     }
+
     /**************************************** private method ***************************************************/
+
+    private List<ESClusterRoleHostVO> buildClusterRoleHostStats(String cluster,
+                                                                List<ClusterRoleHost> clusterRoleHostList) {
+        List<ESClusterRoleHostVO> roleHostList = ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class);
+        if (CollectionUtils.isNotEmpty(roleHostList)) {
+            Map<String, String> regionMap = roleHostList.stream().map(ESClusterRoleHostVO::getRegionId)
+                .filter(regionId -> null != regionId && regionId > 0).distinct()
+                .map(regionId -> clusterRegionService.getRegionById(regionId.longValue())).filter(Objects::nonNull)
+                .collect(
+                    Collectors.toMap(region -> String.valueOf(region.getId()), ClusterRegion::getName, (r1, r2) -> r1));
+
+            Map<String, Triple<Long, Long, Double>> nodeDiskUsageMap = esClusterNodeService.syncGetNodesDiskUsage(cluster);
+            roleHostList.forEach(vo -> {
+                Optional.ofNullable(regionMap.get(String.valueOf(vo.getRegionId()))).ifPresent(vo::setRegionName);
+                Optional.ofNullable(nodeDiskUsageMap.get(vo.getNodeSet())).ifPresent(triple -> {
+                    vo.setDiskTotal(triple.v1());
+                    vo.setDiskUsage(triple.v2());
+                    vo.setDiskUsagePercent(triple.v3());
+                });
+            });
+        }
+        return roleHostList;
+    }
+
     @Nullable
     private Result<Boolean> baseCheckParamValid(ClusterRegionWithNodeInfoDTO param) {
         if (null == param) {

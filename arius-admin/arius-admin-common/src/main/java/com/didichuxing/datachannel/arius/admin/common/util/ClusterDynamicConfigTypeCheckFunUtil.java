@@ -1,7 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class ClusterDynamicConfigTypeCheckFunUtil {
 
@@ -14,7 +18,7 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
     public static final Set<String> allocationEnableTypes = new HashSet<>();
 
     public static final Set<String> masterBlockTypes = new HashSet<>();
-
+    public static final Set<String> bandwidthUnits = new HashSet<>();
     static {
         reBalanceEnableTypes.add("all");
         reBalanceEnableTypes.add("primaries");
@@ -32,6 +36,8 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
 
         masterBlockTypes.add("all");
         masterBlockTypes.add("write");
+        
+        bandwidthUnits.addAll(Arrays.asList("k", "kb", "m", "mb", "g", "gb", "t", "tb", "p", "pb", "b"));
     }
 
     public static boolean percentCheck(String value) {
@@ -146,5 +152,24 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
 
     public static boolean defaultTypeCheck(String value) {
         return false;
+    }
+
+    public static boolean bandwidthCheck(String proStoreSize) {
+        BigDecimal bandwidth = null;
+        try {
+            String lowerSValue = proStoreSize.toLowerCase().trim();
+            String bandwidthUnit = StringUtils.right(lowerSValue, 2);
+            if (ClusterDynamicConfigTypeCheckFunUtil.bandwidthUnits.contains(bandwidthUnit)) {
+                bandwidth = new BigDecimal(StringUtils.left(lowerSValue, lowerSValue.length() - 2).trim());
+            } else {
+                bandwidthUnit = StringUtils.right(lowerSValue, 1);
+                if (ClusterDynamicConfigTypeCheckFunUtil.bandwidthUnits.contains(bandwidthUnit)) {
+                    bandwidth = new BigDecimal(StringUtils.left(lowerSValue, lowerSValue.length() - 1).trim());
+                }
+            }
+        } catch (Exception e) {
+            //pass
+        }
+        return bandwidth != null;
     }
 }

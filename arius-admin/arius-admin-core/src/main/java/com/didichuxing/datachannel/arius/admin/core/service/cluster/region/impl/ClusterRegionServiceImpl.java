@@ -413,9 +413,10 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public List<ClusterRegion> listClusterRegionsByLogicIds(List<Long> clusterLogicIds) {
-        if (CollectionUtils.isEmpty(clusterLogicIds)) { return Lists.newArrayList();}
-
+    public List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIds) {
+        if (CollectionUtils.isEmpty(clusterLogicIds)) {
+            return Lists.newArrayList();
+        }
         List<Long> uniqueClusterLogicIds = clusterLogicIds.stream().distinct().collect(Collectors.toList());
         List<ClusterRegion> clusterRegionList = Lists.newArrayList();
         // 这里不应该一次性把clusterLogic_id列表放置在 sql in中, 使用范围来查询，是为了模糊匹配单列中的clusterLogicId;

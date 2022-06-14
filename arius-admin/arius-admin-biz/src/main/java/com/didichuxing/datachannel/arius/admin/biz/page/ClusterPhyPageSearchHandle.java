@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -41,8 +40,6 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     private AppService               appService;
     @Autowired
     private ClusterPhyService        clusterPhyService;
-    @Autowired
-    private ClusterContextManager clusterContextManager;
     @Autowired
     private ClusterLogicService clusterLogicService;
     @Autowired
@@ -77,7 +74,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
             // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
             List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
             //项目下的有管理权限逻辑集群会关联多个物理集群
-            List<ClusterRegion> regions = clusterRegionService.listClusterRegionsByLogicIds(
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
                 clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
             clusterNames = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
                 .collect(Collectors.toList());

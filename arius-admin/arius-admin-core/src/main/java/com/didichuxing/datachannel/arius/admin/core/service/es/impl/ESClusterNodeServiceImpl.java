@@ -1,24 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.BIG_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.INSERT_PRDER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.ONE_BILLION;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.PRIORITY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.SOURCE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TASKS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIME_IN_QUEUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
-import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -28,6 +22,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
@@ -38,6 +34,8 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNo
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESClusterNodesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
+import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -292,6 +290,40 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         clusterMemInfo.setMemUsedPercent(100 - clusterMemInfo.getMemFreePercent());
 
         return clusterMemInfo;
+    }
+
+    @Override
+    public Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster) {
+        Map<String, Triple<Long, Long, Double>> diskUsageMap = new HashMap<>();
+        List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
+       
+        
+        if (CollectionUtils.isNotEmpty(nodeStatsList)) {
+            // 遍历节点，获得节点和对应的磁盘使用率
+            nodeStatsList.forEach(nodeStats -> {
+
+                FSNode fsNode = nodeStats.getFs();
+                String nodeName = nodeStats.getName();
+                long totalFsBytes = fsNode.getTotal().getTotalInBytes();
+                long usageFsBytes = totalFsBytes - fsNode.getTotal().getFreeInBytes();
+                //Triple<diskTotal, diskUsage, diskUsagePercent>
+                Triple<Long, Long, Double> triple = new Triple<>();
+                if (totalFsBytes > 0) {
+                    triple.setV1(totalFsBytes);
+                }
+                if (usageFsBytes >= 0 && usageFsBytes <= totalFsBytes) {
+                    triple.setV2(usageFsBytes);
+                }
+
+                if (StringUtils.isNotBlank(nodeName) && totalFsBytes > 0 && usageFsBytes >= 0
+                    && usageFsBytes <= totalFsBytes) {
+                    triple.setV3(BigDecimal.valueOf(usageFsBytes)
+                        .divide(BigDecimal.valueOf(totalFsBytes), 5, RoundingMode.HALF_UP).doubleValue());
+                }
+                diskUsageMap.put(nodeName, triple);
+            });
+        }
+        return diskUsageMap;
     }
 
     /*********************************************private******************************************/
