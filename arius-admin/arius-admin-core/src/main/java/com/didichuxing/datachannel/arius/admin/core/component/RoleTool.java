@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.component;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.common.vo.user.UserVO;
 import com.didiglobal.logi.security.service.RoleService;
 import com.didiglobal.logi.security.service.UserService;
 import java.util.Collections;
@@ -54,4 +55,10 @@ public class RoleTool {
                 .collect(Collectors.toList());
     }
     
+    public boolean isAdmin(Integer userId) {
+         final RoleVO roleVO = roleService.getRoleDetailByRoleId(AuthConstant.ADMIN_ROLE_ID);
+        final UserVO userVO = userService.getUserDetailByUserId(userId);
+        return Optional.ofNullable(roleVO).map(RoleVO::getAuthedUsers).orElse(Collections.emptyList()).stream()
+                .anyMatch(user -> StringUtils.equals(user, userVO.getUserName()));
+    }
 }
