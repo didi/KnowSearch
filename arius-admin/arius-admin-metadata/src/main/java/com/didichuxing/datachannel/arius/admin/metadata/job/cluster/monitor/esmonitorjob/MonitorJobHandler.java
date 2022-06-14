@@ -151,7 +151,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
             return JOB_FAILED;
         }
 
-        List<ClusterPhy>           clusterPhyList  =  dataSourceFilter(phyClusterService.getAllClusters());
+        List<ClusterPhy>           clusterPhyList  =  dataSourceFilter(phyClusterService.listAllClusters());
         List<AriusMetaJobClusterDistributePO> allTaskPOList   =  ariusMetaJobClusterDistributeDAO.getAllTaskByDataCentre(dataCentre);
 
         int jobTotalNu = allWorders.size();

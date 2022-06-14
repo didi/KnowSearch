@@ -54,6 +54,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     private static final ILog      LOGGER = LogFactory.getLog(ClusterNodeManager.class);
 
+
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
 
@@ -158,7 +159,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
-        return Result.buildSucc(ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class));
+        return Result.buildSucc(buildClusterRoleHostStats(clusterPhy.getCluster(), clusterRoleHostList));
     }
 
 
@@ -176,6 +177,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         //节点名称列表
         return Result.buildSucc(ConvertUtil.list2List(result.getData(), ESClusterRoleHostVO.class));
     }
+
 
     /**************************************** private method ***************************************************/
 

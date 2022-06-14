@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
@@ -31,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
  * @date 2021-07-30
  */
 @RestController()
-@RequestMapping({  V3 + "/metrics/cluster" })
+@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/metrics/cluster" })
 @Api(tags = "ES物理集群监控信息")
 public class ClusterPhyMetricsController {
     @Autowired
@@ -41,6 +42,17 @@ public class ClusterPhyMetricsController {
     private ClusterPhyManager clusterPhyManager;
     @Autowired
     private TemplateLogicManager templateLogicManager;
+
+
+    @GetMapping("/clusters")
+    @ResponseBody
+    @ApiOperation(value = "根据AppId获取集群名称列表")
+    public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
+    }
+
+    @Autowired
+    private ClusterPhyManager clusterPhyManager;
 
 
     @GetMapping("/clusters")
@@ -116,6 +128,13 @@ public class ClusterPhyMetricsController {
                                                                                HttpServletRequest request) {
         return clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, HttpRequestUtils.getAppId(request),
                 HttpRequestUtils.getOperator(request), ClusterPhyTypeMetricsEnum.TEMPLATES);
+    }
+
+    @GetMapping("{clusterPhyName}/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取物理集群节点列表")
+    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
+        return clusterPhyMetricsManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("{clusterPhyName}/{node}/task")

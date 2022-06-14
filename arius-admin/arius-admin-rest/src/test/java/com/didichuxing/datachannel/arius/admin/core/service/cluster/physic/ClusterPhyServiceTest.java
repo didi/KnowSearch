@@ -90,10 +90,10 @@ public class ClusterPhyServiceTest {
     @Test
     public void listClustersTest() {
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
-        Assertions.assertTrue(ClusterPhyService.getClustersByCondt(esClusterDTO).stream()
+        Assertions.assertTrue(ClusterPhyService.listClustersByCondt(esClusterDTO).stream()
             .anyMatch(esClusterPhy -> esClusterPhy.getCluster().equals(esClusterDTO.getCluster())));
         Mockito.when(clusterDAO.listByCondition(Mockito.any())).thenReturn(null);
-        Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.getClustersByCondt(esClusterDTO)));
+        Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.listClustersByCondt(esClusterDTO)));
     }
 
     @Test
@@ -169,22 +169,22 @@ public class ClusterPhyServiceTest {
     @Test
     public void listAllClustersTest() {
         Assertions.assertTrue(
-                ClusterPhyService.getAllClusters().stream().anyMatch(esClusterPhy -> esClusterPhy.getId().equals(id)));
+                ClusterPhyService.listAllClusters().stream().anyMatch(esClusterPhy -> esClusterPhy.getId().equals(id)));
     }
 
     @Test
-    public void listAllClusterNameListTest() {
-        Assertions.assertTrue(ClusterPhyService.getClusterNames().stream()
+    public void listClusterNamesTest() {
+        Assertions.assertTrue(ClusterPhyService.listClusterNames().stream()
                 .anyMatch(clusterName -> clusterName.equals(cluster)));
         Mockito.when(clusterDAO.listAllName()).thenThrow(new RuntimeException());
-        Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.getClusterNames()));
+        Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.listClusterNames()));
     }
 
     @Test
     public void listClustersByNamesTest() {
-        Assertions.assertTrue(ClusterPhyService.getClustersByNames(Arrays.asList(cluster,existCluster)).stream()
+        Assertions.assertTrue(ClusterPhyService.listClustersByNames(Arrays.asList(cluster,existCluster)).stream()
             .anyMatch(esClusterPhy -> esClusterPhy.getCluster().equals(cluster)));
-        Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.getClustersByNames(Collections.emptyList())));
+        Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.listClustersByNames(Collections.emptyList())));
     }
 
     @Test
@@ -201,11 +201,11 @@ public class ClusterPhyServiceTest {
         pluginDTO.setId(1234L);
         Mockito.when(esPluginService.listClusterAndDefaultESPlugin(id.toString()))
                 .thenReturn(null);
-        Assertions.assertTrue(ClusterPhyService.getClusterPlugins(cluster).isEmpty());
-        Assertions.assertTrue(ClusterPhyService.getClusterPlugins(existCluster).isEmpty());
+        Assertions.assertTrue(ClusterPhyService.listClusterPlugins(cluster).isEmpty());
+        Assertions.assertTrue(ClusterPhyService.listClusterPlugins(existCluster).isEmpty());
         Mockito.when(esPluginService.listClusterAndDefaultESPlugin(id.toString()))
                 .thenReturn(Collections.singletonList(ConvertUtil.obj2Obj(pluginDTO, PluginPO.class)));
-        Assertions.assertTrue(ClusterPhyService.getClusterPlugins(cluster).stream()
+        Assertions.assertTrue(ClusterPhyService.listClusterPlugins(cluster).stream()
                 .map(Plugin::getId)
                 .anyMatch(pId -> pluginDTO.getId().equals(pId)));
     }

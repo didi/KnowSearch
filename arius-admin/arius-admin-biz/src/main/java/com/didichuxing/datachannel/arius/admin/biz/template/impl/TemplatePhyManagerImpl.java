@@ -137,7 +137,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         Multimap<String, IndexTemplatePhy> cluster2IndexTemplatePhysicalMultiMap = ConvertUtil
                 .list2MulMap(templatePhysicals, IndexTemplatePhy::getCluster);
 
-        Set<String> esClusters = clusterPhyService.getAllClusters().stream().map( ClusterPhy::getCluster)
+        Set<String> esClusters = clusterPhyService.listAllClusters().stream().map( ClusterPhy::getCluster)
                 .collect( Collectors.toSet());
 
         for (String cluster : cluster2IndexTemplatePhysicalMultiMap.keySet()) {
@@ -549,7 +549,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         List<String> canCopyClusterPhyNames = Lists.newArrayList();
         IndexTemplatePhy templatePhy = indexTemplatePhyService.getTemplateById(templatePhyId);
         if (null != templatePhy && null != templatePhy.getCluster()) {
-            clusterPhyService.getAllClusters()
+            clusterPhyService.listAllClusters()
                     .stream()
                     .filter(clusterPhy -> !templatePhy.getCluster().equals(clusterPhy.getCluster()))
                     .forEach(clusterPhy -> canCopyClusterPhyNames.add(clusterPhy.getCluster()));

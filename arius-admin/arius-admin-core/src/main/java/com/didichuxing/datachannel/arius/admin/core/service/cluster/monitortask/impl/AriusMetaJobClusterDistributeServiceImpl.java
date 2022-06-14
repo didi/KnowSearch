@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.AriusMetaJobClusterDistribute;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -44,7 +44,7 @@ public class AriusMetaJobClusterDistributeServiceImpl implements AriusMetaJobClu
     @Override
     public List<ClusterPhy> getSingleMachineMonitorCluster(String monitorHost) {
         List<ClusterPhy> monitorCluster = Lists.newArrayList();
-        List<ClusterPhy> clusterPhyList = clusterPhyService.getAllClusters();
+        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             LOGGER.warn("class=AriusMetaJobClusterDistributeServiceImpl||method=getSingleMachineMonitorCluster||" +
                     "msg=clusterPhyList is empty");

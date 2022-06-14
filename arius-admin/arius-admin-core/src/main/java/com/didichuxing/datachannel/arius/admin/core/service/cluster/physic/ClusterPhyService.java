@@ -23,7 +23,7 @@ public interface ClusterPhyService {
      * @return 集群列表
      *
      */
-    List<ClusterPhy> getClustersByCondt(ClusterPhyDTO params);
+    List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params);
 
     /**
      * 删除物理集群
@@ -69,21 +69,21 @@ public interface ClusterPhyService {
      * 列出所有集群
      * @return 集群列表,如果没有返回空列表
      */
-    List<ClusterPhy> getAllClusters();
+    List<ClusterPhy> listAllClusters();
 
     /**
      * 获取所有集群名称列表
      *
      * @return {@link List}<{@link String}>
      */
-    List<String> getClusterNames();
+    List<String> listClusterNames();
 
     /**
      * 根据names列出所有集群
      * @param names
      * @return 集群列表,如果没有返回空列表
      */
-    List<ClusterPhy> getClustersByNames(List<String> names);
+    List<ClusterPhy> listClustersByNames(List<String> names);
     /**
      * 集群是否存在
      *
@@ -97,7 +97,7 @@ public interface ClusterPhyService {
      * @param cluster 集群名称
      * @return
      */
-    List<Plugin> getClusterPlugins(String cluster);
+    List<Plugin> listClusterPlugins(String cluster);
 
     /**
      * 查询指定集群

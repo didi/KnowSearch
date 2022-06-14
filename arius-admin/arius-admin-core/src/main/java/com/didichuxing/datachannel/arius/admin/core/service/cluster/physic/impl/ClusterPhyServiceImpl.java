@@ -61,9 +61,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     private static final String CLUSTER_NOT_EXIST = "集群不存在";
 
-    @Value("${es.client.cluster.port}")
-    private String                   esClusterClientPort;
-
     @Autowired
     private PhyClusterDAO clusterDAO;
 
@@ -72,12 +69,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Autowired
     private ESPluginService          esPluginService;
-
-    @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
-
-    @Autowired
-    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private ClusterRoleService clusterRoleService;
@@ -93,7 +84,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return 集群列表
      */
     @Override
-    public List<ClusterPhy> getClustersByCondt(ClusterPhyDTO params) {
+    public List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params) {
         List<ClusterPhyPO> clusterPOs = clusterDAO.listByCondition(ConvertUtil.obj2Obj(params, ClusterPhyPO.class));
 
         if (CollectionUtils.isEmpty(clusterPOs)) {
@@ -219,12 +210,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<ClusterPhy> getAllClusters() {
+    public List<ClusterPhy> listAllClusters() {
         return ConvertUtil.list2List(clusterDAO.listAll(), ClusterPhy.class);
     }
 
     @Override
-    public List<String> getClusterNames() {
+    public List<String> listClusterNames() {
         List<String> clusterNameList = Lists.newArrayList();
         try {
             clusterNameList.addAll(clusterDAO.listAllName());
@@ -235,7 +226,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<ClusterPhy> getClustersByNames(List<String> names) {
+    public List<ClusterPhy> listClustersByNames(List<String> names) {
         if (CollectionUtils.isEmpty(names)) {
             return new ArrayList<>();
         }
@@ -258,7 +249,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return
      */
     @Override
-    public List<Plugin> getClusterPlugins(String cluster) {
+    public List<Plugin> listClusterPlugins(String cluster) {
         ClusterPhyPO clusterPhy = clusterDAO.getByName(cluster);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return new ArrayList<>();

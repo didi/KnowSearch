@@ -7,6 +7,10 @@ import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
@@ -77,6 +81,8 @@ public interface ESClusterNodeService {
      * @return {@link Map}<{@link String}, {@link Triple}<{@link Long}, {@link Long}, {@link Double}>>
      */
     Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster);
+
+
 
     /**
      * node_state分析

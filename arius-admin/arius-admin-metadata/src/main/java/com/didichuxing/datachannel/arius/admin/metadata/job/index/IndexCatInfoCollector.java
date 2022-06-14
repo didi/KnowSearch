@@ -51,7 +51,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
     @Override
     public Object handleJobTask(String params) {
         List<IndexCatCellPO> indexCatInfoList     =   Lists.newArrayList();
-        List<ClusterPhy>     clusterPhyList       =   clusterPhyService.getAllClusters();
+        List<ClusterPhy>     clusterPhyList       =   clusterPhyService.listAllClusters();
         List<String>         clusterPhyNameList   =   clusterPhyList.stream().map(ClusterPhy::getCluster).collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(clusterPhyNameList)) {
