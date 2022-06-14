@@ -524,6 +524,12 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 nodes.size(), condition.getPage(), condition.getSize());
     }
 
+    @Override
+    public Result<String> estimatedDiskSize(Long clusterLogicId, Integer count) {
+        ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        return null;
+    }
+
 /**************************************************** private method ****************************************************/
     /**
      * 构建OP逻辑集群权限

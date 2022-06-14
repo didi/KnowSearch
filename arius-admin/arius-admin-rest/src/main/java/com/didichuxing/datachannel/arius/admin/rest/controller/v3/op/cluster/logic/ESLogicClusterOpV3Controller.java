@@ -111,4 +111,11 @@ public class ESLogicClusterOpV3Controller {
     public PaginationResult<ESClusterRoleHostVO>  pageGetESClusterRoleHostVO(@PathVariable Long clusterLogicId,@RequestBody ClusterLogicNodeConditionDTO condition) {
         return clusterLogicManager.nodesPage(clusterLogicId,condition);
     }
+
+    @GetMapping("/estimated-disk-size/{clusterLogicId}/{count}")
+    @ResponseBody
+    @ApiOperation(value = "获取预估磁盘大小")
+    public Result<String>  estimatedDiskSize(@PathVariable Long clusterLogicId,@PathVariable Integer count) {
+        return clusterLogicManager.estimatedDiskSize(clusterLogicId,count);
+    }
 }

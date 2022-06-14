@@ -195,4 +195,12 @@ public interface ClusterLogicManager {
      * @return PaginationResult
      */
     PaginationResult<ESClusterRoleHostVO> nodesPage(Long clusterLogicId,ClusterLogicNodeConditionDTO condition);
+
+    /**
+     * 获取预估磁盘大小
+     * @param clusterLogicId
+     * @param count
+     * @return
+     */
+    Result<String> estimatedDiskSize(Long clusterLogicId, Integer count);
 }

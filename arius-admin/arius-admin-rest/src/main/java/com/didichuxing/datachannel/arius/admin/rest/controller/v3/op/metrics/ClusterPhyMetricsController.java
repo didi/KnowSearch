@@ -51,17 +51,6 @@ public class ClusterPhyMetricsController {
         return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
     }
 
-    @Autowired
-    private ClusterPhyManager clusterPhyManager;
-
-
-    @GetMapping("/clusters")
-    @ResponseBody
-    @ApiOperation(value = "根据AppId获取集群名称列表")
-    public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
-    }
-
     @GetMapping("/{type}")
     @ResponseBody
     @ApiOperation(value = "获取物理集群看板指标类型", notes = "type = clusterOverview, clusterNode, clusterNodeIndices")
@@ -128,13 +117,6 @@ public class ClusterPhyMetricsController {
                                                                                HttpServletRequest request) {
         return clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, HttpRequestUtils.getAppId(request),
                 HttpRequestUtils.getOperator(request), ClusterPhyTypeMetricsEnum.TEMPLATES);
-    }
-
-    @GetMapping("{clusterPhyName}/indices")
-    @ResponseBody
-    @ApiModelProperty(value = "获取物理集群节点列表")
-    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
-        return clusterPhyMetricsManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("{clusterPhyName}/{node}/task")
