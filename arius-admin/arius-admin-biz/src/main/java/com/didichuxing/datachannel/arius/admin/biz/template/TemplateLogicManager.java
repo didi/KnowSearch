@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -204,4 +204,27 @@ public interface TemplateLogicManager {
      * @return 物理集群下的全量模板信息列表视图
      */
     Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId);
+
+    /**
+     * 清除索引
+     * @param clearDTO
+     * @return
+     */
+    Result<Void> clearIndices(TemplateClearDTO clearDTO);
+
+    /**
+     * 执行调整shard 数量
+     * @param logicTemplateId 模板id
+     * @param shardNum 调整后的shard数量
+     * @return 调整结果
+     */
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum);
+
+    /**
+     * 模板升级
+     * @param logicTemplateId 模板id
+     * @param operator 操作者
+     * @return
+     */
+    Result<Void> upgrade(Integer logicTemplateId, String operator);
 }

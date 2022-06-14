@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template.srv;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 

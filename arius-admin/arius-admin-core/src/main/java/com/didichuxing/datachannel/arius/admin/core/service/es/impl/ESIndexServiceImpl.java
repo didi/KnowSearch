@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -48,6 +50,9 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Autowired
     private ESIndexDAO        esIndexDAO;
+
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -269,9 +274,22 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.deleteByQuery(cluster, String.join(",", delIndices), delQueryDsl);
     }
 
+    @Override
+    public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
+                                         int retryCount) throws ESOperateException {
+        Set<String> nodeNames = new HashSet<>();
+        Result<List<ClusterRoleHost>> clusterRoleHostResult = clusterRoleHostService.listByRegionId(tgtRegionId);
+        if (clusterRoleHostResult.failed()) {
+            return false;
+        }
+        clusterRoleHostResult.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
+
+        return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
+            () -> esIndexDAO.batchUpdateIndexRegion(cluster, indices, nodeNames));
+    }
+
     /**
      * 修改索引只读配置
-     *
      * @param cluster    集群
      * @param indices    索引
      * @param block   配置

@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -15,8 +14,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -53,7 +52,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     }
 
     @Override
-    //todo: 思考这里失败了如何处理，如何回滚
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> openSrv(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
         // 0.校验服务是否可以开启
         for (Integer templateId : templateIdList) {
@@ -63,52 +62,26 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             }
         }
 
-        // 1.服务开启实际操作
-        Result<Void> openResult = openSrvImpl(templateIdList, openParam);
-        if (openResult.failed()) {
-            return openResult;
-        }
-
-        // 2.更新DB服务开启状态
-        Result<Void> updateDBResult = updateDBSrvStatus(templateIdList, Boolean.TRUE);
-        if (updateDBResult.failed()) {
-            return updateDBResult;
+        // 1.更新DB服务开启状态
+        Result<Void> updateResult = updateSrvStatus(templateIdList, Boolean.TRUE);
+        if (updateResult.failed()) {
+            return updateResult;
         }
 
         return Result.buildSucc();
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> closeSrv(List<Integer> templateIdList) {
-        // 0.服务关闭实际操作
-        Result<Void> closeResult = closeSrvImpl(templateIdList);
-        if (closeResult.failed()) {
-            return closeResult;
-        }
-
-        // 1.更新DB服务关闭状态
-        Result<Void> updateDBResult = updateDBSrvStatus(templateIdList, Boolean.FALSE);
-        if (closeResult.failed()) {
-            return updateDBResult;
+        // 0.更新DB服务关闭状态
+        Result<Void> updateResult = updateSrvStatus(templateIdList, Boolean.FALSE);
+        if (updateResult.failed()) {
+            return updateResult;
         }
 
         return Result.buildSucc();
     }
-
-    /**
-     * 服务开启实际执行体
-     * @param templateIdList
-     * @param openParam
-     * @return
-     */
-    protected abstract Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam);
-
-    /**
-     * 服务关闭实际执行体
-     * @param templateIdList
-     * @return
-     */
-    protected abstract Result<Void> closeSrvImpl(List<Integer> templateIdList);
 
 
     ////////////////////////////private method/////////////////////////////////////
@@ -119,7 +92,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
      * @param status, true:开启, false:关闭
      * @return
      */
-    private Result<Void> updateDBSrvStatus(List<Integer> templateIdList, Boolean status) {
+    private Result<Void> updateSrvStatus(List<Integer> templateIdList, Boolean status) {
         AtomicBoolean isSuccess = new AtomicBoolean(true);
         String srvCode = templateSrv().getCode().toString();
         for (Integer templateId : templateIdList) {
@@ -136,7 +109,6 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
                 }
 
                 try {
-                    //todo: indexTeplateDTO 加字段
                     Result<Void> updateResult = indexTemplateService.editTemplateInfoTODB(ConvertUtil.obj2Obj(indexTemplate, IndexTemplateDTO.class));
                     if (updateResult.failed()) {
                         isSuccess.set(false);

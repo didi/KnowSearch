@@ -25,4 +25,7 @@ public class ClusterRegionDTO {
 
     @ApiModelProperty("物理集群名称")
     private String phyClusterName;
+
+    @ApiModelProperty("配置项")
+    private String config;
 }

@@ -1,5 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv;
+package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板扩缩容参数")
-public class TemplateAdjustShardDTO extends BaseTemplateSrvOpenDTO {
+public class TemplateAdjustShardDTO extends BaseDTO {
 
     @ApiModelProperty("模板Id")
     private Integer templateId;

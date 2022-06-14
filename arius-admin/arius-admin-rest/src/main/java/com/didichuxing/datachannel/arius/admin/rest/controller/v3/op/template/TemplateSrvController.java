@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template.srv;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;

@@ -13,49 +13,46 @@ public interface PipelineManager {
 
     /**
      * 创建
-     * @param logicTemplateId 逻辑模板id
+     * @param templatePhyId 物理模板id
      * @return true/false
      */
-    Result<Void> createPipeline(Integer logicTemplateId);
+    Result<Void> createPipeline(Integer templatePhyId);
 
     /**
      * 同步pipeline
-     * @param logicTemplateId 逻辑模板id
+     * @param templatePhyId 物理模板id
      * @return
      */
-    Boolean syncPipeline(Integer logicTemplateId);
+    Result<Void>syncPipeline(Integer templatePhyId);
 
     /**
      * 删除
-     * @param logicTemplateId 逻辑模板id
+     * @param templatePhyId 物理模板id
      * @return true/false
      */
-    Boolean deletePipeline(Integer logicTemplateId);
+    Result<Void> deletePipeline(Integer templatePhyId);
 
     /**
      * 修改逻辑字段
-     * @param newTemplate 逻辑模板
+     * @param newTemplate 新逻辑模板
+     * @param oldTemplate 旧逻辑模板
      * @return true/false
      */
-    Boolean editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
+    Result<Void> editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
 
     /**
      * 修改物理字段
      * @param oldTemplate 物理模板
+     * @param newTemplate 新物理模板
      * @return true/false
      */
-    Boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
-                                     IndexTemplateWithPhyTemplates logicWithPhysical);
+    Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate);
 
     /**
-     * 调整限流值
-     *
-     * @param indexTemplatePhysicalInfo 名字
-     * @param percent 百分比 [-99, 1000]
-     * @return true/false
+     * 获取指定物理模板限流值
+     * @param templatePhyId
+     * @return
      */
-    Boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysicalInfo, Integer percent);
-
-    Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
+    Integer getRateLimit(Integer templatePhyId);
 
 }
