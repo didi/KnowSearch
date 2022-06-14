@@ -107,10 +107,10 @@ public interface ProjectExtendManager {
      * 增加项目成员
      *
      * @param projectId 项目id
-     * @param userId 项目id
+     * @param userIdList 项目id
      * @param operator 请求信息
      */
-    Result<Void> addProjectUser(Integer projectId, Integer userId, String operator);
+    Result<Void> addProjectUser(Integer projectId, List<Integer> userIdList, String operator);
 
     /**
      * 删除项目成员
@@ -124,11 +124,11 @@ public interface ProjectExtendManager {
     /**
      * 增加项目负责人
      *
-     * @param projectId 项目id
-     * @param ownerId 负责人id
-     * @param operator 请求信息
+     * @param projectId   项目id
+     * @param ownerIdList 负责人id
+     * @param operator    请求信息
      */
-    Result<Void> addProjectOwner(Integer projectId, Integer ownerId, String operator);
+    Result<Void> addProjectOwner(Integer projectId, List<Integer> ownerIdList, String operator);
 
     /**
      * 删除项目负责人

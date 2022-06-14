@@ -39,14 +39,17 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.common.vo.user.UserVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.OplogService;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,13 +68,15 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private ProjectService       projectService;
     @Autowired
-    private ESUserService       esUserService;
+    private ESUserService        esUserService;
     @Autowired
-    private OplogService        oplogService;
+    private OplogService         oplogService;
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService  clusterLogicService;
     @Autowired
     private IndexTemplateService indexTemplateService;
+    @Autowired
+    private UserService          userService;
     
     @Override
     public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator) {
@@ -252,13 +257,19 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * 增加项目成员
      *
      * @param projectId 项目id
-     * @param userId    项目id
+     * @param userIdList    项目id
      * @param operator  请求信息
      */
     @Override
-    public Result<Void> addProjectUser(Integer projectId, Integer userId, String operator) {
+    public Result<Void> addProjectUser(Integer projectId, List<Integer> userIdList, String operator) {
+       final Result<Void> result = checkProject(projectId, userIdList);
+        if (result.failed()) {
+            return result;
+        }
         try {
-            projectService.addProjectUser(projectId, userId, operator);
+            for (Integer id : userIdList) {
+                projectService.addProjectUser(projectId, id, operator);
+            }
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -286,14 +297,21 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     /**
      * 增加项目负责人
      *
-     * @param projectId 项目id
-     * @param ownerId   负责人id
-     * @param operator  请求信息
+     * @param projectId   项目id
+     * @param ownerIdList 负责人id
+     * @param operator    请求信息
      */
     @Override
-    public Result<Void> addProjectOwner(Integer projectId, Integer ownerId, String operator) {
+    public Result<Void> addProjectOwner(Integer projectId, List<Integer> ownerIdList, String operator) {
+        final Result<Void> result = checkProject(projectId, ownerIdList);
+        if (result.failed()) {
+            return result;
+        }
         try {
-            projectService.addProjectOwner(projectId, ownerId, operator);
+            for (Integer ownerId : ownerIdList) {
+                projectService.addProjectOwner(projectId, ownerId, operator);
+        
+            }
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -426,5 +444,41 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     NewModuleEnum.APPLICATION.getModule(), result.getV2().getId().toString(),
                     OperationMethodEnum.SYSTEM_TRIGGER.getOperationMethod()));
         }
+    }
+    
+    private Result<Void> checkProject(Integer projectId, List<Integer> userIdList) {
+        if (CollectionUtils.isNotEmpty(userIdList)) {
+            return Result.buildParamIllegal("用户id不存在");
+        }
+        if (Objects.isNull(projectId)) {
+            return Result.buildParamIllegal("项目id不存在");
+        }
+        //校验当前用户id是否存在
+        final List<UserVO> userList = userService.getUserDetailByUserIds(userIdList).getData();
+        if (userList.size() != userIdList.size()) {
+            final List<Integer> idList = userList.stream().map(UserVO::getId).collect(Collectors.toList());
+            //不存在用户id集合
+            String notExitsIds = userIdList.stream().filter(id -> !idList.contains(id)).distinct().map(String::valueOf)
+                    .collect(Collectors.joining("，"));
+            return Result.buildParamIllegal(String.format("传入用户:%s不存在", notExitsIds));
+        }
+        Function<UserVO, Tuple<Integer, Boolean>> userVOFunction = userVo -> {
+            final Integer userId = userVo.getId();
+            final List<ProjectBriefVO> projectList = userVo.getProjectList();
+            //校验当前项目是否已经被用户拥有
+            final boolean matchProject = projectList.stream()
+                    .anyMatch(projectBriefVO -> projectBriefVO.getId().equals(projectId));
+            return new Tuple<>(userId, matchProject);
+        };
+        //校验当前userList是否已经拥有该项目
+        final List<Integer> haveUserIdList = userList.stream().map(userVOFunction)
+                //过滤出已经拥有该项目的user
+                .filter(tuple2 -> Boolean.TRUE.equals(tuple2.getV2())).map(Tuple::getV1).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(haveUserIdList)) {
+            final String havaUseridListStr = haveUserIdList.stream().map(String::valueOf)
+                    .collect(Collectors.joining("，"));
+            return Result.buildParamIllegal(String.format("以下用户已经用户该项目:%s", havaUseridListStr));
+        }
+        return Result.buildSucc();
     }
 }

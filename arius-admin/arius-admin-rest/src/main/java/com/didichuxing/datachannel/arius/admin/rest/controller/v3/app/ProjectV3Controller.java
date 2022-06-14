@@ -140,16 +140,16 @@ public class ProjectV3Controller {
         return projectExtendManager.getProjectPage(queryDTO);
     }
     
-    @PutMapping("/{id}/owner/{ownerId}")
+    @PutMapping("/{id}/owner")
     @ApiOperation(value = "从角色中增加该项目下的负责人", notes = "从角色中增加该项目下的用户")
     @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
-    public Result<Void> addProjectOwner(@PathVariable Integer id, @PathVariable Integer ownerId,
+    public Result<Void> addProjectOwner(@PathVariable Integer id, @RequestBody List<Integer> ownerList,
                                         HttpServletRequest request) {
         
-        return projectExtendManager.addProjectOwner(id, ownerId, HttpRequestUtil.getOperator(request));
+        return projectExtendManager.addProjectOwner(id, ownerList, HttpRequestUtil.getOperator(request));
     }
     
-    @DeleteMapping("/{id}/owner/{ownerId}")
+    @DeleteMapping("/{id}/owner")
     @ApiOperation(value = "从项目中删除该项目下的负责人", notes = "从项目中删除该项目下的负责人")
     @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
     public Result<Void> deleteProjectOwner(@PathVariable Integer id, @PathVariable Integer ownerId,
@@ -157,13 +157,13 @@ public class ProjectV3Controller {
         return projectExtendManager.delProjectOwner(id, ownerId, HttpRequestUtil.getOperator(request));
     }
     
-    @PutMapping("/{id}/user/{userId}")
+    @PutMapping("/{id}/user")
     @ApiOperation(value = "从角色中增加该项目下的用户", notes = "从角色中增加该项目下的用户")
     @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
-    public Result<Void> addProjectUser(@PathVariable Integer id, @PathVariable Integer userId,
+    public Result<Void> addProjectUser(@PathVariable Integer id, @RequestBody List<Integer>  userList,
                                        HttpServletRequest request) {
         
-        return projectExtendManager.addProjectUser(id, userId, HttpRequestUtil.getOperator(request));
+        return projectExtendManager.addProjectUser(id, userList, HttpRequestUtil.getOperator(request));
     }
     
     @DeleteMapping("/{id}/user/{userId}")
