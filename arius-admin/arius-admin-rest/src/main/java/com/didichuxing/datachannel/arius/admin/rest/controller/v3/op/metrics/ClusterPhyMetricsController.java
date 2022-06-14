@@ -160,7 +160,7 @@ public class ClusterPhyMetricsController {
 
     @GetMapping("{clusterLogicName}/logic/templates")
     @ResponseBody
-    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    @ApiOperation(value = "根据逻辑集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
         return templateLogicManager.getTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtils.getAppId(request));
     }
