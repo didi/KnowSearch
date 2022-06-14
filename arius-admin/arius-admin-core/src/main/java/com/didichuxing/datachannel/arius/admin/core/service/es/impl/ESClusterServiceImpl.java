@@ -1,20 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-
-import java.net.InetAddress;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Sets;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -24,6 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.PendingTaskAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.TaskMissionAnalysisVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -45,6 +33,21 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -393,5 +396,70 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public ESClusterHealthResponse syncGetClusterHealthAtIndicesLevel(String phyClusterName) {
         return esClusterDAO.getClusterHealthAtIndicesLevel(phyClusterName);
+    }
+
+    @Override
+    public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
+        String response = esClusterDAO.pendingTask(cluster);
+        if (null!=response){
+            JSONArray tasks = JSONObject.parseObject(response).getJSONArray("tasks");
+            return JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class);
+        }else {
+            return null;
+        }
+    }
+
+    @Override
+    public List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster) {
+        String response = esClusterDAO.taskMission(cluster);
+        if (null!=response){
+            return buildTaskMission(JSONObject.parseObject(response));
+        }else {
+            return null;
+        }
+    }
+
+    @Override
+    public String hotThreadAnalysis(String cluster) {
+        String response = esClusterDAO.hotThread(cluster);
+        return response;
+    }
+
+    @Override
+    public boolean abnormalShardAllocationRetry(String cluster) {
+        String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
+      boolean  acknowledged  = (boolean) JSONObject.parseObject(response).get("acknowledged");
+        return acknowledged;
+    }
+
+    @Override
+    public boolean clearFieldDataMemory(String cluster) {
+        String response = esClusterDAO.clearFieldDataMemory(cluster);
+        JSONObject shards = JSONObject.parseObject(response).getJSONObject("_shards");
+        return 0 == shards.getInteger("failed");
+    }
+
+    private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
+        List<TaskMissionAnalysisVO> vos = new ArrayList<>();
+
+        JSONObject nodes = responseJson.getJSONObject("nodes");
+        nodes.keySet().forEach(key -> {
+            Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject("tasks")).ifPresent(nodeTasks -> {
+                nodeTasks.forEach((key1, val) -> {
+                    JSONObject nodeInfo = (JSONObject) val;
+                    TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
+                    Optional.ofNullable(nodeInfo)
+                            .ifPresent(o -> {
+                                taskMissionAnalysisVO.setAction(o.getString("action"));
+                                taskMissionAnalysisVO.setNode(o.getString("node"));
+                                taskMissionAnalysisVO.setDescription(o.getString("description"));
+                                taskMissionAnalysisVO.setStartTimeInMillis(o.getLong("start_time_in_millis"));
+                                taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger("running_time_in_nanos"));
+                                vos.add(taskMissionAnalysisVO);
+                            });
+                });
+            });
+        });
+        return vos;
     }
 }

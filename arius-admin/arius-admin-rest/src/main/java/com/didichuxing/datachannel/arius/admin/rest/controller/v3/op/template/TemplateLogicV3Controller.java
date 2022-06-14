@@ -120,7 +120,7 @@ public class TemplateLogicV3Controller {
         return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
     }
 
-    @GetMapping("/listTemplates")
+    @GetMapping("/templates")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,

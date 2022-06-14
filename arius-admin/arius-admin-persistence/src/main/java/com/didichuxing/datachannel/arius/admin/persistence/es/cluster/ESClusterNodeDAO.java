@@ -8,6 +8,20 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
+import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryAction;
+import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import org.springframework.stereotype.Repository;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryAction;
 import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
@@ -55,6 +69,28 @@ public class ESClusterNodeDAO extends BaseESDAO {
         }
         ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true)
             .setJvm(true).setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        if (response.getNodes() != null) {
+            return new ArrayList<>(response.getNodes().values());
+
+        }
+        return Lists.newArrayList();
+    }
+
+    /**
+     * 获取nodes信息
+     * @param cluster
+     * @return
+     */
+    public List<ClusterNodeStats> getNodeState(String cluster) {
+        ESClient esClient = esOpClient.getESClient(cluster);
+        if (esClient == null) {
+            LOGGER.error(
+                    "class=ESClusterNodeServiceImpl||method=getNodeState||clusterName={}||errMsg=esClient is null",
+                    cluster);
+            return Lists.newArrayList();
+        }
+        ESClusterNodesStatsResponse response =  esClient.admin().cluster().nodeStats(new ESClusterNodesStatsRequest())
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         if (response.getNodes() != null) {
             return new ArrayList<>(response.getNodes().values());
 

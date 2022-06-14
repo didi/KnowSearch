@@ -129,6 +129,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private PreCreateManager preCreateManager;
 
+    @Autowired
+    private ClusterLogicService clusterLogicService;
+
     private final Integer RETRY_TIMES = 3;
 
     /**
@@ -499,7 +502,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(TEMPLATE_LOGIC.getPageSearchType());
         if (baseHandle instanceof TemplateLogicPageSearchHandle) {
             TemplateLogicPageSearchHandle handle = (TemplateLogicPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, condition.getAuthType(), appId);
+            return handle.doPage(condition, appId);
         }
 
         LOGGER.warn("class=TemplateLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the TemplateLogicPageSearchHandle");
@@ -705,7 +708,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         // 转化为视图列表展示
         List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
-        templateByPhyCluster.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic, appId)));
+        templateByPhyCluster.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
 
         return Result.buildSucc(consoleTemplateVOLists);
     }
@@ -781,6 +784,29 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc();
     }
 
+    @Override
+    public Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
+        if (clusterLogic == null) {
+            return Result.buildFail();
+        }
+
+        List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
+                .getLogicTemplateWithClustersByClusterId(clusterLogic.getId());
+
+        if (CollectionUtils.isEmpty(logicTemplates)) {
+            return  Result.buildFail();
+        }
+
+        List<IndexTemplateLogicAggregate> indexTemplates = fetchLogicTemplatesAggregates(logicTemplates, appId);
+
+        // 转化为视图列表展示
+        List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
+//        indexTemplates.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
+
+        return null;
+    }
+
     /**************************************** private method ***************************************************/
     /**
      * 校验逻辑模板Master ROLE物理模板是否存在
@@ -817,7 +843,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     /**
      * 构建逻辑模板视图
      */
-    private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyWithLogic param, Integer appId) {
+    private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyWithLogic param) {
         if (param == null) {
             return null;
         }
@@ -826,6 +852,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateVO.setClusterPhies(Collections.singletonList(param.getCluster()));
         return consoleTemplateVO;
     }
+
 
     /**
      * 获取逻辑模板标签列表

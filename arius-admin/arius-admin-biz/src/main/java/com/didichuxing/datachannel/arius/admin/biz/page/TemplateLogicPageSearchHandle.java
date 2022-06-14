@@ -41,43 +41,33 @@ import com.google.common.collect.Lists;
  * Created by linyunan on 2021-10-14
  */
 @Component
-public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleTemplateVO> {
+public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<PageDTO, ConsoleTemplateVO> {
 
     private static final ILog LOGGER = LogFactory.getLog(TemplateLogicPageSearchHandle.class);
 
     @Autowired
-    private AppService                  appService;
-
-    @Autowired
-    private AppLogicTemplateAuthManager appLogicTemplateAuthManager;
+    private AppService appService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplateLogicManager        templateLogicManager;
-
-    @Autowired
     private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private ClusterLogicService          clusterLogicService;
+    private ClusterLogicService clusterLogicService;
 
 
-    private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil.init("BUILD_BELONG_CLUSTER_FUTURE_UTIL",10,10,100);
+    private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil.init("BUILD_BELONG_CLUSTER_FUTURE_UTIL", 10, 10, 100);
 
-    private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL = FutureUtil.init("RESOURCE_BUILD_FUTURE_UTIL",10,10,100);
+    private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL = FutureUtil.init("RESOURCE_BUILD_FUTURE_UTIL", 10, 10, 100);
+
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
+    protected Result<Boolean> checkCondition(PageDTO pageDTO, Integer appId) {
         if (!appService.isAppExists(appId)) {
             return Result.buildParamIllegal("项目不存在");
         }
-        return Result.buildSucc(true);
-    }
-
-    @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
         if (pageDTO instanceof TemplateConditionDTO) {
             TemplateConditionDTO templateConditionDTO = (TemplateConditionDTO) pageDTO;
 
@@ -103,49 +93,12 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     }
 
     @Override
-    protected void init(PageDTO pageDTO) {
+    protected void initCondition(PageDTO condition, Integer appId) {
         // Do nothing
     }
 
     @Override
-    // todo: 灰度后清空这里代码
-    protected PaginationResult<ConsoleTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
-        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
-
-        //1. 获取管理/读写/读/无权限的模板信息
-        List<IndexTemplate> appAuthTemplatesList = templateLogicManager.getTemplatesByAppIdAndAuthType(appId, condition.getAuthType());
-        if (CollectionUtils.isEmpty(appAuthTemplatesList)) {
-            return PaginationResult.buildSucc(null, 0, condition.getPage(), condition.getSize());
-        }
-
-        //2. 根据无模板名称、有模板名称、有数量类型、有模板名称与数据类型等进行模糊匹配, 得出总结果
-        List<IndexTemplate> meetConditionTemplateList = getMeetConditionTemplateList(condition, appAuthTemplatesList);
-
-        //3. 设置命中数
-        int hitTotal = meetConditionTemplateList.size();
-
-        //4. 根据匹配结果进行对模板id进行排序, 根据分页信息过滤出需要获取的模板id
-        sort(meetConditionTemplateList, condition.getSortTerm(), condition.getOrderByDesc());
-
-        // 5.内存分页
-        List<IndexTemplate> fuzzyAndLimitTemplateList = filterFullDataByPage(meetConditionTemplateList, condition);
-        List<ConsoleTemplateVO>  consoleTemplateVOList     = ConvertUtil.list2List(fuzzyAndLimitTemplateList, ConsoleTemplateVO.class);
-
-        //6. 设置权限
-        //7. 设置所属物理集群名称列表
-        //8. 设置是否开启了indexRollover能力
-        RESOURCE_BUILD_FUTURE_UTIL
-                .runnableTask(() -> consoleTemplateVOList.forEach(consoleTemplateVO -> consoleTemplateVO.setAuthType(condition.getAuthType())))
-                .runnableTask(() -> setTemplateBelongClusterPhyNames(consoleTemplateVOList))
-                .runnableTask(() -> setTemplateIndexRolloverStatus(consoleTemplateVOList))
-                .runnableTask(() -> setTemplateClusterName(consoleTemplateVOList))
-                .waitExecute();
-
-        return PaginationResult.buildSucc(consoleTemplateVOList, hitTotal, condition.getPage(), condition.getSize());
-    }
-
-    @Override
-    protected PaginationResult<ConsoleTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<ConsoleTemplateVO> buildPageData(PageDTO pageDTO, Integer appId) {
         TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
 
         List<IndexTemplate> matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
@@ -179,11 +132,11 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
 
         if (!AriusObjUtils.isBlack(condition.getName())) {
             appAuthTemplatesList = appAuthTemplatesList.stream().filter(r -> r.getName().contains(condition.getName()))
-                .collect(Collectors.toList());
+                    .collect(Collectors.toList());
         }
         if (null != condition.getDataType()) {
             appAuthTemplatesList = appAuthTemplatesList.stream()
-                .filter(r -> r.getDataType().equals(condition.getDataType())).collect(Collectors.toList());
+                    .filter(r -> r.getDataType().equals(condition.getDataType())).collect(Collectors.toList());
         }
 
         if (null != condition.getResourceId()) {
@@ -253,7 +206,9 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
     }
 
     private void setTemplateIndexRolloverStatus(List<ConsoleTemplateVO> consoleTemplateVOList) {
-        if (CollectionUtils.isEmpty(consoleTemplateVOList)) { return;}
+        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
+            return;
+        }
 
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
             IndexTemplateConfig templateConfig = indexTemplateService.getTemplateConfig(consoleTemplateVO.getId());
@@ -263,10 +218,11 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
 
     /**
      * 对条件匹配后的结果集进行排序
-     * @param meetConditionTemplateList              条件匹配结果集
-     * @param sortTerm                               排序字段
-     * @see   SortTermEnum                           支持的排序字段枚举
-     * @param orderByDesc                            是否降序排序 true 是 false 否
+     *
+     * @param meetConditionTemplateList 条件匹配结果集
+     * @param sortTerm                  排序字段
+     * @param orderByDesc               是否降序排序 true 是 false 否
+     * @see SortTermEnum                           支持的排序字段枚举
      */
     private void sort(List<IndexTemplate> meetConditionTemplateList, String sortTerm, Boolean orderByDesc) {
         // 使用默认排序
@@ -291,4 +247,5 @@ public class TemplateLogicPageSearchHandle extends BasePageSearchHandle<ConsoleT
             return 0;
         });
     }
+
 }

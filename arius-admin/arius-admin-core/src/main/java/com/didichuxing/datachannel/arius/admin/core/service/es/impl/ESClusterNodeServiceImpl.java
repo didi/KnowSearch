@@ -7,12 +7,18 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
+import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -24,6 +30,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
@@ -34,6 +41,7 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNo
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESClusterNodesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
+import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
 import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import com.didiglobal.logi.log.ILog;
@@ -296,8 +304,8 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     public Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster) {
         Map<String, Triple<Long, Long, Double>> diskUsageMap = new HashMap<>();
         List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
-       
-        
+
+
         if (CollectionUtils.isNotEmpty(nodeStatsList)) {
             // 遍历节点，获得节点和对应的磁盘使用率
             nodeStatsList.forEach(nodeStats -> {
@@ -327,4 +335,36 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     /*********************************************private******************************************/
+
+    @Override
+    public List<NodeStateVO> nodeStateAnalysis(String cluster) {
+        List<ClusterNodeStats> nodeStats = esClusterNodeDAO.getNodeState(cluster);
+        List<NodeStateVO> vos = new ArrayList<>();
+        nodeStats.forEach(nodeStat->{
+            NodeStateVO vo = new NodeStateVO();
+
+            vo.setNodeName(nodeStat.getName());
+            vo.setSegmentsMemory(nodeStat.getIndices().getSegments().getMemoryInBytes());
+            vo.setOsCpu(nodeStat.getOs().getCpu().getPercent());
+            vo.setLoadAverage1m(nodeStat.getOs().getCpu().getLoadAverage().getOneM());
+            vo.setLoadAverage5m(nodeStat.getOs().getCpu().getLoadAverage().getFiveM());
+            vo.setLoadAverage15m(nodeStat.getOs().getCpu().getLoadAverage().getFifteenM());
+            vo.setJvmHeapUsedPercent(nodeStat.getJvm().getMem().getHeapUsedPercent());
+            vo.setThreadsCount(nodeStat.getJvm().getThreads().getCount());
+            vo.setCurrentOpen(nodeStat.getHttp().getCurrentOpen());
+            vo.setThreadPoolWriteActive(nodeStat.getThreadPool().getWrite().getActive());
+            vo.setThreadPoolWriteQueue(nodeStat.getThreadPool().getWrite().getQueue());
+            vo.setThreadPoolWriteReject(nodeStat.getThreadPool().getWrite().getRejected());
+            vo.setThreadPoolSearchActive(nodeStat.getThreadPool().getSearch().getActive());
+            vo.setThreadPoolSearchReject(nodeStat.getThreadPool().getSearch().getRejected());
+            vo.setThreadPoolSearchQueue(nodeStat.getThreadPool().getSearch().getQueue());
+            vo.setThreadPoolManagementActive(nodeStat.getThreadPool().getManagement().getActive());
+            vo.setThreadPoolManagementReject(nodeStat.getThreadPool().getManagement().getRejected());
+            vo.setThreadPoolManagementQueue(nodeStat.getThreadPool().getManagement().getQueue());
+
+
+            vos.add(vo);
+        });
+        return vos;
+    }
 }

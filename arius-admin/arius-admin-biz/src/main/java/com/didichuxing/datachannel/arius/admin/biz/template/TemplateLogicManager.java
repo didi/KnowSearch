@@ -227,4 +227,6 @@ public interface TemplateLogicManager {
      * @return
      */
     Result<Void> upgrade(Integer logicTemplateId, String operator);
+
+    Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId);
 }

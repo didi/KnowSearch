@@ -578,7 +578,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
         if (baseHandle instanceof ClusterPhyPageSearchHandle) {
             ClusterPhyPageSearchHandle pageSearchHandle = (ClusterPhyPageSearchHandle) baseHandle;
-            return pageSearchHandle.selectPage(condition, appId);
+            return pageSearchHandle.doPage(condition, appId);
         }
 
         LOGGER.warn("class=ClusterPhyManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterPhyPageSearchHandle");

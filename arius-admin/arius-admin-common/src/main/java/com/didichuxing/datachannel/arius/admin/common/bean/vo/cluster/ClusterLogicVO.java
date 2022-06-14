@@ -21,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("逻辑集群")
-public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleClusterVO> {
+public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO> {
 
     @ApiModelProperty("集群ID")
     private Long                         id;
@@ -99,9 +99,20 @@ public class ConsoleClusterVO extends BaseVO implements Comparable<ConsoleCluste
 
     @ApiModelProperty("集群健康状态")
     private Integer                      health;
+    
+     @ApiModelProperty("磁盘使用率")
+    private Double                       diskUsagePercent;
+
+    @ApiModelProperty("磁盘总量")
+    private Long                         diskTotal;
+
+    @ApiModelProperty("磁盘使用量")
+    private Long                         diskUsage;
+    
+    
 
     @Override
-    public int compareTo(ConsoleClusterVO o) {
+    public int compareTo(ClusterLogicVO o) {
         if (null == o) {
             return -1;
         }

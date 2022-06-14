@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static java.util.stream.Collectors.toList;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +30,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
@@ -52,9 +56,29 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author d06679
@@ -96,7 +120,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     private ClusterRegionService       clusterRegionService;
 
     @Autowired
-    private ClusterRoleHostService     clusterRoleHostService;
+    private ClusterRoleHostService clusterRoleHostService;
+
+    @Autowired
+    private AriusStatsNodeInfoESDAO ariusStatsNodeInfoESDAO;
+
+    @Autowired
+    private ESClusterRoleHostDAO clusterRoleHostDAO ;
 
     /**
      * 条件查询逻辑集群
@@ -107,8 +137,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     @Override
     public List<ClusterLogic> listClusterLogics(ESLogicClusterDTO param) {
         return responsibleConvertTool.list2List(
-            logicClusterDAO.listByCondition(responsibleConvertTool.obj2Obj(param, ClusterLogicPO.class)),
-            ClusterLogic.class);
+                logicClusterDAO.listByCondition(responsibleConvertTool.obj2Obj(param, ClusterLogicPO.class)),
+                ClusterLogic.class);
     }
 
     /**
@@ -246,7 +276,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public List<Long> getHasAuthClusterLogicIdsByAppId(Integer appId){
+    public List<Long> getHasAuthClusterLogicIdsByAppId(Integer appId) {
         if (appId == null) {
             LOGGER.error(
                     "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByAppId||errMsg=获取有权限逻辑集群时appId为null");
@@ -467,10 +497,17 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     public List<ClusterLogic> pagingGetClusterLogicByCondition(ClusterLogicConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-
-        return ConvertUtil.list2List(logicClusterDAO.pagingByCondition(param.getName(), param.getAppId(),
-                        param.getType(), param.getHealth(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType),
-            ClusterLogic.class);
+        param.setSortTerm(sortTerm);
+        param.setSortType(sortType);
+        param.setFrom((param.getPage() - 1) * param.getSize());
+        List<ClusterLogicPO> clusters = Lists.newArrayList();
+        try {
+            clusters = logicClusterDAO.pagingByCondition(param);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(), e);
+        }
+        return ConvertUtil.list2List(clusters, ClusterLogic.class);
     }
 
     @Override
@@ -481,6 +518,16 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     @Override
     public List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList) {
         return ConvertUtil.list2List(logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)), ClusterLogic.class);
+    }
+
+    @Override
+    public ClusterLogicDiskUsedInfoPO getDiskInfo(Long id) {
+        ClusterRegion clusterRegion =clusterRegionService.getRegionByLogicClusterId(id);
+        List<ESClusterRoleHostPO> esClusterRoleHostPOS = clusterRoleHostDAO.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        //节点名称列表
+        List<String> nodeList = esClusterRoleHostPOS.stream().map(ESClusterRoleHostPO::getNodeSet).collect(toList());
+        String clusterName =clusterRegion.getPhyClusterName();
+        return ariusStatsNodeInfoESDAO.getClusterLogicDiskUsedInfo(clusterName, nodeList);
     }
 
     /***************************************** private method ****************************************************/

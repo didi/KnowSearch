@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
@@ -25,6 +28,21 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResp
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
@@ -114,7 +132,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
-            this::getAvgAndPercentilesFromESQueryResponse, 3);
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -129,7 +147,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
-            this::getAvgAndPercentilesFromESQueryResponse, 3);
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -247,6 +265,24 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         return totalPhySize[0];
     }
 
+    public List<VariousLineChartMetrics> getTopNNodeAggMetricsWithStep(String clusterPhyName, List<String> metricsTypes,
+                                                               Integer topNu,String topMethod,Integer topTimeStep, String aggType,
+                                                               Long startTime, Long endTime) {
+        List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
+        //获取TopN指标节点名称信息
+        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfoWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType,
+                esNodesMaxNum, startTime, endTime);
+
+        //构建多个指标TopN数据
+        for (TopMetrics topMetrics : topNIndexMetricsList) {
+            futureUtil.runnableTask(() -> buildTopNSingleMetricsForNode(buildMetrics, clusterPhyName, aggType,
+                    esNodesMaxNum, startTime, endTime, topMetrics));
+        }
+        futureUtil.waitExecute();
+
+        return buildMetrics;
+    }
+
     /**
      * 获取多个节点折线图指标信息
      *
@@ -345,6 +381,48 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     /**
+     *  获取最新时间分片中指标数值前TopN的节点名称
+     *  如果延迟后的最新时间分片的指标值为null，最新时间迭代 - 1, 直到不为空, 迭代上限为3次。
+     *
+     * @param clusterPhyName   集群名称
+     * @param metricsTypes     指标类型
+     * @param topNu            topN
+     * @param aggType          聚合类型
+     * @param esNodesMaxNum    聚合节点数量最大值（agg bucket number）
+     * @param startTime        开始时间
+     * @param endTime          结束时间
+     * @return
+     */
+    private List<TopMetrics> getTopNNodeMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu,String topMethod,Integer topTimeStep,
+                                                            String aggType, int esNodesMaxNum, Long startTime, Long endTime) {
+
+        int retryTime = 0;
+        List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
+        do {
+            // 获取有数据的第一个时间点
+            Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
+            //没有数据则提前终止
+            if (null == timePoint) { break;}
+
+            long startTimeForOneInterval    = timePoint-topTimeStep*60*1000;
+            long endTimeForOneInterval      = timePoint;
+
+            String interval = "1m";
+
+            String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
+                    startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
+
+            String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
+                    endTimeForOneInterval);
+
+            variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
+                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu,topMethod), 3);
+        }while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
+
+        return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
+    }
+
+    /**
      * 获取单个指标信息
      *
      * @param clusterPhyName    集群名称
@@ -368,6 +446,28 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, nodeName, realIndexName, TYPE, dsl,
             s -> fetchSingleAggMetrics(s, metrics, nodeName), 3);
+    }
+
+    /**
+     *  获取磁盘使用情况
+     * @param clusterName
+     * @param nodeList
+     * @return
+     */
+    public ClusterLogicDiskUsedInfoPO getClusterLogicDiskUsedInfo(String clusterName, List<String> nodeList) {
+        String nodeFormat = CommonUtils.strConcat(nodeList);
+
+        String startTime =  "now - 1m";
+        String endTime  =  "now - 2m";
+
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, System.currentTimeMillis()-120000L, System.currentTimeMillis()-60000L);
+
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_DISK_INFO, clusterName,
+                nodeFormat, startTime, endTime);
+
+        ESQueryResponse esQueryResponse = gatewayClient.performRequest(realIndexName, TYPE, dsl);
+
+        return buildDiskInfoESQueryResponse(esQueryResponse);
     }
 
     /**
@@ -434,5 +534,27 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     private String getIndexNameByNowTimestamp(String indexName){
       return IndexNameUtils.genCurrentDailyIndexName(indexName);
+    }
+
+    private ClusterLogicDiskUsedInfoPO buildDiskInfoESQueryResponse(ESQueryResponse esQueryResponse) {
+        ClusterLogicDiskUsedInfoPO clusterLogicDiskUsedInfoPO = new ClusterLogicDiskUsedInfoPO();
+        if (esQueryResponse != null && esQueryResponse.getAggs() != null) {
+            Map<String, ESAggr> esAggrMap = esQueryResponse.getAggs().getEsAggrMap();
+            if (esAggrMap != null && esAggrMap.containsKey("hist")) {
+                ESAggr minuteBucketESAggr = esAggrMap.get("hist");
+                List<ESBucket> esBuckets = minuteBucketESAggr.getBucketList();
+                if (esBuckets.size()!=0){
+                    Map<String, ESAggr> aggrMap =  esBuckets.get(0).getAggrMap();
+                    Double total =Double.valueOf(aggrMap.get("diskTotal").getUnusedMap().get(VALUE).toString());
+                    Double free =Double.valueOf( aggrMap.get("diskFree").getUnusedMap().get(VALUE).toString());
+                    Double used = total- free;
+                    Double percent = used/total;
+                    clusterLogicDiskUsedInfoPO.setDiskTotal(total.longValue());
+                    clusterLogicDiskUsedInfoPO.setDiskUsage(used.longValue());
+                    clusterLogicDiskUsedInfoPO.setDiskUsagePercent(percent.doubleValue());
+                }
+            }
+        }
+        return clusterLogicDiskUsedInfoPO;
     }
 }
