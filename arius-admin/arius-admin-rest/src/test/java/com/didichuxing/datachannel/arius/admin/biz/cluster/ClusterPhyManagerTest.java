@@ -43,9 +43,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
@@ -129,14 +127,10 @@ class ClusterPhyManagerTest {
     PluginDTO                             pluginDTO;
     ESClusterRoleDTO                      esClusterRoleDTO;
     ESClusterRoleHostDTO                  esClusterRoleHostDTO;
-    ESClusterTemplateSrvVO                esClusterTemplateSrvVO;
-    ESClusterRoleHostVO                   esClusterRoleHostVO;
-    ESClusterRoleVO                       esClusterRoleVO;
     ClusterPhyVO                          clusterPhyVO;
     ClusterPhyVO                          clusterPhyVOWithNotRole;
     ClusterRoleHost                       clusterRoleHost;
     ClusterRoleInfo                       clusterRoleInfo;
-    List<ClusterPhyVO>                    clusterPhyVOList;
 
     List<ClusterPhy>                      clusterPhyList;
     ESClusterStatsResponse                esClusterStatsResponse;
@@ -171,17 +165,12 @@ class ClusterPhyManagerTest {
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
             Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator", "templateSrvs", "password",
             0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl");
-        esClusterTemplateSrvVO = new ESClusterTemplateSrvVO(0, "serviceName", "esVersion");
-        esClusterRoleHostVO = new ESClusterRoleHostVO(0L, 0L, "hostname", "ip", CLUSTER, "clusterLogicNames", "port", 0,
-            0, "rack", "machineSpec", "nodeSet", 0, "logicDepart", "attributes","regionName",0.1d);
-        esClusterRoleVO = new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec",
-            Collections.singletonList(esClusterRoleHostVO));
+
         clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
             Collections.singletonList(
                 new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", Lists.newArrayList())),
             0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl");
-        clusterPhyVOList = Collections.singletonList(clusterPhyVO);
 
         clusterRoleHost = new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet",
             "machineSpec", 0, "attributes");
@@ -216,7 +205,7 @@ class ClusterPhyManagerTest {
 
         clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
             "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
-        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER);
+        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER,"config");
 
         roleHostList = Collections.singletonList(new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0,
             "rack", "nodeSet", "machineSpec", -1, "attributes"));
@@ -293,7 +282,7 @@ class ClusterPhyManagerTest {
     @Test
     void testGetClusterPhys() throws InvocationTargetException, IllegalAccessException {
 
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
 
         when(mockClusterPhyService.isClusterExists(CLUSTER)).thenReturn(false);
 
@@ -313,7 +302,7 @@ class ClusterPhyManagerTest {
     @Test
     void testGetClusterPhys_ClusterPhyServiceGetClustersByCondtReturnsNoItems() {
 
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO)).thenReturn(Collections.emptyList());
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO)).thenReturn(Collections.emptyList());
         when(mockClusterPhyService.isClusterExists(CLUSTER)).thenReturn(false);
 
         when(mockEsClusterService.syncGetClusterStats(CLUSTER)).thenReturn(esClusterStatsResponse);
@@ -329,7 +318,7 @@ class ClusterPhyManagerTest {
     @Test
     void testGetClusterPhys_ESClusterServiceReturnsNull() throws InvocationTargetException, IllegalAccessException {
         // Setup
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
 
         when(mockClusterPhyService.isClusterExists(CLUSTER)).thenReturn(false);
         when(mockEsClusterService.syncGetClusterStats(CLUSTER)).thenReturn(null);
@@ -347,7 +336,7 @@ class ClusterPhyManagerTest {
 
     @Test
     void testGetClusterPhys_ClusterRoleServiceReturnsNoItems() {
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
 
         when(mockClusterPhyService.isClusterExists(CLUSTER)).thenReturn(false);
 
@@ -448,7 +437,7 @@ class ClusterPhyManagerTest {
         when(mockClusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setResourceType(1);
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
         result = clusterPhyManager.listCanBeAssociatedRegionOfClustersPhys(1, 0L);
         assertEquals(clusterNames, result.getData());
     }
@@ -462,14 +451,14 @@ class ClusterPhyManagerTest {
         when(mockClusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setResourceType(1);
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO)).thenReturn(clusterPhyList);
         result = clusterPhyManager.listCanBeAssociatedClustersPhys(1);
         assertEquals(clusterNames, result.getData());
 
         when(mockClusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
         clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setResourceType(3);
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO))
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO))
                 .thenReturn(Collections.singletonList(privateClusterPhy));
         when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(regions);
         when(mockClusterRegionService.isRegionBound(region)).thenReturn(false);
@@ -484,7 +473,7 @@ class ClusterPhyManagerTest {
         when(mockClusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
         clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setResourceType(2);
-        when(mockClusterPhyService.getClustersByCondt(clusterPhyDTO))
+        when(mockClusterPhyService.listClustersByCondt(clusterPhyDTO))
                 .thenReturn(Collections.singletonList(exclusiveClusterPhy));
         when(mockClusterRegionService.getLogicClusterIdByPhyClusterId(0))
                 .thenReturn(new HashSet<>());
@@ -667,7 +656,7 @@ class ClusterPhyManagerTest {
     @Test
     void testGetAppClusterPhyNames() {
         when(mockAppService.isSuperApp(0)).thenReturn(true);
-        when(mockClusterPhyService.getAllClusters()).thenReturn(clusterPhyList);
+        when(mockClusterPhyService.listAllClusters()).thenReturn(clusterPhyList);
         assertEquals(Collections.singletonList(CLUSTER), clusterPhyManager.listClusterPhyNameByAppId(0));
     }
 
@@ -847,7 +836,7 @@ class ClusterPhyManagerTest {
         Assertions.assertTrue(rest.success());
 
         when(mockAppService.isSuperApp(1)).thenReturn(true);
-        when(mockClusterPhyService.getAllClusters()).thenReturn(clusterPhyList);
+        when(mockClusterPhyService.listAllClusters()).thenReturn(clusterPhyList);
         when(mockIndexTemplateService.getLogicTemplateWithPhysicalsById(Mockito.any())).thenReturn(new IndexTemplateWithPhyTemplates(null));
         Assertions.assertEquals(Result.buildFail(String.format("the physicals of templateId[%s] is empty", 37529)).getMessage(),clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(1, 37529).getMessage());
 

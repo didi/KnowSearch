@@ -102,7 +102,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
-        List<ClusterPhy> clusterPhies = clusterPhyService.getAllClusters();
+        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
         return getPhyClusterByOpenTemplateSrv(clusterPhies, srvId);
     }
 

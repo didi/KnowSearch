@@ -264,7 +264,7 @@ public class SecurityServiceImpl extends BaseTemplateSrv implements SecurityServ
      */
     @Override
     public Result<Void> editAppVerifyCode(Integer appId, String verifyCode, int retryCount) {
-        List<ClusterPhy> clusters = clusterPhyService.getAllClusters();
+        List<ClusterPhy> clusters = clusterPhyService.listAllClusters();
 
         List<String> failMsgs = Lists.newArrayList();
         for (ClusterPhy cluster : clusters) {

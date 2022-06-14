@@ -38,7 +38,7 @@ public class ESLogicClusterDTO extends PageDTO {
     private String  dataCenter;
 
     @ApiModelProperty("数据节点个数")
-    private Integer  dataNodeNu;
+    private Integer dataNodeNum;
 
     @ApiModelProperty("责任人")
     private String  responsible;

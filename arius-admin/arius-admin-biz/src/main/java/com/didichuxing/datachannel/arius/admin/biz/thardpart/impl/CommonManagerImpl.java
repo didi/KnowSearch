@@ -95,7 +95,7 @@ public class CommonManagerImpl implements CommonManager {
 
     @Override
     public Result<List<ThirdPartClusterVO>> listDataCluster() {
-        List<ThirdPartClusterVO> clusterVOS = ConvertUtil.list2List(esClusterPhyService.getAllClusters(),
+        List<ThirdPartClusterVO> clusterVOS = ConvertUtil.list2List(esClusterPhyService.listAllClusters(),
                 ThirdPartClusterVO.class);
         //todo 这里应该把获取到的集群传入 getPhyClusterByOpenTemplateSrv
         List<String> hasSecurityClusters = templateSrvManager.getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_SECURITY.getCode());

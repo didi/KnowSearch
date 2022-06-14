@@ -409,7 +409,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             return new ArrayList<>();
         }
 
-        List<ClusterPhy> clusterPhyList = clusterPhyService.getAllClusters();
+        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
         Map<String, ClusterPhy> name2ClusterPhyMap = ConvertUtil.list2Map(clusterPhyList, ClusterPhy::getCluster);
 
         Map<Long, Plugin> pluginMap = new HashMap<>(0);
@@ -591,8 +591,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             param.setConfigJson("");
         }
 
-        if (!AriusObjUtils.isNull(param.getDataNodeNu())) {
-            param.setQuota((double) param.getDataNodeNu());
+        if (!AriusObjUtils.isNull(param.getDataNodeNum())) {
+            param.setQuota((double) param.getDataNodeNum());
         }
 
         if (AriusObjUtils.isNull(param.getDataCenter())) {

@@ -240,7 +240,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public List<ClusterPhyVO> listClusterPhys(ClusterPhyDTO param) {
-        List<ClusterPhy> phyClusters = clusterPhyService.getClustersByCondt(param);
+        List<ClusterPhy> phyClusters = clusterPhyService.listClustersByCondt(param);
         return buildPhyClusters(ConvertUtil.list2List(phyClusters, ClusterPhyVO.class));
     }
 
@@ -311,7 +311,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         List<String> clusters = Lists.newArrayList();
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setResourceType(clusterLogicType);
-        List<ClusterPhy> list = clusterPhyService.getClustersByCondt(clusterPhyDTO);
+        List<ClusterPhy> list = clusterPhyService.listClustersByCondt(clusterPhyDTO);
 
         if (PUBLIC.getCode() == clusterLogicType) {
             //共享
@@ -397,7 +397,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<PluginVO>> listPlugins(String cluster) {
-        return Result.buildSucc(ConvertUtil.list2List(clusterPhyService.getClusterPlugins(cluster), PluginVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(clusterPhyService.listClusterPlugins(cluster), PluginVO.class));
     }
 
     @Override
@@ -442,7 +442,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public List<String> listClusterPhyNameByAppId(Integer appId) {
         if (appService.isSuperApp(appId)) {
             //超级appId返回所有的集群
-            List<ClusterPhy> phyList = clusterPhyService.getAllClusters();
+            List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
             return phyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder())
                 .collect(Collectors.toList());
         }
@@ -475,7 +475,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         String esVersion = clusterPhy.getEsVersion();
 
-        List<ClusterPhy> clusterPhies = clusterPhyService.getAllClusters();
+        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
         List<String> sameVersionClusterNameList = clusterPhies.stream()
                 .filter(Objects::nonNull)
                 .filter(r -> clusterPhyNameList.contains(r.getCluster())
@@ -1194,7 +1194,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     private void refreshClusterDistInfo() {
-        List<String> clusterNameList = clusterPhyService.getAllClusters().stream().map(ClusterPhy::getCluster)
+        List<String> clusterNameList = clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster)
             .collect(Collectors.toList());
         for (String clusterName : clusterNameList) {
             Triple<Long, Long, Double> initTriple = buildInitTriple();

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -267,7 +267,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     public void flushClusterPhyContexts() {
         LOGGER.info("class=ClusterContextManagerImpl||method=flushClusterPhyContexts||msg=start...");
         long currentTimeMillis = System.currentTimeMillis();
-        List<ClusterPhy> clusterPhyList = clusterPhyService.getAllClusters();
+        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             LOGGER.info("class=ClusterContextManagerImpl||method=flushClusterLogicContexts||msg=finish...||consumingTime={}",
                     System.currentTimeMillis() - currentTimeMillis);

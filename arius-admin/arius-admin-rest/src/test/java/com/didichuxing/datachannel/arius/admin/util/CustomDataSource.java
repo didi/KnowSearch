@@ -1,15 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
-import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.alibaba.fastjson.JSON;
@@ -29,6 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.AppPO;
@@ -40,7 +36,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClu
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.MetricsConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
@@ -612,12 +608,12 @@ public class CustomDataSource {
     }
 
     public static ClusterRegion getClusterRegion() {
-        return new ClusterRegion(0L, "name", "logicClusterIds", PHY_CLUSTER_NAME);
+        return new ClusterRegion(0L, "name", "logicClusterIds", PHY_CLUSTER_NAME,"config");
     }
 
     public static ESClusterRoleHostVO getESClusterRoleHostVO() {
         return new ESClusterRoleHostVO(0L, 0L, "hostname", "ip", PHY_CLUSTER_NAME, "clusterLogicNames", "port", 1, 0, "rack",
-            "machineSpec", "nodeSet", 0, "logicDepart", "attributes","regionName", 0.0);
+            "machineSpec", "nodeSet", 0, "logicDepart", "attributes","regionName", 0.0,2L,1L);
     }
 
     public static ClusterRoleInfo getClusterRoleInfo() {
