@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @date 2021-04-28
  */
 @Component
-public class ProjectClusterLogicAuthManagerImpl implements ProjectClusterLogicAuthManager {
+public class AppClusterLogicAuthManagerImpl implements ProjectClusterLogicAuthManager {
     @Autowired
     private ProjectService projectService;
 

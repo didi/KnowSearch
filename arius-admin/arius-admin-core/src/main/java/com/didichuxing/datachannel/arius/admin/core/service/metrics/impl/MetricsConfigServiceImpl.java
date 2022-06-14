@@ -27,9 +27,9 @@ import com.didiglobal.logi.log.LogFactory;
  * @date 2021/08/10
  */
 @Service
-public class UserMetricsConfigServiceImpl implements UserMetricsConfigService {
+public class MetricsConfigServiceImpl implements UserMetricsConfigService {
 
-    private static final ILog LOGGER = LogFactory.getLog(UserMetricsConfigServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(MetricsConfigServiceImpl.class);
 
     private static final String USER_NAME = "user_name";
 

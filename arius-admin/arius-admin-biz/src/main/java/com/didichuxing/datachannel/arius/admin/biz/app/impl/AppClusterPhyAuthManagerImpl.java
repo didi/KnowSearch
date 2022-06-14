@@ -42,8 +42,8 @@ import org.springframework.stereotype.Component;
  * @date 2021-04-28
  */
 @Component
-public class ProjectClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthManager {
-    private static final ILog           LOGGER = LogFactory.getLog(ProjectClusterPhyAuthManagerImpl.class);
+public class AppClusterPhyAuthManagerImpl implements ProjectClusterPhyAuthManager {
+    private static final ILog           LOGGER = LogFactory.getLog(AppClusterPhyAuthManagerImpl.class);
     @Autowired
     private              ProjectService projectService;
     @Autowired

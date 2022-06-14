@@ -9,14 +9,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserMetricsConfigPO;
-import com.didichuxing.datachannel.arius.admin.core.service.metrics.impl.UserMetricsConfigServiceImpl;
+import com.didichuxing.datachannel.arius.admin.core.service.metrics.impl.MetricsConfigServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.UserMetricsConfigDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import java.util.Arrays;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -26,7 +25,7 @@ class UserMetricsConfigServiceTest {
     private UserMetricsConfigDAO userMetricsConfigDAO;
     
     @InjectMocks
-    private UserMetricsConfigServiceImpl userMetricsConfigService;
+    private MetricsConfigServiceImpl userMetricsConfigService;
     
     @Test
     void testGetMetricsByTypeAndUserName() {

@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemp
  * Created by linyunan on 2021-06-15
  */
 @Component
-public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplateAuthManager {
+public class AppLogicTemplateAuthManagerImpl implements ProjectLogicTemplateAuthManager {
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
