@@ -21,6 +21,7 @@ import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import java.util.Objects;
@@ -77,7 +78,7 @@ public class ProjectV3Controller {
     @GetMapping("/{id}")
     @ResponseBody
     @ApiOperation(value = "获取项目详情", notes = "根据项目id获取项目详情")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
+    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", paramType = "path",required = true)
     public Result<ProjectExtendVO> detail(@PathVariable Integer id) {
         return projectExtendManager.getProjectDetailByProjectId(id);
     }
@@ -92,7 +93,7 @@ public class ProjectV3Controller {
     @DeleteMapping("/{id}")
     @ResponseBody
     @ApiOperation(value = "删除项目", notes = "根据项目id删除项目")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
+    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", paramType = "path",required = true)
     public Result<Void> delete(@PathVariable Integer id, HttpServletRequest request) {
         
         return projectExtendManager.deleteProjectByProjectId(id, HttpRequestUtil.getOperator(request));
@@ -107,14 +108,14 @@ public class ProjectV3Controller {
     
     @GetMapping("/{id}/exist")
     @ApiOperation(value = "校验项目是否存在", notes = "校验项目是否存在")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
+    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int",paramType = "path", required = true)
     public Result<Void> checkExist(@PathVariable Integer id) {
         return projectExtendManager.checkProjectExist(id);
     }
     
     @PutMapping("/switch/{id}")
     @ApiOperation(value = "更改项目运行状态", notes = "调用该接口则项目运行状态被反转")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
+    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", paramType = "path",required = true)
     public Result<Void> switched(@PathVariable Integer id, HttpServletRequest request) {
         
         return projectExtendManager.changeProjectStatus(id, HttpRequestUtil.getOperator(request));
@@ -129,7 +130,7 @@ public class ProjectV3Controller {
     
     @GetMapping("/delete/check/{id}")
     @ApiOperation(value = "删除项目前的检查", notes = "检查是否有服务引用了该项目、是否有具体资源挂上了该项目")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
+    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int",paramType = "path",required = true)
     public Result<ProjectDeleteCheckVO> deleteCheck(@PathVariable Integer id) {
         return projectExtendManager.checkBeforeDelete(id);
     }
@@ -142,16 +143,21 @@ public class ProjectV3Controller {
     
     @PutMapping("/{id}/owner")
     @ApiOperation(value = "从角色中增加该项目下的负责人", notes = "从角色中增加该项目下的用户")
-    @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
-    public Result<Void> addProjectOwner(@PathVariable Integer id, @RequestBody List<Integer> ownerList,
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", paramType = "path", required = true),
+            @ApiImplicitParam(name = "ownerList", value = "用户id列表",allowMultiple = true, dataType = "int",  paramType = "body",
+                    required = true) })
+    public Result<Void> addProjectOwner(@PathVariable("id") Integer id, @RequestBody List<Integer> ownerList,
                                         HttpServletRequest request) {
         
         return projectExtendManager.addProjectOwner(id, ownerList, HttpRequestUtil.getOperator(request));
     }
     
-    @DeleteMapping("/{id}/owner")
+    @DeleteMapping("/{id}/owner/{ownerId}")
     @ApiOperation(value = "从项目中删除该项目下的负责人", notes = "从项目中删除该项目下的负责人")
-    @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", paramType = "path", required = true),
+            @ApiImplicitParam(name = "ownerId", value = "项目id", dataType = "int", paramType = "path", required = true) })
     public Result<Void> deleteProjectOwner(@PathVariable Integer id, @PathVariable Integer ownerId,
                                            HttpServletRequest request) {
         return projectExtendManager.delProjectOwner(id, ownerId, HttpRequestUtil.getOperator(request));
@@ -159,7 +165,10 @@ public class ProjectV3Controller {
     
     @PutMapping("/{id}/user")
     @ApiOperation(value = "从角色中增加该项目下的用户", notes = "从角色中增加该项目下的用户")
-    @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
+      @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", paramType = "path", required = true),
+            @ApiImplicitParam(name = "userList", value = "用户id列表",allowMultiple = true, dataType = "int",  paramType = "body",
+                    required = true) })
     public Result<Void> addProjectUser(@PathVariable Integer id, @RequestBody List<Integer>  userList,
                                        HttpServletRequest request) {
         
@@ -168,7 +177,9 @@ public class ProjectV3Controller {
     
     @DeleteMapping("/{id}/user/{userId}")
     @ApiOperation(value = "从项目中删除该项目下的用户", notes = "从项目中删除该项目下的用户")
-    @ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "userId", value = "用户id", dataType = "int", required = true, paramType = "path") })
     public Result<Void> deleteProjectUser(@PathVariable Integer id, @PathVariable Integer userId,
                                           HttpServletRequest request) {
         
@@ -185,7 +196,7 @@ public class ProjectV3Controller {
     
     @GetMapping("/user/{userId}")
     @ApiOperation(value = "获取用户绑定的项目列表", notes = "获取用户绑定的项目列表")
-    @ApiImplicitParam(name = "userId", value = "项目id", dataType = "int", required = true)
+    @ApiImplicitParam(name = "userId", value = "用户id", dataType = "int", required = true,paramType = "path")
     public Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(@PathVariable("userId") Integer userId) {
         if (roleTool.isAdmin(userId)) {
             return projectExtendManager.getProjectBriefList();

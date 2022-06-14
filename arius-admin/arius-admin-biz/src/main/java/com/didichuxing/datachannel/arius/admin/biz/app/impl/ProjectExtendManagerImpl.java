@@ -447,14 +447,16 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     }
     
     private Result<Void> checkProject(Integer projectId, List<Integer> userIdList) {
-        if (CollectionUtils.isNotEmpty(userIdList)) {
+        if (CollectionUtils.isEmpty(userIdList)) {
             return Result.buildParamIllegal("用户id不存在");
         }
         if (Objects.isNull(projectId)) {
             return Result.buildParamIllegal("项目id不存在");
         }
         //校验当前用户id是否存在
-        final List<UserVO> userList = userService.getUserDetailByUserIds(userIdList).getData();
+        final List<UserVO> userList = userIdList.stream()
+                .map(userService::getUserDetailByUserId)
+                .collect(Collectors.toList());
         if (userList.size() != userIdList.size()) {
             final List<Integer> idList = userList.stream().map(UserVO::getId).collect(Collectors.toList());
             //不存在用户id集合
