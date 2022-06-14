@@ -35,4 +35,9 @@ public class ClusterRegion extends BaseEntity {
      * 物理集群名称
      */
     private String phyClusterName;
+
+    /**
+     * 配置
+     */
+    private String config;
 }
