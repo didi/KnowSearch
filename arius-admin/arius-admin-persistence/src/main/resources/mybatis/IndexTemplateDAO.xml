@@ -46,7 +46,7 @@
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where is_active = 1
         <if test="id != null">and id = #{id}</if>
         <if test="name != null">and `name` = #{name}</if>
@@ -60,7 +60,7 @@
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where is_active               = 1
         <if test="name != null">     and `name` LIKE CONCAT(#{name}, '%')</if>
         <if test="dataType != null"> and `data_type` = #{dataType}</if>
@@ -70,7 +70,7 @@
     <select id="pagingByCondition" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where is_active = 1
         <if test="param.id != null"> and `id` = #{param.id}</if>
         <if test="param.name != null">     and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
@@ -86,7 +86,7 @@
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO" resultType="long">
         select
         count(1)
-        from index_template_info2
+        from index_template_info
         where is_active = 1
         <if test="id != null"> and `id` = #{id}</if>
         <if test="name != null">     and `name` LIKE CONCAT('%', #{name}, '%')</if>
@@ -102,7 +102,7 @@
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where is_active = 1
         order by id desc
     </select>
@@ -111,7 +111,7 @@
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into index_template_info2
+        insert into index_template_info
           (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
          department, responsible, date_field, date_field_format, id_field, routing_field, expression,
          `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, open_srv, disk_size)
@@ -125,34 +125,34 @@
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where id = #{logicId} and is_active = 1
     </select>
 
     <select id="listByProjectId" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where project_id = #{projectId} and is_active = 1
     </select>
 
     <select id="listByDataCenter" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where data_center = #{dataCenter} and is_active = 1
     </select>
 
     <select id="listByName" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where `name` = #{name} and is_active = 1
     </select>
 
     <update id="update"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO">
-        update index_template_info2
+        update index_template_info
         <trim prefix="set" prefixOverrides=",">
             <if test="projectId != null">,project_id = #{projectId}</if>
             <if test="name != null">,`name` = #{name}</if>
@@ -186,20 +186,20 @@
 
     <update id="batchChangeHotDay"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO">
-        update index_template_info2
+        update index_template_info
         set hot_time = hot_time + #{days}
         where hot_time > 0 and is_active = 1
     </update>
 
     <delete id="delete" parameterType="int">
-        update index_template_info2 set  is_active = 0
+        update index_template_info set  is_active = 0
         where id = #{logicId}
     </delete>
 
     <select id="listByIds" parameterType="list" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where is_active = 1 and
         id in
         <foreach collection="logicIds" item="id" open="(" separator="," close=")">#{id}</foreach>
@@ -208,7 +208,7 @@
     <select id="likeByResponsible" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from index_template_info2
+        from index_template_info
         where is_active = 1 and (responsible = #{responsible}
         or responsible like CONCAT(#{responsible},',%')
         or responsible like CONCAT('%,', #{responsible})
@@ -216,20 +216,20 @@
     </select>
 
     <update id="updateBlockReadState">
-        update index_template_info2
+        update index_template_info
         set block_read = #{blockRead}
         where id = #{logicId} and is_active = 1
     </update>
 
     <update id="updateBlockWriteState">
-        update index_template_info2
+        update index_template_info
         set block_write = #{blockWrite}
         where id = #{logicId} and is_active = 1
     </update>
 
     <select id="listAllNames" resultType="java.lang.String">
         select `name`
-        from index_template_info2
+        from index_template_info
         where is_active = 1
         order by id desc
     </select>
