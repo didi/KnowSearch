@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 /**
@@ -20,7 +21,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  * @date 2022/5/31
  */
 @RestController
-@RequestMapping(V3_OP + "/indices/srv")
+@RequestMapping(V3 + "/indices/srv")
 @Api(tags = "索引服务")
 public class IndicesSrvController {
 

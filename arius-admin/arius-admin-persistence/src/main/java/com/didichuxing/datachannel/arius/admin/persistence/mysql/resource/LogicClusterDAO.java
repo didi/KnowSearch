@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.resource;
 import java.util.List;
 import java.util.Set;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -38,10 +39,12 @@ public interface LogicClusterDAO {
 
     List<ClusterLogicPO> listByResponsible(String responsible);
 
-    List<ClusterLogicPO> pagingByCondition(@Param("name") String name,  @Param("appId") Integer appId,
-                                           @Param("type") Integer type, @Param("health") Integer health,
-                                           @Param("from") Long from,    @Param("size") Long size,
-                                           @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+//    List<ClusterLogicPO> pagingByCondition(@Param("name") String name,  @Param("appId") Integer appId,
+//                                           @Param("type") Integer type, @Param("health") Integer health,
+//                                           @Param("from") Long from,    @Param("size") Long size,
+//                                           @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+
+    List<ClusterLogicPO> pagingByCondition(ClusterLogicConditionDTO param);
 
     Long getTotalHitByCondition(ClusterLogicPO param);
 }

@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,18 +10,16 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -37,21 +34,11 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
-/**
- * Created by linyunan on 2021-10-28
- */
-@Component
-public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> {
-
-    private static final ILog   LOGGER            = LogFactory.getLog(IndexPageSearchHandle.class);
-
+public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDTO, IndexCatCellVO> {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Autowired
     private AppService          appService;
-
-    @Autowired
-    private ClusterPhyManager   clusterPhyManager;
 
     @Autowired
     private ESIndexCatService   esIndexCatService;
@@ -60,68 +47,39 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
     private ESIndexService      esIndexService;
 
     @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
-        if (pageDTO instanceof IndexQueryDTO) {
-            IndexQueryDTO indexQueryDTO = (IndexQueryDTO) pageDTO;
-
-            if (StringUtils.isNotBlank(indexQueryDTO.getHealth()) && !IndexStatusEnum.isStatusExit(indexQueryDTO.getHealth())) {
-                return Result.buildParamIllegal(String.format("健康状态%s非法", indexQueryDTO.getHealth()));
-            }
-            
-            String indexName = indexQueryDTO.getIndex();
-            if (!AriusObjUtils.isBlack(indexName) && (indexName.startsWith("*") || indexName.startsWith("?"))) {
-                return Result.buildParamIllegal("索引名称不允许带类似*, ?等通配符查询");
-            }
-
-            return Result.buildSucc(true);
-        }
-
-        LOGGER.error("class=IndicesPageSearchHandle||method=validCheckForCondition||errMsg=failed to convert PageDTO to IndicesConditionDTO");
-
-        return Result.buildFail();
-    }
-
-    @Override
-    protected void init(PageDTO pageDTO) {
-        if (pageDTO instanceof IndexQueryDTO) {
-            IndexQueryDTO condition = (IndexQueryDTO) pageDTO;
-            if (null == condition.getPage()) {
-                condition.setPage(1L);
-            }
-
-            if (null == condition.getSize() || 0 == condition.getSize()) {
-                condition.setSize(10L);
-            }
-
-            if (AriusObjUtils.isBlack(condition.getSortTerm())) {
-                condition.setSortTerm(DEFAULT_SORT_TERM);
-            }
-        }
-    }
-
-    @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
+    protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer appId) {
         if (!appService.isAppExists(appId)) {
             return Result.buildParamIllegal("项目不存在");
         }
+        if (StringUtils.isNotBlank(condition.getHealth()) && !IndexStatusEnum.isStatusExit(condition.getHealth())) {
+            return Result.buildParamIllegal(String.format("健康状态%s非法", condition.getHealth()));
+        }
+
+        String indexName = condition.getIndex();
+        if (!AriusObjUtils.isBlack(indexName) && (indexName.startsWith("*") || indexName.startsWith("?"))) {
+            return Result.buildParamIllegal("索引名称不允许带类似*, ?等通配符查询");
+        }
+
         return Result.buildSucc(true);
     }
 
     @Override
-    protected PaginationResult<IndexCatCellVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
-        return PaginationResult.buildSucc();
+    protected void initCondition(IndexQueryDTO condition, Integer appId) {
+        if (null == condition.getPage()) {
+            condition.setPage(1L);
+        }
+
+        if (null == condition.getSize() || 0 == condition.getSize()) {
+            condition.setSize(10L);
+        }
+
+        if (AriusObjUtils.isBlack(condition.getSortTerm())) {
+            condition.setSortTerm(DEFAULT_SORT_TERM);
+        }
     }
 
     @Override
-    protected PaginationResult<IndexCatCellVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
-        IndexQueryDTO condition = buildIndicesConditionDTO(pageDTO);
-
-        if (null == condition) {
-            LOGGER.error(
-                    "class=IndicesPageSearchHandle||method=buildWithoutAuthType||errMsg=failed to convert PageDTO to IndicesConditionDTO");
-            return PaginationResult.buildFail("获取索引查询信息失败");
-        }
-
+    protected PaginationResult<IndexCatCellVO> buildPageData(IndexQueryDTO condition, Integer appId) {
         return getIndexCatCellsFromES(condition, appId);
     }
 
@@ -134,9 +92,15 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
         try {
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple;
             if (appService.isSuperApp(appId)) {
-                totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(condition.getCluster(), condition.getIndex(), condition.getHealth(), appId, null,(condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(), condition.getOrderByDesc());
+                totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(condition.getCluster(),
+                    condition.getIndex(), condition.getHealth(), appId, null,
+                    (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
+                    condition.getOrderByDesc());
             } else {
-                totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(null, condition.getIndex(), condition.getHealth(), appId, condition.getCluster(),(condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(), condition.getOrderByDesc());
+                totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(null, condition.getIndex(),
+                    condition.getHealth(), appId, condition.getCluster(),
+                    (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
+                    condition.getOrderByDesc());
             }
 
             if (null == totalHitAndIndexCatCellListTuple) {
@@ -147,22 +111,19 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
             }
 
             //设置索引阻塞信息
-            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
-            List<IndexCatCellVO> indexCatCellVOList  = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
+            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexBlockInfo(
+                totalHitAndIndexCatCellListTuple.getV2());
+            List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList,
+                IndexCatCellVO.class);
 
-            return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(), condition.getPage(), condition.getSize());
+            return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(),
+                condition.getPage(), condition.getSize());
         } catch (Exception e) {
-            LOGGER.error("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
+            LOGGER.error(
+                "class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
                 condition.getCluster(), condition.getIndex(), e.getMessage(), e);
             return PaginationResult.buildFail("获取分页索引列表失败");
         }
-    }
-
-    private IndexQueryDTO buildIndicesConditionDTO(PageDTO pageDTO) {
-        if (pageDTO instanceof IndexQueryDTO) {
-            return (IndexQueryDTO) pageDTO;
-        }
-        return null;
     }
 
     /**
@@ -211,7 +172,8 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
         List<IndexCatCell> indexCatCellWithBlockInfo = Lists.newArrayList();
         List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(indexNameList)) {
-            LOGGER.warn("class=IndicesPageSearchHandle||method=buildBlockInfo||cluster={}||index={}||errMsg=index is empty",
+            LOGGER.warn(
+                "class=IndicesPageSearchHandle||method=buildBlockInfo||cluster={}||index={}||errMsg=index is empty",
                 cluster, ListUtils.strList2String(indexNameList));
             return indexCatCellWithBlockInfo;
         }
@@ -316,13 +278,14 @@ public class IndexPageSearchHandle extends BasePageSearchHandle<IndexCatCellVO> 
 
     /**
      * 合并block信息
-     * @param tupleFromSetUp    手动配置setting
-     * @param tupleFromDefault  默认setting
-     * @return
+     *
+     * @param tupleFromSetUp   手动配置setting
+     * @param tupleFromDefault 默认setting
+     * @return {@link Tuple}<{@link Boolean}, {@link Boolean}> Tuple<read, write>
      */
-    private Tuple<Boolean/*read*/, Boolean/*write*/> mergeBlockInfo(Tuple<Boolean, Boolean> tupleFromSetUp,
+    private Tuple<Boolean, Boolean> mergeBlockInfo(Tuple<Boolean, Boolean> tupleFromSetUp,
                                                                     Tuple<Boolean, Boolean> tupleFromDefault) {
-        Tuple<Boolean/*read*/, Boolean/*write*/> mergeBlockTuple = new Tuple<>();
+        Tuple<Boolean, Boolean> mergeBlockTuple = new Tuple<>();
 
         //set read block info
         if (null != tupleFromSetUp.getV1()) {

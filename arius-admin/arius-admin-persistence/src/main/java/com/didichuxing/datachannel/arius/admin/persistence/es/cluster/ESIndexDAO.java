@@ -56,8 +56,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
@@ -396,6 +398,10 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         return true;
+    }
+
+    public boolean batchUpdateIndexRegion(String cluster, List<String> indices, Set<String> nodeNames) {
+        return putIndexSetting(cluster, indices, TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(COMMA, nodeNames), "");
     }
 
     /**

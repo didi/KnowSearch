@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * @author lyn
@@ -76,11 +77,13 @@ public interface IndicesManager {
 
     /**
      * 获取索引mapping
-     * @param param
-     * @param appId
-     * @return                   IndexMappingVO
+     *
+     * @param cluster   集群
+     * @param indexName 索引名称
+     * @param appId     项目
+     * @return IndexMappingVO
      */
-    Result<IndexMappingVO> getMapping(IndexCatCellDTO param, Integer appId);
+    Result<IndexMappingVO> getMapping(String cluster, String indexName, Integer appId);
 
     /**
      * 更新索引mapping
@@ -92,11 +95,13 @@ public interface IndicesManager {
 
     /**
      * 获取索引setting信息
-     * @param param
-     * @param appId             项目
-     * @return                  IndexSettingVO
+     *
+     * @param appId     项目
+     * @param cluster   集群
+     * @param indexName 索引名称
+     * @return IndexSettingVO
      */
-    Result<IndexSettingVO> getSetting(IndexCatCellDTO param, Integer appId);
+    Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer appId);
 
     /**
      * 更新索引setting

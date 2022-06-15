@@ -8,10 +8,11 @@
         <result column="phy_cluster_name"  jdbcType="VARCHAR"       property="phyClusterName"/>
         <result column="create_time"       jdbcType="TIMESTAMP"     property="createTime"/>
         <result column="update_time"       jdbcType="TIMESTAMP"     property="updateTime"/>
+        <result column="config"            jdbcType="VARCHAR"       property="config"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, name, logic_cluster_id, phy_cluster_name, create_time, update_time
+        id, name, logic_cluster_id, phy_cluster_name, create_time, update_time, config
     </sql>
 
     <insert id="insert"
@@ -19,9 +20,9 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_cluster_region
-        (name, logic_cluster_id,phy_cluster_name)
+        (name, logic_cluster_id,phy_cluster_name, config)
         values
-        (#{name}, #{logicClusterIds}, #{phyClusterName})
+        (#{name}, #{logicClusterIds}, #{phyClusterName}, #{config})
     </insert>
 
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
@@ -42,22 +43,11 @@
         select
         <include refid="Base_Column_List"/>
         from es_cluster_region
-        where logic_cluster_id = #{logicClusterId} and delete_flag = 0
-    </select>
-
-    <select id="listByLogicClusterIds" parameterType="list" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from es_cluster_region
-        where delete_flag = 0 and
-        <choose>
-            <when test="logicClusterIds != null and logicClusterIds.size() > 0">
-                logic_cluster_id in <foreach collection="logicClusterIds" item="value" open="(" separator="," close=")">#{value}</foreach>
-            </when>
-            <otherwise>
-                1=0
-            </otherwise>
-        </choose>
+        where delete_flag = 0
+        and (logic_cluster_id = #{logicClusterId}
+        or logic_cluster_id like CONCAT(#{logicClusterId},',%')
+        or logic_cluster_id like CONCAT('%,', #{logicClusterId})
+        or logic_cluster_id like CONCAT('%,', #{logicClusterId},',%'))
     </select>
 
     <select id="getByPhyClusterName" parameterType="string" resultMap="BaseResultMap">
@@ -99,6 +89,7 @@
             <if test="name != null">,name = #{name}</if>
             <if test="logicClusterIds != null">,logic_cluster_id = #{logicClusterIds}</if>
             <if test="phyClusterName != null">,phy_cluster_name = #{phyClusterName}</if>
+            <if test="config != null">,config = #{config}</if>
         </trim>
         where id = #{id} and delete_flag = 0
     </update>

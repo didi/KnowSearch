@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.Indices;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
@@ -28,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
  * @date 2021/09/28
  **/
 @RestController
-@RequestMapping(V3_OP + "/indices")
+@RequestMapping(V3 + "/indices")
 @Api(tags = "索引管理接口(REST)")
 public class IndicesController {
     @Autowired
@@ -41,18 +42,18 @@ public class IndicesController {
         return indicesManager.pageGetIndex(condition, HttpRequestUtils.getAppId(request));
     }
 
-    @PutMapping("")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "创建索引")
     public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
         return indicesManager.createIndex(param, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("")
+    @GetMapping("{cluster}/{indexName}")
     @ResponseBody
     @ApiOperation(value = "查询索引")
-    public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @RequestParam String cluster, @RequestParam String index) {
-        return indicesManager.getIndexCatInfo(cluster, index, HttpRequestUtils.getAppId(request));
+    public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @PathVariable String cluster, @PathVariable String indexName) {
+        return indicesManager.getIndexCatInfo(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @DeleteMapping("")
@@ -69,11 +70,12 @@ public class IndicesController {
         return indicesManager.editMapping(param, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/mapping")
+    @GetMapping("{cluster}/{indexName}/mapping")
     @ResponseBody
     @ApiOperation(value = "查询mapping")
-    public Result<IndexMappingVO> getMapping(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
-        return indicesManager.getMapping(param, HttpRequestUtils.getAppId(request));
+    public Result<IndexMappingVO> getMapping(@PathVariable String cluster,
+                                             @PathVariable String indexName,HttpServletRequest request) {
+        return indicesManager.getMapping(cluster,indexName, HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/setting")
@@ -83,11 +85,12 @@ public class IndicesController {
         return indicesManager.editSetting(param, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/setting")
+    @GetMapping("{cluster}/{indexName}/setting")
     @ResponseBody
     @ApiOperation(value = "查询setting")
-    public Result<IndexSettingVO> getSetting(HttpServletRequest request, @RequestBody IndexCatCellDTO param) {
-        return indicesManager.getSetting(param, HttpRequestUtils.getAppId(request));
+    public Result<IndexSettingVO> getSetting(@PathVariable String cluster,
+                                             @PathVariable String indexName,HttpServletRequest request) {
+        return indicesManager.getSetting(cluster,indexName, HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/close")

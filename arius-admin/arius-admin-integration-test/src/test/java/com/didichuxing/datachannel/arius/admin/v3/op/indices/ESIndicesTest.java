@@ -28,7 +28,7 @@ public class ESIndicesTest extends BasePhyClusterInfoTest{
     @Test
     public void pageGetIndexCatInfoVOTest() throws IOException {
         IndexQueryDTO indexQueryDTO = new IndexQueryDTO();
-        indexQueryDTO.setClusterPhyName(Lists.newArrayList(phyClusterInfo.getPhyClusterName()));
+        indexQueryDTO.setCluster(phyClusterInfo.getPhyClusterName());
         indexQueryDTO.setOrderByDesc(false);
         indexQueryDTO.setPage(1L);
         indexQueryDTO.setSize(10L);

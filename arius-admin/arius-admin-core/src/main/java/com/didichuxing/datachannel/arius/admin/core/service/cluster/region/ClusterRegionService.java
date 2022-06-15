@@ -1,10 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
 
 /**
  * @author ohushenglin_v
@@ -23,7 +26,6 @@ public interface ClusterRegionService {
      * @return 已经被绑定到指定逻辑集群的region
      */
     @Deprecated
-    //todo: logic cluster set to key
     List<ClusterRegion> listLogicClusterRegions(Long logicClusterId);
 
     ClusterRegion getRegionByLogicClusterId(Long logicClusterId);
@@ -143,9 +145,30 @@ public interface ClusterRegionService {
     boolean isExistByRegionId(Integer regionId);
 
     /**
-     * 根据逻辑集群Id列表获取region列表
+     * 获取指定物理集群下的冷节点
+     * @param cluster
+     * @return
+     */
+    List<ClusterRegion> listColdRegionByCluster(String cluster);
+
+    /**
+     * 获取region 配置项
+     * @param config
+     * @return
+     */
+    ClusterRegionConfig genClusterRegionConfig(String config);
+
+    /**
+     * 获取region 磁盘使用情况
+     * @param cluster
+     * @return (key, value) = (regionId, diskUsage)
+     */
+    Map<Integer, ClusterRegionFSInfo> getClusterRegionFSInfo(String cluster);
+
+    /**
+     * 根据逻辑集群Id列表获取region列表, 注意这里入参列表元素不能太大，否则有性能影响
      * @param clusterLogicIdList  逻辑集群id列表
      * @return
      */
-    List<ClusterRegion> listClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
+    List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
 }

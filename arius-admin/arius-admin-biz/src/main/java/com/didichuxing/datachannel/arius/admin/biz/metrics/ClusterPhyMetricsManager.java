@@ -66,4 +66,6 @@ public interface ClusterPhyMetricsManager {
      * 获取物理集群中的索引列表
      */
     Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer appId);
+
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
 }

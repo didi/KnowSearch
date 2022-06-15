@@ -4,20 +4,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 
 /**
  * @author ohushenglin_v
  * @date 2022-05-27
  */
 public abstract class AbstractPageSearchHandle<T extends PageDTO, R> implements BaseHandle {
+    protected final ILog LOGGER = LogFactory.getLog(this.getClass());
     /**
      * 处理模糊分页查询
      * @param condition     查询条件
      * @param appId       项目
      * @return            PaginationResult<R>
      */
-    public PaginationResult<R> selectPage(T condition, Integer appId) {
-
+    public PaginationResult<R> doPage(T condition, Integer appId) {
         Result<Boolean> validCheckForConditionResult = checkCondition(condition, appId);
         if (validCheckForConditionResult.failed()) {
             return PaginationResult.buildParamIllegal(validCheckForConditionResult.getMessage());

@@ -1,24 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.source;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterOpV3ControllerMethod;
-import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterRegionControllerMethod;
 import com.didichuxing.datachannel.arius.admin.method.v3.normal.NormalOrderControllerMethod;
-import lombok.Data;
-import org.junit.jupiter.api.Assertions;
+import com.didichuxing.datachannel.arius.admin.method.v3.op.cluster.logic.ESLogicClusterOpV3ControllerMethod;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import lombok.Data;
 
 /**
  * @author cjm
@@ -62,7 +61,7 @@ public class LogicClusterInfoSource {
 
         // 获取刚申请的逻辑集群 id
         ClusterLogicConditionDTO condition = CustomDataSource.getClusterLogicConditionDTO(logicClusterName);
-        PaginationResult<ConsoleClusterVO> result3 = ESLogicClusterOpV3ControllerMethod.pageGetConsoleClusterVOS(condition);
+        PaginationResult<ClusterLogicVO> result3 = ESLogicClusterOpV3ControllerMethod.pageGetConsoleClusterVOS(condition);
         Assertions.assertTrue(result3.success());
         Assertions.assertFalse(result3.getData().getBizData().isEmpty());
         logicClusterInfo.logicClusterId = result3.getData().getBizData().get(0).getId();

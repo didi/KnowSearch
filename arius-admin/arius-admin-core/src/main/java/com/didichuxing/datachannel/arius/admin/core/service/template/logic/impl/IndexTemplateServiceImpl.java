@@ -167,7 +167,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 e.getMessage(), e);
         }
 
-        return responsibleConvertTool.list2List(indexTemplatePOS, IndexTemplate.class);
+        return ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class);
     }
 
     @Override

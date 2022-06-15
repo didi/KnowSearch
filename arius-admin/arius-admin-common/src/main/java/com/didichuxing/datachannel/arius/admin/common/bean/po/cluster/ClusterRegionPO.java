@@ -36,4 +36,10 @@ public class ClusterRegionPO extends BasePO {
      * 物理集群名称
      */
     private String phyClusterName;
+
+    /**
+     * 配置项
+     */
+    private String config;
+
 }

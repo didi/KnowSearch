@@ -28,6 +28,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
@@ -40,6 +42,9 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
@@ -91,7 +96,7 @@ public class IndicesManagerImpl implements IndicesManager {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.INDEX.getPageSearchType());
         if (baseHandle instanceof IndexPageSearchHandle) {
             IndexPageSearchHandle handle = (IndexPageSearchHandle) baseHandle;
-            return handle.doPageHandle(condition, null, appId);
+            return handle.doPage(condition, appId);
         }
 
         LOGGER.warn("class=TemplateLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the TemplateLogicPageSearchHandle");
@@ -262,9 +267,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexMappingVO> getMapping(IndexCatCellDTO param, Integer appId) {
-        String cluster = getClusterPhy(param.getCluster(), appId);
-        String indexName = param.getIndex();
+    public Result<IndexMappingVO> getMapping(String cluster, String indexName, Integer appId) {
         Result<Void> ret = basicCheckParam(cluster, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
@@ -300,9 +303,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexSettingVO> getSetting(IndexCatCellDTO param, Integer appId) {
-        String cluster = getClusterPhy(param.getCluster(), appId);
-        String indexName = param.getIndex();
+    public Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer appId) {
         Result<Void> ret = basicCheckParam(cluster, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
