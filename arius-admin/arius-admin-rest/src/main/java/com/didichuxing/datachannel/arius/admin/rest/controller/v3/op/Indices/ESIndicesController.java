@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ESIndicesController {
     @Autowired
     private IndicesManager indicesManager;
-
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "分页获取索引列表信息", notes = "携带可读可写标志位")
@@ -110,5 +109,19 @@ public class ESIndicesController {
     public Result<IndexSettingVO> setting(@PathVariable String clusterPhyName, @PathVariable String indexName,
                                           HttpServletRequest request) {
         return indicesManager.getIndexSetting(clusterPhyName, indexName, HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("/{clusterPhyName}/phy/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取物理集群索引列表")
+    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
+        return indicesManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("/{clusterLogicName}/logic/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取逻辑集群索引列表")
+    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName, HttpServletRequest request) {
+        return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request));
     }
 }

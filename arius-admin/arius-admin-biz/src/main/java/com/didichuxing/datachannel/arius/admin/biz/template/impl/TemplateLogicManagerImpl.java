@@ -3,15 +3,24 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum.OWN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum.isTemplateAuthExitByCode;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum.OWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
@@ -21,29 +30,16 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.Pr
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithLabels;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -817,21 +813,18 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (clusterLogic == null) {
             return Result.buildFail();
         }
-
-        List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-                .getLogicTemplateWithClustersByClusterId(clusterLogic.getId());
-
-        if (CollectionUtils.isEmpty(logicTemplates)) {
-            return  Result.buildFail();
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        if (clusterRegion == null) {
+            return Result.buildFail();
         }
+        Result<List<IndexTemplate>> listResult = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<ConsoleTemplateVO> vos = listResult.getData().stream().map(indexTemplate -> {
+            ConsoleTemplateVO vo = new ConsoleTemplateVO();
+            BeanUtils.copyProperties(indexTemplate,vo);
+            return vo;
+        }).collect(Collectors.toList());
 
-        List<IndexTemplateLogicAggregate> indexTemplates = fetchLogicTemplatesAggregates(logicTemplates, appId);
-
-        // 转化为视图列表展示
-        List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
-//        indexTemplates.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
-
-        return null;
+        return Result.buildSucc(vos);
     }
 
     /**************************************** private method ***************************************************/

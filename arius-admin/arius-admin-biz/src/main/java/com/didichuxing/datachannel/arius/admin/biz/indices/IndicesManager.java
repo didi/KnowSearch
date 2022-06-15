@@ -101,4 +101,17 @@ public interface IndicesManager {
      * @return
      */
     Result<IndexCatCellVO> getIndexCatInfo(String clusterPhyName, String indexName, Integer projectId);
+
+    /**
+     * 获取物理集群中的索引列表
+     */
+    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId);
+
+    /**
+     * 获取逻辑集群下的索引列表
+     * @param clusterLogicName
+     * @param appId
+     * @return
+     */
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
 }

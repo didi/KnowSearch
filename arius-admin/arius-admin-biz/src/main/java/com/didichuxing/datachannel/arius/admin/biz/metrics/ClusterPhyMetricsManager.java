@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
@@ -7,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetr
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
-import java.util.List;
 
 /**
  * @author Created by linyunan on 2021-07-30
@@ -46,14 +47,8 @@ public interface ClusterPhyMetricsManager {
      * @return result
      */
     Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
+
     
-    /**
-     * 获取物理集群中的索引列表
-     * @param clusterPhyName 物理集群名称
-     * @param projectId 应用程序id
-     * @return {@code Result<List<String>>}
-     */
-    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId);
     
     /**
      * 获取用户配置指标
@@ -84,5 +79,5 @@ public interface ClusterPhyMetricsManager {
      */
     Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer projectId);
 
-    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
+
 }
