@@ -1,8 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.RESOURCE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
@@ -89,8 +109,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private ESIndexService                esIndexService;
 
-    @Autowired
-    private ESClusterStaticsService       esClusterStaticsService;
 
     @Autowired
     private ClusterPhyService             clusterPhyService;
@@ -446,6 +464,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                     catIndexResultList.forEach(catIndexResult -> {
                         IndicesClearDTO indicesClearDTO = new IndicesClearDTO();
                         indicesClearDTO.setIndex(catIndexResult.getIndex());
+//                        indicesClearDTO.setCluster(physicalMaster.getCluster());
                         catIndexResults.add(indicesClearDTO);
                     });
                 }
