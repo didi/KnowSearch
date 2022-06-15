@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,14 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PagingData;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesOpenOrCloseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,6 +88,17 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Autowired
     private HandleFactory         handleFactory;
+
+    @Autowired
+    private ClusterLogicService clusterLogicService;
+
+    @Autowired
+    private ClusterRegionService clusterRegionService;
+
+    @Autowired
+    private IndexTemplateService indexTemplateService;
+
+
 
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
@@ -314,6 +334,36 @@ public class IndicesManagerImpl implements IndicesManager {
         }
 
         return Result.buildSucc(ConvertUtil.obj2Obj(indexCatCellVOs.getBizData().get(0), IndexCatCellVO.class));
+    }
+
+    @Override
+    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId) {
+        if (!appService.isAppExists(appId)) {
+            return Result.buildParamIllegal(String.format("There is no appId:%s", appId));
+        }
+
+        return Result.buildSucc(esIndexService.syncGetIndexName(clusterPhyName));
+    }
+    @Override
+    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
+        if (clusterLogic == null) {
+            return Result.buildFail();
+        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        if (clusterRegion == null) {
+            return Result.buildFail();
+        }
+        Result<List<IndexTemplate>> listResult = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<IndexTemplate> indexTemplates = listResult.getData();
+
+        List<CatIndexResult> catIndexResultList = new ArrayList<>();
+        indexTemplates.forEach(indexTemplate -> {
+            catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
+                    indexTemplate.getExpression()));
+        });
+        List<String> indexNames =  catIndexResultList.stream().map(CatIndexResult::getIndex).collect(Collectors.toList());
+        return Result.buildSucc(indexNames);
     }
 
     /***************************************************private**********************************************************/

@@ -202,7 +202,7 @@ public interface ClusterLogicManager {
      * @param count
      * @return
      */
-    Result<String> estimatedDiskSize(Long clusterLogicId, Integer count);
+    Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count);
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表

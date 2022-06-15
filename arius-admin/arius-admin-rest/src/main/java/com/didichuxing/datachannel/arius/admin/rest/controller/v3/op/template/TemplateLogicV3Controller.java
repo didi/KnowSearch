@@ -163,4 +163,17 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.upgrade(logicTemplateId, HttpRequestUtils.getOperator(request));
     }
 
+    @GetMapping("{clusterPhyName}/phy/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,@PathVariable String clusterPhyName) {
+        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("{clusterLogicName}/logic/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据逻辑集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
+        return templateLogicManager.getTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtils.getAppId(request));
+    }
 }
