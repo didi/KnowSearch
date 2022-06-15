@@ -449,28 +449,6 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     /**
-     *  获取磁盘使用情况
-     * @param clusterName
-     * @param nodeList
-     * @return
-     */
-    public ClusterLogicDiskUsedInfoPO getClusterLogicDiskUsedInfo(String clusterName, List<String> nodeList) {
-        String nodeFormat = CommonUtils.strConcat(nodeList);
-
-        String startTime =  "now - 1m";
-        String endTime  =  "now - 2m";
-
-        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, System.currentTimeMillis()-120000L, System.currentTimeMillis()-60000L);
-
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_DISK_INFO, clusterName,
-                nodeFormat, startTime, endTime);
-
-        ESQueryResponse esQueryResponse = gatewayClient.performRequest(realIndexName, TYPE, dsl);
-
-        return buildDiskInfoESQueryResponse(esQueryResponse);
-    }
-
-    /**
      * 获取集群写文档总数
      * @param cluster 集群名称
      * @return {@link Long}

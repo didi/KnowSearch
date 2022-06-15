@@ -40,8 +40,6 @@ public class ClusterPhyMetricsController {
 
     @Autowired
     private ClusterPhyManager clusterPhyManager;
-    @Autowired
-    private TemplateLogicManager templateLogicManager;
 
 
     @GetMapping("/clusters")

@@ -4,6 +4,8 @@ import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsMana
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -13,12 +15,15 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.MetricsConfigService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +57,14 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     @Autowired
     private HandleFactory                handleFactory;
 
+    @Autowired
+    private ClusterLogicService          clusterLogicService;
+
+    @Autowired
+    private ClusterRegionService         clusterRegionService;
+
+
+
     @Override
     public List<String> getMetricsCode2TypeMap(String type) {
         switch (ClusterPhyTypeMetricsEnum.valueOfType(type)) {
@@ -71,6 +84,14 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     @SuppressWarnings("unchecked")
     public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
         try {
+            if (StringUtils.isNotBlank(param.getClusterLogicName())){
+                ClusterLogic clusterLogic =clusterLogicService.getClusterLogicByName(param.getClusterLogicName());
+                ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+                if (clusterRegion == null) {
+                    return Result.buildFail();
+                }
+                param.setClusterPhyName(clusterRegion.getPhyClusterName());
+            }
             T result = null;
             BaseClusterMetricsHandle metricsHandle = (BaseClusterMetricsHandle) handleFactory.getByHandlerNamePer(metricsTypeEnum.getType());
             if (AriusObjUtils.isNull(metricsHandle)) {

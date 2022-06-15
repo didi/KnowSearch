@@ -19,8 +19,11 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "指标信息")
 public class MetricsClusterPhyDTO extends BaseDTO {
 
-    @ApiModelProperty("集群名称")
+    @ApiModelProperty("物理集群名称")
     private String       clusterPhyName;
+
+    @ApiModelProperty("逻辑集群名称")
+    private String       clusterLogicName;
 
     @ApiModelProperty("开始时间")
     private Long         startTime;

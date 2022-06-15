@@ -520,16 +520,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return ConvertUtil.list2List(logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)), ClusterLogic.class);
     }
 
-    @Override
-    public ClusterLogicDiskUsedInfoPO getDiskInfo(Long id) {
-        ClusterRegion clusterRegion =clusterRegionService.getRegionByLogicClusterId(id);
-        List<ESClusterRoleHostPO> esClusterRoleHostPOS = clusterRoleHostDAO.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        //节点名称列表
-        List<String> nodeList = esClusterRoleHostPOS.stream().map(ESClusterRoleHostPO::getNodeSet).collect(toList());
-        String clusterName =clusterRegion.getPhyClusterName();
-        return ariusStatsNodeInfoESDAO.getClusterLogicDiskUsedInfo(clusterName, nodeList);
-    }
-
     /***************************************** private method ****************************************************/
     /**
      * Check逻辑集群参数
