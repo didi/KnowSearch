@@ -42,7 +42,6 @@ public interface IndexTemplateDAO {
 
     long getTotalHitByCondition(IndexTemplatePO param);
 
-    List<IndexTemplatePO> likeByResponsible(String responsible);
 
     int batchChangeHotDay(Integer days);
 

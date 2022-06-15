@@ -44,11 +44,7 @@ public class IndexTemplateDTO extends PageDTO {
     @ApiModelProperty("热数据保存天数, 单位天")
     private Integer                   hotTime;
 
-    @ApiModelProperty("成本部门ID")
-    private String                    libraDepartmentId;
-
-    @ApiModelProperty("成本部门名称")
-    private String                    libraDepartment;
+  
 
     @ApiModelProperty("责任人")
     private String                    responsible;

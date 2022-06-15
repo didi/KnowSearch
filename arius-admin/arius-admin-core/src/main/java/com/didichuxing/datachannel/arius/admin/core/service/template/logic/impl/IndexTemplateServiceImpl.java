@@ -599,17 +599,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return ConvertUtil.list2List(indexTemplateTypeDAO.listByIndexTemplateId(logicId), IndexTemplateType.class);
     }
 
-    /**
-     * 根据责任人查询
-     *
-     * @param responsibleId 责任人id
-     * @return list
-     */
-    @Override
-    public List<IndexTemplate> getTemplateByResponsibleId(Long responsibleId) {
-        return ConvertUtil.list2List(indexTemplateDAO.likeByResponsible(String.valueOf(responsibleId)),
-            IndexTemplate.class);
-    }
+
 
     /**
      * 需要修改逻辑表和物理表的name

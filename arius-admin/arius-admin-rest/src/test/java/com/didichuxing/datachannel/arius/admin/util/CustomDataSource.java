@@ -332,8 +332,6 @@ public class CustomDataSource {
         po.setExpireTime(3);
         po.setHotTime(3);
         po.setLibraDepartmentId("");
-        po.setLibraDepartment("");
-        po.setResponsible("");
         po.setDateField("");
         po.setDateFieldFormat("");
         po.setIdField("");

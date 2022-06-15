@@ -53,17 +53,8 @@ public class IndexTemplatePO extends BasePO {
      */
     private Integer hotTime;
 
-    /**
-     * 成本部门
-     */
-    @Deprecated
-    private String  libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
-      @Deprecated
-    private String  libraDepartment;
+
 
     /**
      * 责任人，id列表，英文逗号分隔

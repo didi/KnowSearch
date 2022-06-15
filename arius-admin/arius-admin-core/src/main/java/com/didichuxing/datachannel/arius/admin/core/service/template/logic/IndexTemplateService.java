@@ -215,12 +215,7 @@ public interface IndexTemplateService {
      */
     List<IndexTemplateType> getLogicTemplateTypes(Integer logicId);
 
-    /**
-     * 根据责任人查询
-     * @param responsibleId 责任人id
-     * @return list
-     */
-    List<IndexTemplate> getTemplateByResponsibleId(Long responsibleId);
+
 
     /**
      * 修改模板名称

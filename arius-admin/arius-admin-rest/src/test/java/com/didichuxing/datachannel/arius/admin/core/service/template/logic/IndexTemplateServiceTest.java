@@ -271,12 +271,7 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Assertions.assertFalse(ret.isEmpty());
     }
 
-    @Test
-    public void getTemplateByResponsibleIdTest() {
-        Mockito.when(indexTemplateDAO.likeByResponsible(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
-        List<IndexTemplate> ret = indexTemplateService.getTemplateByResponsibleId(1l);
-        Assertions.assertFalse(ret.isEmpty());
-    }
+    
 
     @Test
     public void getLogicTemplatesWithClusterAndMasterTemplateTest() {

@@ -9,8 +9,6 @@
         <result column="data_center"             jdbcType="VARCHAR" property="dataCenter"/>
         <result column="expire_time"             jdbcType="BIGINT" property="expireTime"/>
         <result column="hot_time"                jdbcType="BIGINT" property="hotTime"/>
-        <result column="department_id"           jdbcType="VARCHAR" property="libraDepartmentId"/>
-        <result column="department"              jdbcType="VARCHAR" property="libraDepartment"/>
         <result column="responsible"             jdbcType="VARCHAR" property="responsible"/>
         <result column="date_field"              jdbcType="VARCHAR" property="dateField"/>
         <result column="date_field_format"       jdbcType="VARCHAR" property="dateFieldFormat"/>
@@ -35,8 +33,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-         id, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
-         department, responsible, date_field, date_field_format, id_field, routing_field, expression,
+         id, `name`, data_type, date_format, data_center, expire_time, hot_time,
+          responsible, date_field, date_field_format, id_field, routing_field, expression,
          `desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id,
           check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size
     </sql>
@@ -112,12 +110,11 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into index_template_info
-          (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, department_id,
-         department, responsible, date_field, date_field_format, id_field, routing_field, expression,
+          (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time, responsible, date_field, date_field_format, id_field, routing_field, expression,
          `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, open_srv, disk_size)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
-         #{libraDepartmentId}, #{libraDepartment}, #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
+         #{responsible}, #{dateField}, #{dateFieldFormat}, #{idField},
          #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{projectId}, #{ingestPipeline}, #{resourceId}, #{level}
         , #{openSrv}, #{diskSize})
     </insert>
@@ -163,8 +160,6 @@
             <if test="routingField != null">,routing_field = #{routingField}</if>
             <if test="expireTime != null">,expire_time = #{expireTime}</if>
             <if test="hotTime != null">,hot_time = #{hotTime}</if>
-            <if test="libraDepartmentId != null">,department_id = #{libraDepartmentId}</if>
-            <if test="libraDepartment != null">,department = #{libraDepartment}</if>
             <if test="responsible != null">,responsible = #{responsible}</if>
             <if test="dateField != null">,date_field = #{dateField}</if>
             <if test="expression != null">,expression = #{expression}</if>
@@ -205,16 +200,7 @@
         <foreach collection="logicIds" item="id" open="(" separator="," close=")">#{id}</foreach>
     </select>
 
-    <select id="likeByResponsible" parameterType="string" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from index_template_info
-        where is_active = 1 and (responsible = #{responsible}
-        or responsible like CONCAT(#{responsible},',%')
-        or responsible like CONCAT('%,', #{responsible})
-        or responsible like CONCAT('%,', #{responsible},',%'))
-    </select>
-
+   
     <update id="updateBlockReadState">
         update index_template_info
         set block_read = #{blockRead}
