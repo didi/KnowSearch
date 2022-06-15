@@ -11,13 +11,30 @@ import com.didiglobal.logi.security.common.constant.OplogConstant;
  * @date 2022/06/13
  */
 public enum NewModuleEnum {
+    physical_cluster("physical_cluster","集群接入"),
+    physical_cluster("physical_cluster","集群新建"),
+    physical_cluster("physical_cluster","集群下线"),
+    physical_cluster("physical_cluster","集群扩容"),
+    physical_cluster("physical_cluster","集群缩容"),
+    physical_cluster("physical_cluster","重启"),
+    physical_cluster("physical_cluster","物理集群信息修改"),
+    physical_cluster("physical_cluster",    "集群升级"),
+    physical_cluster("physical_cluster","Region变更"),
+    physical_cluster("physical_cluster","Gateway变更"),
+    physical_cluster("physical_cluster","配置文件变更"),
+    physical_cluster("physical_cluster","动态配置变更"),
+    MY_CLUSTER("my_cluster","我的集群信息修改"),
+    MY_CLUSTER("my_cluster","申请集群"),
+    MY_CLUSTER("my_cluster","集群扩容"),
+    MY_CLUSTER("my_cluster","集群缩容"),
+    MY_CLUSTER("my_cluster","集群下线"),
     /**
      * 应用程序
      */
-    APPLICATION_create(OplogConstant.PM_P);
-    APPLICATION_delete(OplogConstant.PM_P);
-    APPLICATION_access(OplogConstant.PM_P);
-    APPLICATION_user(OplogConstant.RPM_U,"访问模式");
+    APPLICATION_create(OplogConstant.PM_P),
+    APPLICATION_delete(OplogConstant.PM_P),
+    APPLICATION_access(OplogConstant.PM_P),
+    APPLICATION_user(OplogConstant.RPM_U,"访问模式"),
     APPLICATION_user(OplogConstant.RPM_U,"访问模式");
     
     /**
