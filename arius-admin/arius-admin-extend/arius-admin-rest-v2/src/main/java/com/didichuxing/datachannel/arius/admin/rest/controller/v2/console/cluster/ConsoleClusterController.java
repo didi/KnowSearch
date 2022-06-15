@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
-import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -39,7 +38,7 @@ public class ConsoleClusterController {
     @ResponseBody
     @ApiOperation(value = "获取APP拥有的集群列表【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
-    public Result<List<ConsoleClustClusterLogicVOerVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
+    public Result<List<ClusterLogicVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(projectId);
     }
 
@@ -47,7 +46,7 @@ public class ConsoleClusterController {
     @ResponseBody
     @ApiOperation(value = "获取平台所有的集群列表【三方接口】",tags = "【三方接口】" )
     public Result<List<ClusterLogicVO>> getDataCenterLogicClusters(@RequestParam(value = "projectId",required = false) Integer projectId) {
-        return clusterLogicManager.getDataCenterLogicClusters(projectId);
+        return clusterLogicManager.getLogicClustersByProjectId(projectId);
     }
 
     @GetMapping("/get")

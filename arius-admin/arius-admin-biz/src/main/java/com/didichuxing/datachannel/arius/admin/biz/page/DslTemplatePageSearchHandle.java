@@ -17,11 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 详细介绍类情况.
@@ -45,13 +40,6 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<PageDT
          if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
-        return Result.buildSucc(true);
-    }
-
-    @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
-        if (pageDTO instanceof DslTemplateConditionDTO) {
-            DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) pageDTO;
         if (condition instanceof DslTemplateConditionDTO) {
             DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) condition;
             String queryIndex = dslTemplateConditionDTO.getQueryIndex();
@@ -68,12 +56,12 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<PageDT
     }
 
     @Override
-    protected void initCondition(PageDTO condition, Integer appId) {
+    protected void initCondition(PageDTO condition, Integer projectId) {
         // Do nothing
     }
 
     @Override
-    protected PaginationResult<DslTemplateVO> buildPageData(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<DslTemplateVO> buildPageData(PageDTO pageDTO, Integer projectId) {
         DslTemplateConditionDTO condition = buildInitDslTemplateConditionDTO(pageDTO);
 
         Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);

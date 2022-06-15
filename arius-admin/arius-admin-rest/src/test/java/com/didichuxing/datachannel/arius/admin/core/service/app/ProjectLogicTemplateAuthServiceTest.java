@@ -55,34 +55,34 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
 
     @Test
     public void ensureSetLogicTemplateAuthTest() {
-        Integer appId = 1;
+        Integer projectId = 1;
         Integer logicTemplateId = 1147;
         ProjectTemplateAuthEnum auth = ProjectTemplateAuthEnum.RW;
         String responsible = "admin";
         Assertions.assertTrue(
                 projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(null,logicTemplateId,auth,responsible,CustomDataSource.OPERATOR).failed());
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,null,auth,responsible,CustomDataSource.OPERATOR).failed());
+                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(projectId,null,auth,responsible,CustomDataSource.OPERATOR).failed());
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,logicTemplateId,auth,responsible,null).failed());
+                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(projectId,logicTemplateId,auth,responsible,null).failed());
         //之前表中无权限
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,logicTemplateId,null,responsible,CustomDataSource.OPERATOR).success());
+                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(projectId,logicTemplateId,null,responsible,CustomDataSource.OPERATOR).success());
         //插入读写权限
         Mockito.when(templateAuthDAO.getByProjectIdAndTemplateId(Mockito.anyInt(),Mockito.anyString())).thenReturn(CustomDataSource.projectTemplateAuthPO());
         Mockito.when(templateAuthDAO.getByProjectIdAndTemplateId(Mockito.anyInt(),Mockito.anyString())).thenReturn(CustomDataSource.projectTemplateAuthPO());
         //对于权限进行更新操作
         Assertions.assertEquals("权限不存在",
-                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,logicTemplateId,
+                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(projectId,logicTemplateId,
                         ProjectTemplateAuthEnum.R,responsible,CustomDataSource.OPERATOR).getMessage());
         Mockito.when( templateAuthDAO.getById(Mockito.anyLong())).thenReturn(CustomDataSource.projectTemplateAuthPO());
       Assertions.assertEquals("参数错误:责任人非法，请检查后再提交！",
-                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,logicTemplateId,
+                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(projectId,logicTemplateId,
                         ProjectTemplateAuthEnum.R,responsible,CustomDataSource.OPERATOR).getMessage());
       Mockito.when(roleTool.isAdmin(Mockito.anyString())).thenReturn(true);
       Mockito.when(templateAuthDAO.update(Mockito.any())).thenReturn(1);
           Assertions.assertTrue(
-                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(appId,logicTemplateId,ProjectTemplateAuthEnum.R,responsible,CustomDataSource.OPERATOR).success());
+                projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(projectId,logicTemplateId,ProjectTemplateAuthEnum.R,responsible,CustomDataSource.OPERATOR).success());
     }
 
     @Test

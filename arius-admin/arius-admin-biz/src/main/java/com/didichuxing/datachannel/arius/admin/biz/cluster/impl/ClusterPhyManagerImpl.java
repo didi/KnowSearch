@@ -4,20 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterCon
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_IDC;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.JOIN_MASTER_NODE_MIN_NUMBER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_PHY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.EXCLUSIVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PRIVATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PUBLIC;
@@ -40,11 +26,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -63,7 +44,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
@@ -87,7 +67,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -112,7 +91,6 @@ import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -483,7 +461,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> listClusterPhyNameByAppId(Integer projectId) {
+    public List<String> listClusterPhyNameByProjectId(Integer projectId) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             //超级appId返回所有的集群
             List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
@@ -491,7 +469,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 .collect(Collectors.toList());
         }
         // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
-        List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(projectId);
+        List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
         //项目下的有管理权限逻辑集群会关联多个物理集群
         List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
             clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
@@ -501,7 +479,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId) {
-        List<String> clusterPhyNameList = listClusterPhyNameByAppId(projectId);
+        List<String> clusterPhyNameList = listClusterPhyNameByProjectId(projectId);
         // No permission, cut branches and return
         if (CollectionUtils.isEmpty(clusterPhyNameList)) { return Result.buildSucc();}
 
@@ -541,10 +519,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public List<String> listNodeNameByAppId(Integer projectId) {
+    public List<String> listNodeNameByProjectId(Integer projectId) {
         List<String> appAuthNodeNames = Lists.newCopyOnWriteArrayList();
 
-        List<String> appClusterPhyNames = listClusterPhyNameByAppId(projectId);
+        List<String> appClusterPhyNames = listClusterPhyNameByProjectId(projectId);
         appClusterPhyNames
             .forEach(clusterPhyName -> appAuthNodeNames.addAll(esClusterNodeService.syncGetNodeNames(clusterPhyName)));
 
@@ -622,7 +600,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
         if (baseHandle instanceof ClusterPhyPageSearchHandle) {
             ClusterPhyPageSearchHandle pageSearchHandle = (ClusterPhyPageSearchHandle) baseHandle;
-            return pageSearchHandle.selectPage(condition, projectId);
+            return pageSearchHandle.doPage(condition, projectId);
         }
 
         LOGGER.warn("class=ClusterPhyManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterPhyPageSearchHandle");
@@ -805,7 +783,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
         ClusterPhy oldCluster = clusterPhyService.getClusterById(param.getId());
         Result<Boolean> result = clusterPhyService.editCluster(clusterPhyDTO, operator);
-        if (result.failed() || !result.getData()) {
+        if (result.failed() ) {
             return Result.buildFail("编辑gateway失败！");
         }
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());

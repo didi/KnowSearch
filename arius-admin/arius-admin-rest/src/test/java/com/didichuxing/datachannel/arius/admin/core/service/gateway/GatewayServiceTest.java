@@ -79,14 +79,14 @@ public class GatewayServiceTest {
     @Test
     void sqlOperateTest() {
         //设置不同参数遍历preSqlParamCheck的fail分支(String sql, String phyClusterName, Integer appId, String postFix)
-        int appid = 1;
+        int projectId = 1;
         String sql = "show databases";
         Assertions.assertEquals("参数错误:查询的sql语句为空，请检查后再提交！",gatewayService.sqlOperate("",
                 CustomDataSource.PHY_CLUSTER_NAME,null,"postFix").getMessage());
         Assertions.assertEquals("参数错误:查询gateway的路径后缀为空，请检查后再提交！",gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,null,null).getMessage());
         Assertions.assertEquals("参数错误:对应的appId字段非法，请检查后再提交！", gatewayService.sqlOperate(sql,CustomDataSource.PHY_CLUSTER_NAME,null,"postFix").getMessage());
         //App app = new App();
-        //app.setId(appid);
+        //app.setId(projectId);
         //List<App> apps = new ArrayList<>();
         //apps.add(app);
         //Mockito.when(appService.listApps()).thenReturn(apps);

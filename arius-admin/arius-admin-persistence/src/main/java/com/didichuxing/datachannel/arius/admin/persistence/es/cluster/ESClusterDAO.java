@@ -1,26 +1,47 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDICES;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
-import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
-import com.didiglobal.logi.elasticsearch.client.request.index.searchshards.ESIndicesSearchShardsRequest;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.searchshards.ESIndicesSearchShardsResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.stereotype.Repository;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.ABNORMAL_SHARD_RETRY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.CLEAR_FIELDDATA_MEMORY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.HOT_THREAD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.PENDING_TASK;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.TASK_MISSION_ANALYSIS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ACTION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.COUNT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DESCRIPTION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DOCS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_COORDINATING_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_INGEST;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_DATA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_PERCENT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_MAX_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_USED_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDICES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.IP;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.JVM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.MEM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.OS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PARENT_TASK_ID;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.REBALANCE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.RUNNING_TIME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SHARDS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.START_TIME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.STATUS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TASK_ID;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TYPE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_PERCENT;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -59,6 +80,15 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679

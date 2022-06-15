@@ -5,11 +5,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * 集群基本类
@@ -40,7 +39,7 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     private Integer projectId;
 
     @ApiModelProperty("所属应用名")
-    private String                       appName;
+    private String projectName;
 
     @ApiModelProperty("是否关联物理集群")
     private Boolean                      phyClusterAssociated;

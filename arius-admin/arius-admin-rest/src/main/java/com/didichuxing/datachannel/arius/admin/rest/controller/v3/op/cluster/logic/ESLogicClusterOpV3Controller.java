@@ -1,45 +1,35 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 /**
  * @author guoyoupeng_v
@@ -97,7 +87,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "编辑逻辑集群接口")
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.editLogicCluster(param, HttpRequestUtil.getOperator(request),
-                HttpRequestUtils.getAppId(request));
+                HttpRequestUtil.getProjectId(request));
     }
     
     @DeleteMapping("{clusterId}")
@@ -106,7 +96,7 @@ public class ESLogicClusterOpV3Controller {
     
     public Result<Void> delete(HttpServletRequest request, @PathVariable Long clusterId) throws AdminOperateException {
         return clusterLogicManager.deleteLogicCluster(clusterId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtils.getAppId(request));
+                HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping("/index-template-count/{clusterId}")
@@ -114,7 +104,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "提示用户索引和模板的数量")
     public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(HttpServletRequest request, @PathVariable Long clusterId) {
         return clusterLogicManager.indexTemplateCount(clusterId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtils.getAppId(request));
+                HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping("/nodes/{clusterLogicId}")

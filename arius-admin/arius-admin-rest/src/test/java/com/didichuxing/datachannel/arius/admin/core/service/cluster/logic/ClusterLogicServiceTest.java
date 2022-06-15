@@ -1,22 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
-import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
-import com.didiglobal.logi.security.service.ProjectService;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
@@ -31,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNorms
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -39,6 +23,20 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import com.didiglobal.logi.security.service.ProjectService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Rollback
@@ -268,10 +266,10 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         esLogicClusterDTO.setId(id);
-        Integer targetAppId = 1234;
+        Integer targetProjectId = 1234;
         String targetResponsible = "test";
         Assertions.assertTrue(clusterLogicService
-                .transferClusterLogic(id, targetAppId, targetResponsible, OPERATOR).success());
-        Assertions.assertEquals(targetAppId, logicClusterDAO.getById(id).getProjectId());
+                .transferClusterLogic(id, targetProjectId, targetResponsible, OPERATOR).success());
+        Assertions.assertEquals(targetProjectId, logicClusterDAO.getById(id).getProjectId());
     }
 }

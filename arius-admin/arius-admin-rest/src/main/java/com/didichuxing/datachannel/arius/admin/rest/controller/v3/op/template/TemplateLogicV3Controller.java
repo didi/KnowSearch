@@ -6,13 +6,13 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateAdjustShardDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateAdjustShardDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -136,14 +136,14 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
     public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) {
-        return templateLogicManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
+        return templateLogicManager.create(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "用户编辑模板")
     public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
-        return templateLogicManager.newEditTemplate(param, HttpRequestUtils.getOperator(request));
+        return templateLogicManager.newEditTemplate(param, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("/clearIndices")
@@ -164,7 +164,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "升版本")
     public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer logicTemplateId) {
-        return templateLogicManager.upgrade(logicTemplateId, HttpRequestUtils.getOperator(request));
+        return templateLogicManager.upgrade(logicTemplateId, HttpRequestUtil.getOperator(request));
     }
 
 }

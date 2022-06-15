@@ -53,16 +53,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
 
 
     @Override
-    protected Result<Boolean> validCheckForProjectId(Integer projectId) {
+    protected Result<Boolean> checkCondition(PageDTO pageDTO, Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }
-
-        return Result.buildSucc(Boolean.TRUE);
-    }
-
-    @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer projectId) {
         if (!(pageDTO instanceof TemplateQueryDTO)) {
             return Result.buildFail("参数错误");
         }

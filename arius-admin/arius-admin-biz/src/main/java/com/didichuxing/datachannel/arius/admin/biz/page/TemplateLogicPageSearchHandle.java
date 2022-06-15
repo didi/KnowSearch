@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectLogicTemplateAuthManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
@@ -61,7 +60,7 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Page
 
 
     @Override
-    protected Result<Boolean> checkCondition(PageDTO pageDTO, Integer appId) {
+    protected Result<Boolean> checkCondition(PageDTO pageDTO, Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal("项目不存在");
         }

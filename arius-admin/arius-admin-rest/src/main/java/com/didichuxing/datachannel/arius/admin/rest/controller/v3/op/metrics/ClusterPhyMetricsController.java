@@ -3,18 +3,9 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyIndicesDTO;
@@ -26,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetr
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -62,9 +54,9 @@ public class ClusterPhyMetricsController {
 
     @GetMapping("/clusters")
     @ResponseBody
-    @ApiOperation(value = "根据AppId获取集群名称列表")
+    @ApiOperation(value = "根据ProjectId获取集群名称列表")
     public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByProjectId(HttpRequestUtil.getProjectId(request)));
     }
 
     @GetMapping("/{type}")
@@ -80,14 +72,14 @@ public class ClusterPhyMetricsController {
     public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
                                                           HttpServletRequest request) {
         return Result.buildSucc(
-            clusterPhyMetricsManager.getDomainAccountConfigMetrics(param, HttpRequestUtil.getOperator(request)));
+            clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request)));
     }
 
     @PostMapping("/updateConfigMetrics")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
     public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param, HttpServletRequest request) {
-        return clusterPhyMetricsManager.updateDomainAccountConfigMetrics(param, HttpRequestUtil.getOperator(request));
+        return clusterPhyMetricsManager.updateUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("/overview")
@@ -171,7 +163,7 @@ public class ClusterPhyMetricsController {
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,@PathVariable String clusterPhyName) {
-        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName, HttpRequestUtil.getProjectId(request));
+        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName);
     }
 
     @GetMapping("{clusterLogicName}/logic/templates")

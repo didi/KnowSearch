@@ -20,7 +20,7 @@
 
     <sql id="Base_Column_List">
         id
-        , `name`, `type`, project_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json, create_time, update_time, health
+        , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health
     </sql>
 
     <select id="listByCondition"
@@ -44,10 +44,10 @@
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into arius_resource_logic
-        (`name`, `type`, project_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json,
+        insert into project_arius_resource_logic
+        (`name`, `type`, project_id, data_center, responsible,  memo, quota, `level`, config_json,
          health)
-        values (#{name}, #{type}, #{projectId}, #{dataCenter}, #{responsible}, #{libraDepartmentId}, #{libraDepartment},
+        values (#{name}, #{type}, #{projectId}, #{dataCenter}, #{responsible},
                 #{memo}, #{quota}, #{level}, #{configJson}, #{health})
     </insert>
 

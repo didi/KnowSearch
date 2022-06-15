@@ -140,7 +140,7 @@ public interface ClusterPhyManager {
      * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> listClusterPhyNameByAppId(Integer projectId);
+    List<String> listClusterPhyNameByProjectId(Integer projectId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
@@ -168,7 +168,7 @@ public interface ClusterPhyManager {
      * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> listNodeNameByAppId(Integer projectId);
+    List<String> listNodeNameByProjectId(Integer projectId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)

@@ -13,17 +13,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -47,18 +36,18 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicStatis;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
@@ -95,6 +84,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatI
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.enums.ResultCode;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
@@ -102,6 +92,7 @@ import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -116,7 +107,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private static final ILog             LOGGER     = LogFactory.getLog(ClusterLogicManagerImpl.class);
 
     @Autowired
-    private ClusterLogicManager           clusterLogicManager;
+    private ClusterLogicManager clusterLogicManager;
 
     @Autowired
     private ESIndexService                esIndexService;
@@ -219,7 +210,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         //依赖获取集群状态, 不能使用FutureUtil, 否则抛NPE
         buildClusterNodeInfo(clusterLogicVO);
-        clusterLogicVO.setAppName(appService.getAppName(clusterLogicVO.getAppId()));
+        Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogic.getProjectId()))
+                .map(ProjectBriefVO::getProjectName)
+                .ifPresent(clusterLogicVO::setProjectName);
 
         return clusterLogicVO;
     }
@@ -284,7 +277,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<List<ClusterLogicVO>> getLogicClustersByProjectId(Integer projectId) {
-        List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByProjectId(appId),
+        List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId),
                 ClusterLogicVO.class);
         for (ClusterLogicVO clusterLogicVO : list) {
             List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(clusterLogicVO.getId());
@@ -300,7 +293,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @return 集群列表
      */
     @Override
-    public Result<List<ClusterLogicVO>> getAppLogicClusters(Integer appId) {
+    public Result<List<ClusterLogicVO>> getProjectLogicClusters(Integer projectId) {
     
        if (!projectService.checkProjectExist(projectId)){
            return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(),ResultCode.PROJECT_NOT_EXISTS.getMessage());
@@ -326,7 +319,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @return
      */
     @Override
-    public Result<ClusterLogicVO> getAppLogicClusters(Long clusterId, Integer projectId) {
+    public Result<ClusterLogicVO> getProjectLogicClusters(Long clusterId, Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId);
         if (clusterLogic == null) {
             return Result.buildNotExist("集群不存在");
@@ -380,7 +373,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
                 .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, currentProjectId))
-                .runnableTask(() -> consoleClusterVO.setAppName(projectService.getProjectBriefByProjectId(consoleClusterVO.getProjectId()).getProjectName()))
+                .runnableTask(() -> Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogicVO.getProjectId()
+                        )).map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName))
                 .runnableTask(() -> buildClusterNodeInfo(clusterLogicVO)).waitExecute();
 
         return clusterLogicVO;
@@ -431,7 +425,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             templateLogicManager.delTemplate(agg.getIndexTemplateLogicWithCluster().getId(), operator);
         }
 
-        indicesManager.batchDeleteIndex(templateIndexVO.getCatIndexResults(),appId,operator);
+        indicesManager.batchDeleteIndex(templateIndexVO.getCatIndexResults(),projectId,operator);
 
         if (result.success()) {
 			SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
@@ -474,10 +468,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer appId) {
+	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
         Result<Void> result = clusterLogicService.editClusterLogic(param, operator);
         if (result.success()) {
-            SpringTool.publish(new ClusterLogicEvent(param.getId(), appId));
+            SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
             operateRecordService.save(RESOURCE, EDIT, param.getId(), String.valueOf(param.getId()), operator);
         }
 		return result;
@@ -542,7 +536,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public PaginationResult<ESClusterRoleHostVO> nodesPage(Long clusterLogicId,ClusterLogicNodeConditionDTO condition) {
         ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
         Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        List<ClusterRoleHost> nodes;
+        List<ClusterRoleHost> nodes=Collections.emptyList();
         if (result.success()){
             nodes = result.getData();
         }else {
@@ -785,7 +779,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         //4. 没有关联物理集群下, 逻辑集群状态至为red
         if (clusterLogicVO.getPhyClusterAssociated().equals(false)) {
-            clusterLogicVO.getClusterStatus().setStatus("red");
+            clusterLogicVO.getClusterStatus().setStatus(RED.getDesc());
         }
 
         //5. 获取gateway地址
