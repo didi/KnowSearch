@@ -84,9 +84,11 @@ public class ESPhyClusterController {
 
     @GetMapping("/names")
     @ResponseBody
-    @ApiOperation(value = "根据AppId获取逻辑集群下的物理集群名称")
-    public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
+    @ApiOperation(value = "获取项目下的物理集群名称，可根据类型筛选")
+    public Result<List<String>> listClusterPhyNameByResourceType(@RequestParam(value = "clusterResourceType", required = false) Integer clusterResourceType,
+                                                                 HttpServletRequest request) {
+        return clusterPhyManager.listClusterPhyNameByResourceType(clusterResourceType,
+            HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/{templateId}/sameversion/clusternames")
