@@ -16,7 +16,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -790,21 +792,18 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (clusterLogic == null) {
             return Result.buildFail();
         }
-
-        List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-                .getLogicTemplateWithClustersByClusterId(clusterLogic.getId());
-
-        if (CollectionUtils.isEmpty(logicTemplates)) {
-            return  Result.buildFail();
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        if (clusterRegion == null) {
+            return Result.buildFail();
         }
+        Result<List<IndexTemplate>> listResult = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<ConsoleTemplateVO> vos = listResult.getData().stream().map(indexTemplate -> {
+            ConsoleTemplateVO vo = new ConsoleTemplateVO();
+            BeanUtils.copyProperties(indexTemplate,vo);
+            return vo;
+        }).collect(Collectors.toList());
 
-        List<IndexTemplateLogicAggregate> indexTemplates = fetchLogicTemplatesAggregates(logicTemplates, appId);
-
-        // 转化为视图列表展示
-        List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
-//        indexTemplates.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
-
-        return null;
+        return Result.buildSucc(vos);
     }
 
     /**************************************** private method ***************************************************/

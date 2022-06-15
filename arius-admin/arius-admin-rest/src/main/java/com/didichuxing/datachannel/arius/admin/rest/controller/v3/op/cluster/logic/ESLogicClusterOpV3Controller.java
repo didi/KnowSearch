@@ -1,19 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -51,6 +48,14 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "根据AppId获取有权限的逻辑或物理集群信息")
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfo(HttpServletRequest request) {
         return clusterLogicManager.getLogicClustersByProjectId(HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("/{type}")
+    @ResponseBody
+    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
+    public Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(HttpServletRequest request,
+                                                                       @PathVariable Integer type) {
+        return clusterLogicManager.getAppLogicClusterInfoByType(HttpRequestUtils.getAppId(request), type);
     }
 
     @PostMapping("/page")
@@ -115,7 +120,7 @@ public class ESLogicClusterOpV3Controller {
     @GetMapping("/estimated-disk-size/{clusterLogicId}/{count}")
     @ResponseBody
     @ApiOperation(value = "获取预估磁盘大小")
-    public Result<String>  estimatedDiskSize(@PathVariable Long clusterLogicId,@PathVariable Integer count) {
+    public Result<Long>  estimatedDiskSize(@PathVariable Long clusterLogicId,@PathVariable Integer count) {
         return clusterLogicManager.estimatedDiskSize(clusterLogicId,count);
     }
 }

@@ -122,14 +122,6 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
     }
 
-    @Override
-    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal(String.format("There is no appId:%s", appId));
-        }
-
-        return Result.buildSucc(esIndexService.syncGetIndexName(clusterPhyName));
-    }
 
     @Override
     public List<String> getDomainAccountConfigMetrics(MetricsConfigInfoDTO metricsConfigInfoDTO, String domainAccount) {
@@ -154,10 +146,5 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         }
         return Result.buildSucc(ConvertUtil.list2List(nodeStatisService.getClusterTaskDetail(clusterPhyName, node, Long.parseLong(startTime), Long.parseLong(endTime)),
                 ESClusterTaskDetailVO.class));
-    }
-
-    @Override
-    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId) {
-        return null;
     }
 }

@@ -136,33 +136,4 @@ public class ClusterPhyMetricsController {
         return clusterPhyMetricsManager.getMultiClusterMetrics(param, HttpRequestUtils.getAppId(request),
                 HttpRequestUtils.getOperator(request), ClusterPhyTypeMetricsEnum.NODE_TASKS);
     }
-
-    @GetMapping("{clusterPhyName}/phy/indices")
-    @ResponseBody
-    @ApiModelProperty(value = "获取物理集群索引列表")
-    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
-        return clusterPhyMetricsManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtils.getAppId(request));
-    }
-
-    @GetMapping("{clusterLogicName}/logic/indices")
-    @ResponseBody
-    @ApiModelProperty(value = "获取逻辑集群索引列表")
-    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName, HttpServletRequest request) {
-        return clusterPhyMetricsManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtils.getAppId(request));
-    }
-
-    @GetMapping("{clusterPhyName}/phy/templates")
-    @ResponseBody
-    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
-    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,@PathVariable String clusterPhyName) {
-        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName, HttpRequestUtils.getAppId(request));
-    }
-
-    @GetMapping("{clusterLogicName}/logic/templates")
-    @ResponseBody
-    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
-    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
-        return templateLogicManager.getTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtils.getAppId(request));
-    }
-
 }
