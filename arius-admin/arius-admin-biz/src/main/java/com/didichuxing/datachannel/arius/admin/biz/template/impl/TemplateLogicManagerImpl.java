@@ -1078,8 +1078,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         //todo: 移除quota 后删掉这行
         indexTemplateDTO.setQuota(indexTemplateDTO.getDiskSize());
         //todo: 0.3干掉
-        indexTemplateDTO.setLibraDepartment("");
-        indexTemplateDTO.setLibraDepartmentId("");
         indexTemplateDTO.setIdField("");
         indexTemplateDTO.setRoutingField("");
 
