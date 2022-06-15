@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
+import static com.didiglobal.logi.security.common.constant.OplogConstant.PM_P;
+
+import com.didiglobal.logi.security.common.constant.OplogConstant;
 
 /**
  * 操作记录模块枚举
@@ -11,7 +14,11 @@ public enum NewModuleEnum {
     /**
      * 应用程序
      */
-    APPLICATION("应用","访问模式","新增访问模式:%s；es user用户:%s");
+    APPLICATION_create(OplogConstant.PM_P);
+    APPLICATION_delete(OplogConstant.PM_P);
+    APPLICATION_access(OplogConstant.PM_P);
+    APPLICATION_user(OplogConstant.RPM_U,"访问模式");
+    APPLICATION_user(OplogConstant.RPM_U,"访问模式");
     
     /**
      * 模块
@@ -21,20 +28,14 @@ public enum NewModuleEnum {
      * 操作类型
      */
     private String operationType;
-    /**
-     * 操作内容
-     */
-    private String operatingContent;
+
     
     NewModuleEnum(String module, String operationType, String operatingContent) {
         this.module = module;
         this.operationType = operationType;
-        this.operatingContent = operatingContent;
     }
     
-    public void setOperatingContent(String operatingContent) {
-        this.operatingContent = operatingContent;
-    }
+
     
     public String getModule() {
         return module;
@@ -44,22 +45,7 @@ public enum NewModuleEnum {
         return operationType;
     }
     
-    public String getOperatingContent() {
-        return operatingContent;
-    }
-    
-    /**
-     * 获取操作内容
-     *
-     * @param moduleEnum 模块枚举
-     * @param param      入参
-     * @return {@code String}
-     */
-    public static String getOperatingContent(NewModuleEnum moduleEnum,String... param){
-        final String content = moduleEnum.getOperatingContent();
-        return  String.format(content, param);
-    }
-    
+ 
    
     
     

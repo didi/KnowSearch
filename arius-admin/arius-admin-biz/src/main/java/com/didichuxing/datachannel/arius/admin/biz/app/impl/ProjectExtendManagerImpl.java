@@ -466,11 +466,11 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         esUserDTO.setMemo("创建项目es user");
         final Tuple<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
         if (result.getV1().success()){
-            oplogService.saveOplog(new OplogDTO(operator, NewModuleEnum.APPLICATION.getOperationType(),
-                    NewModuleEnum.getOperatingContent(NewModuleEnum.APPLICATION, AppSearchTypeEnum.TEMPLATE.getDesc(),
-                            result.getV2().getId() + ""),
-                    NewModuleEnum.APPLICATION.getModule(), result.getV2().getId().toString(),
-                    OperationMethodEnum.SYSTEM_TRIGGER.getOperationMethod()));
+            //oplogService.saveOplog(new OplogDTO(operator, NewModuleEnum.APPLICATION.getOperationType(),
+            //        NewModuleEnum.getOperatingContent(NewModuleEnum.APPLICATION, AppSearchTypeEnum.TEMPLATE.getDesc(),
+            //                result.getV2().getId() + ""),
+            //        NewModuleEnum.APPLICATION.getModule(), result.getV2().getId().toString(),
+            //        OperationMethodEnum.SYSTEM_TRIGGER.getOperationMethod()));
         }
     }
     
