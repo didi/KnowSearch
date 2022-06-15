@@ -83,7 +83,7 @@ LogiEM自动化安装
 
 1. 需要服务器可以访问外网：将脚本下载到服务器后，执行方式：sh install_LogiEM.sh ip [下载地址](https://logi-em.s3.didiyunapi.com/install_LogiEM.sh)
    ，其中ip指安装服务器的IP地址。
-2. 如不能访问外网，可以将软件包从本地上传至服务器并注释脚本Down_Package函数中的wget命令[下载地址](https://logi-em.s3.didiyunapi.com/LogiEM_pack.tar.gz)。
+2. 如不能访问外网，可以将软件包从本地上传至服务器并注释脚本Down_Package函数中的wget命令[下载地址](https://wri.s3.didiyunapi.com/LogiEM_Pack_v0.2.3.tar.gz)。
 3. 如安装过程中断，请查看断点原因。
 
 ## 5.3 各个模块版本和使用的端口
