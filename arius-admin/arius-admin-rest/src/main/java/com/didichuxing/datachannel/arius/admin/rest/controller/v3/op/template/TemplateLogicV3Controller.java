@@ -1,44 +1,40 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateAdjustShardDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 /**
  * Created by linyunan on 2021-07-30
  */
 @RestController
-@RequestMapping(V3_OP + "/template/logic")
+@RequestMapping({ V3_OP + "/template/logic", V3 + "/template/logic" })
 @Api(tags = "逻辑模板接口(REST)")
 public class TemplateLogicV3Controller {
 
     @Autowired
-    private TemplateLogicManager templateLogicManager;
+    private TemplateLogicManager         templateLogicManager;
 
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
@@ -128,10 +124,10 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getAppId(request));
     }
 
-    @PutMapping("/createTemplate")
+    @PostMapping("/create")
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
-    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) {
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) throws AdminOperateException{
         return templateLogicManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
     }
 

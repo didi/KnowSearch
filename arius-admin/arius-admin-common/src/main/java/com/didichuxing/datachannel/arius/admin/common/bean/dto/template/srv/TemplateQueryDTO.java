@@ -18,6 +18,6 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "模板分页查询条件")
 public class TemplateQueryDTO extends IndexTemplateDTO {
 
-    @ApiModelProperty("所属集群")
+    @ApiModelProperty("所属物理集群")
     private String cluster;
 }
