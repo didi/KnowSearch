@@ -542,15 +542,15 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count) {
+    public Result<String> estimatedDiskSize(Long clusterLogicId, Integer count) {
+        String unknown = "未知";
         ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
         if (clusterRegion == null) {
-            return Result.buildFail("此逻集群未绑定regin！");
+            return Result.buildSucc(unknown);
         }
         Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService.syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
         Triple<Long, Long, Double> diskInfo = getFirstOrNull(map);
-        Long size = 1073741824L;
-        return Result.buildSucc(diskInfo == null?count*size:count * diskInfo.v1());
+        return Result.buildSucc(diskInfo == null?unknown:fileSizeStr(count * diskInfo.v1()));
     }
 
     @Override
@@ -563,6 +563,31 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
 /**************************************************** private method ****************************************************/
+
+    public static final double KB = 1024.0;
+
+    public static String fileSizeStr(double fileLength) {
+        if (fileLength / KB >= 1 && fileLength / KB <= 1024) {
+            double len = fileLength / KB;
+            len = Math.round(len * 100.00) / 100.00;
+            return len + "KB";
+        } else if (fileLength / KB / KB >= 1 && fileLength / KB / KB <= 1024) {
+            double len = fileLength / KB / KB;
+            len = Math.round(len * 100.00) / 100.00;
+            return len + "M";
+        } else if (fileLength >= 0 && fileLength <= 1024) {
+            return fileLength + "b";
+        } else if (fileLength / KB / KB / KB >= 1 && fileLength / KB / KB / KB <= 1024) {
+            double len = fileLength / KB / KB / KB;
+            len = Math.round(len * 100.00) / 100.00;
+            return len + "G";
+        } else if (fileLength / KB / KB / KB / KB >= 1 && fileLength / KB / KB / KB / KB <= 1024) {
+            double len = fileLength / KB / KB / KB / KB;
+            len = Math.round(len * 100.00) / 100.00;
+            return len + "T";
+        }
+        return fileLength + "B";
+    }
     /**
      * 获取map中第⼀个数据值
      *

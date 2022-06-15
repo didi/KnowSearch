@@ -120,7 +120,7 @@ public class ESLogicClusterOpV3Controller {
     @GetMapping("/estimated-disk-size/{clusterLogicId}/{count}")
     @ResponseBody
     @ApiOperation(value = "获取预估磁盘大小")
-    public Result<Long>  estimatedDiskSize(@PathVariable Long clusterLogicId,@PathVariable Integer count) {
+    public Result<String>  estimatedDiskSize(@PathVariable Long clusterLogicId,@PathVariable Integer count) {
         return clusterLogicManager.estimatedDiskSize(clusterLogicId,count);
     }
 }
