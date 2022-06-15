@@ -23,6 +23,12 @@
             "cluster":{
                 "type":"keyword"
             },
+            "clusterPhy":{
+                "type":"keyword"
+            },
+            "clusterLogic":{
+                "type":"keyword"
+            },
             "pri":{
                 "type":"long"
             },
