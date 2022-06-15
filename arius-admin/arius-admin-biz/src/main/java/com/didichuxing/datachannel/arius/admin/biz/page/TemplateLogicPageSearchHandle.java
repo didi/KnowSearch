@@ -41,9 +41,7 @@ import com.google.common.collect.Lists;
  * Created by linyunan on 2021-10-14
  */
 @Component
-public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<PageDTO, ConsoleTemplateVO> {
-    @Autowired
-    private AppService appService;
+public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<TemplateConditionDTO, ConsoleTemplateVO> {
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -61,43 +59,33 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Page
 
 
     @Override
-    protected Result<Boolean> checkCondition(PageDTO pageDTO, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
-        if (pageDTO instanceof TemplateConditionDTO) {
-            TemplateConditionDTO templateConditionDTO = (TemplateConditionDTO) pageDTO;
+    protected Result<Boolean> checkCondition(TemplateConditionDTO templateConditionDTO, Integer appId) {
 
-            if (null != templateConditionDTO.getDataType() && !DataTypeEnum.isExit(templateConditionDTO.getDataType())) {
-                return Result.buildParamIllegal("数据类型不存在");
-            }
-
-            String templateName = templateConditionDTO.getName();
-            if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
-                return Result.buildParamIllegal("模板名称不允许带类似*, ?等通配符查询");
-            }
-
-            if (null != templateConditionDTO.getSortTerm() && !SortTermEnum.isExit(templateConditionDTO.getSortTerm())) {
-                return Result.buildParamIllegal(String.format("暂不支持排序类型[%s]", templateConditionDTO.getSortTerm()));
-            }
-
-            return Result.buildSucc(true);
+        if (null != templateConditionDTO.getDataType() && !DataTypeEnum.isExit(templateConditionDTO.getDataType())) {
+            return Result.buildParamIllegal("数据类型不存在");
         }
 
-        LOGGER.error("class=IndicesPageSearchHandle||method=validCheckForCondition||errMsg=failed to convert PageDTO to templateConditionDTO");
+        String templateName = templateConditionDTO.getName();
+        if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
+            return Result.buildParamIllegal("模板名称不允许带类似*, ?等通配符查询");
+        }
 
-        return Result.buildFail();
+        if (null != templateConditionDTO.getSortTerm() && !SortTermEnum.isExit(templateConditionDTO.getSortTerm())) {
+            return Result.buildParamIllegal(String.format("暂不支持排序类型[%s]", templateConditionDTO.getSortTerm()));
+        }
+
+        return Result.buildSucc(true);
+
     }
 
     @Override
-    protected void initCondition(PageDTO condition, Integer appId) {
+    protected void initCondition(TemplateConditionDTO condition, Integer appId) {
         // Do nothing
     }
 
     @Override
-    protected PaginationResult<ConsoleTemplateVO> buildPageData(PageDTO pageDTO, Integer appId) {
-        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
-
+    protected PaginationResult<ConsoleTemplateVO> buildPageData(TemplateConditionDTO condition, Integer appId) {
+        condition.setAppId(appId);
         List<IndexTemplate> matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
         Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
 

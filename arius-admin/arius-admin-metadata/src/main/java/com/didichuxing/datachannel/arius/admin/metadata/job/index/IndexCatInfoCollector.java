@@ -3,41 +3,35 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterNodeInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexCatESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @author lyn
@@ -123,107 +117,46 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     private List<IndexCatCellPO> getIndexInfoFromEs(List<String> clusterNameList) {
         List<IndexCatCellPO> catIndexCellList = Lists.newArrayList();
+        List<ClusterLogic> logicClusterList = clusterLogicService.listAllClusterLogics();
+        Map<Long, String> logicClusterId2NameMap = ConvertUtil.list2Map(logicClusterList, ClusterLogic::getId, ClusterLogic::getName);
         for (String clusterName : clusterNameList) {
             long timeMillis                      = System.currentTimeMillis();
-            List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 2);
+            List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, RETRY_TIMES);
             if (CollectionUtils.isEmpty(catIndexResults)) {
-                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||index empty");
+                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||clusterName={}||index empty",
+                    clusterName);
                 continue;
             }
 
-            ESClusterStateResponse clusterStateResponse = esClusterService.syncGetClusterState(clusterName);
-            if (null == clusterStateResponse) {
-                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||cluster state null");
+            List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(clusterName);
+            if (CollectionUtils.isEmpty(clusterRegionList)) {
+                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||clusterName={}||cluster region empty",
+                    clusterName);
+                continue;
+            }
+            List<Long> logicClusterIdList = new ArrayList<>();
+            for (ClusterRegion clusterRegion : clusterRegionList) {
+                logicClusterIdList.addAll(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()));
+            }
+
+            // 2. 获取逻辑集群下所有逻辑模板
+            List<IndexTemplate> indexTemplateList = indexTemplateService.listByResourceIds(logicClusterIdList);
+            if (CollectionUtils.isEmpty(indexTemplateList)) {
+                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||clusterName={}||index template empty",
+                    clusterName);
                 continue;
             }
 
-            Map<String, String> node2ClusterLogic = buildNode2ClusterLogic(clusterName ,clusterStateResponse.getNodes());
-
-            List<IndexCatCellPO> indexCatCellPOS = buildIndexCatCellPOS(catIndexResults, clusterName, timeMillis);
+            List<IndexCatCellPO> indexCatCellPOS = buildIndexCatCellPOS(catIndexResults, logicClusterId2NameMap,
+                indexTemplateList, clusterName, timeMillis);
             catIndexCellList.addAll(indexCatCellPOS);
         }
 
         return catIndexCellList;
     }
-
-    private List<IndexCatCell> getIndexCatInfo(String cluster) {
-        List<IndexCatCell> indexCatCellList = Lists.newArrayList();
-
-        // 0. 获取物理集群所有索引cat 信息
-        List<CatIndexResult> catIndexResultList = esIndexService.syncCatIndex(cluster, RETRY_TIMES);
-        if (CollectionUtils.isEmpty(catIndexResultList)) {
-            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||index empty");
-            return indexCatCellList;
-        }
-
-        // 1. 获取物理集群下所有逻辑集群
-        List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(cluster);
-        if (CollectionUtils.isEmpty(clusterRegionList)) {
-            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||cluster region empty");
-            return indexCatCellList;
-        }
-        List<Long> logicClusterIdList = new ArrayList<>();
-        for (ClusterRegion clusterRegion : clusterRegionList) {
-            logicClusterIdList.addAll(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()));
-        }
-        List<ClusterLogic> logicClusterList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList);
-        if (CollectionUtils.isEmpty(logicClusterList)) {
-            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||logic cluster empty");
-            return indexCatCellList;
-        }
-        Map<Long, String> logicClusterId2NameMap = ConvertUtil.list2Map(logicClusterList, ClusterLogic::getId, ClusterLogic::getName);
-
-        // 2. 获取逻辑集群下所有逻辑模板
-        List<IndexTemplate> indexTemplateList = indexTemplateService.listByResourceIds(logicClusterIdList);
-        if (CollectionUtils.isEmpty(indexTemplateList)) {
-            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||index template empty");
-            return indexCatCellList;
-        }
-
-        // 3. 聚合数据，这里有很大性能问题，需要好好测试
-        for (CatIndexResult catIndexResult : catIndexResultList) {
-            for (IndexTemplate indexTemplate : indexTemplateList) {
-                if (IndexNameUtils.indexExpMatch(catIndexResult.getIndex(), indexTemplate.getExpression())) {
-                    IndexCatCell indexCatCell = ConvertUtil.obj2Obj(catIndexResult, IndexCatCell.class);
-                    String logicCluster = logicClusterId2NameMap.get(indexTemplate.getResourceId());
-                    if (null == logicCluster) {
-                        LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||logic cluster null");
-                        break;
-                    }
-
-                    indexCatCell.setClusterLogic(logicCluster);
-                    indexCatCell.setClusterPhy(cluster);
-                    indexCatCellList.add(indexCatCell);
-                    break;
-                }
-            }
-        }
-
-        return indexCatCellList;
-    }
-
-    private Map<String, String> buildNode2ClusterLogic(String cluster, List<ClusterNodeInfo> nodes) {
-        if (CollectionUtils.isEmpty(nodes)) {
-            return null;
-        }
-
-        List<String> nodeSetList = nodes.stream().map(ClusterNodeInfo::getNodeSet).distinct().collect(Collectors.toList());
-        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getByClusterAndNodeSets(cluster, nodeSetList);
-        if (CollectionUtils.isEmpty(clusterRoleHostList)) {
-            return null;
-        }
-        Map<String, Integer> nodeSet2RegionId = new HashMap<>();
-        for (ClusterRoleHost clusterRoleHost : clusterRoleHostList) {
-            nodeSet2RegionId.put(clusterRoleHost.getNodeSet(), clusterRoleHost.getRegionId());
-        }
-
-        List<Integer> regionIdList = clusterRoleHostList.stream().map(ClusterRoleHost::getRegionId).collect(Collectors.toList());
-
-        return null;
-    }
-
-    private List<IndexCatCellPO> buildIndexCatCellPOS(List<CatIndexResult> catIndexResults, String clusterName, long timeMillis) {
-        List<IndexCatCellPO> IndexCatCellPOList = Lists.newArrayList();
+    
+    private List<IndexCatCellPO> buildIndexCatCellPOS(List<CatIndexResult> catIndexResults,Map<Long, String> logicClusterId2NameMap,List<IndexTemplate> indexTemplateList, String clusterName, long timeMillis) {
+        List<IndexCatCellPO> indexCatCellList = Lists.newArrayList();
         for (CatIndexResult catIndexResult : catIndexResults) {
             IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
             if (!AriusObjUtils.isBlack(catIndexResult.getStoreSize())) {
@@ -233,16 +166,16 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                 indexCatCellPO.setPriStoreSize(SizeUtil.getUnitSize(catIndexResult.getPriStoreSize()));
             }
             if (!AriusObjUtils.isBlack(catIndexResult.getDocsCount())) {
-                indexCatCellPO.setDocsCount(Long.valueOf(catIndexResult.getDocsCount()));
+                indexCatCellPO.setDocsCount(Long.parseLong(catIndexResult.getDocsCount()));
             }
             if (!AriusObjUtils.isBlack(catIndexResult.getDocsDeleted())) {
-                indexCatCellPO.setDocsDeleted(Long.valueOf(catIndexResult.getDocsDeleted()));
+                indexCatCellPO.setDocsDeleted(Long.parseLong(catIndexResult.getDocsDeleted()));
             }
             if (!AriusObjUtils.isBlack(catIndexResult.getRep())) {
-                indexCatCellPO.setRep(Long.valueOf(catIndexResult.getRep()));
+                indexCatCellPO.setRep(Long.parseLong(catIndexResult.getRep()));
             }
             if (!AriusObjUtils.isBlack(catIndexResult.getPri())) {
-                indexCatCellPO.setPri(Long.valueOf(catIndexResult.getPri()));
+                indexCatCellPO.setPri(Long.parseLong(catIndexResult.getPri()));
             }
             if (!AriusObjUtils.isBlack(catIndexResult.getStatus())) {
                 indexCatCellPO.setStatus(catIndexResult.getStatus());
@@ -255,11 +188,21 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
             }
 
             indexCatCellPO.setCluster(clusterName);
+            indexCatCellPO.setClusterPhy(clusterName);
             indexCatCellPO.setTimestamp(timeMillis);
-            IndexCatCellPOList.add(indexCatCellPO);
+            indexCatCellPO.setClusterLogic("");
+            if (CollectionUtils.isNotEmpty(indexTemplateList)) {
+                indexTemplateList.stream()
+                    .filter(indexTemplate -> IndexNameUtils.indexExpMatch(catIndexResult.getIndex(),
+                        indexTemplate.getExpression()))
+                    .map(IndexTemplate::getResourceId).map(logicClusterId2NameMap::get).filter(StringUtils::isNotBlank)
+                    .findFirst().ifPresent(indexCatCellPO::setClusterLogic);
+            }
+            
+            indexCatCellList.add(indexCatCellPO);
         }
 
-        return IndexCatCellPOList;
+        return indexCatCellList;
     }
 
     private boolean filterNotCollectorIndexCat(IndexCatCellPO indexCatCellPO) {

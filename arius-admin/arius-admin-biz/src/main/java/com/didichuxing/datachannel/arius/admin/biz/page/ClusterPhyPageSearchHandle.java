@@ -34,8 +34,6 @@ import com.didiglobal.logi.log.LogFactory;
 @Component
 public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyConditionDTO,ClusterPhyVO> {
     @Autowired
-    private AppService               appService;
-    @Autowired
     private ClusterPhyService        clusterPhyService;
     @Autowired
     private ClusterLogicService clusterLogicService;

@@ -37,9 +37,6 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
 
     @Override
     protected Result<Boolean> checkCondition(DslTemplateConditionDTO condition, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
 
         String queryIndex = condition.getQueryIndex();
         if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {

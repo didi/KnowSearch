@@ -39,9 +39,6 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
 
     @Autowired
-    private AppService appService;
-
-    @Autowired
     private IndexTemplateService indexTemplateService;
 
     @Autowired
@@ -53,9 +50,6 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
 
     @Override
     protected Result<Boolean> checkCondition(TemplateQueryDTO condition, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
 
         String templateName = condition.getName();
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {

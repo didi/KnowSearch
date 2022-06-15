@@ -10,10 +10,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -30,15 +30,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 
+@Component
 public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDTO, IndexCatCellVO> {
     private static final String DEFAULT_SORT_TERM = "timestamp";
-
-    @Autowired
-    private AppService          appService;
 
     @Autowired
     private ESIndexCatService   esIndexCatService;
@@ -48,9 +44,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
 
     @Override
     protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
+
         if (StringUtils.isNotBlank(condition.getHealth()) && !IndexStatusEnum.isStatusExit(condition.getHealth())) {
             return Result.buildParamIllegal(String.format("健康状态%s非法", condition.getHealth()));
         }
@@ -93,7 +87,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple;
             if (appService.isSuperApp(appId)) {
                 totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(condition.getCluster(),
-                    condition.getIndex(), condition.getHealth(), appId, null,
+                    condition.getIndex(), condition.getHealth(), null, null,
                     (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                     condition.getOrderByDesc());
             } else {
@@ -102,12 +96,11 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
                     (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                     condition.getOrderByDesc());
             }
-
             if (null == totalHitAndIndexCatCellListTuple) {
                 LOGGER.warn("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||"
                             + "errMsg=get empty index cat info from es",
                     condition.getCluster(), condition.getIndex());
-                return null;
+                return PaginationResult.buildSucc(Lists.newArrayList(), 0, condition.getPage(), condition.getSize());
             }
 
             //设置索引阻塞信息

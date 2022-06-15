@@ -136,7 +136,7 @@ public class IndexCatESDAO extends BaseESDAO {
      * 			"value": "cn_arius.template.label"
      *                } 	}
      * }
-     * @param clusters
+     * @param clusterPhy
      * @param index
      * @param health
      * @return
