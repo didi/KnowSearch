@@ -33,4 +33,11 @@ public class ESLogicClusterNodeController {
     public Result<List<ESClusterRoleHostVO>> getClusterLogicNodes(@PathVariable Integer clusterId) {
         return clusterNodeManager.listClusterLogicNode(clusterId);
     }
+
+    @GetMapping("/{clusterLogicName}/names")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑集群下的节点名称")
+    public Result<List<String>> listClusterLogicNodeName(@PathVariable String clusterLogicName) {
+        return clusterNodeManager.listClusterLogicNodeByName(clusterLogicName);
+    }
 }

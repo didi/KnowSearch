@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,24 +21,25 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -68,6 +67,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -131,7 +131,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private AppService                    appService;
 
     @Autowired
-    private ClusterNodeManager            clusterNodeManager;
+    private ESClusterNodeService            eSClusterNodeService;
 
     @Autowired
     private ESGatewayClient               esGatewayClient;
@@ -315,6 +315,15 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(buildClusterLogic(clusterLogic));
     }
 
+    @Override
+    public Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(Integer appId, Integer type) {
+        ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
+        logicClusterDTO.setAppId(appId);
+        logicClusterDTO.setType(type);
+        return Result.buildSucc(
+                ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ClusterLogicVO.class));
+    }
+
     /**
      * 获取逻辑集群所有逻辑模板列表
      * @param request
@@ -378,9 +387,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         //这里必须clusterLogicManager为了走spring全局缓存
-        List<ClusterLogicVO> clusterLogicVOS = clusterLogicManager.getClusterLogics(null, appId);
-        if (CollectionUtils.isNotEmpty(clusterLogicVOS)) {
-            for (ClusterLogicVO clusterLogicVO : clusterLogicVOS) {
+        List<ClusterLogicVO> clusterLogicList = clusterLogicManager.getClusterLogics(null, appId);
+        if (CollectionUtils.isNotEmpty(clusterLogicList)) {
+            for (ClusterLogicVO clusterLogicVO : clusterLogicList) {
                 if (clusterLogicId.equals(clusterLogicVO.getId())) {
                     return clusterLogicVO;
                 }
@@ -536,12 +545,43 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<String> estimatedDiskSize(Long clusterLogicId, Integer count) {
+    public Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count) {
         ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
-        return null;
+        if (clusterRegion == null) {
+            return Result.buildFail("此逻集群未绑定regin！");
+        }
+        Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService.syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
+        Triple<Long, Long, Double> diskInfo = getFirstOrNull(map);
+        Long size = 1073741824L;
+        return Result.buildSucc(diskInfo == null?count*size:count * diskInfo.v1());
+    }
+
+    @Override
+    public Result<List<String>> getAppLogicClusterNameByType(Integer appId, Integer type) {
+        ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
+        logicClusterDTO.setAppId(appId);
+        logicClusterDTO.setType(type);
+        return Result.buildSucc(clusterLogicService.listClusterLogics(logicClusterDTO)
+                .stream().map(ClusterLogic::getName).collect(Collectors.toList()));
     }
 
 /**************************************************** private method ****************************************************/
+    /**
+     * 获取map中第⼀个数据值
+     *
+     * @param map 数据源
+     * @return
+     */
+    private static Triple<Long, Long, Double> getFirstOrNull(Map<String, Triple<Long, Long, Double>> map) {
+        Triple<Long, Long, Double> obj = null;
+        for (Map.Entry<String, Triple<Long, Long, Double>> entry : map.entrySet()) {
+            obj = entry.getValue();
+            if (obj != null) {
+                break;
+            }
+        }
+        return  obj;
+    }
     /**
      * 构建OP逻辑集群权限
      * @param clusterLogicVO  逻辑集群

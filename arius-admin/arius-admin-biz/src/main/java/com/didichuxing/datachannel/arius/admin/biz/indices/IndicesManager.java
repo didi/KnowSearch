@@ -4,15 +4,16 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
-import org.springframework.web.bind.annotation.PathVariable;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 
 /**
  * @author lyn
@@ -164,4 +165,18 @@ public interface IndicesManager {
      * @return
      */
     Result<Void> forceMerge(IndexForceMergeDTO param);
+
+    /**
+     * 获取物理集群中的索引列表
+     */
+    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId);
+
+    /**
+     * 获取逻辑集群下的索引列表
+     * @param clusterLogicName
+     * @param appId
+     * @return
+     */
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
+
 }

@@ -74,6 +74,15 @@ public interface ClusterLogicManager {
     Result<ClusterLogicVO> getAppLogicClusters(Long clusterId, Integer appId);
 
     /**
+     * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
+     * @param appId
+     * @param type
+     * @return
+     */
+    Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(Integer appId, Integer type);
+
+
+    /**
      * 获取逻辑集群所有逻辑模板列表
      * @param request
      * @param clusterId
@@ -209,5 +218,13 @@ public interface ClusterLogicManager {
      * @param count
      * @return
      */
-    Result<String> estimatedDiskSize(Long clusterLogicId, Integer count);
+    Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count);
+
+    /**
+     * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
+     * @param appId
+     * @param type
+     * @return
+     */
+    Result<List<String>> getAppLogicClusterNameByType(Integer appId, Integer type);
 }

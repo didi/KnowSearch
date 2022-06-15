@@ -47,10 +47,6 @@ public interface ClusterPhyMetricsManager {
      */
     Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum);
 
-    /**
-     * 获取物理集群中的索引列表
-     */
-    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId);
 
     /**
      * 获取账号下已配置指标类型
@@ -67,5 +63,5 @@ public interface ClusterPhyMetricsManager {
      */
     Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer appId);
 
-    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
+
 }

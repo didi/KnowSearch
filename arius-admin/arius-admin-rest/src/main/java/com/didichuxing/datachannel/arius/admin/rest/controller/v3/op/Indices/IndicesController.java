@@ -1,27 +1,29 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.Indices;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -139,5 +141,20 @@ public class IndicesController {
                                                         @PathVariable String indexName, HttpServletRequest request) {
         return indicesManager.getIndexShardsInfo(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
+
+    @GetMapping("/{clusterPhyName}/phy/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取物理集群索引列表")
+    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
+        return indicesManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("/{clusterLogicName}/logic/indices")
+    @ResponseBody
+    @ApiModelProperty(value = "获取逻辑集群索引列表")
+    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName, HttpServletRequest request) {
+        return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtils.getAppId(request));
+    }
+
 
 }
