@@ -73,11 +73,11 @@ public interface ClusterLogicManager {
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param appId
+     * @param projectId
      * @param type
      * @return
      */
-    Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(Integer appId, Integer type);
+    Result<List<ClusterLogicVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type);
 
 
     /**
@@ -219,9 +219,9 @@ public interface ClusterLogicManager {
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param appId
+     * @param projectId
      * @param type
      * @return
      */
-    Result<List<String>> getAppLogicClusterNameByType(Integer appId, Integer type);
+    Result<List<String>> getProjectLogicClusterNameByType(Integer projectId, Integer type);
 }

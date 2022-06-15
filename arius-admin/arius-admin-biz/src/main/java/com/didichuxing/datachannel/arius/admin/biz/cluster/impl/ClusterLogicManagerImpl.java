@@ -93,6 +93,7 @@ import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -275,7 +276,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         return Lists.newArrayList(clusterPhyService.getClusterByName(clusterRegion.getPhyClusterName()));
     }
-
+    @Override
     public List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(String logicCluster) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(logicCluster);
         if (null == clusterLogic) {
@@ -342,7 +343,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<List<ClusterLogicVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type) {
         ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
-        logicClusterDTO.setAppId(projectId);
+        logicClusterDTO.setProjectId(projectId);
         logicClusterDTO.setType(type);
         return Result.buildSucc(
                 ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ClusterLogicVO.class));
@@ -412,7 +413,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         //这里必须clusterLogicManager为了走spring全局缓存
-        List<ClusterLogicVO> clusterLogicList = clusterLogicManager.getClusterLogics(null, appId);
+        List<ClusterLogicVO> clusterLogicList = clusterLogicManager.getClusterLogics(null, projectId);
         if (CollectionUtils.isNotEmpty(clusterLogicList)) {
             for (ClusterLogicVO clusterLogicVO : clusterLogicList) {
                 if (clusterLogicId.equals(clusterLogicVO.getId())) {
@@ -581,9 +582,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<String>> getAppLogicClusterNameByType(Integer projectId, Integer type) {
+    public Result<List<String>> getProjectLogicClusterNameByType(Integer projectId, Integer type) {
         ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
-        logicClusterDTO.setAppId(projectId);
+        logicClusterDTO.setProjectId(projectId);
         logicClusterDTO.setType(type);
         return Result.buildSucc(clusterLogicService.listClusterLogics(logicClusterDTO)
                 .stream().map(ClusterLogic::getName).collect(Collectors.toList()));
