@@ -18,7 +18,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -235,39 +234,31 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) {
+    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) throws AdminOperateException {
         IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, appId);
         Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD);
-        if (validLogicTemplateResult.failed()) {
-            return validLogicTemplateResult;
-        }
+        if (validLogicTemplateResult.failed()) { return validLogicTemplateResult;}
 
         Result<Void> validPhyTemplateResult = indexTemplatePhyService.validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
-        if (validPhyTemplateResult.failed()) {
-            return validPhyTemplateResult;
+        if (validPhyTemplateResult.failed()) { return validPhyTemplateResult;}
+
+        Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
+        if (save2DBResult.failed()) {
+            throw new AdminOperateException(String.format("创建模板失败:%s", save2DBResult.getMessage()));
         }
 
-        try {
-            Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
-            if (save2DBResult.failed()) {
-                return save2DBResult;
-            }
-
-            Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(), indexTemplateDTO.getPhysicalInfos());
-            if (save2PhyTemplateResult.failed()) {
-                return save2PhyTemplateResult;
-            }
-
-            Result<Void> saveTemplateConfigResult = insertTemplateConfig(indexTemplateDTO);
-            if (saveTemplateConfigResult.failed()) {
-                return saveTemplateConfigResult;
-            }
-
-            operateRecordService.save(TEMPLATE, ADD, param.getId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")), operator);
-        } catch (Exception e) {
-            LOGGER.error("class=TemplateCreateManager||method=create||msg=create template failed", e);
-            return Result.buildFail();
+        Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(), indexTemplateDTO.getPhysicalInfos());
+        if (save2PhyTemplateResult.failed()) {
+            throw new AdminOperateException(String.format("创建模板失败:%s", save2PhyTemplateResult.getMessage()));
         }
+
+        Result<Void> saveTemplateConfigResult = insertTemplateConfig(indexTemplateDTO);
+        if (saveTemplateConfigResult.failed()) {
+            throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
+        }
+
+        operateRecordService.save(TEMPLATE, ADD, param.getId(),
+            JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")), operator);
 
         return Result.buildSucc();
     }
@@ -1049,7 +1040,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     private void buildExtraField(IndexTemplateDTO indexTemplateDTO) {
         indexTemplateDTO.setIngestPipeline(indexTemplateDTO.getName());
-        //todo: 移除quota 后删掉这行
+        indexTemplateDTO.setDiskSize(indexTemplateDTO.getDiskSize());
         indexTemplateDTO.setQuota(indexTemplateDTO.getDiskSize());
         //todo: 0.3干掉
         indexTemplateDTO.setLibraDepartment("");
@@ -1057,9 +1048,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         indexTemplateDTO.setIdField("");
         indexTemplateDTO.setRoutingField("");
 
-        if (null == indexTemplateDTO.getDesc()) {
-            indexTemplateDTO.setDesc("");
-        }
+        if (null == indexTemplateDTO.getDesc()) { indexTemplateDTO.setDesc("");}
     }
 
     private void buildCyclicalRoll(IndexTemplateDTO indexTemplateDTO, IndexTemplateWithCreateInfoDTO param) {
@@ -1111,17 +1100,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         indexTemplatePhyDTO.setRegionId(clusterRegion.getId().intValue());
 
         Integer clusterSettingHotDay = templateColdManager.fetchClusterDefaultHotDay(clusterRegion.getPhyClusterName());
-        if (clusterSettingHotDay > 0) {
-            indexTemplateDTO.setHotTime(clusterSettingHotDay);
-        } else {
-            indexTemplateDTO.setHotTime(-1);
-        }
+        if (clusterSettingHotDay > 0) { indexTemplateDTO.setHotTime(clusterSettingHotDay);}
+        else { indexTemplateDTO.setHotTime(-1);}
 
-        if (StringUtils.isNotBlank(param.getSetting())) {
-            indexTemplatePhyDTO.setSettings(param.getSetting());
-        } else {
-            indexTemplatePhyDTO.setSettings("{}");
-        }
+        if (StringUtils.isNotBlank(param.getSetting())) { indexTemplatePhyDTO.setSettings(param.getSetting());}
+        else { indexTemplatePhyDTO.setSettings("{}");}
 
         if (StringUtils.isNotBlank(param.getMapping())) {
             AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
