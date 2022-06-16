@@ -1,0 +1,24 @@
+{
+  "createTime":"2022-03-08T08:19:11.000+0000",
+  "updateTime":"2022-04-13T06:49:42.000+0000",
+  "id":4437,
+  "name":"2-hf-test",
+  "verifyCode":"123456",
+  "queryThreshold":11,
+  "cluster":"lcx-0401",
+  "searchType":2,
+  "indexExp":[
+    "\"\""
+  ],
+  "ip":[
+
+  ],
+  "dataCenter":"cn",
+  "dslAnalyzeEnable":1,
+  "aggrAnalyzeEnable":1,
+  "analyzeResponseEnable":1,
+  "isRoot":0,
+  "windexExp":[
+
+  ]
+}

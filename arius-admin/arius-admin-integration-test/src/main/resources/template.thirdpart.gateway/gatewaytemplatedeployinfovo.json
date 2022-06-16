@@ -1,0 +1,43 @@
+{
+  "*":{
+    "createTime":null,
+    "updateTime":null,
+    "baseInfo":{
+      "createTime":"2022-03-08T06:48:08.000+0000",
+      "updateTime":"2022-03-22T14:57:48.000+0000",
+      "id":33425,
+      "name":"4144-didi-cloud",
+      "dataCenter":"cn",
+      "expression":"4144-didi-cloud*",
+      "dateField":"timeStamp",
+      "dateFieldFormat":"",
+      "idField":"",
+      "routingField":"",
+      "dateFormat":"_yyyy-MM-dd",
+      "expireTime":2,
+      "ingestPipeline":"4144-didi-cloud",
+      "deployStatus":3,
+      "version":0,
+      "aliases":[
+
+      ],
+      "blockRead":false,
+      "blockWrite":false
+    },
+    "masterInfo":{
+      "templateName":"4144-didi-cloud",
+      "cluster":"dcdr-master",
+      "defaultWriterFlags":true,
+      "groupId":"42a9aeef-bab7-4b35-bf8e-b33bd3245496",
+      "rack":"r0,r3",
+      "shardNum":1,
+      "topic":null,
+      "accessApps":null,
+      "mappingIndexNameEnable":null,
+      "typeIndexMapping":null
+    },
+    "slaveInfos":[
+
+    ]
+  }
+}
