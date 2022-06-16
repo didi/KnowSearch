@@ -141,11 +141,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public Result<Void> deleteProjectByProjectId(Integer projectId, String operator) {
         //项目删除前的检查
-        //校验项目是否绑定es user
-        List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
-        if (CollectionUtils.isNotEmpty(esUsers)) {
-            return Result.buildFail("项目已绑定es user，不能删除");
-        }
+       
         //校验项目绑定逻辑集群
         List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
         if (CollectionUtils.isNotEmpty(clusterLogics)) {
@@ -159,6 +155,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
         
         projectService.deleteProjectByProjectId(projectId, operator);
+        //删除es user
+        esUserService.deleteByESUsers(projectId);
         return Result.buildSucc();
     }
     

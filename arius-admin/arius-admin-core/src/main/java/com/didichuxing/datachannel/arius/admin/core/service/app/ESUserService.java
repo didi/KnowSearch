@@ -117,4 +117,6 @@ public interface ESUserService {
      * @return {@code List<Integer>}
      */
     List<Integer> getProjectIdBySearchType(Integer searchType);
+    
+    
 }
