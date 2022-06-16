@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
