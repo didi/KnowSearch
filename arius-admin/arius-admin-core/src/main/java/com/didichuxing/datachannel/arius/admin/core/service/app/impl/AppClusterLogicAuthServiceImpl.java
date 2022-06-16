@@ -40,9 +40,9 @@ import org.springframework.stereotype.Service;
  * @date 2020/09/19
  */
 @Service
-public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAuthService {
+public class AppClusterLogicAuthServiceImpl implements ProjectClusterLogicAuthService {
 
-    private static final ILog      LOGGER = LogFactory.getLog(ProjectLogicTemplateAuthServiceImpl.class);
+    private static final ILog      LOGGER = LogFactory.getLog(AppLogicTemplateAuthServiceImpl.class);
 
     @Autowired
     private ProjectLogicClusterAuthDAO logicClusterAuthDAO;

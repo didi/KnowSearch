@@ -30,7 +30,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -48,9 +47,9 @@ import java.util.stream.Collectors;
  * @date 2019/4/16
  */
 @Service
-public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplateAuthService {
+public class AppLogicTemplateAuthServiceImpl implements ProjectLogicTemplateAuthService {
 	
-	private static final ILog LOGGER = LogFactory.getLog(ProjectLogicTemplateAuthServiceImpl.class);
+	private static final ILog LOGGER = LogFactory.getLog(AppLogicTemplateAuthServiceImpl.class);
 	
 	@Autowired
 	private ProjectTemplateAuthDAO templateAuthDAO;
