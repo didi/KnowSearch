@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterPhyAuthEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -35,7 +33,6 @@ public class ConsoleClusterPhyVO extends ClusterPhyVO {
 	@ApiModelProperty("归属项目名称, 保留兼容客户端")
     private String        belongAppName;
 
-    /** @see AppClusterPhyAuthEnum */
     @ApiModelProperty("当前App对集群的权限 1:配置管理, 2:访问, -1:无权限")
     private Integer       currentAppAuth;
 
