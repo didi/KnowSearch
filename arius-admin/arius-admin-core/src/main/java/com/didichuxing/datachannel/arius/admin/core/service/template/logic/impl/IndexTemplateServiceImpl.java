@@ -480,7 +480,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return list
      */
     @Override
-    public List<IndexTemplate> listAppLogicTemplatesByAppId(Integer projectId) {
+    public List<IndexTemplate> listProjectLogicTemplatesByProjectId(Integer projectId) {
         return ConvertUtil.list2List(indexTemplateDAO.listByProjectId(projectId), IndexTemplate.class);
     }
 
@@ -508,7 +508,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @param projectId projectId
      */
     @Override
-    public Result<List<Tuple<String, String>>> listLogicTemplatesByAppId(Integer projectId) {
+    public Result<List<Tuple<String, String>>> listLogicTemplatesByProjectId(Integer projectId) {
         List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(projectId);
         if (CollectionUtils.isEmpty(projectTemplateAuths)) {
             return Result.buildSucc();
@@ -679,7 +679,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public List<IndexTemplate> listHasAuthTemplatesInLogicCluster(Integer projectId, Long logicClusterId) {
-        if (appId == null || logicClusterId == null) {
+        if (projectId == null || logicClusterId == null) {
             return new ArrayList<>();
         }
 
@@ -700,7 +700,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplateLogicWithClusterAndMasterTemplate> getLogicTemplatesWithClusterAndMasterTemplate() {
+    public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplatesWithClusterAndMasterTemplate() {
 
         List<IndexTemplateWithCluster> logicClusters = listAllLogicTemplateWithClusters();
         if (CollectionUtils.isEmpty(logicClusters)) {
@@ -733,7 +733,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplateLogicWithClusterAndMasterTemplate> getLogicTemplateWithClusterAndMasterTemplateByClusters(Set<Long> logicClusterIds) {
+    public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplateWithClusterAndMasterTemplateByClusters(Set<Long> logicClusterIds) {
 
         if (CollectionUtils.isEmpty(logicClusterIds)) {
             return new ArrayList<>();

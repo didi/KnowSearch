@@ -13,16 +13,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
@@ -459,7 +449,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
                     return indexTemplateService.listAllLogicTemplates();
                 }else {
-                    return indexTemplateService.listAppLogicTemplatesByProjectId(projectId);
+                    return indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
                 }
 
             case RW:
@@ -481,7 +471,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             case NO_PERMISSION:
                 List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
                 List<Integer> projectRAndRwAuthTemplateIdList = projectLogicTemplateAuthService
-                        .getProjectTemplateRWAndRAuthsWithoutCodecResponsible(appId)
+                        .getProjectTemplateRWAndRAuthsWithoutCodecResponsible(projectId)
                         .stream()
                         .map(ProjectTemplateAuth::getTemplateId)
                         .collect(Collectors.toList());
@@ -500,7 +490,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public List<String> getTemplateLogicNames(Integer projectId) {
-        List<IndexTemplate> templateLogics = indexTemplateService.listAppLogicTemplatesByAppId(projectId);
+        List<IndexTemplate> templateLogics = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
 
         return templateLogics.stream().map(IndexTemplate::getName).collect(Collectors.toList());
     }

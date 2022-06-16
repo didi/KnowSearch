@@ -156,7 +156,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
         
         //校验项目绑定模板服务
-        List<IndexTemplate> indexTemplates = indexTemplateService.getProjectLogicTemplatesByProjectId(projectId);
+        List<IndexTemplate> indexTemplates = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
         if (CollectionUtils.isNotEmpty(indexTemplates)) {
             return Result.buildFail("项目已绑定模板服务，不能删除");
         }

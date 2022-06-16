@@ -105,13 +105,13 @@ public interface IndicesManager {
     /**
      * 获取物理集群中的索引列表
      */
-    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId);
+    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId);
 
     /**
      * 获取逻辑集群下的索引列表
      * @param clusterLogicName
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId);
 }

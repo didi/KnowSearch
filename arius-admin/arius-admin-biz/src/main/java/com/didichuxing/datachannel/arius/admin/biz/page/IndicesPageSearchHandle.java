@@ -81,7 +81,7 @@ public class IndicesPageSearchHandle extends AbstractPageSearchHandle<PageDTO, I
     }
 
     @Override
-    protected void initCondition(PageDTO pageDTO, Integer appId) {
+    protected void initCondition(PageDTO pageDTO, Integer projectId) {
         if (pageDTO instanceof IndicesConditionDTO) {
             IndicesConditionDTO condition = (IndicesConditionDTO) pageDTO;
             if (null == condition.getPage()) {

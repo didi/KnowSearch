@@ -75,7 +75,7 @@ public class ESPhyClusterNodeController {
 
     @GetMapping("/names")
     @ResponseBody
-    @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
+    @ApiOperation(value = "根据projectId获取物理集群下的节点名称")
     public Result<List<String>> getAppNodeNames(HttpServletRequest request) {
         return Result.buildSucc(clusterPhyManager.listNodeNameByProjectId(HttpRequestUtil.getProjectId(request)));
     }

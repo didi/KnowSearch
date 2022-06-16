@@ -33,8 +33,8 @@ public class CustomDataSource {
     public static String testAdminPort;
     public static String testPhyClusterIp;
     public static Integer testPhyClusterPort;
-    public static String operator;
-    public static Integer appid;
+    public static String  operator;
+    public static Integer projectId;
 
     private static String generateString(Random random, int length) {
         String sources = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -57,7 +57,7 @@ public class CustomDataSource {
         String clusterName = getRandomClusterName();
         ClusterJoinDTO param = new ClusterJoinDTO();
         param.setType(4);
-        param.setProjectId(appid);
+        param.setProjectId(projectId);
         param.setCluster(clusterName);
         param.setEsVersion("7.6.2");
         param.setPhyClusterDesc("");
@@ -94,7 +94,7 @@ public class CustomDataSource {
         Map<String, Object> contentObj = new HashMap<>();
         workOrderDTO.setContentObj(contentObj);
         workOrderDTO.setSubmitor(operator);
-        workOrderDTO.setSubmitorProjectid(appid);
+        workOrderDTO.setSubmitorProjectid(projectId);
         workOrderDTO.setDescription("testtest");
         workOrderDTO.setType(type);
         return workOrderDTO;
@@ -119,7 +119,7 @@ public class CustomDataSource {
     public static WorkOrderProcessDTO getWorkOrderProcessDTO(Long orderId) {
         WorkOrderProcessDTO workOrderProcessDTO = new WorkOrderProcessDTO();
         workOrderProcessDTO.setAssignee(operator);
-        workOrderProcessDTO.setAssigneeProjectId(appid);
+        workOrderProcessDTO.setAssigneeProjectId(projectId);
         workOrderProcessDTO.setComment("testtest");
         workOrderProcessDTO.setOrderId(orderId);
         workOrderProcessDTO.setCheckAuthority(false);

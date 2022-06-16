@@ -1,14 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -23,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.Unava
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -88,7 +78,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
     }
 
     @Override
-    protected void initCondition(PageDTO condition, Integer appId) {
+    protected void initCondition(PageDTO condition, Integer projectId) {
         // nothing to do
     }
 
@@ -102,10 +92,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
             matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
             totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
         } else {
-            List<IndexTemplate> allTemplateList = indexTemplateService.getAllLogicTemplates();
-            if (CollectionUtils.isEmpty(allTemplateList)) { return PaginationResult.buildSucc();}
-
-            List<IndexTemplate> meetConditionTemplateList = getMeetConditionTemplateList(condition, allTemplateList);
+            List<IndexTemplate> meetConditionTemplateList = getMatchConditionTemplateListByClusterName(condition);
             totalHit = meetConditionTemplateList.size();
             matchIndexTemplateList = filterFullDataByPage(meetConditionTemplateList, condition);
         }
@@ -115,7 +102,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
     }
     /******************************************private***********************************************/
     /**
-     * 根据模板Id、名称、归属AppId、归属物理集群等进行组合查询
+     * 根据模板Id、名称、归属projectId、归属物理集群等进行组合查询
      *
      * @param condition
      * @return
@@ -137,7 +124,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
         }
 
         if (null != condition.getProjectId()) {
-            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getAppId().equals(condition.getAppId())).collect(Collectors.toList());
+            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getProjectId().equals(condition.getProjectId())).collect(Collectors.toList());
         }
         return matchIndexTemplates;
     }

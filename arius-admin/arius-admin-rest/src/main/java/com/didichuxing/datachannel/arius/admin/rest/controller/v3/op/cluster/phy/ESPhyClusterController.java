@@ -98,7 +98,7 @@ public class ESPhyClusterController {
     @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "根据项目获取逻辑集群下的物理集群名称")
-    public Result<List<String>> listClusterPhyNameByAppId(HttpServletRequest request) {
+    public Result<List<String>> listClusterPhyNameByProjectId(HttpServletRequest request) {
         return Result.buildSucc(clusterPhyManager.listClusterPhyNameByProjectId(HttpRequestUtil.getProjectId(request)));
     }
 

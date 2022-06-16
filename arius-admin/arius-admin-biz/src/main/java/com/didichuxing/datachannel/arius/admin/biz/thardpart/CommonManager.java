@@ -89,7 +89,7 @@ public interface CommonManager {
 
     /**
      * 获取授权的模板列表接口
-     * @param appId
+     * @param projectId
      * @param auth
      * @param dataCenter
      * @return
