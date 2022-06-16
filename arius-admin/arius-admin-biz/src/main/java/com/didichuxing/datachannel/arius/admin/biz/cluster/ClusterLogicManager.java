@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
@@ -51,11 +52,11 @@ public interface ClusterLogicManager {
     Result<List<ClusterLogicVO>> getAppLogicClusters(Integer appId);
 
     /**
-     * 获取APP拥有的逻辑集群或者物理集群名称列表
+     * 获取APP拥有的逻辑集群id和名称列表
      * @param appId 应用id
      * @return
      */
-    Result<List<String>> getAppLogicOrPhysicClusterNames(Integer appId);
+    Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> listAppClusterLogicIdsAndNames(Integer appId);
 
     /**
      * 获取项目下的逻辑集群信息
@@ -112,13 +113,6 @@ public interface ClusterLogicManager {
      * @return
      */
     List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
-
-    /**
-     * 获取逻辑集群分派的物理集群列表
-     * @param logicCluster
-     * @return
-     */
-    List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(String logicCluster);
 
     /**
      * 获取所有逻辑集群列表接口

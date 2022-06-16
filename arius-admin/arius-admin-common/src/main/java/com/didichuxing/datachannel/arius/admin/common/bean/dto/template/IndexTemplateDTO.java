@@ -128,8 +128,8 @@ public class IndexTemplateDTO extends PageDTO {
     private List<IndexTemplatePhyDTO> physicalInfos;
 
     @ApiModelProperty("开启服务")
-    private String                          openSrv;
+    private String                    openSrv;
 
     @ApiModelProperty("可用磁盘容量")
-    private Double diskSize;
+    private Double                    diskSize;
 }

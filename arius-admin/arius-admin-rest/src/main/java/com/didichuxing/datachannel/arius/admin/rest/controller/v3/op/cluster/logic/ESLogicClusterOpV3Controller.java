@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
@@ -36,11 +37,11 @@ public class ESLogicClusterOpV3Controller {
     @Autowired
     private ClusterLogicManager clusterLogicManager;
 
-    @GetMapping("/names")
+    @GetMapping("/ids-names")
     @ResponseBody
-    @ApiOperation(value = "根据AppId获取逻辑集群下的逻辑集群名称")
-    public Result<List<String>> getAppLogicOrPhysicClusterNames(HttpServletRequest request) {
-        return clusterLogicManager.getAppLogicOrPhysicClusterNames(HttpRequestUtils.getAppId(request));
+    @ApiOperation(value = "获取APP拥有的逻辑集群id和名称列表")
+    public Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> getAppClusterLogicIdsAndNames(HttpServletRequest request) {
+        return clusterLogicManager.listAppClusterLogicIdsAndNames(HttpRequestUtils.getAppId(request));
     }
     
     @GetMapping()

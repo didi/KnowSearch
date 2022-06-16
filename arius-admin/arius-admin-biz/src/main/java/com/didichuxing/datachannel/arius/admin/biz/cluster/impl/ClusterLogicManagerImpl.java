@@ -29,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHa
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
@@ -268,16 +269,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Lists.newArrayList(clusterPhyService.getClusterByName(clusterRegion.getPhyClusterName()));
     }
 
-    public List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(String logicCluster) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(logicCluster);
-        if (null == clusterLogic) {
-            return null;
-        }
-
-        return getLogicClusterAssignedPhysicalClusters(clusterLogic.getId());
-    }
-
-
     @Override
     public Result<List<ClusterLogicVO>> getLogicClustersByProjectId(Integer appId) {
         List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.getHasAuthClusterLogicsByAppId(appId),
@@ -307,12 +298,20 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<String>> getAppLogicOrPhysicClusterNames(Integer appId) {
-        if (appService.isSuperApp(appId)) {
-            return Result.buildSucc(clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList()));
+    public Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> listAppClusterLogicIdsAndNames(Integer appId) {
+        List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>> res = Lists.newArrayList();
+        List<ClusterLogic> tempAuthLogicClusters = Lists.newArrayList();
+
+        if (appService.isSuperApp(appId)) { tempAuthLogicClusters.addAll(clusterLogicService.listAllClusterLogics());}
+        else { tempAuthLogicClusters.addAll(clusterLogicService.getHasAuthClusterLogicsByAppId(appId));}
+
+        for (ClusterLogic clusterLogic : tempAuthLogicClusters) {
+            Tuple<Long, String> logicClusterId2logicClusterNameTuple = new Tuple<>();
+            logicClusterId2logicClusterNameTuple.setV1(clusterLogic.getId());
+            logicClusterId2logicClusterNameTuple.setV2(clusterLogic.getName());
+            res.add(logicClusterId2logicClusterNameTuple);
         }
-        List<ClusterLogic> appAuthLogicClusters = clusterLogicService.getHasAuthClusterLogicsByAppId(appId);
-        return Result.buildSucc(appAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));
+        return Result.buildSucc(res);
     }
 
     /**

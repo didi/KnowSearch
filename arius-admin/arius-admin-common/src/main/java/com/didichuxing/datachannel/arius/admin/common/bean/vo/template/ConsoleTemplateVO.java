@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "模板信息")
 public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<ConsoleTemplateVO> {
-
     /**
      * @see AppTemplateAuthEnum
      */
