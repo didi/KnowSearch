@@ -1,12 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
- * 操作方法枚举
+ * 触发方式枚举
  *
  * @author shizeying
  * @date 2022/06/14
  */
-public enum OperationMethodEnum {
+public enum TriggerWayEnum {
     /**
      * 手动触发
      */
@@ -18,11 +22,17 @@ public enum OperationMethodEnum {
 
     private String operationMethod;
     
-    OperationMethodEnum(String operationMethod) {
+    TriggerWayEnum(String operationMethod) {
         this.operationMethod = operationMethod;
     }
     
     public String getOperationMethod() {
         return operationMethod;
+    }
+    
+    public static List<String> getOperationList() {
+        return Arrays.stream(TriggerWayEnum.values()).map(TriggerWayEnum::getOperationMethod)
+                .collect(Collectors.toList());
+        
     }
 }

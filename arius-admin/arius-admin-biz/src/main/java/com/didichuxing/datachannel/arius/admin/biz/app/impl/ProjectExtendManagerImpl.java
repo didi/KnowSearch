@@ -21,8 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigV
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationMethodEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
@@ -31,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
@@ -48,7 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
