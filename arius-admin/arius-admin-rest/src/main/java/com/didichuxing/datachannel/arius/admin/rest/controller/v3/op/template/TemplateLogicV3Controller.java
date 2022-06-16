@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
@@ -37,12 +38,12 @@ import org.springframework.web.bind.annotation.RestController;
  * Created by linyunan on 2021-07-30
  */
 @RestController
-@RequestMapping(V3_OP + "/template/logic")
+@RequestMapping({ V3_OP + "/template/logic", V3 + "/template/logic" })
 @Api(tags = "逻辑模板接口(REST)")
 public class TemplateLogicV3Controller {
 
     @Autowired
-    private TemplateLogicManager templateLogicManager;
+    private TemplateLogicManager         templateLogicManager;
 
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
@@ -132,10 +133,10 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster);
     }
 
-    @PutMapping("/createTemplate")
+    @PostMapping("/create")
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
-    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) {
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) throws AdminOperateException{
         return templateLogicManager.create(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 

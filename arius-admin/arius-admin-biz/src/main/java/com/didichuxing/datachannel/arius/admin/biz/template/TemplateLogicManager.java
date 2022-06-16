@@ -48,7 +48,7 @@ public interface TemplateLogicManager {
     List<IndexTemplateWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds);
 
     /**
-     * 获取最近访问该模板的APP
+     * 获取最近访问该模板的project
      *
      * @param logicId logicId
      * @return result
@@ -70,12 +70,12 @@ public interface TemplateLogicManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId);
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 获取所有逻辑模板聚合
      *
-     * @param projectId 当前project Id
+     * @param projectId 当前projectId
      * @return
      */
     List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId);

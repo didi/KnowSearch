@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateAdjustShardDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.util.RandomGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,12 @@ public class TemplateLogicManagerTest extends AriusAdminApplicationTest {
         createInfoDTO.setDateFieldFormat("yyyy-MM-dd HH:mm:ss.SSS");
         createInfoDTO.setLevel(1);
 
-        Result<Void> createResult = templateLogicManager.create(createInfoDTO, "admin", 1);
+        Result<Void> createResult = null;
+        try {
+            createResult = templateLogicManager.create(createInfoDTO, "admin", 1);
+        } catch (AdminOperateException e) {
+            e.printStackTrace();
+        }
         Assertions.assertTrue(createResult.success());
     }
 

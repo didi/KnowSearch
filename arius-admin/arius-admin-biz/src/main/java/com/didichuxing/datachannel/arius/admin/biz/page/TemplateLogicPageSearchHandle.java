@@ -89,159 +89,44 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Page
     }
 
     @Override
-    protected void initCondition(PageDTO condition, Integer appId) {
-        // Do nothing
+    protected void initCondition(PageDTO condition, Integer projectId) {
+        if (condition instanceof TemplateConditionDTO) {
+            TemplateConditionDTO templateConditionDTO = (TemplateConditionDTO) condition;
+            templateConditionDTO.setProjectId(projectId);
+        }
     }
 
     @Override
-    protected PaginationResult<ConsoleTemplateVO> buildPageData(PageDTO pageDTO, Integer appId) {
-        TemplateConditionDTO condition = buildInitTemplateConditionDTO(pageDTO, appId);
+    protected PaginationResult<ConsoleTemplateVO> buildPageData(PageDTO pageDTO, Integer projectId) {
+        TemplateConditionDTO condition          = (TemplateConditionDTO) pageDTO;
+        List<IndexTemplate>  matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
+        long totalHit        = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition);
 
-        List<IndexTemplate> matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
-        Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
-
-        List<ConsoleTemplateVO> consoleTemplateVOList = doBuildWithoutAuthType(matchIndexTemplate);
+        List<ConsoleTemplateVO> consoleTemplateVOList = buildOtherInfo(matchIndexTemplate);
         return PaginationResult.buildSucc(consoleTemplateVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
     /******************************************private***********************************************/
-    /**
-     * 根据无模板名称、有模板名称、有数量类型、有模板名称与数据类型等进行模糊匹配, 得出总结果
-     *
-     * @param condition
-     * @param appAuthTemplatesList
-     * @return
-     */
-    private List<IndexTemplate> getMeetConditionTemplateList(TemplateConditionDTO condition,
-                                                             List<IndexTemplate> appAuthTemplatesList) {
-        List<IndexTemplate> meetConditionTemplateList = Lists.newArrayList();
-        if (null != condition.getHasDCDR()) {
-            appAuthTemplatesList = appAuthTemplatesList.stream().filter(r -> condition.getHasDCDR().equals(r.getHasDCDR()))
-                    .collect(Collectors.toList());
-        }
-
-        if (!AriusObjUtils.isEmptyList(condition.getClusterPhies())) {
-            Set<String> logicIdSet = indexTemplatePhyService.getMatchNormalLogicIdByCluster(condition.getClusterPhies().get(0));
-            appAuthTemplatesList = appAuthTemplatesList.stream().filter(r -> logicIdSet.contains(r.getId().toString()))
-                    .collect(Collectors.toList());
-        }
-
-        if (!AriusObjUtils.isBlack(condition.getName())) {
-            appAuthTemplatesList = appAuthTemplatesList.stream().filter(r -> r.getName().contains(condition.getName()))
-                    .collect(Collectors.toList());
-        }
-        if (null != condition.getDataType()) {
-            appAuthTemplatesList = appAuthTemplatesList.stream()
-                    .filter(r -> r.getDataType().equals(condition.getDataType())).collect(Collectors.toList());
-        }
-
-        if (null != condition.getResourceId()) {
-            appAuthTemplatesList = appAuthTemplatesList.stream()
-                    .filter(r -> r.getResourceId().equals(condition.getResourceId())).collect(Collectors.toList());
-        }
-
-        meetConditionTemplateList.addAll(appAuthTemplatesList);
-        return meetConditionTemplateList;
-    }
-
-    private List<ConsoleTemplateVO> doBuildWithoutAuthType(List<IndexTemplate> indexTemplateList) {
-        if (CollectionUtils.isEmpty(indexTemplateList)) {
-            return Lists.newArrayList();
-        }
+    private List<ConsoleTemplateVO> buildOtherInfo(List<IndexTemplate> indexTemplateList) {
+        if (CollectionUtils.isEmpty(indexTemplateList)) { return Lists.newArrayList();}
 
         List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList, ConsoleTemplateVO.class);
         //1. 设置逻辑集群
         RESOURCE_BUILD_FUTURE_UTIL
                 .runnableTask(() -> setTemplateClusterName(consoleTemplateVOList))
                 .waitExecute();
-
         return consoleTemplateVOList;
     }
 
-    private TemplateConditionDTO buildInitTemplateConditionDTO(PageDTO pageDTO, Integer projectId) {
-        if (pageDTO instanceof TemplateConditionDTO) {
-            TemplateConditionDTO condition = (TemplateConditionDTO) pageDTO;
-            condition.setProjectId(projectId);
-            return condition;
-        }
-        return null;
-    }
-
-    private void setTemplateBelongClusterPhyNames(List<ConsoleTemplateVO> consoleTemplateVOList) {
-        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
-            return;
-        }
-
-        for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
-            BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
-                Set<String> clusterNameList = indexTemplatePhyService.getTemplateByLogicId(consoleTemplateVO.getId())
-                        .stream()
-                        .map(IndexTemplatePhy::getCluster)
-                        .collect(Collectors.toSet());
-
-                consoleTemplateVO.setClusterPhies(Lists.newArrayList(clusterNameList));
-            });
-        }
-
-        BUILD_BELONG_CLUSTER_FUTURE_UTIL.waitExecute();
-    }
-
     private void setTemplateClusterName(List<ConsoleTemplateVO> consoleTemplateVOList) {
-        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
-            return;
-        }
+        if (CollectionUtils.isEmpty(consoleTemplateVOList)) { return;}
 
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
             BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
                 ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(consoleTemplateVO.getResourceId());
-                consoleTemplateVO.setCluster(clusterLogic.getName());
+                if (null != clusterLogic) { consoleTemplateVO.setCluster(clusterLogic.getName());}
             });
         }
-
         BUILD_BELONG_CLUSTER_FUTURE_UTIL.waitExecute();
     }
-
-    private void setTemplateIndexRolloverStatus(List<ConsoleTemplateVO> consoleTemplateVOList) {
-        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
-            return;
-        }
-
-        for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
-            IndexTemplateConfig templateConfig = indexTemplateService.getTemplateConfig(consoleTemplateVO.getId());
-            consoleTemplateVO.setDisableIndexRollover(templateConfig.getDisableIndexRollover());
-        }
-    }
-
-    /**
-     * 对条件匹配后的结果集进行排序
-     *
-     * @param meetConditionTemplateList 条件匹配结果集
-     * @param sortTerm                  排序字段
-     * @param orderByDesc               是否降序排序 true 是 false 否
-     * @see SortTermEnum                           支持的排序字段枚举
-     */
-    private void sort(List<IndexTemplate> meetConditionTemplateList, String sortTerm, Boolean orderByDesc) {
-        // 使用默认排序
-        if (null == sortTerm) {
-            Collections.sort(meetConditionTemplateList);
-            return;
-        }
-
-        meetConditionTemplateList.sort((o1, o2) -> {
-            // 可在此添加需要排序的项
-            if (SortTermEnum.CHECK_POINT_DIFF.getType().equals(sortTerm)) {
-                return orderByDesc ? o2.getCheckPointDiff().compareTo(o1.getCheckPointDiff()) :
-                        o1.getCheckPointDiff().compareTo(o2.getCheckPointDiff());
-            }
-
-            if (SortTermEnum.LEVEL.getType().equals(sortTerm)) {
-                return orderByDesc ? o2.getLevel().compareTo(o1.getLevel()) :
-                        o1.getLevel().compareTo(o2.getLevel());
-            }
-
-            // 不排序
-            return 0;
-        });
-    }
-
 }

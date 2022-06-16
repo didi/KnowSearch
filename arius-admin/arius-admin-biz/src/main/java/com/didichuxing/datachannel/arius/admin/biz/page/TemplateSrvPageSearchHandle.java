@@ -80,14 +80,13 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;
         TemplateQueryDTO condition = (TemplateQueryDTO) pageDTO;
+        // 注意这里的condition是物理集群
         if (AriusObjUtils.isBlank(condition.getCluster())) {
             matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
             totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
         } else {
             List<IndexTemplate> allTemplateList = indexTemplateService.getAllLogicTemplates();
-            if (CollectionUtils.isEmpty(allTemplateList)) {
-                return PaginationResult.buildFail("没有查询到模板");
-            }
+            if (CollectionUtils.isEmpty(allTemplateList)) { return PaginationResult.buildSucc();}
 
             List<IndexTemplate> meetConditionTemplateList = getMeetConditionTemplateList(condition, allTemplateList);
             totalHit = meetConditionTemplateList.size();

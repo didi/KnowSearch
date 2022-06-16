@@ -463,7 +463,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public List<String> listClusterPhyNameByProjectId(Integer projectId) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            //超级appId返回所有的集群
+            //超级projectId返回所有的集群
             List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
             return phyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder())
                 .collect(Collectors.toList());
@@ -475,6 +475,39 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
         return regions.stream().map(ClusterRegion::getPhyClusterName).distinct().sorted(Comparator.naturalOrder())
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId) {
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal("项目不存在");
+        }
+        if (null != clusterResourceType && !ClusterResourceTypeEnum.isExist(clusterResourceType)) {
+            return Result.buildParamIllegal("集群资源类型非法");
+        }
+        List<String> clusters;
+        List<ClusterPhy> clusterPhyList;
+        if (null != clusterResourceType) {
+            ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
+            clusterPhyDTO.setResourceType(clusterResourceType);
+            clusterPhyList = clusterPhyService.listClustersByCondt(clusterPhyDTO);
+
+        } else {
+            clusterPhyList = clusterPhyService.listAllClusters();
+        }
+        Set<String> clusterNameSet = ConvertUtil.list2Set(clusterPhyList, ClusterPhy::getCluster);
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            clusters = clusterPhyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder())
+                .collect(Collectors.toList());
+        } else {
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+            //项目下的有管理权限逻辑集群会关联多个物理集群
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
+                clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
+            clusters = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
+                .filter(clusterNameSet::contains).sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+        }
+        return Result.buildSucc(clusters);
     }
 
     @Override

@@ -332,7 +332,14 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Override
     public Result<Void> addTemplateWithoutCheck(IndexTemplateDTO param) throws AdminOperateException {
         IndexTemplatePO templatePO = ConvertUtil.obj2Obj(param, IndexTemplatePO.class);
-        boolean succ=(1 == indexTemplateDAO.insert(templatePO));
+        boolean succ;
+        try {
+            succ = (1 == indexTemplateDAO.insert(templatePO));
+        } catch (DuplicateKeyException e) {
+            LOGGER.warn("class=TemplateLogicServiceImpl||method=addTemplateWithoutCheck||errMsg={}", e.getMessage());
+            throw new AdminOperateException(String.format("保存逻辑模板【%s】失败！", templatePO.getName()));
+        }
+
         param.setId(templatePO.getId());
         return Result.build(succ);
     }
