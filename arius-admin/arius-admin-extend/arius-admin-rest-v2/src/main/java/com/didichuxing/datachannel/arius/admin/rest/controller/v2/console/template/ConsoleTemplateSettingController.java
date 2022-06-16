@@ -50,13 +50,4 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     public Result<IndexTemplatePhySettings> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
         return templateLogicSettingsManager.getSettings(logicId);
     }
-
-    @PutMapping("/new")
-    @ResponseBody
-    @ApiOperation(value = "更新索引Setting接口" )
-    public Result<Void> modifySetting(@RequestParam("logicId") Integer logicId,
-                                      @RequestBody String settingDTO) {
-        IndexTemplatePhySettings settings = new IndexTemplatePhySettings(JSONObject.parseObject(settingDTO));
-        return templateLogicSettingsManager.updateSettings(logicId, settings);
-    }
 }
