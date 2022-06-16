@@ -18,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvM
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -57,7 +56,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private final Map<Integer, BaseTemplateSrv> BASE_TEMPLATE_SRV_MAP = Maps.newConcurrentMap();
 
     /**
-     * 本地cache 加快索引服务版本不支持版本过滤
+     * 本地cache 加快无效索引服务过滤
      */
     private static final Cache<Integer, String/*ESClusterVersionEnum*/> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE
             = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
@@ -135,11 +134,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public Result<List<TemplateWithSrvVO>> checkAvailable(Integer srvCode, List<Integer> logicTemplateIdList) {
-        return Result.buildFail();
-    }
-
-    @Override
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition) {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(TEMPLATE_SRV.getPageSearchType());
         if (baseHandle instanceof TemplateSrvPageSearchHandle) {
@@ -150,12 +144,12 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
+    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList) {
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
         if (null == srvHandle) { return Result.buildParamIllegal("未找到对应的服务");}
 
         try {
-            return srvHandle.openSrv(templateIdList, openParam);
+            return srvHandle.openSrv(templateIdList);
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateSrvManagerImpl||method=openSrv||templateIdList={}||srvCode={}" +
                     "||errMsg=failed to open template srv", ListUtils.intList2String(templateIdList), srvCode);

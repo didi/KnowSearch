@@ -35,10 +35,9 @@ public interface BaseTemplateSrv {
     /**
      * 开启指定逻辑模板的模板服务
      * @param templateIdList
-     * @param openParam 开启参数
      * @return
      */
-    Result<Void> openSrv(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) throws AdminOperateException;
+    Result<Void> openSrv(List<Integer> templateIdList) throws AdminOperateException;
 
     /**
      * 关闭指定逻辑模板的模板服务

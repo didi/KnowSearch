@@ -58,7 +58,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> openSrv(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) throws AdminOperateException {
+    public Result<Void> openSrv(List<Integer> templateIdList) throws AdminOperateException {
         // 0.校验服务是否可以开启
         for (Integer templateId : templateIdList) {
             Result<Void> checkAvailableResult = checkSrvIsValid(templateId);
