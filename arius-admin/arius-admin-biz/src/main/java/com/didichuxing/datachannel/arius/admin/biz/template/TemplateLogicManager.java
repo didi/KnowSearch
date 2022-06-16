@@ -72,7 +72,7 @@ public interface TemplateLogicManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId);
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) throws AdminOperateException;
 
     /**
      * 获取所有逻辑模板聚合

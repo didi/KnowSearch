@@ -1,5 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -14,20 +23,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.Unava
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author chengxiang
@@ -66,6 +64,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
 
     @Override
     protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer appId) {
+        // 注意这里的condition是物理集群
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;
         if (AriusObjUtils.isBlank(condition.getCluster())) {
@@ -73,9 +72,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
             totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
         } else {
             List<IndexTemplate> allTemplateList = indexTemplateService.getAllLogicTemplates();
-            if (CollectionUtils.isEmpty(allTemplateList)) {
-                return PaginationResult.buildFail("没有查询到模板");
-            }
+            if (CollectionUtils.isEmpty(allTemplateList)) { return PaginationResult.buildSucc();}
 
             List<IndexTemplate> meetConditionTemplateList = getMeetConditionTemplateList(condition, allTemplateList);
             totalHit = meetConditionTemplateList.size();
