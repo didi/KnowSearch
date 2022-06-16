@@ -77,7 +77,7 @@ import com.google.common.collect.Maps;
 @Component
 public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
-    private static final ILog           LOGGER = LogFactory.getLog(TemplateLogicManager.class);
+    private static final ILog           LOGGER      = LogFactory.getLog(TemplateLogicManager.class);
 
     @Autowired
     private AppLogicTemplateAuthService appLogicTemplateAuthService;
@@ -110,10 +110,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private AppService                  appService;
 
     @Autowired
-    private ESIndexService esIndexService;
+    private ESIndexService              esIndexService;
 
     @Autowired
-    private ESTemplateService esTemplateService;
+    private ESTemplateService           esTemplateService;
 
     @Autowired
     private ResponsibleConvertTool      responsibleConvertTool;
@@ -128,10 +128,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private TemplateDCDRManager         templateDcdrManager;
 
     @Autowired
-    private PreCreateManager preCreateManager;
+    private PreCreateManager            preCreateManager;
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService         clusterLogicService;
 
     private final Integer RETRY_TIMES = 3;
 
@@ -143,7 +143,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Override
     public boolean checkAllLogicTemplatesMeta() {
         Map<Integer, App> appId2AppMap = ConvertUtil.list2Map(appService.listApps(), App::getId);
-        List<IndexTemplate> logicTemplates = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> logicTemplates = indexTemplateService.listAllLogicTemplates();
         for (IndexTemplate templateLogic : logicTemplates) {
             try {
                 Result<Void> result = checkLogicTemplateMeta(templateLogic, appId2AppMap);
@@ -273,7 +273,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer appId) {
         List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
         List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-                .getAllLogicTemplateWithClusters();
+                .listAllLogicTemplateWithClusters();
 
         if (CollectionUtils.isNotEmpty(logicTemplates)) {
             indexTemplateLogicAggregates = fetchLogicTemplatesAggregates(logicTemplates, appId);
@@ -297,7 +297,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-                .getLogicTemplateWithClustersByClusterId(logicClusterId);
+                .listLogicTemplateWithClustersByClusterId(logicClusterId);
 
         if (CollectionUtils.isEmpty(logicTemplates)) {
             return new ArrayList<>();
@@ -420,9 +420,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         switch (AppTemplateAuthEnum.valueOf(authType)) {
             case OWN:
                 if (appService.isSuperApp(appId)) {
-                    return indexTemplateService.getAllLogicTemplates();
+                    return indexTemplateService.listAllLogicTemplates();
                 }else {
-                    return indexTemplateService.getAppLogicTemplatesByAppId(appId);
+                    return indexTemplateService.listAppLogicTemplatesByAppId(appId);
                 }
 
             case RW:
@@ -442,7 +442,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         .collect(Collectors.toList());
 
             case NO_PERMISSION:
-                List<IndexTemplate> allLogicTemplates = indexTemplateService.getAllLogicTemplates();
+                List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
                 List<Integer> appRAndRwAuthTemplateIdList = appLogicTemplateAuthService
                         .getAppTemplateRWAndRAuthsWithoutCodecResponsible(appId)
                         .stream()
@@ -463,7 +463,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public List<String> getTemplateLogicNames(Integer appId) {
-        List<IndexTemplate> templateLogics = indexTemplateService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplate> templateLogics = indexTemplateService.listAppLogicTemplatesByAppId(appId);
 
         return templateLogics.stream().map(IndexTemplate::getName).collect(Collectors.toList());
     }
@@ -778,7 +778,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId) {
+    public Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer appId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
         if (clusterLogic == null) {
             return Result.buildFail();
@@ -1008,7 +1008,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 获取全部的正在使用的逻辑模板
-        List<IndexTemplate> allLogicTemplates = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
 
         if (!CollectionUtils.isEmpty(allLogicTemplates)) {
             for (IndexTemplate indexTemplate : allLogicTemplates) {

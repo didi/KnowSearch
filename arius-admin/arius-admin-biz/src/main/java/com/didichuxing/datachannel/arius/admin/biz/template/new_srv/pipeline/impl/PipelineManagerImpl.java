@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
@@ -50,11 +51,6 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     @Override
     public NewTemplateSrvEnum templateSrv() {
         return NewTemplateSrvEnum.TEMPLATE_PIPELINE;
-    }
-
-    @Override
-    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
-        return Result.buildSucc();
     }
 
     @Override

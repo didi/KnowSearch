@@ -70,7 +70,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
      */
     @Override
     public List<IndexTemplateAlias> listAlias() {
-        return listAlias(indexTemplateService.getAllLogicTemplateWithPhysicals());
+        return listAlias(indexTemplateService.listAllLogicTemplateWithPhysicals());
     }
 
     /**
