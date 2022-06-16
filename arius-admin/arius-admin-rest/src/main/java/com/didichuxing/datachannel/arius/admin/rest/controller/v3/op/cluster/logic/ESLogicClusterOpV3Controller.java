@@ -108,15 +108,6 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.indexTemplateCount(clusterId, HttpRequestUtils.getOperator(request),
                 HttpRequestUtils.getAppId(request));
     }
-    
-    @GetMapping("/nodes/{clusterLogicId}")
-    @ResponseBody
-    @ApiOperation(value = "获取指定逻辑集群列表接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
-    public PaginationResult<ESClusterRoleHostVO>  pageGetESClusterRoleHostVO(@PathVariable Long clusterLogicId,@RequestBody ClusterLogicNodeConditionDTO condition) {
-        return clusterLogicManager.nodesPage(clusterLogicId,condition);
-    }
 
     @GetMapping("/estimated-disk-size/{clusterLogicId}/{count}")
     @ResponseBody
