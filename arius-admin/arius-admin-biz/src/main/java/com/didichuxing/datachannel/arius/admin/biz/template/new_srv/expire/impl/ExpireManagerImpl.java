@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -49,11 +50,6 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
     @Override
     public NewTemplateSrvEnum templateSrv() {
         return NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE;
-    }
-
-    @Override
-    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
-        return Result.buildSucc();
     }
 
     @Override

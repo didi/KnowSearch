@@ -186,7 +186,7 @@ public class AppLogicTemplateAuthServiceTest extends AriusAdminApplicationTest {
         appMap.put(app.getId(),app);
 
         // 创建mock规则
-        Mockito.when(indexTemplateService.getAllLogicTemplates()).thenReturn(Collections.singletonList(indexTemplate));
+        Mockito.when(indexTemplateService.listAllLogicTemplates()).thenReturn(Collections.singletonList(indexTemplate));
         Mockito.when(indexTemplateService.getLogicTemplateById(Mockito.anyInt())).thenReturn(indexTemplate);
         Mockito.when(indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(Mockito.anyInt())).thenReturn(indexTemplateLogicWithClusterAndMasterTemplate);
         Mockito.when(logicClusterAuthService.getLogicClusterAuthEnum(Mockito.anyInt(), Mockito.anyLong())).thenReturn(AppClusterLogicAuthEnum.OWN);
