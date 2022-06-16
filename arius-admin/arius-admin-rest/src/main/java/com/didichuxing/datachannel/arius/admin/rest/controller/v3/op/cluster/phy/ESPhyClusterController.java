@@ -67,7 +67,7 @@ public class ESPhyClusterController {
         return clusterPhyManager.joinCluster(param, HttpRequestUtils.getOperator(request));
     }
 
-    @GetMapping("/{clusterLogicType}/{clusterLogicId}/list")
+    @GetMapping("/{clusterLogicType}/{clusterLogicId}/can-associated-names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群可关联region的物理集群名称列表")
     public Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(@PathVariable Integer clusterLogicType,
@@ -75,20 +75,27 @@ public class ESPhyClusterController {
         return clusterPhyManager.listCanBeAssociatedRegionOfClustersPhys(clusterLogicType, clusterLogicId);
     }
 
-    @GetMapping("/{clusterLogicType}/names")
+    @GetMapping("/{clusterLogicType}/can-associated-names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群可进行关联的物理集群名称")
     public Result<List<String>> listCanBeAssociatedClustersPhys(@PathVariable Integer clusterLogicType) {
         return clusterPhyManager.listCanBeAssociatedClustersPhys(clusterLogicType);
     }
 
-    @GetMapping("/names")
+    @GetMapping("/{clusterResourceType}/names")
     @ResponseBody
     @ApiOperation(value = "获取项目下的物理集群名称，可根据类型筛选")
-    public Result<List<String>> listClusterPhyNameByResourceType(@RequestParam(value = "clusterResourceType", required = false) Integer clusterResourceType,
+    public Result<List<String>> listClusterPhyNameByResourceType(@PathVariable Integer clusterResourceType,
                                                                  HttpServletRequest request) {
         return clusterPhyManager.listClusterPhyNameByResourceType(clusterResourceType,
             HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("/names")
+    @ResponseBody
+    @ApiOperation(value = "根据项目获取逻辑集群下的物理集群名称")
+    public Result<List<String>> listClusterPhyNameByAppId(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
     }
 
     @GetMapping("/{templateId}/sameversion/clusternames")
