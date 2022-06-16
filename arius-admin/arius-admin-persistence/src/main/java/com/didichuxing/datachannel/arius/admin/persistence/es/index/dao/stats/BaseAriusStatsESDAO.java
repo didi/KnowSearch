@@ -39,10 +39,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -369,6 +366,61 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     /**
      * 根据第一个时间点的值进行倒排，取topNu
      */
+    void mergeTopNuWithStep(VariousLineChartMetrics variousLineChartsMetrics, Integer topNu,String topMethod) {
+        List<MetricsContent> sortedList = new ArrayList<>();
+        switch (topMethod){
+            case "avg":
+                sortedList = variousLineChartsMetrics.getMetricsContents()
+                        .stream()
+                        .sorted(Comparator.comparing(x -> getAvgValue(x.getMetricsContentCells()), Comparator.reverseOrder()))
+                        .limit(topNu != null ? topNu : 0)
+                        .collect(Collectors.toList());
+                break;
+            case "max":
+                sortedList = variousLineChartsMetrics.getMetricsContents()
+                        .stream()
+                        .sorted(Comparator.comparing(x -> getMaxValue(x.getMetricsContentCells()), Comparator.reverseOrder()))
+                        .limit(topNu != null ? topNu : 0)
+                        .collect(Collectors.toList());
+                break;
+
+        }
+
+        //根据第一个时间点的值进行倒排，取topNu
+        variousLineChartsMetrics.setMetricsContents(sortedList);
+    }
+
+    /**
+     *  获取最大值
+     * @param cells
+     * @return
+     */
+    private double getMaxValue(List<MetricsContentCell> cells){
+        double value = 0d;
+        for (int i = 0; i < cells.size(); i++) {
+            if (value<cells.get(i).getValue()){
+                value = cells.get(i).getValue();
+            }
+        }
+        return  value;
+    }
+
+    /**
+     *  获取平均值
+     * @param cells
+     * @return
+     */
+    private double getAvgValue(List<MetricsContentCell> cells){
+        double value = 0d;
+        for (int i = 0; i < cells.size(); i++) {
+            value += cells.get(i).getValue();
+        }
+        return  value/cells.size();
+    }
+
+    /**
+     * 根据第一个时间点的值进行倒排，取topNu
+     */
     void mergeTopNu(VariousLineChartMetrics variousLineChartsMetrics, Integer topNu) {
         //根据第一个时间点的值进行倒排，取topNu
         List<MetricsContent> sortedList = variousLineChartsMetrics.getMetricsContents()
@@ -446,6 +498,69 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return variousLineChartsMetrics;
     }
 
+
+    /**
+     *
+     * @param response         返回值
+     * @param oneLevelType     一级指标类型(@link OneLevelTypeEnum)
+     * @param metricsKeys      多个指标类型
+     * @param topNu            topN
+     * @return                 结果
+     */
+    List<VariousLineChartMetrics> fetchMultipleAggMetricsTop(ESQueryResponse response, String oneLevelType, List<String> metricsKeys,
+                                                          Integer topNu,Integer topMethod) {
+        List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
+
+        if (null == response || response.getAggs() == null) {
+            LOGGER.warn(
+                    "class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
+            return variousLineChartsMetrics;
+        }
+
+        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+        if (null != esAggrMap && null != esAggrMap.get(HIST)) {
+            metricsKeys.forEach(key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType ,key, esAggrMap)));
+        }
+
+        //get topNu
+        if (topNu != null) {
+            variousLineChartsMetrics.forEach(metrics -> mergeTopNu(metrics, topNu));
+        }
+
+        return variousLineChartsMetrics;
+    }
+
+    /**
+     *
+     * @param response         返回值
+     * @param oneLevelType     一级指标类型(@link OneLevelTypeEnum)
+     * @param metricsKeys      多个指标类型
+     * @param topNu            topN
+     * @return                 结果
+     */
+    List<VariousLineChartMetrics> fetchMultipleAggMetricsWithStep(ESQueryResponse response, String oneLevelType, List<String> metricsKeys,
+                                                          Integer topNu,String topMethod) {
+        List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
+
+        if (null == response || response.getAggs() == null) {
+            LOGGER.warn(
+                    "class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
+            return variousLineChartsMetrics;
+        }
+
+        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+        if (null != esAggrMap && null != esAggrMap.get(HIST)) {
+            metricsKeys.forEach(key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType ,key, esAggrMap)));
+        }
+
+        //get topNu
+        if (topNu != null) {
+            variousLineChartsMetrics.forEach(metrics -> mergeTopNuWithStep(metrics, topNu,topMethod));
+        }
+
+        return variousLineChartsMetrics;
+    }
+
     /**
      *
      * @param response         返回值
@@ -476,6 +591,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
         return variousLineChartsMetrics;
     }
+
 
     TopMetrics buildTopMetrics(VariousLineChartMetrics variousLineChartMetrics) {
         TopMetrics topMetrics = new TopMetrics();

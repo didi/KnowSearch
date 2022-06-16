@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
 
 import io.swagger.annotations.ApiModel;
@@ -20,7 +19,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "模板信息")
 public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<ConsoleTemplateVO> {
-
     /**
      * @see AppTemplateAuthEnum
      */
@@ -29,9 +27,6 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
 
     @ApiModelProperty("所属集群")
     private List<String> clusterPhies;
-
-    @ApiModelProperty("配额使用情况")
-    private QuotaUsage   quotaUsage;
 
     @ApiModelProperty("模板价值")
     private Integer      value;

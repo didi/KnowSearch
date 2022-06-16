@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -72,7 +72,7 @@ public interface TemplateLogicManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId);
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) throws AdminOperateException;
 
     /**
      * 获取所有逻辑模板聚合
@@ -111,11 +111,6 @@ public interface TemplateLogicManager {
      * @return
      */
     ConsoleTemplateVO fetchConsoleTemplate(IndexTemplateLogicAggregate aggregate);
-
-    /**
-     * 获取逻辑集群所有逻辑模板列表
-     */
-    List<ConsoleTemplateVO> getConsoleTemplateVOSForClusterLogic(Long clusterLogicId, Integer appId);
 
     /**
      * 获取逻辑索引列表
@@ -209,4 +204,31 @@ public interface TemplateLogicManager {
      * @return 物理集群下的全量模板信息列表视图
      */
     Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId);
+
+    /**
+     * 清除索引
+     * @param clearDTO
+     * @return
+     */
+    Result<Void> clearIndices(TemplateClearDTO clearDTO);
+
+    /**
+     * 执行调整shard 数量
+     * @param logicTemplateId 模板id
+     * @param shardNum 调整后的shard数量
+     * @return 调整结果
+     */
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum);
+
+    /**
+     * 模板升级
+     * @param logicTemplateId 模板id
+     * @param operator 操作者
+     * @return
+     */
+    Result<Void> upgrade(Integer logicTemplateId, String operator);
+
+    Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId);
+
+
 }

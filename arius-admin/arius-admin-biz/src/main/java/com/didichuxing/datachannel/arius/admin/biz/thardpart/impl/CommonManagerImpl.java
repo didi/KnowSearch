@@ -2,9 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,24 +16,16 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.CommonManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ThirdpartAppVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -87,48 +77,10 @@ public class CommonManagerImpl implements CommonManager {
     private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private TemplateQuotaManager templateQuotaManager;
-
-    @Autowired
     private ClusterRegionManager clusterRegionManager;
 
     @Autowired
     private TemplateSrvManager templateSrvManager;
-
-    @Override
-    public Result<Void> addOperateRecord(OperateRecordDTO param) {
-        return operateRecordService.save(param);
-    }
-
-    @Override
-    public Result<List<ThirdPartLogicClusterVO>> listLogicCluster() {
-        return Result.buildSucc( ConvertUtil.list2List( clusterLogicService.listAllClusterLogics(), ThirdPartLogicClusterVO.class));
-    }
-
-    @Override
-    public Result<List<ThirdPartLogicClusterVO>> listLogicClusterWithRack() {
-        List<ThirdPartLogicClusterVO> thirdPartLogicClusterVOS = new ArrayList<>();
-
-        List<ClusterLogicWithRack> resourceLogicWithItems = clusterLogicService.listAllClusterLogicsWithRackInfo();
-
-        for (ClusterLogicWithRack resourceLogicWithItem : resourceLogicWithItems) {
-            List<ClusterLogicRackInfo> clusterLogicRackInfos = new ArrayList<>(resourceLogicWithItem.getItems());
-            List<LogicClusterRackVO> items = clusterRegionManager.buildLogicClusterRackVOs(
-                    clusterLogicRackInfos);
-            ThirdPartLogicClusterVO thirdpartLogicClusterVO = ConvertUtil.obj2Obj(resourceLogicWithItem,
-                    ThirdPartLogicClusterVO.class);
-            thirdpartLogicClusterVO.setItems(items);
-            thirdPartLogicClusterVOS.add(thirdpartLogicClusterVO);
-        }
-
-        return Result.buildSucc(thirdPartLogicClusterVOS);
-    }
-
-    @Override
-    public Result<ThirdPartLogicClusterVO> queryLogicCluster(String cluster, String rack) {
-        return Result.buildSucc(
-                ConvertUtil.obj2Obj(clusterLogicService.getClusterLogicByRack(cluster, rack), ThirdPartLogicClusterVO.class));
-    }
 
     @Override
     public Result<List<ThirdpartAppVO>> listApp() {
@@ -185,33 +137,11 @@ public class CommonManagerImpl implements CommonManager {
                     ThirdPartTemplateLogicWithMasterTemplateResourceVO vo = ConvertUtil.obj2Obj(entity,
                             ThirdPartTemplateLogicWithMasterTemplateResourceVO.class);
                     vo.setMasterTemplate(ConvertUtil.obj2Obj(entity.getMasterTemplate(), IndexTemplatePhysicalVO.class));
-                    vo.setMasterResource(ConvertUtil.obj2Obj(entity.getLogicCluster(), ConsoleClusterVO.class));
+                    vo.setMasterResource(ConvertUtil.obj2Obj(entity.getLogicCluster(), ClusterLogicVO.class));
                     return vo;
                 }).collect( Collectors.toList());
 
         return Result.buildSucc(vos);
-    }
-
-    @Override
-    public Result<List<ThirdpartTemplateLogicVO>> listLogicByName(String template) {
-        List<IndexTemplate> indexTemplates = indexTemplateService.getLogicTemplateByName(template);
-
-        List<ThirdpartTemplateLogicVO> templateLogicVOList = ConvertUtil.list2List(indexTemplates,
-                ThirdpartTemplateLogicVO.class);
-
-        List<ESTemplateQuotaUsage> templateQuotaUsages = templateQuotaManager.listAll();
-        Map<Integer, ESTemplateQuotaUsage> logicId2ESTemplateQuotaUsageMap = ConvertUtil.list2Map(templateQuotaUsages,
-                ESTemplateQuotaUsage::getLogicId);
-
-        for (ThirdpartTemplateLogicVO templateLogic : templateLogicVOList) {
-            // 填充quota利用率信息
-            ESTemplateQuotaUsage templateQuotaUsage = logicId2ESTemplateQuotaUsageMap.get(templateLogic.getId());
-            if (templateQuotaUsage != null) {
-                templateLogic.setQuotaUsage(ConvertUtil.obj2Obj(templateQuotaUsage, QuotaUsage.class));
-            }
-        }
-
-        return Result.buildSucc(templateLogicVOList);
     }
 
     @Override

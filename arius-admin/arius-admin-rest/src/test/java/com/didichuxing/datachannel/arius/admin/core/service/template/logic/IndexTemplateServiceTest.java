@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -284,26 +286,12 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void getLogicTemplateWithClusterAndMasterTemplateTest() {
-        Mockito.when(indexTemplateDAO.getById(Mockito.anyInt())).thenReturn(CustomDataSource.templateLogicSource());
-        IndexTemplateLogicWithClusterAndMasterTemplate ret = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(1);
-        Assertions.assertNotNull(ret);
-    }
-
-    @Test
     public void getLogicTemplatesWithClusterAndMasterTemplateMapTest() {
         Mockito.when(indexTemplateDAO.listByIds(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         Set<Integer> logicTemplateIds = new HashSet<>();
         logicTemplateIds.add(1);
         Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> ret = indexTemplateService.getLogicTemplatesWithClusterAndMasterTemplateMap(logicTemplateIds);
         Assertions.assertFalse(ret.isEmpty());
-    }
-
-    @Test
-    public void getLogicTemplateWithClusterTest() {
-        Mockito.when(indexTemplateDAO.getById(1)).thenReturn(CustomDataSource.templateLogicSource());
-        IndexTemplateWithCluster ret = indexTemplateService.getLogicTemplateWithCluster(1);
-        Assertions.assertNotNull(ret);
     }
 
     @Test
@@ -350,6 +338,21 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Mockito.when(indexTemplateDAO.listByDataCenter(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
         List<IndexTemplateWithPhyTemplates> ret = indexTemplateService.getTemplateWithPhysicalByDataCenter("cn");
         Assertions.assertFalse(ret.isEmpty());
+    }
+
+    @Test
+    public void listByRegionIdTest() {
+        Mockito.when(indexTemplatePhyService.listByRegionId(Mockito.anyInt())).thenReturn(Result.buildSucc(CustomDataSource.getIndexTemplatePhyList()));
+        Result<List<IndexTemplate>> indexTemplateResult = indexTemplateService.listByRegionId(127);
+        Assertions.assertTrue(indexTemplateResult.success());
+        Assertions.assertTrue(null != indexTemplateResult.getData());
+    }
+
+    @Test
+    public void convert2WithClusterTest() {
+        List<IndexTemplateWithPhyTemplates> physicalTemplates = indexTemplateService.getLogicTemplateWithPhysicalsByIds(
+                Sets.newHashSet(1111, 1109, 1107));
+        List<IndexTemplateWithCluster> indexTemplateWithClusters = indexTemplateService.convert2WithCluster(physicalTemplates);
     }
 
 }

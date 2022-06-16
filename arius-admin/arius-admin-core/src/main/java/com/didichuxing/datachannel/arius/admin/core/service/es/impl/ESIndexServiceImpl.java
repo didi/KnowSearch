@@ -2,25 +2,25 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
@@ -52,6 +52,12 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Autowired
     private ESIndexDAO        esIndexDAO;
+
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
+
+
+
 
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -273,21 +279,18 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.deleteByQuery(cluster, String.join(",", delIndices), delQueryDsl);
     }
 
-    /**
-     * 修改表达式对应索引的rack
-     *
-     * @param cluster    cluster
-     * @param indices 表达式
-     * @param tgtRack tgtRack
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws ESOperateException
-     */
     @Override
-    public boolean syncBatchUpdateRack(String cluster, List<String> indices, String tgtRack,
-                                       int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("syncUpdateRackByExpression", retryCount,
-            () -> esIndexDAO.batchUpdateIndexRack(cluster, indices, tgtRack));
+    public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
+                                         int retryCount) throws ESOperateException {
+        Set<String> nodeNames = new HashSet<>();
+        Result<List<ClusterRoleHost>> clusterRoleHostResult = clusterRoleHostService.listByRegionId(tgtRegionId);
+        if (clusterRoleHostResult.failed()) {
+            return false;
+        }
+        clusterRoleHostResult.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
+
+        return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
+            () -> esIndexDAO.batchUpdateIndexRegion(cluster, indices, nodeNames));
     }
 
     /**
@@ -533,6 +536,17 @@ public class ESIndexServiceImpl implements ESIndexService {
             totalCheckpoint.addAndGet(commonStat.getSeqNo().getGlobalCheckpoint());
         }));
         return totalCheckpoint;
+    }
+
+    @Override
+    public List<IndicesDistributionVO> indicesDistribution(String cluster) {
+        List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
+        // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
+        return catIndexResultList.stream().map(catIndexResult -> {
+            IndicesDistributionVO vo = new IndicesDistributionVO();
+            BeanUtils.copyProperties(catIndexResult, vo);
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /***************************************** private method ****************************************************/

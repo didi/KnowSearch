@@ -41,6 +41,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 
 @Service("templateSrvService")
 @DependsOn("springTool")
+@Deprecated
 public class TemplateSrvManagerImpl implements TemplateSrvManager {
     protected static final ILog   LOGGER                      = LogFactory.getLog(TemplateSrvManagerImpl.class);
 
@@ -51,7 +52,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private ClusterLogicService   clusterLogicService;
 
     @Autowired
-    private ClusterRegionService esClusterRackService;
+    private ClusterRegionService  clusterRegionService;
 
     @Autowired
     private OperateRecordService  operateRecordService;
@@ -284,7 +285,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     public Result<List<ClusterTemplateSrv>> getLogicClusterTemplateSrv(Long logicClusterId) {
-        List<String> phyClusterNames = esClusterRackService.listPhysicClusterNames(logicClusterId);
+        List<String> phyClusterNames = clusterRegionService.listPhysicClusterNames(logicClusterId);
         if (CollectionUtils.isEmpty(phyClusterNames)) {
             return Result.buildNotExist("逻辑集群对应的物理集群不存在");
         }
@@ -338,21 +339,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 phyCluster + "集群，增加一个索引服务：" + clusterTemplateSrv.getServiceName(), operator);
         }
         return result;
-    }
-
-    @Override
-    public Result<Boolean> checkTemplateSrvWhenJoin(String httpAddresses, String password, String strId) {
-        if (StringUtils.isBlank(httpAddresses) || StringUtils.isBlank(strId)) {
-            return Result.buildFail("校验信息有误");
-        }
-
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(strId));
-        if (AriusObjUtils.isNull(templateServiceEnum) ||
-                AriusObjUtils.isNull(templateHandlerMap.get(Integer.parseInt(strId)))) {
-            return Result.buildFail("未找到指定的模板服务");
-        }
-
-        return templateHandlerMap.get(Integer.parseInt(strId)).checkOpenTemplateSrvWhenClusterJoin(httpAddresses, password);
     }
 
     @Override

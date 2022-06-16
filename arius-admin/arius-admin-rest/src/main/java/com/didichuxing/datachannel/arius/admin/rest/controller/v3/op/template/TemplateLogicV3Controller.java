@@ -1,40 +1,40 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 /**
  * Created by linyunan on 2021-07-30
  */
 @RestController
-@RequestMapping(V3_OP + "/template/logic")
+@RequestMapping({ V3_OP + "/template/logic", V3 + "/template/logic" })
 @Api(tags = "逻辑模板接口(REST)")
 public class TemplateLogicV3Controller {
 
     @Autowired
-    private TemplateLogicManager templateLogicManager;
+    private TemplateLogicManager         templateLogicManager;
 
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
@@ -116,7 +116,7 @@ public class TemplateLogicV3Controller {
         return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
     }
 
-    @GetMapping("/listTemplates")
+    @GetMapping("/templates")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,
@@ -124,4 +124,52 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getAppId(request));
     }
 
+    @PostMapping("/create")
+    @ResponseBody
+    @ApiOperation(value = "创建逻辑模板")
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) throws AdminOperateException{
+        return templateLogicManager.create(param, HttpRequestUtils.getOperator(request), HttpRequestUtils.getAppId(request));
+    }
+
+    @PutMapping("/edit")
+    @ResponseBody
+    @ApiOperation(value = "用户编辑模板")
+    public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
+        return templateLogicManager.newEditTemplate(param, HttpRequestUtils.getOperator(request));
+    }
+
+    @PostMapping("/clearIndices")
+    @ResponseBody
+    @ApiOperation(value = "清理索引")
+    public Result<Void> clearIndices(HttpServletRequest request, @RequestBody TemplateClearDTO param) {
+        return templateLogicManager.clearIndices(param);
+    }
+
+    @PostMapping("/adjustShard")
+    @ResponseBody
+    @ApiOperation(value = "扩缩容")
+    public Result<Void> adjustShard(HttpServletRequest request, @RequestBody TemplateAdjustShardDTO param) {
+        return templateLogicManager.adjustShard(param.getTemplateId(), param.getShardNum());
+    }
+
+    @PostMapping("/upgrade")
+    @ResponseBody
+    @ApiOperation(value = "升版本")
+    public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer logicTemplateId) {
+        return templateLogicManager.upgrade(logicTemplateId, HttpRequestUtils.getOperator(request));
+    }
+
+    @GetMapping("{clusterPhyName}/phy/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,@PathVariable String clusterPhyName) {
+        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("{clusterLogicName}/logic/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据逻辑集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
+        return templateLogicManager.getTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtils.getAppId(request));
+    }
 }

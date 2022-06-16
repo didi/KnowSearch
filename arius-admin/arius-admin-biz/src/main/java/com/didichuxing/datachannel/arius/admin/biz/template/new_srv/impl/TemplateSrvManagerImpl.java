@@ -122,7 +122,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         if (baseHandle instanceof TemplateSrvPageSearchHandle) {
             TemplateSrvPageSearchHandle handler = (TemplateSrvPageSearchHandle) baseHandle;
             //todo: zeying appId
-            return handler.doPageHandle(condition, null, 1);
+            return handler.doPage(condition, 1);
         }
         return PaginationResult.buildFail("没有找到对应的处理器");
     }

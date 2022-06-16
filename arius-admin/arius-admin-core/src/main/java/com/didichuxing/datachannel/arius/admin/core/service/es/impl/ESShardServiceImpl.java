@@ -3,9 +3,15 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.BIG_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmenNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.jetbrains.annotations.NotNull;
@@ -79,6 +85,22 @@ public class ESShardServiceImpl implements ESShardService {
         return ConvertUtil.list2List(segmentsPOS, Segments.class);
     }
 
+    @Override
+    public List<ShardDistributionVO> shardDistribution(String cluster) {
+        return  esShardDAO.catShard(cluster);
+    }
+
+    @Override
+    public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
+        String response = esShardDAO.shardAssignment(cluster);
+        if (null!=response){
+            return buildShardAssignment(JSONObject.parseObject(response));
+        }else {
+            return null;
+        }
+    }
+
+
     /*********************************************private******************************************/
     @NotNull
     private List<ShardMetrics> getShardMetrics(String clusterName) {
@@ -107,5 +129,27 @@ public class ESShardServiceImpl implements ESShardService {
         String store = shardMetrics.getStore();
         if (null == store) { return false;}
         return !store.endsWith("tb") && !store.endsWith("gb");
+    }
+
+    private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
+        ShardAssignmentDescriptionVO descriptionVO = new ShardAssignmentDescriptionVO();
+        descriptionVO.setShard((Integer) responseJson.get("shard"));
+        descriptionVO.setIndex((String) responseJson.get("responseJson"));
+        descriptionVO.setPrimary((Boolean) responseJson.get("primary"));
+        descriptionVO.setCurrentState((String) responseJson.get("current_state"));
+        JSONArray decisionsArray = responseJson.getJSONArray("node_allocation_decisions");
+        List<ShardAssignmenNodeVO> decisions = new ArrayList<>();
+        for (int i = 0; i < decisionsArray.size(); i++) {
+            ShardAssignmenNodeVO decisionMap = new ShardAssignmenNodeVO();
+            JSONObject decisionObject = decisionsArray.getJSONObject(i);
+            decisionMap.setNodeName((String) decisionObject.get("node_name"));
+            JSONArray deciders = decisionObject.getJSONArray("deciders");
+            JSONObject decider = (JSONObject) deciders.get(0);
+            decisionMap.setNodeDecide((String) decider.get("decider"));
+            decisionMap.setExplanation((String) decider.get("explanation"));
+            decisions.add(decisionMap);
+        }
+        descriptionVO.setDecisions(decisions);
+        return descriptionVO;
     }
 }

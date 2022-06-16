@@ -28,11 +28,6 @@
             <artifactId>arius-admin-biz</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>capacity-plan</artifactId>
-        </dependency>
-
         <!-- logi -->
         <dependency>
             <groupId>io.github.zqrferrari</groupId>

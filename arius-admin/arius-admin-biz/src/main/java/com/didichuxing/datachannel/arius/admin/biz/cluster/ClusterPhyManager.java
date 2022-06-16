@@ -53,7 +53,7 @@ public interface ClusterPhyManager {
      * @param param 查询参数
      * @return 物理集群列表
      */
-    List<ClusterPhyVO> getClusterPhys(ClusterPhyDTO param);
+    List<ClusterPhyVO> listClusterPhys(ClusterPhyDTO param);
 
     /**
      * 构建客户端需要的数据
@@ -141,7 +141,7 @@ public interface ClusterPhyManager {
      * @param appId appId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNames(Integer appId);
+    List<String> listClusterPhyNameByAppId(Integer appId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
@@ -156,7 +156,7 @@ public interface ClusterPhyManager {
      * @param clusterPhyName 集群phy名称
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNodeNames(String clusterPhyName);
+    List<String> listClusterPhyNodeName(String clusterPhyName);
 
     /**
      * 构建单个物理集群统计信息
@@ -169,7 +169,7 @@ public interface ClusterPhyManager {
      * @param appId appId
      * @return {@link List}<{@link String}>
      */
-    List<String> getAppNodeNames(Integer appId);
+    List<String> listNodeNameByAppId(Integer appId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
@@ -205,28 +205,6 @@ public interface ClusterPhyManager {
      * @return
      */
     PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId);
-
-    /**
-     * 获取项目下指定权限的物理集群列表
-     * @param appId
-     * @param authType
-     * @return
-     */
-    List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer appId, Integer authType);
-
-    /**
-     * 获取项目下有管理权限的物理集群列表
-     * @param appId
-     * @return
-     */
-    List<ClusterPhy> getClusterPhysByAppId(Integer appId);
-
-    /**
-     * 获取项目下有访问权限的物理集群列表
-     * @param appId
-     * @return
-     */
-    List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer appId);
 
     /**
      * 构建物理集群角色信息
@@ -299,15 +277,6 @@ public interface ClusterPhyManager {
     Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId);
 
     /**
-     * 根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表
-     * @param clusterPhy 物理集群名称
-     * @param clusterLogic 逻辑集群名称
-     * @param templateSize 模板设置的数据大小
-     * @return 可以绑定的rack列表
-     */
-    Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
-
-    /**
      * 更新集群网关
      *
      * @param param    参数
@@ -323,4 +292,6 @@ public interface ClusterPhyManager {
      * @return {@link List}<{@link ClusterRoleInfo}>
      */
     List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
+
+    Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer appId);
 }

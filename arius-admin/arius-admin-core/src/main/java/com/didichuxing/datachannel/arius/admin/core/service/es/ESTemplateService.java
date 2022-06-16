@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 import java.util.List;
 import java.util.Map;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
@@ -29,27 +28,25 @@ public interface ESTemplateService {
      * 修改模板rack和shard
      * @param cluster 集群
      * @param name 模板明细
-     * @param rack rack
      * @param shard shard
      * @param retryCount 重试次数
      * @return result
      * @throws ESOperateException
      */
-    boolean syncUpdateRackAndShard(String cluster, String name, String rack, Integer shard, Integer shardRouting,
-                                   int retryCount) throws ESOperateException;
+    boolean syncUpdateShard(String cluster, String name, Integer shard, Integer shardRouting,
+                            int retryCount) throws ESOperateException;
 
     /**
      * 创建模板, 会覆盖之前的存在的
      * @param cluster 集群
      * @param name 模板名字
      * @param expression 表达式
-     * @param rack rack
      * @param shard shard
      * @param retryCount 重试次数
      * @return result
      * @throws ESOperateException
      */
-    boolean syncCreate(String cluster, String name, String expression, String rack, Integer shard, Integer shardRouting,
+    boolean syncCreate(String cluster, String name, String expression, Integer shard, Integer shardRouting,
                        int retryCount) throws ESOperateException;
 
     /**

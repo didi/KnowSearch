@@ -1,33 +1,35 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author cjm
+ * 详细介绍类情况.
+ *
+ * @ClassName DslTemplatePageSearchHandle
+ * @Author gyp
+ * @Date 2022/6/13
+ * @Version 1.0
  */
 @Component
-public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplateVO> {
-
+public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<PageDTO, DslTemplateVO> {
     private static final ILog LOGGER = LogFactory.getLog(DslTemplatePageSearchHandle.class);
-
     @Autowired
     private AppService appService;
 
@@ -35,17 +37,12 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     private DslTemplateService dslTemplateService;
 
     @Override
-    protected Result<Boolean> validCheckForAppId(Integer appId) {
+    protected Result<Boolean> checkCondition(PageDTO condition, Integer appId) {
         if (!appService.isAppExists(appId)) {
             return Result.buildParamIllegal("项目不存在");
         }
-        return Result.buildSucc(true);
-    }
-
-    @Override
-    protected Result<Boolean> validCheckForCondition(PageDTO pageDTO, Integer appId) {
-        if (pageDTO instanceof DslTemplateConditionDTO) {
-            DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) pageDTO;
+        if (condition instanceof DslTemplateConditionDTO) {
+            DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) condition;
             String queryIndex = dslTemplateConditionDTO.getQueryIndex();
             if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
                 return Result.buildParamIllegal("查询索引名称不允许带类似*, ?等通配符");
@@ -60,17 +57,12 @@ public class DslTemplatePageSearchHandle extends BasePageSearchHandle<DslTemplat
     }
 
     @Override
-    protected void init(PageDTO pageDTO) {
+    protected void initCondition(PageDTO condition, Integer appId) {
         // Do nothing
     }
 
     @Override
-    protected PaginationResult<DslTemplateVO> buildWithAuthType(PageDTO pageDTO, Integer authType, Integer appId) {
-        return PaginationResult.buildSucc();
-    }
-
-    @Override
-    protected PaginationResult<DslTemplateVO> buildWithoutAuthType(PageDTO pageDTO, Integer appId) {
+    protected PaginationResult<DslTemplateVO> buildPageData(PageDTO pageDTO, Integer appId) {
         DslTemplateConditionDTO condition = buildInitDslTemplateConditionDTO(pageDTO);
 
         Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(appId, condition);

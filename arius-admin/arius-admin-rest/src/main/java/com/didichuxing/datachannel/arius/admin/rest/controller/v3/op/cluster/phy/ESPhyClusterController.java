@@ -1,10 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -21,14 +18,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -41,31 +35,22 @@ import io.swagger.annotations.ApiOperation;
  * @date 2022-05-20
  */
 @RestController("esPhyClusterControllerV3")
-@RequestMapping({ V3_OP + "/phy/cluster", V3 + "/cluster/phy" })
+@RequestMapping({ V3 + "/cluster/phy" })
 @Api(tags = "ES物理集群集群接口(REST)")
 public class ESPhyClusterController {
 
     @Autowired
     private ClusterPhyManager clusterPhyManager;
 
-    @Autowired
-    private ESPluginService esPluginService;
-
-    @Autowired
-    private ESPackageService  packageService;
-
     @Value("${zeus.server}")
     private String              zeusServerUrl;
 
-    @Autowired
-    private ClusterNodeManager clusterNodeManager;
     /**
      * 根据物理集群ID获取全部角色
      */
     @GetMapping("/{clusterId}/roles")
     @ResponseBody
     @ApiOperation(value = "根据物理集群ID获取全部角色列表", notes = "")
-    @Deprecated
     public Result<List<ESClusterRoleVO>> roleList(@PathVariable Integer clusterId) {
         List<ClusterRoleInfo> clusterRoleInfos = clusterPhyManager.listClusterRolesByClusterId(clusterId);
 
@@ -75,22 +60,6 @@ public class ESPhyClusterController {
         return Result.buildSucc(ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleVO.class));
     }
 
-    @DeleteMapping("/plugin/{id}")
-    @ResponseBody
-    @ApiOperation(value = "删除插件接口", notes = "")
-    @Deprecated
-    public Result<Long> pluginDelete(HttpServletRequest request, @PathVariable Long id) {
-        return esPluginService.deletePluginById(id, HttpRequestUtils.getOperator(request));
-    }
-
-    @DeleteMapping("/package/{id}")
-    @ResponseBody
-    @ApiOperation(value = "删除程序包接口", notes = "")
-    @Deprecated
-    public Result<Long> packageDelete(HttpServletRequest request, @PathVariable Long id) {
-        return packageService.deleteESPackage(id, HttpRequestUtils.getOperator(request));
-    }
-
     @PostMapping("/join")
     @ResponseBody
     @ApiOperation(value = "接入集群", notes = "支持多类型集群加入")
@@ -98,15 +67,7 @@ public class ESPhyClusterController {
         return clusterPhyManager.joinCluster(param, HttpRequestUtils.getOperator(request));
     }
 
-    @GetMapping("/{clusterId}/regions")
-    @ResponseBody
-    @ApiOperation(value = "获取节点划分列表")
-    @Deprecated
-    public Result<List<ESClusterRoleHostVO>> getClusterPhyRegionInfos(@PathVariable Integer clusterId) {
-        return clusterNodeManager.listClusterPhyNode(clusterId);
-    }
-
-    @GetMapping("/{clusterLogicType}/{clusterLogicId}/list")
+    @GetMapping("/{clusterLogicType}/{clusterLogicId}/can-associated-names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群可关联region的物理集群名称列表")
     public Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(@PathVariable Integer clusterLogicType,
@@ -114,18 +75,27 @@ public class ESPhyClusterController {
         return clusterPhyManager.listCanBeAssociatedRegionOfClustersPhys(clusterLogicType, clusterLogicId);
     }
 
-    @GetMapping("/{clusterLogicType}/names")
+    @GetMapping("/{clusterLogicType}/can-associated-names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群可进行关联的物理集群名称")
     public Result<List<String>> listCanBeAssociatedClustersPhys(@PathVariable Integer clusterLogicType) {
         return clusterPhyManager.listCanBeAssociatedClustersPhys(clusterLogicType);
     }
 
+    @GetMapping("/{clusterResourceType}/names")
+    @ResponseBody
+    @ApiOperation(value = "获取项目下的物理集群名称，可根据类型筛选")
+    public Result<List<String>> listClusterPhyNameByResourceType(@PathVariable Integer clusterResourceType,
+                                                                 HttpServletRequest request) {
+        return clusterPhyManager.listClusterPhyNameByResourceType(clusterResourceType,
+            HttpRequestUtils.getAppId(request));
+    }
+
     @GetMapping("/names")
     @ResponseBody
-    @ApiOperation(value = "根据AppId获取逻辑集群下的物理集群名称")
-    public Result<List<String>> getClusterPhyNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNames(HttpRequestUtils.getAppId(request)));
+    @ApiOperation(value = "根据项目获取逻辑集群下的物理集群名称")
+    public Result<List<String>> listClusterPhyNameByAppId(HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.listClusterPhyNameByAppId(HttpRequestUtils.getAppId(request)));
     }
 
     @GetMapping("/{templateId}/sameversion/clusternames")
@@ -133,20 +103,6 @@ public class ESPhyClusterController {
     @ApiOperation(value = "根据模板所在集群，获取与该集群相同版本号的集群名称列表")
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(HttpServletRequest request, @PathVariable Integer templateId) {
         return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(HttpRequestUtils.getAppId(request), templateId);
-    }
-
-    @GetMapping("/{clusterPhyName}/nodes")
-    @ResponseBody
-    @ApiOperation(value = "获取物理集群下的节点名称")
-    public Result<List<String>> getAppClusterPhyNodeNames(@PathVariable String clusterPhyName) {
-        return Result.buildSucc(clusterPhyManager.getAppClusterPhyNodeNames(clusterPhyName));
-    }
-
-    @GetMapping("/node/names")
-    @ResponseBody
-    @ApiOperation(value = "根据AppId获取物理集群下的节点名称")
-    public Result<List<String>> getAppNodeNames(HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.getAppNodeNames(HttpRequestUtils.getAppId(request)));
     }
 
     @PostMapping("/page")
@@ -179,16 +135,6 @@ public class ESPhyClusterController {
     @Deprecated
     public Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(@PathVariable("clusterLogicId") Long clusterLogicId) {
         return clusterPhyManager.getPhyClusterNameWithSameEsVersionAfterBuildLogic(clusterLogicId);
-    }
-
-    @GetMapping("/{clusterPhy}/{clusterLogic}/{templateSize}/bindRack")
-    @ResponseBody
-    @ApiOperation(value = "根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表")
-    @Deprecated
-    public Result<Set<String>> getValidRacksListByDiskSize(@PathVariable("clusterPhy") String clusterPhy,
-                                                @PathVariable("clusterLogic") String clusterLogic,
-                                                @PathVariable("templateSize") String templateSize) {
-        return clusterPhyManager.getValidRacksListByTemplateSize(clusterPhy, clusterLogic, templateSize);
     }
 
     @GetMapping("/zeus-url")

@@ -16,8 +16,7 @@ public abstract class AbstractPageSearchHandle<T extends PageDTO, R> implements 
      * @param appId       项目
      * @return            PaginationResult<R>
      */
-    public PaginationResult<R> selectPage(T condition, Integer appId) {
-
+    public PaginationResult<R> doPage(T condition, Integer appId) {
         Result<Boolean> validCheckForConditionResult = checkCondition(condition, appId);
         if (validCheckForConditionResult.failed()) {
             return PaginationResult.buildParamIllegal(validCheckForConditionResult.getMessage());

@@ -1,12 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COLD_RACK_PREFER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +22,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSe
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -68,9 +61,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     private static final String CLUSTER_NOT_EXIST = "集群不存在";
 
-    @Value("${es.client.cluster.port}")
-    private String                   esClusterClientPort;
-
     @Autowired
     private PhyClusterDAO clusterDAO;
 
@@ -79,12 +69,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Autowired
     private ESPluginService          esPluginService;
-
-    @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
-
-    @Autowired
-    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private ClusterRoleService clusterRoleService;
@@ -231,7 +215,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public List<String> listAllClusterNameList() {
+    public List<String> listClusterNames() {
         List<String> clusterNameList = Lists.newArrayList();
         try {
             clusterNameList.addAll(clusterDAO.listAllName());
@@ -257,79 +241,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public boolean isClusterExists(String clusterName) {
         return clusterDAO.getByName(clusterName) != null;
-    }
-
-    /**
-     * 集群是否存在
-     * @param clusterName 集群名字
-     * @return true 存在
-     */
-    @Override
-    public boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName) {
-        return list.stream().map(ClusterPhy::getCluster).anyMatch(cluster->cluster.equals(clusterName));
-    }
-    /**
-     * rack是否存在
-     * @param cluster 集群名字
-     * @param racks   rack名字
-     * @return true 存在
-     */
-    @Override
-    public boolean isRacksExists(String cluster, String racks) {
-        Set<String> rackSet = getClusterRacks(cluster);
-        if (CollectionUtils.isEmpty(rackSet)) {
-            LOGGER.warn("class=ESClusterPhyServiceImpl||method=rackExist||cluster={}||msg=can not get rack set!",
-                cluster);
-            return false;
-        }
-
-        for (String r : racks.split(AdminConstant.RACK_COMMA)) {
-            if (!rackSet.contains(r)) {
-                LOGGER.warn(
-                    "class=ESClusterPhyServiceImpl||method=rackExist||cluster={}||rack={}||msg=can not get rack!",
-                    cluster, r);
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * 获取集群全部的rack
-     * @param cluster cluster
-     * @return set
-     */
-    @Override
-    public Set<String> getClusterRacks(String cluster) {
-        List<ClusterRoleHost> nodes = clusterRoleHostService.getNodesByCluster(cluster);
-        if (CollectionUtils.isEmpty(nodes)) {
-            return Sets.newHashSet();
-        }
-
-        Set<String> rackSet = new HashSet<>();
-        // 只有datanode才有rack
-        for (ClusterRoleHost clusterRoleHost : nodes) {
-            if (ESClusterNodeRoleEnum.DATA_NODE.getCode() == clusterRoleHost.getRole()) {
-                rackSet.add(clusterRoleHost.getRack());
-            }
-        }
-
-        return rackSet;
-    }
-
-    @Override
-    public Set<String> listHotRacks(String cluster) {
-        // 冷存的rack以c开头，排除冷存即为热存
-        return getClusterRacks(cluster).stream().filter(rack -> !rack.toLowerCase().startsWith(COLD_RACK_PREFER))
-            .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<String> listColdRacks(String cluster) {
-        // 冷存的rack以c开头
-        return getClusterRacks(cluster).stream().filter(rack -> rack.toLowerCase().startsWith(COLD_RACK_PREFER))
-            .collect(Collectors.toSet());
     }
 
     /**
@@ -375,22 +286,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public ClusterPhy getClusterById(Integer phyClusterId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(phyClusterId);
         return ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
-    }
-
-    /**
-     * 获取写节点的个数
-     * @param cluster 集群
-     * @return count
-     */
-    @Override
-    public int getWriteClientCount(String cluster) {
-        ClusterPhyPO clusterPO = clusterDAO.getByName(cluster);
-
-        if (StringUtils.isBlank(clusterPO.getHttpWriteAddress())) {
-            return 1;
-        }
-
-        return clusterPO.getHttpWriteAddress().split(",").length;
     }
 
     /**
@@ -461,54 +356,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param) {
         return clusterDAO.getTotalHitByCondition(param);
-    }
-
-    @Override
-    public Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password) {
-        if (StringUtils.isBlank(addresses)) {
-            return Result.buildFail("连接到es集群的地址信息为空");
-        }
-
-        return esClusterService.getClusterRackByHttpAddress(addresses, password);
-    }
-
-    @Override
-    public Float getSurplusDiskSizeOfRacks(String clusterPhyName, String racks, Map<String, Float> allocationInfoOfRack) {
-        List<String> rackList = ListUtils.string2StrList(racks);
-
-        //获取region下的rack列表对应的总的磁盘空间
-        Float regionDiskSize = 0F;
-        for (String rack : rackList) {
-            if (allocationInfoOfRack.containsKey(rack)) {
-                regionDiskSize += allocationInfoOfRack.get(rack);
-            }
-        }
-
-        //获取存储在region上的物理模板列表
-        Float templateOnRegionDiskSize = 0F;
-        List<IndexTemplatePhy> normalTemplateOnPhyCluster = indexTemplatePhyService.getNormalTemplateByCluster(clusterPhyName);
-        if (CollectionUtils.isEmpty(normalTemplateOnPhyCluster)) {
-            return regionDiskSize;
-        }
-
-        //获取在region上创建的模板的总的设置空间
-        for (IndexTemplatePhy indexTemplatePhy : normalTemplateOnPhyCluster) {
-            if (!rackList.containsAll(ListUtils.string2StrList(indexTemplatePhy.getRack()))) {
-                continue;
-            }
-
-            //根据物理模板获取对应的逻辑模板中的quota参数
-            IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
-            if (AriusObjUtils.isNull(logicTemplate)) {
-                continue;
-            }
-
-            //数据库中quota保存的单位是gb，这里需要统一转化为字节数目
-            templateOnRegionDiskSize += Float.valueOf(SizeUtil.getUnitSize(logicTemplate.getQuota() + "gb"));
-        }
-
-        //返回在指定region上可以利用的剩余磁盘大小
-        return regionDiskSize - templateOnRegionDiskSize;
     }
 
     /**

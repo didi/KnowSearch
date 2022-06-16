@@ -347,35 +347,6 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
     }
 
     /**
-     * 修改expression和shard
-     *
-     * @throws ESOperateException
-     */
-    @Test
-    public void updateByLogicTest() throws ESOperateException {
-        Mockito.when(esTemplateService.syncUpdateExpression(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyInt())).thenReturn(true);
-        Mockito.when(esTemplateService.syncUpdateRackAndShard(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(true);
-        String expression = "test1";
-        IndexTemplatePO logicPO = CustomDataSource.templateLogicSource();
-        logicDAO.insert(logicPO);
-        Integer logicId = logicPO.getId();
-        List<IndexTemplatePhyPO> list = batchInsertWithExpression(logicId, expression);
-        IndexTemplateDTO param = new IndexTemplateDTO();
-        String expression1 = "test2";
-        param.setExpression(expression1);
-        param.setId(logicId);
-        int shard = 5;
-        param.setShardNum(shard);
-        Result result = service.editTemplateFromLogic(param, operator);
-        Assertions.assertTrue(result.success());
-        List<IndexTemplatePhy> templateList = service.getTemplateByLogicId(logicId);
-        for (IndexTemplatePhy indexTemplatePhy : templateList) {
-            Assertions.assertEquals(expression1, indexTemplatePhy.getExpression());
-            Assertions.assertEquals(shard, indexTemplatePhy.getShard());
-        }
-    }
-
-    /**
      * 修改参数为null、待修改集合为空的情况
      *
      * @throws ESOperateException
@@ -442,56 +413,6 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
             Assertions.assertNotNull(template);
             Assertions.assertEquals(clusterName, template.getCluster());
             Assertions.assertEquals(status, template.getStatus());
-        }
-    }
-
-    @Test
-    public void getByClusterAndRackTest() {
-        IndexTemplatePO logicPO = CustomDataSource.templateLogicSource();
-        logicDAO.insert(logicPO);
-        Integer logicId = logicPO.getId();
-        String cluster = "c1";
-        String rack = "r1";
-        int status = 1;
-        List<IndexTemplatePhyPO> list = batchInsertWithClusterAndRack(logicId, cluster, rack, status);
-        List<IndexTemplatePhyPO> deleted = batchInsertWithClusterAndRack(logicId, cluster, rack, -2);
-        List<IndexTemplatePhy> templates = service.getNormalTemplateByClusterAndRack(cluster, Arrays.asList(rack));
-        for (IndexTemplatePhy template : templates) {
-            Assertions.assertEquals(status, template.getStatus());
-            Assertions.assertEquals(cluster, template.getCluster());
-            Assertions.assertEquals(rack, template.getRack());
-        }
-        List<IndexTemplatePhy> empty = service.getNormalTemplateByClusterAndRack(cluster, null);
-        Assertions.assertTrue(empty.isEmpty());
-        String emptyCluster = "c1000";
-        List<IndexTemplatePhy> empty1 = service.getNormalTemplateByClusterAndRack(cluster, Arrays.asList(emptyCluster));
-        Assertions.assertTrue(empty1.isEmpty());
-        String emptyRack = "r1000";
-        List<IndexTemplatePhy> empty2 = service.getNormalTemplateByClusterAndRack(cluster, Arrays.asList(emptyRack));
-        Assertions.assertTrue(empty2.isEmpty());
-    }
-
-    @Test
-    public void getByRegionIdTest() {
-        IndexTemplatePO logicPO = CustomDataSource.templateLogicSource();
-        logicDAO.insert(logicPO);
-        Integer logicId = logicPO.getId();
-        String cluster = "c1";
-        String rack = "r1";
-        int status = 1;
-        Long regionId = 1L;
-        ClusterRegion region = new ClusterRegion();
-        region.setPhyClusterName(cluster);
-        region.setRacks(rack);
-        List<IndexTemplatePhyPO> list = batchInsertWithClusterAndRack(logicId, cluster, rack, status);
-        Mockito.when(clusterRegionService.getRegionById(Mockito.anyLong())).thenReturn(null);
-        List<IndexTemplatePhy> invalid = service.getTemplateByRegionId(1000L);
-        Assertions.assertTrue(invalid.isEmpty());
-        Mockito.when(clusterRegionService.getRegionById(Mockito.eq(regionId))).thenReturn(region);
-        List<IndexTemplatePhy> templates = service.getTemplateByRegionId(regionId);
-        for (IndexTemplatePhy template : templates) {
-            Assertions.assertEquals(cluster, template.getCluster());
-            Assertions.assertEquals(rack, template.getRack());
         }
     }
 
@@ -565,6 +486,13 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(queriedLogicIds.containsAll(logicIds));
     }
 
+    @Test
+    public void listByRegionIdTest() {
+        Result<List<IndexTemplatePhy>> indexTemplatePhyResult = service.listByRegionId(127);
+        Assertions.assertTrue(indexTemplatePhyResult.success());
+        Assertions.assertTrue(null != indexTemplatePhyResult.getData());
+    }
+
     private List<IndexTemplatePhyPO> batchInsert() {
         List<IndexTemplatePhyPO> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -595,20 +523,6 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
             IndexTemplatePhyPO po = CustomDataSource.templatePhysicalSource();
             po.setName("test" + i);
             po.setLogicId(logicId);
-            indexTemplatePhyDAO.insert(po);
-            list.add(po);
-        }
-        return list;
-    }
-
-    private List<IndexTemplatePhyPO> batchInsertWithClusterAndRack(Integer logicId, String cluster, String rack, int status) {
-        List<IndexTemplatePhyPO> list = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            IndexTemplatePhyPO po = CustomDataSource.templatePhysicalSource();
-            po.setName("test" + i);
-            po.setLogicId(logicId);
-            po.setCluster(cluster);
-            po.setRack(rack);
             indexTemplatePhyDAO.insert(po);
             list.add(po);
         }

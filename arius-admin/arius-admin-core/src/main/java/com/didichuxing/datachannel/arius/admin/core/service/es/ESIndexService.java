@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
@@ -151,15 +152,15 @@ public interface ESIndexService {
     boolean syncDeleteByQuery(String cluster, List<String> delIndices, String delQueryDsl) throws ESOperateException;
 
     /**
-     * 修改表达式对应索引的rack
-     * @param cluster cluster
-     * @param indices 表达式
-     * @param tgtRack tgtRack
-     * @param retryCount 重试次数
-     * @return true/false
+     * 修改索引的region
+     * @param cluster
+     * @param indices
+     * @param tgtRegionId
+     * @param retryCount
+     * @return
      * @throws ESOperateException
      */
-    boolean syncBatchUpdateRack(String cluster, List<String> indices, String tgtRack,
+    boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
                                 int retryCount) throws ESOperateException;
 
     /**
@@ -271,4 +272,11 @@ public interface ESIndexService {
      * @return
      */
     AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo);
+
+    /**
+     * indices分布
+     * @param cluster
+     * @return
+     */
+    List<IndicesDistributionVO> indicesDistribution(String cluster);
 }

@@ -228,7 +228,7 @@
             resultType="long">
         select
         count(1)
-        from es_data_source
+        from es_cluster_phy_info
         where is_active = 1
         and package_id = #{packageId}
     </select>

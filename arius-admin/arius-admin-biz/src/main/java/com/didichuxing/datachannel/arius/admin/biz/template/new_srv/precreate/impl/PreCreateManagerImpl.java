@@ -49,16 +49,6 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     }
 
     @Override
-    protected Result<Void> openSrvImpl(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam) {
-        return Result.buildSucc();
-    }
-
-    @Override
-    protected Result<Void> closeSrvImpl(List<Integer> templateIdList) {
-        return Result.buildSucc();
-    }
-
-    @Override
     public Result<Void> preCreateIndex(Integer logicTemplateId) {
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("指定索引模板未开启预先创建能力");

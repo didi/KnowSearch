@@ -37,8 +37,7 @@ public class ClusterRegion extends BaseEntity {
     private String phyClusterName;
 
     /**
-     * Rack列表
+     * 配置
      */
-    @Deprecated
-    private String racks;
+    private String config;
 }
